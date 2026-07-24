@@ -63,6 +63,7 @@ export type CspDirective =
   | 'connect-src'
   | 'style-src'
   | 'font-src'
+  | 'form-action'
 
 /**
  * A single CSP source requirement declared by a module's render() output.

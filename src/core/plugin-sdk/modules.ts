@@ -55,6 +55,15 @@ export interface PluginRenderOutput {
    * document-level event delegation; never executed in the admin canvas.
    */
   js?: string
+  /**
+   * Per-instance content-security-policy requirements. External origins are
+   * accepted only when the plugin has `frontend.assets` and the origin host is
+   * declared in `networkAllowedHosts`.
+   */
+  cspSources?: Array<{
+    directive: 'frame-src' | 'script-src' | 'img-src' | 'media-src' | 'connect-src' | 'style-src' | 'font-src' | 'form-action'
+    sources: string[]
+  }>
 }
 
 export type PluginRenderFn = (

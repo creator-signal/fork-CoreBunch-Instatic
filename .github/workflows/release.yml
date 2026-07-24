@@ -67,7 +67,17 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/corebunch/instatic
+          images: ghcr.io/creator-signal/fork-corebunch-instatic
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest
+
+      - name: Extract media edge Docker metadata
+        id: media-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/creator-signal/instatic-media-edge
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -85,6 +95,16 @@ jobs:
             INSTATIC_VERSION=${{ steps.version.outputs.version }}
             INSTATIC_REVISION=${{ github.sha }}
             INSTATIC_CREATED=${{ steps.version.outputs.created }}
+
+      - name: Build and push media edge image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/creator-signal-media-edge/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.media-meta.outputs.tags }}
+          labels: ${{ steps.media-meta.outputs.labels }}
 
   bundle:
     name: Publish Release Bundle
@@ -107,6 +127,9 @@ jobs:
       - name: Build release bundle
         run: bun run release:bundle -- "${{ needs.image.outputs.version }}"
 
+      - name: Build Creator Signal site plugin
+        run: bun run instatic-plugin build integrations/creator-signal
+
       - name: Create release if missing
         env:
           GH_TOKEN: ${{ github.token }}
@@ -125,4 +148,5 @@ jobs:
         run: |
           gh release upload "$GITHUB_REF_NAME" \
             ".tmp/release/instatic-${{ needs.image.outputs.version }}-release-bundle.tar.gz" \
+            "integrations/creator-signal.plugin.zip" \
             --clobber

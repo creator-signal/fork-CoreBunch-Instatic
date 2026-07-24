@@ -154,6 +154,38 @@ describe('pluginModuleToHostModule', () => {
     const hostModule = pluginModuleToHostModule('acme.canvas', jsDefinition, () => () => null, ['frontend.assets'])
     expect(hostModule.render({}, []).js).toBe('(function(){})();')
   })
+
+  it('keeps only allowlisted plugin CSP origins with the frontend.assets grant', () => {
+    const definition = {
+      ...counterDefinition,
+      id: 'acme.canvas.embed',
+      render: () => ({
+        html: '<div></div>',
+        cspSources: [
+          {
+            directive: 'script-src' as const,
+            sources: ['https://forms.example.com', 'https://evil.example'],
+          },
+          {
+            directive: 'form-action' as const,
+            sources: ['https://forms.example.com'],
+          },
+        ],
+      }),
+    }
+    const hostModule = pluginModuleToHostModule(
+      'acme.canvas',
+      definition,
+      () => () => null,
+      ['frontend.assets'],
+      ['forms.example.com'],
+    )
+
+    expect(hostModule.render({}, []).cspSources).toEqual([
+      { directive: 'script-src', sources: ['https://forms.example.com'] },
+      { directive: 'form-action', sources: ['https://forms.example.com'] },
+    ])
+  })
 })
 
 describe('activatePluginModulePack', () => {

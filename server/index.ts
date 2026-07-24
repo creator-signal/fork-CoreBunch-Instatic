@@ -25,6 +25,22 @@ await syncSystemRoles(db)
 // plugin adapters register through the same registry but local-disk is
 // always the fallback for unset roles. See `mediaStorageRegistry.ts`.
 mediaStorageRegistry.configureLocalDisk({ uploadsDir: config.uploadsDir })
+if (config.minio) {
+  const { buildMinioStorageAdapter } = await import('./media/minioStorageAdapter')
+  const minioAdapter = buildMinioStorageAdapter(config.minio)
+  const verification = await minioAdapter.verify?.()
+  if (!verification?.ok) {
+    throw new Error(
+      `[minio] Startup verification failed: ${verification?.reason ?? 'unknown error'}` +
+      (verification?.hint ? ` ${verification.hint}` : ''),
+    )
+  }
+  mediaStorageRegistry.register(minioAdapter)
+  const { electAdapter } = await import('./repositories/mediaStorageAdapters')
+  for (const role of ['original', 'variant', 'avatar', 'font'] as const) {
+    await electAdapter(db, role, minioAdapter.id, null)
+  }
+}
 await activateInstalledServerPlugins(db, config.uploadsDir)
 // AI runtime: start the nightly conversation-purge tick. Operators add
 // their own provider credentials via /admin/ai/providers on first install.

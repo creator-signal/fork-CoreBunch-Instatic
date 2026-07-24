@@ -94,6 +94,7 @@ export function activatePluginModulePack(
       definition,
       componentFactory,
       manifest.grantedPermissions ?? [],
+      manifest.networkAllowedHosts ?? [],
     )
     registry.registerOrReplace(hostModule)
     ids.add(hostModule.id)
@@ -164,8 +165,22 @@ export interface SandboxedModulePack {
     /** Optional iframe-backed editor preview source. */
     editorRuntime?: PluginEditorRuntime
   }>
-  render(moduleId: string, props: Record<string, unknown>, children: string[]): { html: string; css?: string; js?: string }
-  preview(moduleId: string, props: Record<string, unknown>, children: string[]): { html: string; css?: string; js?: string }
+  render(moduleId: string, props: Record<string, unknown>, children: string[]): {
+    html: string
+    css?: string
+    js?: string
+    cspSources?: PluginModuleDefinition['render'] extends (...args: never[]) => infer R
+      ? R extends { cspSources?: infer C } ? C : never
+      : never
+  }
+  preview(moduleId: string, props: Record<string, unknown>, children: string[]): {
+    html: string
+    css?: string
+    js?: string
+    cspSources?: PluginModuleDefinition['render'] extends (...args: never[]) => infer R
+      ? R extends { cspSources?: infer C } ? C : never
+      : never
+  }
   dispose(): void
 }
 
@@ -215,6 +230,7 @@ export function activateSandboxedPluginModulePack(
       definition,
       STUB_COMPONENT_FACTORY,
       manifest.grantedPermissions ?? [],
+      manifest.networkAllowedHosts ?? [],
     )
     registry.registerOrReplace(hostModule)
     ids.add(hostModule.id)

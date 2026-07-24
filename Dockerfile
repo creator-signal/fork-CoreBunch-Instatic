@@ -2,6 +2,9 @@
 
 FROM oven/bun:1.3.11 AS build
 WORKDIR /app
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends zip \
+    && rm -rf /var/lib/apt/lists/*
 # vendor/pixel-art-icons is a `file:` dep — `bun install` needs it on disk to
 # resolve the dependency, so copy it alongside the manifest before installing.
 COPY package.json bun.lock ./
@@ -9,6 +12,7 @@ COPY vendor ./vendor
 RUN bun install --frozen-lockfile
 COPY . .
 RUN bun run build
+RUN bun run instatic-plugin build integrations/creator-signal
 
 FROM oven/bun:1.3.11 AS production-deps
 WORKDIR /app
@@ -25,9 +29,9 @@ ARG INSTATIC_CREATED=unknown
 
 LABEL org.opencontainers.image.title="Instatic"
 LABEL org.opencontainers.image.description="Self-hosted CMS with an integrated visual editor."
-LABEL org.opencontainers.image.source="https://github.com/corebunch/instatic"
-LABEL org.opencontainers.image.url="https://github.com/corebunch/instatic"
-LABEL org.opencontainers.image.documentation="https://github.com/corebunch/instatic/tree/main/docs/deployment"
+LABEL org.opencontainers.image.source="https://github.com/creator-signal/fork-CoreBunch-Instatic"
+LABEL org.opencontainers.image.url="https://github.com/creator-signal/fork-CoreBunch-Instatic"
+LABEL org.opencontainers.image.documentation="https://github.com/creator-signal/fork-CoreBunch-Instatic/tree/main/docs/deployment"
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.version="${INSTATIC_VERSION}"
 LABEL org.opencontainers.image.revision="${INSTATIC_REVISION}"
@@ -44,6 +48,7 @@ COPY --chown=bun:bun package.json bun.lock ./
 COPY --chown=bun:bun tsconfig*.json ./
 COPY --chown=bun:bun server ./server
 COPY --chown=bun:bun src ./src
+COPY --from=build --chown=bun:bun /app/integrations/creator-signal.plugin.zip /app/starter-plugins/creator-signal.plugin.zip
 
 RUN mkdir -p /app/uploads /app/data && chown -R bun:bun /app
 

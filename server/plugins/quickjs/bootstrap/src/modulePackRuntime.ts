@@ -25,13 +25,26 @@ globalThis.console = {
   error: noop, debug: noop, trace: noop,
 } as Console
 
-/** Normalize a render()/preview() return into the `{ html, css, js }` wire shape. */
-function normalizeRenderOutput(out: unknown): { html: string; css?: string; js?: string } {
-  const o = out as { html?: unknown; css?: unknown; js?: unknown } | null
+/** Normalize a render()/preview() return into the host render-output wire shape. */
+function normalizeRenderOutput(out: unknown): {
+  html: string
+  css?: string
+  js?: string
+  cspSources?: unknown[]
+} {
+  const o = out as {
+    html?: unknown
+    css?: unknown
+    js?: unknown
+    cspSources?: unknown
+  } | null
   return {
     html: o && typeof o === 'object' && typeof o.html === 'string' ? o.html : '',
     css: o && typeof o === 'object' && typeof o.css === 'string' ? o.css : undefined,
     js: o && typeof o === 'object' && typeof o.js === 'string' ? o.js : undefined,
+    cspSources: o && typeof o === 'object' && Array.isArray(o.cspSources)
+      ? o.cspSources
+      : undefined,
   }
 }
 

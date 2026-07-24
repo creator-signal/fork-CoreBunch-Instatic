@@ -9,10 +9,11 @@
  * Source priority:
  *
  *   1. `INSTATIC_SECRET_KEY` environment variable (base64).
- *      Production deployments MUST set this. If unset in production
- *      (`NODE_ENV=production`), boot fails loudly with instructions.
  *
- *   2. `.tmp/secret.key` file in the working directory.
+ *   2. `INSTATIC_SECRET_KEY_FILE`, pointing to a mounted file containing the
+ *      same base64 value.
+ *
+ *   3. `.tmp/secret.key` file in the working directory.
  *      Dev / non-production fallback. Auto-created on first boot so a fresh
  *      `bun run dev` works without manual setup. The file is intentionally
  *      under `.tmp/` (already git-ignored).
@@ -28,6 +29,7 @@ import { dirname } from 'node:path'
 const REQUIRED_KEY_BYTES = 32
 const DEV_KEY_PATH = '.tmp/secret.key'
 const ENV_VAR_NAME = 'INSTATIC_SECRET_KEY'
+const ENV_FILE_VAR_NAME = 'INSTATIC_SECRET_KEY_FILE'
 
 let cachedKey: CryptoKey | null = null
 let cachedFingerprint: string | null = null
@@ -73,10 +75,22 @@ function readMasterKeyBytes(): Uint8Array {
   if (envValue && envValue.trim()) {
     return parseAndValidateBase64(envValue.trim(), `env var ${ENV_VAR_NAME}`)
   }
+  const envFile = process.env[ENV_FILE_VAR_NAME]
+  if (envFile && envFile.trim()) {
+    if (!existsSync(envFile.trim())) {
+      throw new MasterKeyConfigurationError(
+        `[secrets/masterKey] ${ENV_FILE_VAR_NAME} does not exist: ${envFile.trim()}`,
+      )
+    }
+    return parseAndValidateBase64(
+      readFileSync(envFile.trim(), 'utf8').trim(),
+      `file from ${ENV_FILE_VAR_NAME}`,
+    )
+  }
 
   if (process.env.NODE_ENV === 'production') {
     throw new MasterKeyConfigurationError(
-      `[secrets/masterKey] ${ENV_VAR_NAME} is required in production. ` +
+      `[secrets/masterKey] ${ENV_VAR_NAME} or ${ENV_FILE_VAR_NAME} is required in production. ` +
       'Generate one with: bun run scripts/generate-secret-key.ts',
     )
   }

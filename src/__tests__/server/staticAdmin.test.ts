@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'bun:test'
 import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -10,6 +10,13 @@ import { createFakeDb } from './dbTestFake'
 // Static file serving tests never touch the database.
 const fakeDb = createFakeDb(async (sql) => {
   throw new Error(`Unexpected DB call in static admin test: ${sql}`)
+})
+
+const originalAuthMode = process.env.INSTATIC_AUTH_MODE
+
+afterEach(() => {
+  if (originalAuthMode === undefined) delete process.env.INSTATIC_AUTH_MODE
+  else process.env.INSTATIC_AUTH_MODE = originalAuthMode
 })
 
 function createStaticDir(): string {
@@ -78,6 +85,25 @@ describe('self-hosted admin static serving', () => {
       expect(res.status).toBe(200)
       expect(res.headers.get('content-type')).toContain('javascript')
       expect(await res.text()).toContain('console.log')
+    } finally {
+      rmSync(staticDir, { recursive: true, force: true })
+    }
+  })
+
+  it('redirects an unauthenticated Zitadel deployment before rendering native login', async () => {
+    process.env.INSTATIC_AUTH_MODE = 'zitadel'
+    const staticDir = createStaticDir()
+    try {
+      const res = await handleServerRequest(
+        new Request('http://localhost/admin/site?panel=pages'),
+        { db: fakeDb, staticDir },
+      )
+
+      expect(res.status).toBe(302)
+      expect(res.headers.get('location')).toBe(
+        '/admin/api/cms/auth/oidc/login?returnTo=%2Fadmin%2Fsite%3Fpanel%3Dpages',
+      )
+      expect(res.headers.get('cache-control')).toBe('no-store')
     } finally {
       rmSync(staticDir, { recursive: true, force: true })
     }

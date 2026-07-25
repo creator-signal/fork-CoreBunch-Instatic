@@ -433,7 +433,13 @@ describe('CMS handlers', () => {
     const db = makeFakeDb()
     const res = await handleCmsRequest(new Request('http://localhost/admin/api/cms/setup/status'), db)
     expect(res.status).toBe(200)
-    expect(await json(res)).toEqual({ hasSite: false, hasAdmin: false, hasOwner: false, needsSetup: true })
+    expect(await json(res)).toEqual({
+      hasSite: false,
+      hasAdmin: false,
+      hasOwner: false,
+      needsSetup: true,
+      authMode: 'native',
+    })
   })
 
   it('creates the first site and owner account', async () => {

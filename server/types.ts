@@ -41,6 +41,8 @@ export interface UserRow {
   mfa_recovery_code_hashes_json: unknown
   step_up_auth_mode: UserStepUpAuthMode | string
   step_up_window_minutes: number
+  oidc_issuer: string | null
+  oidc_subject: string | null
   created_at: Date | string
   updated_at: Date | string
   deleted_at: Date | string | null

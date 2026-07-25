@@ -52,13 +52,40 @@ describe('Creator Signal site pack', () => {
     expect(new Set(pack.classes.map((rule) => rule.id)).size).toBe(pack.classes.length)
 
     const pageContainer = pack.classes.find((rule) =>
-      rule.kind === 'ambient' &&
-      rule.name.includes('.site-header') &&
-      rule.name.includes('.site-footer'))
+      rule.kind === 'class' && rule.name === 'section')
     expect(pageContainer?.styles).toMatchObject({
       width: 'calc(100% - 2rem)',
       maxWidth: '1160px',
       marginInline: 'auto',
     })
+    for (const className of ['site-header', 'site-footer']) {
+      expect(pack.classes.find((rule) =>
+        rule.kind === 'class' && rule.name === className)?.styles,
+      ).toMatchObject({
+        width: 'calc(100% - 2rem)',
+        maxWidth: '1160px',
+        marginInline: 'auto',
+      })
+    }
+    expect(pack.classes.find((rule) =>
+      rule.kind === 'class' && rule.name === 'hero')?.styles,
+    ).toMatchObject({
+      paddingTop: '5rem',
+      paddingRight: '0px',
+      paddingBottom: '5rem',
+      paddingLeft: '0px',
+    })
+    expect(pack.classes.find((rule) =>
+      rule.kind === 'ambient' && rule.name === 'h1')?.styles,
+    ).toMatchObject({ fontSize: '4rem' })
+
+    const features = pack.pages.find((page) => page.slug === 'features')
+    const hero = Object.values(features?.nodes ?? {}).find((node) =>
+      node.classIds.some((id) => id.endsWith('/hero')))
+    expect(hero?.classIds.some((id) => id.endsWith('/section'))).toBe(true)
+
+    const boundedSections = Object.values(features?.nodes ?? {}).filter((node) =>
+      node.classIds.some((id) => id.endsWith('/section')))
+    expect(boundedSections.length).toBeGreaterThanOrEqual(2)
   })
 })

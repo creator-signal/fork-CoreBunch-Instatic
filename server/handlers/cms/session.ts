@@ -48,6 +48,28 @@ export function clearSessionCookie(req: Request): string {
   return `${SESSION_COOKIE_NAME}=; ${attrs}; Max-Age=0`
 }
 
+const OIDC_STATE_COOKIE_NAME = 'instatic_admin_oidc_state'
+
+export function oidcStateCookie(req: Request, value: string, maxAgeSeconds: number): string {
+  const attrs = sessionCookieAttributes(requestIsHttps(req))
+  return `${OIDC_STATE_COOKIE_NAME}=${value}; ${attrs}; Max-Age=${maxAgeSeconds}`
+}
+
+export function clearOidcStateCookie(req: Request): string {
+  const attrs = sessionCookieAttributes(requestIsHttps(req))
+  return `${OIDC_STATE_COOKIE_NAME}=; ${attrs}; Max-Age=0`
+}
+
+export function oidcStateCookieValue(req: Request): string | null {
+  const header = req.headers.get('cookie')
+  if (!header) return null
+  for (const part of header.split(';')) {
+    const [name, ...rest] = part.trim().split('=')
+    if (name === OIDC_STATE_COOKIE_NAME) return rest.join('=') || null
+  }
+  return null
+}
+
 /**
  * A fixed argon2id hash, computed once per process. Used by the login handler
  * as the verification target when the supplied email doesn't match any admin

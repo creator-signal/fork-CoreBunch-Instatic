@@ -109,6 +109,11 @@ const CmsLoginResponseSchema = Type.Object({
   mfaRequired: Type.Optional(Type.Boolean()),
 })
 
+const CmsLogoutResponseSchema = Type.Object({
+  ok: Type.Boolean(),
+  logoutUrl: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+}, { additionalProperties: true })
+
 export async function getCmsSetupStatus(
   fetchImpl: FetchLike = globalThis.fetch.bind(globalThis),
   basePath = '/admin/api/cms',
@@ -181,12 +186,14 @@ export async function verifyCmsMfa(
 export async function logoutCms(
   fetchImpl: FetchLike = globalThis.fetch.bind(globalThis),
   basePath = '/admin/api/cms',
-): Promise<void> {
-  await apiRequest(`${basePath}/logout`, {
+): Promise<string | null> {
+  const body = await apiRequest(`${basePath}/logout`, {
     method: 'POST',
+    schema: CmsLogoutResponseSchema,
     fetchImpl,
     fallbackMessage: 'CMS logout failed',
   })
+  return body.logoutUrl ?? null
 }
 
 export async function probeCmsSession(

@@ -26,6 +26,15 @@ Production uses mounted files for sensitive values:
 | --- | --- |
 | `DATABASE_URL_FILE` | Site-specific PostgreSQL connection URL |
 | `INSTATIC_SECRET_KEY_FILE` | Site-specific 32-byte base64 master key |
+| `INSTATIC_AUTH_MODE` | Set to `zitadel` to disable native human login |
+| `INSTATIC_OIDC_ISSUER` | HTTPS Zitadel issuer |
+| `INSTATIC_OIDC_CLIENT_ID_FILE` | Dedicated site client ID |
+| `INSTATIC_OIDC_CLIENT_SECRET_FILE` | Dedicated site client secret |
+| `INSTATIC_OIDC_PROJECT_ID_FILE` | Zitadel project ID used for role claims |
+| `INSTATIC_OIDC_REDIRECT_URI` | Exact site callback under `/admin/api/cms/auth/oidc/callback` |
+| `INSTATIC_OIDC_REQUIRED_ROLE` | Required author role, normally `platform:operator` |
+| `INSTATIC_OIDC_OWNER_ROLE` | First-owner role, normally `platform:owner` |
+| `INSTATIC_DEPLOYMENT_TOKEN_FILE` | Machine-only five-minute deployment verification session |
 | `MINIO_ACCESS_KEY_FILE` | Bucket-scoped MinIO access key |
 | `MINIO_SECRET_KEY_FILE` | Bucket-scoped MinIO secret key |
 | `MINIO_ENDPOINT` | Private S3 endpoint used by the host adapter |
@@ -60,7 +69,9 @@ installation, set `INSTATIC_BOOTSTRAP_SITE_NAME`,
 `INSTATIC_BOOTSTRAP_PLUGIN_PACKAGE`, and optionally
 `INSTATIC_BOOTSTRAP_PLUGIN_SETTINGS_FILE`. Startup then creates the first
 owner, replaces the blank homepage, installs the trusted embedded package, and
-publishes all 18 routes. Existing installations are never reset.
+publishes all 18 routes. The bootstrap password is dormant when Zitadel mode
+is enabled; first login links the verified Zitadel identity to that owner.
+Existing installations are never reset.
 
 Plausible, OpenPanel, and GlitchTip are disabled by default. Enable each plugin setting only after its collector and consent gate are accepted. Confirm the live Mautic form ID and API name on the Contact module before publishing.
 
@@ -84,7 +95,7 @@ Do not activate the apex or `www` routes until all of these pass:
 3. MinIO upload, render, delete, cross-bucket denial, versioning, encryption, backup, and isolated restore pass.
 4. PostgreSQL backup and isolated restore pass.
 5. Public metadata, canonical routes, sitemap/redirect behaviour, legal copy, and browser acceptance match.
-6. The pre-provisioned native owner signs in, changes the bootstrap credential and proves the intended author permissions.
+6. A verified Zitadel operator signs in through `/admin`; the owner/operator role mapping, denied wrong-role path, logout, and stale-session re-login all pass without exposing native login.
 7. Cutover and rollback are rehearsed, and DNS activation receives separate approval.
 
 ## Related

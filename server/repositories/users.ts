@@ -55,6 +55,8 @@ export interface AuthUser extends CmsUser {
   passwordHash: string
   encryptedMfaTotpSecret: EncryptedTotpSecret | null
   mfaRecoveryCodeHashes: string[]
+  oidcIssuer: string | null
+  oidcSubject: string | null
 }
 
 export interface JoinedUserRow extends UserRow {
@@ -95,6 +97,8 @@ export const USER_JOINED_COLUMNS = `users.id,
        users.mfa_recovery_code_hashes_json,
        users.step_up_auth_mode,
        users.step_up_window_minutes,
+       users.oidc_issuer,
+       users.oidc_subject,
        users.created_at,
        users.updated_at,
        users.deleted_at,
@@ -209,6 +213,8 @@ export function rowToUser(row: JoinedUserRow): AuthUser {
       row.mfa_totp_secret_key_fingerprint,
     ),
     mfaRecoveryCodeHashes,
+    oidcIssuer: row.oidc_issuer,
+    oidcSubject: row.oidc_subject,
     mfaRecoveryCodesRemaining: mfaRecoveryCodeHashes.length,
     stepUpAuthMode: normalizeStepUpAuthMode(row.step_up_auth_mode),
     stepUpWindowMinutes: normalizeStepUpWindowMinutes(row.step_up_window_minutes),
@@ -268,6 +274,41 @@ export async function findUserByEmail(db: DbClient, email: string): Promise<Auth
     [normalizeEmail(email)],
   )
   return rows[0] ? rowToUser(rows[0]) : null
+}
+
+export async function findUserByOidcIdentity(
+  db: DbClient,
+  issuer: string,
+  subject: string,
+): Promise<AuthUser | null> {
+  const rows = await queryUsers(
+    db,
+    `where users.oidc_issuer = ${placeholder(db.dialect, 1)}
+       and users.oidc_subject = ${placeholder(db.dialect, 2)}
+       and users.deleted_at is null
+     limit 1`,
+    [issuer, subject],
+  )
+  return rows[0] ? rowToUser(rows[0]) : null
+}
+
+export async function linkUserOidcIdentity(
+  db: DbClient,
+  userId: string,
+  issuer: string,
+  subject: string,
+): Promise<AuthUser | null> {
+  const result = await db`
+    update users
+    set oidc_issuer = ${issuer},
+        oidc_subject = ${subject},
+        updated_at = current_timestamp
+    where id = ${userId}
+      and deleted_at is null
+      and (oidc_issuer is null or (oidc_issuer = ${issuer} and oidc_subject = ${subject}))
+  `
+  if (result.rowCount === 0) return null
+  return findUserById(db, userId)
 }
 
 export async function createUser(

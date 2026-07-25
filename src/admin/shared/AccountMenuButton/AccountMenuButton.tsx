@@ -67,11 +67,11 @@ export function AccountMenuButton(): ReactNode {
     setBusy('logout')
     setStatus(null)
     try {
-      await logoutCms()
+      const logoutUrl = await logoutCms()
       // Hard navigation is intentional here — the next request must boot the
       // admin shell from scratch so the unauth login form renders. A soft
       // navigate would keep the React tree alive with stale session state.
-      window.location.assign('/admin')
+      window.location.assign(logoutUrl ?? '/admin')
     } catch (err) {
       console.error('[account-menu] sign out failed:', err)
       setBusy(null)
@@ -184,4 +184,3 @@ export function AccountMenuButton(): ReactNode {
     </>
   )
 }
-

@@ -56,6 +56,10 @@ export const CmsSetupStatusSchema = Type.Object({
   hasAdmin: Type.Boolean(),
   hasOwner: Type.Optional(Type.Boolean()),
   needsSetup: Type.Boolean(),
+  authMode: Type.Optional(Type.Union([
+    Type.Literal('native'),
+    Type.Literal('zitadel'),
+  ])),
 })
 
 export type CmsSetupStatus = Static<typeof CmsSetupStatusSchema>

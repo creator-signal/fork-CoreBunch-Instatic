@@ -18,6 +18,7 @@
 import { nanoid } from 'nanoid'
 import type { DbClient } from '../../db/client'
 import { hashPassword } from '../../auth/tokens'
+import { configuredAdminAuthMode } from '../../auth/oidc'
 import { createSite, getSetupStatus } from '../../repositories/setup'
 import { createUser } from '../../repositories/users'
 import { createAuditEvent } from '../../repositories/audit'
@@ -35,7 +36,10 @@ export async function handleSetupRoutes(req: Request, db: DbClient): Promise<Res
 
   if (url.pathname === `${CMS_API_PREFIX}/setup/status`) {
     if (req.method !== 'GET') return methodNotAllowed()
-    return jsonResponse(await getSetupStatus(db))
+    return jsonResponse({
+      ...await getSetupStatus(db),
+      authMode: configuredAdminAuthMode(),
+    })
   }
 
   if (url.pathname === `${CMS_API_PREFIX}/public-site`) {

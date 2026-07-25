@@ -1120,4 +1120,21 @@ export const pgMigrations: Migration[] = [
         on ai_mcp_oauth_tokens (connector_id);
     `,
   },
+  {
+    // External admin identity linkage. Password hashes remain populated so
+    // native installations keep one user table, while OIDC installations
+    // resolve immutable issuer+subject pairs instead of trusting mutable
+    // email addresses on every sign-in.
+    id: '022_user_oidc_identity',
+    sql: `
+      alter table users add column oidc_issuer text;
+      alter table users add column oidc_subject text;
+
+      create unique index if not exists users_oidc_identity_active_idx
+        on users (oidc_issuer, oidc_subject)
+        where oidc_issuer is not null
+          and oidc_subject is not null
+          and deleted_at is null;
+    `,
+  },
 ]

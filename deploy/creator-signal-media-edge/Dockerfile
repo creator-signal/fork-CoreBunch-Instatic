@@ -7,5 +7,8 @@ LABEL org.opencontainers.image.source="https://github.com/creator-signal/fork-Co
 
 COPY deploy/creator-signal-media-edge/Caddyfile /etc/caddy/Caddyfile
 
+USER root
+RUN setcap -r /usr/bin/caddy
+
 USER 1000:1000
 EXPOSE 8080

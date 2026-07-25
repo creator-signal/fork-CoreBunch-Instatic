@@ -124,8 +124,8 @@ describe('frontend injection — CSP determinism', () => {
         },
         networkAllowedHosts: ['api.acme.com', 'cdn.acme.com'],
         mediaCspOrigins: [
-          { directive: 'img-src', origin: 'cdn.images.example' },
-          { directive: 'connect-src', origin: 'api.media.example' },
+          { directive: 'img-src', origin: 'https://cdn.images.example' },
+          { directive: 'connect-src', origin: 'https://api.media.example' },
         ],
       })
 
@@ -140,8 +140,8 @@ describe('frontend injection — CSP determinism', () => {
       tags: { head: [], 'head-end': [], 'body-start': [], 'body-end': ['<script src="/x/a.js"></script>'] },
       networkAllowedHosts: ['z.example', 'a.example'],
       mediaCspOrigins: [
-        { directive: 'connect-src', origin: 'm2.example' },
-        { directive: 'img-src', origin: 'm1.example' },
+        { directive: 'connect-src', origin: 'https://m2.example' },
+        { directive: 'img-src', origin: 'https://m1.example' },
       ],
     })
     const b = planWith({
@@ -149,8 +149,8 @@ describe('frontend injection — CSP determinism', () => {
       tags: { head: [], 'head-end': [], 'body-start': [], 'body-end': ['<script src="/x/a.js"></script>'] },
       networkAllowedHosts: ['a.example', 'z.example'],
       mediaCspOrigins: [
-        { directive: 'img-src', origin: 'm1.example' },
-        { directive: 'connect-src', origin: 'm2.example' },
+        { directive: 'img-src', origin: 'https://m1.example' },
+        { directive: 'connect-src', origin: 'https://m2.example' },
       ],
     })
     expect(extractCsp(injectFrontendAssets(PAGE_WITH_CSP, a))).toBe(
@@ -163,7 +163,7 @@ describe('frontend injection — CSP determinism', () => {
       hasExternalScript: true,
       tags: { head: [], 'head-end': [], 'body-start': [], 'body-end': ['<script src="/x/a.js"></script>'] },
       networkAllowedHosts: ['z.example', 'a.example'],
-      mediaCspOrigins: [{ directive: 'media-src', origin: 'stream.example' }],
+      mediaCspOrigins: [{ directive: 'media-src', origin: 'https://stream.example' }],
     })
     const csp = extractCsp(injectFrontendAssets(PAGE_WITH_CSP, plan))
     const directives = csp

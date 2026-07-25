@@ -398,7 +398,7 @@ function relaxCspForPlan(html: string, plan: FrontendInjections, hasTags: boolea
     // being active. Extending `'self'` keeps the host-relative defaults
     // (`/uploads/*`, `/_instatic/*`) working.
     for (const { directive, origin } of plan.mediaCspOrigins) {
-      addCspSources(csp, directive, ["'self'", `https://${origin}`])
+      addCspSources(csp, directive, ["'self'", origin])
     }
   })
 }

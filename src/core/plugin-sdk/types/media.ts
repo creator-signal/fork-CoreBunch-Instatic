@@ -209,7 +209,9 @@ export interface MediaStorageAdapter {
   /**
    * Optional. Declared CSP origins the host should add to `img-src` /
    * `media-src` / `connect-src` in the editor preview iframe and the
-   * published-page CSP. Static — declared once at registration.
+   * published-page CSP. Each value is an absolute HTTP(S) origin, including
+   * its scheme and optional port but no path. Static — declared once at
+   * registration.
    */
   cspOrigins?: ReadonlyArray<{
     directive: 'img-src' | 'media-src' | 'connect-src'

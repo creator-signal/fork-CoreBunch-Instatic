@@ -6,6 +6,16 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.16 - 2026-07-25
+
+### Creator Signal integration
+
+- Restored the bounded responsive layout on every public route and compiled
+  the launch site against one shared stylesheet instead of repeating global
+  rules for every page.
+- Made plugin-pack style upgrades authoritative for plugin-owned rules, so
+  obsolete package CSS is removed without touching user-owned styles.
+
 ## 0.0.15 - 2026-07-25
 
 ### Creator Signal integration

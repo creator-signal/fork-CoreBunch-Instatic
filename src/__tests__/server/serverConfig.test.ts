@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'bun:test'
+import { mkdtempSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 import { normalizeOrigin, readServerConfig, resolvePublicOrigins } from '../../../server/config'
 
 describe('normalizeOrigin', () => {
@@ -99,6 +102,7 @@ describe('readServerConfig', () => {
       staticDir: './dist',
       trustedProxyCidrs: [],
       publicOrigins: [],
+      minio: null,
     })
   })
 
@@ -121,6 +125,51 @@ describe('readServerConfig', () => {
       staticDir: '/srv/instatic/dist',
       trustedProxyCidrs: ['10.0.0.0/8', '192.168.0.0/16'],
       publicOrigins: ['https://cms.example.com', 'http://localhost:5173'],
+      minio: null,
     })
+  })
+
+  it('reads DATABASE_URL from a mounted secret file', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'instatic-config-'))
+    const path = join(directory, 'database-url')
+    writeFileSync(path, 'postgres://instatic:secret@postgres:5432/instatic\n')
+    expect(readServerConfig({ DATABASE_URL_FILE: path }).databaseUrl)
+      .toBe('postgres://instatic:secret@postgres:5432/instatic')
+  })
+
+  it('prefers DATABASE_URL over DATABASE_URL_FILE', () => {
+    expect(readServerConfig({
+      DATABASE_URL: 'sqlite:./direct.db',
+      DATABASE_URL_FILE: 'does-not-need-to-exist',
+    }).databaseUrl).toBe('sqlite:./direct.db')
+  })
+
+  it('loads complete MinIO configuration from mounted credential files', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'instatic-minio-'))
+    const accessKeyPath = join(directory, 'access-key')
+    const secretKeyPath = join(directory, 'secret-key')
+    writeFileSync(accessKeyPath, 'site-access\n')
+    writeFileSync(secretKeyPath, 'site-secret\n')
+    expect(readServerConfig({
+      MINIO_ENDPOINT: 'https://objects.example.test:9000',
+      MINIO_PUBLIC_BASE_URL: 'https://site.example.test/media',
+      MINIO_BUCKET: 'site-media',
+      MINIO_PREFIX: 'site-a',
+      MINIO_ACCESS_KEY_FILE: accessKeyPath,
+      MINIO_SECRET_KEY_FILE: secretKeyPath,
+    }).minio).toEqual({
+      endpoint: 'https://objects.example.test:9000',
+      publicBaseUrl: 'https://site.example.test/media',
+      bucket: 'site-media',
+      region: 'us-east-1',
+      prefix: 'site-a',
+      accessKey: 'site-access',
+      secretKey: 'site-secret',
+    })
+  })
+
+  it('rejects partial MinIO configuration', () => {
+    expect(() => readServerConfig({ MINIO_ENDPOINT: 'https://objects.example.test' }))
+      .toThrow(/requires MINIO_ENDPOINT/)
   })
 })

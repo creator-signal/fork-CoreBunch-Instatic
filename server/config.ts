@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+
 interface ServerConfig {
   port: number
   databaseUrl: string
@@ -5,6 +7,29 @@ interface ServerConfig {
   staticDir: string
   trustedProxyCidrs: string[]
   publicOrigins: string[]
+  minio: {
+    endpoint: string
+    publicBaseUrl: string
+    bucket: string
+    region: string
+    prefix: string
+    accessKey: string
+    secretKey: string
+  } | null
+}
+
+function readSecretValue(
+  env: Record<string, string | undefined>,
+  valueName: string,
+  fileName: string,
+): string | undefined {
+  const direct = env[valueName]?.trim()
+  if (direct) return direct
+  const path = env[fileName]?.trim()
+  if (!path) return undefined
+  const value = readFileSync(path, 'utf8').trim()
+  if (!value) throw new Error(`${fileName} points to an empty file`)
+  return value
 }
 
 function readCsvList(value: string | undefined): string[] {
@@ -81,12 +106,34 @@ export function resolvePublicOrigins(env: Record<string, string | undefined>): s
 export function readServerConfig(
   env: Record<string, string | undefined> = process.env,
 ): ServerConfig {
+  const minioEndpoint = env.MINIO_ENDPOINT?.trim()
+  const minioBucket = env.MINIO_BUCKET?.trim()
+  const minioAccessKey = readSecretValue(env, 'MINIO_ACCESS_KEY', 'MINIO_ACCESS_KEY_FILE')
+  const minioSecretKey = readSecretValue(env, 'MINIO_SECRET_KEY', 'MINIO_SECRET_KEY_FILE')
+  const minioValues = [minioEndpoint, minioBucket, minioAccessKey, minioSecretKey]
+  const hasAnyMinioValue = minioValues.some(Boolean)
+  if (hasAnyMinioValue && minioValues.some((value) => !value)) {
+    throw new Error(
+      'MinIO configuration requires MINIO_ENDPOINT, MINIO_BUCKET, and access/secret key values or files',
+    )
+  }
   return {
     port: Number(env.PORT ?? 3001),
-    databaseUrl: env.DATABASE_URL ?? 'sqlite:./.tmp/dev.db',
+    databaseUrl: readSecretValue(env, 'DATABASE_URL', 'DATABASE_URL_FILE') ?? 'sqlite:./.tmp/dev.db',
     uploadsDir: env.UPLOADS_DIR ?? './uploads',
     staticDir: env.STATIC_DIR ?? './dist',
     trustedProxyCidrs: readCsvList(env.TRUSTED_PROXY_CIDRS),
     publicOrigins: resolvePublicOrigins(env),
+    minio: hasAnyMinioValue
+      ? {
+          endpoint: minioEndpoint!,
+          publicBaseUrl: env.MINIO_PUBLIC_BASE_URL?.trim() || '/media',
+          bucket: minioBucket!,
+          region: env.MINIO_REGION?.trim() || 'us-east-1',
+          prefix: env.MINIO_PREFIX?.trim() || '',
+          accessKey: minioAccessKey!,
+          secretKey: minioSecretKey!,
+        }
+      : null,
   }
 }

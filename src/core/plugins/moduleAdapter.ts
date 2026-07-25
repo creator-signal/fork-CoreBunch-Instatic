@@ -125,6 +125,7 @@ export function pluginModuleToHostModule(
    * array) — authority for the `frontend.assets` gate on module JS.
    */
   grantedPermissions: readonly string[],
+  networkAllowedHosts: readonly string[] = [],
 ): ModuleDefinition<Record<string, unknown>> {
   validatePluginModuleId(pluginId, definition.id)
 
@@ -142,6 +143,26 @@ export function pluginModuleToHostModule(
   // module so a publish over hundreds of nodes doesn't spam the log.
   const allowModuleJs = grantedPermissions.includes('frontend.assets')
   let warnedDroppedJs = false
+  const allowedCspHosts = new Set(networkAllowedHosts.map((host) => host.toLowerCase()))
+  const allowedCspSources = (
+    sources: PluginModuleDefinition['render'] extends (...args: never[]) => infer R
+      ? R extends { cspSources?: infer C } ? C : never
+      : never,
+  ) => (sources ?? []).flatMap((requirement) => {
+    const safe = requirement.sources.filter((source) => {
+      if (source === "'self'" || source === 'data:' || source === 'blob:') return true
+      try {
+        const host = new URL(source).hostname.toLowerCase()
+        return allowedCspHosts.has(host) ||
+          [...allowedCspHosts].some((allowed) =>
+            allowed.startsWith('*.') && host.endsWith(allowed.slice(1)) &&
+            host.split('.').length === allowed.split('.').length)
+      } catch {
+        return false
+      }
+    })
+    return safe.length > 0 ? [{ directive: requirement.directive, sources: safe }] : []
+  })
 
   return {
     id: definition.id,
@@ -193,7 +214,14 @@ export function pluginModuleToHostModule(
           }
           return { html: out.html, css: out.css }
         }
-        return { html: out.html, css: out.css, js: out.js }
+        return {
+          html: out.html,
+          css: out.css,
+          js: out.js,
+          ...(allowModuleJs && out.cspSources
+            ? { cspSources: allowedCspSources(out.cspSources) }
+            : {}),
+        }
       } catch (err) {
         console.error(`[plugin-module:${definition.id}] render() threw:`, err)
         return { html: `<!-- instatic: plugin module "${definition.id}" render failed -->` }

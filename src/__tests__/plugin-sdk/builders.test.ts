@@ -10,6 +10,7 @@ import {
   defineModule,
   definePack,
   definePlugin,
+  compilePackPage,
   escapeHtml,
   h,
   html,
@@ -182,6 +183,30 @@ describe('h.* tree builder + defineComponent', () => {
 })
 
 describe('definePack', () => {
+  it('compiles clean HTML into a deterministic installable page', () => {
+    const a = compilePackPage('acme.ui-kit', {
+      id: 'home',
+      title: 'Home',
+      slug: 'index',
+      html: '<main class="page"><h1>Hello</h1></main>',
+      css: '.page { max-width: 70rem; }',
+    })
+    const b = compilePackPage('acme.ui-kit', {
+      id: 'home',
+      title: 'Home',
+      slug: 'index',
+      html: '<main class="page"><h1>Hello</h1></main>',
+      css: '.page { max-width: 70rem; }',
+    })
+
+    expect(a.page.id).toBe('acme.ui-kit/page/home')
+    expect(a.page.slug).toBe('index')
+    expect(a.page.nodes[a.page.rootNodeId].moduleId).toBe('base.body')
+    expect(Object.keys(a.page.nodes)).toEqual(Object.keys(b.page.nodes))
+    expect(a.classes.find((rule) => rule.name === 'page')?.id)
+      .toBe('acme.ui-kit/page/home/page')
+  })
+
   it('expands the classes shorthand into namespaced StyleRule entries with safe names', () => {
     const pack = definePack({
       pluginId: 'acme.ui-kit',

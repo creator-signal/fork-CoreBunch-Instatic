@@ -55,6 +55,10 @@ interface ModulePackRenderOutput {
   html: string
   css?: string
   js?: string
+  cspSources?: Array<{
+    directive: 'frame-src' | 'script-src' | 'img-src' | 'media-src' | 'connect-src' | 'style-src' | 'font-src' | 'form-action'
+    sources: string[]
+  }>
 }
 
 /**

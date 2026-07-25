@@ -45,6 +45,7 @@ export interface PluginPackSummary {
     layouts: { id: string; name: string }[]
   }
   replaced: { visualComponents: string[]; pages: string[]; classes: string[]; layouts: string[] }
+  removed: { classes: string[] }
 }
 
 /**
@@ -93,7 +94,7 @@ async function installPluginPackToSite(
     layouts: existingLayouts,
   }
 
-  const { site: nextSiteDoc, replaced } = applyPluginPackToSite(tempSiteDoc, pack)
+  const { site: nextSiteDoc, replaced, removed } = applyPluginPackToSite(plugin.id, tempSiteDoc, pack)
 
   // Extract shell (strip pages, visualComponents, and layouts) and save
   const { pages: packPages, visualComponents: _vcs, layouts: _layouts, ...nextShell } = nextSiteDoc
@@ -149,6 +150,7 @@ async function installPluginPackToSite(
       replacedPages: replaced.pages,
       replacedClasses: replaced.classes,
       replacedLayouts: replaced.layouts,
+      removedClasses: removed.classes,
     },
     ...requestAuditContext(req),
   })
@@ -160,6 +162,7 @@ async function installPluginPackToSite(
       layouts: pack.layouts.map((l) => ({ id: l.id, name: l.name })),
     },
     replaced,
+    removed,
   }
 }
 

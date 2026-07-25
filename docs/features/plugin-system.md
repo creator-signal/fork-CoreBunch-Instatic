@@ -1042,6 +1042,14 @@ First install still goes through the admin UI (`/admin/plugins` → Upload Plugi
 7. **Install via admin UI** (`/admin/plugins` → Upload Plugin), approve permissions.
 8. **Iterate** with `bun instatic-plugin dev`.
 
+For a starter site with multiple pages, compile the pages and their global
+stylesheet together with `compilePackPages(pluginId, pages, css)`. The builder
+links every page to one shared class registry and emits ambient selectors once.
+Use `compilePackPage` only for a standalone page whose styles are intentionally
+page-namespaced. Re-syncing or upgrading a pack makes its namespaced class
+registry authoritative: plugin-owned rules omitted by the new package are
+removed, while user-owned rules are preserved.
+
 ### Cookbook: a server route + storage collection
 
 ```js

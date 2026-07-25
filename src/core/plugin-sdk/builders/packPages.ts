@@ -25,8 +25,30 @@ export interface CompiledPackPage {
   classes: StyleRule[]
 }
 
+export interface CompiledPackPages {
+  pages: Page[]
+  classes: StyleRule[]
+}
+
 function namespacedPageId(pluginId: string, id: string): string {
   return id.startsWith(`${pluginId}/page/`) ? id : `${pluginId}/page/${id}`
+}
+
+function compileStyleRules(namespace: string, css: string): {
+  classes: StyleRule[]
+  classIdByName: Map<string, string>
+} {
+  const parsedRules = cssToStyleRules(css).rules
+  const classIdByName = new Map<string, string>()
+  let ambientIndex = 0
+  const classes = parsedRules.map((rule) => {
+    const id = rule.kind === 'class'
+      ? `${namespace}/${rule.name}`
+      : `${namespace}/ambient-${ambientIndex++}`
+    if (rule.kind === 'class') classIdByName.set(rule.name, id)
+    return { ...rule, id, createdAt: 0, updatedAt: 0 }
+  })
+  return { classes, classIdByName }
 }
 
 function deterministicNodeIds(
@@ -67,32 +89,16 @@ function deterministicNodeIds(
   }
 }
 
-export function compilePackPage(pluginId: string, entry: PagePackEntry): CompiledPackPage {
-  if (typeof DOMParser === 'undefined') {
-    throw new Error(
-      `[plugin-sdk] Pack page "${entry.id}" needs a DOM to compile its HTML. ` +
-        'Build the plugin with `instatic-plugin build`.',
-    )
-  }
-
+function compileImportedPage(
+  pluginId: string,
+  entry: PagePackEntry,
+  imported: ReturnType<typeof importHtml>,
+  classIdByName: ReadonlyMap<string, string>,
+): Page {
   const pageId = namespacedPageId(pluginId, entry.id)
-  const imported = importHtml(entry.html)
   if (imported.rootIds.length === 0) {
     throw new Error(`[plugin-sdk] Pack page "${pageId}" HTML produced no elements.`)
   }
-
-  const parsedRules = cssToStyleRules(
-    [entry.css, imported.styleCss].filter(Boolean).join('\n\n'),
-  ).rules
-  const classIdByName = new Map<string, string>()
-  let ambientIndex = 0
-  const classes = parsedRules.map((rule) => {
-    const id = rule.kind === 'class'
-      ? `${pageId}/${rule.name}`
-      : `${pageId}/ambient-${ambientIndex++}`
-    if (rule.kind === 'class') classIdByName.set(rule.name, id)
-    return { ...rule, id, createdAt: 0, updatedAt: 0 }
-  })
 
   for (const node of Object.values(imported.nodes)) {
     node.classIds = node.classIds.flatMap((name) => {
@@ -109,13 +115,62 @@ export function compilePackPage(pluginId: string, entry: PagePackEntry): Compile
   reindexNodeParents(nodes)
 
   return {
-    page: {
-      id: pageId,
-      slug: entry.slug,
-      title: entry.title,
-      rootNodeId: body.id,
-      nodes,
-    },
+    id: pageId,
+    slug: entry.slug,
+    title: entry.title,
+    rootNodeId: body.id,
+    nodes,
+  }
+}
+
+function requirePackPageDom(entryId: string): void {
+  if (typeof DOMParser !== 'undefined') return
+  throw new Error(
+    `[plugin-sdk] Pack page "${entryId}" needs a DOM to compile its HTML. ` +
+      'Build the plugin with `instatic-plugin build`.',
+  )
+}
+
+export function compilePackPage(pluginId: string, entry: PagePackEntry): CompiledPackPage {
+  requirePackPageDom(entry.id)
+  const imported = importHtml(entry.html)
+  const { classes, classIdByName } = compileStyleRules(
+    namespacedPageId(pluginId, entry.id),
+    [entry.css, imported.styleCss].filter(Boolean).join('\n\n'),
+  )
+  return {
+    page: compileImportedPage(pluginId, entry, imported, classIdByName),
+    classes,
+  }
+}
+
+/**
+ * Compile a complete site against one shared CSS registry.
+ *
+ * Instatic style rules are site-global. Compiling the same stylesheet once per
+ * page creates duplicate ambient selectors that all publish on every route.
+ * Site packs should use this builder so every page links to the same reusable
+ * classes and the ambient rules are emitted exactly once.
+ */
+export function compilePackPages(
+  pluginId: string,
+  entries: PagePackEntry[],
+  sharedCss = '',
+): CompiledPackPages {
+  for (const entry of entries) requirePackPageDom(entry.id)
+  const importedPages = entries.map((entry) => ({
+    entry,
+    imported: importHtml(entry.html),
+  }))
+  const css = [
+    sharedCss,
+    ...importedPages.flatMap(({ entry, imported }) => [entry.css, imported.styleCss]),
+  ].filter(Boolean).join('\n\n')
+  const { classes, classIdByName } = compileStyleRules(`${pluginId}/site`, css)
+
+  return {
+    pages: importedPages.map(({ entry, imported }) =>
+      compileImportedPage(pluginId, entry, imported, classIdByName)),
     classes,
   }
 }

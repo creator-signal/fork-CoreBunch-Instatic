@@ -1,8 +1,10 @@
 # Creator Signal Stack
 
-This page defines how the Creator Signal Instatic comparison image, site plugin, PostgreSQL database, and MinIO media bucket fit together.
+This page defines how the Creator Signal Instatic production image, site plugin, PostgreSQL database, and MinIO media bucket fit together.
 
-The comparison runs beside Strapi and the Next.js public site until authoring, publishing, integration, recovery, and cutover gates pass. It does not alter the production route by merely becoming healthy.
+The application is the authoring CMS and public-site runtime. Becoming healthy
+does not activate DNS; production routing remains a separately approved
+operation after authoring, publishing, integration and recovery acceptance.
 
 ## TL;DR
 
@@ -58,7 +60,7 @@ installation, set `INSTATIC_BOOTSTRAP_SITE_NAME`,
 `INSTATIC_BOOTSTRAP_PLUGIN_PACKAGE`, and optionally
 `INSTATIC_BOOTSTRAP_PLUGIN_SETTINGS_FILE`. Startup then creates the first
 owner, replaces the blank homepage, installs the trusted embedded package, and
-publishes all eight routes. Existing installations are never reset.
+publishes all 18 routes. Existing installations are never reset.
 
 Plausible, OpenPanel, and GlitchTip are disabled by default. Enable each plugin setting only after its collector and consent gate are accepted. Confirm the live Mautic form ID and API name on the Contact module before publishing.
 
@@ -73,16 +75,16 @@ The deployment follows the current `creator-signal/platform-provisioner` contrac
 - MinIO, Mautic, and backup are verification-only integrations and must exist before reconciliation;
 - DNS activation remains a separate protected operation after live acceptance.
 
-## Replacement gates
+## Production activation gates
 
-Do not remove Strapi or the Next.js public site until all of these pass:
+Do not activate the apex or `www` routes until all of these pass:
 
 1. Authors reproduce and publish every launch page and shared layout.
 2. Mautic success/failure callbacks and consented analytics emit the approved typed events.
 3. MinIO upload, render, delete, cross-bucket denial, versioning, encryption, backup, and isolated restore pass.
 4. PostgreSQL backup and isolated restore pass.
 5. Public metadata, canonical routes, sitemap/redirect behaviour, legal copy, and browser acceptance match.
-6. An approved replacement exists for ZITADEL-backed author SSO and any role-protected public route.
+6. The pre-provisioned native owner signs in, changes the bootstrap credential and proves the intended author permissions.
 7. Cutover and rollback are rehearsed, and DNS activation receives separate approval.
 
 ## Related

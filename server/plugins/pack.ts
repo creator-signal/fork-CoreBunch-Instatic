@@ -129,7 +129,7 @@ export function parsePluginPack(pluginId: string, raw: unknown): PluginPackConte
     // would split it into multiple classes, none of which would have rules.
     // Reject pack authors that ship friendly names — the `id` is for
     // namespacing, the `name` is the CSS identifier.
-    if (!isValidCssClassName(cls.name)) {
+    if (cls.kind === 'class' && !isValidCssClassName(cls.name)) {
       throw new PluginPackError(
         `Plugin "${pluginId}" pack class "${cls.id}" name "${cls.name}" is not a valid CSS class name. Use a single token (no spaces, no slashes), e.g. "${suggestClassName(pluginId, cls.id)}".`,
       )

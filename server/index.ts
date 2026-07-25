@@ -41,6 +41,15 @@ if (config.minio) {
     await electAdapter(db, role, minioAdapter.id, null)
   }
 }
+if (config.starterSite) {
+  const { bootstrapStarterSite } = await import('./bootstrap/starterSite')
+  const result = await bootstrapStarterSite(db, config.starterSite, config.uploadsDir)
+  console.log(
+    `[starter-site] owner=${result.createdOwner ? 'created' : 'existing'} `
+    + `plugin=${result.installedPlugin ? 'installed' : 'current'} `
+    + `publishedPages=${result.publishedPages}`,
+  )
+}
 await activateInstalledServerPlugins(db, config.uploadsDir)
 // AI runtime: start the nightly conversation-purge tick. Operators add
 // their own provider credentials via /admin/ai/providers on first install.

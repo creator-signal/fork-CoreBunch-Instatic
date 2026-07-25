@@ -112,6 +112,24 @@ describe('parsePluginPack', () => {
     ).toThrow(/valid CSS class name/)
   })
 
+  it('accepts ambient selectors whose display name is not a CSS class token', () => {
+    const pack = parsePluginPack('acme.canvas', {
+      classes: [{
+        id: 'acme.canvas/ambient-0',
+        name: '*',
+        kind: 'ambient',
+        selector: '*',
+        order: 0,
+        styles: { boxSizing: 'border-box' },
+        contextStyles: {},
+        createdAt: 0,
+        updatedAt: 0,
+      }],
+    })
+
+    expect(pack.classes[0]).toMatchObject({ kind: 'ambient', selector: '*' })
+  })
+
   it('rejects malformed Visual Component entries', () => {
     expect(() =>
       parsePluginPack('acme.canvas', {

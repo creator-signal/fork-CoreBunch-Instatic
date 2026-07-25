@@ -50,7 +50,15 @@ bun run instatic-plugin lint integrations/creator-signal
 bun run instatic-plugin build integrations/creator-signal
 ```
 
-Install the zip from **Admin → Plugins** and approve its module, site-pack, frontend-asset, and public-config-route permissions. Archive or rename the blank setup homepage, change the imported `creator-signal-home` slug to `index`, and publish the eight imported pages.
+Install the zip from **Admin → Plugins** and approve its module, site-pack,
+frontend-asset, and public-config-route permissions. For a managed empty
+installation, set `INSTATIC_BOOTSTRAP_SITE_NAME`,
+`INSTATIC_BOOTSTRAP_OWNER_EMAIL`,
+`INSTATIC_BOOTSTRAP_OWNER_PASSWORD_FILE`,
+`INSTATIC_BOOTSTRAP_PLUGIN_PACKAGE`, and optionally
+`INSTATIC_BOOTSTRAP_PLUGIN_SETTINGS_FILE`. Startup then creates the first
+owner, replaces the blank homepage, installs the trusted embedded package, and
+publishes all eight routes. Existing installations are never reset.
 
 Plausible, OpenPanel, and GlitchTip are disabled by default. Enable each plugin setting only after its collector and consent gate are accepted. Confirm the live Mautic form ID and API name on the Contact module before publishing.
 

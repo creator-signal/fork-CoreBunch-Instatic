@@ -11,6 +11,7 @@ import {
   definePack,
   definePlugin,
   compilePackPage,
+  compilePackPages,
   escapeHtml,
   h,
   html,
@@ -205,6 +206,31 @@ describe('definePack', () => {
     expect(Object.keys(a.page.nodes)).toEqual(Object.keys(b.page.nodes))
     expect(a.classes.find((rule) => rule.name === 'page')?.id)
       .toBe('acme.ui-kit/page/home/page')
+  })
+
+  it('compiles a multi-page site against one shared style registry', () => {
+    const compiled = compilePackPages('acme.ui-kit', [
+      {
+        id: 'home',
+        title: 'Home',
+        slug: 'index',
+        html: '<main class="page"><h1>Home</h1></main>',
+      },
+      {
+        id: 'about',
+        title: 'About',
+        slug: 'about',
+        html: '<main class="page"><h1>About</h1></main>',
+      },
+    ], '.page { max-width: 70rem; } body { margin: 0; }')
+
+    expect(compiled.classes).toHaveLength(2)
+    expect(compiled.classes.filter((rule) => rule.kind === 'ambient')).toHaveLength(1)
+    const pageClass = compiled.classes.find((rule) => rule.name === 'page')!
+    for (const page of compiled.pages) {
+      expect(Object.values(page.nodes).some((node) =>
+        node.classIds.includes(pageClass.id))).toBe(true)
+    }
   })
 
   it('expands the classes shorthand into namespaced StyleRule entries with safe names', () => {

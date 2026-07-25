@@ -158,7 +158,7 @@ describe('applyPluginPackToSite', () => {
       layouts: [],
     }
 
-    const { site, replaced } = applyPluginPackToSite(baselineSite, pack)
+    const { site, replaced } = applyPluginPackToSite('acme.canvas', baselineSite, pack)
     expect(site.styleRules['acme.canvas/hero'].name).toBe('Hero')
     expect(replaced.classes).toEqual([])
   })
@@ -196,9 +196,50 @@ describe('applyPluginPackToSite', () => {
         },
       },
     }
-    const { site, replaced } = applyPluginPackToSite(seeded, pack)
+    const { site, replaced } = applyPluginPackToSite('acme.canvas', seeded, pack)
     expect(site.styleRules['acme.canvas/hero'].name).toBe('Hero v2')
     expect(replaced.classes).toEqual(['acme.canvas/hero'])
+  })
+
+  it('removes stale plugin-owned classes while preserving user classes', () => {
+    const seeded: SiteDocument = {
+      ...baselineSite,
+      styleRules: {
+        'acme.canvas/page/home/legacy': {
+          id: 'acme.canvas/page/home/legacy',
+          name: 'legacy',
+          kind: 'class',
+          selector: '.legacy',
+          order: 0,
+          styles: { color: 'red' },
+          contextStyles: {},
+          createdAt: 0,
+          updatedAt: 0,
+        },
+        'user-class': {
+          id: 'user-class',
+          name: 'user-class',
+          kind: 'class',
+          selector: '.user-class',
+          order: 0,
+          styles: { color: 'blue' },
+          contextStyles: {},
+          createdAt: 0,
+          updatedAt: 0,
+        },
+      },
+    }
+
+    const { site, removed } = applyPluginPackToSite('acme.canvas', seeded, {
+      visualComponents: [],
+      pages: [],
+      classes: [],
+      layouts: [],
+    })
+
+    expect(removed.classes).toEqual(['acme.canvas/page/home/legacy'])
+    expect(site.styleRules['acme.canvas/page/home/legacy']).toBeUndefined()
+    expect(site.styleRules['user-class']).toBeDefined()
   })
 })
 
@@ -264,7 +305,7 @@ describe('applyPluginPackToSite — layouts', () => {
       classes: [],
       layouts: [packLayout('acme.canvas/hero-section')],
     }
-    const fresh = applyPluginPackToSite(baselineSite, pack)
+    const fresh = applyPluginPackToSite('acme.canvas', baselineSite, pack)
     expect(fresh.replaced.layouts).toEqual([])
     expect(fresh.site.layouts).toEqual([])
 
@@ -272,7 +313,7 @@ describe('applyPluginPackToSite — layouts', () => {
       ...baselineSite,
       layouts: [packLayout('acme.canvas/hero-section')],
     }
-    const resync = applyPluginPackToSite(seeded, pack)
+    const resync = applyPluginPackToSite('acme.canvas', seeded, pack)
     expect(resync.replaced.layouts).toEqual(['acme.canvas/hero-section'])
   })
 })

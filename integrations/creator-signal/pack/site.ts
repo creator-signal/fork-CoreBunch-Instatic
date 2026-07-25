@@ -1,9 +1,9 @@
-import { compilePackPage, definePack, type PagePackEntry } from '@core/plugin-sdk'
+import { compilePackPages, definePack, type PagePackEntry } from '@core/plugin-sdk'
 
 const css = `
 *{box-sizing:border-box}
 body{margin:0;background:#f8f6ef;color:#172a2a;font-family:Inter,ui-sans-serif,system-ui,sans-serif;line-height:1.55}
-.site-header,.site-footer,.section{width:min(1160px,calc(100% - 2rem));margin-inline:auto}
+.site-header,.site-footer,.section{width:calc(100% - 2rem);max-width:1160px;margin-inline:auto}
 .site-header{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 0;gap:1rem}
 .brand{font-size:1.2rem;font-weight:800;color:#172a2a;text-decoration:none}
 .nav{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
@@ -140,9 +140,9 @@ const entries: PagePackEntry[] = [
   ...publicDocuments,
 ]
 
-const compiled = entries.map((entry) => compilePackPage('creator-signal.site', { ...entry, css }))
-const contact = compiled.find(({ page }) => page.id.endsWith('/contact'))!
-const mauticNode = Object.values(contact.page.nodes).find((node) => {
+const compiled = compilePackPages('creator-signal.site', entries, css)
+const contact = compiled.pages.find((page) => page.id.endsWith('/contact'))!
+const mauticNode = Object.values(contact.nodes).find((node) => {
   const attributes = node.props.htmlAttributes
   return typeof attributes === 'object' && attributes !== null &&
     (attributes as Record<string, unknown>)['data-creator-signal-mautic-form'] === 'true'
@@ -172,8 +172,8 @@ const authorLayouts = [
 
 const pack = definePack({
   pluginId: 'creator-signal.site',
-  pages: compiled.map(({ page }) => page),
+  pages: compiled.pages,
   layouts: authorLayouts,
 })
-pack.classes.push(...compiled.flatMap(({ classes }) => classes))
+pack.classes.push(...compiled.classes)
 export { pack }

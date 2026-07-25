@@ -15,6 +15,9 @@ blank setup homepage, and publish the complete site automatically.
 - The host-level MinIO adapter for originals, variants, avatars, and fonts.
 - Plausible pageviews, consent-gated OpenPanel events, GlitchTip browser monitoring, consent UI, and hashed Mautic attribution.
 - Header, footer, legal copy, and navigation links represented as editable page nodes.
+- One shared public stylesheet across all launch routes, so authoring and
+  published output use the same bounded, responsive page layout without
+  duplicate ambient rules.
 
 The integrations are disabled by default. Configure and enable them in the plugin settings only after the corresponding collectors and consent policy are ready.
 

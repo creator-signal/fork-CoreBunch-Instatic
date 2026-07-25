@@ -9,10 +9,11 @@
  *   1. Loads the pack JSON from disk (plus integrity / containment checks).
  *   2. Validates each entry against the canonical site-document schemas
  *      (`parseVisualComponent`, `parsePageNode` traversal, etc.).
- *   3. Merges into the active draft site by id — ids that already exist on
- *      the site get replaced (idempotent re-install). Class ids prefixed
- *      with the plugin id stay namespaced; non-namespaced classes from the
- *      pack are rejected to keep ownership traceable.
+ *   3. Reconciles the active draft site by id — ids that already exist on
+ *      the site get replaced (idempotent re-install), and plugin-owned style
+ *      rules omitted by the new pack are removed. Class ids prefixed with the
+ *      plugin id stay namespaced; non-namespaced classes from the pack are
+ *      rejected to keep ownership traceable.
  *   4. Saves the updated site.
  *
  * Pack validation lives here so the route handler stays thin and the rules
@@ -52,6 +53,9 @@ interface PluginPackInstallResult {
     pages: string[]
     classes: string[]
     layouts: string[]
+  }
+  removedIds: {
+    classes: string[]
   }
 }
 
@@ -191,9 +195,14 @@ function suggestClassName(pluginId: string, classId: string): string {
  * See `installPluginPackToSite` in `server/handlers/cms/plugins/pack.ts`.
  */
 export function applyPluginPackToSite(
+  pluginId: string,
   site: SiteDocument,
   pack: PluginPackContents,
-): { site: SiteDocument; replaced: PluginPackInstallResult['replacedIds'] } {
+): {
+  site: SiteDocument
+  replaced: PluginPackInstallResult['replacedIds']
+  removed: PluginPackInstallResult['removedIds']
+} {
   const replaced: PluginPackInstallResult['replacedIds'] = {
     visualComponents: [],
     pages: [],
@@ -220,7 +229,14 @@ export function applyPluginPackToSite(
     pagesById.set(page.id, page)
   }
 
-  const nextClasses = { ...site.styleRules }
+  const incomingClassIds = new Set(pack.classes.map((cls) => cls.id))
+  const removed = {
+    classes: Object.keys(site.styleRules).filter((id) =>
+      isPluginOwnedId(pluginId, id) && !incomingClassIds.has(id)),
+  }
+  const nextClasses = Object.fromEntries(
+    Object.entries(site.styleRules).filter(([id]) => !removed.classes.includes(id)),
+  )
   for (const cls of pack.classes) {
     if (nextClasses[cls.id]) replaced.classes.push(cls.id)
     nextClasses[cls.id] = cls
@@ -234,5 +250,10 @@ export function applyPluginPackToSite(
       updatedAt: Date.now(),
     },
     replaced,
+    removed,
   }
+}
+
+function isPluginOwnedId(pluginId: string, id: string): boolean {
+  return id.startsWith(`${pluginId}/`) || id.startsWith(`${pluginId}.`)
 }

@@ -47,4 +47,18 @@ describe('Creator Signal site pack', () => {
       'Creator Signal rich text',
     ])
   })
+
+  it('publishes one complete shared stylesheet with a bounded page container', () => {
+    expect(new Set(pack.classes.map((rule) => rule.id)).size).toBe(pack.classes.length)
+
+    const pageContainer = pack.classes.find((rule) =>
+      rule.kind === 'ambient' &&
+      rule.name.includes('.site-header') &&
+      rule.name.includes('.site-footer'))
+    expect(pageContainer?.styles).toMatchObject({
+      width: 'calc(100% - 2rem)',
+      maxWidth: '1160px',
+      marginInline: 'auto',
+    })
+  })
 })

@@ -40,6 +40,13 @@ const ALLOWLIST: ReadonlyMap<string, string> = new Map([
   // only the two fields already rendered on every published page (site
   // name + favicon URL).
   ['setup.ts', 'Public bootstrap + site identity — gates aren\'t applicable.'],
+  // OIDC login and callback establish the authenticated session. They verify
+  // signed state, provider tokens and the required Zitadel project role before
+  // provisioning a user, so an existing Instatic session gate is inapplicable.
+  ['oidc.ts', 'OIDC entry/callback; signed provider identity + project role are the gate.'],
+  // Machine-only release acceptance exchanges a file-backed bearer token for
+  // a five-minute session. It cannot require the session it exists to mint.
+  ['deploymentAuth.ts', 'Machine deployment bearer exchange; it mints the gated session.'],
   // Dispatcher / index — composes the per-resource handlers and runs
   // the CSRF Origin check. Per-handler files apply the actual auth gates.
   ['index.ts', 'Top-level dispatcher; per-handler files own the auth gates.'],

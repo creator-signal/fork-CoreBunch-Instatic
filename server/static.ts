@@ -2,6 +2,7 @@ import { extname, resolve, sep } from 'node:path'
 import { brotliCompressSync, constants as zlibConstants } from 'node:zlib'
 import { readdirSync } from 'node:fs'
 import { SESSION_COOKIE_NAME } from './auth/tokens'
+import { configuredAdminAuthMode, safeAdminReturnTo } from './auth/oidc'
 
 const MIME_TYPES: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
@@ -472,6 +473,21 @@ function injectLoginSkeleton(html: string): string {
 }
 
 export async function serveAdminApp(staticDir: string, req?: Request): Promise<Response | null> {
+  if (
+    req
+    && configuredAdminAuthMode() === 'zitadel'
+    && !requestHasSessionCookie(req)
+  ) {
+    const requested = new URL(req.url)
+    const returnTo = safeAdminReturnTo(`${requested.pathname}${requested.search}`)
+    return new Response(null, {
+      status: 302,
+      headers: {
+        location: `/admin/api/cms/auth/oidc/login?returnTo=${encodeURIComponent(returnTo)}`,
+        'cache-control': 'no-store',
+      },
+    })
+  }
   // Authenticated visitors keep the existing spinner shell — they're about
   // Both authenticated and unauthenticated paths now pass through the
   // dynamic HTML pipeline so we can inject the `BOOT_API_KICKOFF` inline

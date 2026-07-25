@@ -9,6 +9,7 @@ Every state-changing CMS request goes through one auth funnel: parse the session
 ## TL;DR
 
 - **Sessions** are token-cookie based. Cookie name: `SESSION_COOKIE_NAME` (`instatic_admin_session`). Tokens are hashed before storage; the cookie carries the raw token.
+- **Human login mode** is explicit. `INSTATIC_AUTH_MODE=native` uses the built-in password/TOTP flow. `INSTATIC_AUTH_MODE=zitadel` enforces OIDC authorization code + PKCE and rejects the native login endpoints.
 - **Capabilities** are the access model. 38 `CoreCapability` strings defined in `src/core/capabilities.ts` (`@core/capabilities`). Roles are sets of capabilities. Handlers gate on capability, not role.
 - **`requireCapability(req, db, 'site.read')`** is the canonical handler entrypoint. Returns the `AuthUser` or a 401/403 `Response`.
 - **MFA (TOTP)** is per-user opt-in. TOTP seeds are encrypted at rest with `INSTATIC_SECRET_KEY`; recovery codes are one-way hashes. Sessions for MFA-enrolled users are `pending_mfa` until verified, then become `active`. Failed MFA codes go through `mfaRateLimit` AND increment the per-account lockout counter — the same counter the password step uses. A locked account is rejected at the MFA step before any code is checked.
@@ -28,6 +29,7 @@ server/auth/
 ├── authz.ts          — requireAuthenticatedUser, requireCapability, requireAnyCapability, requireStepUp
 ├── capabilities.ts   — imports/re-exports CORE_CAPABILITIES; owns SYSTEM_ROLES, FORCE_SYNC_ROLE_IDS, runtime guards
 ├── sessions.ts       — createSession, findUserBySessionHash, rotateSessionToken, MFA gates, step-up timer
+├── oidc.ts           — Zitadel discovery, PKCE/state, ID-token/JWKS validation, project roles
 ├── stepUpPolicy.ts   — step-up modes and allowed window lengths
 ├── tokens.ts         — SESSION_COOKIE_NAME, hashSessionToken
 ├── mfa.ts            — generateTotpSecret, verifyTotpCode, recovery codes
@@ -39,6 +41,36 @@ server/auth/
 ```
 
 Handler endpoints: `server/handlers/cms/auth.ts`, `server/handlers/cms/me.ts`, `server/handlers/cms/setup.ts`, `server/handlers/cms/users.ts`, `server/handlers/cms/roles.ts`.
+
+---
+
+## Zitadel login mode
+
+Set `INSTATIC_AUTH_MODE=zitadel` to make Zitadel the only human login path for
+`/admin`. Instatic redirects unauthenticated requests to
+`/admin/api/cms/auth/oidc/login`; Zitadel returns to
+`/admin/api/cms/auth/oidc/callback`. The exchange uses authorization code +
+PKCE S256 and a signed, ten-minute state cookie. The callback accepts only a
+verified email and the configured project role (default
+`platform:operator`), then links the Instatic user by immutable issuer and
+subject.
+
+The client ID, client secret and Zitadel project ID can be supplied directly
+or through their `_FILE` variants. `INSTATIC_OIDC_OWNER_ROLE` defaults to
+`platform:owner`; it can create the first Instatic owner, but never promotes an
+installation that already has one. A pre-provisioned owner with the same
+verified email is linked on first login.
+
+Zitadel owns password policy, MFA and re-authentication in this mode. Native
+`POST /login` and `POST /auth/mfa/verify` requests are denied. The OIDC-backed
+Instatic session defaults to one hour and receives a matching step-up window,
+so sensitive operations do not ask for the dormant bootstrap password.
+Logout revokes the local session and then uses Zitadel's end-session endpoint.
+
+`POST /admin/api/cms/auth/deployment-session` is reserved for the production
+deployment verifier. It requires the file-backed deployment bearer token and
+creates a five-minute session for the pre-provisioned owner; it is not a human
+login path.
 
 ---
 

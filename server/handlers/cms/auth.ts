@@ -34,7 +34,6 @@ import {
   createSession,
   findUserByPendingMfaSessionHash,
   rotateSessionToken,
-  revokeSessionByHash,
 } from '../../auth/sessions'
 import { handleListSessions, handleRevokeSession, handleLogoutAll } from './authSessions'
 import {
@@ -66,8 +65,15 @@ import { totpSecretErrorResponse, verifyEncryptedTotpCode } from '../../auth/tot
 import { jsonResponse, readValidatedBody, setCookieHeader } from '../../http'
 import { Type } from '@core/utils/typeboxHelpers'
 import { CMS_API_PREFIX, requestAuditContext } from './shared'
-import { clearSessionCookie, getDummyPasswordHash, sessionCookie } from './session'
+import { getDummyPasswordHash, sessionCookie } from './session'
 import { runRouteTable, type Route } from './routeTable'
+import { configuredAdminAuthMode } from '../../auth/oidc'
+import {
+  handleOidcCallback,
+  handleOidcLogin,
+} from './oidc'
+import { handleDeploymentSession } from './deploymentAuth'
+import { handleLogout } from './logout'
 
 /**
  * Helper: build a 429 response with a `Retry-After` header. Centralises the
@@ -365,6 +371,9 @@ async function respondLoginSuccess(
 const LoginBodySchema = Type.Object({ email: Type.String(), password: Type.String() })
 
 async function handleLogin(req: Request, db: DbClient): Promise<Response> {
+  if (configuredAdminAuthMode() === 'zitadel') {
+    return jsonResponse({ error: 'Zitadel authentication is required' }, { status: 403 })
+  }
   const body = await readValidatedBody(req, LoginBodySchema)
   const email = (body?.email ?? '').trim().toLowerCase()
   const password = (body?.password ?? '').trim()
@@ -409,6 +418,9 @@ async function handleLogin(req: Request, db: DbClient): Promise<Response> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function handleMfaVerify(req: Request, db: DbClient): Promise<Response> {
+  if (configuredAdminAuthMode() === 'zitadel') {
+    return jsonResponse({ error: 'Zitadel authentication is required' }, { status: 403 })
+  }
   const idHash = await getSessionHash(req)
   if (!idHash) return jsonResponse({ error: 'Unauthorized' }, { status: 401 })
   const user = await findUserByPendingMfaSessionHash(db, idHash)
@@ -512,27 +524,6 @@ async function handleMfaVerify(req: Request, db: DbClient): Promise<Response> {
     jsonResponse({ ok: true }),
     sessionCookie(req, nextToken, rotatedSession.expiresAt),
   )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// POST /logout, GET /me
-// ─────────────────────────────────────────────────────────────────────────────
-
-async function handleLogout(req: Request, db: DbClient): Promise<Response> {
-  const user = await requireAuthenticatedUser(req, db)
-  const idHash = await getSessionHash(req)
-  if (idHash) await revokeSessionByHash(db, idHash)
-  if (!(user instanceof Response)) {
-    await createAuditEvent(db, {
-      actorUserId: user.id,
-      action: 'logout',
-      targetType: 'user',
-      targetId: user.id,
-      metadata: {},
-      ...requestAuditContext(req),
-    })
-  }
-  return setCookieHeader(jsonResponse({ ok: true }), clearSessionCookie(req))
 }
 
 async function handleMe(req: Request, db: DbClient): Promise<Response> {
@@ -821,6 +812,13 @@ async function handleActivity(req: Request, db: DbClient): Promise<Response> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const AUTH_ROUTES: readonly Route<[]>[] = [
+  {
+    method: 'POST',
+    pattern: `${CMS_API_PREFIX}/auth/deployment-session`,
+    handler: handleDeploymentSession,
+  },
+  { method: 'GET', pattern: `${CMS_API_PREFIX}/auth/oidc/login`, handler: handleOidcLogin },
+  { method: 'GET', pattern: `${CMS_API_PREFIX}/auth/oidc/callback`, handler: handleOidcCallback },
   { method: 'POST', pattern: `${CMS_API_PREFIX}/login`, handler: handleLogin },
   { method: 'POST', pattern: `${CMS_API_PREFIX}/auth/mfa/verify`, handler: handleMfaVerify },
   { method: 'POST', pattern: `${CMS_API_PREFIX}/logout`, handler: handleLogout },

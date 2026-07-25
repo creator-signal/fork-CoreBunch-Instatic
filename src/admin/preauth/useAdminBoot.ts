@@ -54,6 +54,13 @@ interface AdminBootResult {
 
 const DEFAULT_PUBLIC_SITE: CmsPublicSite = { name: null, faviconUrl: null }
 
+export function oidcAdminLoginPath(pathname = '/admin', search = ''): string {
+  const returnTo = pathname.startsWith('/admin') && !pathname.startsWith('//')
+    ? `${pathname}${search}`
+    : '/admin'
+  return `/admin/api/cms/auth/oidc/login?returnTo=${encodeURIComponent(returnTo)}`
+}
+
 /**
  * Resolves the initial admin shell state on mount:
  *  1. Site identity (logo + name) is fetched in parallel so the brand row
@@ -136,6 +143,11 @@ export function useAdminBoot(): AdminBootResult {
             setPhase('editor')
             setStatus('ready')
           })
+        } else if (setupStatus.authMode === 'zitadel') {
+          window.location.replace(oidcAdminLoginPath(
+            window.location.pathname,
+            window.location.search,
+          ))
         } else {
           flushSync(() => {
             setCurrentUser(null)

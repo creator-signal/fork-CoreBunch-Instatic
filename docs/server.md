@@ -273,6 +273,7 @@ Use `binaryResponse` whenever a route handler returns binary content (runtime as
 |-------------------|----------------------------------------------------------------------------|
 | `tokens.ts`       | Session cookie name, token hashing                                         |
 | `sessions.ts`     | Session lookup, MFA gate, step-up timer                                    |
+| `oidc.ts`         | Zitadel discovery, authorization code + PKCE, JWT/JWKS validation, roles  |
 | `authz.ts`        | `requireAuthenticatedUser`, `requireCapability`, `requireAnyCapability`    |
 | `capabilities.ts` | `CoreCapability` enum and per-capability membership rules                  |
 | `lockout.ts`      | Failed-login lockout policy                                                |
@@ -280,6 +281,32 @@ Use `binaryResponse` whenever a route handler returns binary content (runtime as
 | `rateLimit.ts`    | Token-bucket rate limiters                                                 |
 | `security.ts`     | `isStateChangingMethod`, `originAllowed`, `configurePublicOrigins`, `DEV_ORIGIN_ALLOWLIST`, IP stamp |
 | `deviceLabel.ts`  | Device-fingerprint label for the sessions panel                            |
+
+### Zitadel authentication mode
+
+`INSTATIC_AUTH_MODE=zitadel` delegates every human admin login to Zitadel.
+`GET /admin` redirects to the OIDC authorization-code flow before the native
+login UI renders. A stale Instatic cookie that fails `/me` also redirects back
+to Zitadel. `POST /login` and `POST /auth/mfa/verify` return 403 in this mode.
+
+The callback validates discovery origins, RS256 signatures through the
+provider JWKS, issuer, audience, nonce, PKCE, expiry, verified email, and the
+project role claim. The default required role is `platform:operator`; the
+optional `platform:owner` role may create the first owner only when no active
+owner exists. Users are linked by immutable `(issuer, subject)` columns, with a
+one-time verified-email link for a pre-provisioned owner.
+
+OIDC-backed Instatic sessions are deliberately short (one hour by default).
+Zitadel owns MFA and re-authentication, so their step-up window is aligned to
+the Instatic session lifetime rather than falling back to a dormant local
+password. Logout revokes the Instatic session and continues through Zitadel's
+end-session endpoint.
+
+The required settings are `INSTATIC_OIDC_ISSUER`,
+`INSTATIC_OIDC_REDIRECT_URI`, and client ID, client secret, and project ID
+using either direct values or `INSTATIC_OIDC_CLIENT_ID_FILE`,
+`INSTATIC_OIDC_CLIENT_SECRET_FILE`, and `INSTATIC_OIDC_PROJECT_ID_FILE`.
+Production issuers and redirect URIs must use HTTPS.
 
 ### The session flow
 

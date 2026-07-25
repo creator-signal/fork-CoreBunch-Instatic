@@ -35,8 +35,8 @@ export function getAccountCommands(): Command[] {
       run: async (ctx) => {
         ctx.closeSpotlight()
         try {
-          await logoutCms()
-          window.location.assign('/admin')
+          const logoutUrl = await logoutCms()
+          window.location.assign(logoutUrl ?? '/admin')
         } catch (err) {
           console.error('[spotlight] sign out failed:', err)
         }

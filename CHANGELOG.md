@@ -6,6 +6,25 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.17 - 2026-07-25
+
+### Authentication and deployment
+
+- Added Zitadel OIDC authorization-code authentication with PKCE for the
+  Instatic admin, including role-gated just-in-time operator provisioning,
+  signed state, verified immutable identities, logout, and short-lived
+  deployment authorization.
+- Added PostgreSQL and SQLite identity migrations plus automated coverage for
+  login, denial, session, deployment, and static admin behavior.
+
+### Creator Signal integration
+
+- Restored imported section, feature, prose, header, and footer layout styles
+  so the visual editor and published multi-site pages retain the intended
+  bounded responsive design.
+- Added production image, site-pack, and integration verification for the
+  Zitadel, MinIO, and Creator Signal delivery contracts.
+
 ## 0.0.16 - 2026-07-25
 
 ### Creator Signal integration

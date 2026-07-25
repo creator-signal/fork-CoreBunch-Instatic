@@ -35,6 +35,74 @@ const hero = (label: string, title: string, body: string, href: string, action: 
 const features = (label: string, heading: string, intro: string, cards: Array<[string, string, string]>) => `<section class="section feature-section"><p class="eyebrow">${label}</p><h2>${heading}</h2><p class="lede">${intro}</p><div class="feature-grid">${cards.map(([number, title, body]) => `<article class="feature-card"><span class="eyebrow">${number}</span><strong>${title}</strong><p>${body}</p></article>`).join('')}</div></section>`
 const cta = (label: string, heading: string, body: string, href: string, action: string) => `<section class="section cta"><p class="eyebrow">${label}</p><h2>${heading}</h2><p class="lede">${body}</p><a class="button" href="${href}">${action}</a></section>`
 const prose = (heading: string, paragraphs: string[]) => `<section class="section prose-section"><div class="prose"><h2>${heading}</h2>${paragraphs.map((text) => `<p>${text}</p>`).join('')}</div></section>`
+const publicDocument = (
+  id: string,
+  slug: string,
+  title: string,
+  summary: string,
+  paragraphs: string[],
+): PagePackEntry => ({
+  id,
+  slug,
+  title,
+  html: chrome(
+    hero('Creator Signal', title, summary, '/contact', 'Contact us')
+    + prose(title, paragraphs),
+  ),
+})
+
+const publicDocuments: PagePackEntry[] = [
+  publicDocument('billing', 'legal/billing', 'Subscriptions, Cancellation and Refunds', 'How Sales Pulse plans renew, change, cancel and qualify for refunds.', [
+    'Current plan prices, billing frequency and included capabilities are shown before checkout. Paid plans renew until they are cancelled.',
+    'You can cancel future renewal from the product account area. Access continues until the end of the paid billing period unless a refund or legal requirement changes that outcome.',
+    'Refund requests are assessed under applicable Australian Consumer Law and any additional commitment shown at checkout. Contact support with the account email and relevant charge details.',
+  ]),
+  publicDocument('acceptable-use', 'legal/acceptable-use', 'Acceptable Use Policy', 'The rules that protect customers, connected services and Creator Signal.', [
+    'Do not use Creator Signal to break the law, infringe another person’s rights, distribute harmful material, interfere with the service, probe security controls or access information without authority.',
+    'Connected marketplace and platform access must comply with the relevant provider terms. Automated use must stay within the documented product capabilities and reasonable operational limits.',
+    'We may restrict or suspend access where necessary to protect customers, providers or the service, and will provide notice where it is safe and practical.',
+  ]),
+  publicDocument('browser-extension', 'legal/browser-extension', 'Browser Extension Privacy and Permissions', 'What the Sales Pulse Helper can access, collect and send.', [
+    'The helper uses browser permissions only on supported marketplace pages and Creator Signal product surfaces. It collects the records you explicitly choose to import and operational diagnostics needed to complete that work.',
+    'Extension analytics is independently controlled and is not enabled merely because website analytics was accepted. Sensitive page content and credentials are not an advertising product.',
+    'You can remove the extension, revoke site access and request deletion or export through the account-data process.',
+  ]),
+  publicDocument('cookies', 'legal/cookies', 'Cookie Policy', 'The essential and optional browser storage used by Creator Signal.', [
+    'Essential storage supports sign-in, security, consent choices and reliable product operation. It cannot be disabled while using authenticated features.',
+    'Aggregate traffic measurement is configured without advertising profiles. Optional journey analytics runs only after the relevant consent choice and can be withdrawn.',
+    'Browser settings can remove stored values, although doing so may sign you out or reset preferences.',
+  ]),
+  publicDocument('dpa', 'legal/dpa', 'Data Processing Addendum', 'The data-processing terms available to eligible business customers.', [
+    'Creator Signal processes customer-provided personal information only to deliver, secure and support the contracted services and on documented customer instructions.',
+    'Appropriate technical and organisational controls, confidentiality commitments, incident procedures and subprocessor governance apply to that processing.',
+    'Eligible business customers can contact us to execute the current addendum and any required international-transfer terms.',
+  ]),
+  publicDocument('security', 'trust/security', 'Security and Data Handling', 'How Creator Signal protects customer data and operates its security controls.', [
+    'Access is role-based, credentials and secrets are separated from application images, and production services use encrypted transport and restricted provider identities.',
+    'Customer data is backed up under defined retention and restore procedures. Security events are logged and investigated through the operational incident process.',
+    'No system can be guaranteed risk-free. Report a suspected vulnerability privately through the contact route so it can be assessed without exposing customers.',
+  ]),
+  publicDocument('subprocessors', 'trust/subprocessors', 'Subprocessors and Service Providers', 'The service providers used to operate Creator Signal.', [
+    'Creator Signal uses carefully scoped infrastructure, identity, payment, email, monitoring and support providers to operate the service.',
+    'Each provider receives only the information needed for its function and is reviewed for contractual and security obligations.',
+    'Material changes to providers that process customer personal information will be reflected here and communicated where required.',
+  ]),
+  publicDocument('support', 'support', 'Support and Complaints', 'How to request help, raise a complaint and escalate an unresolved matter.', [
+    'Use the contact form with your account email, the affected product and enough detail to reproduce the problem. Do not include passwords, recovery codes or full payment credentials.',
+    'Complaints are acknowledged, investigated and answered as promptly as practical. Complex security, billing or provider matters may require additional verification.',
+    'If a complaint remains unresolved, we will explain available escalation or external dispute options that apply to the matter.',
+  ]),
+  publicDocument('account-data', 'help/account-data', 'Account Export and Deletion', 'How to export workspace information and request account deletion.', [
+    'Use the product account controls or contact support to request an export of supported workspace records. Identity verification may be required before delivery.',
+    'Deletion requests remove or de-identify information that is no longer required, subject to security, financial, legal and dispute-retention obligations.',
+    'Deleting an account may be irreversible. We will explain material consequences and any information that must be retained before completing the request.',
+  ]),
+  publicDocument('status', 'status', 'Service Status', 'How Creator Signal communicates availability, maintenance and incidents.', [
+    'Current availability, active incidents and planned maintenance are published on the Creator Signal status service.',
+    'Incident updates describe customer impact, mitigation progress and restoration. A follow-up is provided for material events when the investigation is complete.',
+    'Visit status.creatorsignal.me for the operational view or contact support if your experience is not reflected there.',
+  ]),
+]
 
 const entries: PagePackEntry[] = [
   {
@@ -69,6 +137,7 @@ const entries: PagePackEntry[] = [
     id: 'terms', slug: 'legal/terms', title: 'Terms',
     html: chrome(hero('Legal', 'Clear expectations for using Creator Signal.', 'These terms describe acceptable use, subscriptions, connected data and service responsibilities.', '/contact', 'Contact us') + prose('Service terms', ['You are responsible for your account, the authority to connect marketplace information, and the accuracy of information you provide. Do not misuse the service or attempt unauthorised access.', 'Subscription prices, included capabilities and renewal terms are shown before checkout. You retain ownership of your connected business information.', 'Services may change as they improve. Material changes and important limitations will be communicated where practical.', 'This launch copy must receive final jurisdiction-specific legal approval before production activation.'])),
   },
+  ...publicDocuments,
 ]
 
 const compiled = entries.map((entry) => compilePackPage('creator-signal.site', { ...entry, css }))

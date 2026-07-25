@@ -13,6 +13,16 @@ describe('Creator Signal site pack', () => {
       'contact',
       'legal/privacy',
       'legal/terms',
+      'legal/billing',
+      'legal/acceptable-use',
+      'legal/browser-extension',
+      'legal/cookies',
+      'legal/dpa',
+      'trust/security',
+      'trust/subprocessors',
+      'support',
+      'help/account-data',
+      'status',
     ])
   })
 

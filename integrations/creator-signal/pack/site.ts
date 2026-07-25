@@ -38,7 +38,7 @@ const prose = (heading: string, paragraphs: string[]) => `<section class="sectio
 
 const entries: PagePackEntry[] = [
   {
-    id: 'home', slug: 'creator-signal-home', title: 'Creator Signal',
+    id: 'home', slug: 'index', title: 'Creator Signal',
     html: chrome(hero('Creator Signal', 'Turn creative business data into a clearer next move.', 'Creator Signal builds calm, useful tools that help independent creators understand what is working and act with confidence.', '/products/sales-pulse', 'Explore Sales Pulse') + features('Built for working creators', 'Less spreadsheet archaeology. More useful signals.', 'Bring scattered marketplace activity into focused experiences without giving up control of your work or data.', [['01', 'See the whole picture', 'Bring sales history and current activity into one considered view.'], ['02', 'Keep your data yours', 'Use private, exportable records with straightforward controls.'], ['03', 'Act with context', 'Use trends and catalogue signals to decide what deserves attention next.']]) + cta('One useful signal at a time', 'Start with Sales Pulse.', 'Connect your sales history and build a clearer business record over time.', '/products/sales-pulse', 'See Sales Pulse')),
   },
   {

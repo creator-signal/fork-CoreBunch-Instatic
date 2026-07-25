@@ -1,4 +1,13 @@
 import { readFileSync } from 'node:fs'
+import type { PluginSettingsValues } from '@core/plugin-sdk'
+
+export interface StarterSiteConfig {
+  siteName: string
+  ownerEmail: string
+  ownerPassword: string
+  pluginPackagePath: string
+  pluginSettings: PluginSettingsValues
+}
 
 interface ServerConfig {
   port: number
@@ -16,6 +25,7 @@ interface ServerConfig {
     accessKey: string
     secretKey: string
   } | null
+  starterSite: StarterSiteConfig | null
 }
 
 function readSecretValue(
@@ -37,6 +47,27 @@ function readCsvList(value: string | undefined): string[] {
     .split(',')
     .map((entry) => entry.trim())
     .filter(Boolean)
+}
+
+function readJsonObjectFile(path: string | undefined, name: string): PluginSettingsValues {
+  const trimmedPath = path?.trim()
+  if (!trimmedPath) return {}
+  const parsed: unknown = JSON.parse(readFileSync(trimmedPath, 'utf8'))
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error(`${name} must contain a JSON object`)
+  }
+  const settings: PluginSettingsValues = {}
+  for (const [key, value] of Object.entries(parsed)) {
+    if (
+      typeof value !== 'string'
+      && typeof value !== 'number'
+      && typeof value !== 'boolean'
+    ) {
+      throw new Error(`${name} setting "${key}" must be a string, number, or boolean`)
+    }
+    settings[key] = value
+  }
+  return settings
 }
 
 /**
@@ -117,6 +148,32 @@ export function readServerConfig(
       'MinIO configuration requires MINIO_ENDPOINT, MINIO_BUCKET, and access/secret key values or files',
     )
   }
+  const starterSiteName = env.INSTATIC_BOOTSTRAP_SITE_NAME?.trim()
+  const starterOwnerEmail = env.INSTATIC_BOOTSTRAP_OWNER_EMAIL?.trim().toLowerCase()
+  const starterOwnerPassword = readSecretValue(
+    env,
+    'INSTATIC_BOOTSTRAP_OWNER_PASSWORD',
+    'INSTATIC_BOOTSTRAP_OWNER_PASSWORD_FILE',
+  )
+  const starterPluginPackage = env.INSTATIC_BOOTSTRAP_PLUGIN_PACKAGE?.trim()
+  const starterValues = [
+    starterSiteName,
+    starterOwnerEmail,
+    starterOwnerPassword,
+    starterPluginPackage,
+    env.INSTATIC_BOOTSTRAP_PLUGIN_SETTINGS_FILE?.trim(),
+  ]
+  const hasAnyStarterValue = starterValues.some(Boolean)
+  if (
+    hasAnyStarterValue
+    && [starterSiteName, starterOwnerEmail, starterOwnerPassword, starterPluginPackage].some(
+      (value) => !value,
+    )
+  ) {
+    throw new Error(
+      'Starter-site bootstrap requires site name, owner email, owner password, and plugin package',
+    )
+  }
   return {
     port: Number(env.PORT ?? 3001),
     databaseUrl: readSecretValue(env, 'DATABASE_URL', 'DATABASE_URL_FILE') ?? 'sqlite:./.tmp/dev.db',
@@ -133,6 +190,18 @@ export function readServerConfig(
           prefix: env.MINIO_PREFIX?.trim() || '',
           accessKey: minioAccessKey!,
           secretKey: minioSecretKey!,
+        }
+      : null,
+    starterSite: hasAnyStarterValue
+      ? {
+          siteName: starterSiteName!,
+          ownerEmail: starterOwnerEmail!,
+          ownerPassword: starterOwnerPassword!,
+          pluginPackagePath: starterPluginPackage!,
+          pluginSettings: readJsonObjectFile(
+            env.INSTATIC_BOOTSTRAP_PLUGIN_SETTINGS_FILE,
+            'INSTATIC_BOOTSTRAP_PLUGIN_SETTINGS_FILE',
+          ),
         }
       : null,
   }

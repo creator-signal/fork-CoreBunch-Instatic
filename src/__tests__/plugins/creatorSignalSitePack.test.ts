@@ -5,7 +5,7 @@ import { pack } from '../../../integrations/creator-signal/pack/site'
 describe('Creator Signal site pack', () => {
   it('contains the complete public launch route set', () => {
     expect(pack.pages.map((page) => page.slug)).toEqual([
-      'creator-signal-home',
+      'index',
       'products',
       'products/sales-pulse',
       'features',

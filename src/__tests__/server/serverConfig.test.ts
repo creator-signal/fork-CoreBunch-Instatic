@@ -103,6 +103,7 @@ describe('readServerConfig', () => {
       trustedProxyCidrs: [],
       publicOrigins: [],
       minio: null,
+      starterSite: null,
     })
   })
 
@@ -126,6 +127,7 @@ describe('readServerConfig', () => {
       trustedProxyCidrs: ['10.0.0.0/8', '192.168.0.0/16'],
       publicOrigins: ['https://cms.example.com', 'http://localhost:5173'],
       minio: null,
+      starterSite: null,
     })
   })
 
@@ -171,5 +173,39 @@ describe('readServerConfig', () => {
   it('rejects partial MinIO configuration', () => {
     expect(() => readServerConfig({ MINIO_ENDPOINT: 'https://objects.example.test' }))
       .toThrow(/requires MINIO_ENDPOINT/)
+  })
+
+  it('loads complete starter-site bootstrap configuration from mounted files', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'instatic-starter-'))
+    const passwordPath = join(directory, 'owner-password')
+    const settingsPath = join(directory, 'plugin-settings.json')
+    writeFileSync(passwordPath, 'a-production-owner-password\n')
+    writeFileSync(settingsPath, JSON.stringify({
+      plausibleEnabled: true,
+      openPanelEnabled: true,
+    }))
+
+    expect(readServerConfig({
+      INSTATIC_BOOTSTRAP_SITE_NAME: 'Creator Signal',
+      INSTATIC_BOOTSTRAP_OWNER_EMAIL: 'OWNER@CREATORSIGNAL.ME',
+      INSTATIC_BOOTSTRAP_OWNER_PASSWORD_FILE: passwordPath,
+      INSTATIC_BOOTSTRAP_PLUGIN_PACKAGE: '/app/starter-plugins/creator-signal.plugin.zip',
+      INSTATIC_BOOTSTRAP_PLUGIN_SETTINGS_FILE: settingsPath,
+    }).starterSite).toEqual({
+      siteName: 'Creator Signal',
+      ownerEmail: 'owner@creatorsignal.me',
+      ownerPassword: 'a-production-owner-password',
+      pluginPackagePath: '/app/starter-plugins/creator-signal.plugin.zip',
+      pluginSettings: {
+        plausibleEnabled: true,
+        openPanelEnabled: true,
+      },
+    })
+  })
+
+  it('rejects partial starter-site bootstrap configuration', () => {
+    expect(() => readServerConfig({
+      INSTATIC_BOOTSTRAP_SITE_NAME: 'Creator Signal',
+    })).toThrow(/Starter-site bootstrap requires/)
   })
 })

@@ -2,7 +2,10 @@
 
 This plugin packages the current Creator Signal launch pages and public-site integrations for an authoring comparison in Instatic.
 
-TL;DR: build the plugin, install its zip, approve the requested permissions, publish the imported pages, and move the imported homepage to the `index` slug after archiving the blank setup page.
+TL;DR: build the plugin, install its zip, approve the requested permissions,
+and publish the imported pages. Managed deployments can use the starter-site
+bootstrap variables to create the owner, install this package, replace the
+blank setup homepage, and publish the complete site automatically.
 
 ## Included experience
 
@@ -27,7 +30,10 @@ bun run instatic-plugin lint integrations/creator-signal
 bun run instatic-plugin build integrations/creator-signal
 ```
 
-Upload `integrations/creator-signal.plugin.zip` from **Admin → Plugins** and approve all declared permissions. A new Instatic instance starts with a blank page at `index`; rename that blank page first, then change `creator-signal-home` to `index` to publish the imported homepage at `/`.
+Upload `integrations/creator-signal.plugin.zip` from **Admin → Plugins** and
+approve all declared permissions. The pack owns the `index` route. On a managed
+empty installation, configure the starter-site bootstrap so Instatic removes
+the generated blank homepage before importing and publishing this pack.
 
 Verify the live Mautic form ID and API name before publishing Contact. The comparison default uses form ID `3` and API name `creatorsignalcontactenquiry`; these are author-editable module properties.
 

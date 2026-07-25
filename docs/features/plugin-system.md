@@ -819,6 +819,9 @@ api.cms.media.registerStorageAdapter({
 })
 ```
 
+Each `cspOrigins[].origin` value is a complete HTTP(S) origin, including its
+scheme and optional port but no path, credentials, query string, or fragment.
+
 Writes are two-phase. The adapter returns a signed upload plan from `beginWrite`; the **host** streams the bytes to the plan URLs; then the adapter confirms with `finalizeWrite`. Media bytes do not cross the QuickJS boundary for ordinary writes, which keeps large uploads out of the VM heap. `servingMode` controls reads: `public-url` emits the adapter URL directly, `signed-redirect` lets the host 302 to a short-lived URL, and `proxy` streams chunks through the host via `readStream`.
 
 #### URL transformers — requires `media.url.transform`

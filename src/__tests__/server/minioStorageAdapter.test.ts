@@ -12,6 +12,13 @@ const adapter = buildMinioStorageAdapter({
 })
 
 describe('MinIO media storage adapter', () => {
+  it('declares the complete media-edge origin for published CSPs', () => {
+    expect(adapter.cspOrigins).toEqual([
+      { directive: 'img-src', origin: 'https://cms.example.com' },
+      { directive: 'media-src', origin: 'https://cms.example.com' },
+    ])
+  })
+
   it('returns a signed bucket-scoped upload plan without exposing the secret', async () => {
     const plan = await adapter.beginWrite({
       mimeType: 'image/png',

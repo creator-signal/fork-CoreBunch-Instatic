@@ -73,4 +73,16 @@ describe('frontend injection — CSP relaxation', () => {
     expect(out).toContain("script-src 'self' 'unsafe-inline';")
     expect(out).toContain("worker-src 'self' blob:;")
   })
+
+  it('preserves an HTTP media origin with its explicit port', () => {
+    const plan = emptyPlan()
+    plan.mediaCspOrigins = [
+      { directive: 'img-src', origin: 'http://localhost:48141' },
+      { directive: 'media-src', origin: 'http://localhost:48141' },
+    ]
+    const out = injectFrontendAssets(PAGE_WITH_CSP_META, plan)
+    expect(out).toContain("img-src 'self' data: http://localhost:48141;")
+    expect(out).toContain("media-src 'self' http://localhost:48141;")
+    expect(out).not.toContain('https://http://')
+  })
 })

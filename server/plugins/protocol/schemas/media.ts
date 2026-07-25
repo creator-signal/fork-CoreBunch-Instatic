@@ -4,10 +4,10 @@
  */
 
 import { Type } from '@sinclair/typebox'
-import { NETWORK_HOST_PATTERN } from './network'
-
 const MEDIA_ID_PATTERN = '^[a-z][a-z0-9-]*(?:\\.[a-z][a-z0-9-]*)+$'
 const MEDIA_ROLE_VALUES = ['original', 'variant', 'avatar', 'font', 'plugin-pack'] as const
+const MEDIA_CSP_ORIGIN_PATTERN =
+  '^https?://[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*(?::[1-9][0-9]{0,4})?$'
 
 const MediaRoleSchema = Type.Union(MEDIA_ROLE_VALUES.map((v) => Type.Literal(v)))
 
@@ -24,10 +24,11 @@ const MediaCspOriginSchema = Type.Object(
       Type.Literal('media-src'),
       Type.Literal('connect-src'),
     ]),
-    // Same hostname shape that gates outbound fetch — keeps the CSP surface
-    // narrow (no schemes, no paths, no port suffixes; the host renders
-    // `https://<origin>` itself).
-    origin: Type.String({ pattern: NETWORK_HOST_PATTERN.source, maxLength: 253 }),
+    // A complete HTTP(S) origin. Paths, credentials, query strings, and
+    // fragments are excluded so adapters can widen only the intended CSP
+    // source. Explicit schemes and ports keep local/object-store deployments
+    // accurate instead of silently forcing HTTPS.
+    origin: Type.String({ pattern: MEDIA_CSP_ORIGIN_PATTERN, maxLength: 276 }),
   },
   { additionalProperties: false },
 )

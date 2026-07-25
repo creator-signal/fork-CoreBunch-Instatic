@@ -6,6 +6,15 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.15 - 2026-07-25
+
+### Creator Signal integration
+
+- Preserved complete HTTP(S) media origins in published Content Security
+  Policies so MinIO endpoints with an explicit local port remain valid.
+- Removed Caddy's privileged-port file capability from the media-edge image so
+  it can run as an unprivileged user with all Linux capabilities dropped.
+
 ## 0.0.12 - 2026-07-24
 
 ### AI and integrations

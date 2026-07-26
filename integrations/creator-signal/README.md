@@ -9,8 +9,11 @@ blank setup homepage, and publish the complete site automatically.
 
 ## Included experience
 
-- Eight launch pages matching the Strapi-managed public routes.
-- Editable hero, feature-grid, call-to-action, and prose layouts.
+- Eighteen launch, legal, trust, support, and status pages.
+- The warm Creator Signal editorial design system shared by the editor canvas
+  and published pages.
+- A parameterised Hero Visual Component with optional MinIO-backed artwork.
+- Editable hero, feature-grid, call-to-action, prose, testimonial, and FAQ layouts.
 - A Mautic form module with configurable form identity and typed success/failure events.
 - The host-level MinIO adapter for originals, variants, avatars, and fonts.
 - Plausible pageviews, consent-gated OpenPanel events, GlitchTip browser monitoring, consent UI, and hashed Mautic attribution.
@@ -42,11 +45,14 @@ Verify the live Mautic form ID and API name before publishing Contact. The compa
 
 ## Replacement boundary
 
-This pack covers the currently public launch pages. It does not replace the Next.js ZITADEL BFF or role-protected public routes. Instatic author authentication is also independent from the existing ZITADEL Strapi sign-in until an SSO integration is implemented and accepted.
+This pack covers the public marketing routes. Instatic author authentication
+uses Zitadel when `INSTATIC_AUTH_MODE=zitadel`; the Sales Pulse product keeps
+its own role-protected application boundary.
 
 ## Related
 
 - `docs/deployment/creator-signal-stack.md`
+- `integrations/creator-signal/COMPONENTS.md`
 - `integrations/creator-signal/instatic-plugin.config.ts`
 - `integrations/creator-signal/modules/mautic-form.ts`
 - `integrations/creator-signal/frontend/analytics.ts`

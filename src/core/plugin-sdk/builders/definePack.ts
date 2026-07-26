@@ -33,7 +33,7 @@
  *     and no runtime drift.
  */
 
-import type { StyleRule, Page } from '@core/page-tree'
+import type { ConditionDef, StyleRule, Page } from '@core/page-tree'
 import { classKindSelector } from '@core/page-tree'
 import type { VisualComponent } from '@core/visualComponents'
 import type { SavedLayout } from '@core/layouts'
@@ -44,6 +44,8 @@ export interface PluginPackContents {
   pages: Page[]
   classes: StyleRule[]
   layouts: SavedLayout[]
+  /** Site-level media/container/supports conditions used by class overrides. */
+  conditions: ConditionDef[]
 }
 
 interface DefinePackConfig {
@@ -65,6 +67,11 @@ interface DefinePackConfig {
    * auto-namespaced to `<pluginId>/<id>`; re-installs replace by id.
    */
   layouts?: LayoutPackEntry[]
+  /**
+   * Reusable conditions referenced by class `contextStyles`. CSS compiled by
+   * `compilePackPage(s)` returns these alongside its class rules.
+   */
+  conditions?: ConditionDef[]
 }
 
 type ClassPackEntry =
@@ -135,5 +142,6 @@ export function definePack(config: DefinePackConfig): PluginPackContents {
     pages: config.pages ?? [],
     classes,
     layouts,
+    conditions: config.conditions ?? [],
   }
 }

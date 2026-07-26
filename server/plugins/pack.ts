@@ -23,11 +23,12 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type {
+  ConditionDef,
   StyleRule,
   Page,
   SiteDocument,
 } from '@core/page-tree'
-import { assertValidNodeTree } from '@core/page-tree'
+import { assertValidNodeTree, conditionId, parseConditions } from '@core/page-tree'
 import { parseVisualComponent } from '@core/visualComponents'
 import type { VisualComponent } from '@core/visualComponents'
 import { parseSavedLayout, type SavedLayout } from '@core/layouts'
@@ -43,6 +44,7 @@ interface PluginPackContents {
   pages: Page[]
   classes: StyleRule[]
   layouts: SavedLayout[]
+  conditions?: ConditionDef[]
 }
 
 interface PluginPackInstallResult {
@@ -71,6 +73,7 @@ const PluginPackFileSchema = Type.Object({
   pages: Type.Optional(Type.Array(Type.Unknown())),
   classes: Type.Optional(Type.Array(Type.Unknown())),
   layouts: Type.Optional(Type.Array(Type.Unknown())),
+  conditions: Type.Optional(Type.Array(Type.Unknown())),
 })
 
 export async function loadPluginPackFile(
@@ -167,7 +170,22 @@ export function parsePluginPack(pluginId: string, raw: unknown): PluginPackConte
     layouts.push(layout)
   }
 
-  return { visualComponents, pages, classes, layouts }
+  const conditions: ConditionDef[] = []
+  const conditionIds = new Set<string>()
+  for (const rawCondition of parsed.value.conditions ?? []) {
+    const condition = parseConditions([rawCondition])[0]
+    if (!condition || condition.id !== conditionId(condition.condition)) {
+      throw new PluginPackError(
+        `Plugin "${pluginId}" pack contains an invalid or non-deterministic CSS condition entry`,
+      )
+    }
+    if (!conditionIds.has(condition.id)) {
+      conditionIds.add(condition.id)
+      conditions.push(condition)
+    }
+  }
+
+  return { visualComponents, pages, classes, layouts, conditions }
 }
 
 const CSS_CLASS_NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_-]*$/
@@ -241,12 +259,19 @@ export function applyPluginPackToSite(
     if (nextClasses[cls.id]) replaced.classes.push(cls.id)
     nextClasses[cls.id] = cls
   }
+  const nextConditions = new Map(
+    (site.conditions ?? []).map((condition) => [condition.id, condition]),
+  )
+  for (const condition of pack.conditions ?? []) {
+    nextConditions.set(condition.id, condition)
+  }
 
   return {
     site: {
       ...site,
       pages: [...pagesById.values()],
       styleRules: nextClasses,
+      conditions: [...nextConditions.values()],
       updatedAt: Date.now(),
     },
     replaced,

@@ -130,6 +130,29 @@ describe('parsePluginPack', () => {
     expect(pack.classes[0]).toMatchObject({ kind: 'ambient', selector: '*' })
   })
 
+  it('accepts deterministic CSS conditions and rejects mismatched ids', () => {
+    const pack = parsePluginPack('acme.canvas', {
+      conditions: [{
+        id: 'media:(max-width: 700px)',
+        label: 'Small',
+        condition: { kind: 'media', query: '(max-width: 700px)' },
+      }],
+    })
+    expect(pack.conditions).toEqual([{
+      id: 'media:(max-width: 700px)',
+      label: 'Small',
+      condition: { kind: 'media', query: '(max-width: 700px)' },
+    }])
+
+    expect(() => parsePluginPack('acme.canvas', {
+      conditions: [{
+        id: 'media:wrong',
+        label: 'Small',
+        condition: { kind: 'media', query: '(max-width: 700px)' },
+      }],
+    })).toThrow(/non-deterministic CSS condition/)
+  })
+
   it('rejects malformed Visual Component entries', () => {
     expect(() =>
       parsePluginPack('acme.canvas', {
@@ -240,6 +263,26 @@ describe('applyPluginPackToSite', () => {
     expect(removed.classes).toEqual(['acme.canvas/page/home/legacy'])
     expect(site.styleRules['acme.canvas/page/home/legacy']).toBeUndefined()
     expect(site.styleRules['user-class']).toBeDefined()
+  })
+
+  it('merges pack CSS conditions into the site registry by deterministic id', () => {
+    const { site } = applyPluginPackToSite('acme.canvas', baselineSite, {
+      visualComponents: [],
+      pages: [],
+      classes: [],
+      layouts: [],
+      conditions: [{
+        id: 'media:(max-width: 700px)',
+        label: 'Small',
+        condition: { kind: 'media' as const, query: '(max-width: 700px)' },
+      }],
+    })
+
+    expect(site.conditions).toEqual([{
+      id: 'media:(max-width: 700px)',
+      label: 'Small',
+      condition: { kind: 'media', query: '(max-width: 700px)' },
+    }])
   })
 })
 

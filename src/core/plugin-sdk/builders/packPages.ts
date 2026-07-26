@@ -6,7 +6,14 @@
  * ship a complete starter site without hand-writing Instatic's flat node map.
  */
 
-import { createNode, reindexNodeParents, type Page, type PageNode, type StyleRule } from '@core/page-tree'
+import {
+  createNode,
+  reindexNodeParents,
+  type ConditionDef,
+  type Page,
+  type PageNode,
+  type StyleRule,
+} from '@core/page-tree'
 import { importHtml } from '@core/htmlImport'
 import { cssToStyleRules } from '@core/siteImport'
 
@@ -23,11 +30,13 @@ export interface PagePackEntry {
 export interface CompiledPackPage {
   page: Page
   classes: StyleRule[]
+  conditions: ConditionDef[]
 }
 
 export interface CompiledPackPages {
   pages: Page[]
   classes: StyleRule[]
+  conditions: ConditionDef[]
 }
 
 function namespacedPageId(pluginId: string, id: string): string {
@@ -37,8 +46,10 @@ function namespacedPageId(pluginId: string, id: string): string {
 function compileStyleRules(namespace: string, css: string): {
   classes: StyleRule[]
   classIdByName: Map<string, string>
+  conditions: ConditionDef[]
 } {
-  const parsedRules = cssToStyleRules(css).rules
+  const parsed = cssToStyleRules(css)
+  const parsedRules = parsed.rules
   const classIdByName = new Map<string, string>()
   let ambientIndex = 0
   const classes = parsedRules.map((rule) => {
@@ -48,7 +59,7 @@ function compileStyleRules(namespace: string, css: string): {
     if (rule.kind === 'class') classIdByName.set(rule.name, id)
     return { ...rule, id, createdAt: 0, updatedAt: 0 }
   })
-  return { classes, classIdByName }
+  return { classes, classIdByName, conditions: parsed.conditions }
 }
 
 function deterministicNodeIds(
@@ -134,13 +145,14 @@ function requirePackPageDom(entryId: string): void {
 export function compilePackPage(pluginId: string, entry: PagePackEntry): CompiledPackPage {
   requirePackPageDom(entry.id)
   const imported = importHtml(entry.html)
-  const { classes, classIdByName } = compileStyleRules(
+  const { classes, classIdByName, conditions } = compileStyleRules(
     namespacedPageId(pluginId, entry.id),
     [entry.css, imported.styleCss].filter(Boolean).join('\n\n'),
   )
   return {
     page: compileImportedPage(pluginId, entry, imported, classIdByName),
     classes,
+    conditions,
   }
 }
 
@@ -166,11 +178,12 @@ export function compilePackPages(
     sharedCss,
     ...importedPages.flatMap(({ entry, imported }) => [entry.css, imported.styleCss]),
   ].filter(Boolean).join('\n\n')
-  const { classes, classIdByName } = compileStyleRules(`${pluginId}/site`, css)
+  const { classes, classIdByName, conditions } = compileStyleRules(`${pluginId}/site`, css)
 
   return {
     pages: importedPages.map(({ entry, imported }) =>
       compileImportedPage(pluginId, entry, imported, classIdByName)),
     classes,
+    conditions,
   }
 }

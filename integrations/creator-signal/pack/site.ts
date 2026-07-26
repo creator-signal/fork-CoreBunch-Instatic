@@ -1,41 +1,112 @@
 import { compilePackPages, definePack, type PagePackEntry } from '@core/plugin-sdk'
+import { creatorSignalCss } from './design-system'
+import { heroComponent } from './hero-component'
 
-const css = `
-*{box-sizing:border-box}
-body{margin:0;background:#f8f6ef;color:#172a2a;font-family:Inter,ui-sans-serif,system-ui,sans-serif;line-height:1.55}
-.section{width:calc(100% - 2rem);max-width:1160px;margin-inline:auto}
-.site-header{width:calc(100% - 2rem);max-width:1160px;margin-inline:auto;display:flex;align-items:center;justify-content:space-between;padding:1.25rem 0;gap:1rem}
-.brand{font-size:1.2rem;font-weight:800;color:#172a2a;text-decoration:none}
-.nav{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
-.nav a,.footer-links a{color:inherit;text-decoration:none}
-.button{display:inline-flex;padding:.8rem 1.1rem;border-radius:999px;background:#c6ff78;color:#172a2a;text-decoration:none;font-weight:750}
-.button-secondary{background:#fff;border:1px solid #9ca9a1}
-.hero{padding:5rem 0}
-.eyebrow{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.14em}
-h1{font-size:4rem;line-height:.94;letter-spacing:-.055em;max-width:15ch;margin:.35rem 0 1.5rem}
-h2{font-size:3rem;line-height:1.02;letter-spacing:-.04em;margin:.3rem 0 1rem}
-.lede{font-size:1.25rem;max-width:62ch}
-.feature-section{padding:4rem 0}
-.prose-section{padding:4rem 0}
-.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:2rem}
-.feature-card{background:#fff;border:1px solid #d8ded5;border-radius:1.25rem;padding:1.5rem;min-height:13rem}
-.feature-card strong{display:block;font-size:1.35rem;margin:.6rem 0}
-.cta{background:#172a2a;color:#f8f6ef;border-radius:2rem;padding:4rem;margin-block:4rem}
-.prose{max-width:74ch}.prose p{font-size:1.08rem;margin:0 0 1.25rem}
-.site-footer{width:calc(100% - 2rem);max-width:1160px;margin-inline:auto;display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap;padding:4rem 0}
-.footer-links{display:flex;gap:1rem;flex-wrap:wrap}
-.consent{position:fixed;inset:auto 1rem 1rem 1rem;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:1rem;background:#fff;border:1px solid #cdd5cc;border-radius:1rem;padding:1rem;box-shadow:0 12px 40px #172a2a22}
-.consent[hidden]{display:none}.consent-actions{display:flex;gap:.5rem;flex-wrap:wrap}
-@media(max-width:720px){.site-header{align-items:flex-start;flex-direction:column}.nav{font-size:.9rem}.consent{align-items:flex-start;flex-direction:column}}
-`
+const header = `<header class="site-header">
+  <a class="site-brand" href="/" aria-label="Creator Signal home">
+    <span class="brand-signal" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span><strong>Creator Signal</strong><small>Clearer signals for independent creative businesses.</small></span>
+  </a>
+  <nav aria-label="Main navigation">
+    <a href="/products">Products</a>
+    <a href="/features">Features</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/contact">Contact</a>
+    <a class="button button-primary" href="https://salespulse.creatorsignal.me">Sign in</a>
+  </nav>
+</header>`
 
-const header = `<header class="site-header"><a class="brand" href="/">Creator Signal</a><nav class="nav" aria-label="Primary"><a href="/products">Products</a><a href="/features">Features</a><a href="/pricing">Pricing</a><a href="/contact">Contact</a><a class="button" href="https://salespulse.creatorsignal.me">Sign in</a></nav></header>`
-const footer = `<footer class="site-footer"><div><a class="brand" href="/">Creator Signal</a><p>Clearer signals for independent creative businesses.</p></div><nav class="footer-links" aria-label="Footer"><a href="/products">Products</a><a href="/products/sales-pulse">Sales Pulse</a><a href="/features">Features</a><a href="/pricing">Pricing</a><a href="/contact">Contact</a><a href="/legal/privacy">Privacy</a><a href="/legal/terms">Terms</a><a href="https://status.creatorsignal.me">Status</a></nav></footer><aside class="consent" data-consent-banner aria-label="Privacy choices"><div><strong>Your privacy choices</strong><p>Aggregate traffic measurement is enabled when configured. Optional journey analytics only runs with your permission.</p></div><div class="consent-actions"><button class="button button-secondary" data-analytics-choice="denied">Essential only</button><button class="button" data-analytics-choice="granted">Allow optional analytics</button></div></aside>`
+const footer = `<footer class="site-footer">
+  <div class="footer-meta">
+    <div><strong>Creator Signal</strong><p>Clearer signals for independent creative businesses.</p></div>
+    <small>© 2026 Creator Signal</small>
+  </div>
+  <nav aria-label="Footer navigation">
+    <a href="/products">Products</a>
+    <a href="/products/sales-pulse">Sales Pulse</a>
+    <a href="/features">Features</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/contact">Contact</a>
+    <a href="/legal/privacy">Privacy</a>
+    <a href="/legal/terms">Terms</a>
+    <a href="https://status.creatorsignal.me">Status</a>
+  </nav>
+</footer>
+<aside class="consent" data-consent-banner aria-label="Privacy choices">
+  <div><strong>Your privacy choices</strong><p>Aggregate traffic measurement is enabled when configured. Optional journey analytics only runs with your permission.</p></div>
+  <div class="consent-actions">
+    <button class="button button-secondary" data-analytics-choice="denied">Essential only</button>
+    <button class="button button-primary" data-analytics-choice="granted">Allow optional analytics</button>
+  </div>
+</aside>`
+
 const chrome = (main: string) => `${header}<main>${main}</main>${footer}`
-const hero = (label: string, title: string, body: string, href: string, action: string) => `<section class="section hero"><p class="eyebrow">${label}</p><h1>${title}</h1><p class="lede">${body}</p><a class="button" href="${href}">${action}</a></section>`
-const features = (label: string, heading: string, intro: string, cards: Array<[string, string, string]>) => `<section class="section feature-section"><p class="eyebrow">${label}</p><h2>${heading}</h2><p class="lede">${intro}</p><div class="feature-grid">${cards.map(([number, title, body]) => `<article class="feature-card"><span class="eyebrow">${number}</span><strong>${title}</strong><p>${body}</p></article>`).join('')}</div></section>`
-const cta = (label: string, heading: string, body: string, href: string, action: string) => `<section class="section cta"><p class="eyebrow">${label}</p><h2>${heading}</h2><p class="lede">${body}</p><a class="button" href="${href}">${action}</a></section>`
-const prose = (heading: string, paragraphs: string[]) => `<section class="section prose-section"><div class="prose"><h2>${heading}</h2>${paragraphs.map((text) => `<p>${text}</p>`).join('')}</div></section>`
+
+const signalVisual = `<div class="signal-visual" aria-hidden="true"><span></span><span></span><span></span><span></span></div>`
+
+const hero = (
+  label: string,
+  title: string,
+  body: string,
+  href: string,
+  action: string,
+) => `<section class="hero-section">
+  <div class="hero-copy">
+    <p class="eyebrow">${label}</p>
+    <h1>${title}</h1>
+    <p class="hero-body">${body}</p>
+    <div class="actions"><a class="button button-primary" href="${href}">${action}</a></div>
+  </div>
+  <div class="hero-art" aria-label="Creator Signal visual">${signalVisual}</div>
+</section>`
+
+const features = (
+  label: string,
+  heading: string,
+  intro: string,
+  cards: Array<[string, string, string]>,
+) => `<section class="content-section">
+  <div class="section-intro"><p class="eyebrow">${label}</p><h2>${heading}</h2><p>${intro}</p></div>
+  <div class="feature-grid">${cards.map(([number, title, body]) =>
+    `<article class="feature-card"><span class="feature-number">${number}</span><h3>${title}</h3><p>${body}</p></article>`,
+  ).join('')}</div>
+</section>`
+
+const cta = (
+  label: string,
+  heading: string,
+  body: string,
+  href: string,
+  action: string,
+) => `<section class="cta-section">
+  <div class="cta-copy"><p class="eyebrow">${label}</p><h2>${heading}</h2><p>${body}</p></div>
+  <div class="actions"><a class="button button-primary" href="${href}">${action}</a></div>
+</section>`
+
+const prose = (heading: string, paragraphs: string[]) => `<section class="content-section narrow-content">
+  <h2>${heading}</h2>
+  <div class="prose-content">${paragraphs.map((text) => `<p>${text}</p>`).join('')}</div>
+</section>`
+
+const testimonial = (
+  quote: string,
+  attribution: string,
+  role: string,
+) => `<figure class="testimonial">
+  <blockquote>“${quote}”</blockquote>
+  <figcaption><strong>${attribution}</strong><span>${role}</span></figcaption>
+</figure>`
+
+const faq = (
+  heading: string,
+  items: Array<[string, string]>,
+) => `<section class="content-section narrow-content">
+  <h2>${heading}</h2>
+  <div class="faq-list">${items.map(([question, answer]) =>
+    `<details><summary>${question}</summary><p>${answer}</p></details>`,
+  ).join('')}</div>
+</section>`
+
 const publicDocument = (
   id: string,
   slug: string,
@@ -46,10 +117,10 @@ const publicDocument = (
   id,
   slug,
   title,
-  html: chrome(
-    hero('Creator Signal', title, summary, '/contact', 'Contact us')
-    + prose(title, paragraphs),
-  ),
+  html: chrome(`<article class="public-document">
+    <header class="public-document-header"><p class="eyebrow">Creator Signal</p><h1>${title}</h1><p>${summary}</p></header>
+    <div class="prose-content">${paragraphs.map((text) => `<p>${text}</p>`).join('')}</div>
+  </article>`),
 })
 
 const publicDocuments: PagePackEntry[] = [
@@ -128,7 +199,7 @@ const entries: PagePackEntry[] = [
   },
   {
     id: 'contact', slug: 'contact', title: 'Contact',
-    html: chrome(hero('Contact Creator Signal', 'Tell us what you are trying to understand.', 'Send a short note about your creative business, Sales Pulse or a support question. We will use the details only to respond and follow up as requested.', '/legal/privacy', 'Read our privacy notice') + '<section class="section feature-section"><div data-creator-signal-mautic-form="true"></div></section>'),
+    html: chrome(hero('Contact Creator Signal', 'Tell us what you are trying to understand.', 'Send a short note about your creative business, Sales Pulse or a support question. We will use the details only to respond and follow up as requested.', '/legal/privacy', 'Read our privacy notice') + '<section class="content-section"><div data-creator-signal-mautic-form="true"></div></section>'),
   },
   {
     id: 'privacy', slug: 'legal/privacy', title: 'Privacy',
@@ -141,7 +212,7 @@ const entries: PagePackEntry[] = [
   ...publicDocuments,
 ]
 
-const compiled = compilePackPages('creator-signal.site', entries, css)
+const compiled = compilePackPages('creator-signal.site', entries, creatorSignalCss)
 const contact = compiled.pages.find((page) => page.id.endsWith('/contact'))!
 const mauticNode = Object.values(contact.nodes).find((node) => {
   const attributes = node.props.htmlAttributes
@@ -165,15 +236,19 @@ mauticNode.props = {
 mauticNode.classIds = []
 
 const authorLayouts = [
-  { id: 'hero', name: 'Creator Signal hero', html: hero('Eyebrow', 'A clear headline.', 'Add a useful, plain-language introduction for this page.', '#', 'Primary action'), css },
-  { id: 'feature-grid', name: 'Creator Signal feature grid', html: features('Capabilities', 'A focused feature set.', 'Explain what this group helps the visitor do.', [['01', 'First feature', 'Describe the outcome, not only the mechanism.'], ['02', 'Second feature', 'Keep the copy short enough to scan.'], ['03', 'Third feature', 'Use another card only when it adds information.']]), css },
-  { id: 'call-to-action', name: 'Creator Signal call to action', html: cta('Next step', 'Give the visitor one clear next move.', 'Explain what happens after they choose it.', '#', 'Take the next step'), css },
-  { id: 'prose', name: 'Creator Signal rich text', html: prose('Section heading', ['Write the first paragraph here.', 'Add supporting detail here.']), css },
+  { id: 'hero', name: 'Creator Signal hero', html: hero('Eyebrow', 'A clear headline.', 'Add a useful, plain-language introduction for this page.', '#', 'Primary action'), css: creatorSignalCss },
+  { id: 'feature-grid', name: 'Creator Signal feature grid', html: features('Capabilities', 'A focused feature set.', 'Explain what this group helps the visitor do.', [['01', 'First feature', 'Describe the outcome, not only the mechanism.'], ['02', 'Second feature', 'Keep the copy short enough to scan.'], ['03', 'Third feature', 'Use another card only when it adds information.']]), css: creatorSignalCss },
+  { id: 'call-to-action', name: 'Creator Signal call to action', html: cta('Next step', 'Give the visitor one clear next move.', 'Explain what happens after they choose it.', '#', 'Take the next step'), css: creatorSignalCss },
+  { id: 'prose', name: 'Creator Signal rich text', html: prose('Section heading', ['Write the first paragraph here.', 'Add supporting detail here.']), css: creatorSignalCss },
+  { id: 'testimonial', name: 'Creator Signal testimonial', html: testimonial('Add a short customer quotation that supports the page promise.', 'Customer name', 'Role or business'), css: creatorSignalCss },
+  { id: 'faq', name: 'Creator Signal FAQ', html: faq('Frequently asked questions', [['What should visitors know first?', 'Write a direct answer that helps the visitor decide what to do next.'], ['Where can they get more help?', 'Link to the relevant product, policy or contact route.']]), css: creatorSignalCss },
 ]
 
 const pack = definePack({
   pluginId: 'creator-signal.site',
+  visualComponents: [heroComponent],
   pages: compiled.pages,
+  conditions: compiled.conditions,
   layouts: authorLayouts,
 })
 pack.classes.push(...compiled.classes)

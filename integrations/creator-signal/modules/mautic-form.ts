@@ -70,6 +70,146 @@ const runtime = String.raw`(() => {
   new MutationObserver(scan).observe(document.documentElement, { childList: true, subtree: true });
 })();`
 
+const formCss = String.raw`
+.cs-mautic {
+  display: grid;
+  grid-template-columns: minmax(0, .8fr) minmax(320px, 1.2fr);
+  align-items: start;
+  gap: 72px;
+}
+.cs-mautic-copy {
+  max-width: 32rem;
+  padding-top: 12px;
+}
+.cs-mautic-copy h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 4rem;
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -.035em;
+}
+.cs-mautic-copy > p:last-child {
+  color: var(--cs-muted);
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+.cs-eyebrow {
+  margin: 0 0 12px;
+  color: var(--cs-sage);
+  font-size: .76rem;
+  font-weight: 750;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+.cs-mautic-form-shell {
+  min-width: 0;
+  min-height: 240px;
+  padding: 40px;
+  border: 1px solid var(--cs-line);
+  border-radius: 24px;
+  background: white;
+  box-shadow: var(--cs-shadow);
+}
+.cs-mautic [data-form-mount][hidden] { display: none; }
+.cs-mautic [data-form-mount] form { display: grid; gap: 18px; }
+.cs-mautic .mauticform-row { margin: 0; }
+.cs-mautic label, .cs-mautic .mauticform-label {
+  display: block;
+  margin: 0 0 7px;
+  color: var(--cs-ink);
+  font-size: .92rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.cs-mautic input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+.cs-mautic textarea,
+.cs-mautic select {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 11px 14px;
+  border: 1px solid var(--cs-line);
+  border-radius: 11px;
+  background: white;
+  color: var(--cs-ink);
+  font: inherit;
+  line-height: 1.4;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+.cs-mautic textarea { min-height: 140px; resize: vertical; }
+.cs-mautic input[type="checkbox"], .cs-mautic input[type="radio"] {
+  width: auto;
+  min-height: 0;
+  margin-inline-end: 8px;
+  accent-color: var(--cs-sage);
+}
+.cs-mautic .mauticform-checkboxgrp-row,
+.cs-mautic .mauticform-radiogrp-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 8px;
+}
+.cs-mautic .mauticform-errormsg {
+  display: block;
+  margin-top: 6px;
+  color: #9b443c;
+  font-size: .84rem;
+  font-weight: 650;
+}
+.cs-mautic .mauticform-helpmessage {
+  display: block;
+  margin: 0 0 7px;
+  color: var(--cs-muted);
+  font-size: .84rem;
+}
+.cs-mautic button[type="submit"],
+.cs-mautic input[type="submit"],
+.cs-mautic .mauticform-button {
+  display: inline-flex;
+  width: auto;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 22px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  background: var(--cs-sage);
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  box-shadow: 0 10px 24px rgba(94, 111, 87, .18);
+  transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+}
+.cs-mautic button[type="submit"]:hover,
+.cs-mautic input[type="submit"]:hover,
+.cs-mautic .mauticform-button:hover { transform: translateY(-1px); }
+.cs-mautic :is(input, textarea, select, button):focus-visible {
+  outline: 3px solid var(--cs-blue);
+  outline-offset: 2px;
+  border-color: var(--cs-sage);
+  box-shadow: 0 0 0 4px rgba(147, 169, 179, .18);
+}
+.cs-mautic [data-form-status] {
+  margin: 18px 0 0;
+  color: var(--cs-sage);
+  font-weight: 700;
+}
+@media (max-width: 900px) {
+  .cs-mautic { grid-template-columns: 1fr; gap: 40px; }
+  .cs-mautic-copy h2 { font-size: 3.2rem; }
+}
+@media (max-width: 560px) {
+  .cs-mautic-copy h2 { font-size: 2.6rem; }
+  .cs-mautic-form-shell {
+    padding: 22px 18px;
+    border-radius: 20px;
+  }
+}
+`
+
 export default defineModule({
   id: 'creator-signal.site.mautic-form',
   name: 'Mautic form',
@@ -107,11 +247,13 @@ export default defineModule({
           data-form-code="${props.formCode}"
           data-campaign-code="${props.campaignCode}"
           data-success-message="${props.successMessage}">
-          <div><p class="cs-eyebrow">Contact</p><h2>${props.heading}</h2><p>${props.introduction}</p></div>
-          <div data-form-mount></div>
-          <p role="status" aria-live="polite" data-form-status></p>
+          <div class="cs-mautic-copy"><p class="cs-eyebrow">Contact</p><h2>${props.heading}</h2><p>${props.introduction}</p></div>
+          <div class="cs-mautic-form-shell">
+            <div data-form-mount></div>
+            <p role="status" aria-live="polite" data-form-status></p>
+          </div>
         </section>`,
-      css: '.cs-mautic{display:grid;gap:1.5rem;padding:clamp(2rem,5vw,4rem);background:#eef3ec;border-radius:1.5rem}.cs-mautic h2{font-size:clamp(2rem,4vw,3.5rem);margin:.25rem 0}.cs-mautic [data-form-mount][hidden]{display:none}',
+      css: formCss,
       js: runtime,
       ...(origin ? {
         cspSources: [

@@ -222,11 +222,23 @@ describe('definePack', () => {
         slug: 'about',
         html: '<main class="page"><h1>About</h1></main>',
       },
-    ], '.page { max-width: 70rem; } body { margin: 0; }')
+    ], `
+      .page { max-width: 70rem; }
+      body { margin: 0; }
+      @media (max-width: 700px) { .page { max-width: 100%; } }
+    `)
 
     expect(compiled.classes).toHaveLength(2)
     expect(compiled.classes.filter((rule) => rule.kind === 'ambient')).toHaveLength(1)
+    expect(compiled.conditions).toEqual([{
+      id: 'media:(max-width: 700px)',
+      label: '(max-width: 700px)',
+      condition: { kind: 'media', query: '(max-width: 700px)' },
+    }])
     const pageClass = compiled.classes.find((rule) => rule.name === 'page')!
+    expect(pageClass.contextStyles['media:(max-width: 700px)']).toMatchObject({
+      maxWidth: '100%',
+    })
     for (const page of compiled.pages) {
       expect(Object.values(page.nodes).some((node) =>
         node.classIds.includes(pageClass.id))).toBe(true)

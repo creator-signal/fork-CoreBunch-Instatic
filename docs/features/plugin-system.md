@@ -73,7 +73,7 @@ pack/site.json           <- Visual Components / pages / classes / layouts pack (
                            layouts are authored as clean HTML + CSS in
                            definePack({ layouts }) and compiled to snapshot
                            form at build time)
-assets/                  <- static assets shipped in the zip (optional)
+assets/                  <- static assets copied into the zip unchanged (optional)
 ```
 
 `bun instatic-plugin build` produces this runtime layout from `instatic-plugin.config.ts`. Bundle formats are intentionally different per surface:

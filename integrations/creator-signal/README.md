@@ -13,6 +13,8 @@ blank setup homepage, and publish the complete site automatically.
 - The warm Creator Signal editorial design system shared by the editor canvas
   and published pages.
 - A parameterised Hero Visual Component with optional MinIO-backed artwork.
+- Creator Signal favicon, touch icon, maskable icon, and web app manifest
+  injected into every published page from versioned plugin assets.
 - Editable hero, feature-grid, call-to-action, prose, testimonial, and FAQ layouts.
 - A Mautic form module with configurable form identity and typed success/failure events.
 - The host-level MinIO adapter for originals, variants, avatars, and fonts.

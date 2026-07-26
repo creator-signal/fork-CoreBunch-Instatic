@@ -82,9 +82,11 @@ export type FrontendAsset =
   }
   /**
    * Bare `<link>` tag — for preconnect, dns-prefetch, preload, alternate,
-   * etc. The `attrs` object becomes the tag attributes; no body, no inline
-   * content. Use `kind: 'style'` for stylesheet links — the host derives
-   * the right tag shape for you.
+   * icons, manifests, etc. The `attrs` object becomes the tag attributes;
+   * no body, no inline content. A package-relative `href` resolves against
+   * the installed plugin's versioned `assetBasePath`; root-relative and
+   * absolute URLs remain unchanged. Use `kind: 'style'` for stylesheet
+   * links — the host derives the right tag shape for you.
    */
   | {
     kind: 'link'

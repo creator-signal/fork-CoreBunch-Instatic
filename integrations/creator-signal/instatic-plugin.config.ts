@@ -5,7 +5,7 @@ import { pack } from './pack/site'
 export default definePlugin({
   id: 'creator-signal.site',
   name: 'Creator Signal public site',
-  version: '0.1.7',
+  version: '0.1.8',
   description: 'Creator Signal starter pages, author layouts, Mautic forms, consent and analytics integrations.',
   author: { name: 'Creator Signal', url: 'https://creatorsignal.me' },
   license: 'MIT',
@@ -38,6 +38,47 @@ export default definePlugin({
   ],
   frontend: {
     assets: [
+      {
+        kind: 'link',
+        attrs: {
+          rel: 'icon',
+          type: 'image/png',
+          sizes: '192x192',
+          href: 'assets/icons/creator-signal-192.png',
+        },
+      },
+      {
+        kind: 'link',
+        attrs: {
+          rel: 'icon',
+          type: 'image/png',
+          sizes: '512x512',
+          href: 'assets/icons/creator-signal-512.png',
+        },
+      },
+      {
+        kind: 'link',
+        attrs: {
+          rel: 'apple-touch-icon',
+          type: 'image/png',
+          sizes: '192x192',
+          href: 'assets/icons/creator-signal-192.png',
+        },
+      },
+      {
+        kind: 'link',
+        attrs: {
+          rel: 'manifest',
+          href: 'assets/icons/site.webmanifest',
+        },
+      },
+      {
+        kind: 'meta',
+        attrs: {
+          name: 'theme-color',
+          content: '#3A4A2E',
+        },
+      },
       { kind: 'script', src: 'frontend/analytics.js', placement: 'body-end', strategy: 'defer' },
     ],
   },

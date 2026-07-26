@@ -21,7 +21,7 @@
  * node_modules in the zip.
  */
 import { existsSync, readdirSync } from 'node:fs'
-import { copyFile, mkdir, rm, writeFile } from 'node:fs/promises'
+import { copyFile, cp, mkdir, rm, writeFile } from 'node:fs/promises'
 import { basename, dirname, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { spawn } from 'node:child_process'
@@ -471,7 +471,15 @@ export async function buildPlugin(
     )
   }
 
-  // 5b. Marketplace icon — passthrough copy. The manifest path is
+  // 5b. Static assets — preserve the documented package `assets/` tree.
+  // These files are served from the installed plugin's assetBasePath and
+  // can be referenced by relative hrefs in declarative frontend link tags.
+  const staticAssetsSource = join(absoluteSource, 'assets')
+  if (existsSync(staticAssetsSource)) {
+    await cp(staticAssetsSource, join(distDir, 'assets'), { recursive: true })
+  }
+
+  // 5c. Marketplace icon — passthrough copy. The manifest path is
   // validated by the schema (no `..` traversal, allowed extensions only),
   // so a missing file is the only realistic failure here.
   if (definition.manifest.icon) {

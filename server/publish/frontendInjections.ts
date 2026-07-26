@@ -53,9 +53,13 @@ const PLACEMENT_ORDER: ReadonlyArray<FrontendAssetPlacement> = [
  * A fully-resolved tag, ready to be spliced into the document. Carries its
  * placement anchor so the splicer can bucket without re-walking the asset.
  */
-interface ResolvedTag {
+export interface ResolvedFrontendTag {
   html: string
   placement: FrontendAssetPlacement
+}
+
+type FrontendAssetPlugin = {
+  manifest: Pick<InstalledPlugin['manifest'], 'id' | 'assetBasePath'>
 }
 
 export interface FrontendInjections {
@@ -134,7 +138,7 @@ export async function collectFrontendInjections(db: DbClient): Promise<FrontendI
   for (const plugin of eligible) {
     const assets = plugin.manifest.frontend?.assets ?? []
     for (const asset of assets) {
-      const resolved = renderAsset(asset, plugin)
+      const resolved = renderFrontendAsset(asset, plugin)
       if (!resolved) continue
       tags[resolved.placement].push(resolved.html)
       switch (asset.kind) {
@@ -170,7 +174,10 @@ export async function collectFrontendInjections(db: DbClient): Promise<FrontendI
  * (defense in depth) or when an external asset is declared without a base
  * path (the publisher can't form a URL).
  */
-function renderAsset(asset: FrontendAsset, plugin: InstalledPlugin): ResolvedTag | null {
+export function renderFrontendAsset(
+  asset: FrontendAsset,
+  plugin: FrontendAssetPlugin,
+): ResolvedFrontendTag | null {
   const placement = asset.placement ?? defaultPlacement(asset)
 
   if (asset.kind === 'script') {
@@ -218,7 +225,13 @@ function renderAsset(asset: FrontendAsset, plugin: InstalledPlugin): ResolvedTag
   }
 
   if (asset.kind === 'link') {
-    const extra = formatAttrs(asset.attrs)
+    const attrs = { ...asset.attrs }
+    if (typeof attrs.href === 'string') {
+      const href = resolveLinkHref(plugin, attrs.href)
+      if (!href) return null
+      attrs.href = href
+    }
+    const extra = formatAttrs(attrs, LINK_AND_META_RESERVED_ATTRS)
     const pluginAttr = ` data-plugin-id="${escapeAttr(plugin.manifest.id)}"`
     return {
       html: `<link${extra}${pluginAttr}>`,
@@ -227,7 +240,7 @@ function renderAsset(asset: FrontendAsset, plugin: InstalledPlugin): ResolvedTag
   }
 
   if (asset.kind === 'meta') {
-    const extra = formatAttrs(asset.attrs)
+    const extra = formatAttrs(asset.attrs, LINK_AND_META_RESERVED_ATTRS)
     const pluginAttr = ` data-plugin-id="${escapeAttr(plugin.manifest.id)}"`
     return {
       html: `<meta${extra}${pluginAttr}>`,
@@ -270,21 +283,63 @@ function scriptStrategyAttrs(strategy: 'defer' | 'async' | 'module' | 'sync'): s
   }
 }
 
-function resolveAssetUrl(plugin: InstalledPlugin, relativePath: string): string | null {
+function resolveAssetUrl(
+  plugin: FrontendAssetPlugin,
+  relativePath: string,
+): string | null {
   const base = plugin.manifest.assetBasePath
   if (!base) return null
   return `${base.replace(/\/+$/g, '')}/${relativePath.replace(/^\/+/g, '')}`
 }
 
-function formatAttrs(attrs: Record<string, string> | undefined): string {
+const HOST_OWNED_ATTRS = new Set([
+  'src',
+  'href',
+  'rel',
+  'data-plugin-id',
+  'defer',
+  'async',
+  'type',
+])
+const LINK_AND_META_RESERVED_ATTRS = new Set(['data-plugin-id'])
+const SAFE_PLUGIN_ASSET_PATH = /^(?!\/)(?!.*(?:^|\/)\.\.(?:\/|$))[a-zA-Z0-9._/-]+$/
+const ABSOLUTE_URL_SCHEME = /^[a-zA-Z][a-zA-Z0-9+.-]*:/
+
+/**
+ * Root-relative, protocol-relative, fragment, and absolute URLs are already
+ * visitor-facing and remain unchanged. A safe package-relative href resolves
+ * against the plugin's versioned asset directory. Invalid relative paths are
+ * dropped rather than allowing `..` traversal through the static handler.
+ */
+function resolveLinkHref(
+  plugin: FrontendAssetPlugin,
+  rawHref: string,
+): string | null {
+  const href = rawHref.trim()
+  if (!href) return null
+  if (
+    href.startsWith('/') ||
+    href.startsWith('//') ||
+    href.startsWith('#') ||
+    ABSOLUTE_URL_SCHEME.test(href)
+  ) {
+    return href
+  }
+  if (!SAFE_PLUGIN_ASSET_PATH.test(href)) return null
+  return resolveAssetUrl(plugin, href)
+}
+
+function formatAttrs(
+  attrs: Record<string, string> | undefined,
+  reserved: ReadonlySet<string> = HOST_OWNED_ATTRS,
+): string {
   if (!attrs) return ''
   // Skip the few reserved attributes the host owns ("src" on script, "href"
   // on style, "data-plugin-id"). Authors who set those values can break the
   // tag — silently dropping is safer than emitting two competing attributes.
-  const RESERVED = new Set(['src', 'href', 'rel', 'data-plugin-id', 'defer', 'async', 'type'])
   const parts: string[] = []
   for (const [name, value] of Object.entries(attrs)) {
-    if (RESERVED.has(name.toLowerCase())) continue
+    if (reserved.has(name.toLowerCase())) continue
     parts.push(`${name}="${escapeAttr(value)}"`)
   }
   return parts.length === 0 ? '' : ` ${parts.join(' ')}`

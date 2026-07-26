@@ -14,7 +14,11 @@
  * tracker plugin with a single external script hit this.
  */
 import { describe, it, expect } from 'bun:test'
-import { injectFrontendAssets, type FrontendInjections } from '../../../server/publish/frontendInjections'
+import {
+  injectFrontendAssets,
+  renderFrontendAsset,
+  type FrontendInjections,
+} from '../../../server/publish/frontendInjections'
 
 const PAGE_WITH_CSP_META = `<!doctype html>
 <html>
@@ -36,6 +40,51 @@ function emptyPlan(): FrontendInjections {
 }
 
 describe('frontend injection — CSP relaxation', () => {
+  it('resolves package-relative link hrefs without stripping favicon attributes', () => {
+    const resolved = renderFrontendAsset(
+      {
+        kind: 'link',
+        attrs: {
+          rel: 'icon',
+          type: 'image/png',
+          sizes: '192x192',
+          href: 'assets/icons/favicon.png',
+        },
+      },
+      {
+        manifest: {
+          id: 'acme.brand',
+          assetBasePath: '/uploads/plugins/acme.brand/1.0.0',
+        },
+      },
+    )
+
+    expect(resolved).toEqual({
+      html: '<link rel="icon" type="image/png" sizes="192x192" href="/uploads/plugins/acme.brand/1.0.0/assets/icons/favicon.png" data-plugin-id="acme.brand">',
+      placement: 'head-end',
+    })
+  })
+
+  it('rejects a traversing package-relative link href', () => {
+    const resolved = renderFrontendAsset(
+      {
+        kind: 'link',
+        attrs: {
+          rel: 'icon',
+          href: '../favicon.png',
+        },
+      },
+      {
+        manifest: {
+          id: 'acme.brand',
+          assetBasePath: '/uploads/plugins/acme.brand/1.0.0',
+        },
+      },
+    )
+
+    expect(resolved).toBeNull()
+  })
+
   it('keeps script-src `none` when no plugin contributes a tag', () => {
     const out = injectFrontendAssets(PAGE_WITH_CSP_META, emptyPlan())
     expect(out).toContain("script-src 'none'")

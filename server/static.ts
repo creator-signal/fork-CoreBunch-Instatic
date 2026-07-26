@@ -13,6 +13,7 @@ const MIME_TYPES: Record<string, string> = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.map': 'application/json; charset=utf-8',
+  '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.mp4': 'video/mp4',
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
@@ -26,7 +27,15 @@ const MIME_TYPES: Record<string, string> = {
 
 // Mime types worth compressing. Already-compressed binary formats (woff2, png,
 // jpg, mp4, webp, webm) gain nothing and would burn CPU.
-const COMPRESSIBLE_EXTENSIONS = new Set(['.css', '.html', '.js', '.json', '.svg', '.map'])
+const COMPRESSIBLE_EXTENSIONS = new Set([
+  '.css',
+  '.html',
+  '.js',
+  '.json',
+  '.svg',
+  '.map',
+  '.webmanifest',
+])
 
 // Below this size compression overhead (extra response bytes for headers,
 // CPU cost) outweighs the savings.
@@ -565,6 +574,7 @@ const INERT_UPLOAD_MIMES = new Set([
   'image/png',
   'image/gif',
   'image/webp',
+  'application/manifest+json',
   'video/mp4',
   'video/webm',
 ])

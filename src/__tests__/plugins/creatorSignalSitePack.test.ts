@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import '@modules/base'
+import creatorSignalPlugin from '../../../integrations/creator-signal/instatic-plugin.config'
 import { pack } from '../../../integrations/creator-signal/pack/site'
 
 describe('Creator Signal site pack', () => {
@@ -24,6 +25,36 @@ describe('Creator Signal site pack', () => {
       'help/account-data',
       'status',
     ])
+  })
+
+  it('injects the Creator Signal favicon and PWA manifest into published pages', () => {
+    expect(creatorSignalPlugin.manifest.version).toBe('0.1.8')
+    expect(creatorSignalPlugin.manifest.frontend?.assets).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: 'link',
+          attrs: expect.objectContaining({
+            rel: 'icon',
+            sizes: '192x192',
+            href: 'assets/icons/creator-signal-192.png',
+          }),
+        }),
+        expect.objectContaining({
+          kind: 'link',
+          attrs: expect.objectContaining({
+            rel: 'manifest',
+            href: 'assets/icons/site.webmanifest',
+          }),
+        }),
+        expect.objectContaining({
+          kind: 'meta',
+          attrs: expect.objectContaining({
+            name: 'theme-color',
+            content: '#3A4A2E',
+          }),
+        }),
+      ]),
+    )
   })
 
   it('turns the contact placeholder into the configurable Mautic module', () => {

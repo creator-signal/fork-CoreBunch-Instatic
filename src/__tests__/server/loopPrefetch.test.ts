@@ -202,6 +202,62 @@ describe('loopPrefetch', () => {
     expect(data?.items.map((it) => it.fields.title)).toEqual(['About', 'Contact'])
   })
 
+  it('paginates persisted manual items without a registered source', async () => {
+    const page = makePage({
+      slug: 'team',
+      root: { moduleId: 'base.body', children: ['loop'] },
+      loop: {
+        moduleId: 'base.loop',
+        props: {
+          sourceMode: 'manual',
+          sourceId: '',
+          manualItems: [
+            { id: 'one', fields: { title: 'One' } },
+            { id: 'two', fields: { title: 'Two' } },
+            { id: 'three', fields: { title: 'Three' } },
+          ],
+          pagination: 'numbered',
+          pageSize: 1,
+        },
+      },
+    })
+    const db = createFakeDb(async () => ({ rows: [], rowCount: 0 }))
+    const result = await prefetchLoopData(
+      page,
+      makeSite({ pages: [page] }),
+      db,
+      new URL('https://example.com/team?loop_loop_page=2'),
+    )
+
+    expect(result.get('loop')).toMatchObject({
+      items: [{ id: 'two', fields: { title: 'Two' } }],
+      totalItems: 3,
+      pageNumber: 2,
+      paginationMode: 'numbered',
+      previousHref: '/team',
+      nextHref: '/team?loop_loop_page=3',
+    })
+  })
+
+  it('normalizes unsupported manual cursors to previous and next pagination', () => {
+    const props = readLoopProps({
+      id: 'manual',
+      moduleId: 'base.loop',
+      props: {
+        sourceMode: 'manual',
+        pagination: 'cursor',
+        manualItems: [{ id: 'one', fields: { title: 'One' } }],
+      },
+      children: [],
+      breakpointOverrides: {},
+      classIds: [],
+    })
+    expect(props.pagination).toBe('previous-next')
+    expect(props.manualItems).toEqual([
+      { id: 'one', fields: { title: 'One' } },
+    ])
+  })
+
   it('adapts numbered collection pagination and query into loop fetch context', async () => {
     const sourceId = 'test.numbered-collection'
     let received: SourceFetchContext | undefined

@@ -25,6 +25,14 @@ share the current vocabulary. Search capabilities receive their free-text
 query through the same source fetch context and may return opaque cursors
 without a search-specific renderer or pagination model.
 
+Authors can switch a loop's **Source type** to **Manual items** and enter one
+item per line. Each line is persisted as a `LoopItem` with a durable id and
+`label`, `title`, and `text` fields, then travels through the same canvas,
+publisher, offset, limit, numbered, previous/next, and load-more pipeline as a
+dynamic source. Reordering unchanged lines preserves their ids. Cursor
+pagination is intentionally dynamic-source-only because manual items already
+have a deterministic offset.
+
 ---
 
 ## TL;DR

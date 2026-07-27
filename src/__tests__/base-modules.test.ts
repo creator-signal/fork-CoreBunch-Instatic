@@ -173,12 +173,14 @@ describe('base.loop — module contract specifics', () => {
       'direction',
       'filters',
       'limit',
+      'manualItems',
       'offset',
       'orderBy',
       'pageSize',
       'pagination',
       'query',
       'sourceId',
+      'sourceMode',
       'tag',
     ])
     expect(LoopModule.defaults).toMatchObject({

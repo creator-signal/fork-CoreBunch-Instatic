@@ -50,7 +50,9 @@ import { CanvasPreviewReadinessContext } from './CanvasPreviewReadiness'
 // ---------------------------------------------------------------------------
 
 interface ResolvedLoopProps {
+  sourceMode: 'dynamic' | 'manual'
   sourceId: string
+  manualItems: LoopItem[]
   filters: Record<string, unknown>
   orderBy: string
   direction: 'asc' | 'desc'
@@ -73,7 +75,26 @@ const EMPTY_FILTERS: Record<string, unknown> = Object.freeze({}) as Record<strin
 
 function readLoopProps(node: PageNode): ResolvedLoopProps {
   const props = node.props
+  const sourceMode = props.sourceMode === 'manual' ? 'manual' : 'dynamic'
   const sourceId = typeof props.sourceId === 'string' ? props.sourceId : ''
+  const manualItems = Array.isArray(props.manualItems)
+    ? props.manualItems.flatMap((item): LoopItem[] => {
+        if (!item || typeof item !== 'object' || Array.isArray(item)) return []
+        const candidate = item as Record<string, unknown>
+        if (
+          typeof candidate.id !== 'string' ||
+          !candidate.fields ||
+          typeof candidate.fields !== 'object' ||
+          Array.isArray(candidate.fields)
+        ) {
+          return []
+        }
+        return [{
+          id: candidate.id,
+          fields: candidate.fields as Record<string, unknown>,
+        }]
+      })
+    : []
   const filters =
     props.filters && typeof props.filters === 'object' && !Array.isArray(props.filters)
       ? (props.filters as Record<string, unknown>)
@@ -84,7 +105,16 @@ function readLoopProps(node: PageNode): ResolvedLoopProps {
   const limit = Math.min(Math.max(rawLimit, 1), CANVAS_MAX_ITEMS)
   const rawOffset = typeof props.offset === 'number' ? Math.floor(props.offset) : 0
   const offset = Math.max(rawOffset, 0)
-  return { sourceId, filters, orderBy, direction, offset, limit }
+  return {
+    sourceMode,
+    sourceId,
+    manualItems,
+    filters,
+    orderBy,
+    direction,
+    offset,
+    limit,
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -220,6 +250,13 @@ export function selectSitePagesLoopItems(node: PageNode, pages: readonly Page[] 
   return items
 }
 
+export function selectManualLoopItems(node: PageNode): LoopItem[] {
+  const { sourceMode, manualItems, offset, limit } = readLoopProps(node)
+  return sourceMode === 'manual'
+    ? manualItems.slice(offset, offset + limit)
+    : EMPTY_ITEMS
+}
+
 // ---------------------------------------------------------------------------
 // Hook
 // ---------------------------------------------------------------------------
@@ -234,16 +271,29 @@ export function useLoopPreviewItems(node: PageNode): LoopItem[] {
   // from `node.props.filters`, which the editor store (Zustand + Mutative)
   // keeps referentially stable until the user actually edits it. Either way
   // the downstream memo can depend on `filters` directly without thrashing.
-  const { sourceId, filters, orderBy, direction, offset, limit } = readLoopProps(node)
+  const {
+    sourceMode,
+    sourceId,
+    filters,
+    orderBy,
+    direction,
+    offset,
+    limit,
+  } = readLoopProps(node)
   const tableId = typeof filters.tableId === 'string' ? filters.tableId : ''
   const mimePrefix = typeof filters.mimePrefix === 'string' ? filters.mimePrefix : ''
-  const isPluginSource = sourceId !== '' && !BUILT_IN_SOURCE_IDS.has(sourceId)
+  const isPluginSource =
+    sourceMode === 'dynamic' &&
+    sourceId !== '' &&
+    !BUILT_IN_SOURCE_IDS.has(sourceId)
 
   // Narrow, identity-stable subscriptions (see module header). Inactive
   // branches resolve to stable constants so the subscription never fires
   // for them.
   const sitePagesItems = useEditorStore((s) =>
-    sourceId === 'site.pages' ? selectSitePagesLoopItems(node, s.site?.pages ?? null) : EMPTY_ITEMS,
+    sourceMode === 'dynamic' && sourceId === 'site.pages'
+      ? selectSitePagesLoopItems(node, s.site?.pages ?? null)
+      : EMPTY_ITEMS,
   )
   // Plugin `preview()` contractually receives the whole site document, so
   // this is the one branch that genuinely depends on it.
@@ -269,7 +319,7 @@ export function useLoopPreviewItems(node: PageNode): LoopItem[] {
     // gates on `sourceId === 'data.rows'`, so stale state from a previous
     // selection is never read — no need to reset it synchronously here
     // (which would violate react-hooks/set-state-in-effect).
-    if (sourceId !== 'data.rows' || !tableId) return
+    if (sourceMode !== 'dynamic' || sourceId !== 'data.rows' || !tableId) return
     let cancelled = false
     const tableRequest = getCmsDataTable(tableId)
       .then((table) => {
@@ -294,11 +344,20 @@ export function useLoopPreviewItems(node: PageNode): LoopItem[] {
     return () => {
       cancelled = true
     }
-  }, [sourceId, tableId, orderBy, direction, limit, offset, previewReadiness])
+  }, [
+    sourceMode,
+    sourceId,
+    tableId,
+    orderBy,
+    direction,
+    limit,
+    offset,
+    previewReadiness,
+  ])
 
   // ── Async fetch: site.media ─────────────────────────────────────────
   useEffect(() => {
-    if (sourceId !== 'site.media') return
+    if (sourceMode !== 'dynamic' || sourceId !== 'site.media') return
     let cancelled = false
     const request = listCmsMediaAssets()
       .then((assets) => {
@@ -312,9 +371,12 @@ export function useLoopPreviewItems(node: PageNode): LoopItem[] {
     return () => {
       cancelled = true
     }
-  }, [sourceId, previewReadiness])
+  }, [sourceMode, sourceId, previewReadiness])
 
   // ── Sort + offset + limit pipeline ──────────────────────────────────
+  if (sourceMode === 'manual') {
+    return selectManualLoopItems(node)
+  }
   if (!sourceId) return EMPTY_ITEMS
 
   if (sourceId === 'data.rows') {

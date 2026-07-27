@@ -27,12 +27,18 @@ import type { ModuleDefinition } from '@core/module-engine'
 import { registry } from '@core/module-engine'
 import { Type, Value, type Static } from '@core/utils/typeboxHelpers'
 import { CollectionPaginationModeSchema } from '@core/collections'
+import { LoopItemSchema } from '@core/loops/types'
 import { BoxStackSolidIcon } from 'pixel-art-icons/icons/box-stack-solid'
 import { resolveHtmlTag } from '@modules/base/utils/htmlTag'
 import { LoopEditor } from './LoopEditor'
 
 const LoopPropsSchema = Type.Object({
+  sourceMode: Type.Union([
+    Type.Literal('dynamic'),
+    Type.Literal('manual'),
+  ], { default: 'dynamic' }),
   sourceId: Type.String({ default: '' }),
+  manualItems: Type.Array(LoopItemSchema, { default: [] }),
   // filters is a free-form key→value bag: source plugins may store arbitrary
   // filter criteria. Type.Record with Unknown values is the most accurate
   // model; Value.Create yields {} which matches the runtime default.

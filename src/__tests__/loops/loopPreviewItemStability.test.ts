@@ -11,7 +11,10 @@
 
 import { describe, it, expect } from 'bun:test'
 import type { Page, PageNode } from '@core/page-tree'
-import { selectSitePagesLoopItems } from '@site/canvas/useLoopPreviewItems'
+import {
+  selectManualLoopItems,
+  selectSitePagesLoopItems,
+} from '@site/canvas/useLoopPreviewItems'
 
 function makePage(id: string, title: string, slug: string): Page {
   return {
@@ -100,5 +103,47 @@ describe('selectSitePagesLoopItems', () => {
     const items = selectSitePagesLoopItems(node, [makePage('home', 'Home', 'index')])
     expect(items[0].fields.permalink).toBe('/')
     expect(items[0].fields.slug).toBe('index')
+  })
+})
+
+describe('selectManualLoopItems', () => {
+  it('projects persisted manual items through the same canvas slice', () => {
+    const node = makeLoopNode({
+      sourceMode: 'manual',
+      sourceId: '',
+      manualItems: [
+        { id: 'one', fields: { title: 'One' } },
+        { id: 'two', fields: { title: 'Two' } },
+        { id: 'three', fields: { title: 'Three' } },
+      ],
+      offset: 1,
+      limit: 1,
+    })
+
+    expect(selectManualLoopItems(node)).toEqual([
+      { id: 'two', fields: { title: 'Two' } },
+    ])
+  })
+
+  it('rejects malformed items and inactive manual data', () => {
+    const malformed = makeLoopNode({
+      sourceMode: 'manual',
+      manualItems: [
+        { id: 'valid', fields: { title: 'Valid' } },
+        { id: 2, fields: {} },
+        { id: 'missing-fields' },
+      ],
+    })
+    expect(selectManualLoopItems(malformed).map((item) => item.id)).toEqual([
+      'valid',
+    ])
+    expect(
+      selectManualLoopItems(
+        makeLoopNode({
+          sourceMode: 'dynamic',
+          manualItems: [{ id: 'hidden', fields: {} }],
+        }),
+      ),
+    ).toEqual([])
   })
 })

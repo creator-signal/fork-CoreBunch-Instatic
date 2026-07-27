@@ -16,6 +16,7 @@ import {
   collectionNumberedPageWindow,
   collectionPaginationHref,
   normalizeCollectionPaginationMode,
+  normalizeCollectionSource,
   readCollectionPageRequest,
   resolveCollectionPageInfo,
   type CollectionPaginationMode,
@@ -152,7 +153,9 @@ export function collectLoopNodes(
  * still resolves to "no data" instead of crashing the render.
  */
 interface LoopProps {
+  sourceMode: 'dynamic' | 'manual'
   sourceId: string
+  manualItems: LoopItem[]
   filters: Record<string, unknown>
   query: string
   orderBy: string
@@ -165,8 +168,16 @@ interface LoopProps {
 
 export function readLoopProps(node: PageNode): LoopProps {
   const props = node.props
+  const sourceMode = props.sourceMode === 'manual' ? 'manual' : 'dynamic'
+  const pagination = normalizeCollectionPaginationMode(props.pagination)
+  const manualSource = normalizeCollectionSource({
+    mode: 'manual',
+    items: props.manualItems,
+  })
   return {
+    sourceMode,
     sourceId: typeof props.sourceId === 'string' ? props.sourceId : '',
+    manualItems: manualSource.mode === 'manual' ? manualSource.items : [],
     filters:
       props.filters && typeof props.filters === 'object' && !Array.isArray(props.filters)
         ? (props.filters as Record<string, unknown>)
@@ -176,7 +187,10 @@ export function readLoopProps(node: PageNode): LoopProps {
     direction: props.direction === 'asc' ? 'asc' : 'desc',
     limit: typeof props.limit === 'number' && props.limit > 0 ? Math.floor(props.limit) : 10,
     offset: typeof props.offset === 'number' && props.offset >= 0 ? Math.floor(props.offset) : 0,
-    pagination: normalizeCollectionPaginationMode(props.pagination),
+    pagination:
+      sourceMode === 'manual' && pagination === 'cursor'
+        ? 'previous-next'
+        : pagination,
     pageSize:
       typeof props.pageSize === 'number' && props.pageSize > 0 ? Math.floor(props.pageSize) : 10,
   }
@@ -354,7 +368,11 @@ export async function prefetchLoopData(
   const entries: Array<[string, ResolvedLoopData]> = await Promise.all(
     nodes.map(async (node) => {
       const props = readLoopProps(node)
-      const source = props.sourceId ? loopSourceRegistry.get(props.sourceId) : undefined
+      const source = props.sourceMode === 'manual'
+        ? manualLoopSource(props.manualItems)
+        : props.sourceId
+          ? loopSourceRegistry.get(props.sourceId)
+          : undefined
       if (!source) {
         return [
           node.id,
@@ -364,7 +382,7 @@ export async function prefetchLoopData(
             pageNumber: 1,
             hasMore: false,
             paginationMode: props.pagination,
-            ...(props.sourceId
+            ...(props.sourceMode === 'dynamic' && props.sourceId
               ? { error: 'The collection source is unavailable.' }
               : {}),
           },
@@ -382,4 +400,23 @@ export async function prefetchLoopData(
   )
 
   return new Map(entries)
+}
+
+function manualLoopSource(items: LoopItem[]): LoopEntitySource {
+  return {
+    id: 'manual.items',
+    label: 'Manual items',
+    filterSchema: {},
+    orderByOptions: [],
+    fields: [
+      { id: 'label', label: 'Label' },
+      { id: 'title', label: 'Title' },
+      { id: 'text', label: 'Text' },
+    ],
+    fetch: async ({ limit, offset }) => ({
+      items: items.slice(offset, offset + limit),
+      totalItems: items.length,
+    }),
+    preview: ({ limit }) => items.slice(0, limit),
+  }
 }

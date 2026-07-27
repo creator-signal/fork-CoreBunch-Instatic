@@ -48,6 +48,23 @@ export type SiteAccessibilityPolicy = Static<
   typeof SiteAccessibilityPolicySchema
 >
 
+export const SiteSearchSettingsSchema = Type.Object(
+  {
+    enabled: Type.Boolean(),
+    queryParam: Type.String({
+      minLength: 1,
+      maxLength: 32,
+      pattern: '^[A-Za-z][A-Za-z0-9_-]*$',
+    }),
+    minQueryLength: Type.Integer({ minimum: 1, maximum: 32 }),
+    maxQueryLength: Type.Integer({ minimum: 1, maximum: 256 }),
+    maxResults: Type.Integer({ minimum: 1, maximum: 200 }),
+  },
+  { additionalProperties: false },
+)
+
+export type SiteSearchSettings = Static<typeof SiteSearchSettingsSchema>
+
 export const SiteSettingsSchema = Type.Object({
   metaTitle: Type.Optional(Type.String()),
   metaDescription: Type.Optional(Type.String()),
@@ -61,6 +78,8 @@ export const SiteSettingsSchema = Type.Object({
   shortcuts: Type.Record(Type.String(), Type.String()),
   /** Optional site-owned publication policy for accessibility diagnostics. */
   accessibility: Type.Optional(SiteAccessibilityPolicySchema),
+  /** Optional published-page search capability. Absent/disabled means unavailable. */
+  search: Type.Optional(SiteSearchSettingsSchema),
 })
 
 export type SiteSettings = Static<typeof SiteSettingsSchema>
@@ -71,6 +90,14 @@ export type SiteSettings = Static<typeof SiteSettingsSchema>
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   shortcuts: {},
+}
+
+export const DEFAULT_SITE_SEARCH_SETTINGS: SiteSearchSettings = {
+  enabled: false,
+  queryParam: 'q',
+  minQueryLength: 2,
+  maxQueryLength: 120,
+  maxResults: 100,
 }
 
 // ---------------------------------------------------------------------------
@@ -108,6 +135,9 @@ export function parseSiteSettings(raw: unknown): SiteSettings {
   )
     ? (r.accessibility as SiteAccessibilityPolicy)
     : undefined
+  const search = compiledCheck(SiteSearchSettingsSchema, r.search)
+    ? (r.search as SiteSearchSettings)
+    : undefined
 
   return {
     ...(typeof r.metaTitle === 'string' ? { metaTitle: r.metaTitle } : {}),
@@ -117,6 +147,7 @@ export function parseSiteSettings(raw: unknown): SiteSettings {
     framework,
     fonts,
     ...(accessibility ? { accessibility } : {}),
+    ...(search ? { search } : {}),
     shortcuts,
   }
 }

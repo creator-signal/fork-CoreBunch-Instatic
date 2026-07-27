@@ -394,4 +394,71 @@ describe('publisher loop renderer', () => {
 
     expect(html).not.toContain('loop-runtime.js')
   })
+
+  it('renders canonical search results without a child template and reuses pagination', () => {
+    const page = makePage({
+      root: { moduleId: 'base.body', children: ['loop'] },
+      loop: {
+        moduleId: 'base.loop',
+        children: [],
+        props: {
+          itemRenderer: 'search-result',
+          pagination: 'numbered',
+          pageSize: 1,
+        },
+      },
+    })
+    const html = publishPage(page, makeSite(), baseRegistry, {
+      loopData: new Map([['loop', {
+        items: [{
+          id: 'page:one',
+          fields: {
+            title: '<Creator Guide>',
+            excerpt: 'Safe & useful.',
+            permalink: '/guide',
+          },
+        }],
+        totalItems: 2,
+        pageNumber: 1,
+        hasMore: false,
+        paginationMode: 'numbered',
+        nextHref: '/search?q=creator&loop_loop_page=2',
+        numberedHrefs: [
+          { pageNumber: 1, href: '/search?q=creator' },
+          { pageNumber: 2, href: '/search?q=creator&loop_loop_page=2' },
+        ],
+      }]]),
+    }).html
+
+    expect(html).toContain('data-instatic-search-result')
+    expect(html).toContain('&lt;Creator Guide&gt;')
+    expect(html).toContain('Safe &amp; useful.')
+    expect(html).toContain('href="/guide"')
+    expect(html).toContain('data-instatic-collection-pagination="numbered"')
+  })
+
+  it('surfaces capability degradation through the shared collection status', () => {
+    const page = makePage({
+      root: { moduleId: 'base.body', children: ['loop'] },
+      loop: {
+        moduleId: 'base.loop',
+        children: [],
+        props: { itemRenderer: 'search-result' },
+      },
+    })
+    const html = publishPage(page, makeSite(), baseRegistry, {
+      loopData: new Map([['loop', {
+        items: [],
+        totalItems: 0,
+        pageNumber: 1,
+        hasMore: false,
+        operationalState: 'degraded',
+        operationalMessage: 'No eligible published pages are available to search.',
+      }]]),
+    }).html
+
+    expect(html).toContain('data-instatic-collection-state="degraded"')
+    expect(html).toContain('role="status"')
+    expect(html).toContain('No eligible published pages')
+  })
 })

@@ -230,6 +230,7 @@ describe('base.loop — module contract specifics', () => {
       'customTag',
       'direction',
       'filters',
+      'itemRenderer',
       'limit',
       'manualItems',
       'offset',
@@ -244,6 +245,7 @@ describe('base.loop — module contract specifics', () => {
     expect(LoopModule.defaults).toMatchObject({
       sourceId: '',
       filters: {},
+      itemRenderer: 'children',
       orderBy: '',
       direction: 'desc',
       limit: 10,

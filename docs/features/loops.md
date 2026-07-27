@@ -2,7 +2,9 @@
 
 The `base.loop` module — iterates a **loop entity source** and renders its child variants per item. Powers post listings, product grids, related-articles sections, media galleries, anything that displays a collection.
 
-Loop sources are pluggable: built-in sources (`data.rows`, `site.pages`, `site.media`) cover the universal store; plugins can register more via the SDK.
+Loop sources are pluggable: built-in sources (`data.rows`, `site.pages`,
+`site.media`, `search.pages`) cover the universal store and opt-in published
+search; plugins can register more via the SDK.
 
 ## Shared collection contract
 
@@ -53,10 +55,11 @@ src/core/loops/
 ├── types.ts                 — LoopItem, LoopEntitySource, LoopSourceField, LoopFetchResult, ...
 ├── registry.ts              — LoopSourceRegistry singleton (`loopSourceRegistry`)
 └── sources/
-    ├── index.ts             — register the three built-ins at boot
+    ├── index.ts             — register the four built-ins at boot
     ├── dataRows.ts          — data.rows (any data_table)
     ├── sitePages.ts         — site.pages (+ shared helpers re-exported via barrel)
-    └── siteMedia.ts         — site.media
+    ├── siteMedia.ts         — site.media
+    └── searchPages.ts       — search.pages (published index capability)
 
 src/modules/base/loop/        — the base.loop module definition
 
@@ -100,9 +103,10 @@ interface LoopEntitySource {
    * A `requestDependent` (non-perVisitor) hole is rendered at request time and
    * cached by Layer B per `(nodeId, query, publishVersion)`.
    *
-   * Built-in sources (`data.rows`, `site.pages`, `site.media`) are
-   * publish-time-deterministic — leave this unset. Plugin sources that hit
-   * live external APIs should set it.
+   * Most built-in sources (`data.rows`, `site.pages`, `site.media`) are
+   * publish-time-deterministic — leave this unset. `search.pages` is
+   * request-dependent because it consumes the originating page's configured
+   * query parameter. Plugin sources that hit live external APIs should set it.
    */
   requestDependent?: boolean
 
@@ -489,11 +493,14 @@ value `infinite` remains readable as `load-more`.
 - [docs/features/templates.md](templates.md) — `currentEntry` resolves the same way for templates and loops
 - [docs/features/content-storage.md](content-storage.md) — `data_tables` + `data_rows` is the source for `data.rows`
 - [docs/features/plugin-system.md](plugin-system.md) — plugin loop sources
+- [docs/features/site-search.md](site-search.md) — the capability-backed
+  `search.pages` source and published index lifecycle
 - Source-of-truth files:
   - `src/core/loops/index.ts` — public barrel (`pageToLoopItem`, `filterPagesForLoop`, types)
   - `src/core/loops/types.ts` — `LoopEntitySource`, `LoopItem`, `LoopFetchResult`
   - `src/core/loops/registry.ts` — registry singleton
-  - `src/core/loops/sources/dataRows.ts`, `sitePages.ts`, `siteMedia.ts` — built-in sources
+  - `src/core/loops/sources/dataRows.ts`, `sitePages.ts`, `siteMedia.ts`,
+    `searchPages.ts` — built-in sources
   - `src/modules/base/loop/` — the `base.loop` module
   - `src/core/publisher/renderLoop.ts` — render walker
   - `server/publish/loopPrefetch.ts` — pre-fetch

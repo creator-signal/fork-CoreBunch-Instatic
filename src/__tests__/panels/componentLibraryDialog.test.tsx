@@ -6,6 +6,9 @@ import {
   type ComponentLibraryEntry,
 } from '@core/component-library'
 import { ComponentLibraryDialog } from '@site/panels/LayersPanel/ComponentLibraryDialog'
+import { useEditorStore } from '@site/store/store'
+import { DEFAULT_SITE_SEARCH_SETTINGS } from '@core/page-tree'
+import { makePage, makeSite } from '../publisher/helpers'
 import '@modules/base/index'
 
 const dependencyEntry: ComponentLibraryEntry = {
@@ -47,6 +50,7 @@ const dependencyEntry: ComponentLibraryEntry = {
 afterEach(() => {
   cleanup()
   componentLibraryRegistry.unregister(dependencyEntry.id)
+  useEditorStore.setState({ site: null })
 })
 
 describe('ComponentLibraryDialog dependency availability', () => {
@@ -124,5 +128,43 @@ describe('ComponentLibraryDialog dependency availability', () => {
     expect(notice.textContent).toContain('Provider adapter “captcha.hcaptcha”')
     expect(screen.getByRole('button', { name: 'Insert component' }).getAttribute('aria-disabled'))
       .toBe('true')
+  })
+
+  it('keeps Search unavailable until its site capability is enabled and eligible', () => {
+    useEditorStore.setState({ site: makeSite({ pages: [] }) })
+    const first = render(<ComponentLibraryDialog open onClose={() => {}} />)
+
+    fireEvent.change(screen.getByLabelText('Search Component Library'), {
+      target: { value: 'Search Results' },
+    })
+    expect(screen.getByRole('status').textContent).toContain(
+      'Capability “search.index” is unavailable',
+    )
+    first.unmount()
+
+    const page = makePage({
+      root: { moduleId: 'base.body', children: ['text'] },
+      text: { moduleId: 'base.text', props: { text: 'Searchable page.' } },
+    })
+    useEditorStore.setState({
+      site: makeSite({
+        pages: [page],
+        settings: {
+          shortcuts: {},
+          search: {
+            ...DEFAULT_SITE_SEARCH_SETTINGS,
+            enabled: true,
+          },
+        },
+      }),
+    })
+    render(<ComponentLibraryDialog open onClose={() => {}} />)
+    fireEvent.change(screen.getByLabelText('Search Component Library'), {
+      target: { value: 'Search Results' },
+    })
+
+    expect(screen.queryByRole('status')).toBeNull()
+    expect(screen.getByRole('button', { name: 'Insert component' }).getAttribute('aria-disabled'))
+      .toBeNull()
   })
 })

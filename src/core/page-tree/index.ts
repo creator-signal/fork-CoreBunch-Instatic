@@ -50,7 +50,11 @@ export type {
   StyleRuleKind,
 } from './styleRule'
 export type { Condition, ConditionDef } from './condition'
-export type { SiteAccessibilityPolicy, SiteSettings } from './siteSettings'
+export type {
+  SiteAccessibilityPolicy,
+  SiteSearchSettings,
+  SiteSettings,
+} from './siteSettings'
 export type { SiteShell, SiteDocument } from './siteDocument'
 export type {
   DecorativeSiteExplorerSectionId,
@@ -66,7 +70,9 @@ export type {
 export { DEFAULT_BREAKPOINTS, breakpointMediaQuery, defaultBreakpointMediaQuery } from './breakpoint'
 export {
   DEFAULT_SITE_SETTINGS,
+  DEFAULT_SITE_SEARCH_SETTINGS,
   SiteAccessibilityPolicySchema,
+  SiteSearchSettingsSchema,
 } from './siteSettings'
 
 // Condition helpers
@@ -75,6 +81,7 @@ export { conditionId, conditionLabel, makeConditionDef, parseConditions } from '
 // Tolerant parsers — boundary helpers for persisted data.
 export { parseBreakpoint } from './breakpoint'
 export { parsePage } from './page'
+export { parseSiteSettings } from './siteSettings'
 export { parseSiteDocument } from './siteDocument'
 export {
   SITE_EXPLORER_SECTION_IDS,

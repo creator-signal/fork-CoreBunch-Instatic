@@ -27,6 +27,7 @@ import {
   componentLibraryRegistry,
 } from '@core/component-library'
 import { isTemplatePage, resolveNotFoundTemplate } from '@core/templates'
+import { searchIndexService } from '@core/search'
 import type { DbClient } from '../db/client'
 import { nextDataRowVersionNumber } from '../repositories/data'
 import {
@@ -314,6 +315,15 @@ async function publishDraftSiteLocked(
   // window where the freshly-swapped shells (stamped nextPublishVersion) are
   // live while the version counter still reads the old value.
   bumpPublishVersion()
+  try {
+    searchIndexService.reindex(publishedSite)
+  } catch (err) {
+    // Search is derived state just like Layer A artefacts. A failed refresh
+    // must not roll back a committed publication; the request path will retry
+    // against the exact published snapshot and otherwise fail closed.
+    searchIndexService.markStale(publishedSite.id)
+    console.error('[publish:site] search index refresh failed:', err)
+  }
 
   return { publishedPages }
 }

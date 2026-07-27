@@ -12,6 +12,8 @@ import {
   type ComponentLibraryStatus,
 } from '@core/component-library'
 import { providerAdapterRegistry } from '@core/provider-adapters'
+import { searchCapabilityHealth } from '@core/search'
+import { useEditorStore } from '@site/store/store'
 import { ModuleIcon } from '@site/ui/ModuleIcon'
 import { useEditorPermissions } from '@site/editorPermissionsContext'
 import { useInsertComponentLibraryEntry } from '@site/hooks/useInsertComponentLibraryEntry'
@@ -64,6 +66,9 @@ export function ComponentLibraryDialog({
   dependencyState,
 }: ComponentLibraryDialogProps) {
   const permissions = useEditorPermissions()
+  const searchHealth = useEditorStore((state) =>
+    searchCapabilityHealth(state.site),
+  )
   useSyncExternalStore(
     subscribeComponentLibrary,
     getComponentLibraryGeneration,
@@ -71,7 +76,9 @@ export function ComponentLibraryDialog({
   )
   const entries = componentLibraryRegistry.list()
   const resolvedDependencyState = dependencyState ?? {
-    capabilities: {},
+    capabilities: {
+      'search.index': searchHealth,
+    },
     providerAdapters: providerAdapterRegistry.dependencyHealth(),
     plugins: {},
   }

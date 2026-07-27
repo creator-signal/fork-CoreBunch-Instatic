@@ -17,7 +17,7 @@ import { normalizeCollectionPaginationMode } from '@core/collections'
 import type { TemplateRenderDataContext } from '@core/templates/dynamicBindings'
 import { resolveHtmlTag } from '@modules/base/utils/htmlTag'
 import { injectNodeClassIds, injectNodeId, injectNodeInlineStyles } from './classInjection'
-import { escapeHtml } from './utils'
+import { escapeHtml, safeUrl } from './utils'
 import type {
   RenderConfig,
   RenderAccumulators,
@@ -69,7 +69,9 @@ export function renderLoop(
   }
 
   const variants = node.children ?? []
-  if (variants.length === 0) {
+  const itemRenderer =
+    node.props.itemRenderer === 'search-result' ? 'search-result' : 'children'
+  if (variants.length === 0 && itemRenderer === 'children') {
     return '<!-- instatic: loop has no child template -->'
   }
   // The base template context (page/site/route frames + the outer entry stack)
@@ -81,8 +83,21 @@ export function renderLoop(
   let body = ''
   if (data.error) {
     body = collectionStatus(data.error)
+  } else if (data.operationalState && data.items.length === 0) {
+    body = collectionStatus(
+      data.operationalMessage ?? 'This collection is temporarily unavailable.',
+    )
   } else if (data.items.length === 0) {
     body = collectionStatus('No items found.')
+  } else if (itemRenderer === 'search-result') {
+    body = data.items.map(renderSearchResult).join('')
+    if (data.operationalState) {
+      body += collectionStatus(
+        data.operationalMessage ?? 'Search results may be incomplete.',
+      )
+    } else {
+      body += '<span role="status" aria-live="polite" aria-atomic="true" data-instatic-collection-status></span>'
+    }
   } else {
     data.items.forEach((item: LoopItem, i: number) => {
       const variantId = variants[i % variants.length]
@@ -113,7 +128,13 @@ export function renderLoop(
   let attrs = ` data-instatic-loop="${escapeHtml(loopId)}"`
   attrs += ` data-instatic-loop-page="${data.pageNumber}"`
   attrs += ` data-instatic-collection-state="${
-    data.error ? 'error' : data.items.length === 0 ? 'empty' : 'populated'
+    data.error
+      ? 'error'
+      : data.operationalState
+        ? data.operationalState
+        : data.items.length === 0
+          ? 'empty'
+          : 'populated'
   }"`
   if (isLoadMore) {
     attrs += ` data-instatic-loop-mode="load-more"`
@@ -135,6 +156,18 @@ export function renderLoop(
     ? injectNodeId(withStyles, node.id)
     : withStyles
   return wrapper + renderCollectionPagination(data, paginationMode)
+}
+
+function renderSearchResult(item: LoopItem): string {
+  const title = String(item.fields.title ?? 'Untitled page')
+  const permalink = String(item.fields.permalink ?? '#')
+  const excerpt = String(item.fields.excerpt ?? '')
+  return (
+    '<article data-instatic-search-result>' +
+    `<h2><a href="${safeUrl(permalink)}">${escapeHtml(title)}</a></h2>` +
+    (excerpt ? `<p>${escapeHtml(excerpt)}</p>` : '') +
+    '</article>'
+  )
 }
 
 function collectionStatus(message: string): string {

@@ -11,7 +11,9 @@ import { loopSourceRegistry } from '@core/loops/registry'
 import { DataRowsSource } from './dataRows'
 import { SitePagesSource } from './sitePages'
 import { SiteMediaSource } from './siteMedia'
+import { SearchPagesSource } from './searchPages'
 
 loopSourceRegistry.registerOrReplace(DataRowsSource)
 loopSourceRegistry.registerOrReplace(SitePagesSource)
 loopSourceRegistry.registerOrReplace(SiteMediaSource)
+loopSourceRegistry.registerOrReplace(SearchPagesSource)

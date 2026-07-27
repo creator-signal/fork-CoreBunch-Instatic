@@ -48,6 +48,10 @@ const LoopPropsSchema = Type.Object({
   limit: Type.Number({ default: 10 }),
   offset: Type.Number({ default: 0 }),
   query: Type.String({ default: '' }),
+  itemRenderer: Type.Union([
+    Type.Literal('children'),
+    Type.Literal('search-result'),
+  ], { default: 'children' }),
   pagination: Type.Union([
     CollectionPaginationModeSchema,
     Type.Literal('infinite'),

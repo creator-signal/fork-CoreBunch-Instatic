@@ -11,3 +11,4 @@
 
 export type { LoopItem } from './types'
 export { pageToLoopItem, filterPagesForLoop } from './sources/sitePages'
+export { SearchPagesSource } from './sources/searchPages'

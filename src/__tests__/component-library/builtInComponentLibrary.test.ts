@@ -28,6 +28,7 @@ describe('built-in Component Library', () => {
     expect(ids).toContain('base.youtube-embed')
     expect(ids).toContain('base.map')
     expect(ids).toContain('base.captcha')
+    expect(ids).toContain('base.search')
 
     for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
       expect(componentLibraryRegistry.get(entry.id)).toEqual(entry)
@@ -157,6 +158,32 @@ describe('built-in Component Library', () => {
         capabilities: ['forms.captcha'],
         providerAdapters: ['captcha.hcaptcha'],
       },
+    })
+  })
+
+  it('defines Search as a capability-backed shared collection preset', () => {
+    const search = BUILT_IN_COMPONENT_LIBRARY_ENTRIES.find(
+      (entry) => entry.id === 'base.search',
+    )
+    expect(search).toMatchObject({
+      implementation: {
+        type: 'capability-backed',
+        backing: {
+          type: 'primitive',
+          moduleId: 'base.loop',
+          presetId: 'published-pages',
+        },
+      },
+      requirements: {
+        capabilities: ['search.index'],
+      },
+      presets: [{
+        values: {
+          sourceId: 'search.pages',
+          itemRenderer: 'search-result',
+          pagination: 'numbered',
+        },
+      }],
     })
   })
 })

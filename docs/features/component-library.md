@@ -163,6 +163,12 @@ inert and the published iframe is consent-delayed. CAPTCHA declares both
 hCaptcha configuration and server-side response verification are implemented.
 Self-hosted video remains the separate `base.media` entry.
 
+Search Results is backed by `base.loop` plus the request-dependent
+`search.pages` source. It requires `search.index`, stays unavailable until the
+site enables published search, and reuses the shared collection renderer and
+pagination contract. See [Published page search](site-search.md) for indexing,
+visibility, freshness, query, security and degraded-state behavior.
+
 ## Search and filtering
 
 `filterComponentLibraryEntries()` searches:
@@ -331,6 +337,7 @@ opens either boundary before focusing an invalid descendant.
 - `docs/features/modules.md` — the primitive rendering implementation.
 - `docs/features/visual-components.md` — reusable governed structures and slots.
 - `docs/features/templates.md` — template-owned site chrome.
+- `docs/features/site-search.md` — published index and Search Results capability.
 - `docs/reference/typebox-patterns.md` — boundary validation.
 - Source-of-truth files: `src/core/component-library/`
 - Focused tests: `src/__tests__/component-library/componentLibraryRegistry.test.ts`

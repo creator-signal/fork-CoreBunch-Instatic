@@ -261,7 +261,12 @@ export function selectManualLoopItems(node: PageNode): LoopItem[] {
 // Hook
 // ---------------------------------------------------------------------------
 
-const BUILT_IN_SOURCE_IDS = new Set(['data.rows', 'site.media', 'site.pages'])
+const BUILT_IN_SOURCE_IDS = new Set([
+  'data.rows',
+  'site.media',
+  'site.pages',
+  'search.pages',
+])
 
 export function useLoopPreviewItems(node: PageNode): LoopItem[] {
   const previewReadiness = use(CanvasPreviewReadinessContext)
@@ -298,6 +303,9 @@ export function useLoopPreviewItems(node: PageNode): LoopItem[] {
   // Plugin `preview()` contractually receives the whole site document, so
   // this is the one branch that genuinely depends on it.
   const pluginSite = useEditorStore((s) => (isPluginSource ? s.site : null))
+  const searchSite = useEditorStore((s) =>
+    sourceMode === 'dynamic' && sourceId === 'search.pages' ? s.site : null,
+  )
 
   // Raw fetched data for async sources — sort/offset/limit applied below.
   const [asyncDataTable, setAsyncDataTable] = useState<DataTable | null>(null)
@@ -402,6 +410,15 @@ export function useLoopPreviewItems(node: PageNode): LoopItem[] {
   }
 
   if (sourceId === 'site.pages') return sitePagesItems
+  if (sourceId === 'search.pages') {
+    const source = loopSourceRegistry.get(sourceId)
+    if (!source || !searchSite) return EMPTY_ITEMS
+    try {
+      return source.preview({ site: searchSite, filters, limit })
+    } catch {
+      return EMPTY_ITEMS
+    }
+  }
 
   // Plugin source fallback — synchronous preview() with no client-side
   // sort. Plugins that need ordering should apply it inside their own

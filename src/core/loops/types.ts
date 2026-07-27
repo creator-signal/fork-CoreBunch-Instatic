@@ -182,6 +182,14 @@ export interface LoopFetchResult {
   /** Opaque cursor tokens for sources that support cursor pagination. */
   nextCursor?: string
   previousCursor?: string
+  /**
+   * Public-safe operational state for capability-backed sources. Ordinary
+   * sources omit it. Renderers surface the state without exposing provider or
+   * index configuration.
+   */
+  operationalState?: 'degraded' | 'unavailable' | 'stale'
+  /** Public-safe status copy paired with `operationalState`. */
+  operationalMessage?: string
 }
 
 /**

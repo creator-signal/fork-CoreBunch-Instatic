@@ -47,6 +47,8 @@ import { getPublishedNodeIndexForVersion } from '../../publish/publishedSnapshot
 import { getPublishVersion } from '../../publish/publishState'
 import { HOLE_RUNTIME_JS } from '../../publish/holeRuntime'
 import { stampFormPageTokens } from '../../forms/formRuntime'
+import { resolveSiteSearchSettings } from '@core/search'
+import { consumeSearchRequest } from '../../search/rateLimit'
 
 const HOLE_RUNTIME_PATH = '/_instatic/hole-runtime.js'
 const HOLE_PATH_PREFIX = '/_instatic/hole/'
@@ -97,6 +99,36 @@ function parseCookies(header: string | null): Record<string, string> {
 function normalizeQuery(params: URLSearchParams): string {
   const entries = [...params.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
   return new URLSearchParams(entries).toString()
+}
+
+function isSearchHole(node: PageNode): boolean {
+  return (
+    node.moduleId === 'base.loop' &&
+    node.props.sourceId === 'search.pages'
+  )
+}
+
+/**
+ * Search consumes only its configured query plus the shared collection page
+ * keys. Ignoring unrelated query parameters prevents attacker-controlled
+ * cache-key fan-out while preserving the exact inputs that affect rendering.
+ */
+function normalizeHoleQuery(
+  params: URLSearchParams,
+  node: PageNode,
+  site: SiteDocument,
+): string {
+  if (!isSearchHole(node)) return normalizeQuery(params)
+  const settings = resolveSiteSearchSettings(site)
+  const allowed = new Set([
+    `loop_${node.id}_page`,
+    `loop_${node.id}_cursor`,
+    ...(settings ? [settings.queryParam] : []),
+  ])
+  const kept = [...params.entries()]
+    .filter(([key]) => allowed.has(key))
+    .sort(([a], [b]) => a.localeCompare(b))
+  return new URLSearchParams(kept).toString()
 }
 
 /**
@@ -212,6 +244,24 @@ export async function handleHoleRequest(
   }
   const node = foundPage.nodes[nodeId]!
 
+  if (isSearchHole(node)) {
+    const rateLimit = consumeSearchRequest(req)
+    if (!rateLimit.ok) {
+      return new Response(
+        '<span role="status" aria-live="polite" data-instatic-collection-status>' +
+          'Search is temporarily unavailable. Try again later.</span>',
+        {
+          status: 429,
+          headers: {
+            'content-type': 'text/html; charset=utf-8',
+            'cache-control': 'no-store',
+            'retry-after': String(rateLimit.retryAfterSeconds),
+          },
+        },
+      )
+    }
+  }
+
   // Reconstruct the originating page URL forwarded by the runtime (`u`). Falls
   // back to the page's own permalink when absent (older runtime / direct hit).
   const pageUrlRaw = url.searchParams.get('u') ?? buildPageFrame(foundPage).permalink
@@ -258,7 +308,8 @@ export async function handleHoleRequest(
   const cached = await getOrRender(
     {
       urlPath: `${HOLE_PATH_PREFIX}${nodeId}`,
-      queryString: `v=${currentVersion}&${normalizeQuery(pageUrl.searchParams)}`,
+      queryString:
+        `v=${currentVersion}&${normalizeHoleQuery(pageUrl.searchParams, node, snap.site)}`,
     },
     async () => {
       const html = await renderHoleFragment(nodeId, foundPage, snap.site, ctx.db, pageUrl, request)

@@ -28,8 +28,9 @@ import { normalizeCollectionPaginationMode } from '@core/collections'
 
 export const LoopEditor: React.FC<ModuleComponentProps> = ({ props, children, mcClassName, nodeWrapperProps, nodeId }) => {
   const hasChildren = React.Children.count(children) > 0
+  const isSearchResultRenderer = props.itemRenderer === 'search-result'
 
-  if (!hasChildren) {
+  if (!hasChildren && !isSearchResultRenderer) {
     return (
       <CanvasModulePlaceholder
         {...nodeWrapperProps}
@@ -47,6 +48,12 @@ export const LoopEditor: React.FC<ModuleComponentProps> = ({ props, children, mc
   // match in the editor preview.
   const Tag = resolveHtmlTag(props.tag, props.customTag)
   const paginationMode = normalizeCollectionPaginationMode(props.pagination)
+  const previewChildren = isSearchResultRenderer ? (
+    <article data-instatic-search-result>
+      <h2><a href="/" onClick={(event) => event.preventDefault()}>Search result title</a></h2>
+      <p>A matching excerpt from published page content appears here.</p>
+    </article>
+  ) : children
   return React.createElement(
     Tag,
     {
@@ -59,6 +66,6 @@ export const LoopEditor: React.FC<ModuleComponentProps> = ({ props, children, mc
         ? { 'data-instatic-loop-mode': 'load-more' }
         : {}),
     },
-    children,
+    previewChildren,
   )
 }

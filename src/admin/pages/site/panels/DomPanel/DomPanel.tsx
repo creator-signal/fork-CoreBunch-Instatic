@@ -476,7 +476,7 @@ function DomPanelInner({ editable = true }: { editable?: boolean }) {
                   {/*
                     Page mode shows the `base.body` root because it represents
                     the document body and anchors page-level insertion.
-                    Component mode hides that same structural wrapper and
+                    Visual Component document mode hides that same structural wrapper and
                     promotes its children to top-level rows so the panel shows
                     authored component content instead of an implementation
                     anchor. Background insert/paste still targets the hidden

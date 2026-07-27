@@ -12,6 +12,12 @@ export {
 } from '../page-tree/baseNode'
 export type { BaseNode } from '../page-tree/baseNode'
 
+export {
+  CatalogueInstanceMetadataSchema,
+  parseCatalogueInstanceMetadata,
+} from '../page-tree/catalogueInstance'
+export type { CatalogueInstanceMetadata } from '../page-tree/catalogueInstance'
+
 export { asPlainObject } from '../page-tree/parseHelpers'
 
 export { NodeTreeSchema } from '../page-tree/treeSchema'

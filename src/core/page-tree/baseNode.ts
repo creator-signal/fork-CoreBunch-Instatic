@@ -19,6 +19,10 @@ import {
   requireArrayField,
   requireStringField,
 } from './parseHelpers'
+import {
+  CatalogueInstanceMetadataSchema,
+  parseCatalogueInstanceMetadata,
+} from './catalogueInstance'
 
 // ---------------------------------------------------------------------------
 // PropBinding — used by both BaseNode (propBindings field) and VCNodeSchema
@@ -115,6 +119,13 @@ export const BaseNodeSchema = Type.Object({
   // it filters invalid entries rather than failing the whole field. The
   // schema here reflects the validated type; the helper does the filtering.
   propBindings: Type.Optional(Type.Record(Type.String(), PropBindingSchema)),
+
+  /**
+   * Optional Component Library authoring identity. The page tree remains the
+   * source of truth; this metadata only tells Components view how to name and
+   * govern the existing node or subtree.
+   */
+  catalogueInstance: Type.Optional(CatalogueInstanceMetadataSchema),
 })
 
 export type BaseNode = Static<typeof BaseNodeSchema>
@@ -176,6 +187,7 @@ export function parseBaseNodeFields(r: Record<string, unknown>, path: string): B
   const rawChildren = requireArrayField(r, 'children', path)
 
   const propBindings = parsePropBindings(r.propBindings)
+  const catalogueInstance = parseCatalogueInstanceMetadata(r.catalogueInstance)
   // Inline styles — same tolerant bag parser as props/class styles. Dropped
   // when missing or empty so nodes without inline styles stay lean.
   const inlineStyles = parseStylesBag(r.inlineStyles)
@@ -191,6 +203,7 @@ export function parseBaseNodeFields(r: Record<string, unknown>, path: string): B
     ...(typeof r.locked === 'boolean' ? { locked: r.locked } : {}),
     ...(typeof r.hidden === 'boolean' ? { hidden: r.hidden } : {}),
     ...(propBindings !== undefined ? { propBindings } : {}),
+    ...(catalogueInstance !== undefined ? { catalogueInstance } : {}),
     ...(Object.keys(inlineStyles).length > 0 ? { inlineStyles } : {}),
   }
 }

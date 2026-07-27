@@ -1,7 +1,7 @@
 import { rawReturn } from 'mutative'
 import type { StoreApi, UseBoundStore } from 'zustand'
 import type { EditorStore } from '@site/store/types'
-import type { ExplorerPanelTab } from '@site/store/slices/uiSlice'
+import type { ExplorerPanelTab, LayersViewMode } from '@site/store/slices/uiSlice'
 import {
   readWorkspaceLayout,
   writeWorkspaceLayout,
@@ -24,6 +24,7 @@ export type SiteLayoutSelection = readonly [
   codeEditorOpen: boolean,
   agentOpen: boolean,
   explorerTab: ExplorerPanelTab,
+  layersViewMode: LayersViewMode,
   propertiesMode: PropertiesPanelMode,
   leftSidebarWidth: number,
   propertiesWidth: number,
@@ -45,6 +46,13 @@ function explorerTab(
   return value === 'layers' || value === 'site' || value === 'code' || value === 'media'
     ? value
     : current
+}
+
+function layersViewMode(
+  value: unknown,
+  current: LayersViewMode,
+): LayersViewMode {
+  return value === 'components' || value === 'html' ? value : current
 }
 
 function propertiesMode(
@@ -72,6 +80,7 @@ export function selectSiteLayoutState(s: EditorStore): SiteLayoutSelection {
     s.codeEditorPanelOpen,
     s.isAgentOpen,
     s.explorerPanelTab,
+    s.layersViewMode,
     s.propertiesPanelMode,
     s.leftSidebarWidth,
     s.propertiesPanel.width,
@@ -114,6 +123,7 @@ export function siteLayoutFromSelection(
     codeEditorOpen,
     ,
     explorerTab,
+    activeLayersView,
     propertiesMode,
     leftSidebarWidth,
     propertiesWidth,
@@ -127,6 +137,7 @@ export function siteLayoutFromSelection(
     rightOpen: propertiesOpen,
     activeLeftPanel: deriveSiteActiveLeftPanel(selection),
     explorerPanelTab: explorerTab,
+    layersViewMode: activeLayersView,
     activeEditorFileId,
     codeEditorPanelOpen: codeEditorOpen,
     propertiesPanelMode: propertiesMode,
@@ -161,6 +172,7 @@ export function restoreStoredSiteEditorLayout(
       propertiesPanelMode: propertiesMode(layout, state.propertiesPanelMode),
       leftSidebarWidth: leftSidebarWidth(layout, state.leftSidebarWidth),
       explorerPanelTab: explorerTab(layout.explorerPanelTab, state.explorerPanelTab),
+      layersViewMode: layersViewMode(layout.layersViewMode, state.layersViewMode),
       codeEditorPanelOpen: boolOrCurrent(layout.codeEditorPanelOpen, state.codeEditorPanelOpen),
       activeEditorFileId: layout.activeEditorFileId !== undefined
         ? layout.activeEditorFileId

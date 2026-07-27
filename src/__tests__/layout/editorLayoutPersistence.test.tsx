@@ -105,6 +105,7 @@ function resetStore() {
     focusedPanel: 'canvas',
     explorerPanelOpen: true,
     explorerPanelTab: 'layers',
+    layersViewMode: 'html',
     selectorsPanelOpen: false,
     frameworkPanelOpen: false,
     codeEditorPanelOpen: false,
@@ -340,6 +341,7 @@ describe('AdminCanvasLayout — persisted panel layout', () => {
             propertiesPanelMode: 'floating',
             activeLeftPanel: 'explorer',
             explorerPanelTab: 'code',
+            layersViewMode: 'components',
             codeEditorPanelOpen: true,
             activeEditorFileId: 'file-1',
           },
@@ -354,6 +356,7 @@ describe('AdminCanvasLayout — persisted panel layout', () => {
       const state = useEditorStore.getState()
       expect(state.explorerPanelOpen).toBe(true)
       expect(state.explorerPanelTab).toBe('code')
+      expect(state.layersViewMode).toBe('components')
       expect(state.propertiesPanel.collapsed).toBe(false)
       expect(state.propertiesPanelMode).toBe('floating')
       expect(state.propertiesPanel.width).toBe(390)

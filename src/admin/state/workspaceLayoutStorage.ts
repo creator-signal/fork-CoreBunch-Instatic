@@ -78,6 +78,8 @@ export interface StoredWorkspaceLayout {
    * ('layers' | 'pages' | 'media'). Site/content workspaces only.
    */
   explorerPanelTab?: string
+  /** Active Components / HTML projection inside the Site editor Layers tab. */
+  layersViewMode?: string
   /** ID of the file currently open in the floating code editor (site only). */
   activeEditorFileId?: string | null
   /** Whether the floating code editor is visible (site only). */
@@ -119,6 +121,7 @@ const StoredWorkspaceLayoutSchema = Type.Object(
     rightOpen: Type.Optional(Type.Boolean()),
     activeLeftPanel: Type.Optional(Type.Union([Type.String(), Type.Null()])),
     explorerPanelTab: Type.Optional(Type.String()),
+    layersViewMode: Type.Optional(Type.String()),
     activeEditorFileId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
     codeEditorPanelOpen: Type.Optional(Type.Boolean()),
     // PropertiesPanelMode is a string union; keep loose to avoid coupling to

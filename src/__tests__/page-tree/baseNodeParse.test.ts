@@ -31,6 +31,12 @@ function rawStoredNode(): Record<string, unknown> {
     classIds: ['c1', 7, 'c2'],
     inlineStyles: { color: 'blue' },
     propBindings: { text: { paramId: 'p1' }, broken: { nope: 1 } },
+    catalogueInstance: {
+      entryId: 'site.hero',
+      entryVersion: '1',
+      presetId: 'image-left',
+      pattern: { authorableNodeIds: ['child-a'] },
+    },
     label: 'My Node',
     locked: true,
     hidden: false,
@@ -87,6 +93,12 @@ describe('parseBaseNodeFields — page/VC parse equivalence', () => {
     expect(base.breakpointOverrides).toEqual({ mobile: { color: 'red' } })
     // invalid propBindings entry dropped
     expect(base.propBindings).toEqual({ text: { paramId: 'p1' } })
+    expect(base.catalogueInstance).toEqual({
+      entryId: 'site.hero',
+      entryVersion: '1',
+      presetId: 'image-left',
+      pattern: { authorableNodeIds: ['child-a'] },
+    })
     // present inlineStyles kept
     expect(base.inlineStyles).toEqual({ color: 'blue' })
   })
@@ -100,7 +112,17 @@ describe('parseBaseNodeFields — page/VC parse equivalence', () => {
     expect(pageNode.classIds).toEqual([])
     expect('inlineStyles' in pageNode).toBe(false)
     expect('propBindings' in pageNode).toBe(false)
+    expect('catalogueInstance' in pageNode).toBe(false)
     expect(sharedFields(pageNode)).toEqual(sharedFields(vcNode))
+  })
+
+  it('drops invalid optional catalogue metadata without dropping the node', () => {
+    const raw = {
+      ...rawStoredNode(),
+      catalogueInstance: { entryId: '', entryVersion: 1 },
+    }
+    expect(parsedViaPage(raw).catalogueInstance).toBeUndefined()
+    expect(parsedViaVC(raw).catalogueInstance).toBeUndefined()
   })
 
   it('VC path drops a structurally invalid node (missing moduleId) rather than throwing', () => {

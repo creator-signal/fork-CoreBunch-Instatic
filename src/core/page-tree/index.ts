@@ -11,6 +11,10 @@
 // Schemas — exported as both runtime constants (for parse/compiled validation)
 // and types (via Static<typeof X>).
 export { BaseNodeSchema,  parseBaseNodeFields } from './baseNode'
+export {
+  CatalogueInstanceMetadataSchema,
+  parseCatalogueInstanceMetadata,
+} from './catalogueInstance'
 export { asPlainObject } from './parseHelpers'
 export { NodeTreeSchema } from './treeSchema'
 export { PageNodeSchema, parsePageNode } from './pageNode'
@@ -113,6 +117,7 @@ export {
 
 
 export type { BaseNode } from './baseNode'
+export type { CatalogueInstanceMetadata } from './catalogueInstance'
 
 export type { NodeTree } from './treeSchema'
 

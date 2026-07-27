@@ -40,6 +40,9 @@ describe('built-in Component Library', () => {
     expect(ids).toContain('base.reusable-section')
     expect(ids).toContain('base.download')
     expect(ids).toContain('base.progress-bar')
+    expect(ids).toContain('base.dialog')
+    expect(ids).toContain('base.drawer')
+    expect(ids).toContain('base.carousel')
 
     for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
       expect(componentLibraryRegistry.get(entry.id)).toEqual(entry)

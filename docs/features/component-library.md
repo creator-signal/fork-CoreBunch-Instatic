@@ -166,6 +166,17 @@ definition without copying it into site data. Governed Properties write only
 declared parameter overrides and approved variants, and component-only server
 diff validation applies the same contract.
 
+Modal / Dialog and Drawer share the `base.overlay` implementation rather than
+forking focus and dismissal logic. Their unenhanced output is a native
+`details` disclosure; the shared runtime adds a labelled modal boundary,
+Escape and backdrop dismissal policy, Tab containment and trigger-focus
+restoration. Carousel uses `base.carousel`: all slides are visible in document
+order without JavaScript, while enhancement adds previous/next and arrow-key
+navigation, polite position announcements and optional autoplay. Autoplay
+pauses during pointer or focus interaction and does not start when the visitor
+prefers reduced motion. Canvas previews keep overlay and slide content open so
+the runtime cannot interfere with author selection.
+
 Formatted editorial content uses three dedicated semantic primitives rather
 than freeform HTML snippets. `base.rich-text` stores a DOMPurify-governed
 rich-text value, `base.code-block` keeps code as escaped text with safe

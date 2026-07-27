@@ -36,6 +36,7 @@ import './svg'
 import './button'
 import './link'
 import './disclosure'
+import './interactive'
 import './providerEmbed'
 
 // Form modules

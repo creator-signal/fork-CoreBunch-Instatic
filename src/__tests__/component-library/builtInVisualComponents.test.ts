@@ -12,21 +12,33 @@ import {
   BUILT_IN_VISUAL_COMPONENT_LIBRARY_ENTRIES,
   BUILT_IN_VISUAL_COMPONENTS,
 } from '@modules/base/componentLibraryVisualComponents'
+import {
+  BUILT_IN_INTERACTIVE_COMPONENT_LIBRARY_ENTRIES,
+  BUILT_IN_INTERACTIVE_VISUAL_COMPONENTS,
+} from '@modules/base/componentLibraryInteractiveVisualComponents'
 import '@modules/base'
 import { makePage, makeSite } from '../fixtures'
 
 describe('built-in Visual Components', () => {
   it('registers valid immutable definitions for every catalogue entry', () => {
-    for (const definition of BUILT_IN_VISUAL_COMPONENTS) {
+    const definitions = [
+      ...BUILT_IN_VISUAL_COMPONENTS,
+      ...BUILT_IN_INTERACTIVE_VISUAL_COMPONENTS,
+    ]
+    for (const definition of definitions) {
       expect(parseVisualComponent(definition)).not.toBeNull()
       expect(builtInVisualComponentRegistry.get(definition.id)).toBe(definition)
       expect(resolveVisualComponent([], definition.id)).toBe(definition)
     }
 
     const componentIds = new Set(
-      BUILT_IN_VISUAL_COMPONENTS.map((definition) => definition.id),
+      definitions.map((definition) => definition.id),
     )
-    for (const entry of BUILT_IN_VISUAL_COMPONENT_LIBRARY_ENTRIES) {
+    const entries = [
+      ...BUILT_IN_VISUAL_COMPONENT_LIBRARY_ENTRIES,
+      ...BUILT_IN_INTERACTIVE_COMPONENT_LIBRARY_ENTRIES,
+    ]
+    for (const entry of entries) {
       expect(entry.implementation.type).toBe('visual-component')
       if (entry.implementation.type === 'visual-component') {
         expect(componentIds.has(entry.implementation.componentId)).toBe(true)
@@ -86,6 +98,84 @@ describe('built-in Visual Components', () => {
     expect(result.html).toContain('Governed hero')
     expect(result.html).toContain('<p>Shared renderer.</p>')
     expect(result.html).toContain('data-variant="image-left"')
+  })
+
+  it('publishes interactive slot content through the shared overlay runtime', () => {
+    const page = makePage({
+      nodes: {
+        root: {
+          id: 'root',
+          moduleId: 'base.body',
+          props: {},
+          breakpointOverrides: {},
+          children: ['dialog'],
+          classIds: [],
+          parentId: null,
+        },
+        dialog: {
+          id: 'dialog',
+          moduleId: 'base.visual-component-ref',
+          props: {
+            componentId: 'base.vc.dialog',
+            propOverrides: {
+              triggerLabel: 'Open policy',
+              title: 'Policy details',
+            },
+          },
+          breakpointOverrides: {},
+          children: ['content-slot', 'actions-slot'],
+          classIds: [],
+          parentId: 'root',
+          catalogueInstance: {
+            entryId: 'base.dialog',
+            entryVersion: '1.0.0',
+          },
+        },
+        'content-slot': {
+          id: 'content-slot',
+          moduleId: 'base.slot-instance',
+          props: { slotName: 'content' },
+          breakpointOverrides: {},
+          children: ['dialog-copy'],
+          classIds: [],
+          parentId: 'dialog',
+        },
+        'actions-slot': {
+          id: 'actions-slot',
+          moduleId: 'base.slot-instance',
+          props: { slotName: 'actions' },
+          breakpointOverrides: {},
+          children: [],
+          classIds: [],
+          parentId: 'dialog',
+        },
+        'dialog-copy': {
+          id: 'dialog-copy',
+          moduleId: 'base.text',
+          props: {
+            ...registry.get('base.text')!.defaults,
+            text: 'The governed policy content.',
+            tag: 'p',
+          },
+          breakpointOverrides: {},
+          children: [],
+          classIds: [],
+          parentId: 'content-slot',
+        },
+      },
+    }) as Page
+    const site = makeSite({
+      pages: [page],
+      visualComponents: [],
+    }) as SiteDocument
+
+    const result = publishPage(page, site, registry)
+
+    expect(result.html).toContain('data-instatic-overlay')
+    expect(result.html).toContain('Open policy')
+    expect(result.html).toContain('aria-label="Policy details"')
+    expect(result.html).toContain('<p>The governed policy content.</p>')
+    expect(result.jsModuleIds).toContain('base.overlay')
   })
 
   it('preserves built-in references and reconciles their managed slots on load', () => {

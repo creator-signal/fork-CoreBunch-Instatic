@@ -54,6 +54,7 @@ import { CodeBlockModule } from '@modules/base/codeBlock'
 import { TableModule } from '@modules/base/table'
 import { ComponentFrameModule } from '@modules/base/componentFrame'
 import { ProgressModule } from '@modules/base/progress'
+import { CarouselModule, OverlayModule } from '@modules/base/interactive'
 
 // ---------------------------------------------------------------------------
 // Run the full conformance suite for every canonical base module.
@@ -82,6 +83,8 @@ runModuleConformanceSuite(CodeBlockModule)
 runModuleConformanceSuite(TableModule)
 runModuleConformanceSuite(ComponentFrameModule)
 runModuleConformanceSuite(ProgressModule)
+runModuleConformanceSuite(OverlayModule)
+runModuleConformanceSuite(CarouselModule)
 
 describe('base module registration', () => {
   it('only imports available production base modules', async () => {
@@ -101,6 +104,7 @@ describe('base module registration', () => {
     expect(baseIndex).toContain("import './visualComponentRef'")
     expect(baseIndex).toContain("import './slotOutlet'")
     expect(baseIndex).toContain("import './disclosure'")
+    expect(baseIndex).toContain("import './interactive'")
     expect(baseIndex).toContain("import './providerEmbed'")
   })
 
@@ -145,6 +149,8 @@ describe('base module registration', () => {
       TableModule,
       ComponentFrameModule,
       ProgressModule,
+      OverlayModule,
+      CarouselModule,
     ]) {
       // No module should declare CSS-only props as module schema fields.
       const cssOnlyPropNames = ['backgroundColor', 'color', 'fontSize', 'padding', 'margin', 'border']
@@ -191,6 +197,46 @@ describe('base disclosure modules', () => {
     )
     expect(accordion.html).toContain('aria-label="Checkout sections"')
     expect(accordion.js).toBeUndefined()
+  })
+})
+
+describe('base interactive modules', () => {
+  it('publishes overlays as a native disclosure fallback with one shared runtime', () => {
+    const overlay = OverlayModule.render({
+      kind: 'dialog',
+      triggerLabel: 'Open help',
+      title: 'Help',
+      closeLabel: 'Close help',
+      side: 'end',
+      size: 'medium',
+      dismissOnEscape: true,
+      dismissOnBackdrop: true,
+    }, ['<p>Help content</p>'])
+
+    expect(overlay.html).toContain('<details data-instatic-overlay')
+    expect(overlay.html).toContain('<summary data-instatic-overlay-trigger>Open help</summary>')
+    expect(overlay.html).toContain('<p>Help content</p>')
+    expect(overlay.html).not.toContain('aria-modal="true"')
+    expect(overlay.js).toContain('window.__instaticInteractiveRuntimeLoaded')
+  })
+
+  it('publishes every carousel slide before progressive enhancement', () => {
+    const carousel = CarouselModule.render({
+      label: 'Highlights',
+      previousLabel: 'Previous highlight',
+      nextLabel: 'Next highlight',
+      autoplay: false,
+      interval: 5000,
+    }, ['<article>One</article>', '<article>Two</article>'])
+
+    expect(carousel.html).toContain('<article>One</article>')
+    expect(carousel.html).toContain('<article>Two</article>')
+    expect(carousel.html).not.toContain(' hidden')
+    expect(carousel.html).toContain('aria-live="polite"')
+    expect(carousel.js).toBe(OverlayModule.render(
+      OverlayModule.defaults,
+      [],
+    ).js)
   })
 })
 

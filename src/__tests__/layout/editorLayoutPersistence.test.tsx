@@ -394,12 +394,14 @@ describe('AdminCanvasLayout — permanent panel rail', () => {
     expect(within(rail).queryByRole('button', { name: /open dependencies panel/i })).toBeNull()
     expect(within(rail).queryByRole('button', { name: /open ai assistant panel/i })).toBeNull()
 
-    const tree = within(sidebar).getByRole('tree', { name: /page element tree/i })
+    const tree = within(sidebar).getByRole('tree', {
+      name: /component page hierarchy/i,
+    })
     const treeRows = within(tree).getAllByRole('treeitem')
     const selectedTreeRow =
       treeRows.find((row) => row.getAttribute('aria-selected') === 'true') ??
       treeRows[0]
-    if (!selectedTreeRow) throw new Error('Expected at least one DOM tree row')
+    if (!selectedTreeRow) throw new Error('Expected at least one component tree row')
     fireEvent.keyDown(selectedTreeRow, { key: 'F2' })
     expect(within(selectedTreeRow).queryByRole('textbox')).toBeNull()
     fireEvent.contextMenu(selectedTreeRow, { clientX: 12, clientY: 12 })

@@ -3,10 +3,10 @@
  *
  * Self-contained ES module — no dependencies, no framework. The publisher
  * injects a `<script type="module" src="/_instatic/assets/loop-runtime.js">` tag
- * into pages that contain at least one `pagination='infinite'` loop.
+ * into pages that contain at least one `pagination='load-more'` loop.
  *
  * On load, the runtime:
- *   1. Finds every `[data-instatic-loop][data-instatic-loop-mode="infinite"]` element.
+ *   1. Finds every `[data-instatic-loop][data-instatic-loop-mode="load-more"]` element.
  *   2. If `data-instatic-loop-has-more="true"`, attaches a "Load more" button.
  *   3. On click, fetches `<endpoint>/<loopId>?page=N` and appends the
  *      returned HTML to the wrapper, then increments the page counter.
@@ -40,12 +40,15 @@ function runInstaticLoopRuntime(): void {
     button.className = 'instatic-loop-load-more'
     button.textContent = 'Load more'
     button.setAttribute('data-instatic-loop-load-more', loopId)
+    const status = loopEl.querySelector('[data-instatic-collection-status]')
 
     let busy = false
     button.addEventListener('click', async () => {
       if (busy || !hasMore) return
       busy = true
       button.disabled = true
+      loopEl.setAttribute('data-instatic-collection-state', 'loading')
+      if (status) status.textContent = 'Loading more items.'
       const prev = button.textContent
       button.textContent = 'Loading…'
       try {
@@ -67,11 +70,15 @@ function runInstaticLoopRuntime(): void {
         hasMore = body.hasMore === true
         loopEl.setAttribute('data-instatic-loop-page', String(pageNumber))
         loopEl.setAttribute('data-instatic-loop-has-more', hasMore ? 'true' : 'false')
+        loopEl.setAttribute('data-instatic-collection-state', 'populated')
+        if (status) status.textContent = 'More items loaded.'
         if (!hasMore) {
           button.remove()
         }
       } catch (err) {
         console.error('[instatic-loop]', err)
+        loopEl.setAttribute('data-instatic-collection-state', 'error')
+        if (status) status.textContent = 'More items could not be loaded. Try again.'
         button.textContent = 'Try again'
       } finally {
         busy = false
@@ -84,7 +91,10 @@ function runInstaticLoopRuntime(): void {
   }
 
   function init(): void {
-    document.querySelectorAll('[data-instatic-loop][data-instatic-loop-mode="infinite"]').forEach(attach)
+    document.querySelectorAll(
+      '[data-instatic-loop][data-instatic-loop-mode="load-more"],' +
+      '[data-instatic-loop][data-instatic-loop-mode="infinite"]',
+    ).forEach(attach)
   }
 
   if (document.readyState === 'loading') {

@@ -429,21 +429,34 @@ Use **two `base.loop` nodes** side by side, one filtered by `featured: true` and
 
 ### Pagination
 
-Two modes are available via the loop node's `pagination` prop:
+The shared modes are available through the loop node's `pagination` prop:
 
 **`pagination: 'none'` (default)** — renders up to `limit` items at publish time. No load-more affordance.
 
-**`pagination: 'infinite'`** — renders the first `pageSize` items and appends a **"Load more"** button. Each click fetches the next page from `/_instatic/loop/<loopId>?page=N&pagePath=<path>` and appends the returned HTML before the button. When `hasMore` is false the button is removed automatically.
+**`pagination: 'numbered'`** — server-renders a bounded page-number window with
+canonical per-loop query links and `aria-current="page"`.
 
-To enable infinite loading:
-1. Set `props.pagination = 'infinite'` on the loop node.
+**`pagination: 'previous-next'`** — server-renders no-JavaScript previous and
+next links.
+
+**`pagination: 'cursor'`** — forwards an opaque cursor to the source and
+server-renders previous/next links only when that source returns the
+corresponding cursor.
+
+**`pagination: 'load-more'`** — renders the first `pageSize` items and appends a
+**Load more** button. Each click fetches the next page from
+`/_instatic/loop/<loopId>?page=N` and appends the returned HTML. When
+`hasMore` is false the button is removed automatically. Loading, success and
+retry failures update the shared polite status announcement.
+
+To enable load-more:
+1. Set `props.pagination = 'load-more'` on the loop node.
 2. Set `props.pageSize` (items per click; defaults to 10).
-3. The publisher auto-injects `<script type="module" src="/_instatic/assets/loop-runtime.js">` when at least one infinite loop exists on the page (see `server/publish/loopRuntime.ts`). The runtime is < 2 KB and ships only when needed.
+3. The publisher auto-injects `<script type="module" src="/_instatic/assets/loop-runtime.js">` when at least one load-more loop exists on the page (see `server/publish/loopRuntime.ts`). The runtime ships only when needed.
 
 Numbered, previous/next and cursor navigation belong to the shared collection
-configuration. They are not separate insertable modules. The loop adapter
-continues to use its existing offset/load-more runtime while the remaining
-shared modes are wired through that adapter.
+configuration. They are not separate insertable modules. The legacy persisted
+value `infinite` remains readable as `load-more`.
 
 ---
 

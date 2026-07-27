@@ -152,6 +152,16 @@ export function LoopPropertiesView({ nodeId, props }: LoopPropertiesViewProps) {
       {source ? (
         <>
           <PropertyControlRenderer
+            propKey="query"
+            control={{
+              type: 'text',
+              label: 'Query',
+              placeholder: 'Optional search query',
+            }}
+            value={typeof props.query === 'string' ? props.query : ''}
+            onChange={handleScalarChange}
+          />
+          <PropertyControlRenderer
             propKey="orderBy"
             control={orderOptions}
             value={typeof props.orderBy === 'string' ? props.orderBy : ''}
@@ -189,13 +199,22 @@ export function LoopPropertiesView({ nodeId, props }: LoopPropertiesViewProps) {
               label: 'Pagination',
               options: [
                 { label: 'None', value: 'none' },
-                { label: 'Infinite scroll', value: 'infinite' },
+                { label: 'Numbered pages', value: 'numbered' },
+                { label: 'Previous / next', value: 'previous-next' },
+                { label: 'Load more', value: 'load-more' },
+                { label: 'Cursor previous / next', value: 'cursor' },
               ],
             }}
-            value={typeof props.pagination === 'string' ? props.pagination : 'none'}
+            value={
+              props.pagination === 'infinite'
+                ? 'load-more'
+                : typeof props.pagination === 'string'
+                  ? props.pagination
+                  : 'none'
+            }
             onChange={handleScalarChange}
           />
-          {props.pagination === 'infinite' ? (
+          {props.pagination !== 'none' ? (
             <PropertyControlRenderer
               propKey="pageSize"
               control={{ type: 'number', label: 'Page size', min: 1, max: 100, step: 1 }}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import {
+  collectionNumberedPageWindow,
   collectionPaginationHref,
   deriveCollectionLoadState,
   normalizeCollectionPagination,
@@ -96,6 +97,12 @@ describe('shared collection contract', () => {
       'results',
       { pageNumber: 1 },
     )).toBe('/search?q=cards')
+  })
+
+  it('bounds numbered pagination links around the current page', () => {
+    expect(collectionNumberedPageWindow(1, 3)).toEqual([1, 2, 3])
+    expect(collectionNumberedPageWindow(10, 20, 5)).toEqual([8, 9, 10, 11, 12])
+    expect(collectionNumberedPageWindow(20, 20, 5)).toEqual([16, 17, 18, 19, 20])
   })
 
   it('derives loading, empty, error and populated states with announcements', () => {

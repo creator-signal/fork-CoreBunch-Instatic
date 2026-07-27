@@ -4,6 +4,7 @@ export {
   CollectionPaginationSchema,
   CollectionSortSchema,
   CollectionSourceSchema,
+  collectionNumberedPageWindow,
   collectionPaginationHref,
   collectionPaginationQueryKeys,
   deriveCollectionLoadState,

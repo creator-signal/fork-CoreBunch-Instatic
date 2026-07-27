@@ -14,7 +14,7 @@
  *
  *  - `RenderAccumulators` (mutable): the outputs of a render pass — the
  *    deduped CSS map, deduped module-JS map, per-page CSP requirements, the
- *    set of infinite-loop ids, and the set of nodes that actually emitted a
+ *    set of load-more loop ids, and the set of nodes that actually emitted a
  *    `<instatic-hole>`. The top-level `publishPage` owns these, initialises
  *    all five up-front, and threads the SAME instances down the whole tree so
  *    every renderer appends to one shared accumulator.
@@ -31,16 +31,22 @@ import type { Page, SiteDocument } from '@core/page-tree'
 import type { IModuleRegistry } from '@core/module-engine'
 import type { TemplateRenderDataContext } from '@core/templates/dynamicBindings'
 import type { LoopFetchResult } from '@core/loops/types'
+import type { CollectionPaginationMode } from '@core/collections'
 
 /**
  * Resolved loop data for one `base.loop` node, produced by the server's
  * `prefetchLoopData()` helper before publishing.
  */
 export interface ResolvedLoopRenderData extends LoopFetchResult {
-  /** 1-indexed page number when the loop is in `infinite` mode. */
+  /** 1-indexed page number for offset-backed collection modes. */
   pageNumber: number
   /** Whether more rows remain past the current page. */
   hasMore: boolean
+  paginationMode?: CollectionPaginationMode
+  previousHref?: string
+  nextHref?: string
+  numberedHrefs?: ReadonlyArray<{ pageNumber: number; href: string }>
+  error?: string
 }
 
 /**
@@ -145,8 +151,9 @@ export interface RenderAccumulators {
    */
   readonly jsMap: Map<string, string>
   /**
-   * Set of loop nodeIds on the page that requested the infinite-scroll
-   * runtime. The publisher reads `.size` after rendering to decide whether
+   * Set of loop nodeIds on the page that requested the load-more runtime.
+   * The legacy property name is retained internally. The publisher reads
+   * `.size` after rendering to decide whether
    * to inject the `loop-runtime.js` `<script>` tag.
    */
   readonly infiniteLoopIds: Set<string>

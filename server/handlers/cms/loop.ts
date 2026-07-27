@@ -90,8 +90,8 @@ export async function handleLoopRequest(
   const site = loopIndex.site
 
   const props = readLoopProps(loopNode)
-  if (props.pagination !== 'infinite') {
-    return jsonResponse({ error: 'Loop is not in infinite mode' }, { status: 400 })
+  if (props.pagination !== 'load-more') {
+    return jsonResponse({ error: 'Loop is not in load-more mode' }, { status: 400 })
   }
   const source = loopSourceRegistry.get(props.sourceId)
   if (!source) {
@@ -106,6 +106,7 @@ export async function handleLoopRequest(
       db: ctx.db,
       site,
       filters: props.filters,
+      query: props.query,
       orderBy: props.orderBy || (source.orderByOptions[0]?.id ?? ''),
       direction: props.direction,
       limit: props.pageSize,

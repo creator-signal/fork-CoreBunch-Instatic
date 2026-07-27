@@ -14,13 +14,9 @@
  * module's own `render()` is a no-op fallback. Same pattern as
  * `base.visual-component-ref`.
  *
- * Pagination property:
- *   - 'none'     — render up to `limit` items, no paginator
- *   - 'infinite' — render `pageSize` items then a "load more" sentinel
- *                  serviced by the loop runtime (Phase 6)
- *
- * Numeric pagination is intentionally NOT a mode here — it will live in
- * a separate `base.pagination` module that pairs with a loop by ID.
+ * Pagination is collection configuration, never a separate insertable module:
+ * none, numbered, previous-next, load-more or cursor. The legacy persisted
+ * value `infinite` remains accepted and normalizes to load-more.
  *
  * The wrapper element emitted around iterations is configurable via the
  * shared `htmlTag` helper (same controls as `base.container`): authors
@@ -30,6 +26,7 @@
 import type { ModuleDefinition } from '@core/module-engine'
 import { registry } from '@core/module-engine'
 import { Type, Value, type Static } from '@core/utils/typeboxHelpers'
+import { CollectionPaginationModeSchema } from '@core/collections'
 import { BoxStackSolidIcon } from 'pixel-art-icons/icons/box-stack-solid'
 import { resolveHtmlTag } from '@modules/base/utils/htmlTag'
 import { LoopEditor } from './LoopEditor'
@@ -44,7 +41,11 @@ const LoopPropsSchema = Type.Object({
   direction: Type.Union([Type.Literal('asc'), Type.Literal('desc')], { default: 'desc' }),
   limit: Type.Number({ default: 10 }),
   offset: Type.Number({ default: 0 }),
-  pagination: Type.Union([Type.Literal('none'), Type.Literal('infinite')], { default: 'none' }),
+  query: Type.String({ default: '' }),
+  pagination: Type.Union([
+    CollectionPaginationModeSchema,
+    Type.Literal('infinite'),
+  ], { default: 'none' }),
   pageSize: Type.Number({ default: 10 }),
   tag: Type.String({ default: 'div' }),
   customTag: Type.String({ default: '' }),

@@ -286,6 +286,26 @@ export function collectionPaginationHref(
   return `${next.pathname}${next.search}${next.hash}`
 }
 
+export function collectionNumberedPageWindow(
+  currentPage: number,
+  totalPages: number,
+  maximumLinks = 7,
+): number[] {
+  const total = Math.max(1, Math.floor(totalPages))
+  const maximum = Math.max(1, Math.floor(maximumLinks))
+  if (total <= maximum) {
+    return Array.from({ length: total }, (_, index) => index + 1)
+  }
+
+  const current = Math.min(total, Math.max(1, Math.floor(currentPage)))
+  const half = Math.floor(maximum / 2)
+  let start = Math.max(1, current - half)
+  let end = Math.min(total, start + maximum - 1)
+  start = Math.max(1, end - maximum + 1)
+  end = Math.min(total, start + maximum - 1)
+  return Array.from({ length: end - start + 1 }, (_, index) => start + index)
+}
+
 function normalizeLoopItem(value: unknown): LoopItem[] {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return []
   const candidate = value as Record<string, unknown>

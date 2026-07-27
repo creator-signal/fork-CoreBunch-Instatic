@@ -24,6 +24,7 @@ import type { ModuleComponentProps } from '@core/module-engine'
 import { CanvasModulePlaceholder } from '@ui/components/CanvasModulePlaceholder'
 import { BoxStackSolidIcon } from 'pixel-art-icons/icons/box-stack-solid'
 import { resolveHtmlTag } from '@modules/base/utils/htmlTag'
+import { normalizeCollectionPaginationMode } from '@core/collections'
 
 export const LoopEditor: React.FC<ModuleComponentProps> = ({ props, children, mcClassName, nodeWrapperProps, nodeId }) => {
   const hasChildren = React.Children.count(children) > 0
@@ -45,6 +46,7 @@ export const LoopEditor: React.FC<ModuleComponentProps> = ({ props, children, mc
   // `[data-instatic-loop] > article` (a common grid-of-cards pattern) doesn't
   // match in the editor preview.
   const Tag = resolveHtmlTag(props.tag, props.customTag)
+  const paginationMode = normalizeCollectionPaginationMode(props.pagination)
   return React.createElement(
     Tag,
     {
@@ -52,6 +54,10 @@ export const LoopEditor: React.FC<ModuleComponentProps> = ({ props, children, mc
       className: mcClassName,
       'data-instatic-loop': nodeId,
       'data-instatic-loop-page': '1',
+      'data-instatic-collection-state': 'populated',
+      ...(paginationMode === 'load-more'
+        ? { 'data-instatic-loop-mode': 'load-more' }
+        : {}),
     },
     children,
   )

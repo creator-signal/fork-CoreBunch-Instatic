@@ -177,6 +177,7 @@ describe('base.loop — module contract specifics', () => {
       'orderBy',
       'pageSize',
       'pagination',
+      'query',
       'sourceId',
       'tag',
     ])

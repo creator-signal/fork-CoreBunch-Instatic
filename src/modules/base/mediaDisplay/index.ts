@@ -45,7 +45,7 @@ export const MediaDisplayModule: ModuleDefinition<MediaDisplayProps> = {
       { label: 'Audio', value: 'audio' },
       { label: 'Video', value: 'video' },
     ] },
-    source: { type: 'media', label: 'Media' },
+    source: { type: 'media', label: 'Media', mediaKind: 'video' },
     poster: { type: 'image', label: 'Poster or artwork' },
     title: { type: 'text', label: 'Accessible title' },
     transcriptUrl: { type: 'url', label: 'Transcript URL' },

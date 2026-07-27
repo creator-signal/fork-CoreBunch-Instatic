@@ -9,7 +9,7 @@ export interface ComponentLibraryPatternNode {
   key: string
   moduleId: string
   props: Record<string, unknown>
-  children: string[]
+  children: readonly string[]
   catalogueInstance?: CatalogueInstanceMetadata
 }
 

@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it } from 'bun:test'
 import { useEditorStore } from '@site/store/store'
+import {
+  componentLibraryPatternRegistry,
+  componentLibraryRegistry,
+} from '@core/component-library'
 import '@modules/base/index'
 
 beforeEach(() => {
@@ -119,6 +123,37 @@ describe('Component Library governed mutations', () => {
     expect(useEditorStore.getState()._historyPast).toHaveLength(historyLength)
     expect(useEditorStore.getState().site?.pages[0]?.nodes[nodeId]?.props.htmlAttributes)
       .toBeUndefined()
+  })
+
+  it('updates declared pattern-root fields without applying an option', () => {
+    const store = useEditorStore.getState()
+    const site = store.createSite('Pattern Governance Test')
+    const page = site.pages[0]!
+    const entry = componentLibraryRegistry.get('base.list')
+    if (!entry || entry.implementation.type !== 'pattern') {
+      throw new Error('base.list pattern is not registered')
+    }
+    const fragment = componentLibraryPatternRegistry.materialize(
+      entry.implementation.patternId,
+      {
+        entryId: entry.id,
+        entryVersion: entry.version,
+      },
+    )
+    if (!fragment) throw new Error('base.list pattern could not materialize')
+    const rootId = fragment.rootIds[0]!
+    expect(useEditorStore.getState().insertImportedNodes(
+      page.rootNodeId,
+      fragment,
+    )).toEqual([rootId])
+
+    expect(useEditorStore.getState().updateComponentLibraryField(
+      rootId,
+      'query',
+      'accessibility',
+    )).toBe(true)
+    expect(useEditorStore.getState().site?.pages[0]?.nodes[rootId]?.props.query)
+      .toBe('accessibility')
   })
 
   it('resolves approved option values inside the mutation boundary', () => {

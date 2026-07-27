@@ -344,7 +344,7 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
             ...safeComponentLibraryOverrides(node.props.propOverrides),
             [fieldKey]: value,
           }
-        } else if (implementation.type === 'pattern') Object.assign(node.props, option.values)
+        } else if (implementation.type === 'pattern') node.props[fieldKey] = value
         else {
           return false
         }

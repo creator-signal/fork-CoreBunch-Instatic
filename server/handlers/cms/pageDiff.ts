@@ -7,6 +7,8 @@
  * page trees now live in data_rows instead of the site shell.
  *
  * This validator splits an already-validated partial page write by category:
+ *   - components: approved catalogue insert/remove/move, declared fields and
+ *                 preset/variant transitions.
  *   - structure: page roster, page metadata, node topology, module identity,
  *                non-content module props.
  *   - content:   props whose module schema marks them content-editable.
@@ -14,13 +16,19 @@
  */
 import type { CoreCapability } from '../../auth/capabilities'
 import { ForbiddenSiteChangeError } from './siteDiff'
+import {
+  componentLibraryRegistry,
+  type ComponentLibraryEntry,
+  type ComponentLibraryImplementation,
+} from '@core/component-library'
 import { registry, resolvePropertyControlCategory } from '@core/module-engine'
-import type { Page, PageNode } from '@core/page-tree'
+import type { CatalogueInstanceMetadata, Page, PageNode } from '@core/page-tree'
 import '@modules/base'
 
-type PageChangeKind = 'structure' | 'content' | 'style'
+type PageChangeKind = 'components' | 'structure' | 'content' | 'style'
 
 const CAP_FOR_KIND: Record<PageChangeKind, CoreCapability> = {
+  components: 'site.components.edit',
   structure: 'site.structure.edit',
   content: 'site.content.edit',
   style: 'site.style.edit',
@@ -45,6 +53,19 @@ function requireChange(
 ): void {
   if (!allowed(capabilities, kind)) {
     throw new ForbiddenSiteChangeError(kind, path, detail)
+  }
+}
+
+function requireGovernedChange(
+  capabilities: readonly CoreCapability[],
+  path: string,
+  detail: string,
+): void {
+  if (
+    !capabilities.includes('site.components.edit') &&
+    !capabilities.includes('site.structure.edit')
+  ) {
+    throw new ForbiddenSiteChangeError('components', path, detail)
   }
 }
 
@@ -114,11 +135,20 @@ function diffNodes(
     const nodePath = `${pagePath}.nodes.${nodeId}`
 
     if (!prevNode || !nextNode) {
-      requireChange(capabilities, 'structure', nodePath, prevNode ? 'node removed' : 'node added')
+      const changedNode = prevNode ?? nextNode
+      if (changedNode && isValidGovernedStandaloneNode(changedNode)) {
+        requireGovernedChange(
+          capabilities,
+          nodePath,
+          prevNode ? 'governed component removed' : 'governed component added',
+        )
+      } else {
+        requireChange(capabilities, 'structure', nodePath, prevNode ? 'node removed' : 'node added')
+      }
       continue
     }
 
-    diffNode(capabilities, nodePath, prevNode, nextNode)
+    diffNode(capabilities, nodePath, prevNode, nextNode, previous, next)
   }
 }
 
@@ -127,6 +157,8 @@ function diffNode(
   nodePath: string,
   previous: PageNode,
   next: PageNode,
+  previousNodes: Record<string, PageNode>,
+  nextNodes: Record<string, PageNode>,
 ): void {
   if (previous.moduleId !== next.moduleId) {
     requireChange(capabilities, 'structure', `${nodePath}.moduleId`, 'module changed')
@@ -134,7 +166,16 @@ function diffNode(
   }
 
   if (!deepEqual(previous.children, next.children)) {
-    requireChange(capabilities, 'structure', `${nodePath}.children`, 'children changed')
+    const changedIds = changedChildIds(previous.children, next.children)
+    const governedTopology = changedIds.length > 0 && changedIds.every((nodeId) => {
+      const node = nextNodes[nodeId] ?? previousNodes[nodeId]
+      return node !== undefined && governedEntryForNode(node) !== undefined
+    })
+    if (governedTopology) {
+      requireGovernedChange(capabilities, `${nodePath}.children`, 'governed component order changed')
+    } else {
+      requireChange(capabilities, 'structure', `${nodePath}.children`, 'children changed')
+    }
   }
   if (!deepEqual(previous.label, next.label)) {
     requireChange(capabilities, 'structure', `${nodePath}.label`, 'label changed')
@@ -150,6 +191,22 @@ function diffNode(
   }
   if (!deepEqual(previous.dynamicBindings, next.dynamicBindings)) {
     requireChange(capabilities, 'structure', `${nodePath}.dynamicBindings`, 'dynamic bindings changed')
+  }
+  if (!deepEqual(previous.catalogueInstance, next.catalogueInstance)) {
+    if (isApprovedCatalogueMetadataChange(previous, next)) {
+      requireGovernedChange(
+        capabilities,
+        `${nodePath}.catalogueInstance`,
+        'approved component option changed',
+      )
+    } else {
+      requireChange(
+        capabilities,
+        'structure',
+        `${nodePath}.catalogueInstance`,
+        'catalogue identity changed',
+      )
+    }
   }
 
   if (!deepEqual(previous.classIds, next.classIds)) {
@@ -174,9 +231,173 @@ function diffNodeProps(
   const propKeys = new Set([...Object.keys(previous.props), ...Object.keys(next.props)])
   for (const propKey of propKeys) {
     if (deepEqual(previous.props[propKey], next.props[propKey])) continue
+    const path = `${nodePath}.props.${propKey}`
+    if (isApprovedGovernedPropChange(previous, next, propKey)) {
+      const fallbackKind = propChangeKind(previous.moduleId, propKey)
+      if (
+        capabilities.includes('site.components.edit') ||
+        capabilities.includes('site.structure.edit') ||
+        allowed(capabilities, fallbackKind)
+      ) {
+        continue
+      }
+      throw new ForbiddenSiteChangeError('components', path, 'governed component field changed')
+    }
     const kind = propChangeKind(previous.moduleId, propKey)
-    requireChange(capabilities, kind, `${nodePath}.props.${propKey}`, 'prop changed')
+    requireChange(capabilities, kind, path, 'prop changed')
   }
+}
+
+function isApprovedGovernedPropChange(
+  previous: PageNode,
+  next: PageNode,
+  propKey: string,
+): boolean {
+  const previousEntry = governedEntryForNode(previous)
+  const nextEntry = governedEntryForNode(next)
+  if (!previousEntry || !nextEntry || previousEntry.id !== nextEntry.id) return false
+  if (previousEntry.version !== nextEntry.version) return false
+  if (nextEntry.fields.some((field) => field.key === propKey)) return true
+
+  return approvedOptions(nextEntry, next.catalogueInstance).some(
+    (option) =>
+      Object.prototype.hasOwnProperty.call(option.values, propKey) &&
+      deepEqual(next.props[propKey], option.values[propKey]),
+  )
+}
+
+function isApprovedCatalogueMetadataChange(previous: PageNode, next: PageNode): boolean {
+  const previousMetadata = previous.catalogueInstance
+  const nextMetadata = next.catalogueInstance
+  const entry = governedEntryForNode(next)
+  if (!previousMetadata || !nextMetadata || !entry) return false
+  if (
+    previousMetadata.entryId !== nextMetadata.entryId ||
+    previousMetadata.entryVersion !== nextMetadata.entryVersion ||
+    previousMetadata.pinnedVersion !== nextMetadata.pinnedVersion ||
+    !deepEqual(previousMetadata.pattern, nextMetadata.pattern) ||
+    previousMetadata.capabilityId !== nextMetadata.capabilityId ||
+    previousMetadata.providerAdapterId !== nextMetadata.providerAdapterId
+  ) {
+    return false
+  }
+  if (!validOptionIds(entry, nextMetadata)) return false
+
+  const changedPreset = previousMetadata.presetId !== nextMetadata.presetId
+  const changedVariant = previousMetadata.variantId !== nextMetadata.variantId
+  if (!changedPreset && !changedVariant) return false
+  if (
+    (changedPreset && !nextMetadata.presetId) ||
+    (changedVariant && !nextMetadata.variantId)
+  ) {
+    return false
+  }
+  const changedOptions = approvedOptions(entry, nextMetadata)
+    .filter((option) =>
+      (changedPreset && option.id === nextMetadata.presetId) ||
+      (changedVariant && option.id === nextMetadata.variantId),
+    )
+  const expectedChangedOptions = Number(changedPreset) + Number(changedVariant)
+  return changedOptions.length === expectedChangedOptions &&
+    changedOptions.every((option) =>
+      Object.entries(option.values).every(([key, value]) => deepEqual(next.props[key], value)),
+    )
+}
+
+function approvedOptions(
+  entry: ComponentLibraryEntry,
+  metadata: CatalogueInstanceMetadata | undefined,
+) {
+  if (!metadata) return []
+  return [
+    ...entry.presets.filter((option) => option.id === metadata.presetId),
+    ...entry.variants.filter((option) => option.id === metadata.variantId),
+  ]
+}
+
+function governedEntryForNode(node: PageNode): ComponentLibraryEntry | undefined {
+  const metadata = node.catalogueInstance
+  if (!metadata) return undefined
+  const entry = componentLibraryRegistry.getVersion(metadata.entryId, metadata.entryVersion)
+  if (!entry || !validOptionIds(entry, metadata)) return undefined
+  const implementation = backingImplementation(entry.implementation)
+  if (implementation.type !== 'primitive' || implementation.moduleId !== node.moduleId) {
+    return undefined
+  }
+  if (entry.implementation.type === 'capability-backed') {
+    const capabilityId = entry.requirements.capabilities[0]
+    const providerAdapterId = entry.requirements.providerAdapters[0]
+    if (
+      metadata.capabilityId !== capabilityId ||
+      metadata.providerAdapterId !== providerAdapterId
+    ) {
+      return undefined
+    }
+  } else if (metadata.capabilityId || metadata.providerAdapterId) {
+    return undefined
+  }
+  return entry
+}
+
+function isValidGovernedStandaloneNode(node: PageNode): boolean {
+  const entry = governedEntryForNode(node)
+  if (!entry) return false
+  const definition = registry.get(node.moduleId)
+  if (!definition) return false
+  if (
+    node.children.length > 0 ||
+    node.classIds.length > 0 ||
+    Object.keys(node.breakpointOverrides).length > 0 ||
+    (node.inlineStyles && Object.keys(node.inlineStyles).length > 0) ||
+    node.propBindings ||
+    node.dynamicBindings ||
+    node.label !== undefined ||
+    node.locked !== undefined ||
+    node.hidden !== undefined ||
+    node.catalogueInstance?.pinnedVersion !== undefined ||
+    node.catalogueInstance?.pattern !== undefined
+  ) {
+    return false
+  }
+
+  const permittedProps = new Set(entry.fields.map((field) => field.key))
+  for (const option of approvedOptions(entry, node.catalogueInstance)) {
+    for (const [key, value] of Object.entries(option.values)) {
+      permittedProps.add(key)
+      if (!deepEqual(node.props[key], value)) return false
+    }
+  }
+  const propKeys = new Set([...Object.keys(definition.defaults), ...Object.keys(node.props)])
+  for (const key of propKeys) {
+    if (permittedProps.has(key)) continue
+    if (!deepEqual(node.props[key], definition.defaults[key])) return false
+  }
+  return true
+}
+
+function validOptionIds(
+  entry: ComponentLibraryEntry,
+  metadata: CatalogueInstanceMetadata,
+): boolean {
+  return (
+    (!metadata.presetId || entry.presets.some((option) => option.id === metadata.presetId)) &&
+    (!metadata.variantId || entry.variants.some((option) => option.id === metadata.variantId))
+  )
+}
+
+function backingImplementation(
+  implementation: ComponentLibraryImplementation,
+): Exclude<ComponentLibraryImplementation, { type: 'capability-backed' }> {
+  return implementation.type === 'capability-backed'
+    ? implementation.backing
+    : implementation
+}
+
+function changedChildIds(previous: readonly string[], next: readonly string[]): string[] {
+  const ids = new Set([...previous, ...next])
+  return Array.from(ids).filter(
+    (id) => previous.indexOf(id) !== next.indexOf(id),
+  )
 }
 
 function propChangeKind(moduleId: string, propKey: string): PageChangeKind {

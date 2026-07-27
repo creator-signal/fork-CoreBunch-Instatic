@@ -41,7 +41,7 @@ export function ComponentPropertiesView({
           description={metadata
             ? `The retained definition for ${metadata.entryId}@${metadata.entryVersion} is not installed. This content remains intact and read-only in Components view.`
             : 'This content has no governed Component Library mapping. Switch to HTML view to inspect its implementation or convert it through an approved workflow.'}
-          action={(permissions.canEditStructure || permissions.canEditStyle) ? (
+          action={permissions.canEditStructure ? (
             <Button variant="secondary" onClick={() => setLayersViewMode('html')}>
               Open HTML view
             </Button>
@@ -52,7 +52,7 @@ export function ComponentPropertiesView({
   }
 
   const status = resolveComponentLibraryInstanceStatus(metadata, latestEntry)
-  const canApplyOptions = permissions.canEditStructure
+  const canApplyOptions = permissions.canEditComponents
 
   return (
     <div className={styles.surface} data-testid="component-properties-view">
@@ -122,7 +122,12 @@ export function ComponentPropertiesView({
               }}
               value={node.props[field.key]}
               onChange={(key, value) => updateField(node.id, key, value)}
-              disabled={status === 'definition-missing' || status === 'version-ahead'}
+              disabled={
+                !permissions.canEditComponents ||
+                status === 'definition-missing' ||
+                status === 'version-ahead'
+              }
+              permissionOverride={permissions.canEditComponents}
             />
           )
         })}
@@ -163,7 +168,7 @@ export function ComponentPropertiesView({
         </section>
       ) : null}
 
-      {(permissions.canEditStructure || permissions.canEditStyle) ? (
+      {permissions.canEditStructure ? (
         <Button
           variant="ghost"
           size="xs"

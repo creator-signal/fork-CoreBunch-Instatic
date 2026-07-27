@@ -7,6 +7,7 @@ import type { AdminWorkspace } from './workspace'
 // save in some form; granular diff validation enforces which kinds of changes
 // are actually allowed. Mirrors the server gate in handlers/cms/site.ts.
 const SITE_WRITE_CAPABILITIES: CoreCapability[] = [
+  'site.components.edit',
   'site.structure.edit',
   'site.content.edit',
   'site.style.edit',
@@ -60,8 +61,9 @@ function hasAllCapabilities(user: CmsCurrentUser | null, capabilities: readonly 
 // ---------------------------------------------------------------------------
 // Site-editor capability helpers
 //
-// The editor surfaces three granular capabilities:
+// The editor surfaces four granular capabilities:
 //   - site.structure.edit  — DnD, add/remove/move/rename nodes, manage pages
+//   - site.components.edit — insert/configure governed catalogue instances
 //   - site.content.edit    — modify content-typed props (text, image, href)
 //   - site.style.edit      — class styles, breakpoints, framework tokens
 //
@@ -74,6 +76,12 @@ export function canEditStructure(user: CmsCurrentUser | null): boolean {
   // browser's authenticated session, not the absence of a user object.
   if (!user) return true
   return hasAllCapabilities(user, ['site.structure.edit', 'pages.edit'])
+}
+
+/** Caller can insert and configure approved Component Library instances. */
+export function canEditComponents(user: CmsCurrentUser | null): boolean {
+  if (!user) return true
+  return hasCapability(user, 'site.components.edit')
 }
 
 /** Caller can modify content-typed props on existing nodes. */

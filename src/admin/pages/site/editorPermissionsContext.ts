@@ -1,5 +1,5 @@
 /**
- * EditorPermissionsContext — the editor's three site-editing permission flags
+ * EditorPermissionsContext — the editor's four site-editing permission flags
  * surfaced as a single React context so every editor surface (canvas, panels,
  * trees, controls) can read them without prop-drilling.
  *
@@ -20,6 +20,8 @@
 import { createContext, use } from 'react'
 
 export interface EditorPermissions {
+  /** Caller can insert/configure governed Component Library instances. */
+  canEditComponents: boolean
   /** Caller can perform structural edits (DnD, add/remove/move nodes, pages). */
   canEditStructure: boolean
   /** Caller can modify content-typed props on existing nodes. */
@@ -29,6 +31,7 @@ export interface EditorPermissions {
 }
 
 const FULL_EDITOR_PERMISSIONS: EditorPermissions = {
+  canEditComponents: true,
   canEditStructure: true,
   canEditContent: true,
   canEditStyle: true,

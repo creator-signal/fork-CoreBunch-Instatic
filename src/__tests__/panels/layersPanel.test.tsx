@@ -11,6 +11,7 @@ import {
 } from '@testing-library/react'
 import { DndContext } from '@dnd-kit/core'
 import { ExplorerPanel } from '@site/panels/ExplorerPanel'
+import { EditorPermissionsContext } from '@site/editorPermissionsContext'
 import { useEditorStore } from '@site/store/store'
 import { makeNode, makePage, makeSite, makeVC } from '../fixtures'
 import '@modules/base/index'
@@ -130,5 +131,27 @@ describe('Explorer Layers projections', () => {
     await waitFor(() => {
       expect(useEditorStore.getState().selectedNodeId).toBe('implementation')
     })
+  })
+
+  it('keeps a component-only author out of the HTML projection', async () => {
+    render(
+      <EditorPermissionsContext.Provider
+        value={{
+          canEditComponents: true,
+          canEditStructure: false,
+          canEditContent: false,
+          canEditStyle: false,
+        }}
+      >
+        <DndContext><ExplorerPanel editable={false} /></DndContext>
+      </EditorPermissionsContext.Provider>,
+    )
+
+    await waitFor(() => {
+      expect(useEditorStore.getState().layersViewMode).toBe('components')
+    })
+    expect(screen.queryByRole('button', { name: 'HTML' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Open Component Library' })).toBeDefined()
+    expect(screen.getByTestId('component-layers-tree')).toBeDefined()
   })
 })

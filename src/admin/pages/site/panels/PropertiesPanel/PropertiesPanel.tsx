@@ -46,6 +46,7 @@ import { MultiSelectionHeader } from './MultiSelectionInspector'
 import { MultiSelectorHeader } from './MultiSelectorInspector'
 import { type ClassPickerHandle } from './ClassPicker'
 import { useEditorStore } from '@site/store/store'
+import { useEditorPermissions } from '@site/editorPermissionsContext'
 import { PanelHeader } from '@admin/shared/PanelHeader'
 import { useDraggablePanel } from '@admin/shared/FloatingWindow'
 import { Button } from '@ui/components/Button'
@@ -81,7 +82,11 @@ export function PropertiesPanel({ variant = 'floating' }: PropertiesPanelProps) 
   usePropertiesPanelAutoOpen()
 
   const data = usePropertiesPanelData()
+  const permissions = useEditorPermissions()
   const layersViewMode = useEditorStore((state) => state.layersViewMode)
+  const effectiveLayersViewMode = permissions.canEditStructure
+    ? layersViewMode
+    : 'components'
   useSyncExternalStore(
     subscribeComponentLibrary,
     getComponentLibraryGeneration,
@@ -192,7 +197,7 @@ export function PropertiesPanel({ variant = 'floating' }: PropertiesPanelProps) 
             selectedNode={data.selectedNode}
             selectedNodeId={data.selectedNodeId}
             definition={data.definition}
-            layersViewMode={layersViewMode}
+            layersViewMode={effectiveLayersViewMode}
             componentLibraryEntry={componentLibraryEntry}
             renameClass={data.renameClass}
             deleteClass={data.deleteClass}

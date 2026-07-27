@@ -24,11 +24,13 @@ import styles from './ComponentLayersTree.module.css'
 
 interface ComponentLayersTreeProps {
   projection: ComponentTreeProjection | null
+  canInsert?: boolean
   onOpenComponentLibrary: () => void
 }
 
 export function ComponentLayersTree({
   projection,
+  canInsert = true,
   onOpenComponentLibrary,
 }: ComponentLayersTreeProps) {
   const selectedNodeId = useEditorStore((state) => state.selectedNodeId)
@@ -108,16 +110,18 @@ export function ComponentLayersTree({
           aria-label="Search component layers"
           className={styles.search}
         />
-        <Button
-          variant="secondary"
-          size="sm"
-          iconOnly
-          aria-label="Open Component Library"
-          tooltip="Add from Component Library"
-          onClick={onOpenComponentLibrary}
-        >
-          <PlusIcon size={13} aria-hidden="true" />
-        </Button>
+        {canInsert ? (
+          <Button
+            variant="secondary"
+            size="sm"
+            iconOnly
+            aria-label="Open Component Library"
+            tooltip="Add from Component Library"
+            onClick={onOpenComponentLibrary}
+          >
+            <PlusIcon size={13} aria-hidden="true" />
+          </Button>
+        ) : null}
       </div>
 
       <div className={styles.treeArea}>

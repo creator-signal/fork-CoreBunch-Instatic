@@ -177,6 +177,15 @@ The selected Layers projection governs the Properties surface:
 
 Governance is also enforced at the mutation seam. `updateComponentLibraryField()` rejects keys not declared by the instance's retained definition. `applyComponentLibraryOption()` resolves the approved values inside the store and applies those values plus the preset or variant identity in one undoable mutation; the UI cannot submit an arbitrary option payload.
 
+The `site.components.edit` capability is the narrow authoring boundary for this
+surface. Without `site.structure.edit`, the editor forces Layers and Properties
+to the Components projection and does not expose HTML/freeform controls. The
+server independently validates page diffs: it accepts only valid governed
+primitive insertion/removal/reordering, declared field changes, and preset or
+variant metadata whose approved values move in the same request. Raw nodes,
+catalogue identity changes, arbitrary props, bindings, classes and inline or
+breakpoint styles still require their existing structural or style capability.
+
 ## Versioning and migration
 
 Every persisted catalogue instance carries a semantic `entryVersion`. It may also carry `pinnedVersion` while an administrator deliberately retains an older definition, and `variantId` when an approved variant was applied.

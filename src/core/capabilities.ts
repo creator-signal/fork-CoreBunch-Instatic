@@ -8,8 +8,10 @@
  * here flows everywhere automatically. The `capability-picker-coverage.test.ts`
  * gate enforces that every entry also has picker metadata.
  *
- * Site-editing capabilities are split three ways:
+ * Site-editing capabilities are split four ways:
  *
+ *   site.components.edit — insert, remove, move and configure governed
+ *                          Component Library instances only.
  *   site.structure.edit  — add/remove/move/duplicate/rename nodes; manage
  *                          pages, visual components, classes registry.
  *   site.content.edit    — modify content-typed props on existing nodes
@@ -25,6 +27,7 @@
 export const CORE_CAPABILITIES = [
   'dashboard.read',
   'site.read',
+  'site.components.edit',
   'site.structure.edit',
   'site.content.edit',
   'site.style.edit',

@@ -60,6 +60,7 @@ import styles from './AdminCanvasLayout.module.css'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { useCurrentAdminUser } from '@admin/sessionContext'
 import {
+  canEditComponents as accessCanEditComponents,
   canEditContent as accessCanEditContent,
   canEditStructure as accessCanEditStructure,
   canEditStyle as accessCanEditStyle,
@@ -137,11 +138,12 @@ export function AdminCanvasLayout() {
   // The toolbar's "Open live page" target (adminUi.activeLivePath) is owned by
   // `useActiveLivePath` in the lazy editor body — it resolves templates to the
   // page / post they're previewed against instead of their non-routable slug.
-  // Three-way edit permissions — see `src/admin/access.ts`. A user with all
-  // three holds full editor rights; a user with only `canEditContent` is the
+  // Granular edit permissions — see `src/admin/access.ts`. A user with all
+  // four holds full editor rights; a user with only `canEditContent` is the
   // "Client / copy editor" persona: read everything, change copy on existing
   // nodes, no DnD, no style edits, no structural changes.
   const canEditStructureFlag = accessCanEditStructure(currentUser)
+  const canEditComponentsFlag = accessCanEditComponents(currentUser)
   const canEditContentFlag = accessCanEditContent(currentUser)
   const canEditStyleFlag = accessCanEditStyle(currentUser)
   const canSaveSite = canSaveDraftSite(currentUser)
@@ -155,6 +157,7 @@ export function AdminCanvasLayout() {
   const canPublishPages = !currentUser || hasCapability(currentUser, 'pages.publish')
 
   const permissions: EditorPermissions = {
+    canEditComponents: canEditComponentsFlag,
     canEditStructure: canEditStructureFlag,
     canEditContent: canEditContentFlag,
     canEditStyle: canEditStyleFlag,

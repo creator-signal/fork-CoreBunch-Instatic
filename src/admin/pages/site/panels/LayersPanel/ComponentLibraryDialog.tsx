@@ -11,6 +11,7 @@ import {
   type ComponentLibraryStatus,
 } from '@core/component-library'
 import { ModuleIcon } from '@site/ui/ModuleIcon'
+import { useEditorPermissions } from '@site/editorPermissionsContext'
 import { useInsertComponentLibraryEntry } from '@site/hooks/useInsertComponentLibraryEntry'
 import { Button } from '@ui/components/Button'
 import { Dialog } from '@ui/components/Dialog'
@@ -63,6 +64,7 @@ export function ComponentLibraryDialog({
   open,
   onClose,
 }: ComponentLibraryDialogProps) {
+  const permissions = useEditorPermissions()
   useSyncExternalStore(
     subscribeComponentLibrary,
     getComponentLibraryGeneration,
@@ -108,7 +110,11 @@ export function ComponentLibraryDialog({
   }
 
   const handleInsert = (): void => {
-    if (!selectedEntry || availability?.health === 'unavailable') return
+    if (
+      !permissions.canEditComponents ||
+      !selectedEntry ||
+      availability?.health === 'unavailable'
+    ) return
     const inserted = insertEntry(selectedEntry, {
       ...(presetId ? { presetId } : {}),
     })
@@ -131,6 +137,7 @@ export function ComponentLibraryDialog({
             onClick={handleInsert}
             disabled={
               !selectedEntry ||
+              !permissions.canEditComponents ||
               availability?.health === 'unavailable' ||
               !insertionSupported
             }

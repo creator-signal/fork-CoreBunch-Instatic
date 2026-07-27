@@ -162,7 +162,7 @@ describe('CMS route authorization', () => {
     }
   })
 
-  it('requires any of the three site-write capabilities to PUT the draft site document', async () => {
+  it('requires any of the four site-write capabilities to PUT the draft site document', async () => {
     const { db, cleanup } = await createTestDb()
     try {
       const ownerCookie = await setupOwner(db)

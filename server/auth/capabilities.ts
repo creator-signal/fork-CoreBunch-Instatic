@@ -42,6 +42,7 @@ interface SystemRoleDefinition {
 const adminCapabilities: CoreCapability[] = [
   'dashboard.read',
   'site.read',
+  'site.components.edit',
   'site.structure.edit',
   'site.content.edit',
   'site.style.edit',

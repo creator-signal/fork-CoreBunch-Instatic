@@ -703,7 +703,12 @@ describe('PropertyControlRenderer — disabled prop', () => {
   it('disables content controls for structure-only editors', () => {
     const html = renderToStaticMarkup(
       <EditorPermissionsContext.Provider
-        value={{ canEditStructure: true, canEditContent: false, canEditStyle: false }}
+        value={{
+          canEditComponents: true,
+          canEditStructure: true,
+          canEditContent: false,
+          canEditStyle: false,
+        }}
       >
         <PropertyControlRenderer
           propKey="text"
@@ -721,7 +726,12 @@ describe('PropertyControlRenderer — disabled prop', () => {
   it('keeps layout controls editable for structure-only editors', () => {
     const html = renderToStaticMarkup(
       <EditorPermissionsContext.Provider
-        value={{ canEditStructure: true, canEditContent: false, canEditStyle: false }}
+        value={{
+          canEditComponents: true,
+          canEditStructure: true,
+          canEditContent: false,
+          canEditStyle: false,
+        }}
       >
         <PropertyControlRenderer
           propKey="columns"

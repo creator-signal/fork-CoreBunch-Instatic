@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { componentLibraryRegistry } from '@core/component-library'
 import { registry } from '@core/module-engine'
 import { ComponentPropertiesView } from '@site/panels/PropertiesPanel/ComponentPropertiesView'
+import { EditorPermissionsContext } from '@site/editorPermissionsContext'
 import { useEditorStore } from '@site/store/store'
 import '@modules/base/index'
 
@@ -49,5 +50,34 @@ describe('ComponentPropertiesView', () => {
     expect(screen.queryByTestId('property-control-inputType')).toBeNull()
     expect(screen.queryByText('Attributes')).toBeNull()
     expect(screen.getByText('Accessibility')).toBeTruthy()
+  })
+
+  it('enables approved fields for a component-only author', () => {
+    const state = useEditorStore.getState()
+    const node = state.site!.pages[0]!.nodes[state.selectedNodeId!]!
+    const entry = componentLibraryRegistry.getOrThrow('base.email-input')
+    const definition = registry.get('base.input')!
+
+    render(
+      <EditorPermissionsContext.Provider
+        value={{
+          canEditComponents: true,
+          canEditStructure: false,
+          canEditContent: false,
+          canEditStyle: false,
+        }}
+      >
+        <ComponentPropertiesView
+          node={node}
+          definition={definition}
+          entry={entry}
+          latestEntry={entry}
+        />
+      </EditorPermissionsContext.Provider>,
+    )
+
+    const placeholder = screen.getByTestId('property-control-placeholder')
+    expect(placeholder.querySelector('input')?.disabled).toBe(false)
+    expect(screen.queryByText('Inspect implementation in HTML view')).toBeNull()
   })
 })

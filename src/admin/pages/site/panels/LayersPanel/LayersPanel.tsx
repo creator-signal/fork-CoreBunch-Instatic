@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { registry } from '@core/module-engine'
 import { componentLibraryRegistry } from '@core/component-library'
+import { useEditorPermissions } from '@site/editorPermissionsContext'
 import { selectActiveCanvasPage, useEditorStore } from '@site/store/store'
 import { DomPanel } from '@site/panels/DomPanel'
 import { ComponentLayersTree } from './ComponentLayersTree'
@@ -26,8 +27,10 @@ const EMPTY_VISUAL_COMPONENTS = [] as const
  * search state without copying any page data.
  */
 export function LayersPanel({ editable = true }: LayersPanelProps) {
+  const permissions = useEditorPermissions()
   const [componentLibraryOpen, setComponentLibraryOpen] = useState(false)
   const mode = useEditorStore((state) => state.layersViewMode)
+  const effectiveMode = permissions.canEditStructure ? mode : 'components'
   const page = useEditorStore(selectActiveCanvasPage)
   const visualComponents = useEditorStore(
     (state) => state.site?.visualComponents ?? EMPTY_VISUAL_COMPONENTS,
@@ -61,22 +64,28 @@ export function LayersPanel({ editable = true }: LayersPanelProps) {
   const documentKey = page?.id ?? null
 
   useEffect(() => {
+    if (!permissions.canEditStructure && mode !== 'components') {
+      useEditorStore.getState().setLayersViewMode('components')
+    }
+  }, [mode, permissions.canEditStructure])
+
+  useEffect(() => {
     if (
-      mode !== 'html' ||
+      effectiveMode !== 'html' ||
       previousMode.current !== 'html' ||
       !documentKey ||
       !selectedNodeId
     ) return
     htmlSelectionByDocument.current.set(documentKey, selectedNodeId)
-  }, [documentKey, mode, selectedNodeId])
+  }, [documentKey, effectiveMode, selectedNodeId])
 
   useEffect(() => {
     const previous = previousMode.current
-    if (previous === mode) return
-    previousMode.current = mode
+    if (previous === effectiveMode) return
+    previousMode.current = effectiveMode
     if (!page || !projection) return
 
-    if (mode === 'components') {
+    if (effectiveMode === 'components') {
       if (selectedNodeId) {
         htmlSelectionByDocument.current.set(page.id, selectedNodeId)
       }
@@ -91,25 +100,26 @@ export function LayersPanel({ editable = true }: LayersPanelProps) {
     if (exactHtmlNodeId && page.nodes[exactHtmlNodeId] && exactHtmlNodeId !== selectedNodeId) {
       useEditorStore.getState().selectNode(exactHtmlNodeId)
     }
-  }, [mode, page, projection, selectedNodeId])
+  }, [effectiveMode, page, projection, selectedNodeId])
 
   useEffect(() => {
-    if (mode !== 'components' || !page || !projection || !selectedNodeId) return
+    if (effectiveMode !== 'components' || !page || !projection || !selectedNodeId) return
     const visibleNodeId = resolveComponentLayerSelection(projection, selectedNodeId)
     if (!visibleNodeId || visibleNodeId === selectedNodeId) return
     htmlSelectionByDocument.current.set(page.id, selectedNodeId)
     useEditorStore.getState().selectNode(visibleNodeId)
-  }, [mode, page, projection, selectedNodeId])
+  }, [effectiveMode, page, projection, selectedNodeId])
 
   return (
     <div className={styles.panel}>
-      <div className={styles.viewMount} hidden={mode !== 'components'}>
+      <div className={styles.viewMount} hidden={effectiveMode !== 'components'}>
         <ComponentLayersTree
           projection={projection}
+          canInsert={permissions.canEditComponents}
           onOpenComponentLibrary={() => setComponentLibraryOpen(true)}
         />
       </div>
-      <div className={styles.viewMount} hidden={mode !== 'html'}>
+      <div className={styles.viewMount} hidden={effectiveMode !== 'html'}>
         <DomPanel editable={editable} />
       </div>
       <ComponentLibraryDialog

@@ -149,13 +149,13 @@ Users can list active sessions and revoke them individually. `revokeOtherSession
 
 ## Capabilities
 
-38 core capabilities. The canonical list is in `src/core/capabilities.ts` (`@core/capabilities`) as an `as const` array; `CoreCapability` is derived from it via `typeof CORE_CAPABILITIES[number]`:
+39 core capabilities. The canonical list is in `src/core/capabilities.ts` (`@core/capabilities`) as an `as const` array; `CoreCapability` is derived from it via `typeof CORE_CAPABILITIES[number]`:
 
 ```ts
 // src/core/capabilities.ts — source of truth
 export const CORE_CAPABILITIES = [
   'dashboard.read', 'site.read',
-  'site.structure.edit', 'site.content.edit', 'site.style.edit',
+  'site.components.edit', 'site.structure.edit', 'site.content.edit', 'site.style.edit',
   'pages.edit', 'pages.publish',
   'content.create', 'content.edit.own', 'content.edit.any',
   'content.publish.own', 'content.publish.any', 'content.manage',
@@ -174,17 +174,18 @@ export type CoreCapability = typeof CORE_CAPABILITIES[number]
 
 ### Site-editing split
 
-The site editor's permission surface is split three ways:
+The site editor's permission surface is split four ways:
 
 | Capability               | What it permits                                                                |
 |--------------------------|--------------------------------------------------------------------------------|
+| `site.components.edit`   | Insert, remove, move and configure governed Component Library instances only  |
 | `site.structure.edit`    | Add / remove / move / duplicate / rename nodes; pages, VCs, class registry     |
 | `site.content.edit`      | Modify content-typed props on existing nodes (text, image src/alt, link href)  |
 | `site.style.edit`        | Modify CSS classes, style overrides, breakpoints, framework tokens             |
 
-The "Client" role has only `site.content.edit` (a copy-editor surface — no structure, no styling). The "Admin" role has all three.
+The "Client" role has only `site.content.edit` (a copy-editor surface — no structure, no styling). Owner and Admin have all four. Custom roles can receive `site.components.edit` without receiving unrestricted HTML, structure or style access.
 
-`SITE_WRITE_CAPABILITIES = ['site.structure.edit', 'site.content.edit', 'site.style.edit']` — convenience set the save handler accepts. Granular diff validation enforces which kinds of changes are actually allowed once inside.
+`SITE_WRITE_CAPABILITIES = ['site.components.edit', 'site.structure.edit', 'site.content.edit', 'site.style.edit']` — convenience set the save handler accepts. Granular diff validation enforces which kinds of changes are actually allowed once inside.
 
 ### Content publishing split
 
@@ -251,7 +252,8 @@ When any of a set of capabilities is sufficient.
 ```ts
 const user = await requireAnyCapability(req, db, SITE_WRITE_CAPABILITIES)
 if (user instanceof Response) return user
-// AuthUser has at least one of: site.structure.edit, site.content.edit, site.style.edit
+// AuthUser has at least one of: site.components.edit, site.structure.edit,
+// site.content.edit, site.style.edit
 ```
 
 ### `requireStepUp(req, db, user, options?)`

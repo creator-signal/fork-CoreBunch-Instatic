@@ -21,6 +21,7 @@ export const CAPABILITY_GROUPS: CapabilityGroup[] = [
     title: 'Site',
     capabilities: [
       'site.read',
+      'site.components.edit',
       'site.structure.edit',
       'site.content.edit',
       'site.style.edit',

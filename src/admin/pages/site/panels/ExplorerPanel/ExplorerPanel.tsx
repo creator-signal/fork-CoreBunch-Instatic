@@ -12,6 +12,8 @@
  * instances would each register their own `useDndMonitor`, double-handling
  * every explorer drag — so they deliberately share one instance + DnD scope.
  */
+import { useEffect } from 'react'
+import { useEditorPermissions } from '@site/editorPermissionsContext'
 import { useEditorStore } from '@site/store/store'
 import { Panel } from '@admin/shared/Panel'
 import { SegmentedControl } from '@ui/components/SegmentedControl'
@@ -42,11 +44,21 @@ interface ExplorerPanelProps {
 }
 
 export function ExplorerPanel({ editable = true }: ExplorerPanelProps) {
+  const permissions = useEditorPermissions()
   const tab = useEditorStore((s) => s.explorerPanelTab)
   const setTab = useEditorStore((s) => s.setExplorerPanelTab)
   const layersViewMode = useEditorStore((s) => s.layersViewMode)
   const setLayersViewMode = useEditorStore((s) => s.setLayersViewMode)
   const setOpen = useEditorStore((s) => s.setExplorerPanelOpen)
+  const effectiveLayersViewMode = permissions.canEditStructure
+    ? layersViewMode
+    : 'components'
+
+  useEffect(() => {
+    if (!permissions.canEditStructure && layersViewMode !== 'components') {
+      setLayersViewMode('components')
+    }
+  }, [layersViewMode, permissions.canEditStructure, setLayersViewMode])
 
   return (
     <Panel
@@ -69,9 +81,14 @@ export function ExplorerPanel({ editable = true }: ExplorerPanelProps) {
       {tab === 'layers' && (
         <div className={styles.layersViewRow}>
           <SegmentedControl<LayersViewMode>
-            value={layersViewMode}
-            options={LAYER_VIEWS}
-            onChange={setLayersViewMode}
+            value={effectiveLayersViewMode}
+            options={permissions.canEditStructure
+              ? LAYER_VIEWS
+              : LAYER_VIEWS.filter((view) => view.value === 'components')}
+            onChange={(mode) => {
+              if (mode === 'html' && !permissions.canEditStructure) return
+              setLayersViewMode(mode)
+            }}
             size="sm"
             activeSurface="recessed"
             fullWidth

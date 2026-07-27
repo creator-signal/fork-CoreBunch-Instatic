@@ -89,9 +89,12 @@ export function PropertiesPanelBody(props: PropertiesPanelBodyProps): React.Reac
   } = props
   const permissions = useEditorPermissions()
   const layersViewMode = useEditorStore((state) => state.layersViewMode)
+  const effectiveLayersViewMode = permissions.canEditStructure
+    ? layersViewMode
+    : 'components'
   const [activeNodeView, setActiveNodeView] = useState<NodeInspectorView>('styles')
 
-  if (layersViewMode === 'components') {
+  if (effectiveLayersViewMode === 'components') {
     if (isMultiSelect) {
       return (
         <EmptyState

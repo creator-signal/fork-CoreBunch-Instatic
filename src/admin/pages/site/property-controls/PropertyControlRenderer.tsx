@@ -69,6 +69,8 @@ interface RenderControlOptions {
   onChange: (key: string, val: unknown) => void
   isOverride?: boolean
   disabled?: boolean
+  /** Explicit policy gate for governed surfaces that define their own capability. */
+  permissionOverride?: boolean
   dynamicBinding?: DynamicBindingRenderContext
 }
 
@@ -106,6 +108,7 @@ export function PropertyControlRenderer({
   onChange,
   isOverride = false,
   disabled = false,
+  permissionOverride,
   dynamicBinding,
 }: RenderControlOptions) {
   const layout = resolveControlLayout(control)
@@ -118,7 +121,7 @@ export function PropertyControlRenderer({
   const allowedByCategory = category === 'content'
     ? permissions.canEditContent
     : permissions.canEditStructure
-  const effectiveDisabled = disabled || !allowedByCategory
+  const effectiveDisabled = disabled || !(permissionOverride ?? allowedByCategory)
 
   const shared = {
     propKey,

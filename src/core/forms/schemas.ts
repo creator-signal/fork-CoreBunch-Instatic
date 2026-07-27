@@ -15,6 +15,13 @@ const FormControlBindingSchema = Type.Object({
   multiple: Type.Optional(Type.Boolean()),
   maxFiles: Type.Optional(Type.Number()),
   maxFileBytes: Type.Optional(Type.Number()),
+  draftBehavior: Type.Optional(Type.Union([
+    Type.Literal('include'),
+    Type.Literal('session-only'),
+    Type.Literal('exclude'),
+  ])),
+  catalogueEntryId: Type.Optional(Type.String({ minLength: 1 })),
+  catalogueEntryVersion: Type.Optional(Type.String({ minLength: 1 })),
 })
 
 export type FormControlBinding = Static<typeof FormControlBindingSchema>
@@ -84,6 +91,12 @@ const PublishedFormSnapshotSchema = Type.Object({
   targetTableId: Type.String(),
   honeypotName: Type.String(),
   minSubmitSeconds: Type.Number(),
+  draftMode: Type.Optional(Type.Union([
+    Type.Literal('none'),
+    Type.Literal('session'),
+    Type.Literal('persistent'),
+  ])),
+  draftTtlDays: Type.Optional(Type.Number()),
   controls: Type.Array(FormControlBindingSchema),
   labels: Type.Array(PublishedFormLabelSchema),
   submits: Type.Array(PublishedFormSubmitSchema),

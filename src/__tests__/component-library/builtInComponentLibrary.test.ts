@@ -208,4 +208,17 @@ describe('built-in Component Library', () => {
     expect(byId.get('base.form-field-group')?.constraints.allowedChildEntryIds)
       .toContain('base.file-attachment')
   })
+
+  it('advertises Save Draft only through the persistent draft capability', () => {
+    const saveDraft = componentLibraryRegistry.get('base.save-draft')
+    expect(saveDraft?.implementation.type).toBe('capability-backed')
+    expect(saveDraft?.requirements.capabilities).toEqual(['forms.drafts'])
+    expect(saveDraft?.implementation).toMatchObject({
+      backing: {
+        type: 'primitive',
+        moduleId: 'base.form-draft-action',
+        presetId: 'save-draft',
+      },
+    })
+  })
 })

@@ -25,6 +25,7 @@ export type AttachmentOperationResult =
     }
 
 function safeOriginalName(value: string): string {
+  // eslint-disable-next-line no-control-regex -- strip ASCII control bytes from an untrusted upload name.
   const name = basename(value.replace(/\\/g, '/')).replace(/[\u0000-\u001f\u007f]/g, '')
   return (name || 'attachment').slice(0, 255)
 }
@@ -278,4 +279,3 @@ export async function sweepExpiredAttachments(
   }
   return { deleted, failed }
 }
-

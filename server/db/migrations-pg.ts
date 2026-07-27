@@ -1184,4 +1184,40 @@ export const pgMigrations: Migration[] = [
         on form_attachments (data_row_id);
     `,
   },
+  {
+    // Recoverable public form drafts. Anonymous drafts use only a hashed,
+    // scoped bearer token; authenticated drafts are owned by the CMS user.
+    id: '024_form_drafts',
+    sql: `
+      create table if not exists form_drafts (
+        id text primary key,
+        site_id text not null references site(id) on delete cascade,
+        page_id text not null,
+        form_id text not null,
+        target_table_id text not null,
+        owner_user_id text references users(id) on delete cascade,
+        recovery_token_hash text unique,
+        values_json text not null,
+        wizard_state_json text not null,
+        schema_json text not null,
+        schema_hash text not null,
+        schema_version integer not null,
+        revision integer not null default 1,
+        created_at timestamptz not null default current_timestamp,
+        updated_at timestamptz not null default current_timestamp,
+        expires_at timestamptz not null,
+        deleted_at timestamptz,
+        constraint form_drafts_identity_check check (
+          (owner_user_id is not null and recovery_token_hash is null)
+          or (owner_user_id is null and recovery_token_hash is not null)
+        ),
+        constraint form_drafts_revision_check check (revision > 0)
+      );
+
+      create index if not exists form_drafts_owner_scope_idx
+        on form_drafts (owner_user_id, site_id, page_id, form_id, updated_at desc);
+      create index if not exists form_drafts_expiry_idx
+        on form_drafts (expires_at) where deleted_at is null;
+    `,
+  },
 ]

@@ -53,6 +53,25 @@ export async function requireAuthenticatedUser(
   return user
 }
 
+/**
+ * Resolve a valid fully-authenticated session when one is present, while
+ * allowing a genuinely anonymous public request to continue. A pending-MFA
+ * session is never downgraded to anonymous identity.
+ */
+export async function optionalAuthenticatedUser(
+  req: Request,
+  db: DbClient,
+): Promise<AuthUser | Response | null> {
+  const idHash = await getSessionHash(req)
+  if (!idHash) return null
+  const user = await findUserBySessionHash(db, idHash)
+  if (user) return user
+  if (await sessionRequiresMfa(db, idHash)) {
+    return jsonResponse({ error: 'mfa_required' }, { status: 401 })
+  }
+  return null
+}
+
 export async function requireCapability(
   req: Request,
   db: DbClient,

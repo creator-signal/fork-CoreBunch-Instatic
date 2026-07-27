@@ -2,7 +2,7 @@
 
 This index maps supported deployment targets to the files, variables, and persistence rules they need.
 
-Instatic is one Bun server packaged by the root `Dockerfile`. The server reads runtime configuration from `server/config.ts`: `PORT`, `DATABASE_URL`/`DATABASE_URL_FILE`, `UPLOADS_DIR`, `STATIC_DIR`, `PUBLIC_ORIGIN`, `TRUSTED_PROXY_CIDRS`, optional `MINIO_*` values, and the fail-closed `ATTACHMENT_*` policy. Reversible server secrets, including AI provider credentials, plugin secret settings, and MFA TOTP seeds, are encrypted with `INSTATIC_SECRET_KEY` or `INSTATIC_SECRET_KEY_FILE` when configured. Database migrations run automatically on boot in `server/index.ts`.
+Instatic is one Bun server packaged by the root `Dockerfile`. The server reads runtime configuration from `server/config.ts`: `PORT`, `DATABASE_URL`/`DATABASE_URL_FILE`, `UPLOADS_DIR`, `STATIC_DIR`, `PUBLIC_ORIGIN`, `TRUSTED_PROXY_CIDRS`, optional `MINIO_*` values, and the fail-closed `ATTACHMENT_*` and `FORM_DRAFT_*` policies. Reversible server secrets, including AI provider credentials, plugin secret settings, and MFA TOTP seeds, are encrypted with `INSTATIC_SECRET_KEY` or `INSTATIC_SECRET_KEY_FILE` when configured. Database migrations run automatically on boot in `server/index.ts`.
 
 ---
 
@@ -41,6 +41,9 @@ ATTACHMENTS_DIR      private persistent storage, never a public static path
 ATTACHMENT_SCANNER_URL  required scanner endpoint when attachments are enabled
 ATTACHMENT_SCANNER_TOKEN / _FILE  optional scanner bearer credential
 ATTACHMENT_* limits  MIME allow-list, file/count ceilings, temporary TTL, and retention
+FORM_DRAFTS_ENABLED  enables persistent Save Draft; false by default
+FORM_DRAFT_TTL_DAYS  maximum persistent draft lifetime; defaults to 30
+FORM_DRAFT_MAX_BYTES  values + wizard state ceiling; defaults to 262144
 ```
 
 Generate `INSTATIC_SECRET_KEY` with `bun run scripts/generate-secret-key.ts` before adding Anthropic, OpenAI, or OpenRouter credentials or enabling TOTP MFA in production. Without it, the admin can load but saving reversible secrets fails because there is no stable encryption key.
@@ -131,3 +134,4 @@ SQLite installs also need the SQLite database file on persistent storage. On pla
 - `compose.prod.yml`, `compose.sqlite.yml`, `compose.tls.yml`, `compose.build.yml` — VPS Compose files
 - `docs/deployment/render/sqlite/render.yaml`, `docs/deployment/render/postgres/render.yaml` — Render Blueprint templates
 - `docs/features/file-attachments.md` — scanner protocol, policy variables, and retention
+- `docs/features/form-drafts.md` — persistent recovery, conflicts, expiry, deletion, and privacy

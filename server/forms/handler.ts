@@ -45,8 +45,17 @@ import {
   retryAttachmentScan,
   uploadAndScanAttachment,
 } from '../attachments/service'
+import {
+  handlePublicFormDraftRequest,
+  type PublicFormDraftRoute,
+} from './drafts/handler'
 
-type PublicFormRoute = 'challenge' | 'submit' | 'attachment-upload' | 'attachment-scan'
+type PublicFormRoute =
+  | 'challenge'
+  | 'submit'
+  | 'attachment-upload'
+  | 'attachment-scan'
+  | PublicFormDraftRoute
 
 const PUBLIC_FORM_CHALLENGE_MAX_BODY_BYTES = 8 * 1024
 const PUBLIC_FORM_SUBMIT_MAX_BODY_BYTES = 1024 * 1024
@@ -75,6 +84,11 @@ export async function handlePublicFormRequest(
   if (route === 'challenge') return handleChallenge(req, db)
   if (route === 'attachment-upload') return handleAttachmentUpload(req, db)
   if (route === 'attachment-scan') return handleAttachmentScan(req, db)
+  if (
+    route === 'draft-load'
+    || route === 'draft-save'
+    || route === 'draft-delete'
+  ) return handlePublicFormDraftRequest(req, db, route)
   return handleSubmit(req, db)
 }
 
@@ -389,6 +403,9 @@ function publicFormRoute(pathname: string): PublicFormRoute | null {
   if (pathname === '/_instatic/form/submit') return 'submit'
   if (pathname === '/_instatic/form/attachment/upload') return 'attachment-upload'
   if (pathname === '/_instatic/form/attachment/scan') return 'attachment-scan'
+  if (pathname === '/_instatic/form/draft/load') return 'draft-load'
+  if (pathname === '/_instatic/form/draft/save') return 'draft-save'
+  if (pathname === '/_instatic/form/draft/delete') return 'draft-delete'
   if (pathname.startsWith('/_instatic/form/')) return 'submit'
   return null
 }

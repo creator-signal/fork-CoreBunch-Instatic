@@ -145,6 +145,9 @@ Render auto-injects `RENDER_EXTERNAL_URL`, which Instatic uses as the CSRF publi
 | `ATTACHMENT_SCANNER_URL` | When attachments are enabled | HTTP scanner endpoint; see `features/file-attachments.md` |
 | `ATTACHMENT_SCANNER_TOKEN` / `_FILE` | Scanner-dependent | Optional bearer credential |
 | `ATTACHMENT_*` limits | Optional | MIME allow-list, file/count ceilings, temporary TTL, and retention |
+| `FORM_DRAFTS_ENABLED` | Optional | Defaults to `false`; enables persistent Save Draft |
+| `FORM_DRAFT_TTL_DAYS` | Optional | Maximum persistent draft lifetime; defaults to 30 |
+| `FORM_DRAFT_MAX_BYTES` | Optional | Values plus wizard-state ceiling; defaults to 262144 |
 | `STATIC_DIR` | Yes in Docker | `/app/dist` |
 | `PORT` | Platform-dependent | HTTP listen port; defaults to `3001` |
 | `INSTATIC_SECRET_KEY` | Yes for reversible server secrets | Output of `bun run scripts/generate-secret-key.ts` |
@@ -177,5 +180,6 @@ Expected response:
 - [vps.md](vps.md) — Docker Compose install
 - [backup-restore.md](backup-restore.md) — backing up DB and uploads
 - [../features/file-attachments.md](../features/file-attachments.md) — private attachment scanner and storage contract
+- [../features/form-drafts.md](../features/form-drafts.md) — persistent recovery and privacy contract
 - `Dockerfile` — production image definition
 - `server/config.ts` — runtime env parsing

@@ -7,6 +7,9 @@ CMS-native forms let the visual editor build semantic HTML forms from primitive 
 - Form modules live in `src/modules/base/forms/` and register from `src/modules/base/index.ts`.
 - Every form part is a node: `base.form`, `base.label`, `base.input`, `base.textarea`, `base.select`, `base.option`, `base.option-group`, `base.checkbox`, `base.radio`, `base.submit`, and `base.form-message`.
 - Private file inputs use the `attachment` data field and the capability-backed `base.file-attachment` catalogue entry.
+- Save Draft and wizard recovery use `base.form-step`,
+  `base.form-draft-action`, and the versioned persistence contract described
+  in [Recoverable Form Drafts](form-drafts.md).
 - The module picker exposes the form primitives in its Forms category; preview wireframes live in `src/admin/pages/site/module-picker/moduleWireframes.ts`.
 - Paste HTML, agent HTML insert/replace, and Super Import all use `@core/htmlImport`, so semantic HTML form tags import as these same primitive modules.
 - CMS form snapshots are derived at publish/request time by `src/core/forms/snapshot.ts`.
@@ -83,6 +86,15 @@ the storage/scanner boundary is unavailable. See
 [File Attachments](file-attachments.md) for the lifecycle and operator
 contract.
 
+`base.form` can disable recovery, retain progress for the current browser
+session, or enable persistent recovery. Persistent Save Draft is a
+capability-backed entry and is not available in the catalogue unless the
+operator-enabled server health endpoint reports `forms.drafts` available.
+Passwords, files, hidden inputs, honeypots and controls marked Session only or
+Never save are excluded at the server boundary. See
+[Recoverable Form Drafts](form-drafts.md) for conflicts, anonymous recovery,
+schema migration and deletion.
+
 ## Submission Flow
 
 CMS-native submission is a two-step public flow:
@@ -123,6 +135,7 @@ No public form endpoint can be made unusable by a dedicated HTTP client that fet
 
 - [Content storage](content-storage.md) — `data_tables` and `data_rows`
 - [File Attachments](file-attachments.md) — private upload, scan, claim, download, and retention
+- [Recoverable Form Drafts](form-drafts.md) — session/persistent recovery, conflicts, expiry and privacy
 - [Modules](modules.md) — module definitions and the module picker
 - [Publisher](publisher.md) — HTML pipeline and runtime injection
 - [TypeBox patterns](../reference/typebox-patterns.md) — request/response validation

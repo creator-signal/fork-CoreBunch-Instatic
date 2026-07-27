@@ -25,6 +25,11 @@ interface ServerConfig {
     scannerToken: string | null
     policy: AttachmentPolicy
   }
+  formDrafts: {
+    enabled: boolean
+    ttlDays: number
+    maxBytes: number
+  }
   minio: {
     endpoint: string
     publicBaseUrl: string
@@ -271,6 +276,21 @@ export function readServerConfig(
           'ATTACHMENT_RETENTION_DAYS',
         ),
       },
+    },
+    formDrafts: {
+      enabled: readBoolean(env.FORM_DRAFTS_ENABLED),
+      ttlDays: readPositiveInteger(
+        env.FORM_DRAFT_TTL_DAYS,
+        30,
+        'FORM_DRAFT_TTL_DAYS',
+        { maximum: 365 },
+      ),
+      maxBytes: readPositiveInteger(
+        env.FORM_DRAFT_MAX_BYTES,
+        256 * 1024,
+        'FORM_DRAFT_MAX_BYTES',
+        { maximum: 1024 * 1024 },
+      ),
     },
     minio: hasAnyMinioValue
       ? {

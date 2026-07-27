@@ -16,6 +16,7 @@ const {
   createHttpAttachmentScanner,
   createUnavailableAttachmentScanner,
 } = await import('./attachments/scanner')
+const { configureFormDraftRuntime } = await import('./forms/drafts/runtime')
 
 const config = readServerConfig()
 configureTrustedProxyCidrs(config.trustedProxyCidrs)
@@ -43,6 +44,7 @@ configureAttachmentRuntime({
       })
     : createUnavailableAttachmentScanner(),
 })
+configureFormDraftRuntime(config.formDrafts)
 if (config.minio) {
   const { buildMinioStorageAdapter } = await import('./media/minioStorageAdapter')
   const minioAdapter = buildMinioStorageAdapter(config.minio)
@@ -76,6 +78,8 @@ startConversationPurgeTick(db)
 // operator rollback cannot strand previously claimed or quarantined bytes.
 const { startAttachmentCleanupTick } = await import('./attachments/cleanup')
 startAttachmentCleanupTick(db)
+const { startFormDraftCleanupTick } = await import('./forms/drafts/cleanup')
+startFormDraftCleanupTick(db)
 
 /**
  * Build the CORS response headers for an incoming request.

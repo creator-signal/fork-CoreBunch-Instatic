@@ -14,6 +14,7 @@ import {
 import { providerAdapterRegistry } from '@core/provider-adapters'
 import { searchCapabilityHealth } from '@core/search'
 import { AttachmentCapabilityStatusSchema } from '@core/attachments'
+import { FormDraftCapabilityStatusSchema } from '@core/forms'
 import { apiRequest } from '@core/http'
 import { useEditorStore } from '@site/store/store'
 import { ModuleIcon } from '@site/ui/ModuleIcon'
@@ -74,6 +75,9 @@ export function ComponentLibraryDialog({
   const [attachmentHealth, setAttachmentHealth] = useState<
     ComponentLibraryDependencyState['capabilities'][string]
   >('unavailable')
+  const [formDraftHealth, setFormDraftHealth] = useState<
+    ComponentLibraryDependencyState['capabilities'][string]
+  >('unavailable')
   useEffect(() => {
     if (!open || dependencyState) return
     const controller = new AbortController()
@@ -85,6 +89,15 @@ export function ComponentLibraryDialog({
       .then(setAttachmentHealth)
       .catch(() => {
         if (!controller.signal.aborted) setAttachmentHealth('unavailable')
+      })
+    apiRequest('/admin/api/cms/form-drafts/health', {
+      schema: FormDraftCapabilityStatusSchema,
+      signal: controller.signal,
+    })
+      .then((body) => body.health)
+      .then(setFormDraftHealth)
+      .catch(() => {
+        if (!controller.signal.aborted) setFormDraftHealth('unavailable')
       })
     return () => controller.abort()
   }, [dependencyState, open])
@@ -98,6 +111,7 @@ export function ComponentLibraryDialog({
     capabilities: {
       'search.index': searchHealth,
       'forms.attachments': attachmentHealth,
+      'forms.drafts': formDraftHealth,
     },
     providerAdapters: providerAdapterRegistry.dependencyHealth(),
     plugins: {},

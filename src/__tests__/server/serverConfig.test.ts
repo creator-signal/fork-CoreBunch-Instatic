@@ -123,6 +123,11 @@ describe('readServerConfig', () => {
           retentionDays: 90,
         },
       },
+      formDrafts: {
+        enabled: false,
+        ttlDays: 30,
+        maxBytes: 256 * 1024,
+      },
       minio: null,
       starterSite: null,
     })
@@ -167,6 +172,11 @@ describe('readServerConfig', () => {
           temporaryTtlSeconds: 24 * 60 * 60,
           retentionDays: 90,
         },
+      },
+      formDrafts: {
+        enabled: false,
+        ttlDays: 30,
+        maxBytes: 256 * 1024,
       },
       minio: null,
       starterSite: null,
@@ -260,6 +270,22 @@ describe('readServerConfig', () => {
     expect(() => readServerConfig({
       ATTACHMENT_TEMPORARY_TTL_SECONDS: '59',
     })).toThrow(/ATTACHMENT_TEMPORARY_TTL_SECONDS must be an integer at least 60/)
+  })
+
+  it('reads and bounds persistent form draft policy', () => {
+    expect(readServerConfig({
+      FORM_DRAFTS_ENABLED: 'true',
+      FORM_DRAFT_TTL_DAYS: '45',
+      FORM_DRAFT_MAX_BYTES: '131072',
+    }).formDrafts).toEqual({
+      enabled: true,
+      ttlDays: 45,
+      maxBytes: 131072,
+    })
+    expect(() => readServerConfig({ FORM_DRAFT_TTL_DAYS: '366' }))
+      .toThrow(/FORM_DRAFT_TTL_DAYS must be an integer between 1 and 365/)
+    expect(() => readServerConfig({ FORM_DRAFT_MAX_BYTES: '1048577' }))
+      .toThrow(/FORM_DRAFT_MAX_BYTES must be an integer between 1 and 1048576/)
   })
 
   it('loads complete starter-site bootstrap configuration from mounted files', () => {

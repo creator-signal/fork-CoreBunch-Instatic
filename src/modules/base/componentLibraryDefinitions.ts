@@ -209,8 +209,17 @@ export const requiredField: ComponentLibraryField = {
   required: false,
 }
 
+export const draftBehaviorField: ComponentLibraryField = {
+  key: 'draftBehavior',
+  label: 'Draft storage',
+  type: 'select',
+  required: false,
+  advanced: true,
+}
+
 export const formLayoutParentEntryIds = [
   'base.form-container',
+  'base.form-step',
   'base.tab-panel',
   'base.accordion-item',
 ]
@@ -244,6 +253,7 @@ export function inputEntry(
         required: false,
       },
       requiredField,
+      draftBehaviorField,
       {
         key: 'autocomplete',
         label: 'Autocomplete',

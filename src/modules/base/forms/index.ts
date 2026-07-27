@@ -10,6 +10,7 @@ import { Type, Value, type Static } from '@core/utils/typeboxHelpers'
 import { normalizeIdentifierValue } from '@core/utils/identifier'
 import { safeUrl } from '@modules/base/utils/escape'
 import { FORM_RUNTIME_JS } from './formRuntimeJs'
+import { FORM_DRAFT_RUNTIME_JS } from './formDraftRuntimeJs'
 import { FileTextSolidIcon } from 'pixel-art-icons/icons/file-text-solid'
 import { TextStartTIcon } from 'pixel-art-icons/icons/text-start-t'
 import { CheckboxSolidIcon } from 'pixel-art-icons/icons/checkbox-solid'
@@ -28,6 +29,7 @@ import {
   SubmitEditor,
   TextareaEditor,
 } from './FormControls'
+import './wizard'
 
 const FormPropsSchema = Type.Object({
   mode: Type.Union([Type.Literal('cms'), Type.Literal('custom')], { default: 'cms' }),
@@ -40,6 +42,12 @@ const FormPropsSchema = Type.Object({
   redirectUrl: Type.String({ default: '' }),
   honeypotName: Type.String({ default: 'company' }),
   minSubmitSeconds: Type.Number({ default: 2 }),
+  draftMode: Type.Optional(Type.Union([
+    Type.Literal('none'),
+    Type.Literal('session'),
+    Type.Literal('persistent'),
+  ], { default: 'none' })),
+  draftTtlDays: Type.Optional(Type.Number({ default: 30 })),
 })
 
 type FormProps = Static<typeof FormPropsSchema>
@@ -85,6 +93,11 @@ const InputPropsSchema = Type.Object({
   multiple: Type.Boolean({ default: false }),
   attachmentMaxFiles: Type.Number({ default: 1 }),
   attachmentMaxBytes: Type.Number({ default: 10 * 1024 * 1024 }),
+  draftBehavior: Type.Optional(Type.Union([
+    Type.Literal('include'),
+    Type.Literal('session-only'),
+    Type.Literal('exclude'),
+  ], { default: 'include' })),
 })
 
 type InputProps = Static<typeof InputPropsSchema>
@@ -101,6 +114,11 @@ const TextareaPropsSchema = Type.Object({
   rows: Type.Number({ default: 4 }),
   minLength: Type.Number({ default: 0 }),
   maxLength: Type.Number({ default: 0 }),
+  draftBehavior: Type.Optional(Type.Union([
+    Type.Literal('include'),
+    Type.Literal('session-only'),
+    Type.Literal('exclude'),
+  ], { default: 'include' })),
 })
 
 type TextareaProps = Static<typeof TextareaPropsSchema>
@@ -112,6 +130,11 @@ const SelectPropsSchema = Type.Object({
   required: Type.Boolean({ default: false }),
   disabled: Type.Boolean({ default: false }),
   multiple: Type.Boolean({ default: false }),
+  draftBehavior: Type.Optional(Type.Union([
+    Type.Literal('include'),
+    Type.Literal('session-only'),
+    Type.Literal('exclude'),
+  ], { default: 'include' })),
 })
 
 type SelectProps = Static<typeof SelectPropsSchema>
@@ -140,6 +163,11 @@ const ChoicePropsSchema = Type.Object({
   checked: Type.Boolean({ default: false }),
   required: Type.Boolean({ default: false }),
   disabled: Type.Boolean({ default: false }),
+  draftBehavior: Type.Optional(Type.Union([
+    Type.Literal('include'),
+    Type.Literal('session-only'),
+    Type.Literal('exclude'),
+  ], { default: 'include' })),
 })
 
 type ChoiceProps = Static<typeof ChoicePropsSchema>
@@ -196,6 +224,12 @@ export const FormModule: ModuleDefinition<FormProps> = {
     redirectUrl: { type: 'url', label: 'Redirect URL', condition: { field: 'successBehavior', eq: 'redirect' } },
     honeypotName: { type: 'text', label: 'Honeypot field', condition: { field: 'mode', eq: 'cms' } },
     minSubmitSeconds: { type: 'number', label: 'Minimum fill seconds', condition: { field: 'mode', eq: 'cms' } },
+    draftMode: { type: 'select', label: 'Draft recovery', condition: { field: 'mode', eq: 'cms' }, options: [
+      { label: 'Off', value: 'none' },
+      { label: 'This browser session', value: 'session' },
+      { label: 'Persistent recovery', value: 'persistent' },
+    ] },
+    draftTtlDays: { type: 'number', label: 'Draft expiry days', condition: { field: 'draftMode', eq: 'persistent' } },
   },
   propsSchema: FormPropsSchema,
   defaults: Value.Create(FormPropsSchema),
@@ -211,6 +245,8 @@ export const FormModule: ModuleDefinition<FormProps> = {
       props.mode === 'custom' ? `method="${props.method}"` : '',
       props.successBehavior === 'message' ? `data-instatic-success-message="${props.successMessage}"` : '',
       props.successBehavior === 'redirect' ? `data-instatic-success-redirect="${safeUrl(props.redirectUrl)}"` : '',
+      props.draftMode && props.draftMode !== 'none' ? `data-instatic-draft-mode="${props.draftMode}"` : '',
+      props.draftMode === 'persistent' ? `data-instatic-draft-ttl-days="${positiveNumber(props.draftTtlDays ?? 30) ?? 30}"` : '',
     ].filter(Boolean).join(' ')
     const honeypot = props.mode === 'cms'
       ? `<input type="text" name="${props.honeypotName}" autocomplete="off" tabindex="-1" data-instatic-honeypot hidden>`
@@ -219,7 +255,12 @@ export const FormModule: ModuleDefinition<FormProps> = {
       html: `<form ${attrs}>${honeypot}${renderedChildren.join('')}</form>`,
       // CMS-native forms need the browser runtime; custom-action forms are
       // plain HTML form submissions and ship zero JS.
-      ...(props.mode === 'cms' ? { js: FORM_RUNTIME_JS } : {}),
+      ...(props.mode === 'cms'
+        ? {
+            js: FORM_RUNTIME_JS
+              + (props.draftMode && props.draftMode !== 'none' ? FORM_DRAFT_RUNTIME_JS : ''),
+          }
+        : {}),
     }
   },
 }
@@ -284,6 +325,7 @@ export const InputModule: ModuleDefinition<InputProps> = {
     ['accept', props.inputType === 'file' ? props.accept : ''],
     ['data-instatic-attachment-max-files', props.inputType === 'file' ? positiveNumber(props.attachmentMaxFiles) : undefined],
     ['data-instatic-attachment-max-bytes', props.inputType === 'file' ? positiveNumber(props.attachmentMaxBytes) : undefined],
+    ['data-instatic-draft-behavior', props.draftBehavior !== 'include' ? props.draftBehavior : ''],
   ])}${booleanAttrs(props, [
     'required',
     'disabled',
@@ -313,6 +355,11 @@ export const TextareaModule: ModuleDefinition<TextareaProps> = {
     rows: { type: 'number', label: 'Rows' },
     minLength: { type: 'number', label: 'Minimum length' },
     maxLength: { type: 'number', label: 'Maximum length' },
+    draftBehavior: { type: 'select', label: 'Draft storage', options: [
+      { label: 'Include', value: 'include' },
+      { label: 'Session only', value: 'session-only' },
+      { label: 'Never save', value: 'exclude' },
+    ] },
   },
   propsSchema: TextareaPropsSchema,
   defaults: Value.Create(TextareaPropsSchema),
@@ -327,6 +374,7 @@ export const TextareaModule: ModuleDefinition<TextareaProps> = {
     ['rows', props.rows],
     ['minlength', positiveNumber(props.minLength)],
     ['maxlength', positiveNumber(props.maxLength)],
+    ['data-instatic-draft-behavior', props.draftBehavior !== 'include' ? props.draftBehavior : ''],
   ])}${booleanAttrs(props, ['required', 'disabled', 'readOnly'])}>${props.value}</textarea>` }),
 }
 
@@ -346,6 +394,11 @@ export const SelectModule: ModuleDefinition<SelectProps> = {
     required: { type: 'toggle', label: 'Required' },
     disabled: { type: 'toggle', label: 'Disabled' },
     multiple: { type: 'toggle', label: 'Multiple' },
+    draftBehavior: { type: 'select', label: 'Draft storage', options: [
+      { label: 'Include', value: 'include' },
+      { label: 'Session only', value: 'session-only' },
+      { label: 'Never save', value: 'exclude' },
+    ] },
   },
   propsSchema: SelectPropsSchema,
   defaults: Value.Create(SelectPropsSchema),
@@ -357,6 +410,7 @@ export const SelectModule: ModuleDefinition<SelectProps> = {
       ['data-instatic-field-id', props.fieldId],
       ['name', props.name || props.fieldId],
       ['id', props.id],
+      ['data-instatic-draft-behavior', props.draftBehavior !== 'include' ? props.draftBehavior : ''],
     ])}${booleanAttrs(props, ['required', 'disabled', 'multiple'])}>${renderedChildren.join('')}</select>`,
   }),
 }
@@ -522,6 +576,11 @@ function inputLikeSchema(typeLabel: string): ModuleDefinition<InputProps>['schem
     multiple: { type: 'toggle', label: 'Allow multiple files' },
     attachmentMaxFiles: { type: 'number', label: 'Maximum files' },
     attachmentMaxBytes: { type: 'number', label: 'Maximum bytes per file' },
+    draftBehavior: { type: 'select', label: 'Draft storage', options: [
+      { label: 'Include', value: 'include' },
+      { label: 'Session only', value: 'session-only' },
+      { label: 'Never save', value: 'exclude' },
+    ] },
   }
 }
 
@@ -548,6 +607,11 @@ function choiceModule(args: {
       checked: { type: 'toggle', label: 'Checked' },
       required: { type: 'toggle', label: 'Required' },
       disabled: { type: 'toggle', label: 'Disabled' },
+      draftBehavior: { type: 'select', label: 'Draft storage', options: [
+        { label: 'Include', value: 'include' },
+        { label: 'Session only', value: 'session-only' },
+        { label: 'Never save', value: 'exclude' },
+      ] },
     },
     propsSchema: ChoicePropsSchema,
     defaults: Value.Create(ChoicePropsSchema),
@@ -560,6 +624,7 @@ function choiceModule(args: {
         ['name', props.name || props.fieldId],
         ['id', props.id],
         ['value', props.value],
+        ['data-instatic-draft-behavior', props.draftBehavior !== 'include' ? props.draftBehavior : ''],
       ])}${booleanAttrs(props, ['checked', 'required', 'disabled'])}>`,
     }),
   }

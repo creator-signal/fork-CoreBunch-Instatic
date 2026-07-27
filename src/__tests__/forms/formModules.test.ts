@@ -12,6 +12,10 @@ import {
   SubmitModule,
   TextareaModule,
 } from '@modules/base/forms'
+import {
+  FormDraftActionModule,
+  FormStepModule,
+} from '@modules/base/forms/wizard'
 import { escapeProps } from '@core/publisher'
 import { runModuleConformanceSuite } from '../helpers'
 import '../matchers'
@@ -28,6 +32,8 @@ const FORM_MODULES = [
   RadioModule,
   SubmitModule,
   FormMessageModule,
+  FormStepModule,
+  FormDraftActionModule,
 ]
 
 for (const mod of FORM_MODULES) {

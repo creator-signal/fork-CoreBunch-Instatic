@@ -96,6 +96,10 @@ function deriveFormSnapshot(
     targetTableId: stringProp(formNode, 'targetTableId', ''),
     honeypotName: stringProp(formNode, 'honeypotName', 'company'),
     minSubmitSeconds: numberProp(formNode, 'minSubmitSeconds', 2),
+    ...(draftMode(formNode) !== 'none' ? { draftMode: draftMode(formNode) } : {}),
+    ...(draftMode(formNode) === 'persistent'
+      ? { draftTtlDays: positiveNumberProp(formNode, 'draftTtlDays') ?? 30 }
+      : {}),
     controls,
     labels,
     submits,
@@ -111,7 +115,17 @@ function controlBindingFromNode(node: PageNode): FormControlBinding | null {
     nodeId: node.id,
     fieldId,
     name,
-    ...(node.moduleId === 'base.input' ? { inputType: stringProp(node, 'inputType', 'text') } : {}),
+    ...(node.moduleId === 'base.input'
+      ? { inputType: stringProp(node, 'inputType', 'text') }
+      : node.moduleId === 'base.textarea'
+        ? { inputType: 'textarea' }
+        : node.moduleId === 'base.select'
+          ? { inputType: 'select' }
+          : node.moduleId === 'base.checkbox'
+            ? { inputType: 'checkbox' }
+            : node.moduleId === 'base.radio'
+              ? { inputType: 'radio' }
+              : {}),
     ...(booleanProp(node, 'required') ? { required: true } : {}),
     ...(positiveNumberProp(node, 'minLength') !== undefined ? { minLength: positiveNumberProp(node, 'minLength') } : {}),
     ...(positiveNumberProp(node, 'maxLength') !== undefined ? { maxLength: positiveNumberProp(node, 'maxLength') } : {}),
@@ -130,7 +144,24 @@ function controlBindingFromNode(node: PageNode): FormControlBinding | null {
             : {}),
         }
       : {}),
+    ...(draftBehavior(node) !== 'include' ? { draftBehavior: draftBehavior(node) } : {}),
+    ...(node.catalogueInstance
+      ? {
+          catalogueEntryId: node.catalogueInstance.entryId,
+          catalogueEntryVersion: node.catalogueInstance.entryVersion,
+        }
+      : {}),
   }
+}
+
+function draftMode(node: PageNode): 'none' | 'session' | 'persistent' {
+  const value = stringProp(node, 'draftMode', 'none')
+  return value === 'session' || value === 'persistent' ? value : 'none'
+}
+
+function draftBehavior(node: PageNode): 'include' | 'session-only' | 'exclude' {
+  const value = stringProp(node, 'draftBehavior', 'include')
+  return value === 'session-only' || value === 'exclude' ? value : 'include'
 }
 
 function inferLabelTarget(

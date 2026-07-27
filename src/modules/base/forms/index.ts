@@ -42,12 +42,12 @@ const FormPropsSchema = Type.Object({
   redirectUrl: Type.String({ default: '' }),
   honeypotName: Type.String({ default: 'company' }),
   minSubmitSeconds: Type.Number({ default: 2 }),
-  draftMode: Type.Optional(Type.Union([
+  draftMode: Type.Union([
     Type.Literal('none'),
     Type.Literal('session'),
     Type.Literal('persistent'),
-  ], { default: 'none' })),
-  draftTtlDays: Type.Optional(Type.Number({ default: 30 })),
+  ], { default: 'none' }),
+  draftTtlDays: Type.Number({ default: 30 }),
 })
 
 type FormProps = Static<typeof FormPropsSchema>
@@ -93,11 +93,11 @@ const InputPropsSchema = Type.Object({
   multiple: Type.Boolean({ default: false }),
   attachmentMaxFiles: Type.Number({ default: 1 }),
   attachmentMaxBytes: Type.Number({ default: 10 * 1024 * 1024 }),
-  draftBehavior: Type.Optional(Type.Union([
+  draftBehavior: Type.Union([
     Type.Literal('include'),
     Type.Literal('session-only'),
     Type.Literal('exclude'),
-  ], { default: 'include' })),
+  ], { default: 'include' }),
 })
 
 type InputProps = Static<typeof InputPropsSchema>
@@ -114,11 +114,11 @@ const TextareaPropsSchema = Type.Object({
   rows: Type.Number({ default: 4 }),
   minLength: Type.Number({ default: 0 }),
   maxLength: Type.Number({ default: 0 }),
-  draftBehavior: Type.Optional(Type.Union([
+  draftBehavior: Type.Union([
     Type.Literal('include'),
     Type.Literal('session-only'),
     Type.Literal('exclude'),
-  ], { default: 'include' })),
+  ], { default: 'include' }),
 })
 
 type TextareaProps = Static<typeof TextareaPropsSchema>
@@ -130,11 +130,11 @@ const SelectPropsSchema = Type.Object({
   required: Type.Boolean({ default: false }),
   disabled: Type.Boolean({ default: false }),
   multiple: Type.Boolean({ default: false }),
-  draftBehavior: Type.Optional(Type.Union([
+  draftBehavior: Type.Union([
     Type.Literal('include'),
     Type.Literal('session-only'),
     Type.Literal('exclude'),
-  ], { default: 'include' })),
+  ], { default: 'include' }),
 })
 
 type SelectProps = Static<typeof SelectPropsSchema>
@@ -163,11 +163,11 @@ const ChoicePropsSchema = Type.Object({
   checked: Type.Boolean({ default: false }),
   required: Type.Boolean({ default: false }),
   disabled: Type.Boolean({ default: false }),
-  draftBehavior: Type.Optional(Type.Union([
+  draftBehavior: Type.Union([
     Type.Literal('include'),
     Type.Literal('session-only'),
     Type.Literal('exclude'),
-  ], { default: 'include' })),
+  ], { default: 'include' }),
 })
 
 type ChoiceProps = Static<typeof ChoicePropsSchema>

@@ -119,3 +119,13 @@ export type {
   ComponentLibraryMigrationSuccess,
   ComponentLibraryUsage,
 } from './migration'
+
+export {
+  ComponentLibraryPatternRegistry,
+  componentLibraryPatternRegistry,
+} from './patterns'
+
+export type {
+  ComponentLibraryPatternDefinition,
+  ComponentLibraryPatternNode,
+} from './patterns'

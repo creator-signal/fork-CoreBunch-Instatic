@@ -17,6 +17,7 @@
 import type { CoreCapability } from '../../auth/capabilities'
 import { ForbiddenSiteChangeError } from './siteDiff'
 import {
+  componentLibraryPatternRegistry,
   componentLibraryRegistry,
   resolveComponentLibraryPlacement,
   type ComponentLibraryEntry,
@@ -25,6 +26,10 @@ import {
 import { registry, resolvePropertyControlCategory } from '@core/module-engine'
 import type { CatalogueInstanceMetadata, Page, PageNode } from '@core/page-tree'
 import '@modules/base'
+import {
+  isManagedGovernedPatternNode,
+  isValidGovernedPatternBoundary,
+} from './pageDiffPatterns'
 
 type PageChangeKind = 'components' | 'structure' | 'content' | 'style'
 
@@ -143,7 +148,12 @@ function diffNodes(
         changedNode &&
         (
           isValidGovernedStandaloneNode(changedNode, changedNodes) ||
-          isManagedGovernedSlotNode(changedNode, changedNodes)
+          isManagedGovernedSlotNode(changedNode, changedNodes) ||
+          isManagedGovernedPatternNode(
+            changedNode,
+            changedNodes,
+            governedEntryForNode,
+          )
         )
       ) {
         requireGovernedChange(
@@ -190,7 +200,8 @@ function diffNode(
       const nodes = nextNodes[nodeId] ? nextNodes : previousNodes
       return node !== undefined && (
         governedEntryForNode(node) !== undefined ||
-        isManagedGovernedSlotNode(node, nodes)
+        isManagedGovernedSlotNode(node, nodes) ||
+        isManagedGovernedPatternNode(node, nodes, governedEntryForNode)
       )
     })
     if (governedTopology) {
@@ -383,7 +394,12 @@ function governedEntryForNode(node: PageNode): ComponentLibraryEntry | undefined
       : implementation.type === 'visual-component'
         ? node.moduleId === 'base.visual-component-ref' &&
           node.props.componentId === implementation.componentId
-        : false
+        : implementation.type === 'pattern'
+          ? Boolean(metadata.pattern) &&
+            componentLibraryPatternRegistryRootModule(
+              implementation.patternId,
+            ) === node.moduleId
+          : false
   if (!implementationMatches) {
     return undefined
   }
@@ -399,7 +415,17 @@ function governedEntryForNode(node: PageNode): ComponentLibraryEntry | undefined
   } else if (metadata.capabilityId || metadata.providerAdapterId) {
     return undefined
   }
+  if (implementation.type !== 'pattern' && metadata.pattern) return undefined
   return entry
+}
+
+function componentLibraryPatternRegistryRootModule(
+  patternId: string,
+): string | undefined {
+  const definition = componentLibraryPatternRegistry.get(patternId)
+  return definition?.nodes.find(
+    (node) => node.key === definition.rootKey,
+  )?.moduleId
 }
 
 function placementForNode(
@@ -459,6 +485,14 @@ function isValidGovernedStandaloneNode(
   const entry = governedEntryForNode(node)
   if (!entry) return false
   const implementation = backingImplementation(entry.implementation)
+  if (implementation.type === 'pattern') {
+    return isValidGovernedPatternBoundary(
+      node,
+      nodes,
+      entry,
+      governedEntryForNode,
+    )
+  }
   const definition = registry.get(node.moduleId)
   if (!definition) return false
   if (

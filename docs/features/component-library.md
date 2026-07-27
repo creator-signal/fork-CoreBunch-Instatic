@@ -51,6 +51,7 @@ module / Visual Component / pattern / template
 | Retained versions, migration paths and impact previews | `src/core/component-library/version.ts`, `migration.ts` |
 | Explicit built-in definitions | `src/modules/base/componentLibrary.ts`, `componentLibraryForms.ts`, `componentLibraryVisualComponents.ts` |
 | Application-owned Visual Components | `src/core/visual-components-schema/registry.ts` |
+| Pattern definitions and materialization | `src/core/component-library/patterns.ts`, `src/modules/base/componentLibraryPatterns.ts` |
 | Catalogue dialog and Components projection | `src/admin/pages/site/panels/LayersPanel/` |
 | Canonical backing-node insertion | `src/admin/pages/site/hooks/useInsertComponentLibraryEntry.ts` |
 | Public imports | `src/core/component-library/index.ts` |
@@ -233,7 +234,24 @@ A currently available `replacementEntryId` is reported as remediation guidance;
 the operation remains blocked until migration or conversion has actually
 rewritten every old instance.
 
-Primitive and Visual Component implementations can be inserted into the active page or Visual Component canvas. Primitive preset values merge over the module defaults. The store writes `catalogueInstance.entryId`, `entryVersion` and optional `presetId` on the backing node atomically with insertion, so undo removes both content and identity together. Pattern materialization and template-role placement remain disabled until their canonical factories exist; the picker does not synthesize partial content.
+Primitive, Visual Component and Pattern implementations can be inserted into
+the active page or Visual Component canvas. Primitive preset values merge over
+module defaults. Visual Component references materialize their governed slots,
+and Pattern definitions materialize fresh ordinary page-tree subtrees through
+the registered canonical definition. The pattern root records its remapped
+authorable region node IDs; duplication and paste remap those IDs again.
+Insertion is one history transaction, so undo removes content and catalogue
+identity together. Template-role placement remains unavailable in an ordinary
+page canvas because template chrome is managed through the template workflow.
+
+Built-in patterns cover Columns / Grid, Card Grid, Gallery, Icon List,
+Statistics, Logo Cloud, Timeline, Steps, Comparison Table, FAQ List and Empty
+State. They compose the shared primitives and Visual Components rather than
+store rendered HTML. Authorable region nodes remain visible beneath the pattern
+boundary in Components Layers, while implementation framing stays collapsed.
+The component-only server boundary accepts only a registered materialization,
+rejects tampered internal nodes and continues to allow declared fields on
+governed authorable regions.
 
 ### Governed Properties
 

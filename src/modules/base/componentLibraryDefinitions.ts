@@ -50,6 +50,21 @@ interface VisualComponentEntryOptions {
   accessibility: string
 }
 
+interface PatternEntryOptions {
+  id: string
+  name: string
+  description: string
+  category: string
+  icon: string
+  patternId: string
+  tags: string[]
+  allowedParentEntryIds?: string[]
+  allowedChildEntryIds?: string[]
+  accessibilityChecks?: ComponentLibraryAccessibilityCheck[]
+  usage: string
+  accessibility: string
+}
+
 export function primitiveEntry(
   options: PrimitiveEntryOptions,
 ): ComponentLibraryEntry {
@@ -131,6 +146,50 @@ export function visualComponentEntry(
     variants: options.variants ?? [],
     presets: [],
     slots: options.slots ?? [],
+    constraints: {
+      ...(options.allowedParentEntryIds
+        ? { allowedParentEntryIds: options.allowedParentEntryIds }
+        : {}),
+      ...(options.allowedChildEntryIds
+        ? { allowedChildEntryIds: options.allowedChildEntryIds }
+        : {}),
+    },
+    requirements: {
+      capabilities: [],
+      providerAdapters: [],
+      plugins: [],
+    },
+    documentation: {
+      usage: options.usage,
+      accessibility: options.accessibility,
+    },
+    accessibility: {
+      checks: options.accessibilityChecks ?? [],
+    },
+  }
+}
+
+export function patternEntry(
+  options: PatternEntryOptions,
+): ComponentLibraryEntry {
+  return {
+    id: options.id,
+    version: '1.0.0',
+    name: options.name,
+    description: options.description,
+    category: options.category,
+    tags: options.tags,
+    icon: options.icon,
+    source: { type: 'built-in' },
+    status: 'stable',
+    implementation: {
+      type: 'pattern',
+      patternId: options.patternId,
+    },
+    fields: [],
+    variants: [],
+    presets: [],
+    slots: [],
     constraints: {
       ...(options.allowedParentEntryIds
         ? { allowedParentEntryIds: options.allowedParentEntryIds }

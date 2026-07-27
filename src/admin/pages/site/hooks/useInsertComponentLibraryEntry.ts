@@ -1,5 +1,6 @@
 import { registry } from '@core/module-engine'
 import {
+  componentLibraryPatternRegistry,
   componentLibraryRegistry,
   resolveComponentLibraryPlacement,
   type ComponentLibraryEntry,
@@ -32,6 +33,7 @@ export function useInsertComponentLibraryEntry() {
   const site = useEditorStore((state) => state.site)
   const selectedNodeId = useEditorStore((state) => state.selectedNodeId)
   const insertComponentRef = useEditorStore((state) => state.insertComponentRef)
+  const insertImportedNodes = useEditorStore((state) => state.insertImportedNodes)
   const selectNode = useEditorStore((state) => state.selectNode)
   const insertModule = useInsertModule()
 
@@ -92,12 +94,26 @@ export function useInsertComponentLibraryEntry() {
         { catalogueInstance: metadata },
       )
       if (nodeId) selectNode(nodeId)
+    } else if (implementation.type === 'pattern') {
+      const fragment = componentLibraryPatternRegistry.materialize(
+        implementation.patternId,
+        metadata,
+      )
+      if (!fragment) {
+        pushUnsupportedEntryToast(
+          entry,
+          `Pattern "${implementation.patternId}" is not registered.`,
+        )
+        return null
+      }
+      nodeId = insertImportedNodes(location.parentId, fragment, {
+        index: location.index,
+      })[0] ?? null
+      if (nodeId) selectNode(nodeId)
     } else {
       pushUnsupportedEntryToast(
         entry,
-        implementation.type === 'pattern'
-          ? 'Pattern materialization is not available yet.'
-          : 'Template-role placement is not available in this canvas.',
+        'Template-role placement is not available in this canvas.',
       )
       return null
     }

@@ -192,6 +192,26 @@ describe('duplicateNode', () => {
     expect(newChildren[0]).not.toBe(childId) // new ID
   })
 
+  it('remaps governed pattern authorable node IDs to the cloned subtree', () => {
+    const page = makePage()
+    const rootId = page.rootNodeId
+    const patternId = addChildToPage(page, rootId)
+    const regionId = addChildToPage(page, patternId)
+    page.nodes[patternId].catalogueInstance = {
+      entryId: 'base.grid',
+      entryVersion: '1.0.0',
+      pattern: { authorableNodeIds: [regionId] },
+    }
+
+    const cloneId = duplicateNode(page, patternId)
+    const cloneRegionId = page.nodes[cloneId].children[0]!
+
+    expect(
+      page.nodes[cloneId].catalogueInstance?.pattern?.authorableNodeIds,
+    ).toEqual([cloneRegionId])
+    expect(cloneRegionId).not.toBe(regionId)
+  })
+
   it('inserts duplicate right after original in parent', () => {
     const page = makePage()
     const rootId = page.rootNodeId

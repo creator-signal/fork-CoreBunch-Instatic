@@ -56,6 +56,29 @@ export const COMPONENT_FRAME_CSS = `
   flex-direction: column;
   align-items: stretch;
 }
+[data-instatic-component="grid"],
+[data-instatic-component="card-grid"],
+[data-instatic-component="gallery"],
+[data-instatic-component="statistics"],
+[data-instatic-component="logo-cloud"] {
+  display: grid;
+  gap: var(--space-l, 1.5rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+}
+[data-instatic-component="icon-list"],
+[data-instatic-component="timeline"],
+[data-instatic-component="steps"],
+[data-instatic-component="comparison-table"],
+[data-instatic-component="empty-state"] {
+  display: grid;
+  gap: var(--space-m, 1rem);
+}
+[data-instatic-component="empty-state"] {
+  justify-items: start;
+  padding: var(--space-xl, 2rem);
+  border: 1px solid var(--color-border, currentColor);
+  border-radius: var(--radius-m, 0.5rem);
+}
 `.trim()
 
 export const ComponentFrameModule: ModuleDefinition<ComponentFrameStoredProps> = {

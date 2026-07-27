@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'bun:test'
-import { componentLibraryRegistry } from '@core/component-library'
+import {
+  componentLibraryPatternRegistry,
+  componentLibraryRegistry,
+} from '@core/component-library'
 import { registry } from '@core/module-engine'
 import type { Page, PageNode } from '@core/page-tree'
 import { makeNode, makePage } from '../fixtures'
 import { validatePageWriteDiff } from '../../../server/handlers/cms/pageDiff'
+import { BUILT_IN_PATTERN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibraryPatterns'
 
 const COMPONENT_CAPABILITIES = ['site.components.edit'] as const
 
@@ -92,6 +96,27 @@ function governedHeroPage(): Page {
         moduleId: 'base.slot-instance',
         props: { slotName: 'actions' },
       }),
+    },
+  })
+}
+
+function governedPatternPage(
+  entryId = 'base.card-grid',
+  patternId = 'base.pattern.card-grid',
+): Page {
+  const fragment = componentLibraryPatternRegistry.materialize(patternId, {
+    entryId,
+    entryVersion: '1.0.0',
+  })
+  if (!fragment) throw new Error(`${patternId} is not registered`)
+  return makePage({
+    nodes: {
+      root: makeNode({
+        id: 'root',
+        moduleId: 'base.body',
+        children: fragment.rootIds,
+      }),
+      ...fragment.nodes,
     },
   })
 }
@@ -261,5 +286,43 @@ describe('Component Library page diff policy', () => {
     expect(() => validate(previous, metadataOnly)).toThrow(
       /catalogue identity changed/,
     )
+  })
+
+  it('allows canonical pattern subtrees but rejects tampered materialization', () => {
+    const empty = makePage()
+    const pattern = governedPatternPage()
+
+    expect(() => validate(empty, pattern)).not.toThrow()
+    expect(() => validate(pattern, empty)).not.toThrow()
+
+    const tampered = governedPatternPage('base.grid', 'base.pattern.grid')
+    const patternRootId = tampered.nodes.root!.children[0]!
+    const columnId = tampered.nodes[patternRootId]!.children[0]!
+    tampered.nodes[columnId]!.props.implementationSecret = 'unsafe'
+    expect(() => validate(empty, tampered)).toThrow(
+      /forbidden structure change/,
+    )
+
+    const authored = governedPatternPage('base.grid', 'base.pattern.grid')
+    const authoredRootId = authored.nodes.root!.children[0]!
+    const authoredColumnId = authored.nodes[authoredRootId]!.children[0]!
+    authored.nodes[authoredColumnId]!.props.tag = 'section'
+    expect(() => validate(authored, empty)).not.toThrow()
+  })
+
+  it('accepts every built-in pattern through the component-only server boundary', () => {
+    const empty = makePage()
+    for (const entry of BUILT_IN_PATTERN_COMPONENT_LIBRARY_ENTRIES) {
+      const implementation = entry.implementation
+      if (implementation.type !== 'pattern') {
+        throw new Error(`${entry.id} is not a pattern`)
+      }
+      const pattern = governedPatternPage(
+        entry.id,
+        implementation.patternId,
+      )
+      expect(() => validate(empty, pattern), entry.id).not.toThrow()
+      expect(() => validate(pattern, empty), entry.id).not.toThrow()
+    }
   })
 })

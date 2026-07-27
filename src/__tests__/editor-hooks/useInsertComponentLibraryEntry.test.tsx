@@ -123,4 +123,37 @@ describe('useInsertComponentLibraryEntry', () => {
       useEditorStore.getState().site?.pages[0]?.nodes[nodeId!],
     ).toBeUndefined()
   })
+
+  it('materializes a governed pattern subtree in one undoable mutation', () => {
+    const store = useEditorStore.getState()
+    store.createSite('Built-in Pattern')
+    const entry = componentLibraryRegistry.getOrThrow('base.card-grid')
+    const { result } = renderHook(() => useInsertComponentLibraryEntry())
+    let nodeId: string | null = null
+
+    act(() => {
+      nodeId = result.current(entry)
+    })
+
+    const state = useEditorStore.getState()
+    const root = state.site?.pages[0]?.nodes[nodeId!]
+    expect(root?.moduleId).toBe('base.component-frame')
+    expect(root?.catalogueInstance?.entryId).toBe('base.card-grid')
+    expect(root?.children).toHaveLength(1)
+    const itemsId = root!.children[0]!
+    expect(root?.catalogueInstance?.pattern?.authorableNodeIds)
+      .toEqual([itemsId])
+    const items = state.site?.pages[0]?.nodes[itemsId]
+    expect(items?.children).toHaveLength(3)
+    expect(
+      items?.children.map((childId) =>
+        state.site?.pages[0]?.nodes[childId]?.props.componentId),
+    ).toEqual(['base.vc.card', 'base.vc.card', 'base.vc.card'])
+    expect(state._historyPast).toHaveLength(1)
+
+    act(() => useEditorStore.getState().undo())
+    expect(
+      useEditorStore.getState().site?.pages[0]?.nodes[nodeId!],
+    ).toBeUndefined()
+  })
 })

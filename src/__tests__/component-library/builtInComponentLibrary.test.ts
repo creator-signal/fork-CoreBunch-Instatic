@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { componentLibraryRegistry } from '@core/component-library'
+import { componentLibraryPatternRegistry } from '@core/component-library'
 import { registry } from '@core/module-engine'
 import {
   BUILT_IN_COMPONENT_LIBRARY_ENTRIES,
@@ -43,9 +44,42 @@ describe('built-in Component Library', () => {
     expect(ids).toContain('base.dialog')
     expect(ids).toContain('base.drawer')
     expect(ids).toContain('base.carousel')
+    expect(ids).toContain('base.grid')
+    expect(ids).toContain('base.card-grid')
+    expect(ids).toContain('base.gallery')
+    expect(ids).toContain('base.comparison-table')
+    expect(ids).toContain('base.faq-list')
+    expect(ids).toContain('base.empty-state')
 
     for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
       expect(componentLibraryRegistry.get(entry.id)).toEqual(entry)
+    }
+  })
+
+  it('maps every pattern entry to a registered canonical materializer', () => {
+    for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
+      const implementation =
+        entry.implementation.type === 'capability-backed'
+          ? entry.implementation.backing
+          : entry.implementation
+      if (implementation.type !== 'pattern') continue
+
+      const definition = componentLibraryPatternRegistry.get(
+        implementation.patternId,
+      )
+      expect(definition).toBeTruthy()
+      const fragment = componentLibraryPatternRegistry.materialize(
+        implementation.patternId,
+        {
+          entryId: entry.id,
+          entryVersion: entry.version,
+        },
+      )
+      expect(fragment?.rootIds).toHaveLength(1)
+      const root = fragment?.nodes[fragment.rootIds[0]!]
+      expect(root?.catalogueInstance?.entryId).toBe(entry.id)
+      expect(root?.catalogueInstance?.pattern?.authorableNodeIds.length)
+        .toBe(definition?.authorableNodeKeys.length)
     }
   })
 

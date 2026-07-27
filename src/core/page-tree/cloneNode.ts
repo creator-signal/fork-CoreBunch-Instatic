@@ -68,6 +68,21 @@ export function cloneNodeWithRemap(
       Object.entries(node.dynamicBindings).map(([k, v]) => [k, { ...v }]),
     )
   }
+  if (node.catalogueInstance) {
+    cloned.catalogueInstance = {
+      ...node.catalogueInstance,
+      ...(node.catalogueInstance.pattern
+        ? {
+            pattern: {
+              authorableNodeIds:
+                node.catalogueInstance.pattern.authorableNodeIds
+                  .map((nodeId) => idMap.get(nodeId))
+                  .filter((nodeId): nodeId is string => Boolean(nodeId)),
+            },
+          }
+        : {}),
+    }
+  }
 
   return cloned
 }

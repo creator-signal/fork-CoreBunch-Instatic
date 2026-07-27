@@ -67,6 +67,14 @@ associates them with the matching control through `aria-describedby` and
 error through the form status region and focuses the first invalid control.
 Editing that control clears its invalid state and hides the stale error.
 
+The Component Library also declares a provider-neutral CAPTCHA entry backed by
+the shared provider-adapter boundary. The initial hCaptcha adapter is
+deliberately unavailable: a usable CAPTCHA requires the `forms.captcha`
+capability, a public site key, a protected server secret and token verification
+inside the submission handler. Until all four exist, authors see the dependency
+state and published output uses fallback text; it never renders a challenge
+that the server cannot verify.
+
 ## Submission Flow
 
 CMS-native submission is a two-step public flow:

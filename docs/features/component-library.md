@@ -152,6 +152,14 @@ componentLibraryRegistry.register(emailInput)
 
 Registration is deliberately explicit. A low-level HTML module can remain available in HTML view without automatically becoming a governed Component Library entry.
 
+External content uses capability-backed entries. YouTube Embed and Map share
+the policy-validated `base.provider-embed` implementation while declaring
+`media.youtube` and `maps.openstreetmap` requirements. The editor preview is
+inert and the published iframe is consent-delayed. CAPTCHA declares both
+`forms.captcha` and `captcha.hcaptcha`; it remains unavailable until protected
+hCaptcha configuration and server-side response verification are implemented.
+Self-hosted video remains the separate `base.media` entry.
+
 ## Search and filtering
 
 `filterComponentLibraryEntries()` searches:

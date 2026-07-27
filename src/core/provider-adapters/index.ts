@@ -29,3 +29,9 @@ export type {
   ProviderRenderPlan,
   ProviderRuntimePlan,
 } from './schemas'
+export {
+  HcaptchaProviderAdapter,
+  OpenStreetMapProviderAdapter,
+  YoutubeProviderAdapter,
+  registerBuiltInProviderAdapters,
+} from './builtins'

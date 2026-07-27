@@ -97,4 +97,32 @@ describe('ComponentLibraryDialog dependency availability', () => {
     expect(screen.getByRole('button', { name: 'Insert component' }).getAttribute('aria-disabled'))
       .toBeNull()
   })
+
+  it('uses built-in provider health when no dependency override is supplied', () => {
+    render(<ComponentLibraryDialog open onClose={() => {}} />)
+
+    fireEvent.change(screen.getByLabelText('Search Component Library'), {
+      target: { value: 'YouTube Embed' },
+    })
+
+    const dependencies = screen.getByRole('heading', {
+      name: 'Dependencies',
+    }).parentElement!
+    expect(dependencies.textContent).toContain(
+      'All required capabilities, provider adapters and plugins are available.',
+    )
+    expect(screen.getByRole('button', { name: 'Insert component' }).getAttribute('aria-disabled'))
+      .toBeNull()
+
+    fireEvent.change(screen.getByLabelText('Search Component Library'), {
+      target: { value: 'CAPTCHA' },
+    })
+
+    const notice = screen.getByRole('status')
+    expect(within(notice).getByText('Insertion unavailable')).toBeDefined()
+    expect(notice.textContent).toContain('Capability “forms.captcha”')
+    expect(notice.textContent).toContain('Provider adapter “captcha.hcaptcha”')
+    expect(screen.getByRole('button', { name: 'Insert component' }).getAttribute('aria-disabled'))
+      .toBe('true')
+  })
 })

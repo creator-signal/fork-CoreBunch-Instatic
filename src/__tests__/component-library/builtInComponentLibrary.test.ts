@@ -25,6 +25,9 @@ describe('built-in Component Library', () => {
     expect(ids).toContain('base.tab-panel')
     expect(ids).toContain('base.accordion')
     expect(ids).toContain('base.accordion-item')
+    expect(ids).toContain('base.youtube-embed')
+    expect(ids).toContain('base.map')
+    expect(ids).toContain('base.captcha')
 
     for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
       expect(componentLibraryRegistry.get(entry.id)).toEqual(entry)
@@ -33,16 +36,20 @@ describe('built-in Component Library', () => {
 
   it('maps every primitive entry to a registered module and declared preset', () => {
     for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
-      if (entry.implementation.type !== 'primitive') continue
-      expect(registry.get(entry.implementation.moduleId)).toBeTruthy()
+      const implementation =
+        entry.implementation.type === 'capability-backed'
+          ? entry.implementation.backing
+          : entry.implementation
+      if (implementation.type !== 'primitive') continue
+      expect(registry.get(implementation.moduleId)).toBeTruthy()
 
-      const presetId = entry.implementation.presetId
+      const presetId = implementation.presetId
       if (presetId) {
         expect(entry.presets.some((preset) => preset.id === presetId)).toBe(true)
       }
       for (const field of entry.fields) {
         expect(
-          registry.get(entry.implementation.moduleId)?.schema[field.key],
+          registry.get(implementation.moduleId)?.schema[field.key],
           `${entry.id} field ${field.key} must map to its canonical module schema`,
         ).toBeTruthy()
       }
@@ -108,5 +115,48 @@ describe('built-in Component Library', () => {
       .toEqual(['base.accordion-item'])
     expect(byId.get('base.accordion-item')?.constraints.allowedParentEntryIds)
       .toEqual(['base.accordion'])
+  })
+
+  it('declares provider-backed media, map and CAPTCHA dependencies', () => {
+    const byId = new Map(
+      BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [entry.id, entry]),
+    )
+
+    expect(byId.get('base.youtube-embed')).toMatchObject({
+      implementation: {
+        type: 'capability-backed',
+        backing: {
+          type: 'primitive',
+          moduleId: 'base.provider-embed',
+          presetId: 'youtube',
+        },
+      },
+      requirements: { providerAdapters: ['media.youtube'] },
+    })
+    expect(byId.get('base.map')).toMatchObject({
+      implementation: {
+        type: 'capability-backed',
+        backing: {
+          type: 'primitive',
+          moduleId: 'base.provider-embed',
+          presetId: 'openstreetmap',
+        },
+      },
+      requirements: { providerAdapters: ['maps.openstreetmap'] },
+    })
+    expect(byId.get('base.captcha')).toMatchObject({
+      implementation: {
+        type: 'capability-backed',
+        backing: {
+          type: 'primitive',
+          moduleId: 'base.provider-embed',
+          presetId: 'hcaptcha',
+        },
+      },
+      requirements: {
+        capabilities: ['forms.captcha'],
+        providerAdapters: ['captcha.hcaptcha'],
+      },
+    })
   })
 })

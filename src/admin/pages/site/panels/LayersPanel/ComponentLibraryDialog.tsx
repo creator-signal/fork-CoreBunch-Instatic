@@ -11,6 +11,7 @@ import {
   type ComponentLibrarySourceType,
   type ComponentLibraryStatus,
 } from '@core/component-library'
+import { providerAdapterRegistry } from '@core/provider-adapters'
 import { ModuleIcon } from '@site/ui/ModuleIcon'
 import { useEditorPermissions } from '@site/editorPermissionsContext'
 import { useInsertComponentLibraryEntry } from '@site/hooks/useInsertComponentLibraryEntry'
@@ -23,11 +24,6 @@ import { TagPill } from '@ui/components/TagPill'
 import styles from './ComponentLibraryDialog.module.css'
 
 const ALL = 'all'
-const EMPTY_DEPENDENCY_STATE: ComponentLibraryDependencyState = {
-  capabilities: {},
-  providerAdapters: {},
-  plugins: {},
-}
 const subscribeComponentLibrary = (listener: () => void) =>
   componentLibraryRegistry.subscribe(listener)
 const getComponentLibraryGeneration = () => componentLibraryRegistry.generation()
@@ -65,7 +61,7 @@ interface ComponentLibraryDialogProps {
 export function ComponentLibraryDialog({
   open,
   onClose,
-  dependencyState = EMPTY_DEPENDENCY_STATE,
+  dependencyState,
 }: ComponentLibraryDialogProps) {
   const permissions = useEditorPermissions()
   useSyncExternalStore(
@@ -74,6 +70,11 @@ export function ComponentLibraryDialog({
     getComponentLibraryGeneration,
   )
   const entries = componentLibraryRegistry.list()
+  const resolvedDependencyState = dependencyState ?? {
+    capabilities: {},
+    providerAdapters: providerAdapterRegistry.dependencyHealth(),
+    plugins: {},
+  }
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState(ALL)
   const [implementationType, setImplementationType] = useState(ALL)
@@ -101,7 +102,7 @@ export function ComponentLibraryDialog({
     filteredEntries.find((entry) => entry.id === selectedId) ??
     filteredEntries[0]
   const availability = selectedEntry
-    ? resolveComponentLibraryAvailability(selectedEntry, dependencyState)
+    ? resolveComponentLibraryAvailability(selectedEntry, resolvedDependencyState)
     : null
   const insertionSupported = selectedEntry
     ? supportsCanvasInsertion(selectedEntry.implementation)

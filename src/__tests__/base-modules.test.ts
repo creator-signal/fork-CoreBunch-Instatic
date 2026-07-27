@@ -48,6 +48,7 @@ import {
   TabPanelModule,
   TabsModule,
 } from '@modules/base/disclosure'
+import { ProviderEmbedModule } from '@modules/base/providerEmbed'
 
 // ---------------------------------------------------------------------------
 // Run the full conformance suite for every canonical base module.
@@ -70,6 +71,7 @@ runModuleConformanceSuite(TabsModule)
 runModuleConformanceSuite(TabPanelModule)
 runModuleConformanceSuite(AccordionModule)
 runModuleConformanceSuite(AccordionItemModule)
+runModuleConformanceSuite(ProviderEmbedModule)
 
 describe('base module registration', () => {
   it('only imports available production base modules', async () => {
@@ -89,6 +91,7 @@ describe('base module registration', () => {
     expect(baseIndex).toContain("import './visualComponentRef'")
     expect(baseIndex).toContain("import './slotOutlet'")
     expect(baseIndex).toContain("import './disclosure'")
+    expect(baseIndex).toContain("import './providerEmbed'")
   })
 
   it('does not keep retired module directories around', () => {
@@ -126,6 +129,7 @@ describe('base module registration', () => {
       TabPanelModule,
       AccordionModule,
       AccordionItemModule,
+      ProviderEmbedModule,
     ]) {
       // No module should declare CSS-only props as module schema fields.
       const cssOnlyPropNames = ['backgroundColor', 'color', 'fontSize', 'padding', 'margin', 'border']

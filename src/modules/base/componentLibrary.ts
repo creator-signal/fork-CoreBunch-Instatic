@@ -20,6 +20,11 @@ interface PrimitiveEntryOptions {
   }
   allowedParentEntryIds?: string[]
   allowedChildEntryIds?: string[]
+  requirements?: {
+    capabilities: string[]
+    providerAdapters: string[]
+    plugins: string[]
+  }
   usage: string
   accessibility: string
 }
@@ -35,11 +40,20 @@ function primitiveEntry(options: PrimitiveEntryOptions): ComponentLibraryEntry {
     icon: options.icon,
     source: { type: 'built-in' },
     status: 'stable',
-    implementation: {
-      type: 'primitive',
-      moduleId: options.moduleId,
-      ...(options.preset ? { presetId: options.preset.id } : {}),
-    },
+    implementation: options.requirements
+      ? {
+          type: 'capability-backed',
+          backing: {
+            type: 'primitive',
+            moduleId: options.moduleId,
+            ...(options.preset ? { presetId: options.preset.id } : {}),
+          },
+        }
+      : {
+          type: 'primitive',
+          moduleId: options.moduleId,
+          ...(options.preset ? { presetId: options.preset.id } : {}),
+        },
     fields: options.fields ?? [],
     variants: [],
     presets: options.preset
@@ -58,7 +72,7 @@ function primitiveEntry(options: PrimitiveEntryOptions): ComponentLibraryEntry {
         ? { allowedChildEntryIds: options.allowedChildEntryIds }
         : {}),
     },
-    requirements: {
+    requirements: options.requirements ?? {
       capabilities: [],
       providerAdapters: [],
       plugins: [],
@@ -288,11 +302,11 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
   primitiveEntry({
     id: 'base.media',
     name: 'Media',
-    description: 'Accessible hosted video or approved provider video.',
+    description: 'Accessible self-hosted video from the Media Library.',
     category: 'Media',
     icon: 'video',
     moduleId: 'base.video',
-    tags: ['video', 'media', 'youtube'],
+    tags: ['video', 'media', 'hosted'],
     fields: [
       { key: 'videoUrl', label: 'Video', type: 'media', required: true },
       { key: 'poster', label: 'Poster image', type: 'image', required: false },
@@ -300,8 +314,70 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       { key: 'controls', label: 'Show controls', type: 'boolean', required: false },
       { key: 'autoplay', label: 'Autoplay', type: 'boolean', required: false, advanced: true },
     ],
-    usage: 'Use for a hosted video asset or an approved YouTube URL.',
+    usage: 'Use for a video asset hosted by the site. Use YouTube Embed for provider video.',
     accessibility: 'Provide an accurate title, captions where needed and user controls.',
+  }),
+  primitiveEntry({
+    id: 'base.youtube-embed',
+    name: 'YouTube Embed',
+    description: 'A consent-delayed privacy-enhanced YouTube video.',
+    category: 'Media',
+    icon: 'video',
+    moduleId: 'base.provider-embed',
+    tags: ['video', 'youtube', 'provider', 'consent'],
+    fields: [
+      { key: 'sourceUrl', label: 'YouTube URL', type: 'url', required: true },
+      { key: 'title', label: 'Accessible title', type: 'text', required: true },
+      { key: 'fallbackText', label: 'Fallback text', type: 'text', required: true },
+    ],
+    preset: {
+      id: 'youtube',
+      name: 'YouTube',
+      values: {
+        adapterId: 'media.youtube',
+        kind: 'media',
+        title: 'YouTube video',
+        fallbackText: 'YouTube video unavailable.',
+      },
+    },
+    requirements: {
+      capabilities: [],
+      providerAdapters: ['media.youtube'],
+      plugins: [],
+    },
+    usage: 'Paste an approved YouTube URL; the player loads only after marketing consent or explicit activation.',
+    accessibility: 'Provide an accurate title and a meaningful fallback when provider content is blocked.',
+  }),
+  primitiveEntry({
+    id: 'base.map',
+    name: 'Map',
+    description: 'A consent-delayed OpenStreetMap embed.',
+    category: 'Interactive',
+    icon: 'layout-solid',
+    moduleId: 'base.provider-embed',
+    tags: ['map', 'openstreetmap', 'provider', 'consent'],
+    fields: [
+      { key: 'sourceUrl', label: 'OpenStreetMap URL', type: 'url', required: true },
+      { key: 'title', label: 'Accessible title', type: 'text', required: true },
+      { key: 'fallbackText', label: 'Fallback text', type: 'text', required: true },
+    ],
+    preset: {
+      id: 'openstreetmap',
+      name: 'OpenStreetMap',
+      values: {
+        adapterId: 'maps.openstreetmap',
+        kind: 'map',
+        title: 'Map',
+        fallbackText: 'Map unavailable.',
+      },
+    },
+    requirements: {
+      capabilities: [],
+      providerAdapters: ['maps.openstreetmap'],
+      plugins: [],
+    },
+    usage: 'Paste an OpenStreetMap export URL from the approved provider origin.',
+    accessibility: 'Use a title that identifies the location and provide the address in ordinary page text.',
   }),
   primitiveEntry({
     id: 'base.tabs',
@@ -416,6 +492,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       'base.radio',
       'base.form-help',
       'base.form-error',
+      'base.captcha',
       'base.plain-text',
       'base.image',
     ],
@@ -658,6 +735,37 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     allowedParentEntryIds: formFieldParentEntryIds,
     usage: 'Place beside the control whose server validation error it reports.',
     accessibility: 'The runtime marks the control invalid, announces the message and focuses the first invalid field.',
+  }),
+  primitiveEntry({
+    id: 'base.captcha',
+    name: 'CAPTCHA',
+    description: 'A provider-neutral form verification boundary.',
+    category: 'Forms',
+    icon: 'checkbox-solid',
+    moduleId: 'base.provider-embed',
+    tags: ['form', 'captcha', 'verification', 'provider'],
+    fields: [
+      { key: 'title', label: 'Accessible title', type: 'text', required: true },
+      { key: 'fallbackText', label: 'Unavailable message', type: 'text', required: true },
+    ],
+    preset: {
+      id: 'hcaptcha',
+      name: 'hCaptcha',
+      values: {
+        adapterId: 'captcha.hcaptcha',
+        kind: 'captcha',
+        title: 'Verification challenge',
+        fallbackText: 'CAPTCHA verification is unavailable.',
+      },
+    },
+    allowedParentEntryIds: formFieldParentEntryIds,
+    requirements: {
+      capabilities: ['forms.captcha'],
+      providerAdapters: ['captcha.hcaptcha'],
+      plugins: [],
+    },
+    usage: 'Use only when the platform CAPTCHA capability and an approved adapter are healthy.',
+    accessibility: 'Provide an alternate verification path and never claim availability while provider verification is unconfigured.',
   }),
 ]
 

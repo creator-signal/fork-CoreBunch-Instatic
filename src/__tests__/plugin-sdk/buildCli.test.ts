@@ -37,4 +37,64 @@ export default definePlugin({
       await rm(pluginDir, { recursive: true, force: true })
     }
   })
+
+  it('emits governed Component Library entries as a declarative package', async () => {
+    const parentDir = join(PROJECT_ROOT, '.tmp-build')
+    await mkdir(parentDir, { recursive: true })
+    const pluginDir = await mkdtemp(join(parentDir, 'plugin-catalogue-'))
+
+    try {
+      await writeFile(
+        join(pluginDir, 'instatic-plugin.config.ts'),
+        `import { definePlugin } from '@core/plugin-sdk'
+export default definePlugin({
+  id: 'acme.catalogue',
+  name: 'Catalogue',
+  version: '1.0.0',
+  permissions: ['componentLibrary.register'],
+  componentLibrary: [{
+    id: 'acme.catalogue.callout',
+    version: '1.0.0',
+    name: 'Callout',
+    description: 'A governed callout.',
+    category: 'Acme',
+    tags: ['callout'],
+    icon: 'message',
+    source: { type: 'plugin', pluginId: 'acme.catalogue' },
+    status: 'stable',
+    implementation: { type: 'primitive', moduleId: 'base.text' },
+    fields: [],
+    variants: [],
+    presets: [],
+    slots: [],
+    constraints: {},
+    requirements: { capabilities: [], providerAdapters: [], plugins: ['acme.catalogue'] },
+    documentation: {},
+  }],
+})
+`,
+        'utf-8',
+      )
+
+      await buildPlugin(pluginDir, { zip: false })
+
+      const manifest = JSON.parse(
+        await readFile(join(pluginDir, 'dist', 'plugin.json'), 'utf-8'),
+      ) as { componentLibrary?: { path?: string } }
+      const entries = JSON.parse(
+        await readFile(
+          join(pluginDir, 'dist', 'component-library', 'entries.json'),
+          'utf-8',
+        ),
+      ) as Array<{ id?: string }>
+      expect(manifest.componentLibrary?.path).toBe(
+        'component-library/entries.json',
+      )
+      expect(entries.map((entry) => entry.id)).toEqual([
+        'acme.catalogue.callout',
+      ])
+    } finally {
+      await rm(pluginDir, { recursive: true, force: true })
+    }
+  })
 })

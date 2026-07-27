@@ -48,6 +48,7 @@ export const PLUGIN_PERMISSION_VALUES = [
   'editor.store.write',
   // Builder extensions
   'modules.register',
+  'componentLibrary.register',
   'loops.register',
   'visualComponents.register',
   'dashboard.widgets.register',

@@ -9,6 +9,10 @@ import {
   activatePluginModulePack,
   resetPluginModulePacks,
 } from './modulePackLoader'
+import {
+  activatePluginComponentLibraryPack,
+  resetPluginComponentLibraryPacks,
+} from './componentLibraryPackLoader'
 import type { PluginModuleComponentFactory } from './moduleAdapter'
 import { pluginCacheKey, withPluginCacheBuster } from './cacheBuster'
 
@@ -26,6 +30,8 @@ interface InstalledEditorPluginActivationResult {
   failed: InstalledEditorPluginActivationFailure[]
   /** Plugins that registered canvas modules (for diagnostics in the editor). */
   modulePacksLoaded: string[]
+  /** Plugins that registered governed Component Library entries. */
+  componentLibrariesLoaded: string[]
 }
 
 interface ActivateInstalledEditorPluginsOptions {
@@ -106,10 +112,12 @@ export async function activateInstalledEditorPlugins(
     activated: [],
     failed: [],
     modulePacksLoaded: [],
+    componentLibrariesLoaded: [],
   }
 
   pluginRuntime.reset()
   resetPluginModulePacks()
+  resetPluginComponentLibraryPacks()
 
   const payload = await listCmsPlugins(fetchImpl)
   for (const plugin of payload.plugins) {
@@ -162,6 +170,41 @@ export async function activateInstalledEditorPlugins(
       }
     }
 
+    // Governed catalogue package — declarative JSON loaded only after canvas
+    // modules, so primitive entries can resolve their canonical implementation.
+    if (manifest.componentLibrary) {
+      if (!plugin.grantedPermissions.includes('componentLibrary.register')) {
+        result.failed.push({
+          pluginId: plugin.id,
+          error: new Error(
+            'Component Library pack was not loaded: the ' +
+            '"componentLibrary.register" permission is not granted.',
+          ),
+        })
+      } else {
+        try {
+          const response = await fetchImpl(
+            joinAssetPath(
+              manifest.assetBasePath,
+              manifest.componentLibrary.path,
+            ),
+          )
+          if (!response.ok) {
+            throw new Error(
+              `Component Library pack request failed with HTTP ${response.status}.`,
+            )
+          }
+          activatePluginComponentLibraryPack(
+            manifest,
+            await response.json(),
+          )
+          result.componentLibrariesLoaded.push(plugin.id)
+        } catch (error) {
+          result.failed.push({ pluginId: plugin.id, error })
+        }
+      }
+    }
+
     // Editor entrypoint — toolbar, commands, store transactions, etc.
     // This is unsandboxed plugin JavaScript dynamically imported into the
     // admin window, so the host refuses to load it without the explicit
@@ -189,7 +232,11 @@ export async function activateInstalledEditorPlugins(
       }
     }
 
-    if (editorActivated || result.modulePacksLoaded.includes(plugin.id)) {
+    if (
+      editorActivated ||
+      result.modulePacksLoaded.includes(plugin.id) ||
+      result.componentLibrariesLoaded.includes(plugin.id)
+    ) {
       result.activated.push(plugin.id)
     }
   }

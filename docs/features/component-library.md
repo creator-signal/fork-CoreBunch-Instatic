@@ -167,6 +167,8 @@ The **Components** Layers view exposes this query through the add button beside 
 
 When the active page is wrapped by templates, Components Layers uses the same outer-to-inner template chain as the canvas and publisher. Template-owned rows retain their source template, are always read-only in the consuming page, and are spliced around the active page at the first outlet in exact page order. Authors with structural permission get an explicit action to open the owning template; component-only authors can inspect the hierarchy but cannot navigate into or manipulate the protected source.
 
+Plugins publish governed entries explicitly through `definePlugin({ componentLibrary })`; registering a canvas module by itself never adds an author-facing catalogue entry. The build emits declarative `component-library/entries.json`, and the manifest requests `componentLibrary.register`. Both editor and server validate the granted permission, entry schema, `<pluginId>.*` namespace, plugin source ownership, duplicates, and primitive backing-module availability before mutating the registry. Disable, uninstall, reload, upgrade and rollback paths remove or replace the owning plugin's entries as a unit.
+
 Primitive and Visual Component implementations can be inserted into the active page or Visual Component canvas. Primitive preset values merge over the module defaults. The store writes `catalogueInstance.entryId`, `entryVersion` and optional `presetId` on the backing node atomically with insertion, so undo removes both content and identity together. Pattern materialization and template-role placement remain disabled until their canonical factories exist; the picker does not synthesize partial content.
 
 ### Governed Properties

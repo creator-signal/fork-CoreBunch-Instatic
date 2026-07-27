@@ -397,6 +397,68 @@ describe('definePlugin', () => {
     })).toThrow(/namespaced/)
   })
 
+  it('packages explicitly owned governed catalogue entries', () => {
+    const componentEntry = {
+      id: 'acme.ui-kit.callout',
+      version: '1.0.0',
+      name: 'Callout',
+      description: 'A governed callout.',
+      category: 'UI Kit',
+      tags: ['callout'],
+      icon: 'message',
+      source: {
+        type: 'plugin' as const,
+        pluginId: 'acme.ui-kit',
+        name: 'UI Kit',
+      },
+      status: 'stable' as const,
+      implementation: {
+        type: 'primitive' as const,
+        moduleId: 'base.text',
+      },
+      fields: [],
+      variants: [],
+      presets: [],
+      slots: [],
+      constraints: {},
+      requirements: {
+        capabilities: [],
+        providerAdapters: [],
+        plugins: ['acme.ui-kit'],
+      },
+      documentation: {},
+    }
+    const definition = definePlugin({
+      id: 'acme.ui-kit',
+      name: 'UI Kit',
+      version: '1.0.0',
+      permissions: [permissions.componentLibraryRegister],
+      componentLibrary: [componentEntry],
+    })
+
+    expect(definition.componentLibrary).toEqual([componentEntry])
+    expect(() => definePlugin({
+      id: 'acme.ui-kit',
+      name: 'UI Kit',
+      version: '1.0.0',
+      permissions: [],
+      componentLibrary: [componentEntry],
+    })).toThrow(/componentLibrary\.register/)
+    expect(() => definePlugin({
+      id: 'acme.ui-kit',
+      name: 'UI Kit',
+      version: '1.0.0',
+      permissions: [permissions.componentLibraryRegister],
+      componentLibrary: [{
+        ...componentEntry,
+        source: {
+          type: 'plugin',
+          pluginId: 'other.plugin',
+        },
+      }],
+    })).toThrow(/source ownership/)
+  })
+
   it('rejects modules whose id does not start with the plugin id', () => {
     expect(() => definePlugin({
       id: 'acme.ui-kit',

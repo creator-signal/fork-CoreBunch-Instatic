@@ -104,6 +104,13 @@ export const PLUGIN_CAPABILITIES: PluginCapability[] = [
     surfaces: ['editor', 'manifest'],
   },
   {
+    permission: 'componentLibrary.register',
+    label: 'Register governed Component Library entries',
+    description: 'Allows the plugin to expose explicitly packaged, namespaced catalogue entries backed by its modules or existing host implementations. The host validates ownership and removes the entries when the plugin is disabled.',
+    risk: 'high',
+    surfaces: ['editor', 'server', 'manifest'],
+  },
+  {
     permission: 'loops.register',
     label: 'Register loop entity sources',
     description: 'Allows the plugin to register data sources for the base.loop module (e.g. external collections, custom queries).',

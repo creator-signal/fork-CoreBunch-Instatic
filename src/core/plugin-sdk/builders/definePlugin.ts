@@ -34,6 +34,10 @@ import type {
   PluginResource,
 } from '../types'
 import type { PluginModuleDefinition } from '../modules'
+import {
+  parseComponentLibraryEntry,
+  type ComponentLibraryEntry,
+} from '@core/component-library'
 import type { PluginPackContents } from './definePack'
 import {
   validatePluginSettingsDefinitions,
@@ -96,6 +100,13 @@ export interface DefinePluginConfig {
   pack?: PluginPackContents
 
   /**
+   * Governed catalogue entries packaged separately from canvas modules.
+   * Every entry must be namespaced under, and declare ownership by, this
+   * plugin. Requires `componentLibrary.register`.
+   */
+  componentLibrary?: ComponentLibraryEntry[]
+
+  /**
    * Declarative plugin settings — the host renders a form using its
    * design-system primitives. Plugin reads values via
    * `api.cms.settings.get(key)` (server / admin app). Frontend bundles
@@ -123,6 +134,7 @@ export interface PluginDefinition {
   manifest: PluginManifest
   modules: PluginModuleDefinition[]
   pack: PluginPackContents | null
+  componentLibrary: ComponentLibraryEntry[]
 }
 
 export function definePlugin(config: DefinePluginConfig): PluginDefinition {
@@ -149,6 +161,40 @@ export function definePlugin(config: DefinePluginConfig): PluginDefinition {
         `[plugin-sdk] Visual Component id "${vc.id}" must start with "${config.id}/".`,
       )
     }
+  }
+
+  const componentLibrary = (config.componentLibrary ?? []).map((entry) =>
+    parseComponentLibraryEntry(entry),
+  )
+  if (
+    componentLibrary.length > 0 &&
+    !config.permissions.includes('componentLibrary.register')
+  ) {
+    throw new Error(
+      '[plugin-sdk] Component Library entries require the "componentLibrary.register" permission.',
+    )
+  }
+  const componentEntryIds = new Set<string>()
+  for (const entry of componentLibrary) {
+    if (!entry.id.startsWith(`${config.id}.`)) {
+      throw new Error(
+        `[plugin-sdk] Component Library entry id "${entry.id}" must start with "${config.id}.".`,
+      )
+    }
+    if (
+      entry.source.type !== 'plugin' ||
+      entry.source.pluginId !== config.id
+    ) {
+      throw new Error(
+        `[plugin-sdk] Component Library entry "${entry.id}" must declare plugin source ownership by "${config.id}".`,
+      )
+    }
+    if (componentEntryIds.has(entry.id)) {
+      throw new Error(
+        `[plugin-sdk] Duplicate Component Library entry id "${entry.id}".`,
+      )
+    }
+    componentEntryIds.add(entry.id)
   }
 
   if (config.settings && config.settings.length > 0) {
@@ -193,5 +239,6 @@ export function definePlugin(config: DefinePluginConfig): PluginDefinition {
     manifest,
     modules: config.modules ?? [],
     pack: config.pack ?? null,
+    componentLibrary,
   }
 }

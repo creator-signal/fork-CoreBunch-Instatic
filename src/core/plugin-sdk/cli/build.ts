@@ -398,6 +398,9 @@ export async function buildPlugin(
     ...definition.manifest,
     entrypoints,
     ...(definition.pack ? { pack: { path: 'pack/site.json' } } : {}),
+    ...(definition.componentLibrary.length > 0
+      ? { componentLibrary: { path: 'component-library/entries.json' } }
+      : {}),
   }
   await writeFile(join(distDir, 'plugin.json'), JSON.stringify(finalManifest, null, 2), 'utf-8')
 
@@ -467,6 +470,18 @@ export async function buildPlugin(
     await writeFile(
       join(distDir, 'pack', 'site.json'),
       JSON.stringify(definition.pack, null, 2),
+      'utf-8',
+    )
+  }
+
+  // 5a. Governed Component Library definitions. Kept as declarative JSON so
+  // both the browser editor and sandboxed server host validate the same
+  // package without executing plugin code.
+  if (definition.componentLibrary.length > 0) {
+    await mkdir(join(distDir, 'component-library'), { recursive: true })
+    await writeFile(
+      join(distDir, 'component-library', 'entries.json'),
+      JSON.stringify(definition.componentLibrary, null, 2),
       'utf-8',
     )
   }

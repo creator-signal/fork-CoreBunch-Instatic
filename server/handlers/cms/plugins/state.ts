@@ -34,6 +34,7 @@ import { broadcastPluginEvent } from '../../../plugins/eventBroadcaster'
 import { badRequest, jsonResponse, methodNotAllowed, readValidatedBody } from '../../../http'
 import { Type } from '@core/utils/typeboxHelpers'
 import { deactivatePluginModulePack } from '@core/plugins/modulePackLoader'
+import { deactivatePluginComponentLibraryPack } from '@core/plugins/componentLibraryPackLoader'
 import { clearPluginScheduleRuns } from '../../../repositories/pluginSchedules'
 import { type CmsHandlerOptions } from '../shared'
 import {
@@ -196,6 +197,7 @@ async function removePluginCompletely(
   // force / corrupt-manifest paths, which skip the hook runner.
   await unloadPlugin(pluginId)
   deactivatePluginModulePack(pluginId)
+  deactivatePluginComponentLibraryPack(pluginId)
   clearPluginCrashCounter(pluginId)
   await clearPluginCrashes(db, pluginId)
   await clearPluginScheduleRuns(db, pluginId)

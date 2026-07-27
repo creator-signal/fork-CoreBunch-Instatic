@@ -46,6 +46,10 @@ import {
   activateSandboxedPluginModulePack,
   resetPluginModulePacks,
 } from '@core/plugins/modulePackLoader'
+import {
+  activatePluginComponentLibraryPack,
+  resetPluginComponentLibraryPacks,
+} from '@core/plugins/componentLibraryPackLoader'
 import { jsonResponse } from '../http'
 import { hookBus } from '@core/plugins/hookBus'
 import { requireAuthenticatedUser, requireCapability } from '../auth/authz'
@@ -200,6 +204,24 @@ export async function loadPluginModulePack(
   assertPathWithin(uploadsDir, entryPath)
   const packSource = await readFile(entryPath, 'utf-8')
   return await createModulePackVm({ pluginId: manifest.id, packSource })
+}
+
+/** Load and parse a plugin's declarative governed catalogue package. */
+export async function loadPluginComponentLibraryPack(
+  manifest: PluginManifest,
+  uploadsDir?: string,
+): Promise<unknown | null> {
+  if (!uploadsDir || !manifest.assetBasePath || !manifest.componentLibrary) {
+    return null
+  }
+  const relativeBase = manifest.assetBasePath.replace(/^\/uploads\/?/, '')
+  const entryPath = join(
+    uploadsDir,
+    relativeBase,
+    manifest.componentLibrary.path,
+  )
+  assertPathWithin(uploadsDir, entryPath)
+  return JSON.parse(await readFile(entryPath, 'utf-8')) as unknown
 }
 
 // ---------------------------------------------------------------------------
@@ -385,6 +407,7 @@ export async function activateInstalledServerPlugins(
   // slate. Worker is terminated and respawned on next call.
   await resetPluginWorker()
   resetPluginModulePacks()
+  resetPluginComponentLibraryPacks()
   hookBus.reset()
 
   // Start the scheduler tick. Idempotent — a re-bind with the same
@@ -448,6 +471,34 @@ export async function activateInstalledServerPlugins(
           await setPluginLifecycleStatus(db, manifest.id, 'error', message)
         } catch (dbErr) {
           console.error(`[plugin:${manifest.id}] failed to persist boot module-pack error:`, dbErr)
+        }
+      }
+    }
+
+    // Phase: component-library-load — declarative definitions are validated
+    // by the same host loader used in the editor. Load after modules so
+    // primitive catalogue entries can resolve their canonical implementation.
+    if (
+      manifest.componentLibrary &&
+      plugin.grantedPermissions.includes('componentLibrary.register')
+    ) {
+      try {
+        const pack = await loadPluginComponentLibraryPack(manifest, uploadsDir)
+        if (pack) activatePluginComponentLibraryPack(manifest, pack)
+      } catch (err) {
+        const message = err instanceof Error
+          ? err.message
+          : 'Component Library pack load failed'
+        console.error(
+          `[plugin:${manifest.id}] boot component-library-load failed: ${message}`,
+        )
+        try {
+          await setPluginLifecycleStatus(db, manifest.id, 'error', message)
+        } catch (dbErr) {
+          console.error(
+            `[plugin:${manifest.id}] failed to persist Component Library error:`,
+            dbErr,
+          )
         }
       }
     }

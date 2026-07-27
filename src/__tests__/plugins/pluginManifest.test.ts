@@ -381,6 +381,29 @@ describe('plugin manifest validation', () => {
     ).toThrow(/`entrypoints\.modules` requires the `modules\.register` permission/)
   })
 
+  it('requires explicit permission for a Component Library package', () => {
+    expect(() =>
+      parsePluginManifest({
+        id: 'acme.catalogue',
+        name: 'Catalogue',
+        version: '1.0.0',
+        apiVersion: 1,
+        permissions: [],
+        componentLibrary: { path: 'component-library/entries.json' },
+      }),
+    ).toThrow(/`componentLibrary` requires the `componentLibrary\.register` permission/)
+
+    const manifest = parsePluginManifest({
+      id: 'acme.catalogue',
+      name: 'Catalogue',
+      version: '1.0.0',
+      apiVersion: 1,
+      permissions: ['componentLibrary.register'],
+      componentLibrary: { path: 'component-library/entries.json' },
+    })
+    expect(manifest.componentLibrary?.path).toBe('component-library/entries.json')
+  })
+
   it('rejects app-kind admin pages without the editor.code permission', () => {
     expect(() =>
       parsePluginManifest({

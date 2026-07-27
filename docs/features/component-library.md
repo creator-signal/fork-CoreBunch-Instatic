@@ -193,6 +193,14 @@ implementation allow-lists, and slot maximum cardinality. The editor rejects
 an invalid insertion before any history mutation and explains the violated
 contract; the server re-evaluates the post-change tree independently.
 
+Components Layers drag-and-drop moves the backing boundary node once, so
+patterns and Visual Component instances carry their complete persisted subtree
+without serialising or parsing markup. Drop targets first pass the ordinary
+page-tree cycle/lock/slot rules and then the shared catalogue placement policy.
+Freeform, missing and generated slot boundaries are not draggable; invalid
+targets render a rejected state and produce the policy reason without writing
+history. HTML Layers retains its existing independent drag-and-drop path.
+
 ## Versioning and migration
 
 Every persisted catalogue instance carries a semantic `entryVersion`. It may also carry `pinnedVersion` while an administrator deliberately retains an older definition, and `variantId` when an approved variant was applied.

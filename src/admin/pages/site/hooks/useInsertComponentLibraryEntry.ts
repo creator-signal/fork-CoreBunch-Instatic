@@ -117,6 +117,7 @@ function componentLibraryPlacementContext(page: Page, targetParentId: string) {
   return {
     ...(parentEntry ? { parentEntry } : {}),
     ...(slot ? { slot } : {}),
+    parentIsPageRoot: targetParentId === page.rootNodeId,
     existingChildCount: targetParent?.children.length ?? 0,
   }
 }

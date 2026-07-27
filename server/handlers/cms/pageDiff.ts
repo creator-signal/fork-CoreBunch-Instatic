@@ -120,7 +120,7 @@ function diffPage(capabilities: readonly CoreCapability[], previous: Page, next:
     requireChange(capabilities, 'structure', `${pagePath}.template`, 'template settings changed')
   }
 
-  diffNodes(capabilities, pagePath, previous.nodes, next.nodes)
+  diffNodes(capabilities, pagePath, previous.nodes, next.nodes, next.rootNodeId)
 }
 
 function diffNodes(
@@ -128,6 +128,7 @@ function diffNodes(
   pagePath: string,
   previous: Record<string, PageNode>,
   next: Record<string, PageNode>,
+  nextRootNodeId: string,
 ): void {
   const nodeIds = new Set([...Object.keys(previous), ...Object.keys(next)])
   for (const nodeId of nodeIds) {
@@ -149,7 +150,15 @@ function diffNodes(
       continue
     }
 
-    diffNode(capabilities, nodePath, prevNode, nextNode, previous, next)
+    diffNode(
+      capabilities,
+      nodePath,
+      prevNode,
+      nextNode,
+      previous,
+      next,
+      nextRootNodeId,
+    )
   }
 }
 
@@ -160,6 +169,7 @@ function diffNode(
   next: PageNode,
   previousNodes: Record<string, PageNode>,
   nextNodes: Record<string, PageNode>,
+  nextRootNodeId: string,
 ): void {
   if (previous.moduleId !== next.moduleId) {
     requireChange(capabilities, 'structure', `${nodePath}.moduleId`, 'module changed')
@@ -176,7 +186,7 @@ function diffNode(
       if (!capabilities.includes('site.structure.edit')) {
         for (const changedId of changedIds) {
           if (!nextNodes[changedId]) continue
-          const placement = placementForNode(changedId, nextNodes)
+          const placement = placementForNode(changedId, nextNodes, nextRootNodeId)
           if (!placement.allowed) {
             throw new ForbiddenSiteChangeError(
               'components',
@@ -356,6 +366,7 @@ function governedEntryForNode(node: PageNode): ComponentLibraryEntry | undefined
 function placementForNode(
   nodeId: string,
   nodes: Record<string, PageNode>,
+  rootNodeId: string,
 ) {
   const node = nodes[nodeId]
   const entry = node ? governedEntryForNode(node) : undefined
@@ -385,6 +396,7 @@ function placementForNode(
   return resolveComponentLibraryPlacement(entry, {
     ...(parentEntry ? { parentEntry } : {}),
     ...(slot ? { slot } : {}),
+    parentIsPageRoot: targetParent?.id === rootNodeId,
     // The server validates the post-change tree, while the shared resolver
     // accepts the count before the candidate is placed.
     existingChildCount:

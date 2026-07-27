@@ -21,6 +21,17 @@ describe('Component Library placement policy', () => {
       parentEntry: form,
       existingChildCount: 0,
     })).toEqual({ allowed: true })
+    expect(resolveComponentLibraryPlacement(
+      componentLibraryRegistry.getOrThrow('base.plain-text'),
+      { existingChildCount: 0 },
+    )).toMatchObject({
+      allowed: false,
+      code: 'parent-ungoverned',
+    })
+    expect(resolveComponentLibraryPlacement(
+      componentLibraryRegistry.getOrThrow('base.plain-text'),
+      { parentIsPageRoot: true, existingChildCount: 0 },
+    )).toEqual({ allowed: true })
     const restrictedForm = {
       ...form,
       constraints: { allowedChildEntryIds: [] },

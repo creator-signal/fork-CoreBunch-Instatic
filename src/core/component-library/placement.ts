@@ -6,6 +6,7 @@ import type {
 
 export type ComponentLibraryPlacementIssueCode =
   | 'parent-required'
+  | 'parent-ungoverned'
   | 'parent-rejects-child'
   | 'slot-rejects-entry'
   | 'slot-rejects-implementation'
@@ -22,6 +23,8 @@ export type ComponentLibraryPlacementResult =
 export interface ComponentLibraryPlacementContext {
   /** Governed parent entry, or the slot owner's entry for named slots. */
   parentEntry?: ComponentLibraryEntry
+  /** The page-tree root is the only intentionally ungoverned parent. */
+  parentIsPageRoot?: boolean
   /** Named slot receiving the child, when insertion targets a slot instance. */
   slot?: ComponentLibrarySlot
   /** Current direct child count in the target parent/slot. */
@@ -53,6 +56,13 @@ export function resolveComponentLibraryPlacement(
     return denied(
       'parent-rejects-child',
       `${context.parentEntry!.name} does not allow ${entry.name} as a direct child.`,
+    )
+  }
+
+  if (!context.parentEntry && !context.parentIsPageRoot) {
+    return denied(
+      'parent-ungoverned',
+      `${entry.name} cannot be placed inside Custom / Freeform content.`,
     )
   }
 

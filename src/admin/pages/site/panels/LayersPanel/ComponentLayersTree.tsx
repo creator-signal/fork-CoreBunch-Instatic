@@ -1,5 +1,16 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { useEditorStore } from '@site/store/store'
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragMoveEvent,
+} from '@dnd-kit/core'
+import { selectActiveCanvasPage, useEditorStore } from '@site/store/store'
 import { isNarrowEditorChromeViewport } from '@site/layout/responsiveChrome'
 import {
   TreeChevron,
@@ -8,39 +19,57 @@ import {
   TreeLabel,
   TreeLabelGroup,
   TreeRow,
+  treeDropStyles,
 } from '@site/ui/Tree'
 import { ModuleIcon } from '@site/ui/ModuleIcon'
 import { SearchBar } from '@ui/components/SearchBar'
 import { SkeletonTree } from '@ui/components/Skeleton'
 import { TagPill } from '@ui/components/TagPill'
 import { Button } from '@ui/components/Button'
+import { pushToast } from '@ui/components/Toast'
+import { cn } from '@ui/cn'
 import { PlusIcon } from 'pixel-art-icons/icons/plus'
+import type { PageTreeDropPosition } from '@core/page-tree'
 import type {
   ComponentLayerRow,
   ComponentTreeProjection,
 } from './componentTreeProjection'
 import { ComponentLayersExpansionStore } from './componentLayersExpansionStore'
+import {
+  resolveComponentLayerDrop,
+  type ComponentLayerDropResolution,
+} from './componentLayersDnd'
+import { getDomDropZone } from '@site/panels/DomPanel/domPanelDnd'
 import styles from './ComponentLayersTree.module.css'
 
 interface ComponentLayersTreeProps {
   projection: ComponentTreeProjection | null
   canInsert?: boolean
+  canMove?: boolean
   onOpenComponentLibrary: () => void
 }
 
 export function ComponentLayersTree({
   projection,
   canInsert = true,
+  canMove = true,
   onOpenComponentLibrary,
 }: ComponentLayersTreeProps) {
+  const page = useEditorStore(selectActiveCanvasPage)
   const selectedNodeId = useEditorStore((state) => state.selectedNodeId)
   const focusedPanel = useEditorStore((state) => state.focusedPanel)
   const setFocusedPanel = useEditorStore((state) => state.setFocusedPanel)
   const [searchQuery, setSearchQuery] = useState('')
   const [expansionStore] = useState(() => new ComponentLayersExpansionStore())
+  const [dropState, setDropState] = useState<ComponentLayerDropState | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const treeRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    }),
+  )
 
   const rows = projection ? flattenRows(projection.roots) : []
   const normalizedQuery = searchQuery.trim().toLowerCase()
@@ -76,6 +105,51 @@ export function ComponentLayersTree({
     useEditorStore.getState().selectNode(nodeId, undefined, {
       preservePropertiesPanelCollapse: isNarrowEditorChromeViewport(),
     })
+  }
+
+  const resolveDrop = (
+    event: DragMoveEvent | DragEndEvent,
+  ): ComponentLayerDropState | null => {
+    if (!page || !event.over) return null
+    const position = dropPosition(event)
+    const activeId = String(event.active.id)
+    const overId = String(event.over.id)
+    return {
+      activeId,
+      overId,
+      position,
+      resolution: resolveComponentLayerDrop({
+        page,
+        draggedId: activeId,
+        overId,
+        position,
+      }),
+    }
+  }
+
+  const handleDragEnd = (event: DragEndEvent): void => {
+    const finalDrop = resolveDrop(event)
+    setDropState(null)
+    if (!finalDrop) return
+    if (!finalDrop.resolution.allowed) {
+      pushToast({
+        kind: 'warning',
+        title: 'Cannot move component',
+        body: finalDrop.resolution.reason,
+        location: 'component-layers',
+      })
+      return
+    }
+    const target = finalDrop.resolution.target
+    try {
+      useEditorStore.getState().moveNode(
+        finalDrop.activeId,
+        target.parentId,
+        target.index,
+      )
+    } catch (error) {
+      console.warn('[ComponentLayers] Ignored stale drag/drop target:', error)
+    }
   }
 
   return (
@@ -128,39 +202,51 @@ export function ComponentLayersTree({
         {!projection ? (
           <SkeletonTree ariaLabel="Loading component layers" />
         ) : (
-          <TreeContainer
-            ariaLabel="Component page hierarchy"
-            testId="component-layers-tree"
-            containerRef={treeRef}
-            data-instatic-layer-tree="true"
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragMove={(event) => setDropState(resolveDrop(event))}
+            onDragEnd={handleDragEnd}
+            onDragCancel={() => setDropState(null)}
           >
-            {normalizedQuery ? (
-              searchRows.length > 0
-                ? searchRows.map((row) => (
-                    <ComponentLayerTreeRow
-                      key={row.key}
-                      row={row}
-                      depth={0}
-                      selectedNodeId={selectedNodeId}
-                      onToggle={() => {}}
-                      onSelect={selectNode}
-                      searchResult
-                    />
-                  ))
-                : <div className={styles.empty}>No component layers match</div>
-            ) : (
-              projection.roots.map((row) => (
-                <ComponentLayerBranch
-                  key={row.key}
-                  row={row}
-                  depth={0}
-                  selectedNodeId={selectedNodeId}
-                  expansionStore={expansionStore}
-                  onSelect={selectNode}
-                />
-              ))
-            )}
-          </TreeContainer>
+            <TreeContainer
+              ariaLabel="Component page hierarchy"
+              testId="component-layers-tree"
+              containerRef={treeRef}
+              data-instatic-layer-tree="true"
+            >
+              {normalizedQuery ? (
+                searchRows.length > 0
+                  ? searchRows.map((row) => (
+                      <ComponentLayerTreeRow
+                        key={row.key}
+                        row={row}
+                        depth={0}
+                        selectedNodeId={selectedNodeId}
+                        onToggle={() => {}}
+                        onSelect={selectNode}
+                        canMove={false}
+                        dropState={null}
+                        searchResult
+                      />
+                    ))
+                  : <div className={styles.empty}>No component layers match</div>
+              ) : (
+                projection.roots.map((row) => (
+                  <ComponentLayerBranch
+                    key={row.key}
+                    row={row}
+                    depth={0}
+                    selectedNodeId={selectedNodeId}
+                    expansionStore={expansionStore}
+                    onSelect={selectNode}
+                    canMove={canMove}
+                    dropState={dropState}
+                  />
+                ))
+              )}
+            </TreeContainer>
+          </DndContext>
         )}
       </div>
     </div>
@@ -173,6 +259,8 @@ interface ComponentLayerBranchProps {
   selectedNodeId: string | null
   expansionStore: ComponentLayersExpansionStore
   onSelect: (nodeId: string) => void
+  canMove: boolean
+  dropState: ComponentLayerDropState | null
 }
 
 function ComponentLayerBranch(props: ComponentLayerBranchProps) {
@@ -188,6 +276,8 @@ function ComponentLayerBranch(props: ComponentLayerBranchProps) {
         depth={props.depth}
         selectedNodeId={props.selectedNodeId}
         onSelect={props.onSelect}
+        canMove={props.canMove}
+        dropState={props.dropState}
         expanded={expanded}
         onToggle={() => props.expansionStore.toggle(props.row.key)}
       />
@@ -210,6 +300,8 @@ interface ComponentLayerTreeRowProps {
   onSelect: (nodeId: string) => void
   expanded?: boolean
   onToggle: () => void
+  canMove: boolean
+  dropState: ComponentLayerDropState | null
   searchResult?: boolean
 }
 
@@ -220,21 +312,57 @@ function ComponentLayerTreeRow({
   expanded = true,
   onToggle,
   onSelect,
+  canMove,
+  dropState,
   searchResult = false,
 }: ComponentLayerTreeRowProps) {
   const selected = selectedNodeId === row.nodeId
   const hasChildren = !searchResult && row.children.length > 0
+  const draggableEnabled =
+    canMove &&
+    !searchResult &&
+    !row.readOnly &&
+    row.kind !== 'page' &&
+    row.kind !== 'slot' &&
+    Boolean(row.entryId)
+  const draggable = useDraggable({
+    id: row.nodeId,
+    disabled: !draggableEnabled,
+  })
+  const droppable = useDroppable({
+    id: row.nodeId,
+    disabled: !canMove || searchResult,
+  })
+  const setRowRef = (element: HTMLDivElement | null) => {
+    draggable.setNodeRef(element)
+    droppable.setNodeRef(element)
+  }
+  const activeDrop = dropState?.overId === row.nodeId ? dropState : null
+  const dropClass = activeDrop
+    ? !activeDrop.resolution.allowed
+      ? treeDropStyles.dropInvalid
+      : activeDrop.position === 'before'
+        ? treeDropStyles.dropBefore
+        : activeDrop.position === 'after'
+          ? treeDropStyles.dropAfter
+          : treeDropStyles.dropInside
+    : undefined
   return (
     <TreeRow
+      ref={setRowRef}
       depth={depth}
       selected={selected}
       locked={row.readOnly}
+      dragging={draggable.isDragging}
       role="treeitem"
       aria-level={depth + 1}
       aria-selected={selected}
       aria-expanded={hasChildren ? expanded : undefined}
       tabIndex={0}
       data-node-id={row.nodeId}
+      className={cn(dropClass)}
+      {...(draggableEnabled ? draggable.attributes : {})}
+      {...(draggableEnabled ? draggable.listeners : {})}
       onClick={() => onSelect(row.nodeId)}
       onMouseEnter={() => useEditorStore.getState().hoverNode(row.nodeId)}
       onMouseLeave={() => useEditorStore.getState().hoverNode(null)}
@@ -274,6 +402,23 @@ function ComponentLayerTreeRow({
       </TreeLabelGroup>
     </TreeRow>
   )
+}
+
+interface ComponentLayerDropState {
+  activeId: string
+  overId: string
+  position: PageTreeDropPosition
+  resolution: ComponentLayerDropResolution
+}
+
+function dropPosition(event: DragMoveEvent | DragEndEvent): PageTreeDropPosition {
+  const overRect = event.over?.rect
+  if (!overRect) return 'inside'
+  const activeRect = event.active.rect.current.translated
+  const pointerY = activeRect
+    ? activeRect.top + activeRect.height / 2
+    : overRect.top + overRect.height / 2
+  return getDomDropZone(overRect, pointerY)
 }
 
 function LayerBadge({ row }: { row: ComponentLayerRow }) {

@@ -116,6 +116,7 @@ export function LayersPanel({ editable = true }: LayersPanelProps) {
         <ComponentLayersTree
           projection={projection}
           canInsert={permissions.canEditComponents}
+          canMove={permissions.canEditComponents || permissions.canEditStructure}
           onOpenComponentLibrary={() => setComponentLibraryOpen(true)}
         />
       </div>

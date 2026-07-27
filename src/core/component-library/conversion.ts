@@ -53,6 +53,12 @@ export function findComponentLibraryConversionCandidates(
       if (analysis.eligible) candidates.push(analysis.candidate)
     }
   }
+  // A canonical primitive without a preset is the only identity that can be
+  // inferred when more-specific presets resolve to the same default props.
+  // For example, a plain div is a Container; its bytes alone do not prove it
+  // was authored as a Form Field Group or Form Actions boundary.
+  const canonical = candidates.filter((candidate) => !candidate.presetId)
+  if (canonical.length === 1) return canonical
   return candidates
 }
 

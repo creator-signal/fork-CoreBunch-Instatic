@@ -1,5 +1,8 @@
 import { readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
 import type { PluginSettingsValues } from '@core/plugin-sdk'
+import type { AttachmentPolicy } from '@core/attachments'
+import { SUPPORTED_ATTACHMENT_MIME_TYPES } from './attachments/validation'
 
 export interface StarterSiteConfig {
   siteName: string
@@ -16,6 +19,12 @@ interface ServerConfig {
   staticDir: string
   trustedProxyCidrs: string[]
   publicOrigins: string[]
+  attachments: {
+    directory: string
+    scannerUrl: string | null
+    scannerToken: string | null
+    policy: AttachmentPolicy
+  }
   minio: {
     endpoint: string
     publicBaseUrl: string
@@ -47,6 +56,36 @@ function readCsvList(value: string | undefined): string[] {
     .split(',')
     .map((entry) => entry.trim())
     .filter(Boolean)
+}
+
+function readPositiveInteger(
+  value: string | undefined,
+  fallback: number,
+  name: string,
+  bounds: { minimum?: number; maximum?: number } = {},
+): number {
+  if (!value?.trim()) return fallback
+  const parsed = Number(value)
+  const minimum = bounds.minimum ?? 1
+  if (
+    !Number.isInteger(parsed)
+    || parsed < minimum
+    || (bounds.maximum !== undefined && parsed > bounds.maximum)
+  ) {
+    const range = bounds.maximum === undefined
+      ? `at least ${minimum}`
+      : `between ${minimum} and ${bounds.maximum}`
+    throw new Error(`${name} must be an integer ${range}`)
+  }
+  return parsed
+}
+
+function readBoolean(value: string | undefined, fallback = false): boolean {
+  if (!value?.trim()) return fallback
+  const normalized = value.trim().toLowerCase()
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false
+  throw new Error('Boolean configuration must be true/false, yes/no, on/off, or 1/0')
 }
 
 function readJsonObjectFile(path: string | undefined, name: string): PluginSettingsValues {
@@ -142,6 +181,19 @@ export function readServerConfig(
   const minioAccessKey = readSecretValue(env, 'MINIO_ACCESS_KEY', 'MINIO_ACCESS_KEY_FILE')
   const minioSecretKey = readSecretValue(env, 'MINIO_SECRET_KEY', 'MINIO_SECRET_KEY_FILE')
   const minioValues = [minioEndpoint, minioBucket, minioAccessKey, minioSecretKey]
+  const uploadsDir = env.UPLOADS_DIR ?? './uploads'
+  const configuredAttachmentMimes = readCsvList(env.ATTACHMENT_ALLOWED_MIME_TYPES)
+  const allowedAttachmentMimeTypes = configuredAttachmentMimes.length > 0
+    ? configuredAttachmentMimes
+    : [...SUPPORTED_ATTACHMENT_MIME_TYPES]
+  const unsupportedAttachmentMimes = allowedAttachmentMimeTypes.filter(
+    (mime) => !SUPPORTED_ATTACHMENT_MIME_TYPES.includes(mime),
+  )
+  if (unsupportedAttachmentMimes.length > 0) {
+    throw new Error(
+      `ATTACHMENT_ALLOWED_MIME_TYPES contains unsupported values: ${unsupportedAttachmentMimes.join(', ')}`,
+    )
+  }
   const hasAnyMinioValue = minioValues.some(Boolean)
   if (hasAnyMinioValue && minioValues.some((value) => !value)) {
     throw new Error(
@@ -177,10 +229,49 @@ export function readServerConfig(
   return {
     port: Number(env.PORT ?? 3001),
     databaseUrl: readSecretValue(env, 'DATABASE_URL', 'DATABASE_URL_FILE') ?? 'sqlite:./.tmp/dev.db',
-    uploadsDir: env.UPLOADS_DIR ?? './uploads',
+    uploadsDir,
     staticDir: env.STATIC_DIR ?? './dist',
     trustedProxyCidrs: readCsvList(env.TRUSTED_PROXY_CIDRS),
     publicOrigins: resolvePublicOrigins(env),
+    attachments: {
+      // Keep private bytes outside UPLOADS_DIR, which is served verbatim at
+      // `/uploads/*`. The sibling default works for the normal `/data/uploads`
+      // volume layout and remains overrideable for split storage.
+      directory: env.ATTACHMENTS_DIR?.trim()
+        || resolve(dirname(resolve(uploadsDir)), 'attachments'),
+      scannerUrl: env.ATTACHMENT_SCANNER_URL?.trim() || null,
+      scannerToken: readSecretValue(
+        env,
+        'ATTACHMENT_SCANNER_TOKEN',
+        'ATTACHMENT_SCANNER_TOKEN_FILE',
+      ) ?? null,
+      policy: {
+        enabled: readBoolean(env.ATTACHMENTS_ENABLED),
+        allowedMimeTypes: allowedAttachmentMimeTypes,
+        maxFileBytes: readPositiveInteger(
+          env.ATTACHMENT_MAX_FILE_BYTES,
+          10 * 1024 * 1024,
+          'ATTACHMENT_MAX_FILE_BYTES',
+        ),
+        maxFiles: readPositiveInteger(
+          env.ATTACHMENT_MAX_FILES,
+          5,
+          'ATTACHMENT_MAX_FILES',
+          { maximum: 20 },
+        ),
+        temporaryTtlSeconds: readPositiveInteger(
+          env.ATTACHMENT_TEMPORARY_TTL_SECONDS,
+          24 * 60 * 60,
+          'ATTACHMENT_TEMPORARY_TTL_SECONDS',
+          { minimum: 60 },
+        ),
+        retentionDays: readPositiveInteger(
+          env.ATTACHMENT_RETENTION_DAYS,
+          90,
+          'ATTACHMENT_RETENTION_DAYS',
+        ),
+      },
+    },
     minio: hasAnyMinioValue
       ? {
           endpoint: minioEndpoint!,

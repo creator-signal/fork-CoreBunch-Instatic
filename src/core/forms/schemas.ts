@@ -11,6 +11,10 @@ const FormControlBindingSchema = Type.Object({
   minLength: Type.Optional(Type.Number()),
   maxLength: Type.Optional(Type.Number()),
   pattern: Type.Optional(Type.String()),
+  accept: Type.Optional(Type.String()),
+  multiple: Type.Optional(Type.Boolean()),
+  maxFiles: Type.Optional(Type.Number()),
+  maxFileBytes: Type.Optional(Type.Number()),
 })
 
 export type FormControlBinding = Static<typeof FormControlBindingSchema>

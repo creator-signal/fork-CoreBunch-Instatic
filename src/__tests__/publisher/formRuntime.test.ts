@@ -137,6 +137,9 @@ describe('form runtime browser behaviour', () => {
       expect(input?.hasAttribute('aria-invalid')).toBe(false)
       expect(fieldError?.hidden).toBe(true)
     } finally {
+      const cleanup = (window as unknown as Record<string, unknown>)
+        .__instaticFormRuntimeCleanup
+      if (typeof cleanup === 'function') cleanup()
       ;(globalThis as Record<string, unknown>).fetch = originalFetch
       document.body.innerHTML = ''
     }

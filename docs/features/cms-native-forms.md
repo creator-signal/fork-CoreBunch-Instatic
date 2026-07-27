@@ -6,6 +6,7 @@ CMS-native forms let the visual editor build semantic HTML forms from primitive 
 
 - Form modules live in `src/modules/base/forms/` and register from `src/modules/base/index.ts`.
 - Every form part is a node: `base.form`, `base.label`, `base.input`, `base.textarea`, `base.select`, `base.option`, `base.option-group`, `base.checkbox`, `base.radio`, `base.submit`, and `base.form-message`.
+- Private file inputs use the `attachment` data field and the capability-backed `base.file-attachment` catalogue entry.
 - The module picker exposes the form primitives in its Forms category; preview wireframes live in `src/admin/pages/site/module-picker/moduleWireframes.ts`.
 - Paste HTML, agent HTML insert/replace, and Super Import all use `@core/htmlImport`, so semantic HTML form tags import as these same primitive modules.
 - CMS form snapshots are derived at publish/request time by `src/core/forms/snapshot.ts`.
@@ -75,14 +76,25 @@ inside the submission handler. Until all four exist, authors see the dependency
 state and published output uses fallback text; it never renders a challenge
 that the server cannot verify.
 
+File Attachment is a capability-backed `base.input` file preset. It requires
+the `forms.attachments` capability, private storage, and scanner health. The
+catalogue keeps it unavailable when the operator disables attachments or when
+the storage/scanner boundary is unavailable. See
+[File Attachments](file-attachments.md) for the lifecycle and operator
+contract.
+
 ## Submission Flow
 
 CMS-native submission is a two-step public flow:
 
 1. The runtime requests a short-lived challenge from `/_instatic/form/challenge` when the form attaches in the browser.
-2. The runtime posts values plus the challenge to `/_instatic/form/submit`.
+2. For file inputs, the runtime uploads and scans each selected file through
+   `/_instatic/form/attachment/upload`, retrying quarantined scans through
+   `/_instatic/form/attachment/scan` when requested.
+3. The runtime posts scalar values plus opaque attachment references to
+   `/_instatic/form/submit`.
 
-The submit handler reloads the latest published site snapshot, derives the form snapshot from the published page tree, requires the target `DataTable` to be a non-system `data` table, validates fields against that table, and creates a `data_rows` record with `createDataRow`.
+The submit handler reloads the latest published site snapshot, derives the form snapshot from the published page tree, requires the target `DataTable` to be a non-system `data` table, validates fields against that table, and creates a `data_rows` record with `createDataRow`. Attachment references are scoped and claimed inside the same database transaction as the new row.
 
 Validation lives in `src/core/forms/validation.ts`. It rejects unknown fields, enforces required fields, coerces table field types, applies email/url/number/select checks, applies control min/max/pattern constraints, and caps payload size.
 
@@ -98,12 +110,19 @@ The endpoint is public by necessity, so it is layered:
 - The server trusts the published page snapshot, not client-declared fields or target tables.
 - Honeypot and minimum-submit-time checks run before validation.
 - Per-IP and per-IP/form rate limiters throttle repeated submissions.
+- Attachment uploads have separate per-IP and per-IP/form rate limits and a
+  hard multipart body ceiling before parsing.
+- File extension, declared MIME type, signature, authored accept rules, count,
+  and size are checked before activation.
+- Quarantined or rejected bytes cannot be submitted. Rows store private
+  attachment IDs, not binary content or public URLs.
 
 No public form endpoint can be made unusable by a dedicated HTTP client that fetches the public page and behaves like a browser. The goal here is to prevent blind endpoint abuse, cross-site browser abuse, stale/forged form payloads, and high-volume spam.
 
 ## Related
 
 - [Content storage](content-storage.md) — `data_tables` and `data_rows`
+- [File Attachments](file-attachments.md) — private upload, scan, claim, download, and retention
 - [Modules](modules.md) — module definitions and the module picker
 - [Publisher](publisher.md) — HTML pipeline and runtime injection
 - [TypeBox patterns](../reference/typebox-patterns.md) — request/response validation

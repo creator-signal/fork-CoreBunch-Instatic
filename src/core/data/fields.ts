@@ -83,10 +83,15 @@ function buildMetaFields(
       }
       if (field.allowMultiple !== undefined) entry.allowMultiple = field.allowMultiple
       result.push(entry)
-    } else if (field.type === 'pageTree' || field.type === 'fieldSchema') {
+    } else if (
+      field.type === 'attachment'
+      || field.type === 'pageTree'
+      || field.type === 'fieldSchema'
+    ) {
       // Structural types — not part of the instatic binding catalog.
-      // pageTree and fieldSchema cells hold whole documents (tree/field array),
-      // not scalar values that can be bound to a property control.
+      // Attachments are private authenticated resources, while pageTree and
+      // fieldSchema cells hold whole documents. None are safe scalar binding
+      // sources for public page props.
       continue
     } else {
       result.push({ id: field.id, label: field.label, type: field.type })

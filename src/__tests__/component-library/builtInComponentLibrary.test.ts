@@ -29,6 +29,7 @@ describe('built-in Component Library', () => {
     expect(ids).toContain('base.map')
     expect(ids).toContain('base.captcha')
     expect(ids).toContain('base.search')
+    expect(ids).toContain('base.file-attachment')
 
     for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
       expect(componentLibraryRegistry.get(entry.id)).toEqual(entry)
@@ -185,5 +186,26 @@ describe('built-in Component Library', () => {
         },
       }],
     })
+  })
+
+  it('defines File Attachment as a governed capability-backed form control', () => {
+    const byId = new Map(
+      BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [entry.id, entry]),
+    )
+    expect(byId.get('base.file-attachment')).toMatchObject({
+      implementation: {
+        type: 'capability-backed',
+        backing: {
+          type: 'primitive',
+          moduleId: 'base.input',
+          presetId: 'private-scanned',
+        },
+      },
+      requirements: {
+        capabilities: ['forms.attachments'],
+      },
+    })
+    expect(byId.get('base.form-field-group')?.constraints.allowedChildEntryIds)
+      .toContain('base.file-attachment')
   })
 })

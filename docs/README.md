@@ -36,6 +36,7 @@ docs/
 │   ├── templates.md                ← entry templates + dynamic bindings
 │   ├── loops.md                    ← base.loop + loop sources
 │   ├── cms-native-forms.md         ← visual form primitives + data_rows submissions
+│   ├── file-attachments.md         ← private form upload, scan, claim + retention
 │   ├── media.md                    ← Media workspace + storage adapters
 │   ├── audit-log.md                ← audit_events catalog
 │   ├── site-transfer.md            ← export / import CMS bundles
@@ -154,6 +155,7 @@ Three categories, three voices:
 | [features/templates.md](features/templates.md)                   | Entry templates + dynamic bindings + token interpolation             |
 | [features/loops.md](features/loops.md)                           | `base.loop` + loop entity sources                                    |
 | [features/cms-native-forms.md](features/cms-native-forms.md)     | Visual form primitives and secure public submissions                 |
+| [features/file-attachments.md](features/file-attachments.md)     | Private form upload, malware scanning, claims and retention           |
 | [features/media.md](features/media.md)                           | Media workspace, upload pipeline, storage adapters                  |
 | [features/audit-log.md](features/audit-log.md)                   | Audit event catalog + recording new actions                         |
 | [features/site-transfer.md](features/site-transfer.md)           | Export / import CMS bundle (JSON round-trip between instances)      |

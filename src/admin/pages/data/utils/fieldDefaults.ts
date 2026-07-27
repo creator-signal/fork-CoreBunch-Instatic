@@ -23,6 +23,8 @@ export function emptyCellValue(field: DataField): unknown {
       return []
     case 'media':
       return field.allowMultiple ? [] : null
+    case 'attachment':
+      return field.allowMultiple ? [] : null
     case 'relation':
       return field.allowMultiple ? [] : null
 

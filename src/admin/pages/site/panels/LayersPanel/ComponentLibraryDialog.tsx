@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
   componentLibraryRegistry,
   filterComponentLibraryEntries,
@@ -13,6 +13,8 @@ import {
 } from '@core/component-library'
 import { providerAdapterRegistry } from '@core/provider-adapters'
 import { searchCapabilityHealth } from '@core/search'
+import { AttachmentCapabilityStatusSchema } from '@core/attachments'
+import { apiRequest } from '@core/http'
 import { useEditorStore } from '@site/store/store'
 import { ModuleIcon } from '@site/ui/ModuleIcon'
 import { useEditorPermissions } from '@site/editorPermissionsContext'
@@ -69,6 +71,23 @@ export function ComponentLibraryDialog({
   const searchHealth = useEditorStore((state) =>
     searchCapabilityHealth(state.site),
   )
+  const [attachmentHealth, setAttachmentHealth] = useState<
+    ComponentLibraryDependencyState['capabilities'][string]
+  >('unavailable')
+  useEffect(() => {
+    if (!open || dependencyState) return
+    const controller = new AbortController()
+    apiRequest('/admin/api/cms/attachments/health', {
+      schema: AttachmentCapabilityStatusSchema,
+      signal: controller.signal,
+    })
+      .then((body) => body.health)
+      .then(setAttachmentHealth)
+      .catch(() => {
+        if (!controller.signal.aborted) setAttachmentHealth('unavailable')
+      })
+    return () => controller.abort()
+  }, [dependencyState, open])
   useSyncExternalStore(
     subscribeComponentLibrary,
     getComponentLibraryGeneration,
@@ -78,6 +97,7 @@ export function ComponentLibraryDialog({
   const resolvedDependencyState = dependencyState ?? {
     capabilities: {
       'search.index': searchHealth,
+      'forms.attachments': attachmentHealth,
     },
     providerAdapters: providerAdapterRegistry.dependencyHealth(),
     plugins: {},

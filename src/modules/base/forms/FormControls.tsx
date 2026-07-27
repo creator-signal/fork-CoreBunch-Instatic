@@ -22,6 +22,8 @@ type InputProps = Record<string, unknown> & {
   disabled: boolean
   readOnly: boolean
   autocomplete: string
+  accept: string
+  multiple: boolean
 }
 
 type TextareaProps = Record<string, unknown> & {
@@ -117,11 +119,13 @@ export function InputEditor({ mcClassName, nodeWrapperProps, props }: ModuleComp
       name={props.name}
       id={props.id || undefined}
       placeholder={props.placeholder || undefined}
-      defaultValue={props.value || undefined}
+      defaultValue={props.inputType === 'file' ? undefined : props.value || undefined}
       required={props.required}
       disabled={props.disabled}
       readOnly={props.readOnly}
       autoComplete={props.autocomplete || undefined}
+      accept={props.inputType === 'file' ? props.accept || undefined : undefined}
+      multiple={props.inputType === 'file' ? props.multiple : undefined}
     />
   )
 }

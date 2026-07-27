@@ -28,11 +28,21 @@ services:
       PORT: "3001"
       DATABASE_URL: postgres://${POSTGRES_USER:-instatic}:${POSTGRES_PASSWORD:-CHANGEME_set_POSTGRES_PASSWORD_in_env}@postgres:5432/${POSTGRES_DB:-instatic}
       UPLOADS_DIR: /app/uploads
+      ATTACHMENTS_DIR: /app/attachments
+      ATTACHMENTS_ENABLED: ${ATTACHMENTS_ENABLED:-false}
+      ATTACHMENT_SCANNER_URL: ${ATTACHMENT_SCANNER_URL:-}
+      ATTACHMENT_SCANNER_TOKEN: ${ATTACHMENT_SCANNER_TOKEN:-}
+      ATTACHMENT_ALLOWED_MIME_TYPES: ${ATTACHMENT_ALLOWED_MIME_TYPES:-}
+      ATTACHMENT_MAX_FILE_BYTES: ${ATTACHMENT_MAX_FILE_BYTES:-10485760}
+      ATTACHMENT_MAX_FILES: ${ATTACHMENT_MAX_FILES:-5}
+      ATTACHMENT_TEMPORARY_TTL_SECONDS: ${ATTACHMENT_TEMPORARY_TTL_SECONDS:-86400}
+      ATTACHMENT_RETENTION_DAYS: ${ATTACHMENT_RETENTION_DAYS:-90}
       STATIC_DIR: /app/dist
       INSTATIC_SECRET_KEY: ${INSTATIC_SECRET_KEY:-}
       TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:-}
     volumes:
       - uploads:/app/uploads
+      - attachments:/app/attachments
     depends_on:
       postgres:
         condition: service_healthy
@@ -46,3 +56,4 @@ services:
 volumes:
   postgres_data:
   uploads:
+  attachments:

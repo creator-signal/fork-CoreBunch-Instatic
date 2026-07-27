@@ -46,6 +46,7 @@ import { handleRuntimeRoutes } from './runtime'
 import { handleMediaRoutes } from './media'
 import { handleMediaFolderRoutes } from './mediaFolders'
 import { handleMediaStorageAdminRoutes } from './mediaStorageAdmin'
+import { handleAttachmentAdminRoutes } from './attachments'
 import { handlePluginsRoutes } from './plugins'
 import { handleDataRoutes } from './data'
 import { handleDashboardRoutes } from './dashboard'
@@ -103,6 +104,7 @@ export async function handleCmsRequest(
     ?? (await handleMediaFolderRoutes(req, db))
     ?? (await handleMediaStorageAdminRoutes(req, db, options))
     ?? (await handleMediaRoutes(req, db))
+    ?? (await handleAttachmentAdminRoutes(req, db))
     ?? (await handlePluginsRoutes(req, db, options))
     ?? (await handleDataRoutes(req, db, options))
     // Dashboard stats — read-only aggregate counts used by the admin

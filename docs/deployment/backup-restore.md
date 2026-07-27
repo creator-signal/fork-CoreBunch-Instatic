@@ -185,6 +185,9 @@ Railway-specific paths:
 | Postgres | Railway Postgres service | `/app/storage/uploads` |
 
 For uploads, back up whatever disk or volume is mounted at `UPLOADS_DIR`.
+When private form attachments are enabled, also back up `ATTACHMENTS_DIR`.
+Restore the attachment directory and database from the same backup point so
+claimed attachment rows and private bytes remain consistent.
 
 ## Related
 

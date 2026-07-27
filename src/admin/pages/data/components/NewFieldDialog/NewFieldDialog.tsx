@@ -94,6 +94,7 @@ export function NewFieldDialog({
   // media-specific
   const [mediaKind, setMediaKind] = useState<'image' | 'video' | 'any'>('any')
   const [mediaAllowMultiple, setMediaAllowMultiple] = useState(false)
+  const [attachmentAllowMultiple, setAttachmentAllowMultiple] = useState(false)
 
   // relation-specific
   const [relationTargetTableId, setRelationTargetTableId] = useState('')
@@ -150,6 +151,7 @@ export function NewFieldDialog({
     setSelectOptions([makeOption('')])
     setMediaKind('any')
     setMediaAllowMultiple(false)
+    setAttachmentAllowMultiple(false)
     setRelationTargetTableId('')
     setRelationAllowMultiple(false)
     setSaving(false)
@@ -273,6 +275,14 @@ export function NewFieldDialog({
           ...common,
           ...(mediaKind !== 'any' ? { mediaKind } : {}),
           ...(mediaAllowMultiple ? { allowMultiple: true } : {}),
+        }
+        break
+      }
+      case 'attachment': {
+        fieldShape = {
+          type: 'attachment',
+          ...common,
+          ...(attachmentAllowMultiple ? { allowMultiple: true } : {}),
         }
         break
       }
@@ -617,6 +627,16 @@ export function NewFieldDialog({
               <Switch checked={mediaAllowMultiple} onCheckedChange={setMediaAllowMultiple} />
             </div>
           </>
+        )}
+
+        {type === 'attachment' && (
+          <div className={styles.switchRow}>
+            <span className={styles.switchLabel}>Allow multiple</span>
+            <Switch
+              checked={attachmentAllowMultiple}
+              onCheckedChange={setAttachmentAllowMultiple}
+            />
+          </div>
         )}
 
         {type === 'relation' && (

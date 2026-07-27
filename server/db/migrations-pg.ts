@@ -1137,4 +1137,51 @@ export const pgMigrations: Migration[] = [
           and deleted_at is null;
     `,
   },
+  {
+    // Private form attachments. Bytes live in a non-public storage adapter;
+    // this table owns quarantine/scan/claim/retention state and the scoped
+    // bearer hash used by public form submissions.
+    id: '023_form_attachments',
+    sql: `
+      create table if not exists form_attachments (
+        id text primary key,
+        site_id text not null references site(id) on delete cascade,
+        page_id text not null,
+        form_id text not null,
+        field_id text not null,
+        original_name text not null,
+        extension text not null,
+        mime_type text not null,
+        size_bytes bigint not null,
+        sha256 text not null,
+        status text not null,
+        scan_status text not null,
+        scan_message text,
+        storage_adapter_id text not null,
+        storage_path text,
+        reference_token_hash text not null unique,
+        data_row_id text references data_rows(id) on delete set null,
+        created_at timestamptz not null default current_timestamp,
+        scanned_at timestamptz,
+        expires_at timestamptz not null,
+        claimed_at timestamptz,
+        retention_until timestamptz,
+        deleted_at timestamptz,
+        constraint form_attachments_status_check
+          check (status in ('quarantined', 'active', 'rejected', 'claimed', 'deleted')),
+        constraint form_attachments_scan_status_check
+          check (scan_status in ('pending', 'clean', 'rejected', 'unavailable', 'error')),
+        constraint form_attachments_size_check check (size_bytes > 0)
+      );
+
+      create index if not exists form_attachments_scope_idx
+        on form_attachments (site_id, page_id, form_id, field_id, status);
+      create index if not exists form_attachments_expiry_idx
+        on form_attachments (status, expires_at);
+      create index if not exists form_attachments_retention_idx
+        on form_attachments (status, retention_until);
+      create index if not exists form_attachments_data_row_idx
+        on form_attachments (data_row_id);
+    `,
+  },
 ]

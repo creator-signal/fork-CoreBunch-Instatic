@@ -118,6 +118,18 @@ function controlBindingFromNode(node: PageNode): FormControlBinding | null {
     ...(numberPropOrUndefined(node, 'min') !== undefined ? { min: numberPropOrUndefined(node, 'min') } : {}),
     ...(numberPropOrUndefined(node, 'max') !== undefined ? { max: numberPropOrUndefined(node, 'max') } : {}),
     ...(stringProp(node, 'pattern', '') ? { pattern: stringProp(node, 'pattern', '') } : {}),
+    ...(node.moduleId === 'base.input' && stringProp(node, 'inputType', 'text') === 'file'
+      ? {
+          ...(stringProp(node, 'accept', '') ? { accept: stringProp(node, 'accept', '') } : {}),
+          ...(booleanProp(node, 'multiple') ? { multiple: true } : {}),
+          ...(positiveNumberProp(node, 'attachmentMaxFiles') !== undefined
+            ? { maxFiles: positiveNumberProp(node, 'attachmentMaxFiles') }
+            : {}),
+          ...(positiveNumberProp(node, 'attachmentMaxBytes') !== undefined
+            ? { maxFileBytes: positiveNumberProp(node, 'attachmentMaxBytes') }
+            : {}),
+        }
+      : {}),
   }
 }
 

@@ -19,6 +19,7 @@ import { MediaCell } from './MediaCell'
 import { RelationCell } from './RelationCell'
 import { PageTreeCell } from './PageTreeCell'
 import { FieldSchemaCell } from './FieldSchemaCell'
+import { AttachmentCell } from './AttachmentCell'
 
 
 /**
@@ -84,6 +85,9 @@ export function CellEditorRenderer({
 
     case 'media':
       return <MediaCell field={field} {...rest} />
+
+    case 'attachment':
+      return <AttachmentCell field={field} {...rest} />
 
     case 'relation':
       return <RelationCell field={field} {...rest} onOpenPicker={onOpenPicker} />

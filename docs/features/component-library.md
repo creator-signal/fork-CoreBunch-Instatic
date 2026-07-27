@@ -49,7 +49,7 @@ module / Visual Component / pattern / template
 | Search, filters and deterministic ordering | `src/core/component-library/query.ts` |
 | Capability/provider/plugin health | `src/core/component-library/availability.ts` |
 | Retained versions, migration paths and impact previews | `src/core/component-library/version.ts`, `migration.ts` |
-| Explicit built-in definitions | `src/modules/base/componentLibrary.ts` |
+| Explicit built-in definitions | `src/modules/base/componentLibrary.ts`, `componentLibraryForms.ts` |
 | Catalogue dialog and Components projection | `src/admin/pages/site/panels/LayersPanel/` |
 | Canonical backing-node insertion | `src/admin/pages/site/hooks/useInsertComponentLibraryEntry.ts` |
 | Public imports | `src/core/component-library/index.ts` |
@@ -151,7 +151,7 @@ componentLibraryRegistry.register(emailInput)
 
 ### Built-in entries
 
-`src/modules/base/componentLibrary.ts` registers the curated authoring catalogue during base-module startup. Each entry names its canonical module, author-facing fields, optional preset, constraints, usage and accessibility guidance. The list includes structural, content, action, media and form entries, with separate approved presets for each input type.
+`src/modules/base/componentLibrary.ts` registers the curated authoring catalogue during base-module startup. Shared entry builders live in `componentLibraryDefinitions.ts`, and the form catalogue is split into `componentLibraryForms.ts`. Each entry names its canonical module, author-facing fields, optional preset, constraints, usage and accessibility guidance. The list includes structural, content, action, media and form entries, with separate approved presets for each input type.
 
 Registration is deliberately explicit. A low-level HTML module can remain available in HTML view without automatically becoming a governed Component Library entry.
 
@@ -168,6 +168,13 @@ Search Results is backed by `base.loop` plus the request-dependent
 site enables published search, and reuses the shared collection renderer and
 pagination contract. See [Published page search](site-search.md) for indexing,
 visibility, freshness, query, security and degraded-state behavior.
+
+File Attachment is backed by the file preset of `base.input` and requires
+`forms.attachments`. `ComponentLibraryDialog.tsx` reads the authenticated
+attachment health endpoint and keeps the entry unavailable until the operator
+enables private storage and a scanner. Published forms upload only through the
+quarantine/scan boundary described in
+[File Attachments](file-attachments.md).
 
 ## Search and filtering
 
@@ -338,6 +345,7 @@ opens either boundary before focusing an invalid descendant.
 - `docs/features/visual-components.md` — reusable governed structures and slots.
 - `docs/features/templates.md` — template-owned site chrome.
 - `docs/features/site-search.md` — published index and Search Results capability.
+- `docs/features/file-attachments.md` — private form upload and scanner capability.
 - `docs/reference/typebox-patterns.md` — boundary validation.
 - Source-of-truth files: `src/core/component-library/`
 - Focused tests: `src/__tests__/component-library/componentLibraryRegistry.test.ts`

@@ -81,6 +81,10 @@ const InputPropsSchema = Type.Object({
   minLength: Type.Number({ default: 0 }),
   maxLength: Type.Number({ default: 0 }),
   pattern: Type.String({ default: '' }),
+  accept: Type.String({ default: '' }),
+  multiple: Type.Boolean({ default: false }),
+  attachmentMaxFiles: Type.Number({ default: 1 }),
+  attachmentMaxBytes: Type.Number({ default: 10 * 1024 * 1024 }),
 })
 
 type InputProps = Static<typeof InputPropsSchema>
@@ -277,7 +281,15 @@ export const InputModule: ModuleDefinition<InputProps> = {
     ['minlength', positiveNumber(props.minLength)],
     ['maxlength', positiveNumber(props.maxLength)],
     ['pattern', props.pattern],
-  ])}${booleanAttrs(props, ['required', 'disabled', 'readOnly'])}>` }),
+    ['accept', props.inputType === 'file' ? props.accept : ''],
+    ['data-instatic-attachment-max-files', props.inputType === 'file' ? positiveNumber(props.attachmentMaxFiles) : undefined],
+    ['data-instatic-attachment-max-bytes', props.inputType === 'file' ? positiveNumber(props.attachmentMaxBytes) : undefined],
+  ])}${booleanAttrs(props, [
+    'required',
+    'disabled',
+    'readOnly',
+    ...(props.inputType === 'file' ? ['multiple'] : []),
+  ])}>` }),
 }
 
 export const TextareaModule: ModuleDefinition<TextareaProps> = {
@@ -506,6 +518,10 @@ function inputLikeSchema(typeLabel: string): ModuleDefinition<InputProps>['schem
     minLength: { type: 'number', label: 'Minimum length' },
     maxLength: { type: 'number', label: 'Maximum length' },
     pattern: { type: 'text', label: 'Pattern' },
+    accept: { type: 'text', label: 'Accepted file types' },
+    multiple: { type: 'toggle', label: 'Allow multiple files' },
+    attachmentMaxFiles: { type: 'number', label: 'Maximum files' },
+    attachmentMaxBytes: { type: 'number', label: 'Maximum bytes per file' },
   }
 }
 

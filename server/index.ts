@@ -10,6 +10,12 @@ await import('./richtextSanitizer')
 const { handleServerRequest } = await import('./router')
 const { activateInstalledServerPlugins } = await import('./plugins/runtime')
 const { mediaStorageRegistry } = await import('@core/plugins/mediaStorageRegistry')
+const { configureAttachmentRuntime } = await import('./attachments/runtime')
+const { createLocalAttachmentStorage } = await import('./attachments/localStorage')
+const {
+  createHttpAttachmentScanner,
+  createUnavailableAttachmentScanner,
+} = await import('./attachments/scanner')
 
 const config = readServerConfig()
 configureTrustedProxyCidrs(config.trustedProxyCidrs)
@@ -25,6 +31,18 @@ await syncSystemRoles(db)
 // plugin adapters register through the same registry but local-disk is
 // always the fallback for unset roles. See `mediaStorageRegistry.ts`.
 mediaStorageRegistry.configureLocalDisk({ uploadsDir: config.uploadsDir })
+configureAttachmentRuntime({
+  policy: config.attachments.policy,
+  storage: createLocalAttachmentStorage(config.attachments.directory),
+  scanner: config.attachments.scannerUrl
+    ? createHttpAttachmentScanner({
+        endpoint: config.attachments.scannerUrl,
+        ...(config.attachments.scannerToken
+          ? { bearerToken: config.attachments.scannerToken }
+          : {}),
+      })
+    : createUnavailableAttachmentScanner(),
+})
 if (config.minio) {
   const { buildMinioStorageAdapter } = await import('./media/minioStorageAdapter')
   const minioAdapter = buildMinioStorageAdapter(config.minio)
@@ -54,6 +72,10 @@ await activateInstalledServerPlugins(db, config.uploadsDir)
 // AI runtime: start the nightly conversation-purge tick. Operators add
 // their own provider credentials via /admin/ai/providers on first install.
 startConversationPurgeTick(db)
+// Retention cleanup remains active even when new uploads are disabled so an
+// operator rollback cannot strand previously claimed or quarantined bytes.
+const { startAttachmentCleanupTick } = await import('./attachments/cleanup')
+startAttachmentCleanupTick(db)
 
 /**
  * Build the CORS response headers for an incoming request.

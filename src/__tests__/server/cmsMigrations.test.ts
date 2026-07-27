@@ -17,9 +17,22 @@ describe('CMS migrations', () => {
     expect(sql).toContain('create table if not exists data_row_versions')
     expect(sql).toContain('create table if not exists media_assets')
     expect(sql).toContain('create table if not exists published_runtime_assets')
+    expect(sql).toContain('create table if not exists form_attachments')
     // Legacy page-specific tables must NOT be present
     expect(sql).not.toContain('create table if not exists pages ')
     expect(sql).not.toContain('create table if not exists page_versions')
+  })
+
+  it('keeps private attachment lifecycle constraints in both dialects', () => {
+    const pgSql = pgMigrations.map((m) => m.sql).join('\n')
+    const sqliteSql = sqliteMigrations.map((m) => m.sql).join('\n')
+    for (const sql of [pgSql, sqliteSql]) {
+      expect(sql).toContain('reference_token_hash text not null unique')
+      expect(sql).toContain("status in ('quarantined', 'active', 'rejected', 'claimed', 'deleted')")
+      expect(sql).toContain("scan_status in ('pending', 'clean', 'rejected', 'unavailable', 'error')")
+      expect(sql).toContain('form_attachments_scope_idx')
+      expect(sql).toContain('form_attachments_retention_idx')
+    }
   })
 
   it('stores row content and field definitions as jsonb', () => {

@@ -13,6 +13,7 @@ Run the image with:
 - `PORT` set to the platform's HTTP port
 - `DATABASE_URL` pointing at SQLite or Postgres
 - `UPLOADS_DIR` mounted on persistent storage
+- `ATTACHMENTS_DIR` inside persistent private storage when form attachments are enabled
 - `STATIC_DIR=/app/dist`
 - `INSTATIC_SECRET_KEY` set before configuring AI provider credentials, plugin secret settings, or TOTP MFA
 - `PUBLIC_ORIGIN` set to the site's public origin when the platform terminates HTTPS before forwarding to the container (auto-detected from `RENDER_EXTERNAL_URL` / `RAILWAY_PUBLIC_DOMAIN` on those platforms)
@@ -22,6 +23,7 @@ Use one persistent mount root when the platform only supports one app volume:
 ```txt
 DATABASE_URL=sqlite:/app/storage/data/cms.db
 UPLOADS_DIR=/app/storage/uploads
+ATTACHMENTS_DIR=/app/storage/attachments
 ```
 
 ## Build Locally
@@ -138,6 +140,11 @@ Render auto-injects `RENDER_EXTERNAL_URL`, which Instatic uses as the CSRF publi
 |---|---|---|
 | `DATABASE_URL` | Yes | `sqlite:...`, `file:...`, `postgres://...`, or `postgresql://...` |
 | `UPLOADS_DIR` | Yes for durable media | Persistent upload directory |
+| `ATTACHMENTS_DIR` | When attachments are enabled | Private persistent directory outside the public upload path |
+| `ATTACHMENTS_ENABLED` | Optional | Defaults to `false`; enable only with a working scanner |
+| `ATTACHMENT_SCANNER_URL` | When attachments are enabled | HTTP scanner endpoint; see `features/file-attachments.md` |
+| `ATTACHMENT_SCANNER_TOKEN` / `_FILE` | Scanner-dependent | Optional bearer credential |
+| `ATTACHMENT_*` limits | Optional | MIME allow-list, file/count ceilings, temporary TTL, and retention |
 | `STATIC_DIR` | Yes in Docker | `/app/dist` |
 | `PORT` | Platform-dependent | HTTP listen port; defaults to `3001` |
 | `INSTATIC_SECRET_KEY` | Yes for reversible server secrets | Output of `bun run scripts/generate-secret-key.ts` |
@@ -169,5 +176,6 @@ Expected response:
 - [render.md](render.md) — Render Blueprint variables
 - [vps.md](vps.md) — Docker Compose install
 - [backup-restore.md](backup-restore.md) — backing up DB and uploads
+- [../features/file-attachments.md](../features/file-attachments.md) — private attachment scanner and storage contract
 - `Dockerfile` — production image definition
 - `server/config.ts` — runtime env parsing

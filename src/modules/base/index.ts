@@ -20,7 +20,10 @@ import './loop'
 
 // Typography modules
 import './text'
+import './richText'
 import './list'
+import './codeBlock'
+import './table'
 import './outlet'
 
 // Media modules

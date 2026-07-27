@@ -49,6 +49,9 @@ import {
   TabsModule,
 } from '@modules/base/disclosure'
 import { ProviderEmbedModule } from '@modules/base/providerEmbed'
+import { RichTextModule } from '@modules/base/richText'
+import { CodeBlockModule } from '@modules/base/codeBlock'
+import { TableModule } from '@modules/base/table'
 
 // ---------------------------------------------------------------------------
 // Run the full conformance suite for every canonical base module.
@@ -72,6 +75,9 @@ runModuleConformanceSuite(TabPanelModule)
 runModuleConformanceSuite(AccordionModule)
 runModuleConformanceSuite(AccordionItemModule)
 runModuleConformanceSuite(ProviderEmbedModule)
+runModuleConformanceSuite(RichTextModule)
+runModuleConformanceSuite(CodeBlockModule)
+runModuleConformanceSuite(TableModule)
 
 describe('base module registration', () => {
   it('only imports available production base modules', async () => {
@@ -130,6 +136,9 @@ describe('base module registration', () => {
       AccordionModule,
       AccordionItemModule,
       ProviderEmbedModule,
+      RichTextModule,
+      CodeBlockModule,
+      TableModule,
     ]) {
       // No module should declare CSS-only props as module schema fields.
       const cssOnlyPropNames = ['backgroundColor', 'color', 'fontSize', 'padding', 'margin', 'border']

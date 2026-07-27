@@ -155,6 +155,14 @@ componentLibraryRegistry.register(emailInput)
 
 Registration is deliberately explicit. A low-level HTML module can remain available in HTML view without automatically becoming a governed Component Library entry.
 
+Formatted editorial content uses three dedicated semantic primitives rather
+than freeform HTML snippets. `base.rich-text` stores a DOMPurify-governed
+rich-text value, `base.code-block` keeps code as escaped text with safe
+language metadata, and `base.table` turns a small pipe-delimited authoring
+model into captioned `thead`/`tbody` markup with explicit column and optional
+row-header scopes. Each has one module renderer shared by canvas and
+publisher.
+
 External content uses capability-backed entries. YouTube Embed and Map share
 the policy-validated `base.provider-embed` implementation while declaring
 `media.youtube` and `maps.openstreetmap` requirements. The editor preview is

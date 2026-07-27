@@ -55,6 +55,10 @@ import { TableModule } from '@modules/base/table'
 import { ComponentFrameModule } from '@modules/base/componentFrame'
 import { ProgressModule } from '@modules/base/progress'
 import { CarouselModule, OverlayModule } from '@modules/base/interactive'
+import { AudioModule } from '@modules/base/audio'
+import { PdfViewerModule } from '@modules/base/pdfViewer'
+import { IconModule } from '@modules/base/icon'
+import { NavigationListModule } from '@modules/base/navigationList'
 
 // ---------------------------------------------------------------------------
 // Run the full conformance suite for every canonical base module.
@@ -85,6 +89,10 @@ runModuleConformanceSuite(ComponentFrameModule)
 runModuleConformanceSuite(ProgressModule)
 runModuleConformanceSuite(OverlayModule)
 runModuleConformanceSuite(CarouselModule)
+runModuleConformanceSuite(AudioModule)
+runModuleConformanceSuite(PdfViewerModule)
+runModuleConformanceSuite(IconModule)
+runModuleConformanceSuite(NavigationListModule)
 
 describe('base module registration', () => {
   it('only imports available production base modules', async () => {
@@ -151,6 +159,10 @@ describe('base module registration', () => {
       ProgressModule,
       OverlayModule,
       CarouselModule,
+      AudioModule,
+      PdfViewerModule,
+      IconModule,
+      NavigationListModule,
     ]) {
       // No module should declare CSS-only props as module schema fields.
       const cssOnlyPropNames = ['backgroundColor', 'color', 'fontSize', 'padding', 'margin', 'border']
@@ -158,6 +170,63 @@ describe('base module registration', () => {
         expect(Object.keys(mod.schema)).not.toContain(propName)
       }
     }
+  })
+})
+
+describe('base accessible media and design modules', () => {
+  it('publishes audio with native controls, title and transcript', () => {
+    const output = AudioModule.render({
+      ...AudioModule.defaults,
+      source: '/uploads/interview.mp3',
+      title: 'Founder interview',
+      transcriptUrl: '/interview-transcript',
+      transcriptLabel: 'Read interview transcript',
+    }, [])
+
+    expect(output.html).toContain('<audio src="/uploads/interview.mp3"')
+    expect(output.html).toContain('aria-label="Founder interview" controls')
+    expect(output.html).toContain('href="/interview-transcript"')
+    expect(output.html).toContain('Read interview transcript')
+  })
+
+  it('publishes a PDF object with equivalent fallback and download links', () => {
+    const output = PdfViewerModule.render({
+      ...PdfViewerModule.defaults,
+      source: '/uploads/report.pdf',
+      title: 'Annual report',
+      fallbackText: 'Preview unavailable.',
+      downloadLabel: 'Download annual report',
+      height: 'tall',
+    }, [])
+
+    expect(output.html).toContain('type="application/pdf"')
+    expect(output.html).toContain('aria-label="Annual report"')
+    expect(output.html).toContain('Preview unavailable.')
+    expect(output.html).toContain('Download annual report')
+    expect(output.html).toContain('data-height="tall"')
+  })
+
+  it('keeps icon SVG paths application-owned and applies explicit semantics', () => {
+    const meaningful = IconModule.render({
+      ...IconModule.defaults,
+      name: 'warning',
+      label: 'Warning',
+      decorative: false,
+    }, [])
+    const decorative = IconModule.render(IconModule.defaults, [])
+
+    expect(meaningful.html).toContain('data-instatic-icon="warning"')
+    expect(meaningful.html).toContain('role="img" aria-label="Warning"')
+    expect(decorative.html).toContain('aria-hidden="true"')
+  })
+
+  it('wraps every navigation child in a semantic list item', () => {
+    expect(NavigationListModule.render(
+      { ordered: true },
+      ['<a href="/">Home</a>', '<a href="/news">News</a>'],
+    ).html).toBe(
+      '<ol><li><a href="/">Home</a></li><li><a href="/news">News</a></li></ol>',
+    )
   })
 })
 

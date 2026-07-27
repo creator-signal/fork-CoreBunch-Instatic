@@ -15,6 +15,7 @@ import { BUILT_IN_FORM_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryForms
 import { BUILT_IN_INTERACTIVE_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryInteractiveVisualComponents'
 import { BUILT_IN_PATTERN_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryPatterns'
 import { BUILT_IN_VISUAL_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryVisualComponents'
+import { BUILT_IN_DESIGN_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryDesignVisualComponents'
 
 export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[] = [
   primitiveEntry({
@@ -278,7 +279,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
   }),
   primitiveEntry({
     id: 'base.media',
-    name: 'Media',
+    name: 'Video',
     description: 'Accessible self-hosted video from the Media Library.',
     category: 'Media',
     icon: 'video',
@@ -303,6 +304,63 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     ],
     usage: 'Use for a video asset hosted by the site. Use YouTube Embed for provider video.',
     accessibility: 'Provide an accurate title, captions where needed and user controls.',
+  }),
+  primitiveEntry({
+    id: 'base.audio',
+    name: 'Audio',
+    description: 'A native audio player with an accessible title and transcript link.',
+    category: 'Media',
+    icon: 'video',
+    moduleId: 'base.audio',
+    tags: ['audio', 'media', 'recording', 'transcript'],
+    fields: [
+      { key: 'source', label: 'Audio file', type: 'url', required: true },
+      { key: 'title', label: 'Audio title', type: 'text', required: true },
+      { key: 'transcriptUrl', label: 'Transcript URL', type: 'url', required: false },
+      { key: 'transcriptLabel', label: 'Transcript link label', type: 'text', required: false },
+      { key: 'loop', label: 'Loop', type: 'boolean', required: false, advanced: true },
+      { key: 'preload', label: 'Preload', type: 'select', required: true, advanced: true },
+    ],
+    accessibilityChecks: [
+      accessibleNameCheck('title'),
+      accessibilityCheck(
+        'a11y.no-javascript-fallback',
+        'media',
+        'manual',
+        'Spoken audio needs an equivalent transcript when required.',
+        'Link a complete transcript and describe important non-speech audio.',
+        ['transcriptUrl'],
+      ),
+    ],
+    usage: 'Use for a site-hosted or HTTPS recording with native playback controls.',
+    accessibility: 'Provide a specific title and a transcript for spoken information.',
+  }),
+  primitiveEntry({
+    id: 'base.pdf-viewer',
+    name: 'PDF Viewer',
+    description: 'An embedded PDF with a browser fallback and direct download link.',
+    category: 'Media',
+    icon: 'file-text-solid',
+    moduleId: 'base.pdf-viewer',
+    tags: ['pdf', 'document', 'viewer', 'download'],
+    fields: [
+      { key: 'source', label: 'PDF file', type: 'url', required: true },
+      { key: 'title', label: 'Document title', type: 'text', required: true },
+      { key: 'fallbackText', label: 'Fallback message', type: 'text', required: true },
+      { key: 'downloadLabel', label: 'Download link label', type: 'text', required: true },
+      { key: 'height', label: 'Viewer height', type: 'select', required: true },
+    ],
+    accessibilityChecks: [
+      accessibleNameCheck('title'),
+      behaviorCheck(
+        'a11y.no-javascript-fallback',
+        'media',
+        'The PDF remains available through fallback and direct-download links.',
+        'Keep the document title and download label specific.',
+      ),
+    ],
+    usage: 'Use only when an inline preview helps; also provide equivalent accessible page content.',
+    accessibility: 'Name the document and ensure the PDF itself is tagged and accessible.',
   }),
   primitiveEntry({
     id: 'base.youtube-embed',
@@ -481,6 +539,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     accessibility: 'Write a specific summary that identifies the hidden content.',
   }),
   ...BUILT_IN_VISUAL_COMPONENT_LIBRARY_ENTRIES,
+  ...BUILT_IN_DESIGN_COMPONENT_LIBRARY_ENTRIES,
   ...BUILT_IN_INTERACTIVE_COMPONENT_LIBRARY_ENTRIES,
   ...BUILT_IN_PATTERN_COMPONENT_LIBRARY_ENTRIES,
   ...BUILT_IN_FORM_COMPONENT_LIBRARY_ENTRIES,

@@ -9,6 +9,8 @@ export const ComponentFramePropsSchema = Type.Object({
       Type.Literal('article'),
       Type.Literal('aside'),
       Type.Literal('nav'),
+      Type.Literal('figure'),
+      Type.Literal('span'),
       Type.Literal('div'),
     ],
     { default: 'section' },

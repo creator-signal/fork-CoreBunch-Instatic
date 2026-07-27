@@ -6,7 +6,7 @@ import type { ComponentFrameStoredProps } from './props'
 export const ComponentFrameEditor: React.FC<
   ModuleComponentProps<ComponentFrameStoredProps>
 > = ({ props, children, mcClassName, nodeWrapperProps }) => {
-  const tag = ['section', 'article', 'aside', 'nav', 'div'].includes(props.tag)
+  const tag = ['section', 'article', 'aside', 'nav', 'figure', 'span', 'div'].includes(props.tag)
     ? props.tag
     : 'section'
 

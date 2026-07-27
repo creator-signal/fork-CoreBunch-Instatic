@@ -31,6 +31,8 @@ import './outlet'
 // Media modules
 import './image'
 import './svg'
+import './audio'
+import './pdfViewer'
 
 // Interactive modules
 import './button'
@@ -38,6 +40,8 @@ import './link'
 import './disclosure'
 import './interactive'
 import './providerEmbed'
+import './icon'
+import './navigationList'
 
 // Form modules
 import './forms'

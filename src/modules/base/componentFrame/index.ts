@@ -47,6 +47,38 @@ export const COMPONENT_FRAME_CSS = `
 [data-instatic-component="notice"] {
   border-inline-start-width: var(--space-2xs, 0.25rem);
 }
+[data-instatic-component="badge"] {
+  display: inline-flex;
+  gap: var(--space-2xs, 0.25rem);
+  align-items: center;
+  padding: var(--space-2xs, 0.25rem) var(--space-xs, 0.5rem);
+  border-radius: var(--radius-pill, 999px);
+  background: var(--color-surface-muted, Canvas);
+  color: var(--color-text, CanvasText);
+}
+[data-instatic-component="quote"],
+[data-instatic-component="person-profile"] {
+  display: grid;
+  gap: var(--space-m, 1rem);
+}
+[data-instatic-component="quote"] {
+  margin-inline: 0;
+  padding-inline-start: var(--space-l, 1.5rem);
+  border-inline-start: var(--space-2xs, 0.25rem) solid var(--color-border, currentColor);
+}
+[data-instatic-component="breadcrumb"] ol,
+[data-instatic-component="table-of-contents"] ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs, 0.5rem) var(--space-m, 1rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+[data-instatic-component="breadcrumb"] li:not(:last-child)::after {
+  content: "/";
+  margin-inline-start: var(--space-m, 1rem);
+}
 [data-instatic-component="navigation"] {
   display: flex;
   gap: var(--space-m, 1rem);
@@ -102,6 +134,8 @@ export const ComponentFrameModule: ModuleDefinition<ComponentFrameStoredProps> =
         { label: 'Article', value: 'article' },
         { label: 'Aside', value: 'aside' },
         { label: 'Navigation', value: 'nav' },
+        { label: 'Figure', value: 'figure' },
+        { label: 'Inline', value: 'span' },
         { label: 'Generic', value: 'div' },
       ],
     },
@@ -112,11 +146,11 @@ export const ComponentFrameModule: ModuleDefinition<ComponentFrameStoredProps> =
   defaults: Value.Create(ComponentFramePropsSchema),
   component: ComponentFrameEditor,
   htmlTag: (props) =>
-    ['section', 'article', 'aside', 'nav', 'div'].includes(props.tag)
+    ['section', 'article', 'aside', 'nav', 'figure', 'span', 'div'].includes(props.tag)
       ? props.tag
       : 'section',
   render: (props, children) => {
-    const tag = ['section', 'article', 'aside', 'nav', 'div'].includes(props.tag)
+    const tag = ['section', 'article', 'aside', 'nav', 'figure', 'span', 'div'].includes(props.tag)
       ? props.tag
       : 'section'
     const kind = normalizeComponentFrameToken(props.kind, 'section')

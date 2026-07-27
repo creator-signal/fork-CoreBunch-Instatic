@@ -51,6 +51,7 @@ export const TextModule: ModuleDefinition<TextStoredProps> = {
         { label: 'Small', value: 'small' },
         { label: 'Strong', value: 'strong' },
         { label: 'Emphasis', value: 'em' },
+        { label: 'Figure caption', value: 'figcaption' },
       ],
     },
     htmlAttributes: htmlAttributesControl(),

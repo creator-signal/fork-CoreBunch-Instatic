@@ -16,6 +16,10 @@ import {
   BUILT_IN_INTERACTIVE_COMPONENT_LIBRARY_ENTRIES,
   BUILT_IN_INTERACTIVE_VISUAL_COMPONENTS,
 } from '@modules/base/componentLibraryInteractiveVisualComponents'
+import {
+  BUILT_IN_DESIGN_COMPONENT_LIBRARY_ENTRIES,
+  BUILT_IN_DESIGN_VISUAL_COMPONENTS,
+} from '@modules/base/componentLibraryDesignVisualComponents'
 import '@modules/base'
 import { makePage, makeSite } from '../fixtures'
 
@@ -24,6 +28,7 @@ describe('built-in Visual Components', () => {
     const definitions = [
       ...BUILT_IN_VISUAL_COMPONENTS,
       ...BUILT_IN_INTERACTIVE_VISUAL_COMPONENTS,
+      ...BUILT_IN_DESIGN_VISUAL_COMPONENTS,
     ]
     for (const definition of definitions) {
       expect(parseVisualComponent(definition)).not.toBeNull()
@@ -37,6 +42,9 @@ describe('built-in Visual Components', () => {
     const entries = [
       ...BUILT_IN_VISUAL_COMPONENT_LIBRARY_ENTRIES,
       ...BUILT_IN_INTERACTIVE_COMPONENT_LIBRARY_ENTRIES,
+      ...BUILT_IN_DESIGN_COMPONENT_LIBRARY_ENTRIES.filter(
+        (entry) => entry.implementation.type === 'visual-component',
+      ),
     ]
     for (const entry of entries) {
       expect(entry.implementation.type).toBe('visual-component')
@@ -176,6 +184,83 @@ describe('built-in Visual Components', () => {
     expect(result.html).toContain('aria-label="Policy details"')
     expect(result.html).toContain('<p>The governed policy content.</p>')
     expect(result.jsModuleIds).toContain('base.overlay')
+  })
+
+  it('publishes breadcrumb slot links as one labelled ordered navigation list', () => {
+    const page = makePage({
+      nodes: {
+        root: {
+          id: 'root',
+          moduleId: 'base.body',
+          props: {},
+          breakpointOverrides: {},
+          children: ['breadcrumb'],
+          classIds: [],
+          parentId: null,
+        },
+        breadcrumb: {
+          id: 'breadcrumb',
+          moduleId: 'base.visual-component-ref',
+          props: {
+            componentId: 'base.vc.breadcrumb',
+            propOverrides: { label: 'Page path' },
+          },
+          breakpointOverrides: {},
+          children: ['items-slot'],
+          classIds: [],
+          parentId: 'root',
+          catalogueInstance: {
+            entryId: 'base.breadcrumb',
+            entryVersion: '1.0.0',
+          },
+        },
+        'items-slot': {
+          id: 'items-slot',
+          moduleId: 'base.slot-instance',
+          props: { slotName: 'items' },
+          breakpointOverrides: {},
+          children: ['home', 'news'],
+          classIds: [],
+          parentId: 'breadcrumb',
+        },
+        home: {
+          id: 'home',
+          moduleId: 'base.link',
+          props: {
+            ...registry.get('base.link')!.defaults,
+            text: 'Home',
+            href: '/',
+          },
+          breakpointOverrides: {},
+          children: [],
+          classIds: [],
+          parentId: 'items-slot',
+        },
+        news: {
+          id: 'news',
+          moduleId: 'base.link',
+          props: {
+            ...registry.get('base.link')!.defaults,
+            text: 'News',
+            href: '/news',
+          },
+          breakpointOverrides: {},
+          children: [],
+          classIds: [],
+          parentId: 'items-slot',
+        },
+      },
+    }) as Page
+    const site = makeSite({ pages: [page], visualComponents: [] }) as SiteDocument
+
+    const result = publishPage(page, site, registry)
+
+    expect(result.html).toContain(
+      '<nav data-instatic-component="breadcrumb" data-variant="default" aria-label="Page path">',
+    )
+    expect(result.html).toContain(
+      '<ol><li><a href="/" target="_self">Home</a></li><li><a href="/news" target="_self">News</a></li></ol>',
+    )
   })
 
   it('preserves built-in references and reconciles their managed slots on load', () => {

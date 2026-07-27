@@ -50,6 +50,14 @@ describe('built-in Component Library', () => {
     expect(ids).toContain('base.comparison-table')
     expect(ids).toContain('base.faq-list')
     expect(ids).toContain('base.empty-state')
+    expect(ids).toContain('base.icon')
+    expect(ids).toContain('base.badge')
+    expect(ids).toContain('base.quote')
+    expect(ids).toContain('base.person-profile')
+    expect(ids).toContain('base.breadcrumb')
+    expect(ids).toContain('base.table-of-contents')
+    expect(ids).toContain('base.audio')
+    expect(ids).toContain('base.pdf-viewer')
 
     for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
       expect(componentLibraryRegistry.get(entry.id)).toEqual(entry)

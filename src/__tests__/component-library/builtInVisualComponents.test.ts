@@ -20,6 +20,10 @@ import {
   BUILT_IN_DESIGN_COMPONENT_LIBRARY_ENTRIES,
   BUILT_IN_DESIGN_VISUAL_COMPONENTS,
 } from '@modules/base/componentLibraryDesignVisualComponents'
+import {
+  BUILT_IN_FORM_VISUAL_COMPONENT_LIBRARY_ENTRIES,
+  BUILT_IN_FORM_VISUAL_COMPONENTS,
+} from '@modules/base/componentLibraryFormVisualComponents'
 import '@modules/base'
 import { makePage, makeSite } from '../fixtures'
 
@@ -29,6 +33,7 @@ describe('built-in Visual Components', () => {
       ...BUILT_IN_VISUAL_COMPONENTS,
       ...BUILT_IN_INTERACTIVE_VISUAL_COMPONENTS,
       ...BUILT_IN_DESIGN_VISUAL_COMPONENTS,
+      ...BUILT_IN_FORM_VISUAL_COMPONENTS,
     ]
     for (const definition of definitions) {
       expect(parseVisualComponent(definition)).not.toBeNull()
@@ -45,6 +50,7 @@ describe('built-in Visual Components', () => {
       ...BUILT_IN_DESIGN_COMPONENT_LIBRARY_ENTRIES.filter(
         (entry) => entry.implementation.type === 'visual-component',
       ),
+      ...BUILT_IN_FORM_VISUAL_COMPONENT_LIBRARY_ENTRIES,
     ]
     for (const entry of entries) {
       expect(entry.implementation.type).toBe('visual-component')

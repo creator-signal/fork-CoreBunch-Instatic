@@ -144,6 +144,46 @@ describe('form runtime browser behaviour', () => {
       document.body.innerHTML = ''
     }
   })
+
+  it('prefixes reusable fragment controls, labels and messages once per instance', async () => {
+    document.body.innerHTML = `
+      <form data-instatic-form-mode="cms" data-instatic-form-id="contact">
+        <section data-instatic-component="reusable-form-fragment" data-instatic-binding-prefix="Billing Address">
+          <label for="street">Street</label>
+          <input id="street" name="street" data-instatic-form-control="input" data-instatic-field-id="street">
+          <p data-instatic-form-help-for="street">Include the unit number.</p>
+          <p data-instatic-form-error-for="street"></p>
+        </section>
+      </form>
+    `
+    try {
+      await importRuntimeScript(FORM_RUNTIME_JS)
+      await flushRuntime()
+
+      const input = document.querySelector<HTMLInputElement>('input')
+      expect(input?.getAttribute('data-instatic-field-id')).toBe(
+        'billing-address-street',
+      )
+      expect(input?.id).toBe('billing-address-street')
+      expect(input?.name).toBe('billing-address-street')
+      expect(document.querySelector('label')?.getAttribute('for')).toBe(
+        'billing-address-street',
+      )
+      expect(
+        document.querySelector('[data-instatic-form-help-for]')
+          ?.getAttribute('data-instatic-form-help-for'),
+      ).toBe('billing-address-street')
+      expect(
+        document.querySelector('[data-instatic-form-error-for]')
+          ?.getAttribute('data-instatic-form-error-for'),
+      ).toBe('billing-address-street')
+    } finally {
+      const cleanup = (window as unknown as Record<string, unknown>)
+        .__instaticFormRuntimeCleanup
+      if (typeof cleanup === 'function') cleanup()
+      document.body.innerHTML = ''
+    }
+  })
 })
 
 async function flushRuntime(): Promise<void> {

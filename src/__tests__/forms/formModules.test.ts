@@ -45,15 +45,15 @@ describe('base form primitive modules', () => {
   // a `name` attribute (falling back to fieldId) — otherwise the browser's
   // FormData omits the field and the submitted value is silently dropped. The
   // snapshot + validator already key by `name || fieldId`, so render must agree.
-  it('falls back to fieldId for the name attribute when name is blank', () => {
+  it('falls back to fieldId for control names and ids', () => {
     expect(InputModule.render({ ...InputModule.defaults, fieldId: 'email', name: '' }).html)
-      .toContain('name="email"')
+      .toContain('name="email" id="email"')
     expect(TextareaModule.render({ ...TextareaModule.defaults, fieldId: 'bio', name: '' }).html)
-      .toContain('name="bio"')
+      .toContain('name="bio" id="bio"')
     expect(SelectModule.render({ ...SelectModule.defaults, fieldId: 'country', name: '' }, []).html)
-      .toContain('name="country"')
+      .toContain('name="country" id="country"')
     expect(CheckboxModule.render({ ...CheckboxModule.defaults, fieldId: 'optin', name: '' }, []).html)
-      .toContain('name="optin"')
+      .toContain('name="optin" id="optin"')
   })
 
   it('renders a CMS-native form with runtime metadata and children', () => {
@@ -161,8 +161,13 @@ describe('base form primitive modules', () => {
       disabled: false,
     }, []).html).toBe('<input type="radio" data-instatic-form-control="radio" data-instatic-field-id="plan" name="plan" id="plan-pro" value="pro">')
 
-    expect(SubmitModule.render({ label: 'Subscribe', disabled: false, formId: '' }, []).html)
+    expect(SubmitModule.render({ action: 'submit', label: 'Subscribe', disabled: false, formId: '' }, []).html)
       .toBe('<button type="submit">Subscribe</button>')
+    expect(SubmitModule.render({
+      ...SubmitModule.defaults,
+      action: 'reset',
+      label: 'Reset form',
+    }, []).html).toBe('<button type="reset">Reset form</button>')
 
     expect(FormMessageModule.render({
       formId: 'newsletter',

@@ -156,4 +156,42 @@ describe('useInsertComponentLibraryEntry', () => {
       useEditorStore.getState().site?.pages[0]?.nodes[nodeId!],
     ).toBeUndefined()
   })
+
+  it('materializes a selected pattern variant atomically on its governed root', () => {
+    const store = useEditorStore.getState()
+    store.createSite('Form Tabs Variant')
+    const page = useEditorStore.getState().site!.pages[0]!
+    const formId = store.insertNode(
+      'base.form',
+      registry.get('base.form')!.defaults,
+      page.rootNodeId,
+      undefined,
+      {
+        catalogueInstance: {
+          entryId: 'base.form-container',
+          entryVersion: '1.0.0',
+        },
+      },
+    )
+    store.selectNode(formId)
+    useEditorStore.setState({
+      _historyPast: [],
+      _historyFuture: [],
+      canUndo: false,
+      canRedo: false,
+    })
+    const entry = componentLibraryRegistry.getOrThrow('base.form-tabs')
+    const { result } = renderHook(() => useInsertComponentLibraryEntry())
+    let nodeId: string | null = null
+
+    act(() => {
+      nodeId = result.current(entry, { variantId: 'vertical' })
+    })
+
+    const root = useEditorStore.getState().site?.pages[0]?.nodes[nodeId!]
+    expect(root?.moduleId).toBe('base.tabs')
+    expect(root?.props.orientation).toBe('vertical')
+    expect(root?.catalogueInstance?.variantId).toBe('vertical')
+    expect(useEditorStore.getState()._historyPast).toHaveLength(1)
+  })
 })

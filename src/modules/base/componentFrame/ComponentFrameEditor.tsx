@@ -21,6 +21,9 @@ export const ComponentFrameEditor: React.FC<
       ),
       'data-variant': normalizeComponentFrameToken(props.variant, 'default'),
       ...(props.label ? { 'aria-label': props.label } : {}),
+      ...(props.bindingPrefix
+        ? { 'data-instatic-binding-prefix': props.bindingPrefix }
+        : {}),
     },
     children,
   )

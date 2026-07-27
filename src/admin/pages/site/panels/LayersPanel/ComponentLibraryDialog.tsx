@@ -123,6 +123,7 @@ export function ComponentLibraryDialog({
   const [status, setStatus] = useState(ALL)
   const [selectedId, setSelectedId] = useState(entries[0]?.id ?? '')
   const [presetId, setPresetId] = useState(defaultPresetId(entries[0]))
+  const [variantId, setVariantId] = useState(defaultVariantId(entries[0]))
   const insertEntry = useInsertComponentLibraryEntry()
 
   const categories = Array.from(new Set(entries.map((entry) => entry.category))).sort()
@@ -159,6 +160,7 @@ export function ComponentLibraryDialog({
   const selectEntry = (entry: ComponentLibraryEntry): void => {
     setSelectedId(entry.id)
     setPresetId(defaultPresetId(entry))
+    setVariantId(defaultVariantId(entry))
   }
 
   const handleInsert = (): void => {
@@ -169,6 +171,7 @@ export function ComponentLibraryDialog({
     ) return
     const inserted = insertEntry(selectedEntry, {
       ...(presetId ? { presetId } : {}),
+      ...(variantId ? { variantId } : {}),
     })
     if (inserted) onClose()
   }
@@ -269,6 +272,8 @@ export function ComponentLibraryDialog({
               }}
               presetId={presetId}
               onPresetChange={setPresetId}
+              variantId={variantId}
+              onVariantChange={setVariantId}
             />
           ) : (
             <EmptyState
@@ -323,6 +328,8 @@ interface ComponentLibraryDetailsProps {
   availability: ComponentLibraryAvailability
   presetId: string
   onPresetChange: (value: string) => void
+  variantId: string
+  onVariantChange: (value: string) => void
 }
 
 function ComponentLibraryDetails({
@@ -330,6 +337,8 @@ function ComponentLibraryDetails({
   availability,
   presetId,
   onPresetChange,
+  variantId,
+  onVariantChange,
 }: ComponentLibraryDetailsProps) {
   return (
     <>
@@ -380,6 +389,21 @@ function ComponentLibraryDetails({
             }))}
             fieldSize="sm"
             onChange={(event) => onPresetChange(event.target.value)}
+          />
+        </label>
+      ) : null}
+
+      {entry.variants.length > 0 ? (
+        <label className={styles.field}>
+          <span>Variant</span>
+          <Select
+            value={variantId}
+            options={entry.variants.map((variant) => ({
+              value: variant.id,
+              label: variant.name,
+            }))}
+            fieldSize="sm"
+            onChange={(event) => onVariantChange(event.target.value)}
           />
         </label>
       ) : null}
@@ -444,11 +468,17 @@ function defaultPresetId(entry: ComponentLibraryEntry | undefined): string {
     : entry.presets[0]?.id ?? ''
 }
 
+function defaultVariantId(entry: ComponentLibraryEntry | undefined): string {
+  return entry?.variants[0]?.id ?? ''
+}
+
 function supportsCanvasInsertion(implementation: ComponentLibraryImplementation): boolean {
   const backing = implementation.type === 'capability-backed'
     ? implementation.backing
     : implementation
-  return backing.type === 'primitive' || backing.type === 'visual-component'
+  return backing.type === 'primitive' ||
+    backing.type === 'visual-component' ||
+    backing.type === 'pattern'
 }
 
 function moduleIdForEntry(entry: ComponentLibraryEntry): string | undefined {

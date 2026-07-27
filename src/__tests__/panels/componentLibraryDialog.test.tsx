@@ -167,4 +167,23 @@ describe('ComponentLibraryDialog dependency availability', () => {
     expect(screen.getByRole('button', { name: 'Insert component' }).getAttribute('aria-disabled'))
       .toBeNull()
   })
+
+  it('supports governed pattern insertion and exposes declared variants', () => {
+    render(<ComponentLibraryDialog open onClose={() => {}} />)
+
+    fireEvent.change(screen.getByLabelText('Search Component Library'), {
+      target: { value: 'Form Tabs' },
+    })
+
+    const variant = screen.getAllByLabelText('Variant')
+      .find((element) => element.tagName === 'SELECT') as HTMLSelectElement
+    expect(Array.from(variant.options).map((option) => option.textContent))
+      .toEqual(['Horizontal', 'Vertical'])
+    fireEvent.change(variant, { target: { value: 'vertical' } })
+    expect(variant.value).toBe('vertical')
+    expect(
+      screen.getByRole('button', { name: 'Insert component' })
+        .getAttribute('aria-disabled'),
+    ).toBeNull()
+  })
 })

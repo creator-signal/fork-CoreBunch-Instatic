@@ -61,6 +61,12 @@ interface PatternEntryOptions {
   allowedParentEntryIds?: string[]
   allowedChildEntryIds?: string[]
   accessibilityChecks?: ComponentLibraryAccessibilityCheck[]
+  variants?: ComponentLibraryEntry['variants']
+  requirements?: {
+    capabilities: string[]
+    providerAdapters: string[]
+    plugins: string[]
+  }
   usage: string
   accessibility: string
 }
@@ -182,12 +188,20 @@ export function patternEntry(
     icon: options.icon,
     source: { type: 'built-in' },
     status: 'stable',
-    implementation: {
-      type: 'pattern',
-      patternId: options.patternId,
-    },
+    implementation: options.requirements
+      ? {
+          type: 'capability-backed',
+          backing: {
+            type: 'pattern',
+            patternId: options.patternId,
+          },
+        }
+      : {
+          type: 'pattern',
+          patternId: options.patternId,
+        },
     fields: [],
-    variants: [],
+    variants: options.variants ?? [],
     presets: [],
     slots: [],
     constraints: {
@@ -198,7 +212,7 @@ export function patternEntry(
         ? { allowedChildEntryIds: options.allowedChildEntryIds }
         : {}),
     },
-    requirements: {
+    requirements: options.requirements ?? {
       capabilities: [],
       providerAdapters: [],
       plugins: [],

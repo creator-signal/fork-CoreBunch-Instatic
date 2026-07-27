@@ -43,6 +43,7 @@ export class ComponentLibraryPatternRegistry {
   materialize(
     id: string,
     metadata: CatalogueInstanceMetadata,
+    rootPropOverrides: Record<string, unknown> = {},
   ): ImportFragment | null {
     const definition = this.get(id)
     if (!definition) return null
@@ -71,7 +72,11 @@ export class ComponentLibraryPatternRegistry {
       nodes[nodeId] = {
         id: nodeId,
         moduleId: template.moduleId,
-        props: cloneValue(template.props),
+        props: cloneValue(
+          template.key === definition.rootKey
+            ? { ...template.props, ...rootPropOverrides }
+            : template.props,
+        ),
         breakpointOverrides: {},
         children: template.children.map((key) => idByKey.get(key)!),
         classIds: [],

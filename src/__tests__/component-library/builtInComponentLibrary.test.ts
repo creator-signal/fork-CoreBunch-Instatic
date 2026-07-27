@@ -58,6 +58,19 @@ describe('built-in Component Library', () => {
     expect(ids).toContain('base.table-of-contents')
     expect(ids).toContain('base.audio')
     expect(ids).toContain('base.pdf-viewer')
+    expect(ids).toContain('base.form-panel')
+    expect(ids).toContain('base.form-accordion')
+    expect(ids).toContain('base.form-tabs')
+    expect(ids).toContain('base.checkbox-group')
+    expect(ids).toContain('base.radio-group')
+    expect(ids).toContain('base.switch')
+    expect(ids).toContain('base.hidden-field')
+    expect(ids).toContain('base.reset-button')
+    expect(ids).toContain('base.previous-next-actions')
+    expect(ids).toContain('base.form-summary-review')
+    expect(ids).toContain('base.terms-and-conditions')
+    expect(ids).toContain('base.wizard')
+    expect(ids).toContain('base.reusable-form-fragment')
 
     for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
       expect(componentLibraryRegistry.get(entry.id)).toEqual(entry)
@@ -275,5 +288,49 @@ describe('built-in Component Library', () => {
         presetId: 'save-draft',
       },
     })
+  })
+
+  it('completes the form catalogue through shared primitives and governed compositions', () => {
+    const byId = new Map(
+      BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [entry.id, entry]),
+    )
+
+    expect(byId.get('base.switch')).toMatchObject({
+      implementation: {
+        type: 'primitive',
+        moduleId: 'base.checkbox',
+        presetId: 'switch',
+      },
+    })
+    expect(byId.get('base.hidden-field')).toMatchObject({
+      implementation: {
+        type: 'primitive',
+        moduleId: 'base.input',
+        presetId: 'hidden',
+      },
+    })
+    expect(byId.get('base.reset-button')).toMatchObject({
+      implementation: {
+        type: 'primitive',
+        moduleId: 'base.submit',
+        presetId: 'reset',
+      },
+    })
+    expect(byId.get('base.form-tabs')?.variants).toEqual([
+      {
+        id: 'horizontal',
+        name: 'Horizontal',
+        values: { orientation: 'horizontal' },
+      },
+      {
+        id: 'vertical',
+        name: 'Vertical',
+        values: { orientation: 'vertical' },
+      },
+    ])
+    expect(byId.get('base.terms-and-conditions')?.requirements.capabilities)
+      .toEqual(['forms.versioned-consent'])
+    expect(byId.get('base.wizard')?.requirements.capabilities)
+      .toEqual(['forms.drafts'])
   })
 })

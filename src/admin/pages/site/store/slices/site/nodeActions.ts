@@ -44,6 +44,7 @@ import { pushToast } from '@ui/components/Toast'
 import { depthInTree, resolveActiveTreeTarget } from './helpers'
 import { pruneCanvasSelectionDraft } from '../selectionSlice'
 import { indexStyleRulesByName, linkImportedClassNames, mergeImportedStyleRules } from './importLinking'
+import { initialComponentLibraryVariantValues } from './componentLibraryNodeOptions'
 import type { SiteSlice, SiteSliceHelpers } from './types'
 
 type NodeActions = Pick<
@@ -293,7 +294,7 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
       const newNode = createNode('base.visual-component-ref', {
         ...(mod?.defaults ?? {}),
         componentId,
-        propOverrides: {},
+        propOverrides: initialComponentLibraryVariantValues(options?.catalogueInstance),
       })
       if (options?.catalogueInstance) {
         newNode.catalogueInstance = options.catalogueInstance
@@ -343,7 +344,8 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
             ...safeComponentLibraryOverrides(node.props.propOverrides),
             [fieldKey]: value,
           }
-        } else {
+        } else if (implementation.type === 'pattern') Object.assign(node.props, option.values)
+        else {
           return false
         }
         return true

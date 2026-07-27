@@ -173,6 +173,10 @@ const ChoicePropsSchema = Type.Object({
 type ChoiceProps = Static<typeof ChoicePropsSchema>
 
 const SubmitPropsSchema = Type.Object({
+  action: Type.Union(
+    [Type.Literal('submit'), Type.Literal('reset')],
+    { default: 'submit' },
+  ),
   label: Type.String({ default: 'Submit' }),
   disabled: Type.Boolean({ default: false }),
   formId: Type.String({ default: '' }),
@@ -313,7 +317,7 @@ export const InputModule: ModuleDefinition<InputProps> = {
     ['data-instatic-field-id', props.fieldId],
     ['type', props.inputType],
     ['name', props.name || props.fieldId],
-    ['id', props.id],
+    ['id', props.id || props.fieldId],
     ['placeholder', props.placeholder],
     ['value', props.value],
     ['autocomplete', props.autocomplete],
@@ -369,7 +373,7 @@ export const TextareaModule: ModuleDefinition<TextareaProps> = {
     ['data-instatic-form-control', 'textarea'],
     ['data-instatic-field-id', props.fieldId],
     ['name', props.name || props.fieldId],
-    ['id', props.id],
+    ['id', props.id || props.fieldId],
     ['placeholder', props.placeholder],
     ['rows', props.rows],
     ['minlength', positiveNumber(props.minLength)],
@@ -409,7 +413,7 @@ export const SelectModule: ModuleDefinition<SelectProps> = {
       ['data-instatic-form-control', 'select'],
       ['data-instatic-field-id', props.fieldId],
       ['name', props.name || props.fieldId],
-      ['id', props.id],
+      ['id', props.id || props.fieldId],
       ['data-instatic-draft-behavior', props.draftBehavior !== 'include' ? props.draftBehavior : ''],
     ])}${booleanAttrs(props, ['required', 'disabled', 'multiple'])}>${renderedChildren.join('')}</select>`,
   }),
@@ -475,14 +479,22 @@ export const RadioModule: ModuleDefinition<ChoiceProps> = choiceModule({
 
 export const SubmitModule: ModuleDefinition<SubmitProps> = {
   id: 'base.submit',
-  name: 'Submit',
-  description: 'A submit button.',
+  name: 'Form Action',
+  description: 'A submit or reset form action.',
   category: 'Forms',
   version: '1.0.0',
   icon: SendSolidIcon,
   trusted: true,
   canHaveChildren: false,
   schema: {
+    action: {
+      type: 'select',
+      label: 'Action',
+      options: [
+        { label: 'Submit', value: 'submit' },
+        { label: 'Reset', value: 'reset' },
+      ],
+    },
     label: { type: 'text', label: 'Label' },
     disabled: { type: 'toggle', label: 'Disabled' },
     formId: { type: 'text', label: 'Form ID override', normalize: 'identifier' },
@@ -492,7 +504,7 @@ export const SubmitModule: ModuleDefinition<SubmitProps> = {
   component: SubmitEditor,
   htmlTag: 'button',
   render: (props) => ({
-    html: `<button type="submit"${attrs([['form', normalizeIdentifierValue(props.formId)]])}${booleanAttrs(props, ['disabled'])}>${props.label}</button>`,
+    html: `<button type="${props.action === 'reset' ? 'reset' : 'submit'}"${attrs([['form', normalizeIdentifierValue(props.formId)]])}${booleanAttrs(props, ['disabled'])}>${props.label}</button>`,
   }),
 }
 
@@ -622,7 +634,7 @@ function choiceModule(args: {
         ['data-instatic-form-control', args.inputType],
         ['data-instatic-field-id', props.fieldId],
         ['name', props.name || props.fieldId],
-        ['id', props.id],
+        ['id', props.id || props.fieldId],
         ['value', props.value],
         ['data-instatic-draft-behavior', props.draftBehavior !== 'include' ? props.draftBehavior : ''],
       ])}${booleanAttrs(props, ['checked', 'required', 'disabled'])}>`,

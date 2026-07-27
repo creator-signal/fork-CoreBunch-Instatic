@@ -140,6 +140,11 @@ export const ComponentFrameModule: ModuleDefinition<ComponentFrameStoredProps> =
       ],
     },
     label: { type: 'text', label: 'Accessible label' },
+    bindingPrefix: {
+      type: 'text',
+      label: 'Binding prefix',
+      hidden: true,
+    },
   },
 
   propsSchema: ComponentFramePropsSchema,
@@ -156,10 +161,12 @@ export const ComponentFrameModule: ModuleDefinition<ComponentFrameStoredProps> =
     const kind = normalizeComponentFrameToken(props.kind, 'section')
     const variant = normalizeComponentFrameToken(props.variant, 'default')
     const label = String(props.label ?? '').trim()
+    const bindingPrefix = String(props.bindingPrefix ?? '').trim()
     return {
       html:
         `<${tag} data-instatic-component="${kind}" data-variant="${variant}"` +
-        `${label ? ` aria-label="${label}"` : ''}>` +
+        `${label ? ` aria-label="${label}"` : ''}` +
+        `${bindingPrefix ? ` data-instatic-binding-prefix="${bindingPrefix}"` : ''}>` +
         `${children.join('')}</${tag}>`,
       css: COMPONENT_FRAME_CSS,
     }

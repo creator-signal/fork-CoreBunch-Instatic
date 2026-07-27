@@ -77,11 +77,40 @@ export const FORM_RUNTIME_JS = `(() => {
   function attachForm(form) {
     if (form.__instaticFormRuntimeAttached) return;
     form.__instaticFormRuntimeAttached = true;
+    applyBindingPrefixes(form);
     connectLabels(form);
     connectFieldMessages(form);
     ensureStatusMessage(form);
     prepareMessages(form);
     prefetchChallenge(form);
+  }
+
+  function applyBindingPrefixes(form) {
+    for (const fragment of form.querySelectorAll('[data-instatic-component="reusable-form-fragment"][data-instatic-binding-prefix]')) {
+      if (fragment.__instaticBindingPrefixApplied) continue;
+      fragment.__instaticBindingPrefixApplied = true;
+      const raw = fragment.getAttribute('data-instatic-binding-prefix') || '';
+      const prefix = raw.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '');
+      if (!prefix) continue;
+      for (const control of fragment.querySelectorAll('[data-instatic-field-id]')) {
+        const fieldId = control.getAttribute('data-instatic-field-id') || '';
+        if (!fieldId) continue;
+        const nextId = prefix + '-' + fieldId;
+        control.setAttribute('data-instatic-field-id', nextId);
+        if (control.id === fieldId) control.id = nextId;
+        if (!control.name || control.name === fieldId) control.name = nextId;
+      }
+      for (const label of fragment.querySelectorAll('label[for]')) {
+        const target = label.getAttribute('for') || '';
+        if (target) label.setAttribute('for', prefix + '-' + target);
+      }
+      for (const message of fragment.querySelectorAll('[data-instatic-form-help-for], [data-instatic-form-error-for]')) {
+        for (const attr of ['data-instatic-form-help-for', 'data-instatic-form-error-for']) {
+          const target = message.getAttribute(attr);
+          if (target) message.setAttribute(attr, prefix + '-' + target);
+        }
+      }
+    }
   }
 
   async function submitForm(form) {

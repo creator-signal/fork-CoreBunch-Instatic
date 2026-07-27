@@ -13,6 +13,7 @@ type LabelProps = Record<string, unknown> & {
 }
 
 type InputProps = Record<string, unknown> & {
+  fieldId: string
   inputType: string
   name: string
   id: string
@@ -27,6 +28,7 @@ type InputProps = Record<string, unknown> & {
 }
 
 type TextareaProps = Record<string, unknown> & {
+  fieldId: string
   name: string
   id: string
   placeholder: string
@@ -38,6 +40,7 @@ type TextareaProps = Record<string, unknown> & {
 }
 
 type SelectProps = Record<string, unknown> & {
+  fieldId: string
   name: string
   id: string
   required: boolean
@@ -58,6 +61,7 @@ type OptionGroupProps = Record<string, unknown> & {
 }
 
 type ChoiceProps = Record<string, unknown> & {
+  fieldId: string
   name: string
   id: string
   value: string
@@ -67,6 +71,7 @@ type ChoiceProps = Record<string, unknown> & {
 }
 
 type SubmitProps = Record<string, unknown> & {
+  action: 'submit' | 'reset'
   label: string
   disabled: boolean
   formId: string
@@ -116,8 +121,8 @@ export function InputEditor({ mcClassName, nodeWrapperProps, props }: ModuleComp
       {...nodeWrapperProps}
       className={mcClassName}
       type={props.inputType}
-      name={props.name}
-      id={props.id || undefined}
+      name={props.name || props.fieldId}
+      id={props.id || props.fieldId || undefined}
       placeholder={props.placeholder || undefined}
       defaultValue={props.inputType === 'file' ? undefined : props.value || undefined}
       required={props.required}
@@ -135,8 +140,8 @@ export function TextareaEditor({ mcClassName, nodeWrapperProps, props }: ModuleC
     <textarea
       {...nodeWrapperProps}
       className={mcClassName}
-      name={props.name}
-      id={props.id || undefined}
+      name={props.name || props.fieldId}
+      id={props.id || props.fieldId || undefined}
       placeholder={props.placeholder || undefined}
       defaultValue={props.value || undefined}
       required={props.required}
@@ -152,8 +157,8 @@ export function SelectEditor({ children, mcClassName, nodeWrapperProps, props }:
     <select
       {...nodeWrapperProps}
       className={mcClassName}
-      name={props.name}
-      id={props.id || undefined}
+      name={props.name || props.fieldId}
+      id={props.id || props.fieldId || undefined}
       required={props.required}
       disabled={props.disabled}
       multiple={props.multiple}
@@ -185,8 +190,8 @@ export function CheckboxEditor({ mcClassName, nodeWrapperProps, props }: ModuleC
       {...nodeWrapperProps}
       className={mcClassName}
       type="checkbox"
-      name={props.name}
-      id={props.id || undefined}
+      name={props.name || props.fieldId}
+      id={props.id || props.fieldId || undefined}
       value={props.value}
       defaultChecked={props.checked}
       required={props.required}
@@ -201,8 +206,8 @@ export function RadioEditor({ mcClassName, nodeWrapperProps, props }: ModuleComp
       {...nodeWrapperProps}
       className={mcClassName}
       type="radio"
-      name={props.name}
-      id={props.id || undefined}
+      name={props.name || props.fieldId}
+      id={props.id || props.fieldId || undefined}
       value={props.value}
       defaultChecked={props.checked}
       required={props.required}
@@ -218,6 +223,7 @@ export function SubmitEditor({ mcClassName, nodeWrapperProps, props }: ModuleCom
       {...nodeWrapperProps}
       className={mcClassName}
       type="button"
+      data-instatic-form-action={props.action}
       disabled={props.disabled}
       form={formId || undefined}
     >

@@ -12,6 +12,8 @@ import {
   textField,
 } from './componentLibraryDefinitions'
 import { BUILT_IN_FORM_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryForms'
+import { BUILT_IN_FORM_PATTERN_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryFormPatternEntries'
+import { BUILT_IN_FORM_VISUAL_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryFormVisualComponents'
 import { BUILT_IN_INTERACTIVE_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryInteractiveVisualComponents'
 import { BUILT_IN_PATTERN_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryPatterns'
 import { BUILT_IN_VISUAL_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryVisualComponents'
@@ -543,6 +545,8 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
   ...BUILT_IN_INTERACTIVE_COMPONENT_LIBRARY_ENTRIES,
   ...BUILT_IN_PATTERN_COMPONENT_LIBRARY_ENTRIES,
   ...BUILT_IN_FORM_COMPONENT_LIBRARY_ENTRIES,
+  ...BUILT_IN_FORM_PATTERN_COMPONENT_LIBRARY_ENTRIES,
+  ...BUILT_IN_FORM_VISUAL_COMPONENT_LIBRARY_ENTRIES,
 ]
 
 export function registerBuiltInComponentLibraryEntries(): void {

@@ -19,6 +19,7 @@ import { useInsertModule } from './useInsertModule'
 
 export interface InsertComponentLibraryEntryOptions {
   presetId?: string
+  variantId?: string
 }
 
 /**
@@ -59,7 +60,11 @@ export function useInsertComponentLibraryEntry() {
     }
     const presetId = options.presetId ??
       (implementation.type === 'primitive' ? implementation.presetId : undefined)
-    const metadata = createInstanceMetadata(entry, presetId)
+    const variantId = options.variantId
+    const variantValues = variantId
+      ? entry.variants.find((variant) => variant.id === variantId)?.values
+      : undefined
+    const metadata = createInstanceMetadata(entry, presetId, variantId)
 
     let nodeId: string | null
     if (implementation.type === 'primitive') {
@@ -73,7 +78,7 @@ export function useInsertComponentLibraryEntry() {
         ? entry.presets.find((preset) => preset.id === presetId)?.values
         : undefined
       nodeId = insertModule(mod, location, {
-        defaults: { ...mod.defaults, ...presetValues },
+        defaults: { ...mod.defaults, ...presetValues, ...variantValues },
         catalogueInstance: metadata,
       })
     } else if (implementation.type === 'visual-component') {
@@ -98,6 +103,7 @@ export function useInsertComponentLibraryEntry() {
       const fragment = componentLibraryPatternRegistry.materialize(
         implementation.patternId,
         metadata,
+        variantValues,
       )
       if (!fragment) {
         pushUnsupportedEntryToast(
@@ -175,6 +181,7 @@ function backingImplementation(
 function createInstanceMetadata(
   entry: ComponentLibraryEntry,
   presetId: string | undefined,
+  variantId: string | undefined,
 ): CatalogueInstanceMetadata {
   const capabilityId = entry.requirements.capabilities[0]
   const providerAdapterId = entry.requirements.providerAdapters[0]
@@ -182,6 +189,7 @@ function createInstanceMetadata(
     entryId: entry.id,
     entryVersion: entry.version,
     ...(presetId ? { presetId } : {}),
+    ...(variantId ? { variantId } : {}),
     ...(entry.implementation.type === 'capability-backed'
       ? {
           ...(capabilityId ? { capabilityId } : {}),

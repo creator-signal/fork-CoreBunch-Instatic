@@ -52,6 +52,7 @@ export const TextModule: ModuleDefinition<TextStoredProps> = {
         { label: 'Strong', value: 'strong' },
         { label: 'Emphasis', value: 'em' },
         { label: 'Figure caption', value: 'figcaption' },
+        { label: 'Fieldset legend', value: 'legend' },
       ],
     },
     htmlAttributes: htmlAttributesControl(),

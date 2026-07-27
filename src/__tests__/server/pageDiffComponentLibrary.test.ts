@@ -8,6 +8,7 @@ import type { Page, PageNode } from '@core/page-tree'
 import { makeNode, makePage } from '../fixtures'
 import { validatePageWriteDiff } from '../../../server/handlers/cms/pageDiff'
 import { BUILT_IN_PATTERN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibraryPatterns'
+import { BUILT_IN_FORM_PATTERN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibraryFormPatternEntries'
 
 const COMPONENT_CAPABILITIES = ['site.components.edit'] as const
 
@@ -103,22 +104,96 @@ function governedHeroPage(): Page {
 function governedPatternPage(
   entryId = 'base.card-grid',
   patternId = 'base.pattern.card-grid',
+  parentEntryId?: string,
 ): Page {
+  const entry = componentLibraryRegistry.getOrThrow(entryId)
+  const capabilityId = entry.requirements.capabilities[0]
+  const providerAdapterId = entry.requirements.providerAdapters[0]
   const fragment = componentLibraryPatternRegistry.materialize(patternId, {
     entryId,
     entryVersion: '1.0.0',
+    ...(capabilityId ? { capabilityId } : {}),
+    ...(providerAdapterId ? { providerAdapterId } : {}),
   })
   if (!fragment) throw new Error(`${patternId} is not registered`)
-  return makePage({
-    nodes: {
-      root: makeNode({
-        id: 'root',
-        moduleId: 'base.body',
+  const nodes: Record<string, PageNode> = {
+    root: makeNode({
+      id: 'root',
+      moduleId: 'base.body',
+      children: fragment.rootIds,
+    }),
+    ...fragment.nodes,
+  }
+  if (parentEntryId) {
+    const formDefinition = registry.get('base.form')
+    if (!formDefinition) throw new Error('base.form is not registered')
+    nodes.form = makeNode({
+      id: 'form',
+      moduleId: 'base.form',
+      props: { ...formDefinition.defaults },
+      children: fragment.rootIds,
+      catalogueInstance: {
+        entryId: 'base.form-container',
+        entryVersion: '1.0.0',
+      },
+    })
+    nodes.root!.children = ['form']
+    if (parentEntryId === 'base.form-step') {
+      const stepDefinition = registry.get('base.form-step')
+      if (!stepDefinition) throw new Error('base.form-step is not registered')
+      nodes.step = makeNode({
+        id: 'step',
+        moduleId: 'base.form-step',
+        props: { ...stepDefinition.defaults },
         children: fragment.rootIds,
-      }),
-      ...fragment.nodes,
-    },
-  })
+        catalogueInstance: {
+          entryId: 'base.form-step',
+          entryVersion: '1.0.0',
+        },
+      })
+      nodes.form.children = ['step']
+    }
+  }
+  return makePage({ nodes })
+}
+
+function governedPatternParentPage(parentEntryId?: string): Page {
+  if (!parentEntryId) return makePage()
+  const formDefinition = registry.get('base.form')
+  if (!formDefinition) throw new Error('base.form is not registered')
+  const nodes: Record<string, PageNode> = {
+    root: makeNode({
+      id: 'root',
+      moduleId: 'base.body',
+      children: ['form'],
+    }),
+    form: makeNode({
+      id: 'form',
+      moduleId: 'base.form',
+      props: { ...formDefinition.defaults },
+      children: [],
+      catalogueInstance: {
+        entryId: 'base.form-container',
+        entryVersion: '1.0.0',
+      },
+    }),
+  }
+  if (parentEntryId === 'base.form-step') {
+    const stepDefinition = registry.get('base.form-step')
+    if (!stepDefinition) throw new Error('base.form-step is not registered')
+    nodes.step = makeNode({
+      id: 'step',
+      moduleId: 'base.form-step',
+      props: { ...stepDefinition.defaults },
+      children: [],
+      catalogueInstance: {
+        entryId: 'base.form-step',
+        entryVersion: '1.0.0',
+      },
+    })
+    nodes.form!.children = ['step']
+  }
+  return makePage({ nodes })
 }
 
 describe('Component Library page diff policy', () => {
@@ -312,17 +387,52 @@ describe('Component Library page diff policy', () => {
 
   it('accepts every built-in pattern through the component-only server boundary', () => {
     const empty = makePage()
-    for (const entry of BUILT_IN_PATTERN_COMPONENT_LIBRARY_ENTRIES) {
-      const implementation = entry.implementation
+    for (const entry of [
+      ...BUILT_IN_PATTERN_COMPONENT_LIBRARY_ENTRIES,
+      ...BUILT_IN_FORM_PATTERN_COMPONENT_LIBRARY_ENTRIES,
+    ]) {
+      const implementation = entry.implementation.type === 'capability-backed'
+        ? entry.implementation.backing
+        : entry.implementation
       if (implementation.type !== 'pattern') {
         throw new Error(`${entry.id} is not a pattern`)
       }
+      const parentEntryId = entry.constraints.allowedParentEntryIds?.[0]
+      const parent = governedPatternParentPage(parentEntryId)
       const pattern = governedPatternPage(
         entry.id,
         implementation.patternId,
+        parentEntryId,
       )
-      expect(() => validate(empty, pattern), entry.id).not.toThrow()
-      expect(() => validate(pattern, empty), entry.id).not.toThrow()
+      try {
+        validate(parent, pattern)
+        validate(pattern, parent)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        const nodeId = message.match(/nodes\.([^:]+)/)?.[1]
+        const node = nodeId ? pattern.nodes[nodeId] : undefined
+        throw new Error(
+          `${entry.id}: ${message}${node ? ` (${node.moduleId}, ${node.catalogueInstance?.entryId ?? 'unmanaged'})` : ''}`,
+        )
+      }
     }
+  })
+
+  it('accepts declared pattern variants and rejects metadata-only changes', () => {
+    const previous = governedPatternPage(
+      'base.form-tabs',
+      'base.pattern.form-tabs',
+    )
+    const rootId = previous.nodes.root!.children[0]!
+    const approved = structuredClone(previous)
+    approved.nodes[rootId]!.catalogueInstance!.variantId = 'vertical'
+    approved.nodes[rootId]!.props.orientation = 'vertical'
+    expect(() => validate(previous, approved)).not.toThrow()
+
+    const metadataOnly = structuredClone(previous)
+    metadataOnly.nodes[rootId]!.catalogueInstance!.variantId = 'vertical'
+    expect(() => validate(previous, metadataOnly)).toThrow(
+      /catalogue identity changed/,
+    )
   })
 })

@@ -16,6 +16,7 @@ export const ComponentFramePropsSchema = Type.Object({
     { default: 'section' },
   ),
   label: Type.String({ default: '' }),
+  bindingPrefix: Type.String({ default: '' }),
 })
 
 export type ComponentFrameStoredProps = Static<typeof ComponentFramePropsSchema>

@@ -135,7 +135,13 @@ function matchPatternNode(
     return false
   }
   if (templateKey === definition.rootKey) {
-    if (!deepEqual(instance.props, template.props)) return false
+    const rootEntry = resolveEntry(instance)
+    if (
+      !rootEntry ||
+      !isApprovedPatternRootVariation(template, instance, rootEntry)
+    ) {
+      return false
+    }
   } else if (template.catalogueInstance) {
     const nestedEntry = resolveEntry(instance)
     if (
@@ -173,6 +179,42 @@ function matchPatternNode(
     }
   }
   return true
+}
+
+function isApprovedPatternRootVariation(
+  template: ComponentLibraryPatternDefinition['nodes'][number],
+  instance: PageNode,
+  entry: ComponentLibraryEntry,
+): boolean {
+  const metadata = instance.catalogueInstance
+  const implementation = backingImplementation(entry.implementation)
+  if (
+    !metadata?.pattern ||
+    implementation.type !== 'pattern' ||
+    metadata.entryId !== entry.id ||
+    metadata.entryVersion !== entry.version
+  ) {
+    return false
+  }
+  const permitted = new Set(entry.fields.map((field) => field.key))
+  const options = approvedOptions(entry, metadata)
+  for (const option of options) {
+    for (const key of Object.keys(option.values)) permitted.add(key)
+  }
+  const keys = new Set([
+    ...Object.keys(template.props),
+    ...Object.keys(instance.props),
+  ])
+  if (!Array.from(keys).every((key) =>
+    permitted.has(key) || deepEqual(template.props[key], instance.props[key])
+  )) {
+    return false
+  }
+  return options.every((option) =>
+    Object.entries(option.values).every(([key, value]) =>
+      deepEqual(instance.props[key], value),
+    ),
+  )
 }
 
 function isApprovedGovernedVariation(

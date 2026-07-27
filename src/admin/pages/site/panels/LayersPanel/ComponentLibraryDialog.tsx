@@ -1,6 +1,5 @@
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useState } from 'react'
 import {
-  componentLibraryRegistry,
   filterComponentLibraryEntries,
   resolveComponentLibraryAvailability,
   type ComponentLibraryAvailability,
@@ -11,15 +10,13 @@ import {
   type ComponentLibrarySourceType,
   type ComponentLibraryStatus,
 } from '@core/component-library'
-import { providerAdapterRegistry } from '@core/provider-adapters'
-import { searchCapabilityHealth } from '@core/search'
-import { AttachmentCapabilityStatusSchema } from '@core/attachments'
-import { FormDraftCapabilityStatusSchema } from '@core/forms'
-import { apiRequest } from '@core/http'
-import { useEditorStore } from '@site/store/store'
 import { ModuleIcon } from '@site/ui/ModuleIcon'
 import { useEditorPermissions } from '@site/editorPermissionsContext'
 import { useInsertComponentLibraryEntry } from '@site/hooks/useInsertComponentLibraryEntry'
+import {
+  useComponentLibraryDependencyState,
+  useComponentLibraryEntries,
+} from '@site/component-library/useComponentLibraryCatalogue'
 import { Button } from '@ui/components/Button'
 import { Dialog } from '@ui/components/Dialog'
 import { EmptyState } from '@ui/components/EmptyState'
@@ -29,10 +26,6 @@ import { TagPill } from '@ui/components/TagPill'
 import styles from './ComponentLibraryDialog.module.css'
 
 const ALL = 'all'
-const subscribeComponentLibrary = (listener: () => void) =>
-  componentLibraryRegistry.subscribe(listener)
-const getComponentLibraryGeneration = () => componentLibraryRegistry.generation()
-
 const IMPLEMENTATION_OPTIONS = [
   { value: ALL, label: 'All implementations' },
   { value: 'primitive', label: 'Primitive' },
@@ -69,53 +62,11 @@ export function ComponentLibraryDialog({
   dependencyState,
 }: ComponentLibraryDialogProps) {
   const permissions = useEditorPermissions()
-  const searchHealth = useEditorStore((state) =>
-    searchCapabilityHealth(state.site),
+  const entries = useComponentLibraryEntries()
+  const resolvedDependencyState = useComponentLibraryDependencyState(
+    open,
+    dependencyState,
   )
-  const [attachmentHealth, setAttachmentHealth] = useState<
-    ComponentLibraryDependencyState['capabilities'][string]
-  >('unavailable')
-  const [formDraftHealth, setFormDraftHealth] = useState<
-    ComponentLibraryDependencyState['capabilities'][string]
-  >('unavailable')
-  useEffect(() => {
-    if (!open || dependencyState) return
-    const controller = new AbortController()
-    apiRequest('/admin/api/cms/attachments/health', {
-      schema: AttachmentCapabilityStatusSchema,
-      signal: controller.signal,
-    })
-      .then((body) => body.health)
-      .then(setAttachmentHealth)
-      .catch(() => {
-        if (!controller.signal.aborted) setAttachmentHealth('unavailable')
-      })
-    apiRequest('/admin/api/cms/form-drafts/health', {
-      schema: FormDraftCapabilityStatusSchema,
-      signal: controller.signal,
-    })
-      .then((body) => body.health)
-      .then(setFormDraftHealth)
-      .catch(() => {
-        if (!controller.signal.aborted) setFormDraftHealth('unavailable')
-      })
-    return () => controller.abort()
-  }, [dependencyState, open])
-  useSyncExternalStore(
-    subscribeComponentLibrary,
-    getComponentLibraryGeneration,
-    getComponentLibraryGeneration,
-  )
-  const entries = componentLibraryRegistry.list()
-  const resolvedDependencyState = dependencyState ?? {
-    capabilities: {
-      'search.index': searchHealth,
-      'forms.attachments': attachmentHealth,
-      'forms.drafts': formDraftHealth,
-    },
-    providerAdapters: providerAdapterRegistry.dependencyHealth(),
-    plugins: {},
-  }
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState(ALL)
   const [implementationType, setImplementationType] = useState(ALL)

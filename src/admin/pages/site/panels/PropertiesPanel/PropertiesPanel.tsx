@@ -289,7 +289,7 @@ function HeaderTitleContent({
     if (!selectedNode) return undefined
     return (
       <span>
-        {componentLibraryEntry?.name ?? 'Custom / Freeform'}
+        {componentLibraryEntry?.name ?? 'Component Block'}
       </span>
     )
   }

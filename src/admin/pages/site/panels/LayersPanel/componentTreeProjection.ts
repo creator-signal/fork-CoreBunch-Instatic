@@ -262,7 +262,7 @@ function projectOrdinaryNode({
     ...base,
     label: metadata
       ? `Missing library entry: ${metadata.entryId}`
-      : `Custom / Freeform: ${node.label ?? moduleNames[node.moduleId] ?? node.moduleId}`,
+      : `Component Block: ${node.label ?? moduleNames[node.moduleId] ?? node.moduleId}`,
     kind: 'freeform',
     status: metadata ? 'missing-library-entry' : undefined,
     readOnly: true,

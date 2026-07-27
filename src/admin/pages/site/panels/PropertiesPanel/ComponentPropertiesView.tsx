@@ -76,10 +76,10 @@ export function ComponentPropertiesView({
         <div className={styles.locked}>
           <EmptyState
             variant="centered"
-            title={metadata ? 'Component definition unavailable' : 'Custom / Freeform content'}
+            title={metadata ? 'Component definition unavailable' : 'Component Block'}
             description={metadata
               ? `The retained definition for ${metadata.entryId}@${metadata.entryVersion} is not installed. This content remains intact and read-only in Components view.`
-              : 'This content has no governed Component Library mapping. Switch to HTML view to inspect its implementation or convert it through an approved workflow.'}
+              : 'This block has no governed Component Library mapping. Switch to HTML view to inspect its implementation or convert it through an approved workflow.'}
             action={permissions.canEditStructure ? (
               <div className={styles.lockedActions}>
                 {conversionCandidates.length > 0 ? (
@@ -194,22 +194,26 @@ export function ComponentPropertiesView({
             )
           }
           return (
-            <PropertyControlRenderer
-              key={field.key}
-              propKey={field.key}
-              control={{
-                ...control,
-                label: field.label,
-              }}
-              value={componentLibraryFieldValue(entry, field, node, site)}
-              onChange={(key, value) => updateField(node.id, key, value)}
-              disabled={
-                !permissions.canEditComponents ||
-                status === 'definition-missing' ||
-                status === 'version-ahead'
-              }
-              permissionOverride={permissions.canEditComponents}
-            />
+            <div key={field.key} className={styles.field}>
+              <PropertyControlRenderer
+                propKey={field.key}
+                control={{
+                  ...control,
+                  label: field.label,
+                }}
+                value={componentLibraryFieldValue(entry, field, node, site)}
+                onChange={(key, value) => updateField(node.id, key, value)}
+                disabled={
+                  !permissions.canEditComponents ||
+                  status === 'definition-missing' ||
+                  status === 'version-ahead'
+                }
+                permissionOverride={permissions.canEditComponents}
+              />
+              {field.description ? (
+                <p className={styles.fieldDescription}>{field.description}</p>
+              ) : null}
+            </div>
           )
         })}
       </section>
@@ -451,10 +455,12 @@ function componentLibraryFieldControl(
   site: SiteDocument | null,
 ): PropertyControl | undefined {
   const implementation = componentLibraryBacking(entry.implementation)
-  if (implementation.type === 'primitive') {
-    return definition.schema[field.key] as PropertyControl | undefined
+  if (implementation.type !== 'visual-component') {
+    const control = definition.schema[field.key] as PropertyControl | undefined
+    return control && field.description
+      ? { ...control, description: field.description }
+      : control
   }
-  if (implementation.type !== 'visual-component') return undefined
 
   const visualComponent = resolveVisualComponent(
     site?.visualComponents,

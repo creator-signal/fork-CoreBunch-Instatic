@@ -85,6 +85,55 @@ describe('ComponentPropertiesView', () => {
     expect(screen.queryByText('Inspect implementation in HTML view')).toBeNull()
   })
 
+  it('edits the governed Plain Text content and semantic element', () => {
+    const store = useEditorStore.getState()
+    const page = store.site!.pages[0]!
+    const definition = registry.get('base.text')!
+    const nodeId = store.insertNode(
+      'base.text',
+      { ...definition.defaults, text: 'Initial copy', tag: 'p' },
+      page.rootNodeId,
+      undefined,
+      {
+        catalogueInstance: {
+          entryId: 'base.plain-text',
+          entryVersion: '1.0.0',
+          presetId: 'paragraph',
+        },
+      },
+    )
+    store.selectNode(nodeId)
+    const node = useEditorStore.getState().site!.pages[0]!.nodes[nodeId]!
+    const entry = componentLibraryRegistry.getOrThrow('base.plain-text')
+
+    render(
+      <ComponentPropertiesView
+        node={node}
+        definition={definition}
+        entry={entry}
+        latestEntry={entry}
+      />,
+    )
+
+    const text = screen
+      .getByTestId('property-control-text')
+      .querySelector('textarea')
+    const semanticElement = screen
+      .getByTestId('property-control-tag')
+      .querySelector('select')
+    if (!text || !semanticElement) {
+      throw new Error('Plain Text governed controls are missing')
+    }
+    fireEvent.change(text, { target: { value: 'Updated component copy' } })
+    fireEvent.change(semanticElement, { target: { value: 'small' } })
+
+    const updated = useEditorStore.getState().site!.pages[0]!.nodes[nodeId]!
+    expect(updated.props.text).toBe('Updated component copy')
+    expect(updated.props.tag).toBe('small')
+    expect(screen.queryByTestId('property-control-htmlAttributes')).toBeNull()
+    expect(screen.getByText(/literal authored text/i)).toBeTruthy()
+  })
+
   it('previews and confirms a lossless primitive conversion for structural authors', () => {
     const definition = registry.get('base.input')!
     const page = useEditorStore.getState().site!.pages[0]!

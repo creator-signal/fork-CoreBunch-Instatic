@@ -171,7 +171,7 @@ describe('Components Layers projection', () => {
 
     expect(root.children[2]).toMatchObject({
       nodeId: 'raw',
-      label: 'Custom / Freeform: Text',
+      label: 'Component Block: Text',
       kind: 'freeform',
       readOnly: true,
     })

@@ -100,7 +100,16 @@ export function ModuleInserterItemButton({
         data-accent={item.accent}
         data-module-id={item.kind === 'module' ? item.id : undefined}
         data-saved-layout-id={item.kind === 'savedLayout' ? item.id : undefined}
-        data-vc-id={item.kind === 'component' ? item.id : undefined}
+        data-vc-id={
+          item.kind === 'component' && item.source === 'saved'
+            ? item.id
+            : undefined
+        }
+        data-component-library-id={
+          item.kind === 'component' && item.source === 'catalogue'
+            ? item.id
+            : undefined
+        }
       >
         {isList ? <ItemRow item={item} /> : <ItemTile item={item} />}
       </Button>

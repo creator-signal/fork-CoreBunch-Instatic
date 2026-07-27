@@ -378,6 +378,8 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
             ...safeComponentLibraryOverrides(node.props.propOverrides),
             ...option.values,
           }
+        } else if (implementation.type === 'pattern') {
+          Object.assign(node.props, option.values)
         } else {
           return false
         }

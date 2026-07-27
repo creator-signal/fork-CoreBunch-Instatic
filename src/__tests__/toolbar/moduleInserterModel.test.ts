@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it } from 'bun:test'
 import {
   DEFAULT_MODULE_INSERTER_FAVORITES,
+  buildModuleInserterItems,
+  composeComponentSection,
   composeLayoutsSection,
   dedupeModuleInserterRefs,
   getSavedLayoutItems,
@@ -12,6 +14,7 @@ import {
   type ModuleInsertionContext,
   type RegistryModuleForInserter,
 } from '@site/module-picker/moduleInserterModel'
+import { BUILT_IN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibrary'
 import type { SavedLayout } from '@core/layouts'
 import { findCanvasViewportAtPoint } from '@site/canvas/canvasInsertionDrop'
 import { scrollSelectedItemIntoView } from '@site/module-picker/moduleInserterSelectionScroll'
@@ -36,6 +39,31 @@ beforeEach(() => {
 })
 
 describe('module inserter model', () => {
+  it('places governed catalogue entries in Components and Forms folders', () => {
+    const built = buildModuleInserterItems({
+      modules: [],
+      context: PAGE_CTX,
+      savedLayouts: [],
+      visualComponents: [],
+      componentLibraryEntries: BUILT_IN_COMPONENT_LIBRARY_ENTRIES,
+    })
+    const components = built.componentItems.filter(
+      (item) => item.source === 'catalogue' && item.category !== 'Forms',
+    )
+    const forms = built.componentItems.filter(
+      (item) => item.source === 'catalogue' && item.category === 'Forms',
+    )
+    const grouped = composeComponentSection(components)
+
+    expect(components.map((item) => item.id)).toContain('base.hero')
+    expect(components.map((item) => item.id)).toContain('base.grid')
+    expect(components.map((item) => item.id)).toContain('base.plain-text')
+    expect(forms.map((item) => item.id)).toContain('base.form-container')
+    expect(forms.map((item) => item.id)).toContain('base.email-input')
+    expect(grouped.labelByKey.get('component:base.section')).toBe('Layout')
+    expect(grouped.labelByKey.get('component:base.heading')).toBe('Typography')
+  })
+
   it('filters registry modules using the editor insertion rules', () => {
     const modules = [
       mod('base.body', 'Layout'),

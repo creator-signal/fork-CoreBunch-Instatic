@@ -14,12 +14,14 @@ import type {
 import { selectVisualComponentById } from '@core/page-tree'
 import { pushToast } from '@ui/components/Toast'
 import { resolveInsertLocation } from '@site/store/insertLocation'
+import type { InsertLocation } from '@site/store/insertLocation'
 import { selectActiveCanvasPage, useEditorStore } from '@site/store/store'
 import { useInsertModule } from './useInsertModule'
 
 export interface InsertComponentLibraryEntryOptions {
   presetId?: string
   variantId?: string
+  showSuccessToast?: boolean
 }
 
 /**
@@ -41,11 +43,12 @@ export function useInsertComponentLibraryEntry() {
   return (
     entry: ComponentLibraryEntry,
     options: InsertComponentLibraryEntryOptions = {},
+    explicitTarget?: InsertLocation,
   ): string | null => {
     if (!canvasPage) return null
 
     const implementation = backingImplementation(entry.implementation)
-    const location = resolveInsertLocation(
+    const location = explicitTarget ?? resolveInsertLocation(
       canvasPage,
       selectedNodeId ?? canvasPage.rootNodeId,
     )
@@ -125,12 +128,14 @@ export function useInsertComponentLibraryEntry() {
     }
 
     if (!nodeId) return null
-    pushToast({
-      kind: 'success',
-      title: `Inserted ${entry.name}`,
-      body: 'Inserted at the current selection.',
-      location: 'component-library',
-    })
+    if (options.showSuccessToast !== false) {
+      pushToast({
+        kind: 'success',
+        title: `Inserted ${entry.name}`,
+        body: 'Inserted at the current selection.',
+        location: 'component-library',
+      })
+    }
     return nodeId
   }
 }

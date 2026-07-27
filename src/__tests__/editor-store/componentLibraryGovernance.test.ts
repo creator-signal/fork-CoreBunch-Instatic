@@ -189,4 +189,33 @@ describe('Component Library governed mutations', () => {
     )).toBe(false)
     expect(node?.catalogueInstance?.presetId).toBe('email')
   })
+
+  it('applies approved pattern variants to the governed root', () => {
+    const store = useEditorStore.getState()
+    const site = store.createSite('Pattern Variant Test')
+    const page = site.pages[0]!
+    const entry = componentLibraryRegistry.get('base.form-tabs')
+    if (!entry || entry.implementation.type !== 'pattern') {
+      throw new Error('base.form-tabs pattern is not registered')
+    }
+    const fragment = componentLibraryPatternRegistry.materialize(
+      entry.implementation.patternId,
+      {
+        entryId: entry.id,
+        entryVersion: entry.version,
+      },
+    )
+    if (!fragment) throw new Error('base.form-tabs pattern could not materialize')
+    const rootId = fragment.rootIds[0]!
+    store.insertImportedNodes(page.rootNodeId, fragment)
+
+    expect(useEditorStore.getState().applyComponentLibraryOption(
+      rootId,
+      'variant',
+      'vertical',
+    )).toBe(true)
+    const root = useEditorStore.getState().site?.pages[0]?.nodes[rootId]
+    expect(root?.props.orientation).toBe('vertical')
+    expect(root?.catalogueInstance?.variantId).toBe('vertical')
+  })
 })

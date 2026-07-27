@@ -62,7 +62,7 @@ export function resolveComponentLibraryPlacement(
   if (!context.parentEntry && !context.parentIsPageRoot) {
     return denied(
       'parent-ungoverned',
-      `${entry.name} cannot be placed inside Custom / Freeform content.`,
+      `${entry.name} cannot be placed inside an unmapped Component Block.`,
     )
   }
 

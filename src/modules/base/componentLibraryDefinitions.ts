@@ -365,6 +365,8 @@ export const FORM_CONTROL_ACCESSIBILITY_CHECKS: ComponentLibraryAccessibilityChe
 export const textField: ComponentLibraryField = {
   key: 'text',
   label: 'Text',
+  description:
+    'The literal authored text. Markup is escaped and hard newlines publish as line breaks.',
   type: 'text',
   required: true,
 }
@@ -372,6 +374,8 @@ export const textField: ComponentLibraryField = {
 export const htmlTagField: ComponentLibraryField = {
   key: 'tag',
   label: 'Semantic element',
+  description:
+    'The HTML element that describes the text meaning; visual typography belongs to classes.',
   type: 'select',
   required: true,
 }

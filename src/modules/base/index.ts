@@ -16,6 +16,7 @@ import './body'
 
 // Layout modules
 import './container'
+import './componentFrame'
 import './loop'
 
 // Typography modules
@@ -24,6 +25,7 @@ import './richText'
 import './list'
 import './codeBlock'
 import './table'
+import './progress'
 import './outlet'
 
 // Media modules

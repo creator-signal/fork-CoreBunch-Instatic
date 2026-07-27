@@ -33,6 +33,13 @@ describe('built-in Component Library', () => {
     expect(ids).toContain('base.captcha')
     expect(ids).toContain('base.search')
     expect(ids).toContain('base.file-attachment')
+    expect(ids).toContain('base.hero')
+    expect(ids).toContain('base.card')
+    expect(ids).toContain('base.navigation')
+    expect(ids).toContain('base.notice')
+    expect(ids).toContain('base.reusable-section')
+    expect(ids).toContain('base.download')
+    expect(ids).toContain('base.progress-bar')
 
     for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
       expect(componentLibraryRegistry.get(entry.id)).toEqual(entry)

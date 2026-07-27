@@ -134,4 +134,58 @@ describe('ComponentPropertiesView', () => {
       presetId: 'email',
     })
   })
+
+  it('edits built-in Visual Component parameters and approved variants', () => {
+    const store = useEditorStore.getState()
+    const page = store.site!.pages[0]!
+    const nodeId = store.insertComponentRef(
+      page.rootNodeId,
+      'base.vc.hero',
+      undefined,
+      {
+        catalogueInstance: {
+          entryId: 'base.hero',
+          entryVersion: '1.0.0',
+        },
+      },
+    )
+    if (!nodeId) throw new Error('Hero insertion failed')
+    store.selectNode(nodeId)
+    const node = useEditorStore.getState().site!.pages[0]!.nodes[nodeId]!
+    const entry = componentLibraryRegistry.getOrThrow('base.hero')
+    const definition = registry.get('base.visual-component-ref')!
+
+    render(
+      <ComponentPropertiesView
+        node={node}
+        definition={definition}
+        entry={entry}
+        latestEntry={entry}
+      />,
+    )
+
+    const heading = screen
+      .getByTestId('property-control-heading')
+      .querySelector('input')
+    if (!heading) throw new Error('Heading control missing')
+    fireEvent.change(heading, { target: { value: 'A governed introduction' } })
+    const variant = screen.getByText('Variant').closest('label')
+      ?.querySelector('select')
+    if (!variant) throw new Error('Variant control missing')
+    fireEvent.change(variant, {
+      target: { value: 'image-left' },
+    })
+
+    expect(
+      useEditorStore.getState().site!.pages[0]!.nodes[nodeId]!.props
+        .propOverrides,
+    ).toEqual({
+      heading: 'A governed introduction',
+      variant: 'image-left',
+    })
+    expect(
+      useEditorStore.getState().site!.pages[0]!.nodes[nodeId]!
+        .catalogueInstance?.variantId,
+    ).toBe('image-left')
+  })
 })

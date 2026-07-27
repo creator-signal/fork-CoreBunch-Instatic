@@ -15,6 +15,7 @@ import { registry } from '@core/module-engine'
 import {
   analyseComponentLibraryPrimitiveConversion,
   componentLibraryRegistry,
+  type ComponentLibraryImplementation,
 } from '@core/component-library'
 
 import {
@@ -34,6 +35,7 @@ import {
   wrapNode,
   wrapNodes,
   reindexNodeParents,
+  selectVisualComponentById,
 } from '@core/page-tree'
 import type { NodeTree, PageNode, SiteDocument } from '@core/page-tree'
 import { subtreeHasOutlet, treeHasOutlet } from '@core/templates'
@@ -280,7 +282,9 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
 
       // Resolve the referenced VC up-front (read-only) so its slot-instance
       // children can be materialized in the SAME mutation as the ref insertion.
-      const vc = site?.visualComponents.find((v) => v.id === componentId)
+      const vc = site
+        ? selectVisualComponentById(site, componentId)
+        : undefined
 
       // Build the ref node with the module's registry defaults plus the
       // ref-specific props. `index` forwards to insertNode so callers using
@@ -322,7 +326,26 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
         if (!node || !metadata) return false
         const entry = componentLibraryDefinitionForInstance(metadata.entryId, metadata.entryVersion)
         if (!entry?.fields.some((field) => field.key === fieldKey)) return false
-        node.props[fieldKey] = value
+        const implementation = backingComponentLibraryImplementation(
+          entry.implementation,
+        )
+        if (implementation.type === 'primitive') {
+          if (implementation.moduleId !== node.moduleId) return false
+          node.props[fieldKey] = value
+        } else if (implementation.type === 'visual-component') {
+          if (
+            node.moduleId !== 'base.visual-component-ref' ||
+            node.props.componentId !== implementation.componentId
+          ) {
+            return false
+          }
+          node.props.propOverrides = {
+            ...safeComponentLibraryOverrides(node.props.propOverrides),
+            [fieldKey]: value,
+          }
+        } else {
+          return false
+        }
         return true
       }),
 
@@ -336,7 +359,26 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
         const options = kind === 'preset' ? entry.presets : entry.variants
         const option = options.find((candidate) => candidate.id === optionId)
         if (!option) return false
-        Object.assign(node.props, option.values)
+        const implementation = backingComponentLibraryImplementation(
+          entry.implementation,
+        )
+        if (implementation.type === 'primitive') {
+          if (implementation.moduleId !== node.moduleId) return false
+          Object.assign(node.props, option.values)
+        } else if (implementation.type === 'visual-component') {
+          if (
+            node.moduleId !== 'base.visual-component-ref' ||
+            node.props.componentId !== implementation.componentId
+          ) {
+            return false
+          }
+          node.props.propOverrides = {
+            ...safeComponentLibraryOverrides(node.props.propOverrides),
+            ...option.values,
+          }
+        } else {
+          return false
+        }
         if (kind === 'preset') metadata.presetId = optionId
         else metadata.variantId = optionId
         return true
@@ -639,4 +681,18 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
   }
 
   return actions
+}
+
+function backingComponentLibraryImplementation(
+  implementation: ComponentLibraryImplementation,
+): Exclude<ComponentLibraryImplementation, { type: 'capability-backed' }> {
+  return implementation.type === 'capability-backed'
+    ? implementation.backing
+    : implementation
+}
+
+function safeComponentLibraryOverrides(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {}
 }

@@ -8,7 +8,10 @@
  * cache invalidates when the data changes.
  */
 import type { SiteDocument } from './siteDocument'
-import type { VisualComponent } from '@core/visual-components-schema'
+import {
+  builtInVisualComponentRegistry,
+  type VisualComponent,
+} from '@core/visual-components-schema'
 
 // ---------------------------------------------------------------------------
 // Internal caches
@@ -49,5 +52,6 @@ export function selectVisualComponentById(
   site: SiteDocument,
   componentId: string,
 ): VisualComponent | undefined {
-  return selectVisualComponentsById(site).get(componentId)
+  return selectVisualComponentsById(site).get(componentId) ??
+    builtInVisualComponentRegistry.get(componentId)
 }

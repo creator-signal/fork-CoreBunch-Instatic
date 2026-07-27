@@ -6,8 +6,15 @@ import {
   resolveComponentLibraryInstanceStatus,
   type ComponentLibraryConversionCandidate,
   type ComponentLibraryEntry,
+  type ComponentLibraryField,
+  type ComponentLibraryImplementation,
 } from '@core/component-library'
-import type { PageNode } from '@core/page-tree'
+import type { PageNode, SiteDocument } from '@core/page-tree'
+import {
+  resolveVisualComponent,
+  type VCParam,
+} from '@core/visual-components-schema'
+import { safePropOverrides } from '@core/visualComponents'
 import { useEditorPermissions } from '@site/editorPermissionsContext'
 import { selectActiveCanvasPage, useEditorStore } from '@site/store/store'
 import { PropertyControlRenderer } from '@site/property-controls/PropertyControlRenderer'
@@ -38,6 +45,7 @@ export function ComponentPropertiesView({
   const updateField = useEditorStore((state) => state.updateComponentLibraryField)
   const applyOption = useEditorStore((state) => state.applyComponentLibraryOption)
   const activePage = useEditorStore(selectActiveCanvasPage)
+  const site = useEditorStore((state) => state.site)
   const blockingRuleIds = useEditorStore(
     (state) => state.site?.settings.accessibility?.blockingRuleIds,
   )
@@ -50,6 +58,7 @@ export function ComponentPropertiesView({
         activePage,
         componentLibraryRegistry,
         { blockingRuleIds: blockingRuleIds ?? [] },
+        site?.visualComponents ?? [],
       ).filter((diagnostic) => diagnostic.nodeId === node.id)
     : []
   const [conversionOpen, setConversionOpen] = useState(false)
@@ -170,7 +179,12 @@ export function ComponentPropertiesView({
         {entry.fields.length === 0 ? (
           <p className={styles.empty}>This component exposes no instance fields.</p>
         ) : entry.fields.map((field) => {
-          const control = definition.schema[field.key] as PropertyControl | undefined
+          const control = componentLibraryFieldControl(
+            entry,
+            field,
+            definition,
+            site,
+          )
           if (!control || control.hidden) {
             return (
               <div key={field.key} className={styles.unavailableField}>
@@ -187,7 +201,7 @@ export function ComponentPropertiesView({
                 ...control,
                 label: field.label,
               }}
-              value={node.props[field.key]}
+              value={componentLibraryFieldValue(entry, field, node, site)}
               onChange={(key, value) => updateField(node.id, key, value)}
               disabled={
                 !permissions.canEditComponents ||
@@ -428,6 +442,93 @@ function OptionControl({
       />
     </label>
   )
+}
+
+function componentLibraryFieldControl(
+  entry: ComponentLibraryEntry,
+  field: ComponentLibraryField,
+  definition: AnyModuleDefinition,
+  site: SiteDocument | null,
+): PropertyControl | undefined {
+  const implementation = componentLibraryBacking(entry.implementation)
+  if (implementation.type === 'primitive') {
+    return definition.schema[field.key] as PropertyControl | undefined
+  }
+  if (implementation.type !== 'visual-component') return undefined
+
+  const visualComponent = resolveVisualComponent(
+    site?.visualComponents,
+    implementation.componentId,
+  )
+  const parameter = visualComponent?.params.find(
+    (candidate) => candidate.id === field.key,
+  )
+  return parameter ? visualComponentParameterControl(parameter, field) : undefined
+}
+
+function componentLibraryFieldValue(
+  entry: ComponentLibraryEntry,
+  field: ComponentLibraryField,
+  node: PageNode,
+  site: SiteDocument | null,
+): unknown {
+  const implementation = componentLibraryBacking(entry.implementation)
+  if (implementation.type !== 'visual-component') {
+    return node.props[field.key]
+  }
+  const overrides = safePropOverrides(node.props)
+  if (Object.prototype.hasOwnProperty.call(overrides, field.key)) {
+    return overrides[field.key]
+  }
+  return resolveVisualComponent(
+    site?.visualComponents,
+    implementation.componentId,
+  )?.params.find((candidate) => candidate.id === field.key)?.defaultValue
+}
+
+function visualComponentParameterControl(
+  parameter: VCParam,
+  field: ComponentLibraryField,
+): PropertyControl | undefined {
+  const shared = {
+    label: field.label,
+    ...(field.description ? { description: field.description } : {}),
+  }
+  switch (parameter.type) {
+    case 'string':
+      return { ...shared, type: 'text' }
+    case 'richText':
+      return { ...shared, type: 'richtext' }
+    case 'url':
+      return { ...shared, type: 'url' }
+    case 'image':
+      return { ...shared, type: 'image' }
+    case 'number':
+      return { ...shared, type: 'number' }
+    case 'boolean':
+      return { ...shared, type: 'toggle' }
+    case 'color':
+      return { ...shared, type: 'color' }
+    case 'enum':
+      return {
+        ...shared,
+        type: 'select',
+        options: (parameter.enumOptions ?? []).map((value) => ({
+          label: value.replaceAll('-', ' '),
+          value,
+        })),
+      }
+    default:
+      return undefined
+  }
+}
+
+function componentLibraryBacking(
+  implementation: ComponentLibraryImplementation,
+): Exclude<ComponentLibraryImplementation, { type: 'capability-backed' }> {
+  return implementation.type === 'capability-backed'
+    ? implementation.backing
+    : implementation
 }
 
 function statusLabel(

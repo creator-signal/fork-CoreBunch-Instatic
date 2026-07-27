@@ -92,4 +92,35 @@ describe('useInsertComponentLibraryEntry', () => {
     )
     expect(useEditorStore.getState()._historyPast).toHaveLength(0)
   })
+
+  it('inserts a built-in Visual Component and its governed slots atomically', () => {
+    const store = useEditorStore.getState()
+    store.createSite('Built-in Visual Component')
+    const entry = componentLibraryRegistry.getOrThrow('base.hero')
+    const { result } = renderHook(() => useInsertComponentLibraryEntry())
+    let nodeId: string | null = null
+
+    act(() => {
+      nodeId = result.current(entry)
+    })
+
+    const state = useEditorStore.getState()
+    const inserted = state.site?.pages[0]?.nodes[nodeId!]
+    expect(inserted?.moduleId).toBe('base.visual-component-ref')
+    expect(inserted?.props.componentId).toBe('base.vc.hero')
+    expect(inserted?.catalogueInstance).toEqual({
+      entryId: 'base.hero',
+      entryVersion: '1.0.0',
+    })
+    expect(inserted?.children).toHaveLength(1)
+    const slot = state.site?.pages[0]?.nodes[inserted!.children[0]!]
+    expect(slot?.moduleId).toBe('base.slot-instance')
+    expect(slot?.props.slotName).toBe('actions')
+    expect(state._historyPast).toHaveLength(1)
+
+    act(() => useEditorStore.getState().undo())
+    expect(
+      useEditorStore.getState().site?.pages[0]?.nodes[nodeId!],
+    ).toBeUndefined()
+  })
 })

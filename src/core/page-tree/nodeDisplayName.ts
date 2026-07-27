@@ -24,7 +24,10 @@
  */
 
 import type { PageNode } from './pageNode'
-import type { VisualComponent } from '@core/visual-components-schema'
+import {
+  resolveVisualComponent,
+  type VisualComponent,
+} from '@core/visual-components-schema'
 import { resolveHtmlTagBadge, type AnyModuleDefinition } from '@core/module-engine-schema'
 import { classNamesForClassIds, type StyleRuleRegistry } from './classNames'
 
@@ -37,8 +40,8 @@ export function getNodeDisplayName(
 
   if (node.moduleId === 'base.visual-component-ref') {
     const componentId = (node.props as Record<string, unknown> | undefined)?.componentId
-    if (typeof componentId === 'string' && componentId.length > 0 && visualComponents) {
-      const vc = visualComponents.find((v) => v.id === componentId)
+    if (typeof componentId === 'string' && componentId.length > 0) {
+      const vc = resolveVisualComponent(visualComponents, componentId)
       if (vc && vc.name.length > 0) return vc.name
     }
   }

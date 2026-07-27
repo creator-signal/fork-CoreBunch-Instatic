@@ -1,10 +1,15 @@
 import type { Page, PageNode, SiteDocument } from '@core/page-tree'
+import {
+  resolveVisualComponent,
+  type VisualComponent,
+} from '@core/visual-components-schema'
 import type { ComponentLibraryRegistry } from './registry'
 import type {
   ComponentLibraryAccessibilityCheck,
   ComponentLibraryAccessibilityCategory,
   ComponentLibraryAccessibilityRule,
   ComponentLibraryEntry,
+  ComponentLibraryImplementation,
 } from './schemas'
 
 export interface ComponentLibraryAccessibilityPolicy {
@@ -44,6 +49,7 @@ export function analyseComponentLibraryAccessibility(
   page: Page,
   registry: ComponentLibraryRegistry,
   policy: ComponentLibraryAccessibilityPolicy = EMPTY_POLICY,
+  visualComponents: readonly VisualComponent[] = [],
 ): ComponentLibraryAccessibilityDiagnostic[] {
   const blockingRules = new Set(policy.blockingRuleIds)
   const diagnostics: ComponentLibraryAccessibilityDiagnostic[] = []
@@ -64,7 +70,13 @@ export function analyseComponentLibraryAccessibility(
         case 'a11y.accessible-name':
         case 'a11y.provider-fallback':
           for (const field of check.fields ?? []) {
-            if (nonEmptyString(node.props[field])) continue
+            if (
+              nonEmptyString(
+                governedFieldValue(node, entry, field, visualComponents),
+              )
+            ) {
+              continue
+            }
             diagnostics.push(diagnostic(
               page,
               node,
@@ -78,7 +90,9 @@ export function analyseComponentLibraryAccessibility(
 
         case 'a11y.unique-field-id': {
           const field = check.fields?.[0] ?? 'fieldId'
-          const value = nonEmptyString(node.props[field])
+          const value = nonEmptyString(
+            governedFieldValue(node, entry, field, visualComponents),
+          )
           const occurrences = value ? fieldOccurrences.get(value) ?? [] : []
           if (!value) {
             diagnostics.push(diagnostic(
@@ -118,7 +132,12 @@ export function analyseComponentLibraryAccessibility(
           break
 
         case 'a11y.heading-order': {
-          const level = headingLevel(node.props[check.fields?.[0] ?? 'tag'])
+          const level = headingLevel(governedFieldValue(
+            node,
+            entry,
+            check.fields?.[0] ?? 'tag',
+            visualComponents,
+          ))
           if (
             level !== null &&
             previousHeadingLevel !== null &&
@@ -149,7 +168,12 @@ export function analyseSiteComponentLibraryAccessibility(
   policy: ComponentLibraryAccessibilityPolicy = EMPTY_POLICY,
 ): ComponentLibraryAccessibilityDiagnostic[] {
   return site.pages.flatMap((page) =>
-    analyseComponentLibraryAccessibility(page, registry, policy),
+    analyseComponentLibraryAccessibility(
+      page,
+      registry,
+      policy,
+      site.visualComponents,
+    ),
   )
 }
 
@@ -221,6 +245,38 @@ function entryForNode(
     registry.getVersion(metadata.entryId, metadata.entryVersion) ??
     registry.get(metadata.entryId)
   )
+}
+
+function governedFieldValue(
+  node: PageNode,
+  entry: ComponentLibraryEntry,
+  field: string,
+  visualComponents: readonly VisualComponent[],
+): unknown {
+  const implementation = backingImplementation(entry.implementation)
+  if (implementation.type !== 'visual-component') return node.props[field]
+
+  const overrides = node.props.propOverrides
+  if (
+    overrides &&
+    typeof overrides === 'object' &&
+    !Array.isArray(overrides) &&
+    Object.prototype.hasOwnProperty.call(overrides, field)
+  ) {
+    return (overrides as Record<string, unknown>)[field]
+  }
+  return resolveVisualComponent(
+    visualComponents,
+    implementation.componentId,
+  )?.params.find((parameter) => parameter.id === field)?.defaultValue
+}
+
+function backingImplementation(
+  implementation: ComponentLibraryImplementation,
+): Exclude<ComponentLibraryImplementation, { type: 'capability-backed' }> {
+  return implementation.type === 'capability-backed'
+    ? implementation.backing
+    : implementation
 }
 
 function nodeIdsInPageOrder(page: Page): string[] {

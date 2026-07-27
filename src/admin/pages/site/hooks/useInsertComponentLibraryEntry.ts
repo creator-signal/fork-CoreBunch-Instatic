@@ -10,6 +10,7 @@ import type {
   Page,
   PageNode,
 } from '@core/page-tree'
+import { selectVisualComponentById } from '@core/page-tree'
 import { pushToast } from '@ui/components/Toast'
 import { resolveInsertLocation } from '@site/store/insertLocation'
 import { selectActiveCanvasPage, useEditorStore } from '@site/store/store'
@@ -28,6 +29,7 @@ export interface InsertComponentLibraryEntryOptions {
  */
 export function useInsertComponentLibraryEntry() {
   const canvasPage = useEditorStore(selectActiveCanvasPage)
+  const site = useEditorStore((state) => state.site)
   const selectedNodeId = useEditorStore((state) => state.selectedNodeId)
   const insertComponentRef = useEditorStore((state) => state.insertComponentRef)
   const selectNode = useEditorStore((state) => state.selectNode)
@@ -73,6 +75,16 @@ export function useInsertComponentLibraryEntry() {
         catalogueInstance: metadata,
       })
     } else if (implementation.type === 'visual-component') {
+      if (
+        !site ||
+        !selectVisualComponentById(site, implementation.componentId)
+      ) {
+        pushUnsupportedEntryToast(
+          entry,
+          `Visual Component "${implementation.componentId}" is not installed.`,
+        )
+        return null
+      }
       nodeId = insertComponentRef(
         location.parentId,
         implementation.componentId,

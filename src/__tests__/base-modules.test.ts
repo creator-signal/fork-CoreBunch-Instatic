@@ -52,6 +52,8 @@ import { ProviderEmbedModule } from '@modules/base/providerEmbed'
 import { RichTextModule } from '@modules/base/richText'
 import { CodeBlockModule } from '@modules/base/codeBlock'
 import { TableModule } from '@modules/base/table'
+import { ComponentFrameModule } from '@modules/base/componentFrame'
+import { ProgressModule } from '@modules/base/progress'
 
 // ---------------------------------------------------------------------------
 // Run the full conformance suite for every canonical base module.
@@ -78,6 +80,8 @@ runModuleConformanceSuite(ProviderEmbedModule)
 runModuleConformanceSuite(RichTextModule)
 runModuleConformanceSuite(CodeBlockModule)
 runModuleConformanceSuite(TableModule)
+runModuleConformanceSuite(ComponentFrameModule)
+runModuleConformanceSuite(ProgressModule)
 
 describe('base module registration', () => {
   it('only imports available production base modules', async () => {
@@ -139,6 +143,8 @@ describe('base module registration', () => {
       RichTextModule,
       CodeBlockModule,
       TableModule,
+      ComponentFrameModule,
+      ProgressModule,
     ]) {
       // No module should declare CSS-only props as module schema fields.
       const cssOnlyPropNames = ['backgroundColor', 'color', 'fontSize', 'padding', 'margin', 'border']

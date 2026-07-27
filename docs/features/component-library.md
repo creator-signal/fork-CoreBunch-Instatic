@@ -49,7 +49,8 @@ module / Visual Component / pattern / template
 | Search, filters and deterministic ordering | `src/core/component-library/query.ts` |
 | Capability/provider/plugin health | `src/core/component-library/availability.ts` |
 | Retained versions, migration paths and impact previews | `src/core/component-library/version.ts`, `migration.ts` |
-| Explicit built-in definitions | `src/modules/base/componentLibrary.ts`, `componentLibraryForms.ts` |
+| Explicit built-in definitions | `src/modules/base/componentLibrary.ts`, `componentLibraryForms.ts`, `componentLibraryVisualComponents.ts` |
+| Application-owned Visual Components | `src/core/visual-components-schema/registry.ts` |
 | Catalogue dialog and Components projection | `src/admin/pages/site/panels/LayersPanel/` |
 | Canonical backing-node insertion | `src/admin/pages/site/hooks/useInsertComponentLibraryEntry.ts` |
 | Public imports | `src/core/component-library/index.ts` |
@@ -154,6 +155,16 @@ componentLibraryRegistry.register(emailInput)
 `src/modules/base/componentLibrary.ts` registers the curated authoring catalogue during base-module startup. Shared entry builders live in `componentLibraryDefinitions.ts`, and the form catalogue is split into `componentLibraryForms.ts`. Each entry names its canonical module, author-facing fields, optional preset, constraints, usage and accessibility guidance. The list includes structural, content, action, media and form entries, with separate approved presets for each input type.
 
 Registration is deliberately explicit. A low-level HTML module can remain available in HTML view without automatically becoming a governed Component Library entry.
+
+Shared authored structures such as Hero, Card, Navigation, Notice, Reusable
+Section, Download and Progress Bar are application-owned Visual Components.
+Their immutable definitions live in `componentLibraryVisualComponents.ts` and
+are resolved through the same component-reference, slot, publisher and
+persistence paths as site-authored Visual Components. A site definition may
+explicitly override a built-in ID; otherwise authors insert the built-in
+definition without copying it into site data. Governed Properties write only
+declared parameter overrides and approved variants, and component-only server
+diff validation applies the same contract.
 
 Formatted editorial content uses three dedicated semantic primitives rather
 than freeform HTML snippets. `base.rich-text` stores a DOMPurify-governed

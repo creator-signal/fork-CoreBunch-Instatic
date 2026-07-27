@@ -138,7 +138,14 @@ function diffNodes(
 
     if (!prevNode || !nextNode) {
       const changedNode = prevNode ?? nextNode
-      if (changedNode && isValidGovernedStandaloneNode(changedNode)) {
+      const changedNodes = prevNode ? previous : next
+      if (
+        changedNode &&
+        (
+          isValidGovernedStandaloneNode(changedNode, changedNodes) ||
+          isManagedGovernedSlotNode(changedNode, changedNodes)
+        )
+      ) {
         requireGovernedChange(
           capabilities,
           nodePath,
@@ -180,7 +187,11 @@ function diffNode(
     const changedIds = changedChildIds(previous.children, next.children)
     const governedTopology = changedIds.length > 0 && changedIds.every((nodeId) => {
       const node = nextNodes[nodeId] ?? previousNodes[nodeId]
-      return node !== undefined && governedEntryForNode(node) !== undefined
+      const nodes = nextNodes[nodeId] ? nextNodes : previousNodes
+      return node !== undefined && (
+        governedEntryForNode(node) !== undefined ||
+        isManagedGovernedSlotNode(node, nodes)
+      )
     })
     if (governedTopology) {
       if (!capabilities.includes('site.structure.edit')) {
@@ -281,6 +292,25 @@ function isApprovedGovernedPropChange(
   const nextEntry = governedEntryForNode(next)
   if (!previousEntry || !nextEntry || previousEntry.id !== nextEntry.id) return false
   if (previousEntry.version !== nextEntry.version) return false
+  const implementation = backingImplementation(nextEntry.implementation)
+  if (
+    implementation.type === 'visual-component' &&
+    propKey === 'propOverrides'
+  ) {
+    const previousOverrides = safeRecord(previous.props.propOverrides)
+    const nextOverrides = safeRecord(next.props.propOverrides)
+    const keys = new Set([
+      ...Object.keys(previousOverrides),
+      ...Object.keys(nextOverrides),
+    ])
+    const permitted = new Set(nextEntry.fields.map((field) => field.key))
+    for (const option of approvedOptions(nextEntry, next.catalogueInstance)) {
+      for (const key of Object.keys(option.values)) permitted.add(key)
+    }
+    return Array.from(keys)
+      .filter((key) => !deepEqual(previousOverrides[key], nextOverrides[key]))
+      .every((key) => permitted.has(key))
+  }
   if (nextEntry.fields.some((field) => field.key === propKey)) return true
 
   return approvedOptions(nextEntry, next.catalogueInstance).some(
@@ -324,7 +354,9 @@ function isApprovedCatalogueMetadataChange(previous: PageNode, next: PageNode): 
   const expectedChangedOptions = Number(changedPreset) + Number(changedVariant)
   return changedOptions.length === expectedChangedOptions &&
     changedOptions.every((option) =>
-      Object.entries(option.values).every(([key, value]) => deepEqual(next.props[key], value)),
+      Object.entries(option.values).every(([key, value]) =>
+        deepEqual(governedOptionValue(next, entry, key), value),
+      ),
     )
 }
 
@@ -345,7 +377,14 @@ function governedEntryForNode(node: PageNode): ComponentLibraryEntry | undefined
   const entry = componentLibraryRegistry.getVersion(metadata.entryId, metadata.entryVersion)
   if (!entry || !validOptionIds(entry, metadata)) return undefined
   const implementation = backingImplementation(entry.implementation)
-  if (implementation.type !== 'primitive' || implementation.moduleId !== node.moduleId) {
+  const implementationMatches =
+    implementation.type === 'primitive'
+      ? implementation.moduleId === node.moduleId
+      : implementation.type === 'visual-component'
+        ? node.moduleId === 'base.visual-component-ref' &&
+          node.props.componentId === implementation.componentId
+        : false
+  if (!implementationMatches) {
     return undefined
   }
   if (entry.implementation.type === 'capability-backed') {
@@ -413,13 +452,16 @@ function parentNodeFor(
   return Object.values(nodes).find((candidate) => candidate.children.includes(childId))
 }
 
-function isValidGovernedStandaloneNode(node: PageNode): boolean {
+function isValidGovernedStandaloneNode(
+  node: PageNode,
+  nodes: Record<string, PageNode>,
+): boolean {
   const entry = governedEntryForNode(node)
   if (!entry) return false
+  const implementation = backingImplementation(entry.implementation)
   const definition = registry.get(node.moduleId)
   if (!definition) return false
   if (
-    node.children.length > 0 ||
     node.classIds.length > 0 ||
     Object.keys(node.breakpointOverrides).length > 0 ||
     (node.inlineStyles && Object.keys(node.inlineStyles).length > 0) ||
@@ -431,6 +473,30 @@ function isValidGovernedStandaloneNode(node: PageNode): boolean {
     node.catalogueInstance?.pinnedVersion !== undefined ||
     node.catalogueInstance?.pattern !== undefined
   ) {
+    return false
+  }
+
+  if (implementation.type === 'visual-component') {
+    if (
+      node.children.some((childId) => {
+        const child = nodes[childId]
+        return !child || !isManagedGovernedSlotNode(child, nodes)
+      })
+    ) {
+      return false
+    }
+    const overrides = safeRecord(node.props.propOverrides)
+    const permittedOverrides = new Set(entry.fields.map((field) => field.key))
+    for (const option of approvedOptions(entry, node.catalogueInstance)) {
+      for (const [key, value] of Object.entries(option.values)) {
+        permittedOverrides.add(key)
+        if (!deepEqual(overrides[key], value)) return false
+      }
+    }
+    return Object.keys(overrides).every((key) => permittedOverrides.has(key))
+  }
+
+  if (implementation.type !== 'primitive' || node.children.length > 0) {
     return false
   }
 
@@ -447,6 +513,50 @@ function isValidGovernedStandaloneNode(node: PageNode): boolean {
     if (!deepEqual(node.props[key], definition.defaults[key])) return false
   }
   return true
+}
+
+function isManagedGovernedSlotNode(
+  node: PageNode,
+  nodes: Record<string, PageNode>,
+): boolean {
+  if (
+    node.moduleId !== 'base.slot-instance' ||
+    node.classIds.length > 0 ||
+    Object.keys(node.breakpointOverrides).length > 0 ||
+    (node.inlineStyles && Object.keys(node.inlineStyles).length > 0) ||
+    node.catalogueInstance ||
+    node.propBindings ||
+    node.dynamicBindings ||
+    node.label !== undefined ||
+    node.locked !== undefined ||
+    node.hidden !== undefined
+  ) {
+    return false
+  }
+  const parent = parentNodeFor(nodes, node.id)
+  const entry = parent ? governedEntryForNode(parent) : undefined
+  if (!entry) return false
+  const implementation = backingImplementation(entry.implementation)
+  if (implementation.type !== 'visual-component') return false
+  const slotName = String(node.props.slotName ?? '')
+  return entry.slots.some((slot) => slot.id === slotName)
+}
+
+function governedOptionValue(
+  node: PageNode,
+  entry: ComponentLibraryEntry,
+  key: string,
+): unknown {
+  const implementation = backingImplementation(entry.implementation)
+  return implementation.type === 'visual-component'
+    ? safeRecord(node.props.propOverrides)[key]
+    : node.props[key]
+}
+
+function safeRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {}
 }
 
 function validOptionIds(

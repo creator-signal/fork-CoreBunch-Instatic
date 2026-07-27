@@ -12,6 +12,7 @@ import {
   textField,
 } from './componentLibraryDefinitions'
 import { BUILT_IN_FORM_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryForms'
+import { BUILT_IN_VISUAL_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryVisualComponents'
 
 export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[] = [
   primitiveEntry({
@@ -477,6 +478,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     usage: 'Add one independently expandable section.',
     accessibility: 'Write a specific summary that identifies the hidden content.',
   }),
+  ...BUILT_IN_VISUAL_COMPONENT_LIBRARY_ENTRIES,
   ...BUILT_IN_FORM_COMPONENT_LIBRARY_ENTRIES,
 ]
 

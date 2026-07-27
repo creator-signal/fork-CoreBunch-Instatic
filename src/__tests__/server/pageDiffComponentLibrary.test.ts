@@ -66,6 +66,36 @@ function pageWith(node: PageNode): Page {
   })
 }
 
+function governedHeroPage(): Page {
+  return makePage({
+    nodes: {
+      root: makeNode({
+        id: 'root',
+        moduleId: 'base.body',
+        children: ['hero'],
+      }),
+      hero: makeNode({
+        id: 'hero',
+        moduleId: 'base.visual-component-ref',
+        props: {
+          componentId: 'base.vc.hero',
+          propOverrides: {},
+        },
+        children: ['hero-actions'],
+        catalogueInstance: {
+          entryId: 'base.hero',
+          entryVersion: '1.0.0',
+        },
+      }),
+      'hero-actions': makeNode({
+        id: 'hero-actions',
+        moduleId: 'base.slot-instance',
+        props: { slotName: 'actions' },
+      }),
+    },
+  })
+}
+
 describe('Component Library page diff policy', () => {
   it('allows a governed primitive to be added, moved, and removed', () => {
     const empty = makePage()
@@ -193,5 +223,43 @@ describe('Component Library page diff policy', () => {
     } finally {
       componentLibraryRegistry.unregister('test.governed-input')
     }
+  })
+
+  it('allows a built-in Visual Component and managed slots to be added and removed', () => {
+    const empty = makePage()
+    const hero = governedHeroPage()
+
+    expect(() => validate(empty, hero)).not.toThrow()
+    expect(() => validate(hero, empty)).not.toThrow()
+  })
+
+  it('allows declared Visual Component parameters and atomic variants only', () => {
+    const previous = governedHeroPage()
+    const fieldEdit = structuredClone(previous)
+    fieldEdit.nodes.hero!.props.propOverrides = {
+      heading: 'Updated heading',
+    }
+    expect(() => validate(previous, fieldEdit)).not.toThrow()
+
+    const arbitrary = structuredClone(previous)
+    arbitrary.nodes.hero!.props.propOverrides = {
+      implementationSecret: 'not governed',
+    }
+    expect(() => validate(previous, arbitrary)).toThrow(
+      /forbidden structure change/,
+    )
+
+    const approvedVariant = structuredClone(previous)
+    approvedVariant.nodes.hero!.catalogueInstance!.variantId = 'image-left'
+    approvedVariant.nodes.hero!.props.propOverrides = {
+      variant: 'image-left',
+    }
+    expect(() => validate(previous, approvedVariant)).not.toThrow()
+
+    const metadataOnly = structuredClone(previous)
+    metadataOnly.nodes.hero!.catalogueInstance!.variantId = 'image-left'
+    expect(() => validate(previous, metadataOnly)).toThrow(
+      /catalogue identity changed/,
+    )
   })
 })

@@ -32,6 +32,24 @@ interface PrimitiveEntryOptions {
   accessibility: string
 }
 
+interface VisualComponentEntryOptions {
+  id: string
+  name: string
+  description: string
+  category: string
+  icon: string
+  componentId: string
+  tags: string[]
+  fields?: ComponentLibraryField[]
+  variants?: ComponentLibraryEntry['variants']
+  slots?: ComponentLibraryEntry['slots']
+  allowedParentEntryIds?: string[]
+  allowedChildEntryIds?: string[]
+  accessibilityChecks?: ComponentLibraryAccessibilityCheck[]
+  usage: string
+  accessibility: string
+}
+
 export function primitiveEntry(
   options: PrimitiveEntryOptions,
 ): ComponentLibraryEntry {
@@ -78,6 +96,50 @@ export function primitiveEntry(
         : {}),
     },
     requirements: options.requirements ?? {
+      capabilities: [],
+      providerAdapters: [],
+      plugins: [],
+    },
+    documentation: {
+      usage: options.usage,
+      accessibility: options.accessibility,
+    },
+    accessibility: {
+      checks: options.accessibilityChecks ?? [],
+    },
+  }
+}
+
+export function visualComponentEntry(
+  options: VisualComponentEntryOptions,
+): ComponentLibraryEntry {
+  return {
+    id: options.id,
+    version: '1.0.0',
+    name: options.name,
+    description: options.description,
+    category: options.category,
+    tags: options.tags,
+    icon: options.icon,
+    source: { type: 'built-in' },
+    status: 'stable',
+    implementation: {
+      type: 'visual-component',
+      componentId: options.componentId,
+    },
+    fields: options.fields ?? [],
+    variants: options.variants ?? [],
+    presets: [],
+    slots: options.slots ?? [],
+    constraints: {
+      ...(options.allowedParentEntryIds
+        ? { allowedParentEntryIds: options.allowedParentEntryIds }
+        : {}),
+      ...(options.allowedChildEntryIds
+        ? { allowedChildEntryIds: options.allowedChildEntryIds }
+        : {}),
+    },
+    requirements: {
       capabilities: [],
       providerAdapters: [],
       plugins: [],

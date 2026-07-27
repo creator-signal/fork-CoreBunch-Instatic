@@ -169,6 +169,16 @@ When the active page is wrapped by templates, Components Layers uses the same ou
 
 Plugins publish governed entries explicitly through `definePlugin({ componentLibrary })`; registering a canvas module by itself never adds an author-facing catalogue entry. The build emits declarative `component-library/entries.json`, and the manifest requests `componentLibrary.register`. Both editor and server validate the granted permission, entry schema, `<pluginId>.*` namespace, plugin source ownership, duplicates, and primitive backing-module availability before mutating the registry. Disable, uninstall, reload, upgrade and rollback paths remove or replace the owning plugin's entries as a unit.
 
+Disable and uninstall first scan the persisted draft pages and Visual Components
+for stamped `<pluginId>.*` catalogue instances. Any match returns HTTP 409 with
+the affected entry, document and node IDs before plugin state, lifecycle hooks,
+registry entries or files are changed. The scan does not rely on the live
+registry, so it also protects corrupt or partially loaded plugins, and
+`?force=true` bypasses faulty plugin hooks but never this data-integrity gate.
+A currently available `replacementEntryId` is reported as remediation guidance;
+the operation remains blocked until migration or conversion has actually
+rewritten every old instance.
+
 Primitive and Visual Component implementations can be inserted into the active page or Visual Component canvas. Primitive preset values merge over the module defaults. The store writes `catalogueInstance.entryId`, `entryVersion` and optional `presetId` on the backing node atomically with insertion, so undo removes both content and identity together. Pattern materialization and template-role placement remain disabled until their canonical factories exist; the picker does not synthesize partial content.
 
 ### Governed Properties

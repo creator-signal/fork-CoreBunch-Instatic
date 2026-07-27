@@ -34,8 +34,12 @@ import { broadcastPluginEvent } from '../../../plugins/eventBroadcaster'
 import { badRequest, jsonResponse, methodNotAllowed, readValidatedBody } from '../../../http'
 import { Type } from '@core/utils/typeboxHelpers'
 import { deactivatePluginModulePack } from '@core/plugins/modulePackLoader'
-import { deactivatePluginComponentLibraryPack } from '@core/plugins/componentLibraryPackLoader'
+import {
+  deactivatePluginComponentLibraryPack,
+  findPluginComponentLibraryLifecycleBlockers,
+} from '@core/plugins/componentLibraryPackLoader'
 import { clearPluginScheduleRuns } from '../../../repositories/pluginSchedules'
+import { getDraftSiteDocument } from '../../../repositories/publish'
 import { type CmsHandlerOptions } from '../shared'
 import {
   lifecycleErrorMessage,
@@ -124,6 +128,14 @@ export async function handlePluginItem(
         { status: 409 },
       )
     }
+    if (!body.enabled) {
+      const blocked = await componentLibraryLifecycleBlocked(
+        db,
+        pluginId,
+        'disable',
+      )
+      if (blocked) return blocked
+    }
 
     return setPluginEnabledFromRequest(req, db, options, user, pluginId, body.enabled)
   }
@@ -132,6 +144,13 @@ export async function handlePluginItem(
     const force = new URL(req.url).searchParams.get('force') === 'true'
     const lookup = await getInstalledPlugin(db, pluginId)
     if (!lookup) return pluginNotFound()
+
+    const blocked = await componentLibraryLifecycleBlocked(
+      db,
+      pluginId,
+      'uninstall',
+    )
+    if (blocked) return blocked
 
     // Lifecycle hooks run only on the normal path with a parseable manifest:
     // `?force=true` is the operator's escape hatch for a throwing or
@@ -155,6 +174,43 @@ export async function handlePluginItem(
   }
 
   return methodNotAllowed()
+}
+
+async function componentLibraryLifecycleBlocked(
+  db: DbClient,
+  pluginId: string,
+  operation: 'disable' | 'uninstall',
+): Promise<Response | null> {
+  const site = await getDraftSiteDocument(db)
+  if (!site) return null
+
+  const blockers = findPluginComponentLibraryLifecycleBlockers(site, pluginId)
+  if (blockers.length === 0) return null
+
+  const instanceCount = blockers.reduce(
+    (total, blocker) => total + blocker.usages.length,
+    0,
+  )
+  return jsonResponse({
+    error:
+      `Cannot ${operation} plugin "${pluginId}" while ${instanceCount} active ` +
+      `Component Library instance${instanceCount === 1 ? '' : 's'} still ` +
+      'depend on it. Migrate or convert every listed instance first.',
+    code: 'plugin_component_library_instances_active',
+    pluginId,
+    operation,
+    instanceCount,
+    blockers: blockers.map((blocker) => ({
+      entryId: blocker.entryId,
+      ...(blocker.entryName ? { entryName: blocker.entryName } : {}),
+      instanceCount: blocker.usages.length,
+      usages: blocker.usages,
+      ...(blocker.replacementEntryId
+        ? { replacementEntryId: blocker.replacementEntryId }
+        : {}),
+      replacementAvailable: blocker.replacementAvailable,
+    })),
+  }, { status: 409 })
 }
 
 /**

@@ -310,6 +310,11 @@ That trust level is gated by one permission: **`editor.code`** (risk: dangerous)
 
 - The manifest parser rejects an editor entrypoint or app-kind admin page that doesn't declare `editor.code` (`parsePluginManifest` coherence checks; `instatic-plugin lint` reports the same error pre-upload).
 - The editor loader (`src/core/plugins/editorPluginLoader.ts`) refuses to import an editor entrypoint without the `editor.code` *grant*, and records a visible "permission not granted" failure on the plugin card instead of skipping silently. Module packs and governed catalogue packages get the same treatment for `modules.register` and `componentLibrary.register`.
+- Plugin disable and uninstall inspect persisted pages and Visual Components
+  before changing plugin state. A plugin-owned governed instance returns HTTP
+  409 with its document and node locations until it is migrated or converted;
+  force removal skips plugin hooks only and does not bypass this integrity
+  check.
 - The admin-app loader (`src/core/plugins/adminRuntime.ts`) refuses to import an app page without the grant; the page body renders the refusal.
 - `adminPages[].content.assetPath` is pinned to the plugin's own `/uploads/plugins/{id}/{version}` subtree so a manifest can't point the dynamic import at foreign code.
 - The install review dialog (always shown — even for zero-permission plugins) calls out `editor.code` with a dedicated unsandboxed-code warning.

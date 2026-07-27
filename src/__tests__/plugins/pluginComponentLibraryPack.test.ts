@@ -6,9 +6,11 @@ import {
 import {
   activatePluginComponentLibraryPack,
   deactivatePluginComponentLibraryPack,
+  findPluginComponentLibraryLifecycleBlockers,
   listPluginComponentLibraryEntryIds,
 } from '@core/plugins/componentLibraryPackLoader'
 import type { PluginManifest } from '@core/plugin-sdk'
+import { makeNode, makePage, makeSite, makeVC } from '../fixtures'
 import '@modules/base/index'
 
 const pluginId = 'acme.catalogue'
@@ -120,5 +122,104 @@ describe('plugin Component Library package lifecycle', () => {
       ...manifest,
       grantedPermissions: [],
     }, [entry()])).toThrow(/componentLibrary\.register/)
+  })
+
+  it('finds persisted page and Visual Component instances even without a live registration', () => {
+    const pageInstance = makeNode({
+      id: 'page-callout',
+      catalogueInstance: {
+        entryId: `${pluginId}.callout`,
+        entryVersion: '1.0.0',
+      },
+    })
+    const componentInstance = makeNode({
+      id: 'component-callout',
+      catalogueInstance: {
+        entryId: `${pluginId}.callout`,
+        entryVersion: '1.0.0',
+      },
+    })
+    const site = makeSite({
+      pages: [makePage({
+        id: 'home',
+        title: 'Home',
+        rootNodeId: 'page-root',
+        nodes: {
+          'page-root': makeNode({
+            id: 'page-root',
+            moduleId: 'base.body',
+            children: [pageInstance.id],
+          }),
+          [pageInstance.id]: pageInstance,
+        },
+      })],
+      visualComponents: [makeVC({
+        id: 'hero',
+        name: 'Hero',
+        tree: {
+          rootNodeId: 'component-root',
+          nodes: {
+            'component-root': makeNode({
+              id: 'component-root',
+              children: [componentInstance.id],
+            }),
+            [componentInstance.id]: componentInstance,
+          },
+        },
+      })],
+    })
+
+    expect(findPluginComponentLibraryLifecycleBlockers(site, pluginId))
+      .toEqual([{
+        entryId: `${pluginId}.callout`,
+        usages: [
+          expect.objectContaining({
+            documentKind: 'page',
+            documentId: 'home',
+            documentName: 'Home',
+            nodeId: 'page-callout',
+          }),
+          expect.objectContaining({
+            documentKind: 'visual-component',
+            documentId: 'hero',
+            documentName: 'Hero',
+            nodeId: 'component-callout',
+          }),
+        ],
+        replacementAvailable: false,
+      }])
+  })
+
+  it('reports a safe external replacement as remediation without clearing the blocker', () => {
+    activatePluginComponentLibraryPack(manifest, [
+      entry({ replacementEntryId: 'base.plain-text' }),
+    ])
+    const site = makeSite({
+      pages: [makePage({
+        nodes: {
+          root: makeNode({
+            id: 'root',
+            moduleId: 'base.body',
+            children: ['callout'],
+          }),
+          callout: makeNode({
+            id: 'callout',
+            catalogueInstance: {
+              entryId: `${pluginId}.callout`,
+              entryVersion: '1.0.0',
+            },
+          }),
+        },
+      })],
+    })
+
+    expect(findPluginComponentLibraryLifecycleBlockers(site, pluginId))
+      .toEqual([expect.objectContaining({
+        entryId: `${pluginId}.callout`,
+        entryName: 'Callout',
+        replacementEntryId: 'base.plain-text',
+        replacementAvailable: true,
+        usages: [expect.objectContaining({ nodeId: 'callout' })],
+      })])
   })
 })

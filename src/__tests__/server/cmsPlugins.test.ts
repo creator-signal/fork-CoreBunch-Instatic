@@ -8,6 +8,7 @@ import type { DbClient, DbResult } from '../../../server/db'
 import { handleCmsRequest } from '../../../server/handlers/cms'
 import { assertPathWithin } from '../../../server/util/pathWithin'
 import { hookBus } from '@core/plugins/hookBus'
+import { makeNode, makePage, makeSite } from '../fixtures'
 
 function makeFakeDb() {
   const admins: Record<string, unknown>[] = [
@@ -23,6 +24,8 @@ function makeFakeDb() {
   const records: Record<string, unknown>[] = []
   const crashEvents: Record<string, unknown>[] = []
   const secrets: Record<string, unknown>[] = []
+  const sites: Record<string, unknown>[] = []
+  const dataRows: Record<string, unknown>[] = []
 
   const handle = async <Row extends Record<string, unknown> = Record<string, unknown>>(
     strings: TemplateStringsArray,
@@ -60,6 +63,13 @@ function makeFakeDb() {
     }
     if (normalized.includes('insert into audit_events')) {
       return { rows: [], rowCount: 1 }
+    }
+    if (
+      normalized.includes('select id, name, settings_json') &&
+      normalized.includes('from site')
+    ) {
+      const row = sites.find((site) => site.id === 'default')
+      return { rows: row ? [row as Row] : [], rowCount: row ? 1 : 0 }
     }
     // `requireStepUp` lookup — the plugin admin dispatcher now gates
     // install / upgrade / enable / disable / uninstall / restart / pack
@@ -228,13 +238,26 @@ function makeFakeDb() {
     }
     // The background publish scheduler ticks during these tests; model its
     // "due schedules" probe as always-empty so it never throws.
-    if (normalized.includes('from data_rows') && normalized.includes('scheduled_publish_at')) {
+    if (
+      normalized.includes('from data_rows') &&
+      normalized.includes("where status = 'scheduled'")
+    ) {
       return { rows: [], rowCount: 0 }
     }
     // Post-activation schedule ghost sweep (disableSchedulesNotReclaimedSince)
     // — these tests register no schedules, so the sweep matches nothing.
     if (normalized.includes('update plugin_schedules')) {
       return { rows: [], rowCount: 0 }
+    }
+    if (
+      normalized.includes('from data_rows') &&
+      normalized.includes('data_rows.cells_json') &&
+      normalized.includes('data_rows.table_id')
+    ) {
+      const rows = dataRows.filter(
+        (row) => row.table_id === values[0] && row.deleted_at === null,
+      )
+      return { rows: rows as Row[], rowCount: rows.length }
     }
     throw new Error(`Unhandled SQL: ${sql}`)
   }
@@ -248,7 +271,16 @@ function makeFakeDb() {
   handle.transaction = async <T>(cb: (tx: DbClient) => Promise<T>): Promise<T> =>
     cb(handle as unknown as DbClient)
 
-  return Object.assign(handle as DbClient, { admins, sessions, plugins, records, crashEvents, secrets })
+  return Object.assign(handle as DbClient, {
+    admins,
+    sessions,
+    plugins,
+    records,
+    crashEvents,
+    secrets,
+    sites,
+    dataRows,
+  })
 }
 
 async function createCookie(db: ReturnType<typeof makeFakeDb>): Promise<string> {
@@ -1028,6 +1060,134 @@ describe('CMS plugin handlers', () => {
       hookBus.unregisterPlugin('test')
       await rm(uploadsDir, { recursive: true, force: true })
     }
+  })
+
+  it('blocks disable and forced uninstall while plugin catalogue instances remain', async () => {
+    const db = makeFakeDb()
+    const cookie = await createCookie(db)
+    const pluginId = 'acme.catalogue'
+    db.plugins.push({
+      id: pluginId,
+      name: 'Acme catalogue',
+      version: '1.0.0',
+      enabled: true,
+      lifecycle_status: 'active',
+      last_error: null,
+      manifest_json: JSON.stringify({
+        id: pluginId,
+        name: 'Acme catalogue',
+        version: '1.0.0',
+        apiVersion: 1,
+        permissions: ['componentLibrary.register'],
+        grantedPermissions: ['componentLibrary.register'],
+        componentLibrary: { path: 'component-library/entries.json' },
+        resources: [],
+        adminPages: [],
+      }),
+      granted_permissions_json: JSON.stringify(['componentLibrary.register']),
+      settings_json: '{}',
+      installed_at: '2026-05-01T10:00:00.000Z',
+      updated_at: '2026-05-01T10:00:00.000Z',
+    })
+
+    const page = makePage({
+      id: 'home',
+      title: 'Home',
+      rootNodeId: 'page-root',
+      nodes: {
+        'page-root': makeNode({
+          id: 'page-root',
+          moduleId: 'base.body',
+          children: ['callout'],
+        }),
+        callout: makeNode({
+          id: 'callout',
+          moduleId: 'base.text',
+          catalogueInstance: {
+            entryId: `${pluginId}.callout`,
+            entryVersion: '1.0.0',
+          },
+        }),
+      },
+    })
+    const site = makeSite({ pages: [page] })
+    const {
+      name,
+      pages: _pages,
+      visualComponents: _visualComponents,
+      layouts: _layouts,
+      ...shell
+    } = site
+    db.sites.push({
+      id: 'default',
+      name,
+      settings_json: { cmsSiteSchemaVersion: 1, site: shell },
+      created_at: new Date(site.createdAt).toISOString(),
+      updated_at: new Date(site.updatedAt).toISOString(),
+    })
+    db.dataRows.push({
+      id: page.id,
+      table_id: 'pages',
+      cells_json: {
+        title: page.title,
+        slug: page.slug,
+        body: { nodes: page.nodes, rootNodeId: page.rootNodeId },
+      },
+      slug: page.slug,
+      status: 'draft',
+      author_user_id: null,
+      created_by_user_id: null,
+      updated_by_user_id: null,
+      published_by_user_id: null,
+      created_at: '2026-05-01T10:00:00.000Z',
+      updated_at: '2026-05-01T10:00:00.000Z',
+      published_at: null,
+      scheduled_publish_at: null,
+      deleted_at: null,
+    })
+
+    const disable = await handleCmsRequest(
+      cmsRequest(`http://localhost/admin/api/cms/plugins/${pluginId}`, {
+        method: 'PATCH',
+        headers: { cookie, 'content-type': 'application/json' },
+        body: JSON.stringify({ enabled: false }),
+      }),
+      db,
+      {},
+    )
+    expect(disable.status).toBe(409)
+    expect(await disable.json()).toMatchObject({
+      code: 'plugin_component_library_instances_active',
+      pluginId,
+      operation: 'disable',
+      instanceCount: 1,
+      blockers: [{
+        entryId: `${pluginId}.callout`,
+        instanceCount: 1,
+        usages: [expect.objectContaining({
+          documentKind: 'page',
+          documentId: 'home',
+          nodeId: 'callout',
+        })],
+      }],
+    })
+    expect(db.plugins[0]?.enabled).toBe(true)
+
+    const remove = await handleCmsRequest(
+      cmsRequest(
+        `http://localhost/admin/api/cms/plugins/${pluginId}?force=true`,
+        { method: 'DELETE', headers: { cookie } },
+      ),
+      db,
+      {},
+    )
+    expect(remove.status).toBe(409)
+    expect(await remove.json()).toMatchObject({
+      code: 'plugin_component_library_instances_active',
+      operation: 'uninstall',
+      instanceCount: 1,
+    })
+    expect(db.plugins).toHaveLength(1)
   })
 
   it('refuses to re-sync a disabled plugin\'s pack into the site', async () => {

@@ -25,6 +25,25 @@ function governedEmailNode(id = 'email'): PageNode {
   })
 }
 
+function governedPlainTextNode(id = 'text'): PageNode {
+  const definition = registry.get('base.text')
+  if (!definition) throw new Error('base.text is not registered')
+  return makeNode({
+    id,
+    moduleId: 'base.text',
+    props: {
+      ...definition.defaults,
+      text: 'Add your text here.',
+      tag: 'p',
+    },
+    catalogueInstance: {
+      entryId: 'base.plain-text',
+      entryVersion: '1.0.0',
+      presetId: 'paragraph',
+    },
+  })
+}
+
 function validate(previous: Page, next: Page): void {
   validatePageWriteDiff({
     previousPages: [previous],
@@ -50,26 +69,52 @@ function pageWith(node: PageNode): Page {
 describe('Component Library page diff policy', () => {
   it('allows a governed primitive to be added, moved, and removed', () => {
     const empty = makePage()
-    const inserted = pageWith(governedEmailNode())
+    const inserted = pageWith(governedPlainTextNode())
 
     expect(() => validate(empty, inserted)).not.toThrow()
     expect(() => validate(inserted, empty)).not.toThrow()
 
-    const sibling = governedEmailNode('second-email')
+    const sibling = governedPlainTextNode('second-text')
     const beforeMove = makePage({
       nodes: {
         root: makeNode({
           id: 'root',
           moduleId: 'base.body',
-          children: ['email', sibling.id],
+          children: ['text', sibling.id],
         }),
-        email: governedEmailNode(),
+        text: governedPlainTextNode(),
         [sibling.id]: sibling,
       },
     })
     const afterMove = structuredClone(beforeMove)
-    afterMove.nodes.root!.children = [sibling.id, 'email']
+    afterMove.nodes.root!.children = [sibling.id, 'text']
     expect(() => validate(beforeMove, afterMove)).not.toThrow()
+  })
+
+  it('enforces governed parent constraints for component-only topology changes', () => {
+    const previous = makePage()
+    const invalid = pageWith(governedEmailNode())
+    expect(() => validate(previous, invalid)).toThrow(
+      /Email Input must be placed inside base\.form-container/,
+    )
+
+    const formDefinition = registry.get('base.form')
+    if (!formDefinition) throw new Error('base.form is not registered')
+    const form = makeNode({
+      id: 'form',
+      moduleId: 'base.form',
+      props: { ...formDefinition.defaults },
+      children: [],
+      catalogueInstance: {
+        entryId: 'base.form-container',
+        entryVersion: '1.0.0',
+      },
+    })
+    const formPage = pageWith(form)
+    const withEmail = structuredClone(formPage)
+    withEmail.nodes.form!.children = ['email']
+    withEmail.nodes.email = governedEmailNode()
+    expect(() => validate(formPage, withEmail)).not.toThrow()
   })
 
   it('allows declared fields while rejecting raw structure and style changes', () => {

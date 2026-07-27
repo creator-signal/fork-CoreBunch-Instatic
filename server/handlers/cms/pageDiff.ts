@@ -18,6 +18,7 @@ import type { CoreCapability } from '../../auth/capabilities'
 import { ForbiddenSiteChangeError } from './siteDiff'
 import {
   componentLibraryRegistry,
+  resolveComponentLibraryPlacement,
   type ComponentLibraryEntry,
   type ComponentLibraryImplementation,
 } from '@core/component-library'
@@ -172,6 +173,19 @@ function diffNode(
       return node !== undefined && governedEntryForNode(node) !== undefined
     })
     if (governedTopology) {
+      if (!capabilities.includes('site.structure.edit')) {
+        for (const changedId of changedIds) {
+          if (!nextNodes[changedId]) continue
+          const placement = placementForNode(changedId, nextNodes)
+          if (!placement.allowed) {
+            throw new ForbiddenSiteChangeError(
+              'components',
+              `${nodePath}.children`,
+              placement.message,
+            )
+          }
+        }
+      }
       requireGovernedChange(capabilities, `${nodePath}.children`, 'governed component order changed')
     } else {
       requireChange(capabilities, 'structure', `${nodePath}.children`, 'children changed')
@@ -337,6 +351,54 @@ function governedEntryForNode(node: PageNode): ComponentLibraryEntry | undefined
     return undefined
   }
   return entry
+}
+
+function placementForNode(
+  nodeId: string,
+  nodes: Record<string, PageNode>,
+) {
+  const node = nodes[nodeId]
+  const entry = node ? governedEntryForNode(node) : undefined
+  if (!entry) {
+    return {
+      allowed: false as const,
+      code: 'parent-required' as const,
+      message: 'The moved node is not a valid governed component.',
+    }
+  }
+
+  const targetParent = parentNodeFor(nodes, nodeId)
+  const slotOwner = targetParent?.moduleId === 'base.slot-instance'
+    ? parentNodeFor(nodes, targetParent.id)
+    : undefined
+  const parentEntry = slotOwner
+    ? governedEntryForNode(slotOwner)
+    : targetParent
+      ? governedEntryForNode(targetParent)
+      : undefined
+  const slotName = targetParent?.moduleId === 'base.slot-instance'
+    ? String(targetParent.props.slotName ?? '')
+    : ''
+  const slot = slotName
+    ? parentEntry?.slots.find((candidate) => candidate.id === slotName)
+    : undefined
+  return resolveComponentLibraryPlacement(entry, {
+    ...(parentEntry ? { parentEntry } : {}),
+    ...(slot ? { slot } : {}),
+    // The server validates the post-change tree, while the shared resolver
+    // accepts the count before the candidate is placed.
+    existingChildCount:
+      targetParent?.children.filter((childId) => childId !== nodeId).length ?? 0,
+  })
+}
+
+function parentNodeFor(
+  nodes: Record<string, PageNode>,
+  childId: string,
+): PageNode | undefined {
+  const child = nodes[childId]
+  if (child?.parentId) return nodes[child.parentId]
+  return Object.values(nodes).find((candidate) => candidate.children.includes(childId))
 }
 
 function isValidGovernedStandaloneNode(node: PageNode): boolean {

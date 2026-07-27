@@ -186,6 +186,13 @@ variant metadata whose approved values move in the same request. Raw nodes,
 catalogue identity changes, arbitrary props, bindings, classes and inline or
 breakpoint styles still require their existing structural or style capability.
 
+`resolveComponentLibraryPlacement()` is the shared composition policy for
+catalogue insertion, governed moves and server diff validation. It enforces an
+entry's allowed parents, a parent's allowed children, named-slot entry and
+implementation allow-lists, and slot maximum cardinality. The editor rejects
+an invalid insertion before any history mutation and explains the violated
+contract; the server re-evaluates the post-change tree independently.
+
 ## Versioning and migration
 
 Every persisted catalogue instance carries a semantic `entryVersion`. It may also carry `pinnedVersion` while an administrator deliberately retains an older definition, and `variantId` when an approved variant was applied.

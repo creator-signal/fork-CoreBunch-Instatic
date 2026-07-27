@@ -58,6 +58,16 @@ export {
 } from './version'
 
 export {
+  resolveComponentLibraryPlacement,
+} from './placement'
+
+export type {
+  ComponentLibraryPlacementContext,
+  ComponentLibraryPlacementIssueCode,
+  ComponentLibraryPlacementResult,
+} from './placement'
+
+export {
   ComponentLibraryMigrationRegistry,
   componentLibraryMigrationRegistry,
   findComponentLibraryUsages,

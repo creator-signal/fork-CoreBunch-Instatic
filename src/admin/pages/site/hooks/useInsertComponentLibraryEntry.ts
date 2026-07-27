@@ -1,9 +1,15 @@
 import { registry } from '@core/module-engine'
-import type {
-  ComponentLibraryEntry,
-  ComponentLibraryImplementation,
+import {
+  componentLibraryRegistry,
+  resolveComponentLibraryPlacement,
+  type ComponentLibraryEntry,
+  type ComponentLibraryImplementation,
 } from '@core/component-library'
-import type { CatalogueInstanceMetadata } from '@core/page-tree'
+import type {
+  CatalogueInstanceMetadata,
+  Page,
+  PageNode,
+} from '@core/page-tree'
 import { pushToast } from '@ui/components/Toast'
 import { resolveInsertLocation } from '@site/store/insertLocation'
 import { selectActiveCanvasPage, useEditorStore } from '@site/store/store'
@@ -34,6 +40,19 @@ export function useInsertComponentLibraryEntry() {
     if (!canvasPage) return null
 
     const implementation = backingImplementation(entry.implementation)
+    const location = resolveInsertLocation(
+      canvasPage,
+      selectedNodeId ?? canvasPage.rootNodeId,
+    )
+    if (!location) return null
+    const placement = resolveComponentLibraryPlacement(
+      entry,
+      componentLibraryPlacementContext(canvasPage, location.parentId),
+    )
+    if (!placement.allowed) {
+      pushUnsupportedEntryToast(entry, placement.message)
+      return null
+    }
     const presetId = options.presetId ??
       (implementation.type === 'primitive' ? implementation.presetId : undefined)
     const metadata = createInstanceMetadata(entry, presetId)
@@ -49,16 +68,11 @@ export function useInsertComponentLibraryEntry() {
       const presetValues = presetId
         ? entry.presets.find((preset) => preset.id === presetId)?.values
         : undefined
-      nodeId = insertModule(mod, undefined, {
+      nodeId = insertModule(mod, location, {
         defaults: { ...mod.defaults, ...presetValues },
         catalogueInstance: metadata,
       })
     } else if (implementation.type === 'visual-component') {
-      const location = resolveInsertLocation(
-        canvasPage,
-        selectedNodeId ?? canvasPage.rootNodeId,
-      )
-      if (!location) return null
       nodeId = insertComponentRef(
         location.parentId,
         implementation.componentId,
@@ -85,6 +99,40 @@ export function useInsertComponentLibraryEntry() {
     })
     return nodeId
   }
+}
+
+function componentLibraryPlacementContext(page: Page, targetParentId: string) {
+  const targetParent = page.nodes[targetParentId]
+  const slotOwner = targetParent?.moduleId === 'base.slot-instance'
+    ? parentNode(page, targetParent)
+    : undefined
+  const parentNodeForPolicy = slotOwner ?? targetParent
+  const parentEntry = componentLibraryEntryForNode(parentNodeForPolicy)
+  const slotName = targetParent?.moduleId === 'base.slot-instance'
+    ? String(targetParent.props.slotName ?? '')
+    : ''
+  const slot = slotName
+    ? parentEntry?.slots.find((candidate) => candidate.id === slotName)
+    : undefined
+  return {
+    ...(parentEntry ? { parentEntry } : {}),
+    ...(slot ? { slot } : {}),
+    existingChildCount: targetParent?.children.length ?? 0,
+  }
+}
+
+function componentLibraryEntryForNode(
+  node: PageNode | undefined,
+): ComponentLibraryEntry | undefined {
+  const metadata = node?.catalogueInstance
+  return metadata
+    ? componentLibraryRegistry.getVersion(metadata.entryId, metadata.entryVersion)
+    : undefined
+}
+
+function parentNode(page: Page, node: PageNode): PageNode | undefined {
+  if (node.parentId) return page.nodes[node.parentId]
+  return Object.values(page.nodes).find((candidate) => candidate.children.includes(node.id))
 }
 
 function backingImplementation(

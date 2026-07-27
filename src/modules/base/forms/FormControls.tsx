@@ -72,7 +72,8 @@ type SubmitProps = Record<string, unknown> & {
 
 type FormMessageProps = Record<string, unknown> & {
   formId: string
-  kind: 'status' | 'success' | 'error'
+  fieldId: string
+  kind: 'help' | 'status' | 'success' | 'error'
   text: string
   editorPreviewState?: FormPreviewState
   editorPreviewSuccessMessage?: string
@@ -234,9 +235,23 @@ export function FormMessageEditor({ mcClassName, nodeWrapperProps, props }: Modu
       className={mcClassName}
       data-instatic-form-message={props.kind}
       data-instatic-form-id={normalizeIdentifierValue(props.formId)}
+      data-instatic-form-help-for={
+        props.kind === 'help'
+          ? normalizeIdentifierValue(props.fieldId)
+          : undefined
+      }
+      data-instatic-form-error-for={
+        props.kind === 'error' && props.fieldId
+          ? normalizeIdentifierValue(props.fieldId)
+          : undefined
+      }
       data-instatic-form-preview-active={previewActive ? 'true' : undefined}
-      hidden={previewKind !== null && props.kind !== previewKind ? true : undefined}
-      role={props.kind === 'error' ? 'alert' : 'status'}
+      hidden={
+        props.kind !== 'help' && previewKind !== null && props.kind !== previewKind
+          ? true
+          : undefined
+      }
+      role={props.kind === 'error' ? 'alert' : props.kind === 'help' ? undefined : 'status'}
     >
       {text}
     </div>
@@ -260,6 +275,7 @@ function previewTextForMessage(
   successMessage: string | undefined,
 ): string {
   if (text) return text
+  if (kind === 'help') return ''
   if (kind === 'status') return 'Sending...'
   if (kind === 'success') return successMessage || 'Thanks. Your submission was received.'
   return 'Please check the form and try again.'

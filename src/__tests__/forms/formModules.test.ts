@@ -160,9 +160,29 @@ describe('base form primitive modules', () => {
 
     expect(FormMessageModule.render({
       formId: 'newsletter',
+      fieldId: '',
       kind: 'success',
       text: 'Thanks',
     }, []).html).toBe('<div data-instatic-form-message="success" data-instatic-form-id="newsletter" role="status">Thanks</div>')
+  })
+
+  it('renders field help and errors with runtime association metadata', () => {
+    expect(FormMessageModule.render({
+      ...FormMessageModule.defaults,
+      fieldId: 'email',
+      kind: 'help',
+      text: 'Use your work address.',
+    }, []).html).toBe(
+      '<div data-instatic-form-message="help" data-instatic-form-help-for="email">Use your work address.</div>',
+    )
+    expect(FormMessageModule.render({
+      ...FormMessageModule.defaults,
+      fieldId: 'email',
+      kind: 'error',
+      text: 'Check this field.',
+    }, []).html).toBe(
+      '<div data-instatic-form-message="error" data-instatic-form-error-for="email" role="alert">Check this field.</div>',
+    )
   })
 
   it('escapes authored form text and attributes through the publisher boundary', () => {

@@ -18,6 +18,12 @@ The editor exposes form primitives in the module picker.
 
 Primitives are the source of truth. A label is a `base.label` node, an input is a `base.input` node, and a submit button is a `base.submit` node. There is no hidden field-builder shape inside `base.form`; authors compose ordinary nodes, and every node remains directly editable after insertion.
 
+The governed Component Library exposes those same modules rather than a second
+form renderer. `Form Field Group` and `Form Actions` are approved
+`base.container` presets; input variants are presets of `base.input`; Field
+Help, Field Error and Form Status are presets of `base.form-message`. Shared
+Heading, Plain Text, Image and Link entries remain reusable inside forms.
+
 `base.form` has two modes:
 
 - `cms` submits to a selected data table.
@@ -44,6 +50,13 @@ Auto wiring is structural:
 - `base.form-message` nodes can be inside the form or point at a form id.
 
 The published runtime finalizes auto labels in the browser because labels and inputs are independent nodes. It assigns an id to the next control when needed and sets the label's `for` attribute.
+
+Field Help and Field Error messages carry a `fieldId`. On attach, the runtime
+associates them with the matching control through `aria-describedby` and
+`aria-errormessage`. A rejected server submission marks every returned field
+`aria-invalid`, reveals its authored error message, announces the aggregate
+error through the form status region and focuses the first invalid control.
+Editing that control clears its invalid state and hides the stale error.
 
 ## Submission Flow
 

@@ -40,10 +40,13 @@ describe('stampFormPageTokens', () => {
 })
 
 describe('form runtime browser behaviour', () => {
-  it('prefetches the submit challenge on attach and submits via document-level delegation', async () => {
+  it('submits through delegation and exposes field errors to assistive technology', async () => {
     document.body.innerHTML = `
       <form data-instatic-form-mode="cms" data-instatic-form-id="contact" data-instatic-page-id="page-home" data-instatic-page-token="page-token">
-        <input name="email" value="ai@example.com">
+        <label data-instatic-label-target="auto">Email</label>
+        <input data-instatic-form-control="input" data-instatic-field-id="email" name="email" value="invalid">
+        <p data-instatic-form-message="help" data-instatic-form-help-for="email">Use your work address.</p>
+        <p data-instatic-form-message="error" data-instatic-form-error-for="email"></p>
         <button type="submit">Send</button>
         <p data-instatic-form-message="status"></p>
       </form>
@@ -72,8 +75,17 @@ describe('form runtime browser behaviour', () => {
         })
       }
 
-      return new Response(JSON.stringify({ ok: true, rowId: 'row-1' }), {
-        status: 200,
+      return new Response(JSON.stringify({
+        error: 'Invalid form values',
+        errors: [
+          {
+            fieldId: 'email',
+            code: 'invalid_email',
+            message: 'Enter a valid email address.',
+          },
+        ],
+      }), {
+        status: 400,
         headers: { 'content-type': 'application/json' },
       })
     }
@@ -96,6 +108,25 @@ describe('form runtime browser behaviour', () => {
       expect(calls[1].payload.pageId).toBe('page-home')
       expect(calls[1].payload.token).toBe('prefetched-token')
       expect(calls[1].payload.challenge).toBe('prefetched-challenge')
+
+      const input = document.querySelector<HTMLInputElement>('[data-instatic-field-id="email"]')
+      const fieldError = document.querySelector<HTMLElement>('[data-instatic-form-error-for="email"]')
+      const help = document.querySelector<HTMLElement>('[data-instatic-form-help-for="email"]')
+      await waitForCondition(() => input?.getAttribute('aria-invalid') === 'true')
+
+      expect(input?.id).not.toBe('')
+      expect(document.querySelector('label')?.getAttribute('for')).toBe(input?.id)
+      expect(input?.getAttribute('aria-describedby')?.split(/\s+/).sort()).toEqual(
+        [help?.id, fieldError?.id].sort(),
+      )
+      expect(input?.getAttribute('aria-errormessage')).toBe(fieldError?.id)
+      expect(fieldError?.hidden).toBe(false)
+      expect(fieldError?.textContent).toBe('Enter a valid email address.')
+      expect(document.activeElement).toBe(input)
+
+      input?.dispatchEvent(new Event('input', { bubbles: true }))
+      expect(input?.hasAttribute('aria-invalid')).toBe(false)
+      expect(fieldError?.hidden).toBe(true)
     } finally {
       ;(globalThis as Record<string, unknown>).fetch = originalFetch
       document.body.innerHTML = ''
@@ -122,6 +153,13 @@ async function importRuntimeScript(source: string): Promise<void> {
 async function waitForCalls(calls: unknown[], count: number): Promise<void> {
   for (let attempt = 0; attempt < 10; attempt += 1) {
     if (calls.length >= count) return
+    await flushRuntime()
+  }
+}
+
+async function waitForCondition(predicate: () => boolean): Promise<void> {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    if (predicate()) return
     await flushRuntime()
   }
 }

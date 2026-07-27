@@ -39,6 +39,16 @@ export const FORM_RUNTIME_JS = `(() => {
     if (form) attachForm(form);
   });
 
+  document.addEventListener('input', (event) => {
+    const control = event.target;
+    const form = control && control.closest ? control.closest(CMS_FORM_SELECTOR) : null;
+    if (!form || !control.hasAttribute('data-instatic-field-id')) return;
+    const fieldId = control.getAttribute('data-instatic-field-id') || '';
+    control.removeAttribute('aria-invalid');
+    const message = form.querySelector('[data-instatic-form-error-for="' + cssEscape(fieldId) + '"]');
+    if (message) message.hidden = true;
+  });
+
   function isCmsForm(el) {
     return !!el && el.tagName === 'FORM'
       && el.getAttribute('data-instatic-form-mode') === 'cms'
@@ -49,6 +59,8 @@ export const FORM_RUNTIME_JS = `(() => {
     if (form.__instaticFormRuntimeAttached) return;
     form.__instaticFormRuntimeAttached = true;
     connectLabels(form);
+    connectFieldMessages(form);
+    ensureStatusMessage(form);
     prepareMessages(form);
     prefetchChallenge(form);
   }
@@ -63,6 +75,7 @@ export const FORM_RUNTIME_JS = `(() => {
     }
 
     setBusy(form, true);
+    clearFieldErrors(form);
     setState(form, 'pending', 'Sending...');
 
     try {
@@ -85,7 +98,9 @@ export const FORM_RUNTIME_JS = `(() => {
       if (form.getAttribute('data-instatic-reset-on-success') !== 'false') form.reset();
     } catch (err) {
       const message = err instanceof Error && err.message ? err.message : 'Form submission failed.';
+      applyFieldErrors(form, Array.isArray(err && err.formErrors) ? err.formErrors : []);
       setState(form, 'error', message);
+      focusFirstInvalid(form);
     } finally {
       setBusy(form, false);
       if (form.isConnected) prefetchChallenge(form);
@@ -148,7 +163,11 @@ export const FORM_RUNTIME_JS = `(() => {
       body: JSON.stringify(payload),
     });
     const body = await readJson(response);
-    if (!response.ok) throw new Error(errorMessage(body));
+    if (!response.ok) {
+      const error = new Error(errorMessage(body));
+      error.formErrors = Array.isArray(body.errors) ? body.errors : [];
+      throw error;
+    }
     return body;
   }
 
@@ -201,6 +220,64 @@ export const FORM_RUNTIME_JS = `(() => {
     }
   }
 
+  function connectFieldMessages(form) {
+    const messages = form.querySelectorAll('[data-instatic-form-help-for], [data-instatic-form-error-for]');
+    let counter = 0;
+    for (const message of messages) {
+      const fieldId = message.getAttribute('data-instatic-form-help-for')
+        || message.getAttribute('data-instatic-form-error-for')
+        || '';
+      if (!fieldId) continue;
+      const control = form.querySelector('[data-instatic-field-id="' + cssEscape(fieldId) + '"]');
+      if (!control) continue;
+      if (!message.id) {
+        counter += 1;
+        message.id = 'instatic-form-' + safeToken(form.getAttribute('data-instatic-form-id') || 'form')
+          + '-message-' + counter;
+      }
+      const describedBy = new Set((control.getAttribute('aria-describedby') || '').split(/\\s+/).filter(Boolean));
+      describedBy.add(message.id);
+      control.setAttribute('aria-describedby', Array.from(describedBy).join(' '));
+      if (message.hasAttribute('data-instatic-form-error-for')) {
+        control.setAttribute('aria-errormessage', message.id);
+        message.hidden = true;
+      }
+    }
+  }
+
+  function cssEscape(value) {
+    if (window.CSS && typeof window.CSS.escape === 'function') return window.CSS.escape(value);
+    return String(value).replace(/["\\\\]/g, '\\\\$&');
+  }
+
+  function clearFieldErrors(form) {
+    for (const control of form.querySelectorAll('[aria-invalid="true"]')) {
+      control.removeAttribute('aria-invalid');
+    }
+    for (const message of form.querySelectorAll('[data-instatic-form-error-for]')) {
+      message.hidden = true;
+      message.textContent = message.getAttribute('data-instatic-default-text') || '';
+    }
+  }
+
+  function applyFieldErrors(form, errors) {
+    for (const entry of errors) {
+      const fieldId = entry && typeof entry.fieldId === 'string' ? entry.fieldId : '';
+      if (!fieldId || fieldId === '*') continue;
+      const control = form.querySelector('[data-instatic-field-id="' + cssEscape(fieldId) + '"]');
+      if (control) control.setAttribute('aria-invalid', 'true');
+      const message = form.querySelector('[data-instatic-form-error-for="' + cssEscape(fieldId) + '"]');
+      if (!message) continue;
+      message.textContent = entry && typeof entry.message === 'string' ? entry.message : 'Check this field.';
+      message.hidden = false;
+    }
+  }
+
+  function focusFirstInvalid(form) {
+    const first = form.querySelector('[aria-invalid="true"]');
+    if (first && typeof first.focus === 'function') first.focus();
+  }
+
   function safeToken(value) {
     return String(value).replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'form';
   }
@@ -230,9 +307,27 @@ export const FORM_RUNTIME_JS = `(() => {
     }
   }
 
+  function ensureStatusMessage(form) {
+    const existing = formMessages(form).some((message) => {
+      return !message.hasAttribute('data-instatic-form-help-for')
+        && !message.hasAttribute('data-instatic-form-error-for')
+        && (message.getAttribute('data-instatic-form-message') || 'status') === 'status';
+    });
+    if (existing) return;
+    const message = document.createElement('div');
+    message.setAttribute('data-instatic-form-message', 'status');
+    message.setAttribute('data-instatic-runtime-message', 'true');
+    message.setAttribute('role', 'status');
+    message.hidden = true;
+    form.appendChild(message);
+  }
+
   function setState(form, state, text) {
     form.setAttribute('data-instatic-form-state', state);
-    const messages = formMessages(form);
+    const messages = formMessages(form).filter((message) => {
+      return !message.hasAttribute('data-instatic-form-help-for')
+        && !message.hasAttribute('data-instatic-form-error-for');
+    });
     const messageKind = state === 'error' ? 'error' : state === 'success' ? 'success' : 'status';
     const hasExactMessage = messages.some((message) => (message.getAttribute('data-instatic-form-message') || 'status') === messageKind);
 

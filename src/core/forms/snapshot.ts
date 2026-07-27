@@ -78,10 +78,12 @@ function deriveFormSnapshot(
     if (node.moduleId === 'base.form-message') {
       const explicitFormId = normalizeIdentifierValue(stringProp(node, 'formId', ''))
       if (!explicitFormId || explicitFormId === formId) {
+        const fieldId = normalizeIdentifierValue(stringProp(node, 'fieldId', ''))
         messages.push({
           nodeId: node.id,
           kind: messageKind(node),
           text: stringProp(node, 'text', ''),
+          ...(fieldId ? { fieldId } : {}),
         })
       }
     }
@@ -181,5 +183,7 @@ function booleanProp(node: PageNode, key: string): boolean {
 
 function messageKind(node: PageNode): PublishedFormMessage['kind'] {
   const kind = stringProp(node, 'kind', 'status')
-  return kind === 'success' || kind === 'error' ? kind : 'status'
+  return kind === 'help' || kind === 'success' || kind === 'error'
+    ? kind
+    : 'status'
 }

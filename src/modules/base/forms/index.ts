@@ -150,7 +150,13 @@ type SubmitProps = Static<typeof SubmitPropsSchema>
 
 const FormMessagePropsSchema = Type.Object({
   formId: Type.String({ default: '' }),
-  kind: Type.Union([Type.Literal('status'), Type.Literal('success'), Type.Literal('error')], { default: 'status' }),
+  fieldId: Type.String({ default: '' }),
+  kind: Type.Union([
+    Type.Literal('help'),
+    Type.Literal('status'),
+    Type.Literal('success'),
+    Type.Literal('error'),
+  ], { default: 'status' }),
   text: Type.String({ default: '' }),
 })
 
@@ -435,7 +441,13 @@ export const FormMessageModule: ModuleDefinition<FormMessageProps> = {
   canHaveChildren: false,
   schema: {
     formId: { type: 'text', label: 'Form ID', normalize: 'identifier' },
+    fieldId: {
+      type: 'text',
+      label: 'Field ID',
+      condition: { field: 'kind', in: ['help', 'error'] },
+    },
     kind: { type: 'select', label: 'Kind', options: [
+      { label: 'Help', value: 'help' },
       { label: 'Status', value: 'status' },
       { label: 'Success', value: 'success' },
       { label: 'Error', value: 'error' },
@@ -446,9 +458,22 @@ export const FormMessageModule: ModuleDefinition<FormMessageProps> = {
   defaults: Value.Create(FormMessagePropsSchema),
   component: FormMessageEditor,
   htmlTag: 'div',
-  render: (props) => ({
-    html: `<div data-instatic-form-message="${props.kind}" data-instatic-form-id="${normalizeIdentifierValue(props.formId)}" role="${props.kind === 'error' ? 'alert' : 'status'}">${props.text}</div>`,
-  }),
+  render: (props) => {
+    const fieldId = normalizeIdentifierValue(props.fieldId)
+    return {
+      html: `<div${attrs([
+        ['data-instatic-form-message', props.kind],
+        ['data-instatic-form-id', normalizeIdentifierValue(props.formId)],
+        [
+          props.kind === 'help'
+            ? 'data-instatic-form-help-for'
+            : 'data-instatic-form-error-for',
+          (props.kind === 'help' || props.kind === 'error') ? fieldId : '',
+        ],
+        ['role', props.kind === 'error' ? 'alert' : props.kind === 'help' ? '' : 'status'],
+      ])}>${props.text}</div>`,
+    }
+  },
 }
 
 function inputLikeSchema(typeLabel: string): ModuleDefinition<InputProps>['schema'] {

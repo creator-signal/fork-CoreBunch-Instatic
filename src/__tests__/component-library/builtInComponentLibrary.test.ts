@@ -17,6 +17,10 @@ describe('built-in Component Library', () => {
     expect(ids).toContain('base.heading')
     expect(ids).toContain('base.email-input')
     expect(ids).toContain('base.form-message')
+    expect(ids).toContain('base.form-field-group')
+    expect(ids).toContain('base.form-actions')
+    expect(ids).toContain('base.form-help')
+    expect(ids).toContain('base.form-error')
 
     for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
       expect(componentLibraryRegistry.get(entry.id)).toEqual(entry)
@@ -39,5 +43,45 @@ describe('built-in Component Library', () => {
         ).toBeTruthy()
       }
     }
+  })
+
+  it('composes governed form controls through the canonical CMS form modules', () => {
+    const byId = new Map(
+      BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [entry.id, entry]),
+    )
+    const fieldGroup = byId.get('base.form-field-group')
+    const email = byId.get('base.email-input')
+    const help = byId.get('base.form-help')
+    const error = byId.get('base.form-error')
+    const actions = byId.get('base.form-actions')
+    const submit = byId.get('base.submit')
+
+    expect(fieldGroup?.implementation).toMatchObject({
+      type: 'primitive',
+      moduleId: 'base.container',
+      presetId: 'field-group',
+    })
+    expect(email?.implementation).toMatchObject({
+      type: 'primitive',
+      moduleId: 'base.input',
+      presetId: 'email',
+    })
+    expect(help?.implementation).toMatchObject({
+      type: 'primitive',
+      moduleId: 'base.form-message',
+      presetId: 'help',
+    })
+    expect(error?.implementation).toMatchObject({
+      type: 'primitive',
+      moduleId: 'base.form-message',
+      presetId: 'error',
+    })
+    expect(email?.constraints.allowedParentEntryIds).toContain(
+      'base.form-field-group',
+    )
+    expect(actions?.constraints.allowedChildEntryIds).toContain('base.submit')
+    expect(submit?.constraints.allowedParentEntryIds).toContain(
+      'base.form-actions',
+    )
   })
 })

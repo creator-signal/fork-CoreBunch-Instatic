@@ -61,7 +61,13 @@ export type PublishedFormSubmit = Static<typeof PublishedFormSubmitSchema>
 
 const PublishedFormMessageSchema = Type.Object({
   nodeId: Type.String({ minLength: 1 }),
-  kind: Type.Union([Type.Literal('status'), Type.Literal('success'), Type.Literal('error')]),
+  fieldId: Type.Optional(Type.String({ minLength: 1 })),
+  kind: Type.Union([
+    Type.Literal('help'),
+    Type.Literal('status'),
+    Type.Literal('success'),
+    Type.Literal('error'),
+  ]),
   text: Type.String(),
 })
 

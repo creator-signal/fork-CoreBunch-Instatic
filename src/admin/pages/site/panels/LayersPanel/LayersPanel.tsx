@@ -1,8 +1,10 @@
-import { useEffect, useRef, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { registry } from '@core/module-engine'
+import { componentLibraryRegistry } from '@core/component-library'
 import { selectActiveCanvasPage, useEditorStore } from '@site/store/store'
 import { DomPanel } from '@site/panels/DomPanel'
 import { ComponentLayersTree } from './ComponentLayersTree'
+import { ComponentLibraryDialog } from './ComponentLibraryDialog'
 import { buildComponentTreeProjection } from './componentTreeProjection'
 import { resolveComponentLayerSelection } from './layerSelection'
 import styles from './LayersPanel.module.css'
@@ -13,6 +15,9 @@ interface LayersPanelProps {
 
 const subscribeModuleRegistry = (listener: () => void) => registry.subscribe(listener)
 const getModuleRegistryGeneration = () => registry.generation()
+const subscribeComponentLibrary = (listener: () => void) =>
+  componentLibraryRegistry.subscribe(listener)
+const getComponentLibraryGeneration = () => componentLibraryRegistry.generation()
 const EMPTY_VISUAL_COMPONENTS = [] as const
 
 /**
@@ -21,6 +26,7 @@ const EMPTY_VISUAL_COMPONENTS = [] as const
  * search state without copying any page data.
  */
 export function LayersPanel({ editable = true }: LayersPanelProps) {
+  const [componentLibraryOpen, setComponentLibraryOpen] = useState(false)
   const mode = useEditorStore((state) => state.layersViewMode)
   const page = useEditorStore(selectActiveCanvasPage)
   const visualComponents = useEditorStore(
@@ -32,12 +38,22 @@ export function LayersPanel({ editable = true }: LayersPanelProps) {
     getModuleRegistryGeneration,
     getModuleRegistryGeneration,
   )
+  useSyncExternalStore(
+    subscribeComponentLibrary,
+    getComponentLibraryGeneration,
+    getComponentLibraryGeneration,
+  )
 
   const moduleNames = Object.fromEntries(
     registry.list().map((definition) => [definition.id, definition.name]),
   )
   const projection = page
-    ? buildComponentTreeProjection({ page, moduleNames, visualComponents })
+    ? buildComponentTreeProjection({
+        page,
+        moduleNames,
+        visualComponents,
+        catalogueEntries: componentLibraryRegistry.list(),
+      })
     : null
 
   const previousMode = useRef(mode)
@@ -88,11 +104,18 @@ export function LayersPanel({ editable = true }: LayersPanelProps) {
   return (
     <div className={styles.panel}>
       <div className={styles.viewMount} hidden={mode !== 'components'}>
-        <ComponentLayersTree projection={projection} />
+        <ComponentLayersTree
+          projection={projection}
+          onOpenComponentLibrary={() => setComponentLibraryOpen(true)}
+        />
       </div>
       <div className={styles.viewMount} hidden={mode !== 'html'}>
         <DomPanel editable={editable} />
       </div>
+      <ComponentLibraryDialog
+        open={componentLibraryOpen}
+        onClose={() => setComponentLibraryOpen(false)}
+      />
     </div>
   )
 }

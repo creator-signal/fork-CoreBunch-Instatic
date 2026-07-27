@@ -40,6 +40,16 @@ function assertEntryInvariants(entry: ComponentLibraryEntry): void {
     )
   }
 
+  if (entry.implementation.type === 'primitive') {
+    const presetId = entry.implementation.presetId
+    if (presetId && !entry.presets.some((preset) => preset.id === presetId)) {
+      throw new ComponentLibraryDefinitionError(
+        'implementation.presetId',
+        `Preset "${presetId}" is not declared by this entry.`,
+      )
+    }
+  }
+
   if (entry.implementation.type === 'capability-backed') {
     const requirements = entry.requirements
     if (

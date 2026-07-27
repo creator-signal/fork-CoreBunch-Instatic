@@ -2,24 +2,58 @@ import { describe, expect, it } from 'bun:test'
 import {
   buildComponentTreeProjection,
   resolveComponentLayerSelection,
-  type ComponentLayerCatalogueEntry,
 } from '@site/panels/LayersPanel'
+import type {
+  ComponentLibraryEntry,
+  ComponentLibraryImplementation,
+} from '@core/component-library'
 import { makeNode, makePage, makeVC } from '../fixtures'
 
-const catalogue: ComponentLayerCatalogueEntry[] = [
-  {
+function catalogueEntry(
+  entry: Pick<ComponentLibraryEntry, 'id' | 'name' | 'implementation'> &
+    Partial<Pick<ComponentLibraryEntry, 'presets'>>,
+): ComponentLibraryEntry {
+  return {
+    version: '1.0.0',
+    description: `${entry.name} description`,
+    category: 'Test',
+    tags: [],
+    icon: 'square',
+    source: { type: 'site' },
+    status: 'stable',
+    fields: [],
+    variants: [],
+    presets: entry.presets ?? [],
+    slots: [],
+    constraints: {},
+    requirements: { capabilities: [], providerAdapters: [], plugins: [] },
+    documentation: {},
+    ...entry,
+  }
+}
+
+const catalogue: ComponentLibraryEntry[] = [
+  catalogueEntry({
     id: 'site.hero',
     name: 'Hero',
-    implementationType: 'pattern',
-    status: 'stable',
-    presets: { 'image-left': 'Hero · Image left' },
-  },
-  {
+    implementation: {
+      type: 'pattern',
+      patternId: 'site.hero-pattern',
+    } satisfies ComponentLibraryImplementation,
+    presets: [{
+      id: 'image-left',
+      name: 'Hero · Image left',
+      values: {},
+    }],
+  }),
+  catalogueEntry({
     id: 'instatic.heading',
     name: 'Heading',
-    implementationType: 'primitive',
-    status: 'stable',
-  },
+    implementation: {
+      type: 'primitive',
+      moduleId: 'base.text',
+    },
+  }),
 ]
 
 function componentPage() {

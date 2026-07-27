@@ -41,3 +41,7 @@ import './video'
 import './slotInstance'
 import './slotOutlet'
 import './visualComponentRef'
+
+// Author-facing catalogue entries are explicit metadata over the modules
+// above. Registering a module alone never publishes it to Components mode.
+import './componentLibrary'

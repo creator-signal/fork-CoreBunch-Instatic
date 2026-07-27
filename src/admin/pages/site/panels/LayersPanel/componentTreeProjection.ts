@@ -1,30 +1,9 @@
 import type { Page, PageNode } from '@core/page-tree'
+import type {
+  ComponentLibraryEntry,
+  ComponentLibraryStatus,
+} from '@core/component-library'
 import type { VisualComponent } from '@core/visualComponents'
-
-export type ComponentLibraryImplementationType =
-  | 'primitive'
-  | 'visualComponent'
-  | 'pattern'
-  | 'templateComponent'
-  | 'capabilityBacked'
-
-export type ComponentLibraryEntryStatus =
-  | 'stable'
-  | 'experimental'
-  | 'deprecated'
-
-/**
- * The projection only needs the library's author-facing index fields. The
- * complete Component Library definition contract remains owned by the future
- * library registry rather than by this editor view model.
- */
-export interface ComponentLayerCatalogueEntry {
-  id: string
-  name: string
-  implementationType: ComponentLibraryImplementationType
-  status: ComponentLibraryEntryStatus
-  presets?: Readonly<Record<string, string>>
-}
 
 export type ComponentLayerKind =
   | 'page'
@@ -37,7 +16,7 @@ export type ComponentLayerKind =
   | 'freeform'
 
 export type ComponentLayerStatus =
-  | ComponentLibraryEntryStatus
+  | ComponentLibraryStatus
   | 'missing-library-entry'
   | 'missing-component'
 
@@ -69,7 +48,7 @@ interface BuildComponentTreeProjectionOptions {
   page: Page
   moduleNames: Readonly<Record<string, string>>
   visualComponents: ReadonlyArray<Pick<VisualComponent, 'id' | 'name'>>
-  catalogueEntries?: ReadonlyArray<ComponentLayerCatalogueEntry>
+  catalogueEntries?: ReadonlyArray<ComponentLibraryEntry>
 }
 
 /**
@@ -189,7 +168,7 @@ export function buildComponentTreeProjection({
 interface ProjectOrdinaryNodeOptions {
   node: PageNode
   children: ComponentLayerRow[]
-  entry: ComponentLayerCatalogueEntry | undefined
+  entry: ComponentLibraryEntry | undefined
   componentNameById: ReadonlyMap<string, string>
   moduleNames: Readonly<Record<string, string>>
 }
@@ -240,7 +219,7 @@ function projectOrdinaryNode({
     return {
       ...base,
       label: entryLabel(node, entry, moduleNames),
-      kind: entry.implementationType,
+      kind: componentLayerKind(entry),
       status: entry.status,
     }
   }
@@ -258,7 +237,7 @@ function projectOrdinaryNode({
 
 function entryLabel(
   node: PageNode,
-  entry: ComponentLayerCatalogueEntry | undefined,
+  entry: ComponentLibraryEntry | undefined,
   moduleNames: Readonly<Record<string, string>>,
 ): string {
   if (!entry) {
@@ -267,7 +246,22 @@ function entryLabel(
       : node.label ?? moduleNames[node.moduleId] ?? node.moduleId
   }
   const presetId = node.catalogueInstance?.presetId
-  return presetId ? entry.presets?.[presetId] ?? entry.name : entry.name
+  return presetId
+    ? entry.presets.find((preset) => preset.id === presetId)?.name ?? entry.name
+    : entry.name
+}
+
+function componentLayerKind(entry: ComponentLibraryEntry): ComponentLayerKind {
+  switch (entry.implementation.type) {
+    case 'visual-component':
+      return 'visualComponent'
+    case 'template-component':
+      return 'templateComponent'
+    case 'capability-backed':
+      return 'capabilityBacked'
+    default:
+      return entry.implementation.type
+  }
 }
 
 function stringProp(node: PageNode, key: string): string | null {

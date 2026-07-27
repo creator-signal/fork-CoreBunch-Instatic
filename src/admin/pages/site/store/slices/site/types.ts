@@ -22,6 +22,7 @@ import type {
   SiteSettings,
   PageTemplateConfig,
   ConditionDef,
+  CatalogueInstanceMetadata,
   StructuralExplorerRowOrder,
   StructuralSiteExplorerSectionId,
 } from '@core/page-tree'
@@ -38,6 +39,14 @@ import type { EditorStore } from '@site/store/types'
 // ---------------------------------------------------------------------------
 
 export type ColorVariantOptions = { enabled: boolean; count: number }
+
+export interface InsertNodeOptions {
+  /**
+   * Stable Component Library identity stamped in the same undoable mutation
+   * as the backing node. Ordinary HTML insertion leaves this unset.
+   */
+  catalogueInstance?: CatalogueInstanceMetadata
+}
 
 export interface CreateFrameworkColorTokenInput {
   category?: string
@@ -182,7 +191,13 @@ export interface SiteSlice {
   setPageAsHomepage: (pageId: string) => void
 
   // Node mutations (operate on the active page)
-  insertNode: (moduleId: string, defaults: Record<string, unknown>, parentId: string, index?: number) => string
+  insertNode: (
+    moduleId: string,
+    defaults: Record<string, unknown>,
+    parentId: string,
+    index?: number,
+    options?: InsertNodeOptions,
+  ) => string
 
   /**
    * Insert a fragment of imported HTML nodes into the active tree under `parentId`.
@@ -213,7 +228,12 @@ export interface SiteSlice {
    *   pasting / right-clicking a leaf target).
    * - Returns the new node's id on success, or `null` on no-op / cycle prevented.
    */
-  insertComponentRef: (parentId: string, componentId: string, index?: number) => string | null
+  insertComponentRef: (
+    parentId: string,
+    componentId: string,
+    index?: number,
+    options?: InsertNodeOptions,
+  ) => string | null
   deleteNode: (nodeId: string) => void
   /** Multi-delete: removes every id and its descendants in one undo step. */
   deleteNodes: (nodeIds: string[]) => void

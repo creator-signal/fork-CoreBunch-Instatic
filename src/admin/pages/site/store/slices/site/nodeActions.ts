@@ -155,10 +155,13 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
   const { get, set, mutateActiveTree, mutateActiveTreeAndSite } = helpers
 
   const actions: NodeActions = {
-    insertNode: (moduleId, defaults, parentId, index) => {
+    insertNode: (moduleId, defaults, parentId, index, options) => {
       const mod = registry.get(moduleId)
       const resolvedDefaults = { ...(mod?.defaults ?? {}), ...defaults }
       const newNode = createNode(moduleId, resolvedDefaults)
+      if (options?.catalogueInstance) {
+        newNode.catalogueInstance = options.catalogueInstance
+      }
       let inserted = false
       let blockedByOutlet = false
       mutateActiveTree((tree) => {
@@ -251,7 +254,7 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
       return insertedRootIds
     },
 
-    insertComponentRef: (parentId, componentId, index) => {
+    insertComponentRef: (parentId, componentId, index, options) => {
       if (!componentId) return null
 
       const { activeDocument, site } = get()
@@ -277,6 +280,9 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
         componentId,
         propOverrides: {},
       })
+      if (options?.catalogueInstance) {
+        newNode.catalogueInstance = options.catalogueInstance
+      }
 
       // Insert the VC ref AND materialize its slot-instance children inside ONE
       // mutateActiveTree recipe, so both writes land in a single patch set →

@@ -2,6 +2,7 @@ import { Type, type Static } from '@core/utils/typeboxHelpers'
 
 const NAMESPACED_ID_PATTERN = '^[a-z0-9]+(?:[._-][a-z0-9]+)+$'
 const LOCAL_ID_PATTERN = '^[a-z0-9]+(?:[._-][a-z0-9]+)*$'
+const PROPERTY_KEY_PATTERN = '^[A-Za-z_$][A-Za-z0-9_$.-]*$'
 const SEMVER_PATTERN =
   '^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$'
 
@@ -13,6 +14,11 @@ const NamespacedIdSchema = Type.String({
 const LocalIdSchema = Type.String({
   minLength: 1,
   pattern: LOCAL_ID_PATTERN,
+})
+
+const PropertyKeySchema = Type.String({
+  minLength: 1,
+  pattern: PROPERTY_KEY_PATTERN,
 })
 
 export const ComponentLibraryImplementationTypeSchema = Type.Union([
@@ -147,7 +153,8 @@ const ComponentLibraryFieldTypeSchema = Type.Union([
 
 export const ComponentLibraryFieldSchema = Type.Object(
   {
-    key: LocalIdSchema,
+    /** Canonical backing prop key; camelCase module properties are valid. */
+    key: PropertyKeySchema,
     label: Type.String({ minLength: 1 }),
     description: Type.Optional(Type.String()),
     type: ComponentLibraryFieldTypeSchema,

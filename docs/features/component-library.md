@@ -15,6 +15,8 @@ The registry is metadata over Instatic's existing modules, Visual Components, pa
 - `ComponentLibraryRegistry` validates every registration, rejects accidental duplicates and provides deterministic ordering.
 - `filterComponentLibraryEntries` is the shared search and taxonomy filter.
 - `resolveComponentLibraryAvailability` exposes only dependency IDs and health, never provider settings or credentials.
+- The built-in catalogue is explicit in `src/modules/base/componentLibrary.ts`; it is not inferred from every registered HTML module.
+- Components view opens a searchable, filterable catalogue and stamps library identity on the inserted backing node in the same undo transaction.
 - The registry does not own page trees, rendering, component instances or plugin lifecycle.
 
 ## Architecture
@@ -43,6 +45,9 @@ module / Visual Component / pattern / template
 | Registration and subscriptions | `src/core/component-library/registry.ts` |
 | Search, filters and deterministic ordering | `src/core/component-library/query.ts` |
 | Capability/provider/plugin health | `src/core/component-library/availability.ts` |
+| Explicit built-in definitions | `src/modules/base/componentLibrary.ts` |
+| Catalogue dialog and Components projection | `src/admin/pages/site/panels/LayersPanel/` |
+| Canonical backing-node insertion | `src/admin/pages/site/hooks/useInsertComponentLibraryEntry.ts` |
 | Public imports | `src/core/component-library/index.ts` |
 
 External consumers import through `@core/component-library`.
@@ -73,7 +78,13 @@ const emailInput: ComponentLibraryEntry = {
     { key: 'label', label: 'Label', type: 'text', required: true },
   ],
   variants: [],
-  presets: [],
+  presets: [
+    {
+      id: 'email',
+      name: 'Email',
+      values: { inputType: 'email' },
+    },
+  ],
   slots: [],
   constraints: {
     allowedParentEntryIds: ['base.form-container'],
@@ -132,6 +143,12 @@ componentLibraryRegistry.register(emailInput)
 
 `list()` sorts by category, display name and stable ID. Registration order and plugin activation timing therefore do not change catalogue presentation.
 
+### Built-in entries
+
+`src/modules/base/componentLibrary.ts` registers the curated authoring catalogue during base-module startup. Each entry names its canonical module, author-facing fields, optional preset, constraints, usage and accessibility guidance. The list includes structural, content, action, media and form entries, with separate approved presets for each input type.
+
+Registration is deliberately explicit. A low-level HTML module can remain available in HTML view without automatically becoming a governed Component Library entry.
+
 ## Search and filtering
 
 `filterComponentLibraryEntries()` searches:
@@ -142,6 +159,10 @@ componentLibraryRegistry.register(emailInput)
 - slot IDs, names and descriptions.
 
 Multiple search terms use AND semantics. Taxonomy filters cover category, implementation type, source and lifecycle status. Every result set uses the same deterministic ordering as the registry.
+
+The **Components** Layers view exposes this query through the add button beside component-layer search. The dialog presents category chips plus implementation, source and lifecycle filters. Selecting an entry shows its stable ID and version, author fields, slots, preset, dependency health, usage and accessibility notes.
+
+Primitive and Visual Component implementations can be inserted into the active page or Visual Component canvas. Primitive preset values merge over the module defaults. The store writes `catalogueInstance.entryId`, `entryVersion` and optional `presetId` on the backing node atomically with insertion, so undo removes both content and identity together. Pattern materialization and template-role placement remain disabled until their canonical factories exist; the picker does not synthesize partial content.
 
 ## Dependency health
 
@@ -167,6 +188,8 @@ Provider credentials, settings and secret values never enter the Component Libra
 - Do not register a capability-backed entry without a named platform dependency.
 - Do not bypass `parseComponentLibraryEntry()` at an untyped registration boundary.
 - Do not use registration order as presentation order.
+- Do not auto-register every module as a governed authoring component.
+- Do not write catalogue identity after insertion in a second history transaction.
 - Do not include provider credentials or secret configuration in requirements or availability.
 - Do not import internal files from outside the module; use `@core/component-library`.
 

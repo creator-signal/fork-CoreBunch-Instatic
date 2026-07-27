@@ -13,6 +13,8 @@ import { ModuleIcon } from '@site/ui/ModuleIcon'
 import { SearchBar } from '@ui/components/SearchBar'
 import { SkeletonTree } from '@ui/components/Skeleton'
 import { TagPill } from '@ui/components/TagPill'
+import { Button } from '@ui/components/Button'
+import { PlusIcon } from 'pixel-art-icons/icons/plus'
 import type {
   ComponentLayerRow,
   ComponentTreeProjection,
@@ -22,9 +24,13 @@ import styles from './ComponentLayersTree.module.css'
 
 interface ComponentLayersTreeProps {
   projection: ComponentTreeProjection | null
+  onOpenComponentLibrary: () => void
 }
 
-export function ComponentLayersTree({ projection }: ComponentLayersTreeProps) {
+export function ComponentLayersTree({
+  projection,
+  onOpenComponentLibrary,
+}: ComponentLayersTreeProps) {
   const selectedNodeId = useEditorStore((state) => state.selectedNodeId)
   const focusedPanel = useEditorStore((state) => state.focusedPanel)
   const setFocusedPanel = useEditorStore((state) => state.setFocusedPanel)
@@ -100,7 +106,18 @@ export function ComponentLayersTree({ projection }: ComponentLayersTreeProps) {
           onValueChange={setSearchQuery}
           placeholder="Search components…"
           aria-label="Search component layers"
+          className={styles.search}
         />
+        <Button
+          variant="secondary"
+          size="sm"
+          iconOnly
+          aria-label="Open Component Library"
+          tooltip="Add from Component Library"
+          onClick={onOpenComponentLibrary}
+        >
+          <PlusIcon size={13} aria-hidden="true" />
+        </Button>
       </div>
 
       <div className={styles.treeArea}>

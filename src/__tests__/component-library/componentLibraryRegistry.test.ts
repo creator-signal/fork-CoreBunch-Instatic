@@ -35,7 +35,13 @@ function entry(
       },
     ],
     variants: [],
-    presets: [],
+    presets: [
+      {
+        id: 'email',
+        name: 'Email',
+        values: { type: 'email' },
+      },
+    ],
     slots: [],
     constraints: {
       allowedParentEntryIds: ['base.form-container'],
@@ -97,6 +103,16 @@ describe('Component Library definitions', () => {
     }))).toThrow(
       'A capability-backed entry must declare at least one capability, provider adapter or plugin',
     )
+  })
+
+  it('requires primitive preset mappings to resolve inside the same entry', () => {
+    expect(() => parseComponentLibraryEntry(entry({
+      implementation: {
+        type: 'primitive',
+        moduleId: 'base.input',
+        presetId: 'missing',
+      },
+    }))).toThrow('Preset "missing" is not declared by this entry')
   })
 })
 

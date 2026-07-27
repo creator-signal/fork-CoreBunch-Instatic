@@ -120,7 +120,7 @@ Transport failures, timeouts, non-2xx responses, and invalid response bodies nev
 
 The capability is unavailable while disabled or while storage/scanner health is unavailable. A newly configured HTTP scanner starts degraded until it completes a scan. The Component Library surfaces this health through `GET /admin/api/cms/attachments/health`.
 
-The local adapter stores bytes below `<ATTACHMENTS_DIR>/<siteId>/<attachmentId>/`. Quarantine and active paths are private and relative to the configured adapter root. Back up `ATTACHMENTS_DIR` together with the database; restoring only one side leaves references or bytes incomplete.
+The local adapter stores bytes below `<ATTACHMENTS_DIR>/<attachmentId>/`. Quarantine and active paths are private and relative to the configured adapter root. Instatic is single-install, so attachment rows and paths do not carry tenant-style site identifiers. Back up `ATTACHMENTS_DIR` together with the database; restoring only one side leaves references or bytes incomplete.
 
 ## Forbidden Patterns
 

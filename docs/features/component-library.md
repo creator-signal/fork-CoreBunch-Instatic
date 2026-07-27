@@ -272,6 +272,17 @@ Missing dependency IDs resolve to `unavailable`. Any unavailable dependency make
 
 Provider credentials, settings and secret values never enter the Component Library registry.
 
+### Shared collections
+
+List, Card Grid, Gallery, Search and Structured Content List consume the
+schema-backed contract in `src/core/collections`. The contract owns
+manual/dynamic sources, query/filter/sort inputs, pagination configuration,
+load states, canonical URL state and accessible announcements; each catalogue
+entry supplies only its item renderer and placement metadata. Pagination is
+therefore never exposed as a standalone insertable catalogue entry. The
+existing `base.loop` publisher remains the rendering and static/dynamic/hole
+execution layer underneath the contract.
+
 ## Forbidden patterns
 
 - Do not store rendered HTML in a library entry.

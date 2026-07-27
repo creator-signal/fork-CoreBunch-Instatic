@@ -4,6 +4,27 @@ The `base.loop` module — iterates a **loop entity source** and renders its chi
 
 Loop sources are pluggable: built-in sources (`data.rows`, `site.pages`, `site.media`) cover the universal store; plugins can register more via the SDK.
 
+## Shared collection contract
+
+`src/core/collections/contract.ts` is the consumer-neutral contract used by
+loop-backed List, Card Grid, Gallery, Search and Structured Content List
+entries. It defines:
+
+- manual items or a dynamic namespaced source with shared filters, free-text
+  query and ordered sort clauses;
+- `none`, `numbered`, `previous-next`, `load-more` and `cursor` pagination as
+  collection configuration rather than an insertable component;
+- deterministic per-instance page/cursor query keys and history URLs;
+- loading, empty, error and populated states with author-facing `aria-live`
+  announcement text;
+- opaque next/previous cursor tokens on `LoopFetchResult`.
+
+The legacy `base.loop` value `pagination: 'infinite'` normalizes to
+`load-more`; persisted sites remain readable while new collection consumers
+share the current vocabulary. Search capabilities receive their free-text
+query through the same source fetch context and may return opaque cursors
+without a search-specific renderer or pagination model.
+
 ---
 
 ## TL;DR
@@ -99,6 +120,8 @@ interface LoopItem {
 interface LoopFetchResult {
   items:      LoopItem[]
   totalItems: number         // total across all pages — used for hasMore + paginators
+  nextCursor?: string        // opaque; only for cursor sources
+  previousCursor?: string
 }
 ```
 
@@ -417,8 +440,10 @@ To enable infinite loading:
 2. Set `props.pageSize` (items per click; defaults to 10).
 3. The publisher auto-injects `<script type="module" src="/_instatic/assets/loop-runtime.js">` when at least one infinite loop exists on the page (see `server/publish/loopRuntime.ts`). The runtime is < 2 KB and ships only when needed.
 
-For static multi-page navigation (no JS required):
-- Use separate `base.loop` nodes with an `offset` filter — one per "page" — and static links between pages.
+Numbered, previous/next and cursor navigation belong to the shared collection
+configuration. They are not separate insertable modules. The loop adapter
+continues to use its existing offset/load-more runtime while the remaining
+shared modes are wired through that adapter.
 
 ---
 

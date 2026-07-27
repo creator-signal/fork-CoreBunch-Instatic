@@ -40,7 +40,12 @@ export interface PluginVm {
   runRoute: (routeKey: string, ctx: VmRouteContext) => Promise<unknown>
   runHookListener: (listenerId: string, payload: unknown) => Promise<void>
   runHookFilter: (filterId: string, value: unknown, context?: Record<string, unknown>) => Promise<unknown>
-  runLoopFetch: (sourceId: string, ctx: unknown) => Promise<{ items: unknown[]; totalItems: number }>
+  runLoopFetch: (sourceId: string, ctx: unknown) => Promise<{
+    items: unknown[]
+    totalItems: number
+    nextCursor?: string
+    previousCursor?: string
+  }>
   runLoopPreview: (sourceId: string, ctx: unknown) => Promise<unknown[]>
   /**
    * Fire a scheduled job's handler. `maxDurationMs` overrides the VM's

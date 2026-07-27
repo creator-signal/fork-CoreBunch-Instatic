@@ -65,7 +65,6 @@ export async function loadFormDraft(
   db: DbClient,
   input: {
     identity: DraftIdentity
-    siteId: string
     snapshot: PublishedFormSnapshot
   },
 ): Promise<FormDraftResult> {
@@ -77,7 +76,6 @@ export async function loadFormDraft(
     : input.identity.user
       ? await getLatestOwnedFormDraft(db, {
           ownerUserId: input.identity.user.id,
-          siteId: input.siteId,
           pageId: input.snapshot.pageId,
           formId: input.snapshot.formId,
           nowIso,
@@ -86,7 +84,7 @@ export async function loadFormDraft(
   if (!record) return notFound()
   const owned = ownsDraft(record, input.identity)
   if (owned) return owned
-  const scoped = draftMatchesScope(record, input.siteId, input.snapshot)
+  const scoped = draftMatchesScope(record, input.snapshot)
   if (scoped) return scoped
   if (record.expiresAt <= nowIso || record.deletedAt) {
     await deleteFormDraft(db, record.id)
@@ -115,7 +113,6 @@ export async function saveFormDraft(
   db: DbClient,
   input: {
     identity: DraftIdentity
-    siteId: string
     snapshot: PublishedFormSnapshot
     revision?: number
     values: Record<string, unknown>
@@ -151,7 +148,7 @@ export async function saveFormDraft(
     if (!current) return notFound()
     const owned = ownsDraft(current, input.identity)
     if (owned) return owned
-    const scoped = draftMatchesScope(current, input.siteId, input.snapshot)
+    const scoped = draftMatchesScope(current, input.snapshot)
     if (scoped) return scoped
     if (input.revision === undefined || input.revision !== current.revision) {
       return conflict(current.revision)
@@ -179,7 +176,6 @@ export async function saveFormDraft(
     : randomBytes(32).toString('base64url')
   const created = await createFormDraft(db, {
     id: nanoid(),
-    siteId: input.siteId,
     pageId: input.snapshot.pageId,
     formId: input.snapshot.formId,
     targetTableId: input.snapshot.targetTableId,
@@ -204,7 +200,6 @@ export async function removeFormDraft(
   db: DbClient,
   input: {
     identity: DraftIdentity
-    siteId: string
     snapshot: PublishedFormSnapshot
     revision: number
   },
@@ -216,7 +211,7 @@ export async function removeFormDraft(
   if (!current) return notFound()
   const owned = ownsDraft(current, input.identity)
   if (owned) return owned
-  const scoped = draftMatchesScope(current, input.siteId, input.snapshot)
+  const scoped = draftMatchesScope(current, input.snapshot)
   if (scoped) return scoped
   if (current.revision !== input.revision) return conflict(current.revision)
   const deleted = await deleteFormDraft(db, current.id, input.revision)
@@ -263,11 +258,9 @@ function ownsDraft(
 
 function draftMatchesScope(
   record: FormDraftRecord,
-  siteId: string,
   snapshot: PublishedFormSnapshot,
 ): DraftFailure | null {
-  return record.siteId === siteId
-    && record.pageId === snapshot.pageId
+  return record.pageId === snapshot.pageId
     && record.formId === snapshot.formId
     && record.targetTableId === snapshot.targetTableId
     ? null

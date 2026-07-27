@@ -23,14 +23,12 @@ export function createLocalAttachmentStorage(
   const root = resolve(rootDir)
 
   const targetFor = (
-    siteId: string,
     attachmentId: string,
     state: 'quarantine' | 'active',
     extension: string,
   ): string => {
     const target = join(
       root,
-      safeSegment(siteId, 'site id'),
       safeSegment(attachmentId, 'id'),
       `${state}${safeExtension(extension)}`,
     )
@@ -69,8 +67,8 @@ export function createLocalAttachmentStorage(
         }
       }
     },
-    async putQuarantined({ siteId, attachmentId, extension, bytes }) {
-      const target = targetFor(siteId, attachmentId, 'quarantine', extension)
+    async putQuarantined({ attachmentId, extension, bytes }) {
+      const target = targetFor(attachmentId, 'quarantine', extension)
       await mkdir(dirname(target), { recursive: true })
       await writeFile(target, bytes, { flag: 'wx' })
       return relative(root, target).replace(/\\/g, '/')

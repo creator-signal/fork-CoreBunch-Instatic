@@ -106,7 +106,6 @@ describe('private attachment lifecycle', () => {
     cleanups.push(async () => rm(storageDir, { recursive: true, force: true }))
     const storage = createLocalAttachmentStorage(storageDir)
     const quarantinePath = await storage.putQuarantined({
-      siteId: 'default',
       attachmentId: 'recovery-test',
       extension: '.pdf',
       bytes: PDF_BYTES,
@@ -124,7 +123,6 @@ describe('private attachment lifecycle', () => {
     const { testDb } = await harness(cleanScanner)
     const uploaded = await uploadAndScanAttachment(testDb.db, {
       file: pdf(),
-      siteId: 'default',
       pageId: 'page-home',
       formId: 'contact',
       fieldId: 'documents',
@@ -134,7 +132,6 @@ describe('private attachment lifecycle', () => {
 
     const record = await getAttachmentRecord(testDb.db, uploaded.attachment.id)
     expect(record).toMatchObject({
-      siteId: 'default',
       status: 'active',
       scanStatus: 'clean',
       storageAdapterId: 'local-private',
@@ -166,7 +163,6 @@ describe('private attachment lifecycle', () => {
         maxFiles: 1,
       }],
       values: { documents: uploaded.attachment.reference },
-      siteId: 'default',
       pageId: 'page-home',
       formId: 'contact',
       policyMaxFiles: 3,
@@ -183,7 +179,6 @@ describe('private attachment lifecycle', () => {
         inputType: 'file',
       }],
       values: { documents: uploaded.attachment.reference },
-      siteId: 'default',
       pageId: 'another-page',
       formId: 'contact',
       policyMaxFiles: 3,
@@ -222,7 +217,6 @@ describe('private attachment lifecycle', () => {
     const { testDb, storageDir } = await harness(unavailableScanner)
     const uploaded = await uploadAndScanAttachment(testDb.db, {
       file: pdf('retry.pdf'),
-      siteId: 'default',
       pageId: 'page-home',
       formId: 'contact',
       fieldId: 'documents',
@@ -244,7 +238,6 @@ describe('private attachment lifecycle', () => {
     expect(await retryAttachmentScan(testDb.db, {
       uploadId: uploaded.retry.uploadId,
       retryToken: 'wrong-token',
-      siteId: 'default',
       pageId: 'page-home',
       formId: 'contact',
       fieldId: 'documents',
@@ -262,7 +255,6 @@ describe('private attachment lifecycle', () => {
     const retried = await retryAttachmentScan(testDb.db, {
       uploadId: uploaded.retry.uploadId,
       retryToken: uploaded.retry.retryToken,
-      siteId: 'default',
       pageId: 'page-home',
       formId: 'contact',
       fieldId: 'documents',
@@ -274,7 +266,6 @@ describe('private attachment lifecycle', () => {
     const { testDb } = await harness(cleanScanner)
     const upload = (file: File) => uploadAndScanAttachment(testDb.db, {
       file,
-      siteId: 'default',
       pageId: 'page-home',
       formId: 'contact',
       fieldId: 'documents',
@@ -307,7 +298,6 @@ describe('private attachment lifecycle', () => {
     const { testDb } = await harness(unavailableScanner)
     const uploaded = await uploadAndScanAttachment(testDb.db, {
       file: pdf('expired.pdf'),
-      siteId: 'default',
       pageId: 'page-home',
       formId: 'contact',
       fieldId: 'documents',
@@ -340,7 +330,6 @@ describe('private attachment lifecycle', () => {
 
     const uploaded = await uploadAndScanAttachment(testDb.db, {
       file: pdf('private.pdf'),
-      siteId: 'default',
       pageId: 'page-home',
       formId: 'contact',
       fieldId: 'documents',
@@ -367,7 +356,6 @@ describe('private attachment lifecycle', () => {
         inputType: 'file',
       }],
       values: { documents: uploaded.attachment.reference },
-      siteId: 'default',
       pageId: 'page-home',
       formId: 'contact',
       policyMaxFiles: 1,

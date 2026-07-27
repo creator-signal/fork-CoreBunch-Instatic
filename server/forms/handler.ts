@@ -174,7 +174,6 @@ async function handleSubmit(req: Request, db: DbClient): Promise<Response> {
     table,
     controls: snapshot.controls,
     values,
-    siteId: context.siteId,
     pageId: snapshot.pageId,
     formId: snapshot.formId,
     policyMaxFiles: runtime?.policy.maxFiles ?? 1,
@@ -289,7 +288,6 @@ async function handleAttachmentUpload(req: Request, db: DbClient): Promise<Respo
 
   const result = await uploadAndScanAttachment(db, {
     file,
-    siteId: context.siteId,
     pageId,
     formId,
     fieldId,
@@ -346,7 +344,6 @@ async function handleAttachmentScan(req: Request, db: DbClient): Promise<Respons
   const result = await retryAttachmentScan(db, {
     uploadId: parsed.uploadId,
     retryToken: parsed.retryToken,
-    siteId: context.siteId,
     pageId: parsed.pageId,
     formId: parsed.formId,
     fieldId: parsed.fieldId,
@@ -388,14 +385,14 @@ async function findPublishedFormContext(
   db: DbClient,
   pageId: string,
   formId: string,
-): Promise<{ siteId: string; form: PublishedFormSnapshot } | null> {
+): Promise<{ form: PublishedFormSnapshot } | null> {
   const snapshot = await getLatestPublishedSiteSnapshot(db)
   const page = snapshot?.site.pages.find((candidate) => candidate.id === pageId)
   if (!snapshot || !page) return null
   const form = derivePageFormSnapshots(page).find(
     (candidate) => candidate.formId === formId,
   )
-  return form ? { siteId: snapshot.site.id, form } : null
+  return form ? { form } : null
 }
 
 function publicFormRoute(pathname: string): PublicFormRoute | null {

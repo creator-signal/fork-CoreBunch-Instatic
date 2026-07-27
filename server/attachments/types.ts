@@ -7,7 +7,6 @@ import type {
 
 export interface AttachmentRecord {
   id: string
-  siteId: string
   pageId: string
   formId: string
   fieldId: string
@@ -35,7 +34,6 @@ export interface AttachmentStorageAdapter {
   readonly id: string
   health(): Promise<{ health: AttachmentHealth; message?: string }>
   putQuarantined(input: {
-    siteId: string
     attachmentId: string
     extension: string
     bytes: Uint8Array
@@ -67,4 +65,3 @@ export interface AttachmentRuntime {
   storage: AttachmentStorageAdapter
   scanner: AttachmentScanner
 }
-

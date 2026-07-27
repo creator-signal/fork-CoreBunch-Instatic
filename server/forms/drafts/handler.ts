@@ -75,7 +75,6 @@ export async function handlePublicFormDraftRequest(
     }
     result = await saveFormDraft(db, {
       identity,
-      siteId: context.siteId,
       snapshot: context.form,
       ...('revision' in parsed && parsed.revision !== undefined
         ? { revision: parsed.revision }
@@ -89,14 +88,12 @@ export async function handlePublicFormDraftRequest(
     }
     result = await removeFormDraft(db, {
       identity,
-      siteId: context.siteId,
       snapshot: context.form,
       revision: parsed.revision,
     })
   } else {
     result = await loadFormDraft(db, {
       identity,
-      siteId: context.siteId,
       snapshot: context.form,
     })
   }
@@ -122,14 +119,14 @@ async function findPublishedFormContext(
   db: DbClient,
   pageId: string,
   formId: string,
-): Promise<{ siteId: string; form: PublishedFormSnapshot } | null> {
+): Promise<{ form: PublishedFormSnapshot } | null> {
   const snapshot = await getLatestPublishedSiteSnapshot(db)
   const page = snapshot?.site.pages.find((candidate) => candidate.id === pageId)
   if (!snapshot || !page) return null
   const form = derivePageFormSnapshots(page).find(
     (candidate) => candidate.formId === formId,
   )
-  return form ? { siteId: snapshot.site.id, form } : null
+  return form ? { form } : null
 }
 
 async function readDraftBody<T extends TSchema>(

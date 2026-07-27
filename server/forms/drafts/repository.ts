@@ -3,7 +3,6 @@ import { placeholder, type DbClient } from '../../db/client'
 
 export interface FormDraftRecord {
   id: string
-  siteId: string
   pageId: string
   formId: string
   targetTableId: string
@@ -23,7 +22,6 @@ export interface FormDraftRecord {
 
 interface FormDraftRow {
   id: string
-  site_id: string
   page_id: string
   form_id: string
   target_table_id: string
@@ -42,7 +40,7 @@ interface FormDraftRow {
 }
 
 const DRAFT_COLUMNS = `
-  id, site_id, page_id, form_id, target_table_id, owner_user_id,
+  id, page_id, form_id, target_table_id, owner_user_id,
   recovery_token_hash, values_json, wizard_state_json, schema_json,
   schema_hash, schema_version, revision, created_at, updated_at,
   expires_at, deleted_at
@@ -56,7 +54,6 @@ export async function createFormDraft(
   db: DbClient,
   input: {
     id: string
-    siteId: string
     pageId: string
     formId: string
     targetTableId: string
@@ -72,13 +69,13 @@ export async function createFormDraft(
 ): Promise<FormDraftRecord> {
   await db`
     insert into form_drafts (
-      id, site_id, page_id, form_id, target_table_id, owner_user_id,
+      id, page_id, form_id, target_table_id, owner_user_id,
       recovery_token_hash, values_json, wizard_state_json, schema_json,
       schema_hash, schema_version, expires_at
     )
     values (
-      ${input.id}, ${input.siteId}, ${input.pageId}, ${input.formId},
-      ${input.targetTableId}, ${input.ownerUserId}, ${input.recoveryTokenHash},
+      ${input.id}, ${input.pageId}, ${input.formId}, ${input.targetTableId},
+      ${input.ownerUserId}, ${input.recoveryTokenHash},
       ${JSON.stringify(input.values)}, ${JSON.stringify(input.wizard)},
       ${JSON.stringify(input.schema)}, ${input.schemaHash},
       ${input.schemaVersion}, ${input.expiresAt}
@@ -104,7 +101,6 @@ export async function getLatestOwnedFormDraft(
   db: DbClient,
   input: {
     ownerUserId: string
-    siteId: string
     pageId: string
     formId: string
     nowIso: string
@@ -113,18 +109,16 @@ export async function getLatestOwnedFormDraft(
   const p = (index: number) => placeholder(db.dialect, index)
   const { rows } = await db.unsafe<FormDraftRow>(
     `select ${DRAFT_COLUMNS}
-       from form_drafts
+      from form_drafts
       where owner_user_id = ${p(1)}
-        and site_id = ${p(2)}
-        and page_id = ${p(3)}
-        and form_id = ${p(4)}
-        and expires_at > ${p(5)}
+        and page_id = ${p(2)}
+        and form_id = ${p(3)}
+        and expires_at > ${p(4)}
         and deleted_at is null
       order by updated_at desc
       limit 1`,
     [
       input.ownerUserId,
-      input.siteId,
       input.pageId,
       input.formId,
       input.nowIso,
@@ -201,7 +195,6 @@ export async function deleteExpiredFormDrafts(
 function mapDraft(row: FormDraftRow): FormDraftRecord {
   return {
     id: row.id,
-    siteId: row.site_id,
     pageId: row.page_id,
     formId: row.form_id,
     targetTableId: row.target_table_id,

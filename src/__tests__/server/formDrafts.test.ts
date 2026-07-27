@@ -239,7 +239,6 @@ describe('persistent form drafts', () => {
     ])
     const created = await saveFormDraft(db, {
       identity: { user: null },
-      siteId: 'default',
       snapshot: form,
       values: {
         contact_email: 'person@example.com',
@@ -262,7 +261,6 @@ describe('persistent form drafts', () => {
         draftId: created.draft.id,
         recoveryToken: 'wrong-token-with-enough-length',
       },
-      siteId: 'default',
       snapshot: form,
     })
     expect(denied).toMatchObject({ ok: false, status: 404 })
@@ -273,7 +271,6 @@ describe('persistent form drafts', () => {
         draftId: created.draft.id,
         recoveryToken: created.recoveryToken,
       },
-      siteId: 'default',
       snapshot: form,
     })
     expect(loaded).toMatchObject({
@@ -291,7 +288,6 @@ describe('persistent form drafts', () => {
         draftId: created.draft.id,
         recoveryToken: created.recoveryToken,
       },
-      siteId: 'default',
       snapshot: form,
       revision: 1,
       values: { email: 'new@example.com' },
@@ -305,7 +301,6 @@ describe('persistent form drafts', () => {
         draftId: created.draft.id,
         recoveryToken: created.recoveryToken,
       },
-      siteId: 'default',
       snapshot: form,
       revision: 1,
       values: { email: 'stale@example.com' },
@@ -337,7 +332,6 @@ describe('persistent form drafts', () => {
 
     const created = await saveFormDraft(db, {
       identity: { user },
-      siteId: 'default',
       snapshot: snapshot(),
       values: { email: 'owner@example.com' },
       wizard,
@@ -348,7 +342,6 @@ describe('persistent form drafts', () => {
 
     const resumed = await loadFormDraft(db, {
       identity: { user },
-      siteId: 'default',
       snapshot: snapshot(),
     })
     expect(resumed).toMatchObject({
@@ -358,7 +351,6 @@ describe('persistent form drafts', () => {
 
     const deleted = await removeFormDraft(db, {
       identity: { user, draftId: created.draft.id },
-      siteId: 'default',
       snapshot: snapshot(),
       revision: 1,
     })
@@ -370,7 +362,6 @@ describe('persistent form drafts', () => {
     const { db } = await harness()
     const created = await saveFormDraft(db, {
       identity: { user: null },
-      siteId: 'default',
       snapshot: snapshot(),
       values: { email: 'person@example.com' },
       wizard,
@@ -391,7 +382,6 @@ describe('persistent form drafts', () => {
         draftId: created.draft.id,
         recoveryToken: created.recoveryToken,
       },
-      siteId: 'default',
       snapshot: changed,
     })
     expect(migrated).toMatchObject({
@@ -409,7 +399,6 @@ describe('persistent form drafts', () => {
     const { db } = await harness()
     const created = await saveFormDraft(db, {
       identity: { user: null },
-      siteId: 'default',
       snapshot: snapshot(),
       values: { email: 'future@example.com' },
       wizard,
@@ -426,7 +415,6 @@ describe('persistent form drafts', () => {
         draftId: created.draft.id,
         recoveryToken: created.recoveryToken,
       },
-      siteId: 'default',
       snapshot: snapshot(),
     })
     expect(loaded).toMatchObject({
@@ -441,7 +429,6 @@ describe('persistent form drafts', () => {
     const { db } = await harness()
     const created = await saveFormDraft(db, {
       identity: { user: null },
-      siteId: 'default',
       snapshot: snapshot(),
       values: { email: 'person@example.com' },
       wizard,

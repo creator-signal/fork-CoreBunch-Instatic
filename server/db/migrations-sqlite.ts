@@ -1209,7 +1209,6 @@ export const sqliteMigrations: Migration[] = [
     sql: `
       create table if not exists form_attachments (
         id text primary key,
-        site_id text not null references site(id) on delete cascade,
         page_id text not null,
         form_id text not null,
         field_id text not null,
@@ -1239,7 +1238,7 @@ export const sqliteMigrations: Migration[] = [
       );
 
       create index if not exists form_attachments_scope_idx
-        on form_attachments (site_id, page_id, form_id, field_id, status);
+        on form_attachments (page_id, form_id, field_id, status);
       create index if not exists form_attachments_expiry_idx
         on form_attachments (status, expires_at);
       create index if not exists form_attachments_retention_idx
@@ -1255,7 +1254,6 @@ export const sqliteMigrations: Migration[] = [
     sql: `
       create table if not exists form_drafts (
         id text primary key,
-        site_id text not null references site(id) on delete cascade,
         page_id text not null,
         form_id text not null,
         target_table_id text not null,
@@ -1279,7 +1277,7 @@ export const sqliteMigrations: Migration[] = [
       );
 
       create index if not exists form_drafts_owner_scope_idx
-        on form_drafts (owner_user_id, site_id, page_id, form_id, updated_at desc);
+        on form_drafts (owner_user_id, page_id, form_id, updated_at desc);
       create index if not exists form_drafts_expiry_idx
         on form_drafts (expires_at) where deleted_at is null;
     `,

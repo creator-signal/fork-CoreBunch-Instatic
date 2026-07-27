@@ -38,7 +38,6 @@ export async function uploadAndScanAttachment(
   db: DbClient,
   input: {
     file: File
-    siteId: string
     pageId: string
     formId: string
     fieldId: string
@@ -84,7 +83,6 @@ export async function uploadAndScanAttachment(
   const id = nanoid()
   const token = nanoid(32)
   const storagePath = await runtime.storage.putQuarantined({
-    siteId: input.siteId,
     attachmentId: id,
     extension: validated.extension,
     bytes: validated.bytes,
@@ -94,7 +92,6 @@ export async function uploadAndScanAttachment(
   try {
     const record = await createAttachmentRecord(db, {
       id,
-      siteId: input.siteId,
       pageId: input.pageId,
       formId: input.formId,
       fieldId: input.fieldId,
@@ -120,7 +117,6 @@ export async function retryAttachmentScan(
   input: {
     uploadId: string
     retryToken: string
-    siteId: string
     pageId: string
     formId: string
     fieldId: string
@@ -141,7 +137,6 @@ export async function retryAttachmentScan(
   if (
     !record
     || record.referenceTokenHash !== hashAttachmentToken(input.retryToken)
-    || record.siteId !== input.siteId
     || record.pageId !== input.pageId
     || record.formId !== input.formId
     || record.fieldId !== input.fieldId

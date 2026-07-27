@@ -4,7 +4,6 @@ import type { AttachmentRecord } from './types'
 
 interface AttachmentRow {
   id: string
-  site_id: string
   page_id: string
   form_id: string
   field_id: string
@@ -29,7 +28,7 @@ interface AttachmentRow {
 }
 
 const ATTACHMENT_COLUMNS = `
-  id, site_id, page_id, form_id, field_id, original_name, extension,
+  id, page_id, form_id, field_id, original_name, extension,
   mime_type, size_bytes, sha256, status, scan_status, scan_message,
   storage_adapter_id, storage_path, reference_token_hash, data_row_id,
   created_at, scanned_at, expires_at, claimed_at, retention_until, deleted_at
@@ -43,7 +42,6 @@ function iso(value: Date | string | null): string | null {
 function mapAttachment(row: AttachmentRow): AttachmentRecord {
   return {
     id: row.id,
-    siteId: row.site_id,
     pageId: row.page_id,
     formId: row.form_id,
     fieldId: row.field_id,
@@ -76,7 +74,6 @@ export async function createAttachmentRecord(
   db: DbClient,
   input: {
     id: string
-    siteId: string
     pageId: string
     formId: string
     fieldId: string
@@ -93,13 +90,13 @@ export async function createAttachmentRecord(
 ): Promise<AttachmentRecord> {
   await db<{ id: string }>`
     insert into form_attachments (
-      id, site_id, page_id, form_id, field_id, original_name, extension,
+      id, page_id, form_id, field_id, original_name, extension,
       mime_type, size_bytes, sha256, status, scan_status, storage_adapter_id,
       storage_path, reference_token_hash, expires_at
     )
     values (
-      ${input.id}, ${input.siteId}, ${input.pageId}, ${input.formId},
-      ${input.fieldId}, ${input.originalName}, ${input.extension},
+      ${input.id}, ${input.pageId}, ${input.formId}, ${input.fieldId},
+      ${input.originalName}, ${input.extension},
       ${input.mimeType}, ${input.sizeBytes}, ${input.sha256},
       ${'quarantined'}, ${'pending'}, ${input.storageAdapterId},
       ${input.storagePath}, ${input.referenceTokenHash}, ${input.expiresAt}
@@ -150,7 +147,6 @@ export async function claimAttachment(
   input: {
     id: string
     tokenHash: string
-    siteId: string
     pageId: string
     formId: string
     fieldId: string
@@ -167,7 +163,6 @@ export async function claimAttachment(
         retention_until = ${input.retentionUntil}
     where id = ${input.id}
       and reference_token_hash = ${input.tokenHash}
-      and site_id = ${input.siteId}
       and page_id = ${input.pageId}
       and form_id = ${input.formId}
       and field_id = ${input.fieldId}

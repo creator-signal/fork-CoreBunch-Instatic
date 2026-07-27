@@ -2,7 +2,6 @@ import type { DbClient } from '../../db/client'
 import { requireAnyCapability, requireCapability } from '../../auth/authz'
 import { binaryResponse } from '../../binary'
 import { jsonResponse, methodNotAllowed } from '../../http'
-import { getDraftSite } from '../../repositories/site'
 import {
   getAttachmentRecord,
   getDownloadableAttachment,
@@ -46,13 +45,12 @@ export async function handleAttachmentAdminRoutes(
       'content.manage',
     ])
     if (user instanceof Response) return user
-    const site = await getDraftSite(db)
     const attachment = await getDownloadableAttachment(
       db,
       id,
       new Date().toISOString(),
     )
-    if (!site || !attachment || attachment.siteId !== site.id || !attachment.storagePath) {
+    if (!attachment || !attachment.storagePath) {
       return jsonResponse({ error: 'Attachment not found' }, { status: 404 })
     }
     const runtime = getAttachmentRuntime()
@@ -78,11 +76,8 @@ export async function handleAttachmentAdminRoutes(
   if (req.method !== 'DELETE') return methodNotAllowed()
   const user = await requireCapability(req, db, 'data.custom.tables.manage')
   if (user instanceof Response) return user
-  const [site, attachment] = await Promise.all([
-    getDraftSite(db),
-    getAttachmentRecord(db, id),
-  ])
-  if (!site || !attachment || attachment.siteId !== site.id || attachment.deletedAt) {
+  const attachment = await getAttachmentRecord(db, id)
+  if (!attachment || attachment.deletedAt) {
     return jsonResponse({ error: 'Attachment not found' }, { status: 404 })
   }
   const runtime = getAttachmentRuntime()
@@ -109,4 +104,3 @@ function contentDisposition(filename: string): string {
     .slice(0, 180)
   return `attachment; filename="${ascii || 'attachment'}"; filename*=UTF-8''${encodeURIComponent(filename)}`
 }
-

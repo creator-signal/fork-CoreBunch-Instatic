@@ -7,7 +7,6 @@ import { claimAttachment, hashAttachmentToken } from './repository'
 interface PreparedClaim {
   id: string
   tokenHash: string
-  siteId: string
   pageId: string
   formId: string
   fieldId: string
@@ -25,7 +24,6 @@ export function prepareAttachmentClaims(input: {
   table: DataTable
   controls: FormControlBinding[]
   values: Record<string, unknown>
-  siteId: string
   pageId: string
   formId: string
   policyMaxFiles: number
@@ -90,7 +88,6 @@ export function prepareAttachmentClaims(input: {
       claims.push({
         id: parsed.id,
         tokenHash: hashAttachmentToken(parsed.token),
-        siteId: input.siteId,
         pageId: input.pageId,
         formId: input.formId,
         fieldId: control.fieldId,
@@ -129,4 +126,3 @@ export async function claimPreparedAttachments(
   }
   return true
 }
-

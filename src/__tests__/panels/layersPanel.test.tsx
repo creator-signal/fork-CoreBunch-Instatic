@@ -66,6 +66,53 @@ function loadSite(): void {
   } as Parameters<typeof useEditorStore.setState>[0])
 }
 
+function addWrapperTemplate(): void {
+  const currentSite = useEditorStore.getState().site!
+  const template = makePage({
+    id: 'global-layout',
+    title: 'Global layout',
+    template: {
+      enabled: true,
+      target: { kind: 'everywhere' },
+      priority: 0,
+    },
+    rootNodeId: 'layout-root',
+    nodes: {
+      'layout-root': makeNode({
+        id: 'layout-root',
+        moduleId: 'base.body',
+        children: ['layout-header', 'layout-outlet', 'layout-footer'],
+      }),
+      'layout-header': makeNode({
+        id: 'layout-header',
+        moduleId: 'base.container',
+        catalogueInstance: {
+          entryId: 'base.container',
+          entryVersion: '1.0.0',
+        },
+      }),
+      'layout-outlet': makeNode({
+        id: 'layout-outlet',
+        moduleId: 'base.outlet',
+      }),
+      'layout-footer': makeNode({
+        id: 'layout-footer',
+        moduleId: 'base.container',
+        catalogueInstance: {
+          entryId: 'base.container',
+          entryVersion: '1.0.0',
+        },
+      }),
+    },
+  })
+  useEditorStore.setState({
+    site: {
+      ...currentSite,
+      pages: [...currentSite.pages, template],
+    },
+  } as Parameters<typeof useEditorStore.setState>[0])
+}
+
 beforeEach(() => {
   localStorage.clear()
   useEditorStore.setState({
@@ -134,6 +181,7 @@ describe('Explorer Layers projections', () => {
   })
 
   it('keeps a component-only author out of the HTML projection', async () => {
+    addWrapperTemplate()
     render(
       <EditorPermissionsContext.Provider
         value={{
@@ -153,5 +201,22 @@ describe('Explorer Layers projections', () => {
     expect(screen.queryByRole('button', { name: 'HTML' })).toBeNull()
     expect(screen.getByRole('button', { name: 'Open Component Library' })).toBeDefined()
     expect(screen.getByTestId('component-layers-tree')).toBeDefined()
+    expect(screen.getByText('Global layout template')).toBeDefined()
+    expect(screen.queryByRole('button', { name: 'Open Global layout template' })).toBeNull()
+  })
+
+  it('opens a composed row in its owning template for structural authors', async () => {
+    addWrapperTemplate()
+    render(<DndContext><ExplorerPanel /></DndContext>)
+    fireEvent.click(screen.getByRole('button', { name: 'Components' }))
+
+    const openTemplate = await screen.findByRole('button', {
+      name: 'Open Global layout template',
+    })
+    fireEvent.click(openTemplate)
+
+    await waitFor(() => {
+      expect(useEditorStore.getState().activePageId).toBe('global-layout')
+    })
   })
 })

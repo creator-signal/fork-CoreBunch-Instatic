@@ -212,4 +212,95 @@ describe('Components Layers projection', () => {
       status: 'missing-library-entry',
     })
   })
+
+  it('splices template-owned branches around the active page in publish order', () => {
+    const page = componentPage()
+    const template = makePage({
+      id: 'global-layout',
+      title: 'Global layout',
+      template: {
+        enabled: true,
+        target: { kind: 'everywhere' },
+        priority: 0,
+      },
+      rootNodeId: 'layout-root',
+      nodes: {
+        'layout-root': makeNode({
+          id: 'layout-root',
+          moduleId: 'base.body',
+          children: ['header', 'outlet', 'footer'],
+        }),
+        header: makeNode({
+          id: 'header',
+          moduleId: 'base.container',
+          catalogueInstance: {
+            entryId: 'base.container',
+            entryVersion: '1.0.0',
+          },
+        }),
+        outlet: makeNode({
+          id: 'outlet',
+          moduleId: 'base.outlet',
+        }),
+        footer: makeNode({
+          id: 'footer',
+          moduleId: 'base.container',
+          catalogueInstance: {
+            entryId: 'base.container',
+            entryVersion: '1.0.0',
+          },
+        }),
+      },
+    })
+    const baseContainer = catalogueEntry({
+      id: 'base.container',
+      name: 'Container',
+      implementation: {
+        type: 'primitive',
+        moduleId: 'base.container',
+      },
+    })
+
+    const projection = buildComponentTreeProjection({
+      page,
+      wrapperTemplates: [template],
+      moduleNames: {
+        'base.body': 'Body',
+        'base.container': 'Container',
+      },
+      visualComponents: [],
+      catalogueEntries: [...catalogue, baseContainer],
+    })
+
+    const root = projection.roots[0]
+    expect(root).toMatchObject({
+      key: 'template:global-layout:layout-root',
+      label: 'Global layout template',
+      kind: 'templateComponent',
+      sourcePageId: 'global-layout',
+      readOnly: true,
+    })
+    expect(root.children.map((row) => row.nodeId)).toEqual([
+      'header',
+      'root',
+      'footer',
+    ])
+    expect(root.children[0]).toMatchObject({
+      label: 'Container',
+      sourcePageId: 'global-layout',
+      readOnly: true,
+    })
+    expect(root.children[1]).toMatchObject({
+      label: 'Home',
+      kind: 'page',
+      readOnly: false,
+    })
+    expect(root.children[1].sourcePageId).toBeUndefined()
+    expect(root.children[2]).toMatchObject({
+      label: 'Container',
+      sourcePageId: 'global-layout',
+      readOnly: true,
+    })
+    expect(resolveComponentLayerSelection(projection, 'heading')).toBe('heading')
+  })
 })

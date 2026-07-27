@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { registry } from '@core/module-engine'
 import { componentLibraryRegistry } from '@core/component-library'
+import { resolveEditorWrapperTemplates } from '@site/canvas/canvasComposition'
 import { useEditorPermissions } from '@site/editorPermissionsContext'
 import { selectActiveCanvasPage, useEditorStore } from '@site/store/store'
 import { DomPanel } from '@site/panels/DomPanel'
@@ -36,6 +37,7 @@ export function LayersPanel({ editable = true }: LayersPanelProps) {
     (state) => state.site?.visualComponents ?? EMPTY_VISUAL_COMPONENTS,
   )
   const selectedNodeId = useEditorStore((state) => state.selectedNodeId)
+  const site = useEditorStore((state) => state.site)
   useSyncExternalStore(
     subscribeModuleRegistry,
     getModuleRegistryGeneration,
@@ -53,6 +55,9 @@ export function LayersPanel({ editable = true }: LayersPanelProps) {
   const projection = page
     ? buildComponentTreeProjection({
         page,
+        wrapperTemplates: site
+          ? resolveEditorWrapperTemplates(site, page)
+          : [],
         moduleNames,
         visualComponents,
         catalogueEntries: componentLibraryRegistry.list(),
@@ -117,6 +122,7 @@ export function LayersPanel({ editable = true }: LayersPanelProps) {
           projection={projection}
           canInsert={permissions.canEditComponents}
           canMove={permissions.canEditComponents || permissions.canEditStructure}
+          canOpenTemplateSource={permissions.canEditStructure}
           onOpenComponentLibrary={() => setComponentLibraryOpen(true)}
         />
       </div>

@@ -37,6 +37,10 @@ export interface ComponentLayerRow {
   status?: ComponentLayerStatus
   entryId?: string
   presetId?: string
+  /** Owning template for read-only composed rows. Absent for active-page rows. */
+  sourcePageId?: string
+  sourcePageTitle?: string
+  sourceRoot?: boolean
   readOnly: boolean
   children: ComponentLayerRow[]
 }
@@ -52,6 +56,8 @@ export interface ComponentTreeProjection {
 
 interface BuildComponentTreeProjectionOptions {
   page: Page
+  /** Publish-order wrapper templates, outermost first. */
+  wrapperTemplates?: readonly Page[]
   moduleNames: Readonly<Record<string, string>>
   visualComponents: ReadonlyArray<Pick<VisualComponent, 'id' | 'name'>>
   catalogueEntries?: ReadonlyArray<ComponentLibraryEntry>
@@ -66,6 +72,7 @@ interface BuildComponentTreeProjectionOptions {
  */
 export function buildComponentTreeProjection({
   page,
+  wrapperTemplates = [],
   moduleNames,
   visualComponents,
   catalogueEntries = [],
@@ -165,8 +172,29 @@ export function buildComponentTreeProjection({
   }
 
   const root = projectNode(page.rootNodeId, true)
-  return {
+  const activeProjection = {
     roots: root ? [root] : [],
+    selectionOwnerByNodeId,
+  }
+  if (!root || wrapperTemplates.length === 0) return activeProjection
+
+  let composedRoot = root
+  for (let index = wrapperTemplates.length - 1; index >= 0; index -= 1) {
+    const template = wrapperTemplates[index]
+    const templateProjection = buildComponentTreeProjection({
+      page: template,
+      moduleNames,
+      visualComponents,
+      catalogueEntries,
+    })
+    const templateRoot = templateProjection.roots[0]
+    if (!templateRoot) continue
+    const ownedRoot = markTemplateOwnership(templateRoot, template)
+    composedRoot = replaceFirstTemplateOutlet(ownedRoot, composedRoot).row
+  }
+
+  return {
+    roots: [composedRoot],
     selectionOwnerByNodeId,
   }
 }
@@ -326,4 +354,53 @@ function hasAncestorInSet(
     current = parentByNodeId.get(current)
   }
   return false
+}
+
+function markTemplateOwnership(
+  row: ComponentLayerRow,
+  template: Page,
+  root = true,
+): ComponentLayerRow {
+  return {
+    ...row,
+    key: `template:${template.id}:${row.key}`,
+    ...(root
+      ? {
+          label: `${template.title} template`,
+          kind: 'templateComponent' as const,
+        }
+      : {}),
+    sourcePageId: template.id,
+    sourcePageTitle: template.title,
+    ...(root ? { sourceRoot: true } : {}),
+    readOnly: true,
+    children: row.children.map((child) =>
+      markTemplateOwnership(child, template, false),
+    ),
+  }
+}
+
+function replaceFirstTemplateOutlet(
+  row: ComponentLayerRow,
+  content: ComponentLayerRow,
+): { row: ComponentLayerRow; replaced: boolean } {
+  if (row.moduleId === 'base.outlet') {
+    return { row: content, replaced: true }
+  }
+
+  const children: ComponentLayerRow[] = []
+  let replaced = false
+  for (const child of row.children) {
+    if (replaced) {
+      children.push(child)
+      continue
+    }
+    const result = replaceFirstTemplateOutlet(child, content)
+    children.push(result.row)
+    replaced = result.replaced
+  }
+  return {
+    row: children === row.children ? row : { ...row, children },
+    replaced,
+  }
 }

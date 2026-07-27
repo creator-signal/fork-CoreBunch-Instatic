@@ -29,6 +29,7 @@ import { Button } from '@ui/components/Button'
 import { pushToast } from '@ui/components/Toast'
 import { cn } from '@ui/cn'
 import { PlusIcon } from 'pixel-art-icons/icons/plus'
+import { ArrowRightIcon } from 'pixel-art-icons/icons/arrow-right'
 import type { PageTreeDropPosition } from '@core/page-tree'
 import type {
   ComponentLayerRow,
@@ -46,6 +47,7 @@ interface ComponentLayersTreeProps {
   projection: ComponentTreeProjection | null
   canInsert?: boolean
   canMove?: boolean
+  canOpenTemplateSource?: boolean
   onOpenComponentLibrary: () => void
 }
 
@@ -53,6 +55,7 @@ export function ComponentLayersTree({
   projection,
   canInsert = true,
   canMove = true,
+  canOpenTemplateSource = true,
   onOpenComponentLibrary,
 }: ComponentLayersTreeProps) {
   const page = useEditorStore(selectActiveCanvasPage)
@@ -105,6 +108,9 @@ export function ComponentLayersTree({
     useEditorStore.getState().selectNode(nodeId, undefined, {
       preservePropertiesPanelCollapse: isNarrowEditorChromeViewport(),
     })
+  }
+  const openTemplateSource = (pageId: string): void => {
+    useEditorStore.getState().openPageInCanvas(pageId)
   }
 
   const resolveDrop = (
@@ -225,6 +231,8 @@ export function ComponentLayersTree({
                         selectedNodeId={selectedNodeId}
                         onToggle={() => {}}
                         onSelect={selectNode}
+                        onOpenTemplateSource={openTemplateSource}
+                        canOpenTemplateSource={canOpenTemplateSource}
                         canMove={false}
                         dropState={null}
                         searchResult
@@ -240,6 +248,8 @@ export function ComponentLayersTree({
                     selectedNodeId={selectedNodeId}
                     expansionStore={expansionStore}
                     onSelect={selectNode}
+                    onOpenTemplateSource={openTemplateSource}
+                    canOpenTemplateSource={canOpenTemplateSource}
                     canMove={canMove}
                     dropState={dropState}
                   />
@@ -259,6 +269,8 @@ interface ComponentLayerBranchProps {
   selectedNodeId: string | null
   expansionStore: ComponentLayersExpansionStore
   onSelect: (nodeId: string) => void
+  onOpenTemplateSource: (pageId: string) => void
+  canOpenTemplateSource: boolean
   canMove: boolean
   dropState: ComponentLayerDropState | null
 }
@@ -276,6 +288,8 @@ function ComponentLayerBranch(props: ComponentLayerBranchProps) {
         depth={props.depth}
         selectedNodeId={props.selectedNodeId}
         onSelect={props.onSelect}
+        onOpenTemplateSource={props.onOpenTemplateSource}
+        canOpenTemplateSource={props.canOpenTemplateSource}
         canMove={props.canMove}
         dropState={props.dropState}
         expanded={expanded}
@@ -298,6 +312,8 @@ interface ComponentLayerTreeRowProps {
   depth: number
   selectedNodeId: string | null
   onSelect: (nodeId: string) => void
+  onOpenTemplateSource: (pageId: string) => void
+  canOpenTemplateSource: boolean
   expanded?: boolean
   onToggle: () => void
   canMove: boolean
@@ -312,11 +328,13 @@ function ComponentLayerTreeRow({
   expanded = true,
   onToggle,
   onSelect,
+  onOpenTemplateSource,
+  canOpenTemplateSource,
   canMove,
   dropState,
   searchResult = false,
 }: ComponentLayerTreeRowProps) {
-  const selected = selectedNodeId === row.nodeId
+  const selected = !row.sourcePageId && selectedNodeId === row.nodeId
   const hasChildren = !searchResult && row.children.length > 0
   const draggableEnabled =
     canMove &&
@@ -326,12 +344,12 @@ function ComponentLayerTreeRow({
     row.kind !== 'slot' &&
     Boolean(row.entryId)
   const draggable = useDraggable({
-    id: row.nodeId,
+    id: row.sourcePageId ? row.key : row.nodeId,
     disabled: !draggableEnabled,
   })
   const droppable = useDroppable({
-    id: row.nodeId,
-    disabled: !canMove || searchResult,
+    id: row.sourcePageId ? row.key : row.nodeId,
+    disabled: !canMove || searchResult || row.readOnly,
   })
   const setRowRef = (element: HTMLDivElement | null) => {
     draggable.setNodeRef(element)
@@ -359,17 +377,24 @@ function ComponentLayerTreeRow({
       aria-selected={selected}
       aria-expanded={hasChildren ? expanded : undefined}
       tabIndex={0}
-      data-node-id={row.nodeId}
+      data-node-id={row.sourcePageId ? undefined : row.nodeId}
+      data-source-node-id={row.sourcePageId ? row.nodeId : undefined}
       className={cn(dropClass)}
       {...(draggableEnabled ? draggable.attributes : {})}
       {...(draggableEnabled ? draggable.listeners : {})}
-      onClick={() => onSelect(row.nodeId)}
-      onMouseEnter={() => useEditorStore.getState().hoverNode(row.nodeId)}
-      onMouseLeave={() => useEditorStore.getState().hoverNode(null)}
+      onClick={() => {
+        if (!row.sourcePageId) onSelect(row.nodeId)
+      }}
+      onMouseEnter={() => {
+        if (!row.sourcePageId) useEditorStore.getState().hoverNode(row.nodeId)
+      }}
+      onMouseLeave={() => {
+        if (!row.sourcePageId) useEditorStore.getState().hoverNode(null)
+      }}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault()
-          onSelect(row.nodeId)
+          if (!row.sourcePageId) onSelect(row.nodeId)
         }
         if (event.key === 'ArrowRight' && hasChildren && !expanded) {
           event.preventDefault()
@@ -400,6 +425,22 @@ function ComponentLayerTreeRow({
         <TreeLabel>{row.label}</TreeLabel>
         <LayerBadge row={row} />
       </TreeLabelGroup>
+      {row.sourcePageId && row.sourceRoot && canOpenTemplateSource ? (
+        <Button
+          variant="ghost"
+          size="micro"
+          iconOnly
+          className={styles.sourceAction}
+          aria-label={`Open ${row.sourcePageTitle ?? 'owning'} template`}
+          tooltip={`Open ${row.sourcePageTitle ?? 'owning'} template`}
+          onClick={(event) => {
+            event.stopPropagation()
+            onOpenTemplateSource(row.sourcePageId!)
+          }}
+        >
+          <ArrowRightIcon size={10} aria-hidden="true" />
+        </Button>
+      ) : null}
     </TreeRow>
   )
 }
@@ -436,6 +477,8 @@ function LayerBadge({ row }: { row: ComponentLayerRow }) {
                 row.status === 'invalid-preset' ||
                 row.status === 'invalid-variant'
               ? 'warning'
+        : row.sourcePageId
+          ? 'template'
         : row.kind === 'slot'
           ? 'slot'
           : row.kind === 'freeform'

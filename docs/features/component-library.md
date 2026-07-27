@@ -165,6 +165,8 @@ Multiple search terms use AND semantics. Taxonomy filters cover category, implem
 
 The **Components** Layers view exposes this query through the add button beside component-layer search. The dialog presents category chips plus implementation, source and lifecycle filters. Selecting an entry shows its stable ID and version, author fields, slots, preset, dependency health, usage and accessibility notes.
 
+When the active page is wrapped by templates, Components Layers uses the same outer-to-inner template chain as the canvas and publisher. Template-owned rows retain their source template, are always read-only in the consuming page, and are spliced around the active page at the first outlet in exact page order. Authors with structural permission get an explicit action to open the owning template; component-only authors can inspect the hierarchy but cannot navigate into or manipulate the protected source.
+
 Primitive and Visual Component implementations can be inserted into the active page or Visual Component canvas. Primitive preset values merge over the module defaults. The store writes `catalogueInstance.entryId`, `entryVersion` and optional `presetId` on the backing node atomically with insertion, so undo removes both content and identity together. Pattern materialization and template-role placement remain disabled until their canonical factories exist; the picker does not synthesize partial content.
 
 ### Governed Properties

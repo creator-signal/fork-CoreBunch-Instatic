@@ -167,6 +167,16 @@ The **Components** Layers view exposes this query through the add button beside 
 
 Primitive and Visual Component implementations can be inserted into the active page or Visual Component canvas. Primitive preset values merge over the module defaults. The store writes `catalogueInstance.entryId`, `entryVersion` and optional `presetId` on the backing node atomically with insertion, so undo removes both content and identity together. Pattern materialization and template-role placement remain disabled until their canonical factories exist; the picker does not synthesize partial content.
 
+### Governed Properties
+
+The selected Layers projection governs the Properties surface:
+
+- **Components** renders `ComponentPropertiesView`. It shows only fields declared by the retained library definition, approved presets and variants, slot contracts, lifecycle state, usage guidance and accessibility guidance.
+- **HTML** retains the existing module settings, ClassPicker, CSS sections and raw Attributes surface.
+- Custom / Freeform content and instances whose retained definition is unavailable stay intact but are read-only in Components view. Advanced users receive an explicit route to HTML view.
+
+Governance is also enforced at the mutation seam. `updateComponentLibraryField()` rejects keys not declared by the instance's retained definition. `applyComponentLibraryOption()` resolves the approved values inside the store and applies those values plus the preset or variant identity in one undoable mutation; the UI cannot submit an arbitrary option payload.
+
 ## Versioning and migration
 
 Every persisted catalogue instance carries a semantic `entryVersion`. It may also carry `pinnedVersion` while an administrator deliberately retains an older definition, and `variantId` when an approved variant was applied.
@@ -215,6 +225,7 @@ Provider credentials, settings and secret values never enter the Component Libra
 - Do not use registration order as presentation order.
 - Do not auto-register every module as a governed authoring component.
 - Do not write catalogue identity after insertion in a second history transaction.
+- Do not route Components Properties controls through unrestricted module-prop patches.
 - Do not mutate live nodes while calculating a migration or impact preview.
 - Do not skip semantic versions or invent an implicit migration across an unregistered gap.
 - Do not include provider credentials or secret configuration in requirements or availability.

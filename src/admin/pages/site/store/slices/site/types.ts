@@ -234,6 +234,24 @@ export interface SiteSlice {
     index?: number,
     options?: InsertNodeOptions,
   ) => string | null
+  /**
+   * Update one field declared by the selected node's retained Component
+   * Library definition. Returns false for freeform, stale or undeclared keys.
+   */
+  updateComponentLibraryField: (
+    nodeId: string,
+    fieldKey: string,
+    value: unknown,
+  ) => boolean
+  /**
+   * Apply a declared preset or variant and stamp its identity atomically.
+   * Option values are resolved from the registry, never accepted from UI.
+   */
+  applyComponentLibraryOption: (
+    nodeId: string,
+    kind: 'preset' | 'variant',
+    optionId: string,
+  ) => boolean
   deleteNode: (nodeId: string) => void
   /** Multi-delete: removes every id and its descendants in one undo step. */
   deleteNodes: (nodeIds: string[]) => void

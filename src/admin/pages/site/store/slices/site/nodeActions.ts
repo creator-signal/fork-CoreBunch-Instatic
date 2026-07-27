@@ -12,6 +12,7 @@
 
 import { nanoid } from 'nanoid'
 import { registry } from '@core/module-engine'
+import { componentLibraryRegistry } from '@core/component-library'
 
 import {
   cloneScopedClassesForNodeMap,
@@ -45,6 +46,8 @@ type NodeActions = Pick<
   | 'insertNode'
   | 'insertComponentRef'
   | 'insertImportedNodes'
+  | 'updateComponentLibraryField'
+  | 'applyComponentLibraryOption'
   | 'deleteNode'
   | 'deleteNodes'
   | 'updateNodeProps'
@@ -149,6 +152,10 @@ function coalesceKeyForPatch(
   const keys = Object.keys(patch)
   if (keys.length !== 1) return undefined
   return { coalesceKey: `${scope}:${nodeId}:${keys[0]}` }
+}
+
+function componentLibraryDefinitionForInstance(entryId: string, version: string) {
+  return componentLibraryRegistry.getVersion(entryId, version)
 }
 
 export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
@@ -303,6 +310,33 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
 
       return inserted ? newNode.id : null
     },
+
+    updateComponentLibraryField: (nodeId, fieldKey, value) =>
+      mutateActiveTree((tree) => {
+        const node = tree.nodes[nodeId]
+        const metadata = node?.catalogueInstance
+        if (!node || !metadata) return false
+        const entry = componentLibraryDefinitionForInstance(metadata.entryId, metadata.entryVersion)
+        if (!entry?.fields.some((field) => field.key === fieldKey)) return false
+        node.props[fieldKey] = value
+        return true
+      }),
+
+    applyComponentLibraryOption: (nodeId, kind, optionId) =>
+      mutateActiveTree((tree) => {
+        const node = tree.nodes[nodeId]
+        const metadata = node?.catalogueInstance
+        if (!node || !metadata) return false
+        const entry = componentLibraryDefinitionForInstance(metadata.entryId, metadata.entryVersion)
+        if (!entry) return false
+        const options = kind === 'preset' ? entry.presets : entry.variants
+        const option = options.find((candidate) => candidate.id === optionId)
+        if (!option) return false
+        Object.assign(node.props, option.values)
+        if (kind === 'preset') metadata.presetId = optionId
+        else metadata.variantId = optionId
+        return true
+      }),
 
     deleteNode: (nodeId) => {
       const deleted = mutateActiveTree((tree) => {

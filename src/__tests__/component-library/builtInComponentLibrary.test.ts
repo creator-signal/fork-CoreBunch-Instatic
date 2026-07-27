@@ -32,6 +32,12 @@ describe('built-in Component Library', () => {
       if (presetId) {
         expect(entry.presets.some((preset) => preset.id === presetId)).toBe(true)
       }
+      for (const field of entry.fields) {
+        expect(
+          registry.get(entry.implementation.moduleId)?.schema[field.key],
+          `${entry.id} field ${field.key} must map to its canonical module schema`,
+        ).toBeTruthy()
+      }
     }
   })
 })

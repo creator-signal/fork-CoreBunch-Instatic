@@ -21,7 +21,9 @@
 import { useState } from 'react'
 import { EmptyState } from '@ui/components/EmptyState'
 import { useEditorPermissions } from '@site/editorPermissionsContext'
+import { useEditorStore } from '@site/store/store'
 import type { AnyModuleDefinition } from '@core/module-engine'
+import type { ComponentLibraryEntry } from '@core/component-library'
 import type { StyleRule, PageNode } from '@core/page-tree'
 import type { VisualComponent } from '@core/visualComponents'
 import type { ActiveDocument } from '../../store/slices/uiSlice'
@@ -35,6 +37,7 @@ import { ConvertToComponentButton } from './ConvertToComponentButton'
 import { MultiSelectionInspector } from './MultiSelectionInspector'
 import { MultiSelectorInspector } from './MultiSelectorInspector'
 import { SelectorInspector } from './SelectorInspector'
+import { ComponentPropertiesView } from './ComponentPropertiesView'
 import { canComponentizeNode } from '@site/componentization'
 import styles from './PropertiesPanel.module.css'
 
@@ -49,6 +52,8 @@ interface PropertiesPanelBodyProps {
   selectedNode: PageNode | null
   selectedNodeId: string | null
   definition: AnyModuleDefinition | null | undefined
+  componentLibraryEntry: ComponentLibraryEntry | undefined
+  latestComponentLibraryEntry: ComponentLibraryEntry | undefined
   activeDocument: ActiveDocument | null
   activeVc: VisualComponent | null
   activeClass: StyleRule | null
@@ -72,6 +77,8 @@ export function PropertiesPanelBody(props: PropertiesPanelBodyProps): React.Reac
     selectedNode,
     selectedNodeId,
     definition,
+    componentLibraryEntry,
+    latestComponentLibraryEntry,
     activeDocument,
     activeVc,
     activeClass,
@@ -81,7 +88,36 @@ export function PropertiesPanelBody(props: PropertiesPanelBodyProps): React.Reac
     onFocusClassPicker,
   } = props
   const permissions = useEditorPermissions()
+  const layersViewMode = useEditorStore((state) => state.layersViewMode)
   const [activeNodeView, setActiveNodeView] = useState<NodeInspectorView>('styles')
+
+  if (layersViewMode === 'components') {
+    if (isMultiSelect) {
+      return (
+        <EmptyState
+          variant="centered"
+          title="Select one governed component"
+          description="Bulk component configuration is not available yet."
+        />
+      )
+    }
+    if (!selectedNode || !definition) {
+      return (
+        <EmptyState
+          variant="centered"
+          title="Select a component on the canvas to view its approved properties."
+        />
+      )
+    }
+    return (
+      <ComponentPropertiesView
+        node={selectedNode}
+        definition={definition}
+        entry={componentLibraryEntry}
+        latestEntry={latestComponentLibraryEntry}
+      />
+    )
+  }
 
   // Selector multi-selection (Selectors panel checkboxes) takes priority — the
   // user explicitly built a bulk set and expects the bulk action surface.

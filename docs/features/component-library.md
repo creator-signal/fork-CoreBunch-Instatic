@@ -201,6 +201,25 @@ Freeform, missing and generated slot boundaries are not draggable; invalid
 targets render a rejected state and produce the policy reason without writing
 history. HTML Layers retains its existing independent drag-and-drop path.
 
+### Freeform conversion
+
+Custom / Freeform primitives are never rewritten automatically. Structural
+authors may open a conversion preview when
+`findComponentLibraryConversionCandidates()` finds a lossless match: the
+backing module must match, hidden implementation props must already equal
+module defaults or canonical preset values, and the node must not already have
+catalogue identity. The preview lists the selected definition, mapped author
+fields, retained child count and retained styling.
+
+Confirmation calls `convertFreeformPrimitiveToComponent()`, which revalidates
+the candidate inside the store and writes only `catalogueInstance` in one
+undoable mutation. Props, children, classes, inline styles and breakpoint
+overrides remain byte-for-byte unchanged; the publisher ignores authoring
+identity, so rendered output is identical. Ineligible nodes remain freeform and
+editable only through authorised HTML mode. Pattern and Visual Component
+conversion require their later structure/slot mapping workflows and are not
+silently approximated by this primitive path.
+
 ## Versioning and migration
 
 Every persisted catalogue instance carries a semantic `entryVersion`. It may also carry `pinnedVersion` while an administrator deliberately retains an older definition, and `variantId` when an approved variant was applied.

@@ -1,6 +1,9 @@
 import type { AnyModuleDefinition, PropertyControl } from '@core/module-engine'
 import {
+  componentLibraryRegistry,
+  findComponentLibraryConversionCandidates,
   resolveComponentLibraryInstanceStatus,
+  type ComponentLibraryConversionCandidate,
   type ComponentLibraryEntry,
 } from '@core/component-library'
 import type { PageNode } from '@core/page-tree'
@@ -9,8 +12,11 @@ import { useEditorStore } from '@site/store/store'
 import { PropertyControlRenderer } from '@site/property-controls/PropertyControlRenderer'
 import { Button } from '@ui/components/Button'
 import { EmptyState } from '@ui/components/EmptyState'
+import { Dialog } from '@ui/components/Dialog'
 import { Select } from '@ui/components/Select'
 import { TagPill } from '@ui/components/TagPill'
+import { pushToast } from '@ui/components/Toast'
+import { useState } from 'react'
 import styles from './ComponentPropertiesView.module.css'
 
 interface ComponentPropertiesViewProps {
@@ -30,24 +36,73 @@ export function ComponentPropertiesView({
   const setLayersViewMode = useEditorStore((state) => state.setLayersViewMode)
   const updateField = useEditorStore((state) => state.updateComponentLibraryField)
   const applyOption = useEditorStore((state) => state.applyComponentLibraryOption)
+  const convertPrimitive = useEditorStore(
+    (state) => state.convertFreeformPrimitiveToComponent,
+  )
   const metadata = node.catalogueInstance
+  const [conversionOpen, setConversionOpen] = useState(false)
+  const conversionCandidates = metadata
+    ? []
+    : findComponentLibraryConversionCandidates(
+        node,
+        componentLibraryRegistry.list(),
+        (moduleId) => moduleId === definition.id ? definition.defaults : undefined,
+      )
 
   if (!metadata || !entry) {
     return (
-      <div className={styles.locked}>
-        <EmptyState
-          variant="centered"
-          title={metadata ? 'Component definition unavailable' : 'Custom / Freeform content'}
-          description={metadata
-            ? `The retained definition for ${metadata.entryId}@${metadata.entryVersion} is not installed. This content remains intact and read-only in Components view.`
-            : 'This content has no governed Component Library mapping. Switch to HTML view to inspect its implementation or convert it through an approved workflow.'}
-          action={permissions.canEditStructure ? (
-            <Button variant="secondary" onClick={() => setLayersViewMode('html')}>
-              Open HTML view
-            </Button>
-          ) : undefined}
+      <>
+        <div className={styles.locked}>
+          <EmptyState
+            variant="centered"
+            title={metadata ? 'Component definition unavailable' : 'Custom / Freeform content'}
+            description={metadata
+              ? `The retained definition for ${metadata.entryId}@${metadata.entryVersion} is not installed. This content remains intact and read-only in Components view.`
+              : 'This content has no governed Component Library mapping. Switch to HTML view to inspect its implementation or convert it through an approved workflow.'}
+            action={permissions.canEditStructure ? (
+              <div className={styles.lockedActions}>
+                {conversionCandidates.length > 0 ? (
+                  <Button variant="primary" onClick={() => setConversionOpen(true)}>
+                    Preview conversion
+                  </Button>
+                ) : null}
+                <Button variant="secondary" onClick={() => setLayersViewMode('html')}>
+                  Open HTML view
+                </Button>
+              </div>
+            ) : undefined}
+          />
+        </div>
+        <ComponentConversionDialog
+          open={conversionOpen}
+          node={node}
+          candidates={conversionCandidates}
+          onClose={() => setConversionOpen(false)}
+          onConvert={(candidate) => {
+            const converted = convertPrimitive(
+              node.id,
+              candidate.entry.id,
+              candidate.presetId,
+            )
+            if (!converted) {
+              pushToast({
+                kind: 'error',
+                title: 'Conversion no longer eligible',
+                body: 'The node or catalogue definition changed. Review it and try again.',
+                location: 'component-library',
+              })
+              return
+            }
+            setConversionOpen(false)
+            pushToast({
+              kind: 'success',
+              title: `Converted to ${candidate.entry.name}`,
+              body: 'Props, children and styles were preserved. Undo restores the freeform state.',
+              location: 'component-library',
+            })
+          }}
         />
-      </div>
+      </>
     )
   }
 
@@ -180,6 +235,108 @@ export function ComponentPropertiesView({
       ) : null}
     </div>
   )
+}
+
+function ComponentConversionDialog({
+  open,
+  node,
+  candidates,
+  onClose,
+  onConvert,
+}: {
+  open: boolean
+  node: PageNode
+  candidates: readonly ComponentLibraryConversionCandidate[]
+  onClose: () => void
+  onConvert: (candidate: ComponentLibraryConversionCandidate) => void
+}) {
+  const [selectedKey, setSelectedKey] = useState('')
+  const selected = candidates.find((candidate) => candidateKey(candidate) === selectedKey) ??
+    candidates[0]
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title="Convert to governed component"
+      eyebrow="Lossless preview"
+      size="md"
+      footer={(
+        <>
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button
+            variant="primary"
+            disabled={!selected}
+            onClick={() => selected && onConvert(selected)}
+          >
+            Convert component
+          </Button>
+        </>
+      )}
+    >
+      {selected ? (
+        <div className={styles.conversionPreview}>
+          <label className={styles.conversionChoice}>
+            <span>Governed definition</span>
+            <Select
+              value={candidateKey(selected)}
+              options={candidates.map((candidate) => ({
+                value: candidateKey(candidate),
+                label: `${candidate.entry.name}${candidate.presetId ? ` · ${candidate.presetId}` : ''}`,
+              }))}
+              onChange={(event) => setSelectedKey(event.target.value)}
+            />
+          </label>
+          <div className={styles.notice}>
+            This conversion writes catalogue identity only. It does not change the
+            backing module, props, child order, classes, styles or rendered output.
+          </div>
+          <section className={styles.section}>
+            <h4>Author fields</h4>
+            {selected.fields.length > 0 ? (
+              <ul className={styles.conversionFields}>
+                {selected.fields.map((field) => (
+                  <li key={field.key}>
+                    <span>{field.label}</span>
+                    <span>{previewValue(field.value)}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : <p className={styles.empty}>No author fields are mapped.</p>}
+          </section>
+          <section className={styles.section}>
+            <h4>Preserved implementation</h4>
+            <p className={styles.empty}>
+              {selected.retainedChildCount} child
+              {selected.retainedChildCount === 1 ? '' : 'ren'} retained
+              {selected.retainsStyling ? '; existing classes and style overrides retained' : ''}
+              . Node {node.id} remains the backing identity.
+            </p>
+          </section>
+        </div>
+      ) : (
+        <EmptyState
+          plain
+          title="No lossless conversion is available"
+          description="The implementation no longer matches an installed catalogue definition."
+        />
+      )}
+    </Dialog>
+  )
+}
+
+function candidateKey(candidate: ComponentLibraryConversionCandidate): string {
+  return `${candidate.entry.id}:${candidate.presetId ?? ''}`
+}
+
+function previewValue(value: unknown): string {
+  if (typeof value === 'string') return value || 'Empty'
+  if (value === undefined) return 'Not set'
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return String(value)
+  }
 }
 
 interface LibraryOption {

@@ -68,6 +68,17 @@ export type {
 } from './placement'
 
 export {
+  analyseComponentLibraryPrimitiveConversion,
+  findComponentLibraryConversionCandidates,
+} from './conversion'
+
+export type {
+  ComponentLibraryConversionAnalysis,
+  ComponentLibraryConversionCandidate,
+  ComponentLibraryConversionField,
+} from './conversion'
+
+export {
   ComponentLibraryMigrationRegistry,
   componentLibraryMigrationRegistry,
   findComponentLibraryUsages,

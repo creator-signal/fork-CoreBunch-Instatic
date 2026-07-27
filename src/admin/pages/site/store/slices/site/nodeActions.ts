@@ -12,7 +12,10 @@
 
 import { nanoid } from 'nanoid'
 import { registry } from '@core/module-engine'
-import { componentLibraryRegistry } from '@core/component-library'
+import {
+  analyseComponentLibraryPrimitiveConversion,
+  componentLibraryRegistry,
+} from '@core/component-library'
 
 import {
   cloneScopedClassesForNodeMap,
@@ -48,6 +51,7 @@ type NodeActions = Pick<
   | 'insertImportedNodes'
   | 'updateComponentLibraryField'
   | 'applyComponentLibraryOption'
+  | 'convertFreeformPrimitiveToComponent'
   | 'deleteNode'
   | 'deleteNodes'
   | 'updateNodeProps'
@@ -335,6 +339,23 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
         Object.assign(node.props, option.values)
         if (kind === 'preset') metadata.presetId = optionId
         else metadata.variantId = optionId
+        return true
+      }),
+
+    convertFreeformPrimitiveToComponent: (nodeId, entryId, presetId) =>
+      mutateActiveTree((tree) => {
+        const node = tree.nodes[nodeId]
+        const entry = componentLibraryRegistry.get(entryId)
+        const definition = node ? registry.get(node.moduleId) : undefined
+        if (!node || !entry || !definition) return false
+        const analysis = analyseComponentLibraryPrimitiveConversion(
+          node,
+          entry,
+          definition.defaults,
+          presetId,
+        )
+        if (!analysis.eligible) return false
+        node.catalogueInstance = analysis.candidate.metadata
         return true
       }),
 

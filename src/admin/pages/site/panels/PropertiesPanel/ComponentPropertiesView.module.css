@@ -15,6 +15,56 @@
     padding: var(--space-2xl);
 }
 
+.lockedActions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-s);
+}
+
+.conversionPreview {
+    display: grid;
+    gap: var(--space-l);
+}
+
+.conversionChoice {
+    display: grid;
+    gap: var(--space-xs);
+    color: var(--text-subtle);
+    font-size: var(--text-xs);
+    font-weight: 700;
+}
+
+.conversionFields {
+    display: grid;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.conversionFields li {
+    display: grid;
+    grid-template-columns: minmax(100px, 0.4fr) minmax(0, 1fr);
+    gap: var(--space-s);
+    padding: var(--space-s);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface-2);
+    font-size: var(--text-xs);
+}
+
+.conversionFields li span:first-child {
+    color: var(--text);
+    font-weight: 700;
+}
+
+.conversionFields li span:last-child {
+    overflow: hidden;
+    color: var(--text-subtle);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .header {
     display: flex;
     align-items: flex-start;

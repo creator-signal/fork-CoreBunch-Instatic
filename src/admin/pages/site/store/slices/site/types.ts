@@ -252,6 +252,16 @@ export interface SiteSlice {
     kind: 'preset' | 'variant',
     optionId: string,
   ) => boolean
+  /**
+   * Losslessly stamp an eligible freeform primitive with catalogue identity.
+   * The store revalidates the entry/default contract and never accepts raw
+   * metadata from the UI.
+   */
+  convertFreeformPrimitiveToComponent: (
+    nodeId: string,
+    entryId: string,
+    presetId?: string,
+  ) => boolean
   deleteNode: (nodeId: string) => void
   /** Multi-delete: removes every id and its descendants in one undo step. */
   deleteNodes: (nodeIds: string[]) => void

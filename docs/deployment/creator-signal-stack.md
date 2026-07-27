@@ -42,6 +42,11 @@ Production uses mounted files for sensitive values:
 | `MINIO_PUBLIC_BASE_URL` | Same-origin public media edge, normally `/media` |
 | `MINIO_REGION` | S3 signing region, normally `us-east-1` |
 | `MINIO_PREFIX` | Optional stable prefix inside the site bucket |
+| `INSTATIC_ADMIN_GLITCHTIP_DSN_FILE` | Mounted Admin-browser GlitchTip DSN; separate project from the public site and server |
+| `INSTATIC_SERVER_GLITCHTIP_DSN_FILE` | Mounted Bun-server GlitchTip DSN |
+| `INSTATIC_ENVIRONMENT` | Stable deployment environment label |
+| `INSTATIC_RELEASE` | Immutable image/source commit identifier |
+| `INSTATIC_PUBLIC_CONNECT_ORIGINS` | Optional browser-only collector origins added to published-page CSP; never grants plugin server-network access |
 
 When all required MinIO values are present, startup verifies the bucket and
 fails closed if it cannot be reached. The host then registers and elects

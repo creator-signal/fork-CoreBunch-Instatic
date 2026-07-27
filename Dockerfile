@@ -41,6 +41,7 @@ ENV NODE_ENV=production
 ENV PORT=3001
 ENV STATIC_DIR=/app/dist
 ENV UPLOADS_DIR=/app/uploads
+ENV INSTATIC_BUILD_RELEASE="${INSTATIC_REVISION}"
 
 COPY --from=production-deps --chown=bun:bun /app/node_modules ./node_modules
 COPY --from=build --chown=bun:bun /app/dist ./dist

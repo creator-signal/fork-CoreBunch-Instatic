@@ -22,6 +22,7 @@ import { registry } from '@core/module-engine'
 import type { CssBundleFile, SiteCssBundleId } from '@core/publisher'
 import { buildPublishedSiteCssBundle } from './publish/siteCssBundle'
 import { mediaStorageRegistry } from '@core/plugins/mediaStorageRegistry'
+import type { MonitoringTargetConfig } from './config'
 
 const VITE_DEV_URL = 'http://localhost:5173'
 
@@ -35,6 +36,7 @@ interface ServerRuntime {
    * storage dashboard widget).
    */
   databaseUrl?: string
+  adminMonitoring?: MonitoringTargetConfig | null
 }
 
 /**
@@ -436,7 +438,11 @@ async function tryServeAdminApp(
   if (!isAdminPath) return null
 
   if (runtime.staticDir) {
-    const adminApp = await serveAdminApp(runtime.staticDir, req)
+    const adminApp = await serveAdminApp(
+      runtime.staticDir,
+      req,
+      runtime.adminMonitoring,
+    )
     if (adminApp) return adminApp
   }
   // Admin SPA isn't served from this port (dev mode, or production missing a

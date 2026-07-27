@@ -7,6 +7,10 @@ import { AdminContextMenuGuard } from './shared/AdminContextMenuGuard'
 import { AdminZoomGuard } from './shared/AdminZoomGuard'
 import { ErrorBoundary, flattenErrorChain, logErrorChain } from '@ui/components/ErrorBoundary'
 import { ToastProvider, pushToast } from '@ui/components/Toast'
+import {
+  captureAdminException,
+  initializeAdminMonitoring,
+} from './monitoringBridge'
 import '../styles/globals.css'
 
 // `installPluginRuntime()` used to be called here, eagerly. That dragged
@@ -24,6 +28,7 @@ import '../styles/globals.css'
 
 const rootElement = document.getElementById('root')
 if (!rootElement) throw new Error('Root element #root not found')
+initializeAdminMonitoring()
 
 // React 19 root-level error callbacks — single telemetry funnel that fires
 // even for errors caught by an <ErrorBoundary>. Logs follow the project's
@@ -44,6 +49,7 @@ function handleRootError(
 ): void {
   const chain = flattenErrorChain(error)
   logErrorChain(prefix, chain, info.componentStack ?? null)
+  captureAdminException(error, prefix)
   if (toastTitle) {
     const head = chain[0]
     pushToast({

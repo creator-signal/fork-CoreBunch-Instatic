@@ -32,6 +32,7 @@ import { listInstalledPlugins, type InstalledPluginResult } from '../repositorie
 import { mediaStorageRegistry } from '@core/plugins/mediaStorageRegistry'
 import { listElectedAdapters } from '../repositories/mediaStorageAdapters'
 import { addCspSources, rewriteCspMeta, setCspDirective } from '@core/publisher'
+import { frontendConnectOrigins } from './frontendConnectOrigins'
 import type {
   FrontendAsset,
   FrontendAssetPlacement,
@@ -92,6 +93,11 @@ export interface FrontendInjections {
    * reaches the hosts the manifest declared.
    */
   networkAllowedHosts: string[]
+  /**
+   * Operator-approved browser-only origins. Unlike `networkAllowedHosts`,
+   * these do not grant a plugin any server-side outbound capability.
+   */
+  publicConnectOrigins: string[]
   /**
    * CSP origins declared by elected media storage adapters. Appended to
    * `img-src` / `media-src` / `connect-src` so the browser can load assets
@@ -164,6 +170,7 @@ export async function collectFrontendInjections(db: DbClient): Promise<FrontendI
     hasInlineStyle,
     hasExternalScript,
     networkAllowedHosts: [...networkAllowedHostsSet].sort(),
+    publicConnectOrigins: [...frontendConnectOrigins()].sort(),
     mediaCspOrigins: await collectMediaAdapterCspOrigins(db),
   }
 }
@@ -441,8 +448,14 @@ function relaxCspForPlan(html: string, plan: FrontendInjections, hasTags: boolea
 
       // Connect: union per-plugin `networkAllowedHosts`, plus the standard
       // `https:` for plugin frontend code that lazily-loads images.
+      if (plan.networkAllowedHosts.length > 0 || plan.publicConnectOrigins.length > 0) {
+        addCspSources(csp, 'connect-src', [
+          "'self'",
+          ...toCspHostSources(plan.networkAllowedHosts),
+          ...plan.publicConnectOrigins,
+        ])
+      }
       if (plan.networkAllowedHosts.length > 0) {
-        addCspSources(csp, 'connect-src', ["'self'", ...toCspHostSources(plan.networkAllowedHosts)])
         addCspSources(csp, 'img-src', ["'self'", 'data:', 'https:'])
       }
     }

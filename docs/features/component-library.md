@@ -20,6 +20,9 @@ The registry is metadata over Instatic's existing modules, Visual Components, pa
   blockers.
 - The built-in catalogue is explicit in `src/modules/base/componentLibrary.ts`; it is not inferred from every registered HTML module.
 - Components view opens a searchable, filterable catalogue and stamps library identity on the inserted backing node in the same undo transaction.
+- Add to canvas lists governed non-form entries under Components, groups
+  Structure entries as Layout, and gives all form entries their own Forms
+  section.
 - The registry does not own page trees, rendering, component instances or plugin lifecycle.
 
 ## Architecture
@@ -259,9 +262,15 @@ The selected Layers projection governs the Properties surface:
 
 - **Components** renders `ComponentPropertiesView`. It shows only fields declared by the retained library definition, approved presets and variants, slot contracts, lifecycle state, usage guidance and accessibility guidance.
 - **HTML** retains the existing module settings, ClassPicker, CSS sections and raw Attributes surface.
-- Custom / Freeform content and instances whose retained definition is unavailable stay intact but are read-only in Components view. Advanced users receive an explicit route to HTML view.
+- Unmapped content is labelled **Component Block** in Components view. It and instances whose retained definition is unavailable stay intact but are read-only there; advanced users receive an explicit route to HTML view.
 
 Governance is also enforced at the mutation seam. `updateComponentLibraryField()` rejects keys not declared by the instance's retained definition. `applyComponentLibraryOption()` resolves the approved values inside the store and applies those values plus the preset or variant identity in one undoable mutation; the UI cannot submit an arbitrary option payload.
+
+The first focused acceptance starter is
+[Plain Text component](plain-text-component.md). Its six pages retain real
+catalogue identity so insertion, Components projection, approved properties,
+semantics, composition and publisher fidelity can be reviewed in one clean
+installation.
 
 The selected instance also exposes its accessibility contract and any current
 automated diagnostics. Diagnostics carry the backing node, rule and
@@ -296,7 +305,7 @@ history. HTML Layers retains its existing independent drag-and-drop path.
 
 ### Freeform conversion
 
-Custom / Freeform primitives are never rewritten automatically. Structural
+Unmapped Component Block primitives are never rewritten automatically. Structural
 authors may open a conversion preview when
 `findComponentLibraryConversionCandidates()` finds a lossless match: the
 backing module must match, hidden implementation props must already equal

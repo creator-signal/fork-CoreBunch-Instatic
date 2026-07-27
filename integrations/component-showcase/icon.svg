@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Instatic Component Showcase</title>
+  <rect width="64" height="64" rx="14" fill="#16181d"/>
+  <rect x="10" y="11" width="19" height="17" rx="4" fill="#8ef0ce"/>
+  <rect x="35" y="11" width="19" height="17" rx="4" fill="#b8a7ff"/>
+  <rect x="10" y="34" width="19" height="19" rx="4" fill="#8ccfff"/>
+  <path d="M44.5 35v17M36 43.5h17" stroke="#ffbf8e" stroke-width="6" stroke-linecap="round"/>
+</svg>

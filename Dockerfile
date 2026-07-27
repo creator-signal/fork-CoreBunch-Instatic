@@ -13,6 +13,7 @@ RUN bun install --frozen-lockfile
 COPY . .
 RUN bun run build
 RUN bun run instatic-plugin build integrations/creator-signal
+RUN bun run instatic-plugin build integrations/component-showcase
 
 FROM oven/bun:1.3.11 AS production-deps
 WORKDIR /app
@@ -49,6 +50,7 @@ COPY --chown=bun:bun tsconfig*.json ./
 COPY --chown=bun:bun server ./server
 COPY --chown=bun:bun src ./src
 COPY --from=build --chown=bun:bun /app/integrations/creator-signal.plugin.zip /app/starter-plugins/creator-signal.plugin.zip
+COPY --from=build --chown=bun:bun /app/integrations/component-showcase.plugin.zip /app/starter-plugins/component-showcase.plugin.zip
 
 RUN mkdir -p /app/uploads /app/data && chown -R bun:bun /app
 

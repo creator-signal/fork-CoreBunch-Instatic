@@ -143,6 +143,7 @@ Three categories, three voices:
 | [features/publisher.md](features/publisher.md)                   | The page-tree-to-HTML/CSS renderer + server-side publishing wrappers |
 | [features/visual-components.md](features/visual-components.md)   | VCs, slots, params, instantiation, recursion guard                   |
 | [features/component-library.md](features/component-library.md)   | Governed catalogue metadata, registry, search and dependency health |
+| [features/plain-text-component.md](features/plain-text-component.md) | Plain Text governed properties, sample pages and isolated acceptance |
 | [features/content-storage.md](features/content-storage.md)       | `data_tables` + `data_rows` — the universal content store           |
 | [features/content-workspace.md](features/content-workspace.md)   | Content workspace UI: collections, entries, body editor, settings panel |
 | [features/data-workspace.md](features/data-workspace.md)         | Data workspace UI: DataInspector, field management, DataGrid        |

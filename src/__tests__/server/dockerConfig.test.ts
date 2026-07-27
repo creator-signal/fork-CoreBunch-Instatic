@@ -37,6 +37,17 @@ describe('self-host docker config', () => {
     expect(dockerfile).toContain('COPY --chown=bun:bun tsconfig*.json ./')
   })
 
+  it('builds and bundles the isolated Plain Text showcase starter', () => {
+    const dockerfile = readFileSync('Dockerfile', 'utf8')
+
+    expect(dockerfile).toContain(
+      'RUN bun run instatic-plugin build integrations/component-showcase',
+    )
+    expect(dockerfile).toContain(
+      '/app/starter-plugins/component-showcase.plugin.zip',
+    )
+  })
+
   it('installs the runtime script bundler in production dependencies', () => {
     const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as {
       dependencies?: Record<string, string>
@@ -96,5 +107,16 @@ describe('self-host docker config', () => {
     expect(env).toContain('TRUSTED_PROXY_CIDRS=')
     expect(compose).toContain('INSTATIC_SECRET_KEY:')
     expect(compose).toContain('TRUSTED_PROXY_CIDRS:')
+  })
+
+  it('passes optional clean-site bootstrap settings and accepts an ephemeral host port', () => {
+    const compose = readFileSync('compose.prod.yml', 'utf8')
+
+    expect(compose).toContain('"${HOST_PORT:-3001}:3001"')
+    expect(compose).toContain('INSTATIC_BOOTSTRAP_SITE_NAME:')
+    expect(compose).toContain('INSTATIC_BOOTSTRAP_OWNER_EMAIL:')
+    expect(compose).toContain('INSTATIC_BOOTSTRAP_OWNER_PASSWORD:')
+    expect(compose).toContain('INSTATIC_BOOTSTRAP_OWNER_PASSWORD_FILE:')
+    expect(compose).toContain('INSTATIC_BOOTSTRAP_PLUGIN_PACKAGE:')
   })
 })

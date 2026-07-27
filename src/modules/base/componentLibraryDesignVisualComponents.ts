@@ -4,7 +4,6 @@ import {
   type VisualComponent,
 } from '@core/visual-components-schema'
 import { ComponentFrameModule } from './componentFrame'
-import { IconModule } from './icon'
 import { ImageModule } from './image'
 import { NavigationListModule } from './navigationList'
 import { RichTextModule } from './richText'
@@ -13,7 +12,6 @@ import { TextModule } from './text'
 import {
   accessibleNameCheck,
   behaviorCheck,
-  primitiveEntry,
   visualComponentEntry,
 } from './componentLibraryDefinitions'
 import {
@@ -273,31 +271,6 @@ const navigationItemSlot: ComponentLibraryEntry['slots'][number] = {
 
 export const BUILT_IN_DESIGN_COMPONENT_LIBRARY_ENTRIES:
 readonly ComponentLibraryEntry[] = [
-  primitiveEntry({
-    id: 'base.icon',
-    name: 'Icon',
-    description: 'An approved symbolic icon with controlled semantics and size.',
-    category: 'Design',
-    icon: 'star-solid',
-    moduleId: IconModule.id,
-    tags: ['icon', 'symbol', 'design', 'status'],
-    fields: [
-      { key: 'name', label: 'Icon', type: 'select', required: true },
-      { key: 'label', label: 'Accessible label', type: 'text', required: false },
-      { key: 'decorative', label: 'Decorative', type: 'boolean', required: false },
-      { key: 'size', label: 'Size', type: 'select', required: true },
-    ],
-    accessibilityChecks: [
-      behaviorCheck(
-        'a11y.accessible-name',
-        'naming',
-        'Meaningful icons expose a text alternative and decorative icons stay silent.',
-        'Turn off Decorative and supply a short label when the symbol adds meaning.',
-      ),
-    ],
-    usage: 'Use only an approved symbol; pair unfamiliar icons with visible text.',
-    accessibility: 'Decorative icons are hidden. Meaningful icons require a concise label.',
-  }),
   visualComponentEntry({
     id: 'base.badge',
     name: 'Badge',

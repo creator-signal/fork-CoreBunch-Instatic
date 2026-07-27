@@ -18,8 +18,12 @@ import { BUILT_IN_INTERACTIVE_COMPONENT_LIBRARY_ENTRIES } from './componentLibra
 import { BUILT_IN_PATTERN_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryPatterns'
 import { BUILT_IN_VISUAL_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryVisualComponents'
 import { BUILT_IN_DESIGN_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryDesignVisualComponents'
+import { BUILT_IN_CAPABILITY_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryCapabilityEntries'
+import { BUILT_IN_TEMPLATE_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryTemplateComponents'
+import { BUILT_IN_CANONICAL_VISUAL_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryCanonicalVisualComponents'
 
 export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[] = [
+  ...BUILT_IN_TEMPLATE_COMPONENT_LIBRARY_ENTRIES,
   primitiveEntry({
     id: 'base.section',
     name: 'Section',
@@ -125,24 +129,6 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     accessibilityChecks: [accessibleNameCheck('label')],
     usage: 'Use for source code, command output or any content where whitespace is meaningful.',
     accessibility: 'Name the example and enable wrapping when horizontal scrolling would make it difficult to read.',
-  }),
-  primitiveEntry({
-    id: 'base.table',
-    name: 'Table',
-    description: 'A captioned semantic table for genuinely tabular editorial data.',
-    category: 'Content',
-    icon: 'list-box-solid',
-    moduleId: 'base.table',
-    tags: ['table', 'data', 'rows', 'columns'],
-    fields: [
-      { key: 'caption', label: 'Caption', type: 'text', required: true },
-      { key: 'columns', label: 'Column headings', type: 'text', required: true },
-      { key: 'rows', label: 'Rows', type: 'text', required: true },
-      { key: 'firstColumnHeader', label: 'First cell is a row heading', type: 'boolean', required: false },
-    ],
-    accessibilityChecks: [accessibleNameCheck('caption')],
-    usage: 'Use only when row and column relationships are meaningful; separate cells with a pipe character.',
-    accessibility: 'Provide a specific caption and mark the first column as row headings when it identifies each record.',
   }),
   primitiveEntry({
     id: 'base.image',
@@ -265,8 +251,8 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     accessibility: 'Pair results with a labelled GET search form whose field name matches the configured query parameter.',
   }),
   primitiveEntry({
-    id: 'base.list',
-    name: 'List',
+    id: 'base.semantic-list',
+    name: 'Simple List',
     description: 'An ordered or unordered semantic list.',
     category: 'Typography',
     icon: 'list-box',
@@ -278,34 +264,6 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     ],
     usage: 'Use for a sequence or group of related short items.',
     accessibility: 'Use an ordered list when item order carries meaning.',
-  }),
-  primitiveEntry({
-    id: 'base.media',
-    name: 'Video',
-    description: 'Accessible self-hosted video from the Media Library.',
-    category: 'Media',
-    icon: 'video',
-    moduleId: 'base.video',
-    tags: ['video', 'media', 'hosted'],
-    fields: [
-      { key: 'videoUrl', label: 'Video', type: 'media', required: true },
-      { key: 'poster', label: 'Poster image', type: 'image', required: false },
-      { key: 'title', label: 'Accessible title', type: 'text', required: true },
-      { key: 'controls', label: 'Show controls', type: 'boolean', required: false },
-      { key: 'autoplay', label: 'Autoplay', type: 'boolean', required: false, advanced: true },
-    ],
-    accessibilityChecks: [
-      accessibleNameCheck('title'),
-      accessibilityCheck(
-        'a11y.motion-control',
-        'motion',
-        'manual',
-        'Autoplay and motion behavior require user control.',
-        'Keep controls available and review reduced-motion and autoplay behavior.',
-      ),
-    ],
-    usage: 'Use for a video asset hosted by the site. Use YouTube Embed for provider video.',
-    accessibility: 'Provide an accurate title, captions where needed and user controls.',
   }),
   primitiveEntry({
     id: 'base.audio',
@@ -336,33 +294,6 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     ],
     usage: 'Use for a site-hosted or HTTPS recording with native playback controls.',
     accessibility: 'Provide a specific title and a transcript for spoken information.',
-  }),
-  primitiveEntry({
-    id: 'base.pdf-viewer',
-    name: 'PDF Viewer',
-    description: 'An embedded PDF with a browser fallback and direct download link.',
-    category: 'Media',
-    icon: 'file-text-solid',
-    moduleId: 'base.pdf-viewer',
-    tags: ['pdf', 'document', 'viewer', 'download'],
-    fields: [
-      { key: 'source', label: 'PDF file', type: 'url', required: true },
-      { key: 'title', label: 'Document title', type: 'text', required: true },
-      { key: 'fallbackText', label: 'Fallback message', type: 'text', required: true },
-      { key: 'downloadLabel', label: 'Download link label', type: 'text', required: true },
-      { key: 'height', label: 'Viewer height', type: 'select', required: true },
-    ],
-    accessibilityChecks: [
-      accessibleNameCheck('title'),
-      behaviorCheck(
-        'a11y.no-javascript-fallback',
-        'media',
-        'The PDF remains available through fallback and direct-download links.',
-        'Keep the document title and download label specific.',
-      ),
-    ],
-    usage: 'Use only when an inline preview helps; also provide equivalent accessible page content.',
-    accessibility: 'Name the document and ensure the PDF itself is tagged and accessible.',
   }),
   primitiveEntry({
     id: 'base.youtube-embed',
@@ -437,44 +368,6 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     accessibility: 'Use a title that identifies the location and provide the address in ordinary page text.',
   }),
   primitiveEntry({
-    id: 'base.tabs',
-    name: 'Tabs',
-    description: 'A labelled set of progressively enhanced content panels.',
-    category: 'Interactive',
-    icon: 'layout-solid',
-    moduleId: 'base.tabs',
-    tags: ['tabs', 'panels', 'interactive', 'form'],
-    fields: [
-      { key: 'label', label: 'Accessible label', type: 'text', required: true },
-      { key: 'orientation', label: 'Orientation', type: 'select', required: true },
-      { key: 'activation', label: 'Keyboard activation', type: 'select', required: true },
-    ],
-    allowedChildEntryIds: ['base.tab-panel'],
-    accessibilityChecks: [
-      accessibleNameCheck('label'),
-      behaviorCheck(
-        'a11y.keyboard-contract',
-        'keyboard',
-        'Tabs require Arrow, Home, End, Enter and Space behavior appropriate to activation mode.',
-        'Run the tab runtime keyboard behavior suite after implementation changes.',
-      ),
-      behaviorCheck(
-        'a11y.focus-contract',
-        'focus',
-        'Tabs require roving focus and a visible active panel.',
-        'Verify selected state, focus order and validation-driven panel activation.',
-      ),
-      behaviorCheck(
-        'a11y.no-javascript-fallback',
-        'semantic',
-        'Every tab panel must remain available without JavaScript.',
-        'Verify the server-rendered output leaves all panels visible.',
-      ),
-    ],
-    usage: 'Organize related peer sections when visitors benefit from switching between them.',
-    accessibility: 'Arrow, Home and End keys move through tabs; manual activation also uses Enter or Space.',
-  }),
-  primitiveEntry({
     id: 'base.tab-panel',
     name: 'Tab Panel',
     description: 'One labelled panel inside Tabs.',
@@ -492,36 +385,6 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     accessibilityChecks: [accessibleNameCheck('label')],
     usage: 'Add one labelled content region to Tabs.',
     accessibility: 'Use a short unique label; all panels remain visible when JavaScript is unavailable.',
-  }),
-  primitiveEntry({
-    id: 'base.accordion',
-    name: 'Accordion',
-    description: 'A labelled group of native disclosure sections.',
-    category: 'Interactive',
-    icon: 'list-box-solid',
-    moduleId: 'base.accordion',
-    tags: ['accordion', 'disclosure', 'interactive', 'form'],
-    fields: [
-      { key: 'label', label: 'Accessible label', type: 'text', required: true },
-    ],
-    allowedChildEntryIds: ['base.accordion-item'],
-    accessibilityChecks: [
-      accessibleNameCheck('label'),
-      behaviorCheck(
-        'a11y.keyboard-contract',
-        'keyboard',
-        'Accordion items must retain native keyboard-operable disclosure behavior.',
-        'Verify the published details and summary elements remain native controls.',
-      ),
-      behaviorCheck(
-        'a11y.no-javascript-fallback',
-        'semantic',
-        'Accordion content must remain operable without JavaScript.',
-        'Verify native details and summary markup in published output.',
-      ),
-    ],
-    usage: 'Organize sections that visitors can expand independently.',
-    accessibility: 'Uses native details and summary behavior with a complete no-JavaScript fallback.',
   }),
   primitiveEntry({
     id: 'base.accordion-item',
@@ -547,6 +410,8 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
   ...BUILT_IN_FORM_COMPONENT_LIBRARY_ENTRIES,
   ...BUILT_IN_FORM_PATTERN_COMPONENT_LIBRARY_ENTRIES,
   ...BUILT_IN_FORM_VISUAL_COMPONENT_LIBRARY_ENTRIES,
+  ...BUILT_IN_CAPABILITY_COMPONENT_LIBRARY_ENTRIES,
+  ...BUILT_IN_CANONICAL_VISUAL_COMPONENT_LIBRARY_ENTRIES,
 ]
 
 export function registerBuiltInComponentLibraryEntries(): void {

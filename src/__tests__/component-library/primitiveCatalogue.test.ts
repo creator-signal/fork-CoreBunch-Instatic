@@ -8,7 +8,7 @@ import { BUILT_IN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibra
 import '../matchers'
 
 describe('governed editorial primitives', () => {
-  it('registers rich text, code and table through canonical modules', () => {
+  it('registers rich text and code as primitives and Table as a governed definition', () => {
     const byId = new Map(
       BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [entry.id, entry]),
     )
@@ -22,8 +22,8 @@ describe('governed editorial primitives', () => {
       moduleId: 'base.code-block',
     })
     expect(byId.get('base.table')?.implementation).toEqual({
-      type: 'primitive',
-      moduleId: 'base.table',
+      type: 'visual-component',
+      componentId: 'base.vc.table',
     })
   })
 

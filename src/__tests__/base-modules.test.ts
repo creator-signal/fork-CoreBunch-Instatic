@@ -59,6 +59,8 @@ import { AudioModule } from '@modules/base/audio'
 import { PdfViewerModule } from '@modules/base/pdfViewer'
 import { IconModule } from '@modules/base/icon'
 import { NavigationListModule } from '@modules/base/navigationList'
+import { SeparatorModule } from '@modules/base/separator'
+import { MediaDisplayModule } from '@modules/base/mediaDisplay'
 
 // ---------------------------------------------------------------------------
 // Run the full conformance suite for every canonical base module.
@@ -93,6 +95,21 @@ runModuleConformanceSuite(AudioModule)
 runModuleConformanceSuite(PdfViewerModule)
 runModuleConformanceSuite(IconModule)
 runModuleConformanceSuite(NavigationListModule)
+runModuleConformanceSuite(SeparatorModule)
+runModuleConformanceSuite(MediaDisplayModule)
+
+describe('base.separator — semantic thematic break', () => {
+  it('publishes a native horizontal rule with token-facing controls', () => {
+    expect(SeparatorModule.render({
+      style: 'dashed',
+      width: 'wide',
+      colorToken: 'border<strong>',
+      spacing: 'spacious',
+    }, []).html).toBe(
+      '<hr data-instatic-separator-style="dashed" data-instatic-separator-width="wide" data-instatic-separator-color="border&lt;strong&gt;" data-instatic-separator-spacing="spacious">',
+    )
+  })
+})
 
 describe('base module registration', () => {
   it('only imports available production base modules', async () => {
@@ -1129,9 +1146,12 @@ describe('base.svg — render() specifics', () => {
 // ---------------------------------------------------------------------------
 
 describe('base.video — render() specifics', () => {
-  it('exposes the v4 schema (single videoUrl, playback, poster, perf hints, title, noRelatedVideos)', () => {
+  it('exposes one video source plus accessible caption controls', () => {
     expect(Object.keys(VideoModule.schema).sort()).toEqual([
       'autoplay',
+      'captionsLabel',
+      'captionsLanguage',
+      'captionsUrl',
       'controls',
       'loop',
       'muted',
@@ -1142,6 +1162,18 @@ describe('base.video — render() specifics', () => {
       'title',
       'videoUrl',
     ])
+  })
+
+  it('publishes a captions track for hosted video', () => {
+    const { html } = renderModule(VideoModule, {
+      videoUrl: '/uploads/demo.mp4',
+      captionsUrl: '/uploads/demo.vtt',
+      captionsLanguage: 'en-AU',
+      captionsLabel: 'English captions',
+    })
+    expect(html).toContain(
+      '<track kind="captions" src="/uploads/demo.vtt" srclang="en-AU" label="English captions" default>',
+    )
   })
 
   it('exposes videoUrl as a media-kind:video control with no condition gate', () => {

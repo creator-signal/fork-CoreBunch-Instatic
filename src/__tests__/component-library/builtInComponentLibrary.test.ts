@@ -118,10 +118,14 @@ describe('built-in Component Library', () => {
         expect(entry.presets.some((preset) => preset.id === presetId)).toBe(true)
       }
       for (const field of entry.fields) {
+        const definition = registry.get(implementation.moduleId)
         expect(
-          registry.get(implementation.moduleId)?.schema[field.key],
+          definition?.schema[field.key] ??
+            (Object.hasOwn(definition?.defaults ?? {}, field.key)
+              ? definition?.defaults[field.key]
+              : undefined),
           `${entry.id} field ${field.key} must map to its canonical module schema`,
-        ).toBeTruthy()
+        ).toBeDefined()
       }
     }
   })
@@ -172,17 +176,25 @@ describe('built-in Component Library', () => {
     )
   })
 
-  it('defines tabs and accordion as shared governed primitives', () => {
+  it('defines tabs and accordion as shared governed Visual Components', () => {
     const byId = new Map(
       BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [entry.id, entry]),
     )
     expect(byId.get('base.tabs')?.constraints.allowedChildEntryIds).toEqual([
       'base.tab-panel',
     ])
+    expect(byId.get('base.tabs')?.implementation).toEqual({
+      type: 'visual-component',
+      componentId: 'base.vc.tabs',
+    })
     expect(byId.get('base.tab-panel')?.constraints.allowedParentEntryIds)
       .toEqual(['base.tabs'])
     expect(byId.get('base.accordion')?.constraints.allowedChildEntryIds)
       .toEqual(['base.accordion-item'])
+    expect(byId.get('base.accordion')?.implementation).toEqual({
+      type: 'visual-component',
+      componentId: 'base.vc.accordion',
+    })
     expect(byId.get('base.accordion-item')?.constraints.allowedParentEntryIds)
       .toEqual(['base.accordion'])
   })

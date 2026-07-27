@@ -24,6 +24,10 @@ import {
   BUILT_IN_FORM_VISUAL_COMPONENT_LIBRARY_ENTRIES,
   BUILT_IN_FORM_VISUAL_COMPONENTS,
 } from '@modules/base/componentLibraryFormVisualComponents'
+import {
+  BUILT_IN_CANONICAL_VISUAL_COMPONENT_LIBRARY_ENTRIES,
+  BUILT_IN_CANONICAL_VISUAL_COMPONENTS,
+} from '@modules/base/componentLibraryCanonicalVisualComponents'
 import '@modules/base'
 import { makePage, makeSite } from '../fixtures'
 
@@ -34,6 +38,7 @@ describe('built-in Visual Components', () => {
       ...BUILT_IN_INTERACTIVE_VISUAL_COMPONENTS,
       ...BUILT_IN_DESIGN_VISUAL_COMPONENTS,
       ...BUILT_IN_FORM_VISUAL_COMPONENTS,
+      ...BUILT_IN_CANONICAL_VISUAL_COMPONENTS,
     ]
     for (const definition of definitions) {
       expect(parseVisualComponent(definition)).not.toBeNull()
@@ -51,6 +56,7 @@ describe('built-in Visual Components', () => {
         (entry) => entry.implementation.type === 'visual-component',
       ),
       ...BUILT_IN_FORM_VISUAL_COMPONENT_LIBRARY_ENTRIES,
+      ...BUILT_IN_CANONICAL_VISUAL_COMPONENT_LIBRARY_ENTRIES,
     ]
     for (const entry of entries) {
       expect(entry.implementation.type).toBe('visual-component')
@@ -266,6 +272,77 @@ describe('built-in Visual Components', () => {
     )
     expect(result.html).toContain(
       '<ol><li><a href="/" target="_self">Home</a></li><li><a href="/news" target="_self">News</a></li></ol>',
+    )
+  })
+
+  it('publishes canonical Table and hosted Media definitions', () => {
+    const page = makePage({
+      nodes: {
+        root: {
+          id: 'root',
+          moduleId: 'base.body',
+          props: {},
+          breakpointOverrides: {},
+          children: ['table', 'media'],
+          classIds: [],
+          parentId: null,
+        },
+        table: {
+          id: 'table',
+          moduleId: 'base.visual-component-ref',
+          props: {
+            componentId: 'base.vc.table',
+            propOverrides: {
+              caption: 'Release status',
+              columns: 'Release | State',
+              rows: 'Catalogue | Ready',
+              firstColumnHeader: true,
+            },
+          },
+          breakpointOverrides: {},
+          children: [],
+          classIds: [],
+          parentId: 'root',
+          catalogueInstance: {
+            entryId: 'base.table',
+            entryVersion: '1.0.0',
+          },
+        },
+        media: {
+          id: 'media',
+          moduleId: 'base.visual-component-ref',
+          props: {
+            componentId: 'base.vc.media',
+            propOverrides: {
+              kind: 'video',
+              source: '/uploads/demo.mp4',
+              title: 'Product demonstration',
+              captionsUrl: '/uploads/demo.vtt',
+              captionsLanguage: 'en-AU',
+              captionsLabel: 'English captions',
+            },
+          },
+          breakpointOverrides: {},
+          children: [],
+          classIds: [],
+          parentId: 'root',
+          catalogueInstance: {
+            entryId: 'base.media',
+            entryVersion: '1.0.0',
+            variantId: 'hosted-video',
+          },
+        },
+      },
+    }) as Page
+    const site = makeSite({ pages: [page], visualComponents: [] }) as SiteDocument
+
+    const result = publishPage(page, site, registry)
+
+    expect(result.html).toContain('<caption>Release status</caption>')
+    expect(result.html).toContain('<th scope="row">Catalogue</th>')
+    expect(result.html).toContain('<video src="/uploads/demo.mp4"')
+    expect(result.html).toContain(
+      '<track kind="captions" src="/uploads/demo.vtt" srclang="en-AU" label="English captions" default>',
     )
   })
 

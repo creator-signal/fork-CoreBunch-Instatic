@@ -15,6 +15,7 @@ interface PrimitiveEntryOptions {
   moduleId: string
   tags: string[]
   fields?: ComponentLibraryField[]
+  variants?: ComponentLibraryEntry['variants']
   preset?: {
     id: string
     name: string
@@ -58,6 +59,7 @@ interface PatternEntryOptions {
   icon: string
   patternId: string
   tags: string[]
+  fields?: ComponentLibraryField[]
   allowedParentEntryIds?: string[]
   allowedChildEntryIds?: string[]
   accessibilityChecks?: ComponentLibraryAccessibilityCheck[]
@@ -67,6 +69,20 @@ interface PatternEntryOptions {
     providerAdapters: string[]
     plugins: string[]
   }
+  usage: string
+  accessibility: string
+}
+
+interface TemplateComponentEntryOptions {
+  id: string
+  name: string
+  description: string
+  category: string
+  icon: string
+  role: string
+  tags: string[]
+  fields?: ComponentLibraryField[]
+  accessibilityChecks?: ComponentLibraryAccessibilityCheck[]
   usage: string
   accessibility: string
 }
@@ -99,7 +115,7 @@ export function primitiveEntry(
           ...(options.preset ? { presetId: options.preset.id } : {}),
         },
     fields: options.fields ?? [],
-    variants: [],
+    variants: options.variants ?? [],
     presets: options.preset
       ? [{
           id: options.preset.id,
@@ -117,6 +133,43 @@ export function primitiveEntry(
         : {}),
     },
     requirements: options.requirements ?? {
+      capabilities: [],
+      providerAdapters: [],
+      plugins: [],
+    },
+    documentation: {
+      usage: options.usage,
+      accessibility: options.accessibility,
+    },
+    accessibility: {
+      checks: options.accessibilityChecks ?? [],
+    },
+  }
+}
+
+export function templateComponentEntry(
+  options: TemplateComponentEntryOptions,
+): ComponentLibraryEntry {
+  return {
+    id: options.id,
+    version: '1.0.0',
+    name: options.name,
+    description: options.description,
+    category: options.category,
+    tags: options.tags,
+    icon: options.icon,
+    source: { type: 'built-in' },
+    status: 'stable',
+    implementation: {
+      type: 'template-component',
+      role: options.role,
+    },
+    fields: options.fields ?? [],
+    variants: [],
+    presets: [],
+    slots: [],
+    constraints: {},
+    requirements: {
       capabilities: [],
       providerAdapters: [],
       plugins: [],
@@ -200,7 +253,7 @@ export function patternEntry(
           type: 'pattern',
           patternId: options.patternId,
         },
-    fields: [],
+    fields: options.fields ?? [],
     variants: options.variants ?? [],
     presets: [],
     slots: [],

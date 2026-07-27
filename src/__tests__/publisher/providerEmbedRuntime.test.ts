@@ -23,6 +23,21 @@ describe('provider embed runtime browser behavior', () => {
     expect(frame?.getAttribute('sandbox')).toContain('allow-scripts')
     expect(frame?.getAttribute('allow')).toContain('fullscreen')
     expect(frame?.referrerPolicy).toBe('strict-origin-when-cross-origin')
+    expect(frame?.style.width).toBe('100%')
+    expect(frame?.style.aspectRatio).toBe('16 / 9')
+    document.body.innerHTML = ''
+  })
+
+  it('applies the governed fixed-height fallback', async () => {
+    document.body.innerHTML = hostMarkup('essential').replace(
+      'data-instatic-provider-aspect="16 / 9"',
+      'data-instatic-provider-aspect="16 / 9" data-instatic-provider-height-mode="fixed" data-instatic-provider-height="640"',
+    )
+    await importRuntimeScript(PROVIDER_EMBED_RUNTIME_JS)
+
+    const frame = document.querySelector<HTMLIFrameElement>('iframe')
+    expect(frame?.style.height).toBe('640px')
+    expect(frame?.style.width).toBe('100%')
     document.body.innerHTML = ''
   })
 

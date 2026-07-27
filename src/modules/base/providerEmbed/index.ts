@@ -30,6 +30,12 @@ const ProviderEmbedPropsSchema = Type.Object({
   sourceUrl: Type.String({ default: '' }),
   title: Type.String({ default: 'Provider content' }),
   fallbackText: Type.String({ default: 'Provider content unavailable.' }),
+  heightMode: Type.Union([
+    Type.Literal('responsive'),
+    Type.Literal('fixed'),
+    Type.Literal('content-driven'),
+  ], { default: 'responsive' }),
+  height: Type.Number({ default: 480 }),
 })
 
 type ProviderEmbedProps = Static<typeof ProviderEmbedPropsSchema>
@@ -64,6 +70,16 @@ export const ProviderEmbedModule: ModuleDefinition<ProviderEmbedProps> = {
     sourceUrl: { type: 'url', label: 'Provider URL' },
     title: { type: 'text', label: 'Accessible title' },
     fallbackText: { type: 'text', label: 'Fallback text' },
+    heightMode: {
+      type: 'select',
+      label: 'Height mode',
+      options: [
+        { label: 'Responsive', value: 'responsive' },
+        { label: 'Fixed', value: 'fixed' },
+        { label: 'Content driven', value: 'content-driven' },
+      ],
+    },
+    height: { type: 'number', label: 'Fallback height' },
   },
   propsSchema: ProviderEmbedPropsSchema,
   defaults: Value.Create(ProviderEmbedPropsSchema),
@@ -102,6 +118,8 @@ function renderProviderEmbed(props: ProviderEmbedProps): RenderOutput {
     resolution.plan,
     resolution.status,
     resolution.message,
+    props.heightMode,
+    props.height,
   )
 }
 
@@ -110,6 +128,8 @@ function iframeOutput(
   plan: ProviderIframePlan,
   status: 'ready' | 'degraded',
   message: string | undefined,
+  heightMode: ProviderEmbedProps['heightMode'],
+  height: number,
 ): RenderOutput {
   const policy = adapter.iframePolicy
   if (!policy) {
@@ -133,7 +153,9 @@ function iframeOutput(
     `data-instatic-provider-sandbox="${policy.sandbox.join(' ')}" ` +
     `data-instatic-provider-referrer="${policy.referrerPolicy}" ` +
     `data-instatic-provider-allow="${policy.permissions.join('; ')}" ` +
-    `data-instatic-provider-aspect="${attribute(plan.aspectRatio)}">` +
+    `data-instatic-provider-aspect="${attribute(plan.aspectRatio)}" ` +
+    `data-instatic-provider-height-mode="${heightMode}" ` +
+    `data-instatic-provider-height="${boundedHeight(height)}">` +
     `<button type="button" data-instatic-provider-load>${attribute(loadLabel)}</button>` +
     `<p>${attribute(adapter.fallbackText)}</p>${notice}</div>`
   const cspSources: CspSourceRequirement[] = [
@@ -144,6 +166,10 @@ function iframeOutput(
     js: PROVIDER_EMBED_RUNTIME_JS,
     cspSources,
   }
+}
+
+function boundedHeight(value: number): number {
+  return Math.max(160, Math.min(2_000, Math.round(value || 480)))
 }
 
 function attribute(value: string): string {

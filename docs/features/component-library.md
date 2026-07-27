@@ -394,6 +394,7 @@ opens either boundary before focusing an invalid descendant.
 - `docs/features/templates.md` — template-owned site chrome.
 - `docs/features/site-search.md` — published index and Search Results capability.
 - `docs/features/file-attachments.md` — private form upload and scanner capability.
+- `docs/features/component-library-catalogue.md` — complete issue #11 catalogue traceability matrix and capability gates.
 - `docs/reference/typebox-patterns.md` — boundary validation.
 - Source-of-truth files: `src/core/component-library/`
 - Focused tests: `src/__tests__/component-library/componentLibraryRegistry.test.ts`

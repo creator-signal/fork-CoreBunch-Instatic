@@ -10,6 +10,7 @@ import { ContainerModule } from './container'
 import { ImageModule } from './image'
 import { LinkModule } from './link'
 import { ListModule } from './list'
+import { LoopModule } from './loop'
 import { SlotInstanceModule } from './slotInstance'
 import { TableModule } from './table'
 import { TextModule } from './text'
@@ -177,7 +178,7 @@ const ICON_LIST = definition(
       ListModule.defaults,
       { items: 'First supported item\nSecond supported item\nThird supported item' },
       [],
-      'base.list',
+      'base.semantic-list',
     ),
   ],
   ['items'],
@@ -254,7 +255,7 @@ const TIMELINE = definition(
         items: 'First milestone — add its date and description\nSecond milestone — add its date and description\nThird milestone — add its date and description',
       },
       [],
-      'base.list',
+      'base.semantic-list',
     ),
   ],
   ['items'],
@@ -279,7 +280,7 @@ const STEPS = definition(
         items: 'Complete the first step\nComplete the second step\nComplete the third step',
       },
       [],
-      'base.list',
+      'base.semantic-list',
     ),
   ],
   ['items'],
@@ -306,7 +307,6 @@ const COMPARISON_TABLE = definition(
         firstColumnHeader: true,
       },
       [],
-      'base.table',
     ),
   ],
   ['table'],
@@ -328,7 +328,6 @@ const FAQ = definition(
       AccordionModule.defaults,
       { label: 'Frequently asked questions' },
       ['question-1', 'question-2'],
-      'base.accordion',
     ),
     patternNode(
       'question-1',
@@ -374,6 +373,37 @@ const EMPTY_STATE = definition(
   ['title', 'message', 'action'],
 )
 
+const LIST = definition(
+  'base.pattern.list',
+  [
+    patternNode(
+      'root',
+      LoopModule.id,
+      LoopModule.defaults,
+      {
+        sourceMode: 'manual',
+        sourceId: '',
+        manualItems: [{ id: 'item-1', fields: {} }],
+        itemRenderer: 'children',
+        pagination: 'none',
+        pageSize: 10,
+        limit: 10,
+        tag: 'div',
+      },
+      ['item'],
+    ),
+    patternNode(
+      'item',
+      ContainerModule.id,
+      ContainerModule.defaults,
+      { tag: 'article' },
+      [],
+      'base.container',
+    ),
+  ],
+  ['item'],
+)
+
 export const BUILT_IN_COMPONENT_LIBRARY_PATTERNS:
 readonly ComponentLibraryPatternDefinition[] = [
   GRID,
@@ -387,6 +417,7 @@ readonly ComponentLibraryPatternDefinition[] = [
   COMPARISON_TABLE,
   FAQ,
   EMPTY_STATE,
+  LIST,
 ]
 
 for (const pattern of BUILT_IN_COMPONENT_LIBRARY_PATTERNS) {
@@ -395,6 +426,34 @@ for (const pattern of BUILT_IN_COMPONENT_LIBRARY_PATTERNS) {
 
 export const BUILT_IN_PATTERN_COMPONENT_LIBRARY_ENTRIES:
 readonly ComponentLibraryEntry[] = [
+  patternEntry({
+    id: 'base.list',
+    name: 'List',
+    description: 'A static or generated collection using one governed item template.',
+    category: 'Editorial',
+    icon: 'list-box',
+    patternId: LIST.id,
+    tags: ['list', 'collection', 'loop', 'pages', 'records'],
+    fields: [
+      { key: 'sourceMode', label: 'Source mode', type: 'select', required: true },
+      { key: 'sourceId', label: 'Content source', type: 'select', required: false },
+      { key: 'query', label: 'Query', type: 'text', required: false },
+      { key: 'orderBy', label: 'Sort by', type: 'select', required: false },
+      { key: 'direction', label: 'Direction', type: 'select', required: true },
+      { key: 'limit', label: 'Limit', type: 'number', required: true },
+      { key: 'pagination', label: 'Pagination', type: 'select', required: true },
+      { key: 'pageSize', label: 'Page size', type: 'number', required: true },
+    ],
+    allowedChildEntryIds: [
+      'base.card',
+      'base.teaser',
+      'base.link',
+      'base.plain-text',
+      'base.rich-text',
+    ],
+    usage: 'Choose manual items or a registered loop source and author one governed item template.',
+    accessibility: 'Retain meaningful item semantics, source order and the shared collection status.',
+  }),
   patternEntry({
     id: 'base.grid',
     name: 'Columns / Grid',

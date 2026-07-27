@@ -18,6 +18,7 @@ import './body'
 import './container'
 import './componentFrame'
 import './loop'
+import './separator'
 
 // Typography modules
 import './text'
@@ -33,6 +34,7 @@ import './image'
 import './svg'
 import './audio'
 import './pdfViewer'
+import './mediaDisplay'
 
 // Interactive modules
 import './button'

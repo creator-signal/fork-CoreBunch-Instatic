@@ -28,6 +28,10 @@ describe('provider embed publishing', () => {
     expect(output.html).toContain(
       'data-instatic-provider-title="Product &amp; roadmap"',
     )
+    expect(output.html).toContain(
+      'data-instatic-provider-height-mode="responsive"',
+    )
+    expect(output.html).toContain('data-instatic-provider-height="480"')
     expect(output.html).not.toContain('&amp;amp;')
     expect(output.js).toContain('instatic:consent-changed')
     expect(output.cspSources).toEqual([

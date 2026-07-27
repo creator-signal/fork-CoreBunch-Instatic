@@ -1,0 +1,307 @@
+import type { ComponentLibraryEntry } from '@core/component-library'
+import { LoopModule } from './loop'
+import { ProviderEmbedModule } from './providerEmbed'
+import { SeparatorModule } from './separator'
+import {
+  accessibleNameCheck,
+  behaviorCheck,
+  primitiveEntry,
+  providerFallbackCheck,
+} from './componentLibraryDefinitions'
+
+const collectionDefaults = {
+  ...LoopModule.defaults,
+  sourceMode: 'dynamic',
+  manualItems: [],
+  filters: {},
+  orderBy: '',
+  direction: 'desc',
+  offset: 0,
+  query: '',
+  itemRenderer: 'children',
+  pagination: 'none',
+  pageSize: 10,
+  tag: 'div',
+  customTag: '',
+}
+
+const structuredDisplayEntries = [
+  'base.card',
+  'base.teaser',
+  'base.reusable-section',
+  'base.rich-text',
+  'base.plain-text',
+]
+
+export const BUILT_IN_CAPABILITY_COMPONENT_LIBRARY_ENTRIES:
+readonly ComponentLibraryEntry[] = [
+  primitiveEntry({
+    id: 'base.separator',
+    name: 'Separator / Divider',
+    description: 'A semantic thematic break using approved width, colour and spacing tokens.',
+    category: 'Structure',
+    icon: 'layout-solid',
+    moduleId: SeparatorModule.id,
+    tags: ['separator', 'divider', 'rule', 'thematic break'],
+    fields: [
+      { key: 'style', label: 'Style', type: 'select', required: true },
+      { key: 'width', label: 'Width', type: 'select', required: true },
+      { key: 'colorToken', label: 'Colour token', type: 'design-token', required: true },
+      { key: 'spacing', label: 'Spacing', type: 'select', required: true },
+    ],
+    usage: 'Use only when a thematic change benefits from an explicit visual boundary.',
+    accessibility: 'The native horizontal-rule element exposes the semantic break without extra ARIA.',
+  }),
+  primitiveEntry({
+    id: 'base.language-navigation',
+    name: 'Language Navigation',
+    description: 'A locale switcher supplied by the configured localisation capability.',
+    category: 'Navigation',
+    icon: 'link',
+    moduleId: LoopModule.id,
+    tags: ['language', 'locale', 'translation', 'navigation'],
+    preset: {
+      id: 'configured-locales',
+      name: 'Configured locales',
+      values: {
+        ...collectionDefaults,
+        sourceId: 'localization.locales',
+        limit: 100,
+        tag: 'nav',
+      },
+    },
+    allowedChildEntryIds: ['base.link'],
+    requirements: {
+      capabilities: ['localization.locales'],
+      providerAdapters: [],
+      plugins: [],
+    },
+    accessibilityChecks: [
+      behaviorCheck(
+        'a11y.accessible-name',
+        'naming',
+        'The locale navigation and current language require clear programmatic names.',
+        'Name the navigation and expose the current locale on its selected link.',
+      ),
+    ],
+    usage: 'Enable and configure localisation before adding the approved locale-link item renderer.',
+    accessibility: 'Use each language’s own name and identify the current locale without relying on colour.',
+  }),
+  primitiveEntry({
+    id: 'base.structured-content',
+    name: 'Structured Content',
+    description: 'Renders one governed CMS record through an approved display component.',
+    category: 'Content',
+    icon: 'box-stack-solid',
+    moduleId: LoopModule.id,
+    tags: ['structured content', 'record', 'reference', 'data'],
+    fields: [
+      { key: 'query', label: 'Record selector', type: 'text', required: true },
+      { key: 'orderBy', label: 'Record order', type: 'select', required: false },
+    ],
+    preset: {
+      id: 'single-record',
+      name: 'Single record',
+      values: {
+        ...collectionDefaults,
+        sourceId: 'data.rows',
+        limit: 1,
+      },
+    },
+    allowedChildEntryIds: structuredDisplayEntries,
+    requirements: {
+      capabilities: ['content.structured'],
+      providerAdapters: [],
+      plugins: [],
+    },
+    usage: 'Select one approved record and add one compatible display component as its item template.',
+    accessibility: 'The selected display component owns the semantics and fallback for missing content.',
+  }),
+  primitiveEntry({
+    id: 'base.structured-content-list',
+    name: 'Structured Content List',
+    description: 'Queries governed CMS records through the shared collection contract.',
+    category: 'Content',
+    icon: 'box-stack-solid',
+    moduleId: LoopModule.id,
+    tags: ['structured content', 'collection', 'loop', 'records'],
+    fields: [
+      { key: 'query', label: 'Query', type: 'text', required: false },
+      { key: 'orderBy', label: 'Sort by', type: 'select', required: false },
+      { key: 'direction', label: 'Direction', type: 'select', required: true },
+      { key: 'limit', label: 'Limit', type: 'number', required: true },
+      { key: 'pagination', label: 'Pagination', type: 'select', required: true },
+      { key: 'pageSize', label: 'Page size', type: 'number', required: true },
+    ],
+    preset: {
+      id: 'record-collection',
+      name: 'Record collection',
+      values: {
+        ...collectionDefaults,
+        sourceId: 'data.rows',
+        limit: 10,
+        pagination: 'numbered',
+      },
+    },
+    allowedChildEntryIds: structuredDisplayEntries,
+    requirements: {
+      capabilities: ['content.structured'],
+      providerAdapters: [],
+      plugins: [],
+    },
+    accessibilityChecks: [
+      behaviorCheck(
+        'a11y.announcement-contract',
+        'naming',
+        'Empty, unavailable and updated collection states require a polite announcement.',
+        'Retain the shared collection status and pagination output.',
+      ),
+    ],
+    usage: 'Configure one content query and one or more approved loop item components.',
+    accessibility: 'Use meaningful item landmarks and the shared collection status and pagination contract.',
+  }),
+  primitiveEntry({
+    id: 'base.shared-content-fragment',
+    name: 'Shared Content Fragment',
+    description: 'References centrally managed content fields without owning page layout.',
+    category: 'Content',
+    icon: 'box-stack-solid',
+    moduleId: LoopModule.id,
+    tags: ['shared content', 'fragment', 'reference', 'slots'],
+    fields: [
+      { key: 'query', label: 'Fragment selector', type: 'text', required: true },
+    ],
+    preset: {
+      id: 'content-fragment',
+      name: 'Content fragment',
+      values: {
+        ...collectionDefaults,
+        sourceId: 'data.rows',
+        limit: 1,
+        tag: 'span',
+      },
+    },
+    allowedChildEntryIds: [
+      'base.rich-text',
+      'base.plain-text',
+      'base.image',
+      'base.link',
+    ],
+    requirements: {
+      capabilities: ['content.structured'],
+      providerAdapters: [],
+      plugins: [],
+    },
+    usage: 'Select a centrally managed fragment and map only its fields into a compatible slot.',
+    accessibility: 'The consuming slot and item template retain ownership of layout and semantics.',
+  }),
+  primitiveEntry({
+    id: 'base.embed',
+    name: 'Embed',
+    description: 'A consent-delayed third-party embed resolved through an approved adapter.',
+    category: 'Embed',
+    icon: 'layout-solid',
+    moduleId: ProviderEmbedModule.id,
+    tags: ['embed', 'provider', 'iframe', 'consent'],
+    fields: [
+      { key: 'adapterId', label: 'Provider adapter', type: 'select', required: true },
+      { key: 'sourceUrl', label: 'Provider URL', type: 'url', required: true },
+      { key: 'title', label: 'Accessible title', type: 'text', required: true },
+      { key: 'fallbackText', label: 'Fallback text', type: 'text', required: true },
+    ],
+    preset: {
+      id: 'provider-embed',
+      name: 'Approved provider',
+      values: {
+        ...ProviderEmbedModule.defaults,
+        kind: 'embed',
+      },
+    },
+    requirements: {
+      capabilities: ['embeds.provider'],
+      providerAdapters: [],
+      plugins: [],
+    },
+    accessibilityChecks: [accessibleNameCheck('title'), providerFallbackCheck()],
+    usage: 'Enable the provider-embed capability and select an allow-listed adapter before insertion.',
+    accessibility: 'Keep consent activation keyboard reachable and provide equivalent fallback content.',
+  }),
+  primitiveEntry({
+    id: 'base.form-embed',
+    name: 'Form Embed',
+    description: 'An approved internal or provider form embedded behind consent and sandbox policy.',
+    category: 'Forms',
+    icon: 'file-text-solid',
+    moduleId: ProviderEmbedModule.id,
+    tags: ['form', 'embed', 'provider', 'iframe'],
+    fields: [
+      { key: 'adapterId', label: 'Form provider', type: 'select', required: true },
+      { key: 'sourceUrl', label: 'Form URL', type: 'url', required: true },
+      { key: 'title', label: 'Accessible title', type: 'text', required: true },
+      { key: 'fallbackText', label: 'Fallback text', type: 'text', required: true },
+      { key: 'height', label: 'Fallback height', type: 'number', required: true },
+    ],
+    variants: [
+      { id: 'responsive', name: 'Responsive', values: { heightMode: 'responsive' } },
+      { id: 'fixed', name: 'Fixed', values: { heightMode: 'fixed' } },
+      {
+        id: 'content-driven',
+        name: 'Content driven',
+        values: { heightMode: 'content-driven' },
+      },
+    ],
+    preset: {
+      id: 'provider-form',
+      name: 'Approved form provider',
+      values: {
+        ...ProviderEmbedModule.defaults,
+        kind: 'form-embed',
+        title: 'Embedded form',
+        fallbackText: 'This form is currently unavailable.',
+      },
+    },
+    requirements: {
+      capabilities: ['forms.embed'],
+      providerAdapters: [],
+      plugins: [],
+    },
+    accessibilityChecks: [accessibleNameCheck('title'), providerFallbackCheck()],
+    usage: 'Enable the form-embed capability and choose one governed height mode and provider adapter.',
+    accessibility: 'Name the embedded form, preserve focus order and provide a direct accessible fallback.',
+  }),
+  primitiveEntry({
+    id: 'base.share-links',
+    name: 'Share Links',
+    description: 'Privacy-preserving share destinations supplied by an approved policy capability.',
+    category: 'Navigation',
+    icon: 'link',
+    moduleId: LoopModule.id,
+    tags: ['share', 'social', 'links', 'privacy'],
+    preset: {
+      id: 'approved-networks',
+      name: 'Approved networks',
+      values: {
+        ...collectionDefaults,
+        sourceId: 'sharing.links',
+        limit: 20,
+        tag: 'nav',
+      },
+    },
+    allowedChildEntryIds: ['base.link'],
+    requirements: {
+      capabilities: ['sharing.links'],
+      providerAdapters: [],
+      plugins: [],
+    },
+    accessibilityChecks: [
+      behaviorCheck(
+        'a11y.accessible-name',
+        'naming',
+        'Share destinations require specific names and a labelled navigation region.',
+        'Include the destination network and sharing action in every link label.',
+      ),
+    ],
+    usage: 'Configure approved networks and metadata policy; no tracking script is loaded by this entry.',
+    accessibility: 'Use ordinary links with descriptive labels and announce any new-window behavior.',
+  }),
+]

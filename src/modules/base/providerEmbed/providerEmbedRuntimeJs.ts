@@ -60,7 +60,12 @@ export const PROVIDER_EMBED_RUNTIME_JS = `(() => {
     if (allow) frame.setAttribute('allow', allow);
     frame.setAttribute('allowfullscreen', '');
     const aspectRatio = host.getAttribute('data-instatic-provider-aspect') || '16 / 9';
-    frame.style.aspectRatio = aspectRatio;
+    const heightMode = host.getAttribute('data-instatic-provider-height-mode') || 'responsive';
+    const height = Number(host.getAttribute('data-instatic-provider-height') || '480');
+    frame.style.width = '100%';
+    if (heightMode === 'responsive') frame.style.aspectRatio = aspectRatio;
+    else frame.style.height = Math.max(160, Math.min(2000, height || 480)) + 'px';
+    if (heightMode === 'content-driven') frame.setAttribute('data-instatic-content-driven-height', '');
     host.replaceChildren(frame);
     host.setAttribute('data-instatic-provider-loaded', 'true');
   }

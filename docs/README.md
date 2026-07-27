@@ -23,6 +23,7 @@ docs/
 │   ├── plugin-system.md            ← plugin SDK, sandbox, lifecycle, permissions
 │   ├── publisher.md                ← page tree → static HTML/CSS pipeline
 │   ├── visual-components.md        ← VCs, slots, params, instantiation
+│   ├── component-library.md         ← governed catalogue metadata + registry
 │   ├── content-storage.md          ← data_tables + data_rows (the universal store)
 │   ├── content-workspace.md        ← Content workspace: collections, entries, body editor
 │   ├── auth-and-access.md          ← sessions, MFA, capabilities, roles
@@ -139,6 +140,7 @@ Three categories, three voices:
 | [features/plugin-system.md](features/plugin-system.md)           | The plugin system end-to-end: package shape, lifecycle, sandbox, SDK, permissions, CLI |
 | [features/publisher.md](features/publisher.md)                   | The page-tree-to-HTML/CSS renderer + server-side publishing wrappers |
 | [features/visual-components.md](features/visual-components.md)   | VCs, slots, params, instantiation, recursion guard                   |
+| [features/component-library.md](features/component-library.md)   | Governed catalogue metadata, registry, search and dependency health |
 | [features/content-storage.md](features/content-storage.md)       | `data_tables` + `data_rows` — the universal content store           |
 | [features/content-workspace.md](features/content-workspace.md)   | Content workspace UI: collections, entries, body editor, settings panel |
 | [features/data-workspace.md](features/data-workspace.md)         | Data workspace UI: DataInspector, field management, DataGrid        |

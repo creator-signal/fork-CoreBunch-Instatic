@@ -21,6 +21,10 @@ describe('built-in Component Library', () => {
     expect(ids).toContain('base.form-actions')
     expect(ids).toContain('base.form-help')
     expect(ids).toContain('base.form-error')
+    expect(ids).toContain('base.tabs')
+    expect(ids).toContain('base.tab-panel')
+    expect(ids).toContain('base.accordion')
+    expect(ids).toContain('base.accordion-item')
 
     for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
       expect(componentLibraryRegistry.get(entry.id)).toEqual(entry)
@@ -83,5 +87,26 @@ describe('built-in Component Library', () => {
     expect(submit?.constraints.allowedParentEntryIds).toContain(
       'base.form-actions',
     )
+    expect(fieldGroup?.constraints.allowedParentEntryIds).toContain(
+      'base.tab-panel',
+    )
+    expect(fieldGroup?.constraints.allowedParentEntryIds).toContain(
+      'base.accordion-item',
+    )
+  })
+
+  it('defines tabs and accordion as shared governed primitives', () => {
+    const byId = new Map(
+      BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [entry.id, entry]),
+    )
+    expect(byId.get('base.tabs')?.constraints.allowedChildEntryIds).toEqual([
+      'base.tab-panel',
+    ])
+    expect(byId.get('base.tab-panel')?.constraints.allowedParentEntryIds)
+      .toEqual(['base.tabs'])
+    expect(byId.get('base.accordion')?.constraints.allowedChildEntryIds)
+      .toEqual(['base.accordion-item'])
+    expect(byId.get('base.accordion-item')?.constraints.allowedParentEntryIds)
+      .toEqual(['base.accordion'])
   })
 })

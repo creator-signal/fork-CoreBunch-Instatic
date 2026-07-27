@@ -105,8 +105,14 @@ const requiredField: ComponentLibraryField = {
   required: false,
 }
 
-const formFieldParentEntryIds = [
+const formLayoutParentEntryIds = [
   'base.form-container',
+  'base.tab-panel',
+  'base.accordion-item',
+]
+
+const formFieldParentEntryIds = [
+  ...formLayoutParentEntryIds,
   'base.form-field-group',
 ]
 
@@ -298,6 +304,72 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     accessibility: 'Provide an accurate title, captions where needed and user controls.',
   }),
   primitiveEntry({
+    id: 'base.tabs',
+    name: 'Tabs',
+    description: 'A labelled set of progressively enhanced content panels.',
+    category: 'Interactive',
+    icon: 'layout-solid',
+    moduleId: 'base.tabs',
+    tags: ['tabs', 'panels', 'interactive', 'form'],
+    fields: [
+      { key: 'label', label: 'Accessible label', type: 'text', required: true },
+      { key: 'orientation', label: 'Orientation', type: 'select', required: true },
+      { key: 'activation', label: 'Keyboard activation', type: 'select', required: true },
+    ],
+    allowedChildEntryIds: ['base.tab-panel'],
+    usage: 'Organize related peer sections when visitors benefit from switching between them.',
+    accessibility: 'Arrow, Home and End keys move through tabs; manual activation also uses Enter or Space.',
+  }),
+  primitiveEntry({
+    id: 'base.tab-panel',
+    name: 'Tab Panel',
+    description: 'One labelled panel inside Tabs.',
+    category: 'Interactive',
+    icon: 'layout-solid',
+    moduleId: 'base.tab-panel',
+    tags: ['tab', 'panel', 'interactive', 'form'],
+    fields: [
+      { key: 'tabId', label: 'Tab ID', type: 'text', required: true, advanced: true },
+      { key: 'label', label: 'Label', type: 'text', required: true },
+      { key: 'selected', label: 'Selected initially', type: 'boolean', required: false },
+      { key: 'disabled', label: 'Disabled', type: 'boolean', required: false },
+    ],
+    allowedParentEntryIds: ['base.tabs'],
+    usage: 'Add one labelled content region to Tabs.',
+    accessibility: 'Use a short unique label; all panels remain visible when JavaScript is unavailable.',
+  }),
+  primitiveEntry({
+    id: 'base.accordion',
+    name: 'Accordion',
+    description: 'A labelled group of native disclosure sections.',
+    category: 'Interactive',
+    icon: 'list-box-solid',
+    moduleId: 'base.accordion',
+    tags: ['accordion', 'disclosure', 'interactive', 'form'],
+    fields: [
+      { key: 'label', label: 'Accessible label', type: 'text', required: true },
+    ],
+    allowedChildEntryIds: ['base.accordion-item'],
+    usage: 'Organize sections that visitors can expand independently.',
+    accessibility: 'Uses native details and summary behavior with a complete no-JavaScript fallback.',
+  }),
+  primitiveEntry({
+    id: 'base.accordion-item',
+    name: 'Accordion Item',
+    description: 'One native disclosure section inside an Accordion.',
+    category: 'Interactive',
+    icon: 'list-box-solid',
+    moduleId: 'base.accordion-item',
+    tags: ['accordion', 'details', 'summary', 'form'],
+    fields: [
+      { key: 'title', label: 'Summary', type: 'text', required: true },
+      { key: 'open', label: 'Open initially', type: 'boolean', required: false },
+    ],
+    allowedParentEntryIds: ['base.accordion'],
+    usage: 'Add one independently expandable section.',
+    accessibility: 'Write a specific summary that identifies the hidden content.',
+  }),
+  primitiveEntry({
     id: 'base.form-container',
     name: 'Form Container',
     description: 'A CMS-native or custom form boundary.',
@@ -329,7 +401,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       name: 'Field group',
       values: { tag: 'div' },
     },
-    allowedParentEntryIds: ['base.form-container'],
+    allowedParentEntryIds: formLayoutParentEntryIds,
     allowedChildEntryIds: [
       'base.form-label',
       'base.text-input',
@@ -363,7 +435,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       name: 'Actions',
       values: { tag: 'div' },
     },
-    allowedParentEntryIds: ['base.form-container'],
+    allowedParentEntryIds: formLayoutParentEntryIds,
     allowedChildEntryIds: [
       'base.submit',
       'base.link',

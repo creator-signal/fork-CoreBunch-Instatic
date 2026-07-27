@@ -275,7 +275,29 @@ export const FORM_RUNTIME_JS = `(() => {
 
   function focusFirstInvalid(form) {
     const first = form.querySelector('[aria-invalid="true"]');
-    if (first && typeof first.focus === 'function') first.focus();
+    if (!first) return;
+    for (const disclosure of ancestorDisclosures(first, form)) {
+      disclosure.open = true;
+    }
+    const panel = first.closest('[data-instatic-tab-panel]');
+    if (panel && form.contains(panel)) {
+      if (typeof window.__instaticActivateTabPanel === 'function') {
+        window.__instaticActivateTabPanel(panel, false);
+      } else {
+        panel.hidden = false;
+      }
+    }
+    if (typeof first.focus === 'function') first.focus();
+  }
+
+  function ancestorDisclosures(control, form) {
+    const disclosures = [];
+    let current = control.parentElement;
+    while (current && current !== form) {
+      if (current.tagName === 'DETAILS') disclosures.push(current);
+      current = current.parentElement;
+    }
+    return disclosures;
   }
 
   function safeToken(value) {

@@ -42,6 +42,12 @@ import { BodyModule } from '@modules/base/body'
 import { VisualComponentRefModule } from '@modules/base/visualComponentRef'
 import { SlotInstanceModule } from '@modules/base/slotInstance'
 import { SlotOutletModule } from '@modules/base/slotOutlet'
+import {
+  AccordionItemModule,
+  AccordionModule,
+  TabPanelModule,
+  TabsModule,
+} from '@modules/base/disclosure'
 
 // ---------------------------------------------------------------------------
 // Run the full conformance suite for every canonical base module.
@@ -60,6 +66,10 @@ runModuleConformanceSuite(LinkModule)
 runModuleConformanceSuite(VisualComponentRefModule)
 runModuleConformanceSuite(SlotInstanceModule)
 runModuleConformanceSuite(SlotOutletModule)
+runModuleConformanceSuite(TabsModule)
+runModuleConformanceSuite(TabPanelModule)
+runModuleConformanceSuite(AccordionModule)
+runModuleConformanceSuite(AccordionItemModule)
 
 describe('base module registration', () => {
   it('only imports available production base modules', async () => {
@@ -78,6 +88,7 @@ describe('base module registration', () => {
     expect(baseIndex).toContain("import './slotInstance'")
     expect(baseIndex).toContain("import './visualComponentRef'")
     expect(baseIndex).toContain("import './slotOutlet'")
+    expect(baseIndex).toContain("import './disclosure'")
   })
 
   it('does not keep retired module directories around', () => {
@@ -111,6 +122,10 @@ describe('base module registration', () => {
       VisualComponentRefModule,
       SlotInstanceModule,
       SlotOutletModule,
+      TabsModule,
+      TabPanelModule,
+      AccordionModule,
+      AccordionItemModule,
     ]) {
       // No module should declare CSS-only props as module schema fields.
       const cssOnlyPropNames = ['backgroundColor', 'color', 'fontSize', 'padding', 'margin', 'border']
@@ -118,6 +133,45 @@ describe('base module registration', () => {
         expect(Object.keys(mod.schema)).not.toContain(propName)
       }
     }
+  })
+})
+
+describe('base disclosure modules', () => {
+  it('publishes tabs as a complete no-JavaScript fallback with one shared runtime', () => {
+    const panel = TabPanelModule.render({
+      tabId: 'contact',
+      label: 'Contact',
+      selected: true,
+      disabled: false,
+    }, ['<p>Contact fields</p>'])
+    const tabs = TabsModule.render({
+      label: 'Contact steps',
+      orientation: 'horizontal',
+      activation: 'automatic',
+    }, [panel.html])
+
+    expect(panel.html).not.toContain(' hidden')
+    expect(panel.html).toContain('data-instatic-tab-selected="true"')
+    expect(tabs.html).toContain('aria-label="Contact steps"')
+    expect(tabs.html).toContain('<p>Contact fields</p>')
+    expect(tabs.js).toContain('window.__instaticActivateTabPanel')
+  })
+
+  it('publishes accordion items as native details and summary elements', () => {
+    const item = AccordionItemModule.render({
+      title: 'Billing details',
+      open: true,
+    }, ['<p>Billing fields</p>'])
+    const accordion = AccordionModule.render(
+      { label: 'Checkout sections' },
+      [item.html],
+    )
+
+    expect(item.html).toBe(
+      '<details data-instatic-accordion-item open><summary>Billing details</summary><p>Billing fields</p></details>',
+    )
+    expect(accordion.html).toContain('aria-label="Checkout sections"')
+    expect(accordion.js).toBeUndefined()
   })
 })
 

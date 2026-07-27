@@ -283,6 +283,15 @@ therefore never exposed as a standalone insertable catalogue entry. The
 existing `base.loop` publisher remains the rendering and static/dynamic/hole
 execution layer underneath the contract.
 
+### Shared disclosure layouts
+
+Tabs and Accordion are canonical interactive modules that can organize ordinary
+content or CMS form groups. Tabs publish every panel as a readable
+no-JavaScript fallback, then add the WAI-ARIA tab roles, roving focus and
+keyboard activation through one deduplicated runtime. Accordion publishes
+native `details` and `summary` elements and needs no runtime. Form validation
+opens either boundary before focusing an invalid descendant.
+
 ## Forbidden patterns
 
 - Do not store rendered HTML in a library entry.

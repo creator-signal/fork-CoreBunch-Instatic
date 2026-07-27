@@ -43,10 +43,17 @@ describe('form runtime browser behaviour', () => {
   it('submits through delegation and exposes field errors to assistive technology', async () => {
     document.body.innerHTML = `
       <form data-instatic-form-mode="cms" data-instatic-form-id="contact" data-instatic-page-id="page-home" data-instatic-page-token="page-token">
-        <label data-instatic-label-target="auto">Email</label>
-        <input data-instatic-form-control="input" data-instatic-field-id="email" name="email" value="invalid">
-        <p data-instatic-form-message="help" data-instatic-form-help-for="email">Use your work address.</p>
-        <p data-instatic-form-message="error" data-instatic-form-error-for="email"></p>
+        <div data-instatic-tabs>
+          <section data-instatic-tab-panel="contact" data-instatic-tab-label="Contact" hidden>
+            <details>
+              <summary>Contact details</summary>
+              <label data-instatic-label-target="auto">Email</label>
+              <input data-instatic-form-control="input" data-instatic-field-id="email" name="email" value="invalid">
+              <p data-instatic-form-message="help" data-instatic-form-help-for="email">Use your work address.</p>
+              <p data-instatic-form-message="error" data-instatic-form-error-for="email"></p>
+            </details>
+          </section>
+        </div>
         <button type="submit">Send</button>
         <p data-instatic-form-message="status"></p>
       </form>
@@ -123,6 +130,8 @@ describe('form runtime browser behaviour', () => {
       expect(fieldError?.hidden).toBe(false)
       expect(fieldError?.textContent).toBe('Enter a valid email address.')
       expect(document.activeElement).toBe(input)
+      expect(input?.closest('details')?.open).toBe(true)
+      expect(input?.closest<HTMLElement>('[data-instatic-tab-panel]')?.hidden).toBe(false)
 
       input?.dispatchEvent(new Event('input', { bubbles: true }))
       expect(input?.hasAttribute('aria-invalid')).toBe(false)

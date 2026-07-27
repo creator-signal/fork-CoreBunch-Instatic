@@ -24,6 +24,15 @@ form renderer. `Form Field Group` and `Form Actions` are approved
 Help, Field Error and Form Status are presets of `base.form-message`. Shared
 Heading, Plain Text, Image and Link entries remain reusable inside forms.
 
+Tabs and Accordion are shared interactive primitives rather than form-only
+copies. Form Field Groups can be placed inside `Tab Panel` or `Accordion Item`
+entries and still participate in the same snapshot, validation and submission
+flow. Tabs progressively enhance from fully visible panels and implement
+roving focus plus Arrow, Home, End, Enter and Space behavior. Accordion uses
+native `details`/`summary`, so it remains operable without JavaScript. When a
+server error targets a hidden field, the form runtime opens ancestor
+disclosures and activates its tab before moving focus.
+
 `base.form` has two modes:
 
 - `cms` submits to a selected data table.

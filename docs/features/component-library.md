@@ -45,6 +45,7 @@ module / Visual Component / pattern / template
 | Registration and subscriptions | `src/core/component-library/registry.ts` |
 | Search, filters and deterministic ordering | `src/core/component-library/query.ts` |
 | Capability/provider/plugin health | `src/core/component-library/availability.ts` |
+| Retained versions, migration paths and impact previews | `src/core/component-library/version.ts`, `migration.ts` |
 | Explicit built-in definitions | `src/modules/base/componentLibrary.ts` |
 | Catalogue dialog and Components projection | `src/admin/pages/site/panels/LayersPanel/` |
 | Canonical backing-node insertion | `src/admin/pages/site/hooks/useInsertComponentLibraryEntry.ts` |
@@ -143,6 +144,8 @@ componentLibraryRegistry.register(emailInput)
 
 `list()` sorts by category, display name and stable ID. Registration order and plugin activation timing therefore do not change catalogue presentation.
 
+`registerOrReplace()` also retains each validated semantic version. `getVersion()` and `listVersions()` expose those retained definitions for pinned instances, migration previews and rollback. Removing an entry or its owning source removes its retained versions too, so uninstall checks must inspect active usages first.
+
 ### Built-in entries
 
 `src/modules/base/componentLibrary.ts` registers the curated authoring catalogue during base-module startup. Each entry names its canonical module, author-facing fields, optional preset, constraints, usage and accessibility guidance. The list includes structural, content, action, media and form entries, with separate approved presets for each input type.
@@ -163,6 +166,28 @@ Multiple search terms use AND semantics. Taxonomy filters cover category, implem
 The **Components** Layers view exposes this query through the add button beside component-layer search. The dialog presents category chips plus implementation, source and lifecycle filters. Selecting an entry shows its stable ID and version, author fields, slots, preset, dependency health, usage and accessibility notes.
 
 Primitive and Visual Component implementations can be inserted into the active page or Visual Component canvas. Primitive preset values merge over the module defaults. The store writes `catalogueInstance.entryId`, `entryVersion` and optional `presetId` on the backing node atomically with insertion, so undo removes both content and identity together. Pattern materialization and template-role placement remain disabled until their canonical factories exist; the picker does not synthesize partial content.
+
+## Versioning and migration
+
+Every persisted catalogue instance carries a semantic `entryVersion`. It may also carry `pinnedVersion` while an administrator deliberately retains an older definition, and `variantId` when an approved variant was applied.
+
+Runtime transforms register with `ComponentLibraryMigrationRegistry` as directed, increasing edges:
+
+```ts
+componentLibraryMigrationRegistry.register({
+  entryId: 'site.notice',
+  fromVersion: '1.0.0',
+  toVersion: '2.0.0',
+  migrate: (data) => ({
+    ...data,
+    props: { ...data.props, dismissible: false },
+  }),
+})
+```
+
+`migrateComponentLibraryInstance()` finds a complete path, clones the source data, runs every transform and validates the final preset and variant against the target definition. A missing path, pinned instance, thrown transform or invalid output returns an actionable failure without mutating the source node.
+
+`findComponentLibraryUsages()` scans both page and Visual Component trees. `planComponentLibraryMigration()` combines those usages with detached migration results to produce changed, unchanged and failed impact groups suitable for an administrator preview. It does not apply writes. Components Layers rows surface missing definitions, required migrations, pins, newer-than-installed versions and invalid presets or variants.
 
 ## Dependency health
 
@@ -190,6 +215,8 @@ Provider credentials, settings and secret values never enter the Component Libra
 - Do not use registration order as presentation order.
 - Do not auto-register every module as a governed authoring component.
 - Do not write catalogue identity after insertion in a second history transaction.
+- Do not mutate live nodes while calculating a migration or impact preview.
+- Do not skip semantic versions or invent an implicit migration across an unregistered gap.
 - Do not include provider credentials or secret configuration in requirements or availability.
 - Do not import internal files from outside the module; use `@core/component-library`.
 

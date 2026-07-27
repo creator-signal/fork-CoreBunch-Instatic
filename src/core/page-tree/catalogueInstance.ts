@@ -9,13 +9,20 @@
 import { Type, type Static } from '@core/utils/typeboxHelpers'
 import { compiledCheck } from '@core/utils/typeboxCompiler'
 
+const SEMVER_PATTERN =
+  '^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$'
+
 export const CatalogueInstanceMetadataSchema = Type.Object({
   /** Stable namespaced Component Library entry id. */
   entryId: Type.String({ minLength: 1 }),
   /** Entry or schema version used when this instance was authored. */
-  entryVersion: Type.String({ minLength: 1 }),
+  entryVersion: Type.String({ pattern: SEMVER_PATTERN }),
+  /** Explicitly retained definition version for an instance awaiting upgrade. */
+  pinnedVersion: Type.Optional(Type.String({ pattern: SEMVER_PATTERN })),
   /** Author-facing preset backed by the entry's canonical implementation. */
   presetId: Type.Optional(Type.String({ minLength: 1 })),
+  /** Approved variant whose values were applied to this instance. */
+  variantId: Type.Optional(Type.String({ minLength: 1 })),
   /**
    * Present on a pattern root. The listed backing nodes remain visible and
    * authorable while implementation-only descendants collapse behind the

@@ -51,3 +51,29 @@ export {
   ComponentLibraryRegistry,
   componentLibraryRegistry,
 } from './registry'
+
+export {
+  compareComponentLibraryVersions,
+  isValidComponentLibraryVersion,
+} from './version'
+
+export {
+  ComponentLibraryMigrationRegistry,
+  componentLibraryMigrationRegistry,
+  findComponentLibraryUsages,
+  migrateComponentLibraryInstance,
+  planComponentLibraryMigration,
+  resolveComponentLibraryInstanceStatus,
+} from './migration'
+
+export type {
+  ComponentLibraryInstanceStatus,
+  ComponentLibraryMigration,
+  ComponentLibraryMigrationChange,
+  ComponentLibraryMigrationData,
+  ComponentLibraryMigrationFailure,
+  ComponentLibraryMigrationPlan,
+  ComponentLibraryMigrationResult,
+  ComponentLibraryMigrationSuccess,
+  ComponentLibraryUsage,
+} from './migration'

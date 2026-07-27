@@ -1,8 +1,10 @@
 import type { Page, PageNode } from '@core/page-tree'
 import type {
   ComponentLibraryEntry,
+  ComponentLibraryInstanceStatus,
   ComponentLibraryStatus,
 } from '@core/component-library'
+import { resolveComponentLibraryInstanceStatus } from '@core/component-library'
 import type { VisualComponent } from '@core/visualComponents'
 
 export type ComponentLayerKind =
@@ -17,6 +19,10 @@ export type ComponentLayerKind =
 
 export type ComponentLayerStatus =
   | ComponentLibraryStatus
+  | Exclude<
+      ComponentLibraryInstanceStatus,
+      'current' | 'definition-missing'
+    >
   | 'missing-library-entry'
   | 'missing-component'
 
@@ -135,7 +141,7 @@ export function buildComponentTreeProjection({
         moduleId: node.moduleId,
         label: entryLabel(node, entry, moduleNames),
         kind: 'pattern',
-        status: entry?.status ?? 'missing-library-entry',
+        status: componentLayerStatus(node, entry),
         entryId: metadata.entryId,
         presetId: metadata.presetId,
         readOnly: false,
@@ -220,7 +226,7 @@ function projectOrdinaryNode({
       ...base,
       label: entryLabel(node, entry, moduleNames),
       kind: componentLayerKind(entry),
-      status: entry.status,
+      status: componentLayerStatus(node, entry),
     }
   }
 
@@ -233,6 +239,19 @@ function projectOrdinaryNode({
     status: metadata ? 'missing-library-entry' : undefined,
     readOnly: true,
   }
+}
+
+function componentLayerStatus(
+  node: PageNode,
+  entry: ComponentLibraryEntry | undefined,
+): ComponentLayerStatus {
+  const metadata = node.catalogueInstance
+  if (!metadata) return entry?.status ?? 'missing-library-entry'
+  const instanceStatus = resolveComponentLibraryInstanceStatus(metadata, entry)
+  if (instanceStatus === 'definition-missing') return 'missing-library-entry'
+  return instanceStatus === 'current'
+    ? entry?.status ?? 'missing-library-entry'
+    : instanceStatus
 }
 
 function entryLabel(

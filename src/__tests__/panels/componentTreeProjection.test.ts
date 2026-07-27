@@ -89,7 +89,7 @@ function componentPage() {
         children: ['implementation'],
         catalogueInstance: {
           entryId: 'site.hero',
-          entryVersion: '1',
+          entryVersion: '1.0.0',
           presetId: 'image-left',
           pattern: { authorableNodeIds: ['heading'] },
         },
@@ -104,7 +104,7 @@ function componentPage() {
         moduleId: 'base.text',
         catalogueInstance: {
           entryId: 'instatic.heading',
-          entryVersion: '1',
+          entryVersion: '1.0.0',
         },
       }),
       decoration: makeNode({

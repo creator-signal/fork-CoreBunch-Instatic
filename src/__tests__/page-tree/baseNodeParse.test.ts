@@ -33,7 +33,7 @@ function rawStoredNode(): Record<string, unknown> {
     propBindings: { text: { paramId: 'p1' }, broken: { nope: 1 } },
     catalogueInstance: {
       entryId: 'site.hero',
-      entryVersion: '1',
+      entryVersion: '1.0.0',
       presetId: 'image-left',
       pattern: { authorableNodeIds: ['child-a'] },
     },
@@ -95,7 +95,7 @@ describe('parseBaseNodeFields — page/VC parse equivalence', () => {
     expect(base.propBindings).toEqual({ text: { paramId: 'p1' } })
     expect(base.catalogueInstance).toEqual({
       entryId: 'site.hero',
-      entryVersion: '1',
+      entryVersion: '1.0.0',
       presetId: 'image-left',
       pattern: { authorableNodeIds: ['child-a'] },
     })

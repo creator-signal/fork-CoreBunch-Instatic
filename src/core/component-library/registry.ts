@@ -1,5 +1,6 @@
 import { parseComponentLibraryEntry } from './definition'
 import { compareComponentLibraryEntries } from './query'
+import { compareComponentLibraryVersions } from './version'
 import type {
   ComponentLibraryEntry,
   ComponentLibrarySource,
@@ -9,6 +10,7 @@ type ComponentLibraryRegistryListener = () => void
 
 export class ComponentLibraryRegistry {
   private readonly entries = new Map<string, ComponentLibraryEntry>()
+  private readonly versions = new Map<string, Map<string, ComponentLibraryEntry>>()
   private readonly listeners = new Set<ComponentLibraryRegistryListener>()
   private currentGeneration = 0
 
@@ -22,6 +24,7 @@ export class ComponentLibraryRegistry {
     }
 
     this.entries.set(entry.id, entry)
+    this.rememberVersion(entry)
     this.emitChange()
     return entry
   }
@@ -29,12 +32,15 @@ export class ComponentLibraryRegistry {
   registerOrReplace(raw: unknown): ComponentLibraryEntry {
     const entry = parseComponentLibraryEntry(raw)
     this.entries.set(entry.id, entry)
+    this.rememberVersion(entry)
     this.emitChange()
     return entry
   }
 
   unregister(id: string): void {
-    if (this.entries.delete(id)) this.emitChange()
+    const removed = this.entries.delete(id)
+    this.versions.delete(id)
+    if (removed) this.emitChange()
   }
 
   unregisterSource(source: ComponentLibrarySource): void {
@@ -42,6 +48,7 @@ export class ComponentLibraryRegistry {
     for (const [id, entry] of this.entries) {
       if (!sameSource(entry.source, source)) continue
       this.entries.delete(id)
+      this.versions.delete(id)
       changed = true
     }
     if (changed) this.emitChange()
@@ -59,6 +66,22 @@ export class ComponentLibraryRegistry {
       )
     }
     return entry
+  }
+
+  /**
+   * Resolve a retained definition version for pinned instances, migration
+   * previews and rollback. Intentional replacements retain prior versions
+   * until the entry or owning source is unregistered.
+   */
+  getVersion(id: string, version: string): ComponentLibraryEntry | undefined {
+    return this.versions.get(id)?.get(version)
+  }
+
+  listVersions(id: string): ComponentLibraryEntry[] {
+    return Array.from(this.versions.get(id)?.values() ?? [])
+      .sort((left, right) =>
+        compareComponentLibraryVersions(left.version, right.version),
+      )
   }
 
   has(id: string): boolean {
@@ -87,6 +110,15 @@ export class ComponentLibraryRegistry {
   private emitChange(): void {
     this.currentGeneration += 1
     for (const listener of this.listeners) listener()
+  }
+
+  private rememberVersion(entry: ComponentLibraryEntry): void {
+    let definitions = this.versions.get(entry.id)
+    if (!definitions) {
+      definitions = new Map()
+      this.versions.set(entry.id, definitions)
+    }
+    definitions.set(entry.version, entry)
   }
 }
 

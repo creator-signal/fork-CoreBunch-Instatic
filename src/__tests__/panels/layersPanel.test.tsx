@@ -46,7 +46,7 @@ function loadSite(): void {
         children: ['implementation'],
         catalogueInstance: {
           entryId: 'site.hero',
-          entryVersion: '1',
+          entryVersion: '1.0.0',
           pattern: { authorableNodeIds: [] },
         },
       }),

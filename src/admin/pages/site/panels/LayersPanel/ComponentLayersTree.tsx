@@ -279,6 +279,14 @@ function LayerBadge({ row }: { row: ComponentLayerRow }) {
       ? 'missing'
       : row.status === 'deprecated'
         ? 'deprecated'
+        : row.status === 'migration-required'
+          ? 'upgrade'
+          : row.status === 'version-pinned'
+            ? 'pinned'
+            : row.status === 'version-ahead' ||
+                row.status === 'invalid-preset' ||
+                row.status === 'invalid-variant'
+              ? 'warning'
         : row.kind === 'slot'
           ? 'slot'
           : row.kind === 'freeform'

@@ -254,7 +254,7 @@ const availability = resolveComponentLibraryAvailability(entry, {
 })
 ```
 
-Missing dependency IDs resolve to `unavailable`. Any unavailable dependency makes the entry unavailable; otherwise a degraded dependency makes it degraded. The result contains only dependency kind, ID and health.
+Missing dependency IDs resolve to `unavailable`. Any unavailable dependency makes the entry unavailable; otherwise a degraded dependency makes it degraded. The result contains only dependency kind, ID and health. The Component Library detail pane lists each non-healthy dependency by kind and stable ID, summarizes the exact reason, and blocks insertion only when at least one requirement is unavailable. Degraded entries remain insertable with a visible warning.
 
 Provider credentials, settings and secret values never enter the Component Library registry.
 

@@ -164,6 +164,26 @@
     font-weight: 700;
 }
 
+.availabilityNotice {
+    display: grid;
+    gap: var(--space-3xs);
+    padding: var(--space-m);
+    border: 1px solid var(--border);
+    border-radius: var(--panel-radius);
+    background: var(--bg-surface-3);
+}
+
+.availabilityNotice strong {
+    color: var(--text);
+    font-size: var(--text-xs);
+}
+
+.availabilityNotice span {
+    color: var(--text-subtle);
+    font-size: var(--text-xs);
+    line-height: 1.5;
+}
+
 .detailSection {
     display: grid;
     gap: var(--space-xs);

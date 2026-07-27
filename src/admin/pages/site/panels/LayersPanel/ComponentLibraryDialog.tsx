@@ -3,6 +3,7 @@ import {
   componentLibraryRegistry,
   filterComponentLibraryEntries,
   resolveComponentLibraryAvailability,
+  type ComponentLibraryAvailability,
   type ComponentLibraryDependencyState,
   type ComponentLibraryEntry,
   type ComponentLibraryImplementation,
@@ -58,11 +59,13 @@ const STATUS_OPTIONS = [
 interface ComponentLibraryDialogProps {
   open: boolean
   onClose: () => void
+  dependencyState?: ComponentLibraryDependencyState
 }
 
 export function ComponentLibraryDialog({
   open,
   onClose,
+  dependencyState = EMPTY_DEPENDENCY_STATE,
 }: ComponentLibraryDialogProps) {
   const permissions = useEditorPermissions()
   useSyncExternalStore(
@@ -98,11 +101,18 @@ export function ComponentLibraryDialog({
     filteredEntries.find((entry) => entry.id === selectedId) ??
     filteredEntries[0]
   const availability = selectedEntry
-    ? resolveComponentLibraryAvailability(selectedEntry, EMPTY_DEPENDENCY_STATE)
+    ? resolveComponentLibraryAvailability(selectedEntry, dependencyState)
     : null
   const insertionSupported = selectedEntry
     ? supportsCanvasInsertion(selectedEntry.implementation)
     : false
+  const insertionBlockReason = selectedEntry
+    ? componentInsertionBlockReason({
+        availability,
+        insertionSupported,
+        canEditComponents: permissions.canEditComponents,
+      })
+    : undefined
 
   const selectEntry = (entry: ComponentLibraryEntry): void => {
     setSelectedId(entry.id)
@@ -141,9 +151,7 @@ export function ComponentLibraryDialog({
               availability?.health === 'unavailable' ||
               !insertionSupported
             }
-            tooltip={!insertionSupported && selectedEntry
-              ? 'This implementation type is not available for canvas insertion yet.'
-              : undefined}
+            tooltip={insertionBlockReason}
           >
             Insert component
           </Button>
@@ -213,7 +221,10 @@ export function ComponentLibraryDialog({
           {selectedEntry ? (
             <ComponentLibraryDetails
               entry={selectedEntry}
-              availability={availability?.health ?? 'unavailable'}
+              availability={availability ?? {
+                health: 'unavailable',
+                issues: [],
+              }}
               presetId={presetId}
               onPresetChange={setPresetId}
             />
@@ -267,7 +278,7 @@ function ComponentLibraryResult({
 
 interface ComponentLibraryDetailsProps {
   entry: ComponentLibraryEntry
-  availability: 'available' | 'degraded' | 'unavailable'
+  availability: ComponentLibraryAvailability
   presetId: string
   onPresetChange: (value: string) => void
 }
@@ -294,8 +305,27 @@ function ComponentLibraryDetails({
         <TagPill label={implementationLabel(entry.implementation.type)} size="xs" />
         <TagPill label={sourceLabel(entry)} size="xs" />
         <TagPill label={entry.status} size="xs" muted={entry.status !== 'stable'} />
-        <TagPill label={availability} size="xs" muted={availability !== 'available'} />
+        <TagPill
+          label={availability.health}
+          size="xs"
+          muted={availability.health !== 'available'}
+        />
       </div>
+
+      {availability.health !== 'available' ? (
+        <div
+          className={styles.availabilityNotice}
+          role="status"
+          data-health={availability.health}
+        >
+          <strong>
+            {availability.health === 'unavailable'
+              ? 'Insertion unavailable'
+              : 'Dependency degraded'}
+          </strong>
+          <span>{dependencyAvailabilitySummary(availability)}</span>
+        </div>
+      ) : null}
 
       {entry.presets.length > 0 ? (
         <label className={styles.field}>
@@ -325,6 +355,11 @@ function ComponentLibraryDetails({
           `${slot.name} · ${slot.minItems}${slot.maxItems === undefined ? '+' : `–${slot.maxItems}`} items`,
         )}
         empty="This component has no named authoring slots."
+      />
+      <DetailSection
+        title="Dependencies"
+        items={availability.issues.map(dependencyIssueLabel)}
+        empty="All required capabilities, provider adapters and plugins are available."
       />
       {entry.documentation.usage ? (
         <DetailSection title="Usage" items={[entry.documentation.usage]} />
@@ -391,4 +426,66 @@ function sourceLabel(entry: ComponentLibraryEntry): string {
   if (entry.source.type === 'design-system') return entry.source.name
   if (entry.source.type === 'plugin') return entry.source.name ?? entry.source.pluginId
   return entry.source.type.replaceAll('-', ' ')
+}
+
+function dependencyIssueLabel(
+  issue: ComponentLibraryAvailability['issues'][number],
+): string {
+  return `${dependencyKindLabel(issue.kind)} · ${issue.id} · ${issue.health}`
+}
+
+function dependencyKindLabel(
+  kind: ComponentLibraryAvailability['issues'][number]['kind'],
+): string {
+  if (kind === 'provider-adapter') return 'Provider adapter'
+  return kind.charAt(0).toUpperCase() + kind.slice(1)
+}
+
+function dependencyAvailabilitySummary(
+  availability: ComponentLibraryAvailability,
+): string {
+  if (availability.issues.length === 0) {
+    return 'No dependency details are available.'
+  }
+  const unavailable = availability.issues
+    .filter((issue) => issue.health === 'unavailable')
+    .map((issue) => `${dependencyKindLabel(issue.kind)} “${issue.id}”`)
+  const degraded = availability.issues
+    .filter((issue) => issue.health === 'degraded')
+    .map((issue) => `${dependencyKindLabel(issue.kind)} “${issue.id}”`)
+  const parts = [
+    unavailable.length > 0
+      ? `${joinReadable(unavailable)} ${unavailable.length === 1 ? 'is' : 'are'} unavailable`
+      : '',
+    degraded.length > 0
+      ? `${joinReadable(degraded)} ${degraded.length === 1 ? 'is' : 'are'} degraded`
+      : '',
+  ].filter(Boolean)
+  return `${parts.join('; ')}.`
+}
+
+function joinReadable(items: readonly string[]): string {
+  if (items.length <= 1) return items[0] ?? ''
+  return `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`
+}
+
+function componentInsertionBlockReason({
+  availability,
+  insertionSupported,
+  canEditComponents,
+}: {
+  availability: ComponentLibraryAvailability | null
+  insertionSupported: boolean
+  canEditComponents: boolean
+}): string | undefined {
+  if (!canEditComponents) {
+    return 'You do not have permission to insert governed components.'
+  }
+  if (!insertionSupported) {
+    return 'This implementation type is not available for canvas insertion yet.'
+  }
+  if (availability?.health === 'unavailable') {
+    return dependencyAvailabilitySummary(availability)
+  }
+  return undefined
 }

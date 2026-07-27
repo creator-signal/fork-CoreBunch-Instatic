@@ -50,6 +50,10 @@ describe('ComponentPropertiesView', () => {
     expect(screen.queryByTestId('property-control-inputType')).toBeNull()
     expect(screen.queryByText('Attributes')).toBeNull()
     expect(screen.getByText('Accessibility')).toBeTruthy()
+    expect(screen.getByLabelText('Accessibility diagnostics')).toBeTruthy()
+    expect(screen.getByText('a11y.form-control-label', { exact: false }))
+      .toBeTruthy()
+    expect(screen.getAllByText('form · automated')).toHaveLength(2)
   })
 
   it('enables approved fields for a component-only author', () => {

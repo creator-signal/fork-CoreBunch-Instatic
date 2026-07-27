@@ -22,6 +22,10 @@ import type { PublishedPageRuntimeAssets } from '@core/site-runtime'
 import type { PublishedRuntimePackageImportmap, SiteCssBundle } from '@core/publisher'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import { registry } from '@core/module-engine'
+import {
+  assertComponentLibraryAccessibilityPublishable,
+  componentLibraryRegistry,
+} from '@core/component-library'
 import { isTemplatePage, resolveNotFoundTemplate } from '@core/templates'
 import type { DbClient } from '../db/client'
 import { nextDataRowVersionNumber } from '../repositories/data'
@@ -100,6 +104,15 @@ async function publishDraftSiteLocked(
   // paths under that same lock, so reading outside the transaction is stable.
   const site = await getDraftSiteDocument(db)
   if (!site) throw new Error('draft site not found')
+
+  assertComponentLibraryAccessibilityPublishable(
+    site,
+    componentLibraryRegistry,
+    {
+      blockingRuleIds:
+        site.settings.accessibility?.blockingRuleIds ?? [],
+    },
+  )
 
   const runtime = normalizeSiteRuntimeConfig(site.runtime)
   const dependencyCache = Object.keys(runtime.dependencyLock.packages).length > 0

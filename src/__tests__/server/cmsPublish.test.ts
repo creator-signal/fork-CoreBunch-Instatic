@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import type { SiteDocument, SiteShell } from '@core/page-tree'
+import type { Page, SiteDocument, SiteShell } from '@core/page-tree'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import type { DbResult } from '../../../server/db'
 import { saveDraftSite } from '../../../server/repositories/site'
@@ -222,7 +222,7 @@ function makeSiteShell(overrides: Partial<SiteShell> = {}): SiteShell {
   }
 }
 
-function makeHomePage(text: string) {
+function makeHomePage(text: string): Page {
   return {
     id: 'page_home',
     title: 'Home',
@@ -275,6 +275,37 @@ describe('CMS publishing', () => {
     expect(result).toMatchObject({ publishedPages: 1 })
     expect(state.dataRowVersions).toHaveLength(1)
     expect(published?.site.pages[0].nodes.text_1.props.text).toBe('Published headline')
+  })
+
+  it('blocks only accessibility rules selected by site publication policy', async () => {
+    const { state, db } = createPublishFakeDb()
+    const shell = makeSiteShell({
+      settings: {
+        shortcuts: {},
+        accessibility: {
+          blockingRuleIds: ['a11y.accessible-name'],
+        },
+      },
+    })
+    await saveDraftSite(db, shell)
+    const page = makeHomePage('')
+    page.nodes.text_1.catalogueInstance = {
+      entryId: 'base.heading',
+      entryVersion: '1.0.0',
+      presetId: 'heading',
+    }
+    await createDataRow(db, {
+      id: page.id,
+      tableId: 'pages',
+      cells: pageToCells(page),
+      slug: page.slug,
+    }, 'admin_1')
+
+    await expect(publishDraftSite(db, 'admin_1')).rejects.toThrow(
+      'Accessibility policy blocked publication',
+    )
+    expect(state.dataRowVersions).toHaveLength(0)
+    expect(state.siteSnapshots).toHaveLength(0)
   })
 
   it('does not expose later draft changes until another publish occurs', async () => {

@@ -32,6 +32,10 @@ function assertEntryInvariants(entry: ComponentLibraryEntry): void {
   assertUniqueIds('variants', entry.variants.map((variant) => variant.id))
   assertUniqueIds('presets', entry.presets.map((preset) => preset.id))
   assertUniqueIds('slots', entry.slots.map((slot) => slot.id))
+  assertUniqueIds(
+    'accessibility.checks',
+    entry.accessibility?.checks.map((check) => check.rule) ?? [],
+  )
 
   if (entry.replacementEntryId === entry.id) {
     throw new ComponentLibraryDefinitionError(

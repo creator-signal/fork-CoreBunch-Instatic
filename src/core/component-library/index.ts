@@ -1,5 +1,9 @@
 export {
   ComponentLibraryAvailabilitySchema,
+  ComponentLibraryAccessibilityCategorySchema,
+  ComponentLibraryAccessibilityCheckSchema,
+  ComponentLibraryAccessibilityContractSchema,
+  ComponentLibraryAccessibilityRuleSchema,
   ComponentLibraryConstraintsSchema,
   ComponentLibraryDependencyHealthSchema,
   ComponentLibraryDependencyIssueSchema,
@@ -18,6 +22,10 @@ export {
 } from './schemas'
 
 export type {
+  ComponentLibraryAccessibilityCategory,
+  ComponentLibraryAccessibilityCheck,
+  ComponentLibraryAccessibilityContract,
+  ComponentLibraryAccessibilityRule,
   ComponentLibraryAvailability,
   ComponentLibraryConstraints,
   ComponentLibraryDependencyHealth,
@@ -33,6 +41,19 @@ export type {
   ComponentLibrarySourceType,
   ComponentLibraryStatus,
 } from './schemas'
+
+export {
+  analyseComponentLibraryAccessibility,
+  analyseSiteComponentLibraryAccessibility,
+  blockingComponentLibraryAccessibilityDiagnostics,
+  ComponentLibraryAccessibilityPublishError,
+  assertComponentLibraryAccessibilityPublishable,
+} from './accessibility'
+
+export type {
+  ComponentLibraryAccessibilityDiagnostic,
+  ComponentLibraryAccessibilityPolicy,
+} from './accessibility'
 
 export {
   ComponentLibraryDefinitionError,

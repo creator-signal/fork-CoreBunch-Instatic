@@ -33,6 +33,21 @@ import { SiteFontsSettingsSchema, parseSiteFontsSettings } from '@core/fonts'
 // SiteSettingsSchema
 // ---------------------------------------------------------------------------
 
+export const SiteAccessibilityPolicySchema = Type.Object(
+  {
+    /**
+     * Component Library accessibility rule IDs that are allowed to block
+     * publication. An empty or absent policy keeps diagnostics advisory.
+     */
+    blockingRuleIds: Type.Array(Type.String(), { uniqueItems: true }),
+  },
+  { additionalProperties: false },
+)
+
+export type SiteAccessibilityPolicy = Static<
+  typeof SiteAccessibilityPolicySchema
+>
+
 export const SiteSettingsSchema = Type.Object({
   metaTitle: Type.Optional(Type.String()),
   metaDescription: Type.Optional(Type.String()),
@@ -44,6 +59,8 @@ export const SiteSettingsSchema = Type.Object({
   fonts: Type.Optional(SiteFontsSettingsSchema),
   /** Keyboard shortcut overrides — defaults to {} — handled in parseSiteSettings. */
   shortcuts: Type.Record(Type.String(), Type.String()),
+  /** Optional site-owned publication policy for accessibility diagnostics. */
+  accessibility: Type.Optional(SiteAccessibilityPolicySchema),
 })
 
 export type SiteSettings = Static<typeof SiteSettingsSchema>
@@ -85,6 +102,12 @@ export function parseSiteSettings(raw: unknown): SiteSettings {
     : undefined
 
   const fonts = r.fonts != null ? parseSiteFontsSettings(r.fonts) : undefined
+  const accessibility = compiledCheck(
+    SiteAccessibilityPolicySchema,
+    r.accessibility,
+  )
+    ? (r.accessibility as SiteAccessibilityPolicy)
+    : undefined
 
   return {
     ...(typeof r.metaTitle === 'string' ? { metaTitle: r.metaTitle } : {}),
@@ -93,6 +116,7 @@ export function parseSiteSettings(raw: unknown): SiteSettings {
     ...(typeof r.language === 'string' ? { language: r.language } : {}),
     framework,
     fonts,
+    ...(accessibility ? { accessibility } : {}),
     shortcuts,
   }
 }

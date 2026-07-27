@@ -92,6 +92,32 @@ describe('Component Library definitions', () => {
         maxItems: 1,
       }],
     }))).toThrow('maxItems must be greater than or equal to minItems')
+
+    expect(() => parseComponentLibraryEntry(entry({
+      accessibility: {
+        checks: [
+          {
+            rule: 'a11y.accessible-name',
+            category: 'naming',
+            enforcement: 'automated',
+            severity: 'error',
+            fields: ['label'],
+            summary: 'Requires a name.',
+            remediation: 'Add a label.',
+          },
+          {
+            rule: 'a11y.accessible-name',
+            category: 'naming',
+            enforcement: 'manual',
+            severity: 'warning',
+            summary: 'Duplicate rule.',
+            remediation: 'Remove the duplicate.',
+          },
+        ],
+      },
+    }))).toThrow(
+      'Duplicate accessibility.checks identifier "a11y.accessible-name"',
+    )
   })
 
   it('requires capability-backed entries to name a real dependency', () => {

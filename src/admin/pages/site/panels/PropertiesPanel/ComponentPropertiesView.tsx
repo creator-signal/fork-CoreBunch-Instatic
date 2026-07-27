@@ -1,5 +1,6 @@
 import type { AnyModuleDefinition, PropertyControl } from '@core/module-engine'
 import {
+  analyseComponentLibraryAccessibility,
   componentLibraryRegistry,
   findComponentLibraryConversionCandidates,
   resolveComponentLibraryInstanceStatus,
@@ -8,7 +9,7 @@ import {
 } from '@core/component-library'
 import type { PageNode } from '@core/page-tree'
 import { useEditorPermissions } from '@site/editorPermissionsContext'
-import { useEditorStore } from '@site/store/store'
+import { selectActiveCanvasPage, useEditorStore } from '@site/store/store'
 import { PropertyControlRenderer } from '@site/property-controls/PropertyControlRenderer'
 import { Button } from '@ui/components/Button'
 import { EmptyState } from '@ui/components/EmptyState'
@@ -36,10 +37,21 @@ export function ComponentPropertiesView({
   const setLayersViewMode = useEditorStore((state) => state.setLayersViewMode)
   const updateField = useEditorStore((state) => state.updateComponentLibraryField)
   const applyOption = useEditorStore((state) => state.applyComponentLibraryOption)
+  const activePage = useEditorStore(selectActiveCanvasPage)
+  const blockingRuleIds = useEditorStore(
+    (state) => state.site?.settings.accessibility?.blockingRuleIds,
+  )
   const convertPrimitive = useEditorStore(
     (state) => state.convertFreeformPrimitiveToComponent,
   )
   const metadata = node.catalogueInstance
+  const accessibilityDiagnostics = activePage
+    ? analyseComponentLibraryAccessibility(
+        activePage,
+        componentLibraryRegistry,
+        { blockingRuleIds: blockingRuleIds ?? [] },
+      ).filter((diagnostic) => diagnostic.nodeId === node.id)
+    : []
   const [conversionOpen, setConversionOpen] = useState(false)
   const conversionCandidates = metadata
     ? []
@@ -200,6 +212,49 @@ export function ComponentPropertiesView({
                   {' · '}
                   {slot.minItems}{slot.maxItems === undefined ? '+' : `–${slot.maxItems}`} items
                 </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {(entry.accessibility?.checks.length ?? 0) > 0 ? (
+        <section className={styles.section}>
+          <h4>Accessibility contract</h4>
+          <ul className={styles.slotList}>
+            {entry.accessibility?.checks.map((check) => (
+              <li key={check.rule}>
+                <span>
+                  {check.category}
+                  {' · '}
+                  {check.enforcement.replace('-', ' ')}
+                </span>
+                <span>{check.summary}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {accessibilityDiagnostics.length > 0 ? (
+        <section
+          className={styles.section}
+          aria-label="Accessibility diagnostics"
+        >
+          <h4>Accessibility diagnostics</h4>
+          <ul className={styles.diagnosticList}>
+            {accessibilityDiagnostics.map((diagnostic) => (
+              <li
+                key={`${diagnostic.rule}:${diagnostic.message}`}
+                data-blocking={diagnostic.blocking ? 'true' : 'false'}
+              >
+                <span>
+                  {diagnostic.blocking ? 'Publication blocker' : diagnostic.severity}
+                  {' · '}
+                  {diagnostic.rule}
+                </span>
+                <span>{diagnostic.message}</span>
+                <span>{diagnostic.remediation}</span>
               </li>
             ))}
           </ul>

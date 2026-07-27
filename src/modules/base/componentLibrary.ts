@@ -1,5 +1,8 @@
 import {
   componentLibraryRegistry,
+  type ComponentLibraryAccessibilityCategory,
+  type ComponentLibraryAccessibilityCheck,
+  type ComponentLibraryAccessibilityRule,
   type ComponentLibraryEntry,
   type ComponentLibraryField,
 } from '@core/component-library'
@@ -25,6 +28,7 @@ interface PrimitiveEntryOptions {
     providerAdapters: string[]
     plugins: string[]
   }
+  accessibilityChecks?: ComponentLibraryAccessibilityCheck[]
   usage: string
   accessibility: string
 }
@@ -81,8 +85,91 @@ function primitiveEntry(options: PrimitiveEntryOptions): ComponentLibraryEntry {
       usage: options.usage,
       accessibility: options.accessibility,
     },
+    accessibility: {
+      checks: options.accessibilityChecks ?? [],
+    },
   }
 }
+
+function accessibilityCheck(
+  rule: ComponentLibraryAccessibilityRule,
+  category: ComponentLibraryAccessibilityCategory,
+  enforcement: ComponentLibraryAccessibilityCheck['enforcement'],
+  summary: string,
+  remediation: string,
+  fields?: string[],
+  severity: ComponentLibraryAccessibilityCheck['severity'] = 'warning',
+): ComponentLibraryAccessibilityCheck {
+  return {
+    rule,
+    category,
+    enforcement,
+    severity,
+    ...(fields ? { fields } : {}),
+    summary,
+    remediation,
+  }
+}
+
+function accessibleNameCheck(field: string): ComponentLibraryAccessibilityCheck {
+  return accessibilityCheck(
+    'a11y.accessible-name',
+    'naming',
+    'automated',
+    'This component requires a non-empty accessible name.',
+    `Provide a specific ${field} value that explains the component's purpose.`,
+    [field],
+    'error',
+  )
+}
+
+function providerFallbackCheck(): ComponentLibraryAccessibilityCheck {
+  return accessibilityCheck(
+    'a11y.provider-fallback',
+    'provider',
+    'automated',
+    'Provider content requires both an accessible title and fallback text.',
+    'Provide a specific title and a useful alternative when provider content cannot load.',
+    ['title', 'fallbackText'],
+    'error',
+  )
+}
+
+function behaviorCheck(
+  rule: ComponentLibraryAccessibilityRule,
+  category: ComponentLibraryAccessibilityCategory,
+  summary: string,
+  remediation: string,
+): ComponentLibraryAccessibilityCheck {
+  return accessibilityCheck(
+    rule,
+    category,
+    'behavior-test',
+    summary,
+    remediation,
+  )
+}
+
+const FORM_CONTROL_ACCESSIBILITY_CHECKS: ComponentLibraryAccessibilityCheck[] = [
+  accessibilityCheck(
+    'a11y.form-control-label',
+    'form',
+    'automated',
+    'This form control has no visible associated label.',
+    'Add a visible Label immediately before the control or explicitly target its field ID.',
+    undefined,
+    'error',
+  ),
+  accessibilityCheck(
+    'a11y.unique-field-id',
+    'form',
+    'automated',
+    'Form field IDs must be present and unique within the page.',
+    'Assign a stable field ID that is not used by another control.',
+    ['fieldId'],
+    'error',
+  ),
+]
 
 const textField: ComponentLibraryField = {
   key: 'text',
@@ -167,6 +254,7 @@ function inputEntry(
       values: { inputType },
     },
     allowedParentEntryIds: formFieldParentEntryIds,
+    accessibilityChecks: FORM_CONTROL_ACCESSIBILITY_CHECKS,
     usage: `Use ${name} when the submitted value is ${description.toLowerCase()}`,
     accessibility: 'Pair the input with a visible Label and useful autocomplete value.',
   })
@@ -215,6 +303,17 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       name: 'Heading',
       values: { text: 'Heading', tag: 'h2' },
     },
+    accessibilityChecks: [
+      accessibleNameCheck('text'),
+      accessibilityCheck(
+        'a11y.heading-order',
+        'heading',
+        'automated',
+        'Heading levels should not skip a level in page order.',
+        'Choose the next logical heading level based on document structure.',
+        ['tag'],
+      ),
+    ],
     usage: 'Introduce a page or section with a meaningful heading.',
     accessibility: 'Keep heading levels logical and do not choose a level for visual size alone.',
   }),
@@ -248,6 +347,15 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       { key: 'loading', label: 'Loading', type: 'select', required: true },
       { key: 'fetchPriority', label: 'Fetch priority', type: 'select', required: true },
     ],
+    accessibilityChecks: [
+      accessibilityCheck(
+        'a11y.image-alternative',
+        'media',
+        'manual',
+        'Image alternative text must match the authored context.',
+        'Review the Media Library alternative text and mark decorative images appropriately.',
+      ),
+    ],
     usage: 'Use an uploaded asset with loading behavior appropriate to its page position.',
     accessibility: 'Provide meaningful alternative text in the Media Library or mark decorative images.',
   }),
@@ -265,6 +373,23 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       { key: 'target', label: 'Open in', type: 'select', required: true },
       { key: 'disabled', label: 'Disabled', type: 'boolean', required: false },
     ],
+    accessibilityChecks: [
+      accessibleNameCheck('label'),
+      accessibilityCheck(
+        'a11y.touch-target',
+        'touch',
+        'manual',
+        'The rendered action needs an adequate touch target.',
+        'Verify the final design provides sufficient target size and spacing.',
+      ),
+      accessibilityCheck(
+        'a11y.contrast',
+        'contrast',
+        'manual',
+        'Text, focus and disabled states require sufficient contrast.',
+        'Review the final token combination in every supported theme and state.',
+      ),
+    ],
     usage: 'Use for an action or prominent navigation destination.',
     accessibility: 'Use a specific label that describes the result of activating the control.',
   }),
@@ -281,6 +406,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       { key: 'href', label: 'Destination', type: 'url', required: true },
       { key: 'target', label: 'Open in', type: 'select', required: true },
     ],
+    accessibilityChecks: [accessibleNameCheck('text')],
     usage: 'Use for navigation within text or a group of linked content.',
     accessibility: 'Link text must make sense without relying on surrounding prose.',
   }),
@@ -314,6 +440,16 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       { key: 'controls', label: 'Show controls', type: 'boolean', required: false },
       { key: 'autoplay', label: 'Autoplay', type: 'boolean', required: false, advanced: true },
     ],
+    accessibilityChecks: [
+      accessibleNameCheck('title'),
+      accessibilityCheck(
+        'a11y.motion-control',
+        'motion',
+        'manual',
+        'Autoplay and motion behavior require user control.',
+        'Keep controls available and review reduced-motion and autoplay behavior.',
+      ),
+    ],
     usage: 'Use for a video asset hosted by the site. Use YouTube Embed for provider video.',
     accessibility: 'Provide an accurate title, captions where needed and user controls.',
   }),
@@ -345,6 +481,15 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       providerAdapters: ['media.youtube'],
       plugins: [],
     },
+    accessibilityChecks: [
+      providerFallbackCheck(),
+      behaviorCheck(
+        'a11y.focus-contract',
+        'focus',
+        'Consent activation and the loaded player must preserve a predictable focus path.',
+        'Verify focus remains visible and does not move unexpectedly when the provider loads.',
+      ),
+    ],
     usage: 'Paste an approved YouTube URL; the player loads only after marketing consent or explicit activation.',
     accessibility: 'Provide an accurate title and a meaningful fallback when provider content is blocked.',
   }),
@@ -376,6 +521,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       providerAdapters: ['maps.openstreetmap'],
       plugins: [],
     },
+    accessibilityChecks: [providerFallbackCheck()],
     usage: 'Paste an OpenStreetMap export URL from the approved provider origin.',
     accessibility: 'Use a title that identifies the location and provide the address in ordinary page text.',
   }),
@@ -393,6 +539,27 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       { key: 'activation', label: 'Keyboard activation', type: 'select', required: true },
     ],
     allowedChildEntryIds: ['base.tab-panel'],
+    accessibilityChecks: [
+      accessibleNameCheck('label'),
+      behaviorCheck(
+        'a11y.keyboard-contract',
+        'keyboard',
+        'Tabs require Arrow, Home, End, Enter and Space behavior appropriate to activation mode.',
+        'Run the tab runtime keyboard behavior suite after implementation changes.',
+      ),
+      behaviorCheck(
+        'a11y.focus-contract',
+        'focus',
+        'Tabs require roving focus and a visible active panel.',
+        'Verify selected state, focus order and validation-driven panel activation.',
+      ),
+      behaviorCheck(
+        'a11y.no-javascript-fallback',
+        'semantic',
+        'Every tab panel must remain available without JavaScript.',
+        'Verify the server-rendered output leaves all panels visible.',
+      ),
+    ],
     usage: 'Organize related peer sections when visitors benefit from switching between them.',
     accessibility: 'Arrow, Home and End keys move through tabs; manual activation also uses Enter or Space.',
   }),
@@ -411,6 +578,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       { key: 'disabled', label: 'Disabled', type: 'boolean', required: false },
     ],
     allowedParentEntryIds: ['base.tabs'],
+    accessibilityChecks: [accessibleNameCheck('label')],
     usage: 'Add one labelled content region to Tabs.',
     accessibility: 'Use a short unique label; all panels remain visible when JavaScript is unavailable.',
   }),
@@ -426,6 +594,21 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       { key: 'label', label: 'Accessible label', type: 'text', required: true },
     ],
     allowedChildEntryIds: ['base.accordion-item'],
+    accessibilityChecks: [
+      accessibleNameCheck('label'),
+      behaviorCheck(
+        'a11y.keyboard-contract',
+        'keyboard',
+        'Accordion items must retain native keyboard-operable disclosure behavior.',
+        'Verify the published details and summary elements remain native controls.',
+      ),
+      behaviorCheck(
+        'a11y.no-javascript-fallback',
+        'semantic',
+        'Accordion content must remain operable without JavaScript.',
+        'Verify native details and summary markup in published output.',
+      ),
+    ],
     usage: 'Organize sections that visitors can expand independently.',
     accessibility: 'Uses native details and summary behavior with a complete no-JavaScript fallback.',
   }),
@@ -442,6 +625,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       { key: 'open', label: 'Open initially', type: 'boolean', required: false },
     ],
     allowedParentEntryIds: ['base.accordion'],
+    accessibilityChecks: [accessibleNameCheck('title')],
     usage: 'Add one independently expandable section.',
     accessibility: 'Write a specific summary that identifies the hidden content.',
   }),
@@ -460,6 +644,20 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       { key: 'successBehavior', label: 'Success behavior', type: 'select', required: true },
       { key: 'successMessage', label: 'Success message', type: 'text', required: false },
       { key: 'redirectUrl', label: 'Redirect destination', type: 'url', required: false },
+    ],
+    accessibilityChecks: [
+      behaviorCheck(
+        'a11y.announcement-contract',
+        'form',
+        'Submission success and errors require appropriate live announcements.',
+        'Run the CMS form runtime announcement behavior tests.',
+      ),
+      behaviorCheck(
+        'a11y.focus-contract',
+        'focus',
+        'Invalid submissions must reveal and focus the first invalid field.',
+        'Run validation through nested disclosure fixtures and verify focus placement.',
+      ),
     ],
     usage: 'Add approved fields and actions inside this form boundary.',
     accessibility: 'Provide labels, instructions, errors and a clear submission result.',
@@ -536,6 +734,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       { key: 'targetId', label: 'Target ID', type: 'text', required: false, advanced: true },
     ],
     allowedParentEntryIds: formFieldParentEntryIds,
+    accessibilityChecks: [accessibleNameCheck('text')],
     usage: 'Place immediately before the control it describes.',
     accessibility: 'Use visible, specific labels; placeholders do not replace labels.',
   }),
@@ -561,6 +760,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       { key: 'rows', label: 'Rows', type: 'number', required: true },
     ],
     allowedParentEntryIds: formFieldParentEntryIds,
+    accessibilityChecks: FORM_CONTROL_ACCESSIBILITY_CHECKS,
     usage: 'Use for responses that may need more than one line.',
     accessibility: 'Pair with a visible Label and concise help text when needed.',
   }),
@@ -575,6 +775,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     fields: [fieldIdField, fieldNameField, requiredField],
     allowedParentEntryIds: formFieldParentEntryIds,
     allowedChildEntryIds: ['base.option', 'base.option-group'],
+    accessibilityChecks: FORM_CONTROL_ACCESSIBILITY_CHECKS,
     usage: 'Use when one or more choices come from a controlled option set.',
     accessibility: 'Pair with a visible Label and keep option labels concise.',
   }),
@@ -628,6 +829,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       requiredField,
     ],
     allowedParentEntryIds: formFieldParentEntryIds,
+    accessibilityChecks: FORM_CONTROL_ACCESSIBILITY_CHECKS,
     usage: 'Use for a choice that can be selected independently.',
     accessibility: 'Pair with a visible label describing the selected state.',
   }),
@@ -647,6 +849,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       requiredField,
     ],
     allowedParentEntryIds: formFieldParentEntryIds,
+    accessibilityChecks: FORM_CONTROL_ACCESSIBILITY_CHECKS,
     usage: 'Use with other Radio entries sharing one submission name.',
     accessibility: 'Group related radios under a visible question or fieldset legend.',
   }),
@@ -666,6 +869,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       'base.form-container',
       'base.form-actions',
     ],
+    accessibilityChecks: [accessibleNameCheck('label')],
     usage: 'Place once near the end of a form.',
     accessibility: 'Use a label that clearly states what will be submitted.',
   }),
@@ -691,6 +895,15 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       'base.form-container',
       'base.form-actions',
     ],
+    accessibilityChecks: [
+      accessibleNameCheck('text'),
+      behaviorCheck(
+        'a11y.announcement-contract',
+        'form',
+        'Submission status changes must be announced without unnecessary focus movement.',
+        'Run the form runtime announcement and focus behavior tests.',
+      ),
+    ],
     usage: 'Explain form status or the result of a submission.',
     accessibility: 'Status messages must be concise and announced without moving focus unnecessarily.',
   }),
@@ -712,6 +925,15 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       values: { kind: 'help' },
     },
     allowedParentEntryIds: formFieldParentEntryIds,
+    accessibilityChecks: [
+      accessibleNameCheck('text'),
+      behaviorCheck(
+        'a11y.announcement-contract',
+        'form',
+        'Field help must be connected through the control description.',
+        'Verify aria-describedby includes the authored help message.',
+      ),
+    ],
     usage: 'Add concise instructions that remain visible before and after validation.',
     accessibility: 'The form runtime associates this text through aria-describedby.',
   }),
@@ -733,6 +955,14 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       values: { kind: 'error' },
     },
     allowedParentEntryIds: formFieldParentEntryIds,
+    accessibilityChecks: [
+      behaviorCheck(
+        'a11y.announcement-contract',
+        'form',
+        'Field errors must be announced and associated with the invalid control.',
+        'Verify aria-invalid, aria-errormessage, announcement and first-invalid focus behavior.',
+      ),
+    ],
     usage: 'Place beside the control whose server validation error it reports.',
     accessibility: 'The runtime marks the control invalid, announces the message and focuses the first invalid field.',
   }),
@@ -764,6 +994,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
       providerAdapters: ['captcha.hcaptcha'],
       plugins: [],
     },
+    accessibilityChecks: [providerFallbackCheck()],
     usage: 'Use only when the platform CAPTCHA capability and an approved adapter are healthy.',
     accessibility: 'Provide an alternate verification path and never claim availability while provider verification is unconfigured.',
   }),

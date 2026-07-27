@@ -15,6 +15,9 @@ The registry is metadata over Instatic's existing modules, Visual Components, pa
 - `ComponentLibraryRegistry` validates every registration, rejects accidental duplicates and provides deterministic ordering.
 - `filterComponentLibraryEntries` is the shared search and taxonomy filter.
 - `resolveComponentLibraryAvailability` exposes only dependency IDs and health, never provider settings or credentials.
+- Entry-specific accessibility contracts distinguish automated diagnostics,
+  behavior tests and manual review; site policy alone selects publication
+  blockers.
 - The built-in catalogue is explicit in `src/modules/base/componentLibrary.ts`; it is not inferred from every registered HTML module.
 - Components view opens a searchable, filterable catalogue and stamps library identity on the inserted backing node in the same undo transaction.
 - The registry does not own page trees, rendering, component instances or plugin lifecycle.
@@ -198,6 +201,13 @@ The selected Layers projection governs the Properties surface:
 - Custom / Freeform content and instances whose retained definition is unavailable stay intact but are read-only in Components view. Advanced users receive an explicit route to HTML view.
 
 Governance is also enforced at the mutation seam. `updateComponentLibraryField()` rejects keys not declared by the instance's retained definition. `applyComponentLibraryOption()` resolves the approved values inside the store and applies those values plus the preset or variant identity in one undoable mutation; the UI cannot submit an arbitrary option payload.
+
+The selected instance also exposes its accessibility contract and any current
+automated diagnostics. Diagnostics carry the backing node, rule and
+remediation. They remain advisory unless the site's
+`settings.accessibility.blockingRuleIds` explicitly selects the rule; the
+publisher runs the same analyser before any publish writes. See
+[Component accessibility contracts](component-accessibility.md).
 
 The `site.components.edit` capability is the narrow authoring boundary for this
 surface. Without `site.structure.edit`, the editor forces Layers and Properties

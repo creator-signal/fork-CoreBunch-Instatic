@@ -178,6 +178,38 @@
     list-style: none;
 }
 
+.diagnosticList {
+    display: grid;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.diagnosticList li {
+    display: grid;
+    gap: var(--space-3xs);
+    padding: var(--space-s);
+    border-inline-start: 3px solid var(--warning);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface-2);
+}
+
+.diagnosticList li[data-blocking='true'] {
+    border-inline-start-color: var(--danger);
+}
+
+.diagnosticList span {
+    color: var(--text-subtle);
+    font-size: var(--text-2xs);
+    line-height: 1.45;
+}
+
+.diagnosticList span:first-child {
+    color: var(--text);
+    font-weight: 700;
+}
+
 .guidance > div {
     display: grid;
     gap: var(--space-xs);

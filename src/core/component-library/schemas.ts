@@ -234,6 +234,81 @@ export const ComponentLibraryDocumentationSchema = Type.Object(
   { additionalProperties: false },
 )
 
+export const ComponentLibraryAccessibilityRuleSchema = Type.Union([
+  Type.Literal('a11y.accessible-name'),
+  Type.Literal('a11y.heading-order'),
+  Type.Literal('a11y.form-control-label'),
+  Type.Literal('a11y.unique-field-id'),
+  Type.Literal('a11y.keyboard-contract'),
+  Type.Literal('a11y.focus-contract'),
+  Type.Literal('a11y.announcement-contract'),
+  Type.Literal('a11y.no-javascript-fallback'),
+  Type.Literal('a11y.provider-fallback'),
+  Type.Literal('a11y.image-alternative'),
+  Type.Literal('a11y.motion-control'),
+  Type.Literal('a11y.contrast'),
+  Type.Literal('a11y.touch-target'),
+])
+
+export type ComponentLibraryAccessibilityRule = Static<
+  typeof ComponentLibraryAccessibilityRuleSchema
+>
+
+export const ComponentLibraryAccessibilityCategorySchema = Type.Union([
+  Type.Literal('semantic'),
+  Type.Literal('keyboard'),
+  Type.Literal('focus'),
+  Type.Literal('naming'),
+  Type.Literal('heading'),
+  Type.Literal('form'),
+  Type.Literal('media'),
+  Type.Literal('motion'),
+  Type.Literal('contrast'),
+  Type.Literal('touch'),
+  Type.Literal('provider'),
+])
+
+export type ComponentLibraryAccessibilityCategory = Static<
+  typeof ComponentLibraryAccessibilityCategorySchema
+>
+
+export const ComponentLibraryAccessibilityCheckSchema = Type.Object(
+  {
+    rule: ComponentLibraryAccessibilityRuleSchema,
+    category: ComponentLibraryAccessibilityCategorySchema,
+    enforcement: Type.Union([
+      Type.Literal('automated'),
+      Type.Literal('behavior-test'),
+      Type.Literal('manual'),
+    ]),
+    severity: Type.Union([
+      Type.Literal('warning'),
+      Type.Literal('error'),
+    ]),
+    fields: Type.Optional(
+      Type.Array(PropertyKeySchema, { minItems: 1, uniqueItems: true }),
+    ),
+    summary: Type.String({ minLength: 1 }),
+    remediation: Type.String({ minLength: 1 }),
+  },
+  { additionalProperties: false },
+)
+
+export type ComponentLibraryAccessibilityCheck = Static<
+  typeof ComponentLibraryAccessibilityCheckSchema
+>
+
+export const ComponentLibraryAccessibilityContractSchema = Type.Object(
+  {
+    checks: Type.Array(ComponentLibraryAccessibilityCheckSchema),
+  },
+  { additionalProperties: false },
+)
+
+export type ComponentLibraryAccessibilityContract = Static<
+  typeof ComponentLibraryAccessibilityContractSchema
+>
+
 export const ComponentLibraryPreviewSchema = Type.Object(
   {
     type: Type.Union([Type.Literal('wireframe'), Type.Literal('image')]),
@@ -263,6 +338,7 @@ export const ComponentLibraryEntrySchema = Type.Object(
     constraints: ComponentLibraryConstraintsSchema,
     requirements: ComponentLibraryRequirementsSchema,
     documentation: ComponentLibraryDocumentationSchema,
+    accessibility: Type.Optional(ComponentLibraryAccessibilityContractSchema),
     preview: Type.Optional(ComponentLibraryPreviewSchema),
   },
   { additionalProperties: false },

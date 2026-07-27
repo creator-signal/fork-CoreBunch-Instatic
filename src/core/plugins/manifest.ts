@@ -15,6 +15,7 @@ import {
   permissionLabel as sdkPermissionLabel,
 } from '@core/plugin-sdk'
 import { collectEnabledAdminPages, pluginAdminPageRoute } from './manifestAdminPages'
+import { assertComponentLibraryCoherent } from './manifestComponentLibrary'
 
 // Admin-page route helpers and resource-record helpers live in sibling
 // modules (responsibility split); re-exported here so
@@ -442,15 +443,7 @@ export function parsePluginManifest(input: unknown): PluginManifest {
       `\`modules.register\` permission. Add "modules.register" to \`permissions\`.`,
     )
   }
-  if (
-    data.componentLibrary &&
-    !data.permissions.includes('componentLibrary.register')
-  ) {
-    throw new Error(
-      'Invalid plugin manifest: `componentLibrary` requires the ' +
-      '`componentLibrary.register` permission. Add "componentLibrary.register" to `permissions`.',
-    )
-  }
+  assertComponentLibraryCoherent(data)
 
   const duplicateResources = new Set<string>()
   const resources: PluginResource[] = data.resources.map((resource) => {

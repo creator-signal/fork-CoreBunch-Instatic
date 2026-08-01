@@ -5,6 +5,11 @@ import { readServerConfig } from './config'
 import { DEV_ORIGIN_ALLOWLIST, configurePublicOrigins, configureTrustedProxyCidrs, stampSocketIp } from './auth/security'
 import { applySecurityHeaders } from './securityHeaders'
 import { startConversationPurgeTick } from './ai/boot'
+import { configureFrontendConnectOrigins } from './publish/frontendConnectOrigins'
+import {
+  captureServerException,
+  initializeServerMonitoring,
+} from './monitoring'
 
 await import('./richtextSanitizer')
 const { handleServerRequest } = await import('./router')
@@ -19,8 +24,10 @@ const {
 const { configureFormDraftRuntime } = await import('./forms/drafts/runtime')
 
 const config = readServerConfig()
+initializeServerMonitoring(config.monitoring.server)
 configureTrustedProxyCidrs(config.trustedProxyCidrs)
 configurePublicOrigins(config.publicOrigins)
+configureFrontendConnectOrigins(config.publicConnectOrigins)
 const { db, migrations } = createDbClient(config.databaseUrl)
 await runMigrations(db, migrations)
 // System role sync runs after migrations on every boot — the Owner row's
@@ -145,6 +152,7 @@ Bun.serve({
         staticDir: config.staticDir,
         uploadsDir: config.uploadsDir,
         databaseUrl: config.databaseUrl,
+        adminMonitoring: config.monitoring.adminBrowser,
       })
       for (const [k, v] of Object.entries(cors)) {
         res.headers.set(k, v)
@@ -157,6 +165,12 @@ Bun.serve({
       // SQL fragments, absolute paths, spawn() arguments, etc. Log fully,
       // respond generically.
       console.error('[server] Unhandled request error:', err)
+      captureServerException(err, {
+        source: 'server-request',
+        method: req.method,
+        route: pathname,
+        status: 500,
+      })
       return applySecurityHeaders(
         new Response(JSON.stringify({ error: 'Internal server error' }), {
           status: 500,
@@ -169,6 +183,10 @@ Bun.serve({
 
   error(err: Error) {
     console.error('[server] Unhandled error:', err)
+    captureServerException(err, {
+      source: 'bun-server',
+      status: 500,
+    })
     return new Response('Internal Server Error', { status: 500 })
   },
 })

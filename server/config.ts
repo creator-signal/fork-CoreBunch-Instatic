@@ -12,6 +12,12 @@ export interface StarterSiteConfig {
   pluginSettings: PluginSettingsValues
 }
 
+export interface MonitoringTargetConfig {
+  dsn: string
+  environment: string
+  release?: string
+}
+
 interface ServerConfig {
   port: number
   databaseUrl: string
@@ -19,6 +25,11 @@ interface ServerConfig {
   staticDir: string
   trustedProxyCidrs: string[]
   publicOrigins: string[]
+  publicConnectOrigins: string[]
+  monitoring: {
+    adminBrowser: MonitoringTargetConfig | null
+    server: MonitoringTargetConfig | null
+  }
   attachments: {
     directory: string
     scannerUrl: string | null
@@ -114,6 +125,46 @@ function readJsonObjectFile(path: string | undefined, name: string): PluginSetti
   return settings
 }
 
+function readMonitoringLabel(
+  env: Record<string, string | undefined>,
+  name: string,
+  fallback?: string,
+): string | undefined {
+  const value = env[name]?.trim() || fallback
+  if (!value) return undefined
+  if (value.length > 160 || !/^[a-zA-Z0-9._:/-]+$/.test(value)) {
+    throw new Error(`${name} must be a safe release/environment label`)
+  }
+  return value
+}
+
+function readMonitoringDsn(
+  env: Record<string, string | undefined>,
+  valueName: string,
+  fileName: string,
+): string | undefined {
+  const value = readSecretValue(env, valueName, fileName)
+  if (!value) return undefined
+  let parsed: URL
+  try {
+    parsed = new URL(value)
+  } catch {
+    throw new Error(`${valueName} or ${fileName} must contain an absolute GlitchTip DSN`)
+  }
+  if (
+    (parsed.protocol !== 'https:' && parsed.protocol !== 'http:')
+    || !parsed.hostname
+    || !parsed.username
+    || parsed.password
+    || parsed.pathname === '/'
+    || parsed.search
+    || parsed.hash
+  ) {
+    throw new Error(`${valueName} or ${fileName} must contain a public Sentry-compatible HTTP(S) DSN`)
+  }
+  return value
+}
+
 /**
  * Normalize a raw origin string to a canonical `scheme://host[:port]` form.
  *
@@ -154,6 +205,71 @@ function normalizeOrigins(raw: readonly string[]): string[] {
   return out
 }
 
+function isLocalHostname(hostname: string): boolean {
+  const normalized = hostname.toLowerCase()
+  return (
+    normalized === 'localhost'
+    || normalized.endsWith('.localhost')
+    || normalized === '127.0.0.1'
+    || normalized === '[::1]'
+  )
+}
+
+function parseConnectOrigin(raw: string, name: string): URL {
+  let url: URL
+  try {
+    url = new URL(raw)
+  } catch {
+    throw new Error(`${name} entry "${raw}" must be an absolute HTTP(S) origin`)
+  }
+  if (
+    (url.protocol !== 'https:' && url.protocol !== 'http:')
+    || !url.hostname
+    || url.username
+    || url.password
+    || (url.pathname !== '' && url.pathname !== '/')
+    || url.search
+    || url.hash
+  ) {
+    throw new Error(`${name} entry "${raw}" must be an absolute HTTP(S) origin without credentials, path, query, or fragment`)
+  }
+  return url
+}
+
+/**
+ * Resolve operator-approved browser-only CSP connection origins.
+ *
+ * HTTP is accepted only for loopback collectors when the site itself has an
+ * HTTP loopback public origin. This supports the integrated local stack
+ * without weakening production transport or the plugin sandbox SSRF boundary.
+ */
+export function resolvePublicConnectOrigins(
+  env: Record<string, string | undefined>,
+  publicOrigins: readonly string[] = resolvePublicOrigins(env),
+): string[] {
+  const entries = readCsvList(env.INSTATIC_PUBLIC_CONNECT_ORIGINS)
+  if (entries.length === 0) return []
+
+  const permitsLocalHttp = publicOrigins.some((origin) => {
+    const parsed = parseConnectOrigin(origin, 'PUBLIC_ORIGIN')
+    return parsed.protocol === 'http:' && isLocalHostname(parsed.hostname)
+  })
+  const normalized = new Set<string>()
+  for (const entry of entries) {
+    const parsed = parseConnectOrigin(entry, 'INSTATIC_PUBLIC_CONNECT_ORIGINS')
+    if (parsed.protocol === 'http:') {
+      if (!isLocalHostname(parsed.hostname)) {
+        throw new Error('INSTATIC_PUBLIC_CONNECT_ORIGINS requires HTTPS for non-local origins')
+      }
+      if (!permitsLocalHttp) {
+        throw new Error('HTTP localhost collector origins require an HTTP localhost PUBLIC_ORIGIN')
+      }
+    }
+    normalized.add(parsed.origin)
+  }
+  return [...normalized]
+}
+
 /**
  * The set of public origins the CSRF check derives `expectedOrigin` from.
  *
@@ -181,6 +297,30 @@ export function resolvePublicOrigins(env: Record<string, string | undefined>): s
 export function readServerConfig(
   env: Record<string, string | undefined> = process.env,
 ): ServerConfig {
+  const publicOrigins = resolvePublicOrigins(env)
+  const monitoringEnvironment = readMonitoringLabel(
+    env,
+    'INSTATIC_ENVIRONMENT',
+    'development',
+  )!
+  const monitoringRelease = readMonitoringLabel(
+    env,
+    'INSTATIC_RELEASE',
+    env.INSTATIC_BUILD_RELEASE?.trim(),
+  )
+  const adminBrowserDsn = readMonitoringDsn(
+    env,
+    'INSTATIC_ADMIN_GLITCHTIP_DSN',
+    'INSTATIC_ADMIN_GLITCHTIP_DSN_FILE',
+  )
+  const serverDsn = readMonitoringDsn(
+    env,
+    'INSTATIC_SERVER_GLITCHTIP_DSN',
+    'INSTATIC_SERVER_GLITCHTIP_DSN_FILE',
+  )
+  if (adminBrowserDsn && serverDsn && adminBrowserDsn === serverDsn) {
+    throw new Error('Instatic Admin browser and server monitoring require separate GlitchTip DSNs')
+  }
   const minioEndpoint = env.MINIO_ENDPOINT?.trim()
   const minioBucket = env.MINIO_BUCKET?.trim()
   const minioAccessKey = readSecretValue(env, 'MINIO_ACCESS_KEY', 'MINIO_ACCESS_KEY_FILE')
@@ -237,7 +377,24 @@ export function readServerConfig(
     uploadsDir,
     staticDir: env.STATIC_DIR ?? './dist',
     trustedProxyCidrs: readCsvList(env.TRUSTED_PROXY_CIDRS),
-    publicOrigins: resolvePublicOrigins(env),
+    publicOrigins,
+    publicConnectOrigins: resolvePublicConnectOrigins(env, publicOrigins),
+    monitoring: {
+      adminBrowser: adminBrowserDsn
+        ? {
+            dsn: adminBrowserDsn,
+            environment: monitoringEnvironment,
+            ...(monitoringRelease ? { release: monitoringRelease } : {}),
+          }
+        : null,
+      server: serverDsn
+        ? {
+            dsn: serverDsn,
+            environment: monitoringEnvironment,
+            ...(monitoringRelease ? { release: monitoringRelease } : {}),
+          }
+        : null,
+    },
     attachments: {
       // Keep private bytes outside UPLOADS_DIR, which is served verbatim at
       // `/uploads/*`. The sibling default works for the normal `/data/uploads`

@@ -3,6 +3,7 @@ import { brotliCompressSync, constants as zlibConstants } from 'node:zlib'
 import { readdirSync } from 'node:fs'
 import { SESSION_COOKIE_NAME } from './auth/tokens'
 import { configuredAdminAuthMode, safeAdminReturnTo } from './auth/oidc'
+import type { MonitoringTargetConfig } from './config'
 
 const MIME_TYPES: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
@@ -481,7 +482,23 @@ function injectLoginSkeleton(html: string): string {
   return next2
 }
 
-export async function serveAdminApp(staticDir: string, req?: Request): Promise<Response | null> {
+function injectAdminMonitoringConfig(
+  html: string,
+  monitoring: MonitoringTargetConfig | null | undefined,
+): string {
+  if (!monitoring) return html
+  const serialized = JSON.stringify(monitoring).replace(/</g, '\\u003c')
+  return html.replace(
+    '</head>',
+    `    <script>window.__instaticMonitoring=${serialized};</script>\n  </head>`,
+  )
+}
+
+export async function serveAdminApp(
+  staticDir: string,
+  req?: Request,
+  monitoring?: MonitoringTargetConfig | null,
+): Promise<Response | null> {
   if (
     req
     && configuredAdminAuthMode() === 'zitadel'
@@ -514,9 +531,10 @@ export async function serveAdminApp(staticDir: string, req?: Request): Promise<R
   if (!(await file.exists())) return null
 
   const html = await file.text()
-  const transformed = requestHasSessionCookie(req)
+  const shell = requestHasSessionCookie(req)
     ? injectAuthenticatedHints(html, staticDir)
     : injectLoginSkeleton(html)
+  const transformed = injectAdminMonitoringConfig(shell, monitoring)
   const bytes = new TextEncoder().encode(transformed) as ResponseBytes
   const acceptEncoding = req?.headers.get('accept-encoding') ?? null
   const encoding = selectEncoding(acceptEncoding)

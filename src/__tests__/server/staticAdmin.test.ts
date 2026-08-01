@@ -148,6 +148,30 @@ describe('self-hosted admin static serving', () => {
     }
   })
 
+  it('injects only the public Admin browser monitoring configuration', async () => {
+    const staticDir = createAdminShellFixture()
+    try {
+      const res = await serveAdminApp(
+        staticDir,
+        new Request('http://localhost/admin'),
+        {
+          dsn: 'https://public-key@errors.example.test/101',
+          environment: 'local-development',
+          release: 'sha-abc123',
+        },
+      )
+
+      const html = (await res?.text()) ?? ''
+      expect(html).toContain('window.__instaticMonitoring=')
+      expect(html).toContain('https://public-key@errors.example.test/101')
+      expect(html).toContain('"environment":"local-development"')
+      expect(html).toContain('"release":"sha-abc123"')
+      expect(html).not.toContain('INSTATIC_ADMIN_GLITCHTIP_DSN')
+    } finally {
+      rmSync(staticDir, { recursive: true, force: true })
+    }
+  })
+
   it('serves uploaded media files from /uploads', async () => {
     const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-uploads-'))
     try {

@@ -2,7 +2,7 @@
 
 This index maps supported deployment targets to the files, variables, and persistence rules they need.
 
-Instatic is one Bun server packaged by the root `Dockerfile`. The server reads runtime configuration from `server/config.ts`: `PORT`, `DATABASE_URL`/`DATABASE_URL_FILE`, `UPLOADS_DIR`, `STATIC_DIR`, `PUBLIC_ORIGIN`, `TRUSTED_PROXY_CIDRS`, optional `MINIO_*` values, and the fail-closed `ATTACHMENT_*` and `FORM_DRAFT_*` policies. Reversible server secrets, including AI provider credentials, plugin secret settings, and MFA TOTP seeds, are encrypted with `INSTATIC_SECRET_KEY` or `INSTATIC_SECRET_KEY_FILE` when configured. Database migrations run automatically on boot in `server/index.ts`.
+Instatic is one Bun server packaged by the root `Dockerfile`. The server reads runtime configuration from `server/config.ts`: `PORT`, `DATABASE_URL`/`DATABASE_URL_FILE`, `UPLOADS_DIR`, `STATIC_DIR`, `PUBLIC_ORIGIN`, `TRUSTED_PROXY_CIDRS`, optional `MINIO_*` values, browser-only `INSTATIC_PUBLIC_CONNECT_ORIGINS`, optional Admin/server GlitchTip settings, and the fail-closed `ATTACHMENT_*` and `FORM_DRAFT_*` policies. Reversible server secrets, including AI provider credentials, plugin secret settings, and MFA TOTP seeds, are encrypted with `INSTATIC_SECRET_KEY` or `INSTATIC_SECRET_KEY_FILE` when configured. Database migrations run automatically on boot in `server/index.ts`.
 
 ---
 
@@ -36,6 +36,10 @@ INSTATIC_SECRET_KEY_FILE  mounted file containing the same key; direct value win
 PUBLIC_ORIGIN        comma-separated public origin(s) the CSRF check trusts; auto-detected from RENDER_EXTERNAL_URL / RAILWAY_PUBLIC_DOMAIN on those platforms
 TRUSTED_PROXY_CIDRS  optional; trusts proxy socket peers for forwarded client-IP attribution only (audit logs, rate-limit keys) — NOT used for CSRF
 MINIO_*  optional host-level S3-compatible media adapter; see creator-signal-stack.md
+INSTATIC_PUBLIC_CONNECT_ORIGINS  optional comma-separated browser-only CSP origins; HTTPS required except for a loopback HTTP site
+INSTATIC_ADMIN_GLITCHTIP_DSN[_FILE]  optional Admin browser project DSN
+INSTATIC_SERVER_GLITCHTIP_DSN[_FILE] optional Bun server project DSN; must differ from the Admin DSN
+INSTATIC_ENVIRONMENT / INSTATIC_RELEASE  safe monitoring labels
 ATTACHMENTS_ENABLED  enables private form attachments; false by default
 ATTACHMENTS_DIR      private persistent storage, never a public static path
 ATTACHMENT_SCANNER_URL  required scanner endpoint when attachments are enabled
@@ -57,6 +61,26 @@ UPLOADS_DIR=/app/uploads
 ```
 
 Managed platforms often override `PORT`. That is fine; the server uses `process.env.PORT`. When a managed platform terminates HTTPS before forwarding HTTP to the container, the CSRF origin check derives the site's public origin from `PUBLIC_ORIGIN` — auto-detected from `RENDER_EXTERNAL_URL` / `RAILWAY_PUBLIC_DOMAIN` on Render and Railway, so one-click deploys need no manual value. Set `PUBLIC_ORIGIN` explicitly (a comma-separated list) when adding a custom domain. `TRUSTED_PROXY_CIDRS` is independent of CSRF and only attributes the real client IP for audit logs and rate-limit keys.
+
+`INSTATIC_PUBLIC_CONNECT_ORIGINS` extends only the CSP emitted for published
+pages. It deliberately does not change a plugin's `networkAllowedHosts`, so it
+cannot be used to bypass the server-side network sandbox. Non-loopback origins
+must use HTTPS. Plain HTTP collectors are accepted only when both the collector
+and configured public site use loopback hosts.
+
+Admin and server GlitchTip monitoring are fail-open and disabled when their
+separate DSNs are absent. Replay, tracing, logs, session tracking and default
+PII are disabled. The allowlist redactor removes user identity, headers,
+cookies, request bodies, arbitrary messages, local variables and unknown tags
+before transmission.
+
+Creator Signal tag releases build hidden Admin source maps in a separate
+protected `production` job, upload them to the Admin browser project, then
+delete them. The upload token and `.map` files never enter the runtime image.
+Configure repository environment values `SENTRY_URL`, `SENTRY_ORG`,
+`SENTRY_INSTATIC_ADMIN_BROWSER_PROJECT` and secret `SENTRY_AUTH_TOKEN`.
+The release name is the exact Instatic Git commit SHA embedded in the image as
+`INSTATIC_BUILD_RELEASE`; operators may override it with `INSTATIC_RELEASE`.
 
 ## Image Availability
 

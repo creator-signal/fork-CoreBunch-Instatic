@@ -187,6 +187,7 @@ Three categories, three voices:
 | [reference/editor-history.md](reference/editor-history.md)       | Patch-based undo/redo history: `HistoryEntry`, `mutate*` helpers, coalescing |
 | [reference/react-compiler.md](reference/react-compiler.md)       | React Compiler memoization rule, three exceptions, enforcement gates |
 | [reference/use-async-resource.md](reference/use-async-resource.md) | `useAsyncResource` — canonical single-resource async load hook; when to use and when not to |
+| [reference/claude-mcp.md](reference/claude-mcp.md)               | Connect Claude Code or a Claude custom connector to Instatic over MCP |
 
 ### Operations
 

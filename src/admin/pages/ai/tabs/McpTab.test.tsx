@@ -18,6 +18,13 @@ mock.module('../../../ai/api', () => ({
   revokeMcpConnection: async () => {},
 }))
 
+mock.module('@admin/shared/StepUp', () => ({
+  StepUpCancelledMessage: 'step_up_cancelled',
+  useStepUp: () => ({
+    runStepUp: async <T,>(action: () => Promise<T>) => action(),
+  }),
+}))
+
 const { McpTab } = await import('./McpTab')
 
 afterEach(() => cleanup())
@@ -35,5 +42,22 @@ describe('McpTab', () => {
 
     expect(screen.getByRole('heading', { name: /create a personal token/i })).toBeTruthy()
     expect(screen.getByRole('button', { name: /create access token/i })).toBeTruthy()
+  })
+
+  it('generates the canonical Claude Code HTTP command', async () => {
+    render(<McpTab />)
+
+    await screen.findByRole('heading', { name: /connect a remote client/i })
+    fireEvent.click(screen.getByRole('button', { name: /Personal token Local and CLI clients/i }))
+    fireEvent.click(screen.getByRole('button', { name: /create access token/i }))
+    fireEvent.change(screen.getByLabelText(/token name/i), {
+      target: { value: 'Claude Code test' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /^create token$/i }))
+
+    expect(await screen.findByText(
+      'claude mcp add --transport http instatic http://localhost/_instatic/mcp '
+      + '--header "Authorization: Bearer imcp_pat_test"',
+    )).toBeTruthy()
   })
 })

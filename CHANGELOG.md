@@ -6,6 +6,20 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.19 - 2026-08-02
+
+### MCP connections
+
+- Added an end-user guide for connecting Claude Code and hosted custom
+  connectors through OAuth or capability-scoped personal access tokens.
+- Corrected the generated Claude Code HTTP command to use the canonical
+  option order and added regression coverage for the copyable command.
+- Documented least-privilege capability selection, draft and publish
+  behaviour, credential revocation, endpoint verification, and troubleshooting.
+- Clarified that governed Component Library insertion remains an editor action;
+  MCP currently exposes generic freeform authoring rather than catalogue-native
+  list or insert tools.
+
 ## 0.0.18 - 2026-08-01
 
 ### Component Library and authoring

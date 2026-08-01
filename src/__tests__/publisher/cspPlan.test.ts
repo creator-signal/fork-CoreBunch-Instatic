@@ -106,6 +106,7 @@ function planWith(overrides: Partial<FrontendInjections>): FrontendInjections {
     hasExternalScript: false,
     hasInlineStyle: false,
     networkAllowedHosts: [],
+    publicConnectOrigins: [],
     mediaCspOrigins: [],
     ...overrides,
   }

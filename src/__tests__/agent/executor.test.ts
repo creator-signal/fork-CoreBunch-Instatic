@@ -15,7 +15,144 @@ import { useEditorStore } from '@site/store/store'
 import { executeAgentTool } from '@site/agent'
 import type { AiToolOutput } from '@core/ai'
 import { classNamesForClassIds } from '@core/page-tree'
+import { componentLibraryRegistry } from '@core/component-library'
 import '@modules/base'
+
+describe('executeAgentTool — governed Component Library', () => {
+  it('lists live plugin-owned entries without exposing registered option values', async () => {
+    componentLibraryRegistry.register({
+      id: 'test.mcp-plugin-button',
+      version: '1.0.0',
+      name: 'MCP Plugin Button',
+      description: 'A plugin-owned test component.',
+      category: 'Interactive',
+      tags: ['plugin', 'button'],
+      icon: 'button',
+      source: { type: 'plugin', pluginId: 'test.mcp-plugin' },
+      status: 'stable',
+      implementation: { type: 'primitive', moduleId: 'base.button' },
+      fields: [{ key: 'label', label: 'Label', type: 'text', required: true }],
+      presets: [{ id: 'primary', name: 'Primary', values: { label: 'Continue' } }],
+      variants: [],
+      slots: [],
+      constraints: {},
+      requirements: { capabilities: [], providerAdapters: [], plugins: ['test.mcp-plugin'] },
+      documentation: { usage: 'Use for a primary action.' },
+    })
+    try {
+      freshStore()
+      const result = await executeAgentTool('site_list_component_library', {
+        search: 'MCP Plugin Button',
+      })
+      const data = expectToolData<{
+        total: number
+        entries: Array<{
+          id: string
+          source: { type: string; pluginId?: string }
+          presets: Array<Record<string, unknown>>
+        }>
+      }>(result)
+      expect(data.total).toBe(1)
+      expect(data.entries[0]?.id).toBe('test.mcp-plugin-button')
+      expect(data.entries[0]?.source).toEqual({
+        type: 'plugin',
+        pluginId: 'test.mcp-plugin',
+      })
+      expect(data.entries[0]?.presets[0]).toEqual({ id: 'primary', name: 'Primary' })
+      expect(data.entries[0]?.presets[0]).not.toHaveProperty('values')
+
+      const rootId = activePage().rootNodeId
+      const inserted = expectToolData<{ nodeId: string }>(
+        await executeAgentTool('site_insert_component', {
+          entryId: 'test.mcp-plugin-button',
+          parentId: rootId,
+          presetId: 'primary',
+        }),
+      )
+      expect(activePage().nodes[inserted.nodeId]?.catalogueInstance).toEqual({
+        entryId: 'test.mcp-plugin-button',
+        entryVersion: '1.0.0',
+        presetId: 'primary',
+      })
+      expect(activePage().nodes[inserted.nodeId]?.props.label).toBe('Continue')
+    } finally {
+      componentLibraryRegistry.unregister('test.mcp-plugin-button')
+    }
+  })
+
+  it('inserts a governed entry and updates only its declared fields', async () => {
+    const { rootId } = freshStore()
+    const inserted = expectToolData<{
+      nodeId: string
+      entryId: string
+      entryVersion: string
+    }>(await executeAgentTool('site_insert_component', {
+      entryId: 'base.button',
+      parentId: rootId,
+    }))
+
+    const node = activePage().nodes[inserted.nodeId]
+    expect(node?.moduleId).toBe('base.button')
+    expect(node?.catalogueInstance).toEqual({
+      entryId: 'base.button',
+      entryVersion: '1.0.0',
+    })
+
+    expectToolOk(await executeAgentTool('site_update_component_field', {
+      nodeId: inserted.nodeId,
+      fieldKey: 'label',
+      value: 'Buy now',
+    }))
+    expect(activePage().nodes[inserted.nodeId]?.props.label).toBe('Buy now')
+
+    const blocked = await executeAgentTool('site_update_component_field', {
+      nodeId: inserted.nodeId,
+      fieldKey: 'onclick',
+      value: 'unsafe()',
+    })
+    expectToolError(blocked)
+    expect(activePage().nodes[inserted.nodeId]?.props.onclick).toBeUndefined()
+
+    const wrongType = await executeAgentTool('site_update_component_field', {
+      nodeId: inserted.nodeId,
+      fieldKey: 'label',
+      value: { arbitrary: true },
+    })
+    expectToolError(wrongType)
+    expect(activePage().nodes[inserted.nodeId]?.props.label).toBe('Buy now')
+  })
+
+  it('enforces placement and resolves registered variants by id', async () => {
+    const { rootId } = freshStore()
+    const blocked = await executeAgentTool('site_insert_component', {
+      entryId: 'base.email-input',
+      parentId: rootId,
+    })
+    expectToolError(blocked)
+
+    const hero = expectToolData<{ nodeId: string }>(
+      await executeAgentTool('site_insert_component', {
+        entryId: 'base.hero',
+        parentId: rootId,
+      }),
+    )
+    expectToolOk(await executeAgentTool('site_apply_component_option', {
+      nodeId: hero.nodeId,
+      kind: 'variant',
+      optionId: 'image-right',
+    }))
+    const node = activePage().nodes[hero.nodeId]
+    expect(node?.catalogueInstance?.variantId).toBe('image-right')
+    expect((node?.props.propOverrides as Record<string, unknown>)?.variant).toBe('image-right')
+
+    const invalid = await executeAgentTool('site_apply_component_option', {
+      nodeId: hero.nodeId,
+      kind: 'variant',
+      optionId: 'invented',
+    })
+    expectToolError(invalid)
+  })
+})
 
 // ---------------------------------------------------------------------------
 // Store reset helper

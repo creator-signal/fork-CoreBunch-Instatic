@@ -79,6 +79,10 @@ protected `production` job, upload them to the Admin browser project, then
 delete them. The upload token and `.map` files never enter the runtime image.
 Configure repository environment values `SENTRY_URL`, `SENTRY_ORG`,
 `SENTRY_INSTATIC_ADMIN_BROWSER_PROJECT` and secret `SENTRY_AUTH_TOKEN`.
+When any protected value is absent, the job records an explicit notice and
+skips only the private source-map upload; verified release bundles and runtime
+images still publish without source maps, matching monitoring's fail-open
+runtime policy.
 The release name is the exact Instatic Git commit SHA embedded in the image as
 `INSTATIC_BUILD_RELEASE`; operators may override it with `INSTATIC_RELEASE`.
 

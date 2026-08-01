@@ -31,6 +31,10 @@ import {
   MoveNodeInputSchema,
   RenameNodeInputSchema,
   DuplicateNodeInputSchema,
+  ListComponentLibraryInputSchema,
+  InsertComponentLibraryEntryInputSchema,
+  UpdateComponentLibraryFieldInputSchema,
+  ApplyComponentLibraryOptionInputSchema,
   ApplyCssInputSchema,
   ApplyCssExecutionInputSchema,
   AssignClassInputSchema,
@@ -98,6 +102,12 @@ import {
   runReadDocument,
 } from './documentTools'
 import { getErrorMessage } from '@core/utils/errorMessage'
+import {
+  runApplyComponentLibraryOption,
+  runInsertComponentLibraryEntry,
+  runListComponentLibrary,
+  runUpdateComponentLibraryField,
+} from './componentLibraryTools'
 
 // Live access to the editor store. Routed through `./storeRef` so this module
 // has no static import edge back into `editor-store/store.ts`.
@@ -203,6 +213,9 @@ const AUTO_NAVIGATE_TOOLS = new Set<string>([
   'site_move_node',
   'site_rename_node',
   'site_duplicate_node',
+  'site_insert_component',
+  'site_update_component_field',
+  'site_apply_component_option',
   'site_assign_class',
   'site_remove_class',
 ])
@@ -640,6 +653,23 @@ export async function executeAgentTool(
         return runClearPageTemplate(parseValue(ClearPageTemplateInputSchema, rawInput))
       case 'site_duplicate_node':
         return runDuplicateNode(parseValue(DuplicateNodeInputSchema, rawInput))
+      case 'site_list_component_library':
+        return runListComponentLibrary(parseValue(ListComponentLibraryInputSchema, rawInput))
+      case 'site_insert_component':
+        return await runInsertComponentLibraryEntry(
+          parseValue(InsertComponentLibraryEntryInputSchema, rawInput),
+          getStoreState(),
+        )
+      case 'site_update_component_field':
+        return runUpdateComponentLibraryField(
+          parseValue(UpdateComponentLibraryFieldInputSchema, rawInput),
+          getStoreState(),
+        )
+      case 'site_apply_component_option':
+        return runApplyComponentLibraryOption(
+          parseValue(ApplyComponentLibraryOptionInputSchema, rawInput),
+          getStoreState(),
+        )
       case 'site_set_color_tokens':
         return runSetColorTokens(rawInput)
       case 'site_set_font_tokens':

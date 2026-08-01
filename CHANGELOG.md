@@ -6,6 +6,25 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.20 - 2026-08-02
+
+### MCP Component Library authoring
+
+- Added capability-filtered MCP tools to search the live governed Component
+  Library, including plugin-owned entries, and insert registered components.
+- Added declared-field and preset/variant authoring tools that retain catalogue
+  identity and version while rejecting invalid placement, fields and options.
+- Shared the canonical registry, placement, dependency installation and
+  page-tree insertion path between the Site editor and browser-bridged MCP.
+- Kept component changes as drafts until an explicit, separately authorized
+  publish operation.
+
+### Release reliability
+
+- Made private source-map upload conditional on the complete protected
+  monitoring configuration so missing optional credentials no longer suppress
+  otherwise verified release bundles and runtime images.
+
 ## 0.0.19 - 2026-08-02
 
 ### MCP connections

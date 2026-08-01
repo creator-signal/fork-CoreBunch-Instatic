@@ -31,6 +31,10 @@ import {
   MoveNodeInputSchema,
   RenameNodeInputSchema,
   DuplicateNodeInputSchema,
+  ListComponentLibraryInputSchema,
+  InsertComponentLibraryEntryInputSchema,
+  UpdateComponentLibraryFieldInputSchema,
+  ApplyComponentLibraryOptionInputSchema,
   ApplyCssInputSchema,
   AssignClassInputSchema,
   RemoveClassInputSchema,
@@ -75,6 +79,8 @@ const SITE_CONTENT_CAPS: readonly CoreCapability[] = [
 
 const SITE_STYLE_CAPS: readonly CoreCapability[] = ['site.style.edit']
 
+const SITE_COMPONENT_CAPS: readonly CoreCapability[] = ['site.components.edit']
+
 // ---------------------------------------------------------------------------
 // HTML-native write tools
 // ---------------------------------------------------------------------------
@@ -116,6 +122,50 @@ const openDocumentTool: AiTool = {
   description:
     'Visibly open a page/template/visual component document in the editor. Use before site_render_snapshot or when the user asks to navigate. For background inspection, prefer site_read_document because it does not move the canvas.',
   inputSchema: OpenDocumentInputSchema,
+}
+
+// ---------------------------------------------------------------------------
+// Governed Component Library tools
+// ---------------------------------------------------------------------------
+
+const listComponentLibraryTool: AiTool = {
+  name: 'site_list_component_library',
+  scope: 'site',
+  execution: 'browser',
+  requiredCapabilities: ['site.read'],
+  description:
+    'Search the governed Component Library loaded by the editor, including plugin-owned entries. Returns current entry ids and versions, source ownership, implementation type, declared authoring fields, preset/variant ids, slots, placement constraints, requirements, documentation, and accessibility contracts. Option values remain internal; apply them by id with site_apply_component_option. Use this before inserting a catalogue component.',
+  inputSchema: ListComponentLibraryInputSchema,
+}
+
+const insertComponentLibraryEntryTool: AiTool = {
+  name: 'site_insert_component',
+  scope: 'site',
+  execution: 'browser',
+  requiredCapabilities: SITE_COMPONENT_CAPS,
+  description:
+    'Insert a governed Component Library entry under an existing parent node. The editor resolves the registered backing implementation, placement rules, preset/variant values, dependencies, versioned catalogue identity, slots, and plugin ownership. Use an entry id and option ids returned by site_list_component_library. Do not substitute site_insert_html when the requested component exists in the catalogue. Returns the inserted node id and retained catalogue version.',
+  inputSchema: InsertComponentLibraryEntryInputSchema,
+}
+
+const updateComponentLibraryFieldTool: AiTool = {
+  name: 'site_update_component_field',
+  scope: 'site',
+  execution: 'browser',
+  requiredCapabilities: SITE_COMPONENT_CAPS,
+  description:
+    'Update one declared authoring field on an existing governed Component Library instance. The field key must be present in the retained catalogue definition; arbitrary props, styles, bindings, or implementation details are rejected. Read allowed field keys with site_list_component_library.',
+  inputSchema: UpdateComponentLibraryFieldInputSchema,
+}
+
+const applyComponentLibraryOptionTool: AiTool = {
+  name: 'site_apply_component_option',
+  scope: 'site',
+  execution: 'browser',
+  requiredCapabilities: SITE_COMPONENT_CAPS,
+  description:
+    'Apply a declared preset or variant by id to an existing governed Component Library instance. The editor resolves the registered option values and updates retained instance metadata; callers cannot supply arbitrary option values. Read option ids with site_list_component_library.',
+  inputSchema: ApplyComponentLibraryOptionInputSchema,
 }
 
 const replaceNodeHtmlTool: AiTool = {
@@ -420,6 +470,10 @@ export const siteWriteTools: AiTool[] = [
   moveNodeTool,
   renameNodeTool,
   duplicateNodeTool,
+  listComponentLibraryTool,
+  insertComponentLibraryEntryTool,
+  updateComponentLibraryFieldTool,
+  applyComponentLibraryOptionTool,
   applyCssTool,
   assignClassTool,
   removeClassTool,

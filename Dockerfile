@@ -61,4 +61,3 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD ["bun", "run", "server/healthcheck.ts"]
 
 CMD ["bun", "run", "server/index.ts"]
-

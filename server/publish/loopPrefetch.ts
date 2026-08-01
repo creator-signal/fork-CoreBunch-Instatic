@@ -11,6 +11,16 @@
  */
 
 import type { Page, PageNode, SiteDocument } from '@core/page-tree'
+import { pagePublicPath } from '@core/page-tree'
+import {
+  collectionNumberedPageWindow,
+  collectionPaginationHref,
+  normalizeCollectionPaginationMode,
+  normalizeCollectionSource,
+  readCollectionPageRequest,
+  resolveCollectionPageInfo,
+  type CollectionPaginationMode,
+} from '@core/collections'
 import type {
   LoopEntitySource,
   LoopFetchResult,
@@ -29,12 +39,17 @@ import { walkRenderTree } from './renderTreeWalk'
 /**
  * Resolved loop data for a single loop node on a page.
  *
- * `pageNumber` is 1-indexed. `hasMore` enables the infinite-loading
- * sentinel; `totalItems` powers the future numeric paginator block.
+ * `pageNumber` is 1-indexed. `hasMore` enables load-more; link metadata
+ * powers numbered, previous/next and cursor navigation.
  */
 interface ResolvedLoopData extends LoopFetchResult {
   pageNumber: number
   hasMore: boolean
+  paginationMode: CollectionPaginationMode
+  previousHref?: string
+  nextHref?: string
+  numberedHrefs?: Array<{ pageNumber: number; href: string }>
+  error?: string
 }
 
 type LoopDataMap = Map<string, ResolvedLoopData>
@@ -138,46 +153,52 @@ export function collectLoopNodes(
  * still resolves to "no data" instead of crashing the render.
  */
 interface LoopProps {
+  sourceMode: 'dynamic' | 'manual'
   sourceId: string
+  manualItems: LoopItem[]
   filters: Record<string, unknown>
+  query: string
   orderBy: string
   direction: 'asc' | 'desc'
   limit: number
   offset: number
-  pagination: 'none' | 'infinite'
+  pagination: CollectionPaginationMode
   pageSize: number
 }
 
 export function readLoopProps(node: PageNode): LoopProps {
   const props = node.props
+  const sourceMode = props.sourceMode === 'manual' ? 'manual' : 'dynamic'
+  const pagination = normalizeCollectionPaginationMode(props.pagination)
+  const manualSource = normalizeCollectionSource({
+    mode: 'manual',
+    items: props.manualItems,
+  })
   return {
+    sourceMode,
     sourceId: typeof props.sourceId === 'string' ? props.sourceId : '',
+    manualItems: manualSource.mode === 'manual' ? manualSource.items : [],
     filters:
       props.filters && typeof props.filters === 'object' && !Array.isArray(props.filters)
         ? (props.filters as Record<string, unknown>)
         : {},
+    query: typeof props.query === 'string' ? props.query : '',
     orderBy: typeof props.orderBy === 'string' ? props.orderBy : '',
     direction: props.direction === 'asc' ? 'asc' : 'desc',
     limit: typeof props.limit === 'number' && props.limit > 0 ? Math.floor(props.limit) : 10,
     offset: typeof props.offset === 'number' && props.offset >= 0 ? Math.floor(props.offset) : 0,
-    pagination: props.pagination === 'infinite' ? 'infinite' : 'none',
+    pagination:
+      sourceMode === 'manual' && pagination === 'cursor'
+        ? 'previous-next'
+        : pagination,
     pageSize:
       typeof props.pageSize === 'number' && props.pageSize > 0 ? Math.floor(props.pageSize) : 10,
   }
 }
 
-/**
- * URL query parameter prefix for per-loop pagination state, e.g.
- * `?loop_<nodeId>_page=2`. Multiple loops on a single page each get their
- * own param so they paginate independently.
- */
-function loopPageQueryKey(loopNodeId: string): string {
-  return `loop_${loopNodeId}_page`
-}
-
-/** True for a `loop_<nodeId>_page` pagination param. */
-function isLoopPageQueryKey(key: string): boolean {
-  return /^loop_.+_page$/.test(key)
+/** True for a per-loop page or cursor pagination parameter. */
+function isLoopPaginationQueryKey(key: string): boolean {
+  return /^loop_.+_(page|cursor)$/.test(key)
 }
 
 /**
@@ -191,19 +212,11 @@ function isLoopPageQueryKey(key: string): boolean {
 export function canonicalRenderQuery(searchParams: URLSearchParams): string {
   const kept: Array<[string, string]> = []
   for (const [key, value] of searchParams) {
-    if (isLoopPageQueryKey(key)) kept.push([key, value])
+    if (isLoopPaginationQueryKey(key)) kept.push([key, value])
   }
   if (kept.length === 0) return ''
   kept.sort((a, b) => (a[0] === b[0] ? a[1].localeCompare(b[1]) : a[0].localeCompare(b[0])))
   return `?${new URLSearchParams(kept).toString()}`
-}
-
-function readPageNumber(url: URL | undefined, loopNodeId: string): number {
-  if (!url) return 1
-  const raw = url.searchParams.get(loopPageQueryKey(loopNodeId))
-  if (!raw) return 1
-  const parsed = Number.parseInt(raw, 10)
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
 }
 
 /**
@@ -211,35 +224,61 @@ function readPageNumber(url: URL | undefined, loopNodeId: string): number {
  * applying the requested page slice.
  *
  * - `pagination: 'none'` → fetch up to `limit`, single page, never `hasMore`.
- * - `pagination: 'infinite'` → fetch `pageSize` items at `offset + (page-1)*pageSize`,
- *   `hasMore` reflects whether more rows remain.
+ * - offset modes fetch `pageSize` items at
+ *   `offset + (page-1)*pageSize`;
+ * - cursor mode forwards the opaque cursor and leaves offset interpretation to
+ *   the source.
  *
- * Errors from a source are swallowed and the loop renders empty — one
- * misconfigured loop must not crash the whole page.
+ * Errors from a source are isolated into a public-safe collection error state
+ * — one misconfigured loop must not crash the whole page or expose internals.
  */
 async function resolveOneLoop(
   node: PageNode,
   source: LoopEntitySource,
-  ctx: { db: DbClient; site: SiteDocument; url?: URL; request?: SourceRequestContext },
+  ctx: {
+    db: DbClient
+    site: SiteDocument
+    page: Page
+    url?: URL
+    request?: SourceRequestContext
+  },
 ): Promise<ResolvedLoopData> {
   const props = readLoopProps(node)
-  const pageNumber = props.pagination === 'infinite' ? readPageNumber(ctx.url, node.id) : 1
+  const pageUrl = ctx.url ?? new URL(
+    pagePublicPath(ctx.page.slug),
+    'http://instatic.local',
+  )
+  const pageRequest = readCollectionPageRequest(
+    pageUrl.searchParams,
+    node.id,
+    { mode: props.pagination, pageSize: props.pageSize },
+    'loop',
+  )
+  const pageNumber = pageRequest.pageNumber
 
   let limit = props.limit
   let offset = props.offset
-  if (props.pagination === 'infinite') {
+  if (
+    props.pagination === 'numbered' ||
+    props.pagination === 'previous-next' ||
+    props.pagination === 'load-more'
+  ) {
     limit = props.pageSize
     offset = props.offset + (pageNumber - 1) * props.pageSize
+  } else if (props.pagination === 'cursor') {
+    limit = props.pageSize
   }
 
   const fetchCtx: SourceFetchContext = {
     db: ctx.db,
     site: ctx.site,
     filters: props.filters,
+    query: props.query,
     orderBy: props.orderBy || (source.orderByOptions[0]?.id ?? ''),
     direction: props.direction,
     limit,
     offset,
+    cursor: pageRequest.cursor,
     // Request context — present only when rendering inside a Layer C hole.
     // Built-in publish-time sources ignore it.
     request: ctx.request,
@@ -248,15 +287,57 @@ async function resolveOneLoop(
   try {
     const result = await source.fetch(fetchCtx)
     const consumed = offset + result.items.length
+    const pageInfo = resolveCollectionPageInfo(pageRequest, result)
+    const href = (target: { pageNumber?: number; cursor?: string }) =>
+      collectionPaginationHref(pageUrl, node.id, target, 'loop')
     return {
-      items: result.items,
-      totalItems: result.totalItems,
+      ...result,
       pageNumber,
-      hasMore: props.pagination === 'infinite' && consumed < result.totalItems,
+      hasMore:
+        props.pagination === 'cursor'
+          ? Boolean(result.nextCursor)
+          : props.pagination === 'load-more' && consumed < result.totalItems,
+      paginationMode: props.pagination,
+      ...(pageInfo.hasPrevious
+        ? {
+            previousHref: href(
+              props.pagination === 'cursor'
+                ? { cursor: pageInfo.previousCursor }
+                : { pageNumber: pageNumber - 1 },
+            ),
+          }
+        : {}),
+      ...(pageInfo.hasNext
+        ? {
+            nextHref: href(
+              props.pagination === 'cursor'
+                ? { cursor: pageInfo.nextCursor }
+                : { pageNumber: pageNumber + 1 },
+            ),
+          }
+        : {}),
+      ...(props.pagination === 'numbered'
+        ? {
+            numberedHrefs: collectionNumberedPageWindow(
+              pageInfo.pageNumber,
+              pageInfo.totalPages,
+            ).map((targetPage) => ({
+              pageNumber: targetPage,
+              href: href({ pageNumber: targetPage }),
+            })),
+          }
+        : {}),
     }
   } catch (err) {
     console.error(`[loopPrefetch] source "${source.id}" failed for node "${node.id}":`, err)
-    return { items: [], totalItems: 0, pageNumber, hasMore: false }
+    return {
+      items: [],
+      totalItems: 0,
+      pageNumber,
+      hasMore: false,
+      paginationMode: props.pagination,
+      error: 'Items could not be loaded.',
+    }
   }
 }
 
@@ -266,7 +347,7 @@ async function resolveOneLoop(
  * synchronous walk.
  *
  * `url` is optional — when present, per-loop `?loop_<id>_page` query
- * params drive infinite-loading slices. When absent (e.g. SSR for
+ * page/cursor params drive collection slices. When absent (e.g. SSR for
  * editor preview) every loop renders page 1.
  */
 export async function prefetchLoopData(
@@ -287,16 +368,30 @@ export async function prefetchLoopData(
   const entries: Array<[string, ResolvedLoopData]> = await Promise.all(
     nodes.map(async (node) => {
       const props = readLoopProps(node)
-      const source = props.sourceId ? loopSourceRegistry.get(props.sourceId) : undefined
+      const source = props.sourceMode === 'manual'
+        ? manualLoopSource(props.manualItems)
+        : props.sourceId
+          ? loopSourceRegistry.get(props.sourceId)
+          : undefined
       if (!source) {
         return [
           node.id,
-          { items: [], totalItems: 0, pageNumber: 1, hasMore: false },
+          {
+            items: [],
+            totalItems: 0,
+            pageNumber: 1,
+            hasMore: false,
+            paginationMode: props.pagination,
+            ...(props.sourceMode === 'dynamic' && props.sourceId
+              ? { error: 'The collection source is unavailable.' }
+              : {}),
+          },
         ] as [string, ResolvedLoopData]
       }
       const data = await resolveOneLoop(node, source, {
         db,
         site,
+        page,
         url,
         request: options?.request,
       })
@@ -305,4 +400,23 @@ export async function prefetchLoopData(
   )
 
   return new Map(entries)
+}
+
+function manualLoopSource(items: LoopItem[]): LoopEntitySource {
+  return {
+    id: 'manual.items',
+    label: 'Manual items',
+    filterSchema: {},
+    orderByOptions: [],
+    fields: [
+      { id: 'label', label: 'Label' },
+      { id: 'title', label: 'Title' },
+      { id: 'text', label: 'Text' },
+    ],
+    fetch: async ({ limit, offset }) => ({
+      items: items.slice(offset, offset + limit),
+      totalItems: items.length,
+    }),
+    preview: ({ limit }) => items.slice(0, limit),
+  }
 }

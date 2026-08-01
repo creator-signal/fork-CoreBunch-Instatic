@@ -3,6 +3,7 @@ import { resolveInsertLocation, type InsertLocation } from '@site/store/insertLo
 import { pushToast } from '@ui/components/Toast'
 import type { ModuleInserterItem } from '@site/module-picker/moduleInserterModel'
 import { useInsertModule } from './useInsertModule'
+import { useInsertComponentLibraryEntry } from './useInsertComponentLibraryEntry'
 
 /**
  * Shared handler for the module inserter dialog's `onInsertItem` callback.
@@ -22,6 +23,7 @@ export function useInsertInserterItem() {
   const insertComponentRef = useEditorStore((s) => s.insertComponentRef)
   const selectedNodeId = useEditorStore((s) => s.selectedNodeId)
   const insertModule = useInsertModule()
+  const insertCatalogueEntry = useInsertComponentLibraryEntry()
 
   const insertLayoutAction = useEditorStore((s) => s.insertLayout)
 
@@ -49,7 +51,17 @@ export function useInsertInserterItem() {
         : item.kind === 'savedLayout'
           ? Boolean(insertLayoutAction(item.id, target))
           : item.kind === 'component'
-            ? insertVC(item.id, target)
+            ? item.source === 'catalogue'
+              ? Boolean(insertCatalogueEntry(
+                  item.entry,
+                  {
+                    ...(item.presetId ? { presetId: item.presetId } : {}),
+                    ...(item.variantId ? { variantId: item.variantId } : {}),
+                    showSuccessToast: false,
+                  },
+                  target,
+                ))
+              : insertVC(item.id, target)
             : false
 
     if (!inserted) return false

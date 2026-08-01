@@ -43,6 +43,8 @@ export interface FieldEditState {
   // media
   mediaKind: 'image' | 'video' | 'any'
   mediaAllowMultiple: boolean
+  // attachment
+  attachmentAllowMultiple: boolean
   // relation
   relationAllowMultiple: boolean
 }
@@ -105,6 +107,7 @@ export function fieldToEditState(field: DataField): FieldEditState {
         : [makeOption('')],
     mediaKind: field.type === 'media' ? (field.mediaKind ?? 'any') : 'any',
     mediaAllowMultiple: field.type === 'media' ? (field.allowMultiple ?? false) : false,
+    attachmentAllowMultiple: field.type === 'attachment' ? (field.allowMultiple ?? false) : false,
     relationAllowMultiple: field.type === 'relation' ? (field.allowMultiple ?? false) : false,
   }
 }
@@ -187,6 +190,12 @@ export function applyEditState(
         ...common,
         ...(state.mediaKind !== 'any' ? { mediaKind: state.mediaKind } : {}),
         ...(state.mediaAllowMultiple ? { allowMultiple: true as const } : {}),
+      }
+    case 'attachment':
+      return {
+        type: 'attachment',
+        ...common,
+        ...(state.attachmentAllowMultiple ? { allowMultiple: true as const } : {}),
       }
     case 'relation':
       return {

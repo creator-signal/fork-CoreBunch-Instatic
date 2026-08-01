@@ -416,6 +416,30 @@ export function CellDisplayRenderer({
           })()
       return <MediaDisplay ids={ids} />
     }
+    case 'attachment': {
+      const ids = field.allowMultiple === true
+        ? readStringArrayCell(cells, field.id)
+        : (() => {
+            const value = cells[field.id]
+            return typeof value === 'string' && value.length > 0 ? [value] : []
+          })()
+      if (ids.length === 0) return <Empty />
+      return (
+        <span className={styles.attachmentLinks}>
+          {ids.slice(0, 3).map((id, index) => (
+            <a
+              key={id}
+              href={`/admin/api/cms/attachments/${encodeURIComponent(id)}/download`}
+              className={styles.attachmentLink}
+              onClick={(event) => event.stopPropagation()}
+            >
+              Attachment {index + 1}
+            </a>
+          ))}
+          {ids.length > 3 && <span className={styles.mediaOverflow}>+{ids.length - 3}</span>}
+        </span>
+      )
+    }
     case 'relation': {
       const ids = field.allowMultiple === true
         ? readStringArrayCell(cells, field.id)

@@ -29,6 +29,7 @@ export const FIELD_TYPE_LABELS: Record<DataFieldType, string> = {
   url: 'URL',
   email: 'Email',
   media: 'Media',
+  attachment: 'Attachment',
   relation: 'Relation',
   pageTree: 'Page tree',
   fieldSchema: 'Field schema',

@@ -3,6 +3,11 @@
     flex: 0 0 auto;
 }
 
+.layersViewRow {
+    padding: var(--space-xs) var(--space-s) 0;
+    flex: 0 0 auto;
+}
+
 /* The tab area fills the panel; each mounted tab owns its own scroll surface. */
 .tabBody {
     flex: 1 1 auto;

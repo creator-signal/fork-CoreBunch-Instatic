@@ -368,8 +368,13 @@ interface LoopFetchResultMessage {
   kind: 'loop-fetch-result'
   correlationId: string
   ok: boolean
-  /** `{ items, totalItems }` shape from the plugin's source — re-validated host-side. */
-  value?: { items: unknown[]; totalItems: number }
+  /** Collection page from the plugin's source — re-validated host-side. */
+  value?: {
+    items: unknown[]
+    totalItems: number
+    nextCursor?: string
+    previousCursor?: string
+  }
   error?: string
   /**
    * QuickJS-side stack frames of the failure (plugin sources are evaluated

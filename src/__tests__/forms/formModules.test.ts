@@ -12,6 +12,10 @@ import {
   SubmitModule,
   TextareaModule,
 } from '@modules/base/forms'
+import {
+  FormDraftActionModule,
+  FormStepModule,
+} from '@modules/base/forms/wizard'
 import { escapeProps } from '@core/publisher'
 import { runModuleConformanceSuite } from '../helpers'
 import '../matchers'
@@ -28,6 +32,8 @@ const FORM_MODULES = [
   RadioModule,
   SubmitModule,
   FormMessageModule,
+  FormStepModule,
+  FormDraftActionModule,
 ]
 
 for (const mod of FORM_MODULES) {
@@ -39,15 +45,15 @@ describe('base form primitive modules', () => {
   // a `name` attribute (falling back to fieldId) — otherwise the browser's
   // FormData omits the field and the submitted value is silently dropped. The
   // snapshot + validator already key by `name || fieldId`, so render must agree.
-  it('falls back to fieldId for the name attribute when name is blank', () => {
+  it('falls back to fieldId for control names and ids', () => {
     expect(InputModule.render({ ...InputModule.defaults, fieldId: 'email', name: '' }).html)
-      .toContain('name="email"')
+      .toContain('name="email" id="email"')
     expect(TextareaModule.render({ ...TextareaModule.defaults, fieldId: 'bio', name: '' }).html)
-      .toContain('name="bio"')
+      .toContain('name="bio" id="bio"')
     expect(SelectModule.render({ ...SelectModule.defaults, fieldId: 'country', name: '' }, []).html)
-      .toContain('name="country"')
+      .toContain('name="country" id="country"')
     expect(CheckboxModule.render({ ...CheckboxModule.defaults, fieldId: 'optin', name: '' }, []).html)
-      .toContain('name="optin"')
+      .toContain('name="optin" id="optin"')
   })
 
   it('renders a CMS-native form with runtime metadata and children', () => {
@@ -155,14 +161,39 @@ describe('base form primitive modules', () => {
       disabled: false,
     }, []).html).toBe('<input type="radio" data-instatic-form-control="radio" data-instatic-field-id="plan" name="plan" id="plan-pro" value="pro">')
 
-    expect(SubmitModule.render({ label: 'Subscribe', disabled: false, formId: '' }, []).html)
+    expect(SubmitModule.render({ action: 'submit', label: 'Subscribe', disabled: false, formId: '' }, []).html)
       .toBe('<button type="submit">Subscribe</button>')
+    expect(SubmitModule.render({
+      ...SubmitModule.defaults,
+      action: 'reset',
+      label: 'Reset form',
+    }, []).html).toBe('<button type="reset">Reset form</button>')
 
     expect(FormMessageModule.render({
       formId: 'newsletter',
+      fieldId: '',
       kind: 'success',
       text: 'Thanks',
     }, []).html).toBe('<div data-instatic-form-message="success" data-instatic-form-id="newsletter" role="status">Thanks</div>')
+  })
+
+  it('renders field help and errors with runtime association metadata', () => {
+    expect(FormMessageModule.render({
+      ...FormMessageModule.defaults,
+      fieldId: 'email',
+      kind: 'help',
+      text: 'Use your work address.',
+    }, []).html).toBe(
+      '<div data-instatic-form-message="help" data-instatic-form-help-for="email">Use your work address.</div>',
+    )
+    expect(FormMessageModule.render({
+      ...FormMessageModule.defaults,
+      fieldId: 'email',
+      kind: 'error',
+      text: 'Check this field.',
+    }, []).html).toBe(
+      '<div data-instatic-form-message="error" data-instatic-form-error-for="email" role="alert">Check this field.</div>',
+    )
   })
 
   it('escapes authored form text and attributes through the publisher boundary', () => {

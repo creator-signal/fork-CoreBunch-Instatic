@@ -8,7 +8,7 @@ A plugin is a zip package containing a `plugin.json` manifest and one or more bu
 
 ## TL;DR
 
-- **Package shape:** the CLI reads `instatic-plugin.config.ts` and emits a zip containing `plugin.json` plus entrypoint bundles (`server/index.js`, `editor/index.js`, admin app bundles, `modules/index.js`, `frontend/*.js`, optional `pack/site.json`).
+- **Package shape:** the CLI reads `instatic-plugin.config.ts` and emits a zip containing `plugin.json` plus entrypoint bundles (`server/index.js`, `editor/index.js`, admin app bundles, `modules/index.js`, `frontend/*.js`, optional `pack/site.json`, and optional declarative `component-library/entries.json`).
 - **Runtime:** each server plugin has a Bun `Worker` (`server/plugins/pluginWorker.ts`) that owns one QuickJS VM (`server/plugins/quickjs/vm.ts`). Canvas module packs run in a separate QuickJS VM on the server (`server/plugins/modulePackVm.ts`) and as ESM in the browser editor. No host APIs leak into QuickJS.
 - **SDK:** every API call goes through `api` — `api.plugin.*` for metadata + logging, `api.cms.*` for routes, storage, hooks, loops, settings, schedule, content, and media; `api.editor.*` for editor extensions; `api.dashboard.*` for dashboard widgets.
 - **Lifecycle:** `install` → `activate` → (optionally `deactivate` / `migrate`) → `uninstall`. Each hook is async-capable and isolated; if one throws, the host rolls back and parks the plugin in `error`.
@@ -73,6 +73,8 @@ pack/site.json           <- Visual Components / pages / classes / layouts pack (
                            layouts are authored as clean HTML + CSS in
                            definePack({ layouts }) and compiled to snapshot
                            form at build time)
+component-library/
+  entries.json           <- governed catalogue definitions (optional; declarative JSON)
 assets/                  <- static assets copied into the zip unchanged (optional)
 ```
 
@@ -110,6 +112,7 @@ Authors normally write `instatic-plugin.config.ts` with `definePlugin(...)`; the
     "admin.navigation",   // required by adminPages[]
     "editor.code",        // required by entrypoints.editor (unsandboxed admin-window code)
     "modules.register",   // required by entrypoints.modules
+    "componentLibrary.register", // required by componentLibrary
     "frontend.assets",    // required by frontend.assets[]
     "network.outbound"    // required by fetch() in the server sandbox
   ],
@@ -118,6 +121,10 @@ Authors normally write `instatic-plugin.config.ts` with `definePlugin(...)`; the
     "server":  "server/index.js",
     "editor":  "editor/index.js",
     "modules": "modules/index.js"
+  },
+
+  "componentLibrary": {
+    "path": "component-library/entries.json"
   },
 
   "resources": [
@@ -200,6 +207,7 @@ Authors normally write `instatic-plugin.config.ts` with `definePlugin(...)`; the
 
 - `entrypoints.editor` and app-kind admin pages require `editor.code`.
 - `entrypoints.modules` requires `modules.register`.
+- `componentLibrary` requires `componentLibrary.register`.
 - Any `adminPages[]` entry requires `admin.navigation`.
 - `frontend.assets[]` requires `frontend.assets`.
 - Public routes require both `cms.routes` and `cms.routes.public`.
@@ -301,7 +309,12 @@ Editor entrypoints (`entrypoints.editor`) and app-kind admin pages (`adminPages[
 That trust level is gated by one permission: **`editor.code`** (risk: dangerous).
 
 - The manifest parser rejects an editor entrypoint or app-kind admin page that doesn't declare `editor.code` (`parsePluginManifest` coherence checks; `instatic-plugin lint` reports the same error pre-upload).
-- The editor loader (`src/core/plugins/editorPluginLoader.ts`) refuses to import an editor entrypoint without the `editor.code` *grant*, and records a visible "permission not granted" failure on the plugin card instead of skipping silently. Module packs get the same treatment for `modules.register`.
+- The editor loader (`src/core/plugins/editorPluginLoader.ts`) refuses to import an editor entrypoint without the `editor.code` *grant*, and records a visible "permission not granted" failure on the plugin card instead of skipping silently. Module packs and governed catalogue packages get the same treatment for `modules.register` and `componentLibrary.register`.
+- Plugin disable and uninstall inspect persisted pages and Visual Components
+  before changing plugin state. A plugin-owned governed instance returns HTTP
+  409 with its document and node locations until it is migrated or converted;
+  force removal skips plugin hooks only and does not bypass this integrity
+  check.
 - The admin-app loader (`src/core/plugins/adminRuntime.ts`) refuses to import an app page without the grant; the page body renders the refusal.
 - `adminPages[].content.assetPath` is pinned to the plugin's own `/uploads/plugins/{id}/{version}` subtree so a manifest can't point the dynamic import at foreign code.
 - The install review dialog (always shown — even for zero-permission plugins) calls out `editor.code` with a dedicated unsandboxed-code warning.
@@ -939,6 +952,7 @@ Risk levels:
 | `editor.canvas`             | Editor               | High      | Register canvas overlay React components                                |
 | `editor.panels`             | Editor               | Medium    | Register left-sidebar panels. Use `definePluginPanel({ id, label, iconName, accent? })` from the SDK — `accent` pins a specific rail tint; omit it to let the host derive one automatically from the panel identity. |
 | `modules.register`          | Editor / manifest    | High      | Ship new modules to the canvas module library                           |
+| `componentLibrary.register` | Editor / server / manifest | High | Ship explicitly namespaced governed catalogue entries; definitions unload with the plugin |
 | `loops.register`            | Editor / server / manifest | Medium | Register custom `base.loop` sources                                  |
 | `visualComponents.register` | Admin / manifest     | Medium    | Ship VCs / page templates / class / layout packs (via `pack/site.json`) |
 | `dashboard.widgets.register`| Admin                | Medium    | Register cards in the admin dashboard widget grid                       |

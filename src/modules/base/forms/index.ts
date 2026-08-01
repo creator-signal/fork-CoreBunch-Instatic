@@ -10,6 +10,7 @@ import { Type, Value, type Static } from '@core/utils/typeboxHelpers'
 import { normalizeIdentifierValue } from '@core/utils/identifier'
 import { safeUrl } from '@modules/base/utils/escape'
 import { FORM_RUNTIME_JS } from './formRuntimeJs'
+import { FORM_DRAFT_RUNTIME_JS } from './formDraftRuntimeJs'
 import { FileTextSolidIcon } from 'pixel-art-icons/icons/file-text-solid'
 import { TextStartTIcon } from 'pixel-art-icons/icons/text-start-t'
 import { CheckboxSolidIcon } from 'pixel-art-icons/icons/checkbox-solid'
@@ -28,6 +29,7 @@ import {
   SubmitEditor,
   TextareaEditor,
 } from './FormControls'
+import './wizard'
 
 const FormPropsSchema = Type.Object({
   mode: Type.Union([Type.Literal('cms'), Type.Literal('custom')], { default: 'cms' }),
@@ -40,6 +42,12 @@ const FormPropsSchema = Type.Object({
   redirectUrl: Type.String({ default: '' }),
   honeypotName: Type.String({ default: 'company' }),
   minSubmitSeconds: Type.Number({ default: 2 }),
+  draftMode: Type.Union([
+    Type.Literal('none'),
+    Type.Literal('session'),
+    Type.Literal('persistent'),
+  ], { default: 'none' }),
+  draftTtlDays: Type.Number({ default: 30 }),
 })
 
 type FormProps = Static<typeof FormPropsSchema>
@@ -81,6 +89,15 @@ const InputPropsSchema = Type.Object({
   minLength: Type.Number({ default: 0 }),
   maxLength: Type.Number({ default: 0 }),
   pattern: Type.String({ default: '' }),
+  accept: Type.String({ default: '' }),
+  multiple: Type.Boolean({ default: false }),
+  attachmentMaxFiles: Type.Number({ default: 1 }),
+  attachmentMaxBytes: Type.Number({ default: 10 * 1024 * 1024 }),
+  draftBehavior: Type.Union([
+    Type.Literal('include'),
+    Type.Literal('session-only'),
+    Type.Literal('exclude'),
+  ], { default: 'include' }),
 })
 
 type InputProps = Static<typeof InputPropsSchema>
@@ -97,6 +114,11 @@ const TextareaPropsSchema = Type.Object({
   rows: Type.Number({ default: 4 }),
   minLength: Type.Number({ default: 0 }),
   maxLength: Type.Number({ default: 0 }),
+  draftBehavior: Type.Union([
+    Type.Literal('include'),
+    Type.Literal('session-only'),
+    Type.Literal('exclude'),
+  ], { default: 'include' }),
 })
 
 type TextareaProps = Static<typeof TextareaPropsSchema>
@@ -108,6 +130,11 @@ const SelectPropsSchema = Type.Object({
   required: Type.Boolean({ default: false }),
   disabled: Type.Boolean({ default: false }),
   multiple: Type.Boolean({ default: false }),
+  draftBehavior: Type.Union([
+    Type.Literal('include'),
+    Type.Literal('session-only'),
+    Type.Literal('exclude'),
+  ], { default: 'include' }),
 })
 
 type SelectProps = Static<typeof SelectPropsSchema>
@@ -136,11 +163,20 @@ const ChoicePropsSchema = Type.Object({
   checked: Type.Boolean({ default: false }),
   required: Type.Boolean({ default: false }),
   disabled: Type.Boolean({ default: false }),
+  draftBehavior: Type.Union([
+    Type.Literal('include'),
+    Type.Literal('session-only'),
+    Type.Literal('exclude'),
+  ], { default: 'include' }),
 })
 
 type ChoiceProps = Static<typeof ChoicePropsSchema>
 
 const SubmitPropsSchema = Type.Object({
+  action: Type.Union(
+    [Type.Literal('submit'), Type.Literal('reset')],
+    { default: 'submit' },
+  ),
   label: Type.String({ default: 'Submit' }),
   disabled: Type.Boolean({ default: false }),
   formId: Type.String({ default: '' }),
@@ -150,7 +186,13 @@ type SubmitProps = Static<typeof SubmitPropsSchema>
 
 const FormMessagePropsSchema = Type.Object({
   formId: Type.String({ default: '' }),
-  kind: Type.Union([Type.Literal('status'), Type.Literal('success'), Type.Literal('error')], { default: 'status' }),
+  fieldId: Type.String({ default: '' }),
+  kind: Type.Union([
+    Type.Literal('help'),
+    Type.Literal('status'),
+    Type.Literal('success'),
+    Type.Literal('error'),
+  ], { default: 'status' }),
   text: Type.String({ default: '' }),
 })
 
@@ -186,6 +228,12 @@ export const FormModule: ModuleDefinition<FormProps> = {
     redirectUrl: { type: 'url', label: 'Redirect URL', condition: { field: 'successBehavior', eq: 'redirect' } },
     honeypotName: { type: 'text', label: 'Honeypot field', condition: { field: 'mode', eq: 'cms' } },
     minSubmitSeconds: { type: 'number', label: 'Minimum fill seconds', condition: { field: 'mode', eq: 'cms' } },
+    draftMode: { type: 'select', label: 'Draft recovery', condition: { field: 'mode', eq: 'cms' }, options: [
+      { label: 'Off', value: 'none' },
+      { label: 'This browser session', value: 'session' },
+      { label: 'Persistent recovery', value: 'persistent' },
+    ] },
+    draftTtlDays: { type: 'number', label: 'Draft expiry days', condition: { field: 'draftMode', eq: 'persistent' } },
   },
   propsSchema: FormPropsSchema,
   defaults: Value.Create(FormPropsSchema),
@@ -201,6 +249,8 @@ export const FormModule: ModuleDefinition<FormProps> = {
       props.mode === 'custom' ? `method="${props.method}"` : '',
       props.successBehavior === 'message' ? `data-instatic-success-message="${props.successMessage}"` : '',
       props.successBehavior === 'redirect' ? `data-instatic-success-redirect="${safeUrl(props.redirectUrl)}"` : '',
+      props.draftMode && props.draftMode !== 'none' ? `data-instatic-draft-mode="${props.draftMode}"` : '',
+      props.draftMode === 'persistent' ? `data-instatic-draft-ttl-days="${positiveNumber(props.draftTtlDays ?? 30) ?? 30}"` : '',
     ].filter(Boolean).join(' ')
     const honeypot = props.mode === 'cms'
       ? `<input type="text" name="${props.honeypotName}" autocomplete="off" tabindex="-1" data-instatic-honeypot hidden>`
@@ -209,7 +259,12 @@ export const FormModule: ModuleDefinition<FormProps> = {
       html: `<form ${attrs}>${honeypot}${renderedChildren.join('')}</form>`,
       // CMS-native forms need the browser runtime; custom-action forms are
       // plain HTML form submissions and ship zero JS.
-      ...(props.mode === 'cms' ? { js: FORM_RUNTIME_JS } : {}),
+      ...(props.mode === 'cms'
+        ? {
+            js: FORM_RUNTIME_JS
+              + (props.draftMode && props.draftMode !== 'none' ? FORM_DRAFT_RUNTIME_JS : ''),
+          }
+        : {}),
     }
   },
 }
@@ -262,7 +317,7 @@ export const InputModule: ModuleDefinition<InputProps> = {
     ['data-instatic-field-id', props.fieldId],
     ['type', props.inputType],
     ['name', props.name || props.fieldId],
-    ['id', props.id],
+    ['id', props.id || props.fieldId],
     ['placeholder', props.placeholder],
     ['value', props.value],
     ['autocomplete', props.autocomplete],
@@ -271,7 +326,16 @@ export const InputModule: ModuleDefinition<InputProps> = {
     ['minlength', positiveNumber(props.minLength)],
     ['maxlength', positiveNumber(props.maxLength)],
     ['pattern', props.pattern],
-  ])}${booleanAttrs(props, ['required', 'disabled', 'readOnly'])}>` }),
+    ['accept', props.inputType === 'file' ? props.accept : ''],
+    ['data-instatic-attachment-max-files', props.inputType === 'file' ? positiveNumber(props.attachmentMaxFiles) : undefined],
+    ['data-instatic-attachment-max-bytes', props.inputType === 'file' ? positiveNumber(props.attachmentMaxBytes) : undefined],
+    ['data-instatic-draft-behavior', props.draftBehavior !== 'include' ? props.draftBehavior : ''],
+  ])}${booleanAttrs(props, [
+    'required',
+    'disabled',
+    'readOnly',
+    ...(props.inputType === 'file' ? ['multiple'] : []),
+  ])}>` }),
 }
 
 export const TextareaModule: ModuleDefinition<TextareaProps> = {
@@ -295,6 +359,11 @@ export const TextareaModule: ModuleDefinition<TextareaProps> = {
     rows: { type: 'number', label: 'Rows' },
     minLength: { type: 'number', label: 'Minimum length' },
     maxLength: { type: 'number', label: 'Maximum length' },
+    draftBehavior: { type: 'select', label: 'Draft storage', options: [
+      { label: 'Include', value: 'include' },
+      { label: 'Session only', value: 'session-only' },
+      { label: 'Never save', value: 'exclude' },
+    ] },
   },
   propsSchema: TextareaPropsSchema,
   defaults: Value.Create(TextareaPropsSchema),
@@ -304,11 +373,12 @@ export const TextareaModule: ModuleDefinition<TextareaProps> = {
     ['data-instatic-form-control', 'textarea'],
     ['data-instatic-field-id', props.fieldId],
     ['name', props.name || props.fieldId],
-    ['id', props.id],
+    ['id', props.id || props.fieldId],
     ['placeholder', props.placeholder],
     ['rows', props.rows],
     ['minlength', positiveNumber(props.minLength)],
     ['maxlength', positiveNumber(props.maxLength)],
+    ['data-instatic-draft-behavior', props.draftBehavior !== 'include' ? props.draftBehavior : ''],
   ])}${booleanAttrs(props, ['required', 'disabled', 'readOnly'])}>${props.value}</textarea>` }),
 }
 
@@ -328,6 +398,11 @@ export const SelectModule: ModuleDefinition<SelectProps> = {
     required: { type: 'toggle', label: 'Required' },
     disabled: { type: 'toggle', label: 'Disabled' },
     multiple: { type: 'toggle', label: 'Multiple' },
+    draftBehavior: { type: 'select', label: 'Draft storage', options: [
+      { label: 'Include', value: 'include' },
+      { label: 'Session only', value: 'session-only' },
+      { label: 'Never save', value: 'exclude' },
+    ] },
   },
   propsSchema: SelectPropsSchema,
   defaults: Value.Create(SelectPropsSchema),
@@ -338,7 +413,8 @@ export const SelectModule: ModuleDefinition<SelectProps> = {
       ['data-instatic-form-control', 'select'],
       ['data-instatic-field-id', props.fieldId],
       ['name', props.name || props.fieldId],
-      ['id', props.id],
+      ['id', props.id || props.fieldId],
+      ['data-instatic-draft-behavior', props.draftBehavior !== 'include' ? props.draftBehavior : ''],
     ])}${booleanAttrs(props, ['required', 'disabled', 'multiple'])}>${renderedChildren.join('')}</select>`,
   }),
 }
@@ -403,14 +479,22 @@ export const RadioModule: ModuleDefinition<ChoiceProps> = choiceModule({
 
 export const SubmitModule: ModuleDefinition<SubmitProps> = {
   id: 'base.submit',
-  name: 'Submit',
-  description: 'A submit button.',
+  name: 'Form Action',
+  description: 'A submit or reset form action.',
   category: 'Forms',
   version: '1.0.0',
   icon: SendSolidIcon,
   trusted: true,
   canHaveChildren: false,
   schema: {
+    action: {
+      type: 'select',
+      label: 'Action',
+      options: [
+        { label: 'Submit', value: 'submit' },
+        { label: 'Reset', value: 'reset' },
+      ],
+    },
     label: { type: 'text', label: 'Label' },
     disabled: { type: 'toggle', label: 'Disabled' },
     formId: { type: 'text', label: 'Form ID override', normalize: 'identifier' },
@@ -420,7 +504,7 @@ export const SubmitModule: ModuleDefinition<SubmitProps> = {
   component: SubmitEditor,
   htmlTag: 'button',
   render: (props) => ({
-    html: `<button type="submit"${attrs([['form', normalizeIdentifierValue(props.formId)]])}${booleanAttrs(props, ['disabled'])}>${props.label}</button>`,
+    html: `<button type="${props.action === 'reset' ? 'reset' : 'submit'}"${attrs([['form', normalizeIdentifierValue(props.formId)]])}${booleanAttrs(props, ['disabled'])}>${props.label}</button>`,
   }),
 }
 
@@ -435,7 +519,13 @@ export const FormMessageModule: ModuleDefinition<FormMessageProps> = {
   canHaveChildren: false,
   schema: {
     formId: { type: 'text', label: 'Form ID', normalize: 'identifier' },
+    fieldId: {
+      type: 'text',
+      label: 'Field ID',
+      condition: { field: 'kind', in: ['help', 'error'] },
+    },
     kind: { type: 'select', label: 'Kind', options: [
+      { label: 'Help', value: 'help' },
       { label: 'Status', value: 'status' },
       { label: 'Success', value: 'success' },
       { label: 'Error', value: 'error' },
@@ -446,9 +536,22 @@ export const FormMessageModule: ModuleDefinition<FormMessageProps> = {
   defaults: Value.Create(FormMessagePropsSchema),
   component: FormMessageEditor,
   htmlTag: 'div',
-  render: (props) => ({
-    html: `<div data-instatic-form-message="${props.kind}" data-instatic-form-id="${normalizeIdentifierValue(props.formId)}" role="${props.kind === 'error' ? 'alert' : 'status'}">${props.text}</div>`,
-  }),
+  render: (props) => {
+    const fieldId = normalizeIdentifierValue(props.fieldId)
+    return {
+      html: `<div${attrs([
+        ['data-instatic-form-message', props.kind],
+        ['data-instatic-form-id', normalizeIdentifierValue(props.formId)],
+        [
+          props.kind === 'help'
+            ? 'data-instatic-form-help-for'
+            : 'data-instatic-form-error-for',
+          (props.kind === 'help' || props.kind === 'error') ? fieldId : '',
+        ],
+        ['role', props.kind === 'error' ? 'alert' : props.kind === 'help' ? '' : 'status'],
+      ])}>${props.text}</div>`,
+    }
+  },
 }
 
 function inputLikeSchema(typeLabel: string): ModuleDefinition<InputProps>['schema'] {
@@ -481,6 +584,15 @@ function inputLikeSchema(typeLabel: string): ModuleDefinition<InputProps>['schem
     minLength: { type: 'number', label: 'Minimum length' },
     maxLength: { type: 'number', label: 'Maximum length' },
     pattern: { type: 'text', label: 'Pattern' },
+    accept: { type: 'text', label: 'Accepted file types' },
+    multiple: { type: 'toggle', label: 'Allow multiple files' },
+    attachmentMaxFiles: { type: 'number', label: 'Maximum files' },
+    attachmentMaxBytes: { type: 'number', label: 'Maximum bytes per file' },
+    draftBehavior: { type: 'select', label: 'Draft storage', options: [
+      { label: 'Include', value: 'include' },
+      { label: 'Session only', value: 'session-only' },
+      { label: 'Never save', value: 'exclude' },
+    ] },
   }
 }
 
@@ -507,6 +619,11 @@ function choiceModule(args: {
       checked: { type: 'toggle', label: 'Checked' },
       required: { type: 'toggle', label: 'Required' },
       disabled: { type: 'toggle', label: 'Disabled' },
+      draftBehavior: { type: 'select', label: 'Draft storage', options: [
+        { label: 'Include', value: 'include' },
+        { label: 'Session only', value: 'session-only' },
+        { label: 'Never save', value: 'exclude' },
+      ] },
     },
     propsSchema: ChoicePropsSchema,
     defaults: Value.Create(ChoicePropsSchema),
@@ -517,8 +634,9 @@ function choiceModule(args: {
         ['data-instatic-form-control', args.inputType],
         ['data-instatic-field-id', props.fieldId],
         ['name', props.name || props.fieldId],
-        ['id', props.id],
+        ['id', props.id || props.fieldId],
         ['value', props.value],
+        ['data-instatic-draft-behavior', props.draftBehavior !== 'include' ? props.draftBehavior : ''],
       ])}${booleanAttrs(props, ['checked', 'required', 'disabled'])}>`,
     }),
   }

@@ -78,10 +78,12 @@ function deriveFormSnapshot(
     if (node.moduleId === 'base.form-message') {
       const explicitFormId = normalizeIdentifierValue(stringProp(node, 'formId', ''))
       if (!explicitFormId || explicitFormId === formId) {
+        const fieldId = normalizeIdentifierValue(stringProp(node, 'fieldId', ''))
         messages.push({
           nodeId: node.id,
           kind: messageKind(node),
           text: stringProp(node, 'text', ''),
+          ...(fieldId ? { fieldId } : {}),
         })
       }
     }
@@ -94,6 +96,10 @@ function deriveFormSnapshot(
     targetTableId: stringProp(formNode, 'targetTableId', ''),
     honeypotName: stringProp(formNode, 'honeypotName', 'company'),
     minSubmitSeconds: numberProp(formNode, 'minSubmitSeconds', 2),
+    ...(draftMode(formNode) !== 'none' ? { draftMode: draftMode(formNode) } : {}),
+    ...(draftMode(formNode) === 'persistent'
+      ? { draftTtlDays: positiveNumberProp(formNode, 'draftTtlDays') ?? 30 }
+      : {}),
     controls,
     labels,
     submits,
@@ -109,14 +115,53 @@ function controlBindingFromNode(node: PageNode): FormControlBinding | null {
     nodeId: node.id,
     fieldId,
     name,
-    ...(node.moduleId === 'base.input' ? { inputType: stringProp(node, 'inputType', 'text') } : {}),
+    ...(node.moduleId === 'base.input'
+      ? { inputType: stringProp(node, 'inputType', 'text') }
+      : node.moduleId === 'base.textarea'
+        ? { inputType: 'textarea' }
+        : node.moduleId === 'base.select'
+          ? { inputType: 'select' }
+          : node.moduleId === 'base.checkbox'
+            ? { inputType: 'checkbox' }
+            : node.moduleId === 'base.radio'
+              ? { inputType: 'radio' }
+              : {}),
     ...(booleanProp(node, 'required') ? { required: true } : {}),
     ...(positiveNumberProp(node, 'minLength') !== undefined ? { minLength: positiveNumberProp(node, 'minLength') } : {}),
     ...(positiveNumberProp(node, 'maxLength') !== undefined ? { maxLength: positiveNumberProp(node, 'maxLength') } : {}),
     ...(numberPropOrUndefined(node, 'min') !== undefined ? { min: numberPropOrUndefined(node, 'min') } : {}),
     ...(numberPropOrUndefined(node, 'max') !== undefined ? { max: numberPropOrUndefined(node, 'max') } : {}),
     ...(stringProp(node, 'pattern', '') ? { pattern: stringProp(node, 'pattern', '') } : {}),
+    ...(node.moduleId === 'base.input' && stringProp(node, 'inputType', 'text') === 'file'
+      ? {
+          ...(stringProp(node, 'accept', '') ? { accept: stringProp(node, 'accept', '') } : {}),
+          ...(booleanProp(node, 'multiple') ? { multiple: true } : {}),
+          ...(positiveNumberProp(node, 'attachmentMaxFiles') !== undefined
+            ? { maxFiles: positiveNumberProp(node, 'attachmentMaxFiles') }
+            : {}),
+          ...(positiveNumberProp(node, 'attachmentMaxBytes') !== undefined
+            ? { maxFileBytes: positiveNumberProp(node, 'attachmentMaxBytes') }
+            : {}),
+        }
+      : {}),
+    ...(draftBehavior(node) !== 'include' ? { draftBehavior: draftBehavior(node) } : {}),
+    ...(node.catalogueInstance
+      ? {
+          catalogueEntryId: node.catalogueInstance.entryId,
+          catalogueEntryVersion: node.catalogueInstance.entryVersion,
+        }
+      : {}),
   }
+}
+
+function draftMode(node: PageNode): 'none' | 'session' | 'persistent' {
+  const value = stringProp(node, 'draftMode', 'none')
+  return value === 'session' || value === 'persistent' ? value : 'none'
+}
+
+function draftBehavior(node: PageNode): 'include' | 'session-only' | 'exclude' {
+  const value = stringProp(node, 'draftBehavior', 'include')
+  return value === 'session-only' || value === 'exclude' ? value : 'include'
 }
 
 function inferLabelTarget(
@@ -181,5 +226,7 @@ function booleanProp(node: PageNode, key: string): boolean {
 
 function messageKind(node: PageNode): PublishedFormMessage['kind'] {
   const kind = stringProp(node, 'kind', 'status')
-  return kind === 'success' || kind === 'error' ? kind : 'status'
+  return kind === 'help' || kind === 'success' || kind === 'error'
+    ? kind
+    : 'status'
 }

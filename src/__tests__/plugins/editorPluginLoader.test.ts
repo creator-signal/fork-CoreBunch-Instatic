@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it } from 'bun:test'
 import { activateInstalledEditorPlugins } from '@core/plugins/editorPluginLoader'
+import {
+  listPluginComponentLibraryEntryIds,
+  resetPluginComponentLibraryPacks,
+} from '@core/plugins/componentLibraryPackLoader'
 import { pluginRuntime } from '@core/plugins/runtime'
 import type { CmsPluginsPayload, PluginManifest } from '@core/plugin-sdk'
+import '@modules/base/index'
 
 const workflowManifest: PluginManifest = {
   id: 'acme.workflow',
@@ -20,6 +25,7 @@ const workflowManifest: PluginManifest = {
 
 beforeEach(() => {
   pluginRuntime.reset()
+  resetPluginComponentLibraryPacks()
 })
 
 describe('installed editor plugin loader', () => {
@@ -67,6 +73,7 @@ describe('installed editor plugin loader', () => {
       activated: ['acme.workflow'],
       failed: [],
       modulePacksLoaded: [],
+      componentLibrariesLoaded: [],
     })
     expect(pluginRuntime.getToolbarButtons()).toEqual([{
       id: 'workflow.approve',
@@ -108,6 +115,7 @@ describe('installed editor plugin loader', () => {
       activated: [],
       failed: [],
       modulePacksLoaded: [],
+      componentLibrariesLoaded: [],
     })
     expect(pluginRuntime.getToolbarButtons()).toEqual([])
   })
@@ -144,6 +152,7 @@ describe('installed editor plugin loader', () => {
       activated: [],
       failed: [],
       modulePacksLoaded: [],
+      componentLibrariesLoaded: [],
     })
   })
 
@@ -224,5 +233,87 @@ describe('installed editor plugin loader', () => {
     expect(result.failed).toHaveLength(1)
     expect(result.failed[0].pluginId).toBe('acme.blocks')
     expect(String((result.failed[0].error as Error).message)).toContain('modules.register')
+  })
+
+  it('loads a granted declarative Component Library package', async () => {
+    const catalogueManifest: PluginManifest = {
+      id: 'acme.catalogue',
+      name: 'Catalogue',
+      version: '1.0.0',
+      apiVersion: 1,
+      permissions: ['componentLibrary.register'],
+      grantedPermissions: ['componentLibrary.register'],
+      componentLibrary: { path: 'component-library/entries.json' },
+      assetBasePath: '/uploads/plugins/acme.catalogue/1.0.0',
+      resources: [],
+      adminPages: [],
+    }
+    const payload: CmsPluginsPayload = {
+      adminPages: [],
+      plugins: [{
+        id: catalogueManifest.id,
+        name: catalogueManifest.name,
+        version: catalogueManifest.version,
+        enabled: true,
+        lifecycleStatus: 'active',
+        lastError: null,
+        grantedPermissions: ['componentLibrary.register'],
+        manifest: catalogueManifest,
+        installedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }],
+    }
+    const requested: string[] = []
+    const result = await activateInstalledEditorPlugins({
+      fetchImpl: async (input) => {
+        const url = String(input)
+        requested.push(url)
+        if (url.endsWith('/component-library/entries.json')) {
+          return Response.json([{
+            id: 'acme.catalogue.callout',
+            version: '1.0.0',
+            name: 'Callout',
+            description: 'A governed plugin callout.',
+            category: 'Acme',
+            tags: ['callout'],
+            icon: 'message',
+            source: {
+              type: 'plugin',
+              pluginId: 'acme.catalogue',
+            },
+            status: 'stable',
+            implementation: {
+              type: 'primitive',
+              moduleId: 'base.text',
+            },
+            fields: [],
+            variants: [],
+            presets: [],
+            slots: [],
+            constraints: {},
+            requirements: {
+              capabilities: [],
+              providerAdapters: [],
+              plugins: ['acme.catalogue'],
+            },
+            documentation: {},
+          }])
+        }
+        return Response.json(payload)
+      },
+    })
+
+    expect(requested).toContain(
+      '/uploads/plugins/acme.catalogue/1.0.0/component-library/entries.json',
+    )
+    expect(result).toEqual({
+      activated: ['acme.catalogue'],
+      failed: [],
+      modulePacksLoaded: [],
+      componentLibrariesLoaded: ['acme.catalogue'],
+    })
+    expect(listPluginComponentLibraryEntryIds('acme.catalogue')).toEqual([
+      'acme.catalogue.callout',
+    ])
   })
 })

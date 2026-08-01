@@ -6,6 +6,36 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.18 - 2026-08-01
+
+### Component Library and authoring
+
+- Added a governed 101-entry Component Library covering templates, reusable
+  components, editorial primitives, patterns, forms, collections, media, and
+  capability-backed integrations.
+- Added catalogue insertion, component-aware Layers and Properties surfaces,
+  placement rules, migrations, lossless Freeform conversion, plugin ownership,
+  and author-permission enforcement.
+- Added generated field specifications, a component showcase site pack, and
+  complete author and visitor acceptance documentation.
+
+### Components and visitor behaviour
+
+- Added accessible tabs, accordions, overlays, carousels, navigation, tables,
+  rich content, media, provider embeds, search, and structured form patterns
+  with useful no-JavaScript fallbacks.
+- Added governed form drafts, wizard state, secure file attachments, collection
+  pagination, site search, provider policies, and accessibility diagnostics.
+
+### Publishing and metadata
+
+- Added page and site controls for canonical URLs, robots directives, language
+  alternates, Open Graph metadata, Twitter cards, and social-image alternatives.
+- Added semantic breadcrumb and image structured data, safe metadata URL
+  handling, and mandatory no-index directives for previews.
+- Documented the complete semantic HTML, accessibility, metadata, structured
+  data, progressive-enhancement, BEM, and design-token publishing contract.
+
 ## 0.0.17 - 2026-07-25
 
 ### Authentication and deployment

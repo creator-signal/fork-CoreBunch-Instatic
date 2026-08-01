@@ -36,6 +36,7 @@ import type {
 import { readPluginPackage } from '../../../plugins/package'
 import {
   loadPluginModulePack,
+  loadPluginComponentLibraryPack,
   loadPluginServerEntrypoint,
   primePluginSettingsCache,
   runPluginLifecycle,
@@ -46,6 +47,10 @@ import {
   activateSandboxedPluginModulePack,
   deactivatePluginModulePack,
 } from '@core/plugins/modulePackLoader'
+import {
+  activatePluginComponentLibraryPack,
+  deactivatePluginComponentLibraryPack,
+} from '@core/plugins/componentLibraryPackLoader'
 import { broadcastPluginEvent } from '../../../plugins/eventBroadcaster'
 import { badRequest, jsonResponse, methodNotAllowed, readValidatedBody } from '../../../http'
 import { Type } from '@core/utils/typeboxHelpers'
@@ -335,6 +340,16 @@ async function installUpgradeFromPackage(ctx: UpgradeContext): Promise<Response>
         console.error(`[plugin:${pluginId}] post-upgrade module pack load failed`, err)
       }
     }
+    if (
+      upgradedManifest.componentLibrary
+      && upgradedManifest.grantedPermissions?.includes('componentLibrary.register')
+    ) {
+      const pack = await loadPluginComponentLibraryPack(
+        upgradedManifest,
+        options.uploadsDir,
+      )
+      if (pack) activatePluginComponentLibraryPack(upgradedManifest, pack)
+    }
     if (loaded) {
       await runPluginLifecycle(db, pluginId, 'activate')
     }
@@ -420,6 +435,7 @@ async function teardownPreviousVersion(
   }
   await unloadPlugin(pluginId)
   deactivatePluginModulePack(pluginId)
+  deactivatePluginComponentLibraryPack(pluginId)
 }
 
 /**
@@ -464,6 +480,7 @@ async function rollbackUpgrade(args: {
   // safer state than half-upgraded.
   await unloadPlugin(pluginId)
   deactivatePluginModulePack(pluginId)
+  deactivatePluginComponentLibraryPack(pluginId)
   try {
     const restoredManifest = pluginManifestWithGrants(restored)
     await primePluginSettingsCache(db, restored)
@@ -473,6 +490,16 @@ async function rollbackUpgrade(args: {
     ) {
       const pack = await loadPluginModulePack(restoredManifest, options.uploadsDir)
       if (pack) activateSandboxedPluginModulePack(restoredManifest, pack)
+    }
+    if (
+      restoredManifest.componentLibrary
+      && restoredManifest.grantedPermissions?.includes('componentLibrary.register')
+    ) {
+      const pack = await loadPluginComponentLibraryPack(
+        restoredManifest,
+        options.uploadsDir,
+      )
+      if (pack) activatePluginComponentLibraryPack(restoredManifest, pack)
     }
     if (restoredManifest.entrypoints?.server) {
       const loaded = await loadPluginServerEntrypoint(restoredManifest, options.uploadsDir)

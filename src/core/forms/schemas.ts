@@ -11,6 +11,17 @@ const FormControlBindingSchema = Type.Object({
   minLength: Type.Optional(Type.Number()),
   maxLength: Type.Optional(Type.Number()),
   pattern: Type.Optional(Type.String()),
+  accept: Type.Optional(Type.String()),
+  multiple: Type.Optional(Type.Boolean()),
+  maxFiles: Type.Optional(Type.Number()),
+  maxFileBytes: Type.Optional(Type.Number()),
+  draftBehavior: Type.Optional(Type.Union([
+    Type.Literal('include'),
+    Type.Literal('session-only'),
+    Type.Literal('exclude'),
+  ])),
+  catalogueEntryId: Type.Optional(Type.String({ minLength: 1 })),
+  catalogueEntryVersion: Type.Optional(Type.String({ minLength: 1 })),
 })
 
 export type FormControlBinding = Static<typeof FormControlBindingSchema>
@@ -61,7 +72,13 @@ export type PublishedFormSubmit = Static<typeof PublishedFormSubmitSchema>
 
 const PublishedFormMessageSchema = Type.Object({
   nodeId: Type.String({ minLength: 1 }),
-  kind: Type.Union([Type.Literal('status'), Type.Literal('success'), Type.Literal('error')]),
+  fieldId: Type.Optional(Type.String({ minLength: 1 })),
+  kind: Type.Union([
+    Type.Literal('help'),
+    Type.Literal('status'),
+    Type.Literal('success'),
+    Type.Literal('error'),
+  ]),
   text: Type.String(),
 })
 
@@ -74,6 +91,12 @@ const PublishedFormSnapshotSchema = Type.Object({
   targetTableId: Type.String(),
   honeypotName: Type.String(),
   minSubmitSeconds: Type.Number(),
+  draftMode: Type.Optional(Type.Union([
+    Type.Literal('none'),
+    Type.Literal('session'),
+    Type.Literal('persistent'),
+  ])),
+  draftTtlDays: Type.Optional(Type.Number()),
   controls: Type.Array(FormControlBindingSchema),
   labels: Type.Array(PublishedFormLabelSchema),
   submits: Type.Array(PublishedFormSubmitSchema),

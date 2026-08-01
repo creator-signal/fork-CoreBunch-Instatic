@@ -16,20 +16,34 @@ import './body'
 
 // Layout modules
 import './container'
+import './componentFrame'
 import './loop'
+import './separator'
 
 // Typography modules
 import './text'
+import './richText'
 import './list'
+import './codeBlock'
+import './table'
+import './progress'
 import './outlet'
 
 // Media modules
 import './image'
 import './svg'
+import './audio'
+import './pdfViewer'
+import './mediaDisplay'
 
 // Interactive modules
 import './button'
 import './link'
+import './disclosure'
+import './interactive'
+import './providerEmbed'
+import './icon'
+import './navigationList'
 
 // Form modules
 import './forms'
@@ -41,3 +55,7 @@ import './video'
 import './slotInstance'
 import './slotOutlet'
 import './visualComponentRef'
+
+// Author-facing catalogue entries are explicit metadata over the modules
+// above. Registering a module alone never publishes it to Components mode.
+import './componentLibrary'

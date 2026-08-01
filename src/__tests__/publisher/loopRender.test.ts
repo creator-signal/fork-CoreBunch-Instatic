@@ -123,7 +123,7 @@ describe('publisher loop renderer', () => {
     expect(fourIdx).toBeGreaterThan(threeIdx)
   })
 
-  it('renders empty when items list is empty', () => {
+  it('renders an accessible empty state when items list is empty', () => {
     const page = makePage({
       root: { moduleId: 'base.body', children: ['loop'] },
       loop: { moduleId: 'base.loop', children: ['card'] },
@@ -134,8 +134,9 @@ describe('publisher loop renderer', () => {
     }).html
 
     expect(html).not.toContain('<p>fallback</p>')
-    // Wrapper div from renderLoop should not appear when items is empty.
-    expect(html).toContain('<main></main>')
+    expect(html).toContain('data-instatic-collection-state="empty"')
+    expect(html).toContain('role="status"')
+    expect(html).toContain('No items found.')
   })
 
   it('emits a marker comment when loop data is missing', () => {
@@ -310,7 +311,7 @@ describe('publisher loop renderer', () => {
     })
   })
 
-  it('attaches data attrs and registers infinite mode', () => {
+  it('migrates infinite to load-more attrs and registers the runtime', () => {
     const items = [makeItem('1', 'one'), makeItem('2', 'two')]
     const page = makePage({
       root: { moduleId: 'base.body', children: ['loop'] },
@@ -330,11 +331,50 @@ describe('publisher loop renderer', () => {
     }).html
 
     expect(html).toContain('data-instatic-loop="loop"')
-    expect(html).toContain('data-instatic-loop-mode="infinite"')
+    expect(html).toContain('data-instatic-loop-mode="load-more"')
     expect(html).toContain('data-instatic-loop-has-more="true"')
     expect(html).toContain('data-instatic-loop-page-size="2"')
     // Loop runtime script injected when at least one infinite loop exists
     expect(html).toContain('/_instatic/assets/loop-runtime.js')
+  })
+
+  it('renders numbered pagination as navigation outside the item wrapper', () => {
+    const page = makePage({
+      root: { moduleId: 'base.body', children: ['loop'] },
+      loop: {
+        moduleId: 'base.loop',
+        children: ['card'],
+        props: { pagination: 'numbered', pageSize: 1 },
+      },
+      card: {
+        moduleId: 'base.text',
+        props: { text: '' },
+        dynamicBindings: { text: { source: 'currentEntry', field: 'title' } },
+      },
+    })
+    const html = publishPage(page, makeSite(), baseRegistry, {
+      loopData: new Map([['loop', {
+        items: [makeItem('2', 'two')],
+        totalItems: 3,
+        pageNumber: 2,
+        hasMore: false,
+        paginationMode: 'numbered',
+        previousHref: '/articles',
+        nextHref: '/articles?loop_loop_page=3',
+        numberedHrefs: [
+          { pageNumber: 1, href: '/articles' },
+          { pageNumber: 2, href: '/articles?loop_loop_page=2' },
+          { pageNumber: 3, href: '/articles?loop_loop_page=3' },
+        ],
+      }]]),
+    }).html
+
+    expect(html).toContain('aria-label="Collection pagination"')
+    expect(html).toContain('data-instatic-collection-pagination="numbered"')
+    expect(html).toContain('aria-current="page">2</a>')
+    expect(html).toContain('rel="prev" href="/articles"')
+    expect(html).toContain('rel="next" href="/articles?loop_loop_page=3"')
+    expect(html.indexOf('</div><nav')).toBeGreaterThan(-1)
   })
 
   it('does not inject the loop runtime when no loop is infinite', () => {
@@ -353,5 +393,72 @@ describe('publisher loop renderer', () => {
     }).html
 
     expect(html).not.toContain('loop-runtime.js')
+  })
+
+  it('renders canonical search results without a child template and reuses pagination', () => {
+    const page = makePage({
+      root: { moduleId: 'base.body', children: ['loop'] },
+      loop: {
+        moduleId: 'base.loop',
+        children: [],
+        props: {
+          itemRenderer: 'search-result',
+          pagination: 'numbered',
+          pageSize: 1,
+        },
+      },
+    })
+    const html = publishPage(page, makeSite(), baseRegistry, {
+      loopData: new Map([['loop', {
+        items: [{
+          id: 'page:one',
+          fields: {
+            title: '<Creator Guide>',
+            excerpt: 'Safe & useful.',
+            permalink: '/guide',
+          },
+        }],
+        totalItems: 2,
+        pageNumber: 1,
+        hasMore: false,
+        paginationMode: 'numbered',
+        nextHref: '/search?q=creator&loop_loop_page=2',
+        numberedHrefs: [
+          { pageNumber: 1, href: '/search?q=creator' },
+          { pageNumber: 2, href: '/search?q=creator&loop_loop_page=2' },
+        ],
+      }]]),
+    }).html
+
+    expect(html).toContain('data-instatic-search-result')
+    expect(html).toContain('&lt;Creator Guide&gt;')
+    expect(html).toContain('Safe &amp; useful.')
+    expect(html).toContain('href="/guide"')
+    expect(html).toContain('data-instatic-collection-pagination="numbered"')
+  })
+
+  it('surfaces capability degradation through the shared collection status', () => {
+    const page = makePage({
+      root: { moduleId: 'base.body', children: ['loop'] },
+      loop: {
+        moduleId: 'base.loop',
+        children: [],
+        props: { itemRenderer: 'search-result' },
+      },
+    })
+    const html = publishPage(page, makeSite(), baseRegistry, {
+      loopData: new Map([['loop', {
+        items: [],
+        totalItems: 0,
+        pageNumber: 1,
+        hasMore: false,
+        operationalState: 'degraded',
+        operationalMessage: 'No eligible published pages are available to search.',
+      }]]),
+    }).html
+
+    expect(html).toContain('data-instatic-collection-state="degraded"')
+    expect(html).toContain('role="status"')
+    expect(html).toContain('No eligible published pages')
   })
 })

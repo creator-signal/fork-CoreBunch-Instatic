@@ -42,6 +42,25 @@ import { BodyModule } from '@modules/base/body'
 import { VisualComponentRefModule } from '@modules/base/visualComponentRef'
 import { SlotInstanceModule } from '@modules/base/slotInstance'
 import { SlotOutletModule } from '@modules/base/slotOutlet'
+import {
+  AccordionItemModule,
+  AccordionModule,
+  TabPanelModule,
+  TabsModule,
+} from '@modules/base/disclosure'
+import { ProviderEmbedModule } from '@modules/base/providerEmbed'
+import { RichTextModule } from '@modules/base/richText'
+import { CodeBlockModule } from '@modules/base/codeBlock'
+import { TableModule } from '@modules/base/table'
+import { ComponentFrameModule } from '@modules/base/componentFrame'
+import { ProgressModule } from '@modules/base/progress'
+import { CarouselModule, OverlayModule } from '@modules/base/interactive'
+import { AudioModule } from '@modules/base/audio'
+import { PdfViewerModule } from '@modules/base/pdfViewer'
+import { IconModule } from '@modules/base/icon'
+import { NavigationListModule } from '@modules/base/navigationList'
+import { SeparatorModule } from '@modules/base/separator'
+import { MediaDisplayModule } from '@modules/base/mediaDisplay'
 
 // ---------------------------------------------------------------------------
 // Run the full conformance suite for every canonical base module.
@@ -60,6 +79,37 @@ runModuleConformanceSuite(LinkModule)
 runModuleConformanceSuite(VisualComponentRefModule)
 runModuleConformanceSuite(SlotInstanceModule)
 runModuleConformanceSuite(SlotOutletModule)
+runModuleConformanceSuite(TabsModule)
+runModuleConformanceSuite(TabPanelModule)
+runModuleConformanceSuite(AccordionModule)
+runModuleConformanceSuite(AccordionItemModule)
+runModuleConformanceSuite(ProviderEmbedModule)
+runModuleConformanceSuite(RichTextModule)
+runModuleConformanceSuite(CodeBlockModule)
+runModuleConformanceSuite(TableModule)
+runModuleConformanceSuite(ComponentFrameModule)
+runModuleConformanceSuite(ProgressModule)
+runModuleConformanceSuite(OverlayModule)
+runModuleConformanceSuite(CarouselModule)
+runModuleConformanceSuite(AudioModule)
+runModuleConformanceSuite(PdfViewerModule)
+runModuleConformanceSuite(IconModule)
+runModuleConformanceSuite(NavigationListModule)
+runModuleConformanceSuite(SeparatorModule)
+runModuleConformanceSuite(MediaDisplayModule)
+
+describe('base.separator — semantic thematic break', () => {
+  it('publishes a native horizontal rule with token-facing controls', () => {
+    expect(SeparatorModule.render({
+      style: 'dashed',
+      width: 'wide',
+      colorToken: 'border<strong>',
+      spacing: 'spacious',
+    }, []).html).toBe(
+      '<hr data-instatic-separator-style="dashed" data-instatic-separator-width="wide" data-instatic-separator-color="border&lt;strong&gt;" data-instatic-separator-spacing="spacious">',
+    )
+  })
+})
 
 describe('base module registration', () => {
   it('only imports available production base modules', async () => {
@@ -78,6 +128,9 @@ describe('base module registration', () => {
     expect(baseIndex).toContain("import './slotInstance'")
     expect(baseIndex).toContain("import './visualComponentRef'")
     expect(baseIndex).toContain("import './slotOutlet'")
+    expect(baseIndex).toContain("import './disclosure'")
+    expect(baseIndex).toContain("import './interactive'")
+    expect(baseIndex).toContain("import './providerEmbed'")
   })
 
   it('does not keep retired module directories around', () => {
@@ -111,6 +164,22 @@ describe('base module registration', () => {
       VisualComponentRefModule,
       SlotInstanceModule,
       SlotOutletModule,
+      TabsModule,
+      TabPanelModule,
+      AccordionModule,
+      AccordionItemModule,
+      ProviderEmbedModule,
+      RichTextModule,
+      CodeBlockModule,
+      TableModule,
+      ComponentFrameModule,
+      ProgressModule,
+      OverlayModule,
+      CarouselModule,
+      AudioModule,
+      PdfViewerModule,
+      IconModule,
+      NavigationListModule,
     ]) {
       // No module should declare CSS-only props as module schema fields.
       const cssOnlyPropNames = ['backgroundColor', 'color', 'fontSize', 'padding', 'margin', 'border']
@@ -118,6 +187,162 @@ describe('base module registration', () => {
         expect(Object.keys(mod.schema)).not.toContain(propName)
       }
     }
+  })
+})
+
+describe('base accessible media and design modules', () => {
+  it('publishes audio with native controls, title and transcript', () => {
+    const output = AudioModule.render({
+      ...AudioModule.defaults,
+      source: '/uploads/interview.mp3',
+      title: 'Founder interview',
+      transcriptUrl: '/interview-transcript',
+      transcriptLabel: 'Read interview transcript',
+    }, [])
+
+    expect(output.html).toContain('<audio src="/uploads/interview.mp3"')
+    expect(output.html).toContain('aria-label="Founder interview" controls')
+    expect(output.html).toContain('href="/interview-transcript"')
+    expect(output.html).toContain('Read interview transcript')
+  })
+
+  it('publishes a PDF object with equivalent fallback and download links', () => {
+    const output = PdfViewerModule.render({
+      ...PdfViewerModule.defaults,
+      source: '/uploads/report.pdf',
+      title: 'Annual report',
+      fallbackText: 'Preview unavailable.',
+      downloadLabel: 'Download annual report',
+      height: 'tall',
+    }, [])
+
+    expect(output.html).toContain('type="application/pdf"')
+    expect(output.html).toContain('aria-label="Annual report"')
+    expect(output.html).toContain('Preview unavailable.')
+    expect(output.html).toContain('Download annual report')
+    expect(output.html).toContain('data-height="tall"')
+  })
+
+  it('keeps icon SVG paths application-owned and applies explicit semantics', () => {
+    const meaningful = IconModule.render({
+      ...IconModule.defaults,
+      name: 'warning',
+      label: 'Warning',
+      decorative: false,
+    }, [])
+    const decorative = IconModule.render(IconModule.defaults, [])
+
+    expect(meaningful.html).toContain('data-instatic-icon="warning"')
+    expect(meaningful.html).toContain('role="img" aria-label="Warning"')
+    expect(decorative.html).toContain('aria-hidden="true"')
+  })
+
+  it('wraps every navigation child in a semantic list item', () => {
+    expect(NavigationListModule.render(
+      { ...NavigationListModule.defaults, ordered: true },
+      ['<a href="/">Home</a>', '<a href="/news">News</a>'],
+    ).html).toBe(
+      '<ol><li><a href="/">Home</a></li><li><a href="/news">News</a></li></ol>',
+    )
+  })
+
+  it('publishes complete breadcrumb structured data from governed links', () => {
+    expect(NavigationListModule.render(
+      {
+        ...NavigationListModule.defaults,
+        ordered: true,
+        structuredData: 'breadcrumb',
+      },
+      ['<a href="/">Home</a>', '<a href="/news">News</a>'],
+    ).html).toBe(
+      '<ol itemscope itemtype="https://schema.org/BreadcrumbList">' +
+      '<li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">' +
+      '<a itemprop="item" href="/"><span itemprop="name">Home</span></a>' +
+      '<meta itemprop="position" content="1"></li>' +
+      '<li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">' +
+      '<a itemprop="item" href="/news" aria-current="page">' +
+      '<span itemprop="name">News</span></a>' +
+      '<meta itemprop="position" content="2"></li></ol>',
+    )
+  })
+})
+
+describe('base disclosure modules', () => {
+  it('publishes tabs as a complete no-JavaScript fallback with one shared runtime', () => {
+    const panel = TabPanelModule.render({
+      tabId: 'contact',
+      label: 'Contact',
+      selected: true,
+      disabled: false,
+    }, ['<p>Contact fields</p>'])
+    const tabs = TabsModule.render({
+      label: 'Contact steps',
+      orientation: 'horizontal',
+      activation: 'automatic',
+    }, [panel.html])
+
+    expect(panel.html).not.toContain(' hidden')
+    expect(panel.html).toContain('data-instatic-tab-selected="true"')
+    expect(tabs.html).toContain('aria-label="Contact steps"')
+    expect(tabs.html).toContain('<p>Contact fields</p>')
+    expect(tabs.js).toContain('window.__instaticActivateTabPanel')
+  })
+
+  it('publishes accordion items as native details and summary elements', () => {
+    const item = AccordionItemModule.render({
+      title: 'Billing details',
+      open: true,
+    }, ['<p>Billing fields</p>'])
+    const accordion = AccordionModule.render(
+      { label: 'Checkout sections' },
+      [item.html],
+    )
+
+    expect(item.html).toBe(
+      '<details data-instatic-accordion-item open><summary>Billing details</summary><p>Billing fields</p></details>',
+    )
+    expect(accordion.html).toContain('aria-label="Checkout sections"')
+    expect(accordion.js).toBeUndefined()
+  })
+})
+
+describe('base interactive modules', () => {
+  it('publishes overlays as a native disclosure fallback with one shared runtime', () => {
+    const overlay = OverlayModule.render({
+      kind: 'dialog',
+      triggerLabel: 'Open help',
+      title: 'Help',
+      closeLabel: 'Close help',
+      side: 'end',
+      size: 'medium',
+      dismissOnEscape: true,
+      dismissOnBackdrop: true,
+    }, ['<p>Help content</p>'])
+
+    expect(overlay.html).toContain('<details data-instatic-overlay')
+    expect(overlay.html).toContain('<summary data-instatic-overlay-trigger>Open help</summary>')
+    expect(overlay.html).toContain('<p>Help content</p>')
+    expect(overlay.html).not.toContain('aria-modal="true"')
+    expect(overlay.js).toContain('window.__instaticInteractiveRuntimeLoaded')
+  })
+
+  it('publishes every carousel slide before progressive enhancement', () => {
+    const carousel = CarouselModule.render({
+      label: 'Highlights',
+      previousLabel: 'Previous highlight',
+      nextLabel: 'Next highlight',
+      autoplay: false,
+      interval: 5000,
+    }, ['<article>One</article>', '<article>Two</article>'])
+
+    expect(carousel.html).toContain('<article>One</article>')
+    expect(carousel.html).toContain('<article>Two</article>')
+    expect(carousel.html).not.toContain(' hidden')
+    expect(carousel.html).toContain('aria-live="polite"')
+    expect(carousel.js).toBe(OverlayModule.render(
+      OverlayModule.defaults,
+      [],
+    ).js)
   })
 })
 
@@ -172,17 +397,22 @@ describe('base.loop — module contract specifics', () => {
       'customTag',
       'direction',
       'filters',
+      'itemRenderer',
       'limit',
+      'manualItems',
       'offset',
       'orderBy',
       'pageSize',
       'pagination',
+      'query',
       'sourceId',
+      'sourceMode',
       'tag',
     ])
     expect(LoopModule.defaults).toMatchObject({
       sourceId: '',
       filters: {},
+      itemRenderer: 'children',
       orderBy: '',
       direction: 'desc',
       limit: 10,
@@ -781,6 +1011,42 @@ describe('base.image — render() specifics', () => {
     expect(html).toContain('alt="Profile photo"')
   })
 
+  it('publishes ImageObject metadata from the resolved Media Library asset', () => {
+    const safeProps = escapeProps(
+      { ...ImageModule.defaults, src: '/img.jpg' },
+      ImageModule.schema,
+    )
+    const html = ImageModule.render(
+      {
+        ...safeProps,
+        _resolvedMediaByKey: {
+          src: {
+            publicPath: '/img.jpg',
+            mimeType: 'image/jpeg',
+            width: 100,
+            height: 100,
+            altText: 'Profile photo',
+            caption: 'A profile image & portrait',
+            blurHash: null,
+            variants: [],
+            posterPath: null,
+          },
+        },
+      },
+      [],
+    ).html
+
+    expect(html).toContain(
+      'itemscope itemtype="https://schema.org/ImageObject"',
+    )
+    expect(html).toContain(
+      '<meta itemprop="contentUrl" content="/img.jpg">',
+    )
+    expect(html).toContain(
+      '<meta itemprop="caption" content="A profile image &amp; portrait">',
+    )
+  })
+
   it('emits empty alt attribute when no library asset is resolved', () => {
     const { html } = renderModule(ImageModule, { src: '/img.jpg' })
     expect(html).toContain('alt=""')
@@ -936,9 +1202,12 @@ describe('base.svg — render() specifics', () => {
 // ---------------------------------------------------------------------------
 
 describe('base.video — render() specifics', () => {
-  it('exposes the v4 schema (single videoUrl, playback, poster, perf hints, title, noRelatedVideos)', () => {
+  it('exposes one video source plus accessible caption controls', () => {
     expect(Object.keys(VideoModule.schema).sort()).toEqual([
       'autoplay',
+      'captionsLabel',
+      'captionsLanguage',
+      'captionsUrl',
       'controls',
       'loop',
       'muted',
@@ -949,6 +1218,18 @@ describe('base.video — render() specifics', () => {
       'title',
       'videoUrl',
     ])
+  })
+
+  it('publishes a captions track for hosted video', () => {
+    const { html } = renderModule(VideoModule, {
+      videoUrl: '/uploads/demo.mp4',
+      captionsUrl: '/uploads/demo.vtt',
+      captionsLanguage: 'en-AU',
+      captionsLabel: 'English captions',
+    })
+    expect(html).toContain(
+      '<track kind="captions" src="/uploads/demo.vtt" srclang="en-AU" label="English captions" default>',
+    )
   })
 
   it('exposes videoUrl as a media-kind:video control with no condition gate', () => {

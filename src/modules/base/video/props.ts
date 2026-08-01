@@ -3,6 +3,9 @@ import { Type, type Static } from '@core/utils/typeboxHelpers'
 export const VideoPropsSchema = Type.Object({
   videoUrl: Type.String({ default: '' }),
   poster: Type.String({ default: '' }),
+  captionsUrl: Type.String({ default: '' }),
+  captionsLanguage: Type.String({ default: 'en' }),
+  captionsLabel: Type.String({ default: 'Captions' }),
   autoplay: Type.Boolean({ default: false }),
   loop: Type.Boolean({ default: false }),
   muted: Type.Boolean({ default: false }),

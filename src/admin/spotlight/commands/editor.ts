@@ -17,6 +17,7 @@ import type { Command } from '../types'
 
 /** Mirrors `SITE_WRITE_CAPABILITIES` — any holder can save a draft. */
 const SITE_WRITE_CAPABILITIES = [
+  'site.components.edit',
   'site.structure.edit',
   'site.content.edit',
   'site.style.edit',

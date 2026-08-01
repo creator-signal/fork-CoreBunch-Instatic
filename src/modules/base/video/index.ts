@@ -77,6 +77,9 @@ export const VideoModule: ModuleDefinition<VideoProps> = {
       label: 'Poster image',
       description: 'Shown before the video starts. For YouTube, also shown while the player lazy-loads.',
     },
+    captionsUrl: { type: 'url', label: 'Captions file' },
+    captionsLanguage: { type: 'text', label: 'Captions language' },
+    captionsLabel: { type: 'text', label: 'Captions label' },
     autoplay: { type: 'toggle', label: 'Autoplay' },
     loop: { type: 'toggle', label: 'Loop' },
     muted: { type: 'toggle', label: 'Muted' },
@@ -160,7 +163,13 @@ export const VideoModule: ModuleDefinition<VideoProps> = {
     if (props.muted) attrs.push('muted')
     if (props.controls) attrs.push('controls')
 
-    return { html: `<video ${attrs.join(' ')}></video>` }
+    const captionsUrl = safeUrl(String(props.captionsUrl ?? ''))
+    const captions = captionsUrl
+      ? `<track kind="captions" src="${captionsUrl}"` +
+        ` srclang="${String(props.captionsLanguage || 'en')}"` +
+        ` label="${String(props.captionsLabel || 'Captions')}" default>`
+      : ''
+    return { html: `<video ${attrs.join(' ')}>${captions}</video>` }
   },
 }
 

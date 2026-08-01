@@ -114,4 +114,31 @@ describe('PublishingSection — framework CSS output preferences', () => {
         ?.treeShakeGeneratedFrameworkUtilities,
     ).toBe(false)
   })
+
+  it('configures published search before the catalogue capability becomes available', () => {
+    const site = makeSite()
+    useEditorStore.setState({
+      site,
+      activePageId: site.pages[0].id,
+    } as Parameters<typeof useEditorStore.setState>[0])
+
+    render(<PublishingSection />)
+
+    const toggle = screen.getByRole('switch', {
+      name: /enable the published search index/i,
+    })
+    expect(toggle.getAttribute('aria-checked')).toBe('false')
+
+    fireEvent.click(toggle)
+
+    expect(useEditorStore.getState().site!.settings.search).toEqual({
+      enabled: true,
+      queryParam: 'q',
+      minQueryLength: 2,
+      maxQueryLength: 120,
+      maxResults: 100,
+    })
+    expect(screen.getByLabelText(/query parameter/i)).toBeDefined()
+    expect(screen.getAllByRole('spinbutton')).toHaveLength(2)
+  })
 })

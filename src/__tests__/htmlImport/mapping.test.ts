@@ -1302,7 +1302,8 @@ describe('base.loop — <instatic-loop>', () => {
       direction: 'desc',
       limit: 3,
       offset: 1,
-      pagination: 'infinite',
+      query: '',
+      pagination: 'load-more',
       pageSize: 2,
     }))
     expect(loop.children).toHaveLength(1)

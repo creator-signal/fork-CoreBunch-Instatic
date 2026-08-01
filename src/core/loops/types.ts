@@ -114,12 +114,24 @@ export interface SourceFetchContext {
   site: SiteDocument
   /** Source-specific filter values, validated against `filterSchema`. */
   filters: Record<string, unknown>
+  /**
+   * Free-text collection query. Sources that do not support search ignore it;
+   * capability-backed search sources consume the same field rather than
+   * defining a parallel request shape.
+   */
+  query?: string
   /** One of the source's `orderByOptions[].id` values. */
   orderBy: string
   direction: 'asc' | 'desc'
   /** Hard cap from the loop instance; sources may further clamp. */
   limit: number
   offset: number
+  /**
+   * Opaque cursor supplied by a cursor-pagination consumer. Offset sources
+   * ignore it; cursor sources must never parse or expose provider internals to
+   * the caller.
+   */
+  cursor?: string
   /**
    * Originating page request context — only populated when the loop is
    * rendered at request time inside a Layer C hole (i.e. the source is
@@ -167,6 +179,17 @@ export interface LoopFetchResult {
   items: LoopItem[]
   /** Total matching items across all pages. Used for hasMore + paginators. */
   totalItems: number
+  /** Opaque cursor tokens for sources that support cursor pagination. */
+  nextCursor?: string
+  previousCursor?: string
+  /**
+   * Public-safe operational state for capability-backed sources. Ordinary
+   * sources omit it. Renderers surface the state without exposing provider or
+   * index configuration.
+   */
+  operationalState?: 'degraded' | 'unavailable' | 'stale'
+  /** Public-safe status copy paired with `operationalState`. */
+  operationalMessage?: string
 }
 
 /**

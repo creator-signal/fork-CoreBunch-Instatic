@@ -14,6 +14,7 @@
  */
 
 import { useEditorStore } from '@site/store/store'
+import { resolveVisualComponent } from '@core/visual-components-schema'
 import { WarningDiamondSolidIcon } from 'pixel-art-icons/icons/warning-diamond-solid'
 import { BracesIcon } from 'pixel-art-icons/icons/braces'
 import { ExternalLinkSolidIcon } from 'pixel-art-icons/icons/external-link-solid'
@@ -34,9 +35,10 @@ export function ComponentRefView({ nodeId, componentId, propOverrides }: Compone
   const setActiveDocument = useEditorStore((s) => s.setActiveDocument)
   const updateNodeProps = useEditorStore((s) => s.updateNodeProps)
 
-  const vc = useEditorStore(
+  const siteComponent = useEditorStore(
     (s) => s.site?.visualComponents?.find((v) => v.id === componentId) ?? null,
   )
+  const vc = siteComponent ?? resolveVisualComponent([], componentId) ?? null
 
   function handleOpenInCanvas() {
     if (componentId) {
@@ -72,15 +74,17 @@ export function ComponentRefView({ nodeId, componentId, propOverrides }: Compone
           <BracesIcon size={12} color="currentColor" />
         </span>
         <span className={styles.headerName}>{vc.name}</span>
-        <Button
-          variant="ghost"
-          size="xs"
-          onClick={handleOpenInCanvas}
-          tooltip="Open component in canvas"
-        >
-          <ExternalLinkSolidIcon size={10} color="currentColor" aria-hidden="true" />
-          Open in canvas
-        </Button>
+        {siteComponent ? (
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={handleOpenInCanvas}
+            tooltip="Open component in canvas"
+          >
+            <ExternalLinkSolidIcon size={10} color="currentColor" aria-hidden="true" />
+            Open in canvas
+          </Button>
+        ) : null}
       </div>
 
       {/* ── Param rows ──────────────────────────────────────────────────── */}

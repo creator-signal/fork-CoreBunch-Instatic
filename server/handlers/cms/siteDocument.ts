@@ -72,6 +72,7 @@ import { ForbiddenSiteChangeError, validateSiteWriteDiff } from './siteDiff'
 import { validatePageWriteDiff } from './pageDiff'
 
 const SITE_WRITE_CAPABILITIES = [
+  'site.components.edit',
   'site.structure.edit',
   'site.content.edit',
   'site.style.edit',

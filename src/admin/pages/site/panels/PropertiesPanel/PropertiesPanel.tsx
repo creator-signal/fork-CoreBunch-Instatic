@@ -31,7 +31,11 @@
  * `renderModuleTabContent`. Keeping the shell trivial means the hotspot
  * complexity score stays bounded as the panel grows.
  */
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useSyncExternalStore } from 'react'
+import {
+  componentLibraryRegistry,
+  type ComponentLibraryEntry,
+} from '@core/component-library'
 import { usePropertiesPanelAutoOpen } from './usePropertiesPanelAutoOpen'
 import { usePropertiesPanelData } from './usePropertiesPanelData'
 import { renderModuleTabContent } from './renderModuleTabContent'
@@ -42,6 +46,7 @@ import { MultiSelectionHeader } from './MultiSelectionInspector'
 import { MultiSelectorHeader } from './MultiSelectorInspector'
 import { type ClassPickerHandle } from './ClassPicker'
 import { useEditorStore } from '@site/store/store'
+import { useEditorPermissions } from '@site/editorPermissionsContext'
 import { PanelHeader } from '@admin/shared/PanelHeader'
 import { useDraggablePanel } from '@admin/shared/FloatingWindow'
 import { Button } from '@ui/components/Button'
@@ -51,6 +56,9 @@ import { cn } from '@ui/cn'
 import styles from './PropertiesPanel.module.css'
 
 const DEFAULT_WIDTH = 360
+const subscribeComponentLibrary = (listener: () => void) =>
+  componentLibraryRegistry.subscribe(listener)
+const getComponentLibraryGeneration = () => componentLibraryRegistry.generation()
 
 type PanelVariant = 'floating' | 'docked'
 
@@ -74,6 +82,26 @@ export function PropertiesPanel({ variant = 'floating' }: PropertiesPanelProps) 
   usePropertiesPanelAutoOpen()
 
   const data = usePropertiesPanelData()
+  const permissions = useEditorPermissions()
+  const layersViewMode = useEditorStore((state) => state.layersViewMode)
+  const effectiveLayersViewMode = permissions.canEditStructure
+    ? layersViewMode
+    : 'components'
+  useSyncExternalStore(
+    subscribeComponentLibrary,
+    getComponentLibraryGeneration,
+    getComponentLibraryGeneration,
+  )
+  const instanceMetadata = data.selectedNode?.catalogueInstance
+  const componentLibraryEntry = instanceMetadata
+    ? componentLibraryRegistry.getVersion(
+        instanceMetadata.entryId,
+        instanceMetadata.entryVersion,
+      )
+    : undefined
+  const latestComponentLibraryEntry = instanceMetadata
+    ? componentLibraryRegistry.get(instanceMetadata.entryId)
+    : undefined
 
   // ── ClassPicker ref — for the locked-state 'Add class' CTA ────────────────
   const classPickerRef = useRef<ClassPickerHandle>(null)
@@ -169,6 +197,8 @@ export function PropertiesPanel({ variant = 'floating' }: PropertiesPanelProps) 
             selectedNode={data.selectedNode}
             selectedNodeId={data.selectedNodeId}
             definition={data.definition}
+            layersViewMode={effectiveLayersViewMode}
+            componentLibraryEntry={componentLibraryEntry}
             renameClass={data.renameClass}
             deleteClass={data.deleteClass}
             selectedSelectorUsage={data.selectedSelectorUsage}
@@ -200,6 +230,8 @@ export function PropertiesPanel({ variant = 'floating' }: PropertiesPanelProps) 
           selectedNode={data.selectedNode}
           selectedNodeId={data.selectedNodeId}
           definition={data.definition}
+          componentLibraryEntry={componentLibraryEntry}
+          latestComponentLibraryEntry={latestComponentLibraryEntry}
           activeDocument={data.activeDocument}
           activeVc={data.activeVc}
           activeClass={data.activeClass}
@@ -229,6 +261,8 @@ interface HeaderTitleProps {
   selectedNode: ReturnType<typeof usePropertiesPanelData>['selectedNode']
   selectedNodeId: string | null
   definition: ReturnType<typeof usePropertiesPanelData>['definition']
+  layersViewMode: 'components' | 'html'
+  componentLibraryEntry: ComponentLibraryEntry | undefined
   renameClass: (classId: string, name: string) => void
   deleteClass: (classId: string) => void
   selectedSelectorUsage: string | null
@@ -244,11 +278,21 @@ function HeaderTitleContent({
   selectedNode,
   selectedNodeId,
   definition,
+  layersViewMode,
+  componentLibraryEntry,
   renameClass,
   deleteClass,
   selectedSelectorUsage,
   renameNode,
 }: HeaderTitleProps): React.ReactNode {
+  if (layersViewMode === 'components') {
+    if (!selectedNode) return undefined
+    return (
+      <span>
+        {componentLibraryEntry?.name ?? 'Component Block'}
+      </span>
+    )
+  }
   if (isSelectorMultiSelect) {
     return <MultiSelectorHeader count={selectedSelectorClassIdsCount} />
   }

@@ -7,6 +7,7 @@ import {
   canCreateContent,
   canDeleteMedia,
   canEditAnyContent,
+  canEditComponents,
   canEditContent,
   canEditContentEntry,
   canEditStructure,
@@ -128,6 +129,13 @@ describe('admin capability access helpers', () => {
   })
 
   it('keeps editor write modes independent in the UI policy layer', () => {
+    const componentEditor = user('component-editor', ['site.read', 'site.components.edit'])
+    expect(canEditComponents(componentEditor)).toBe(true)
+    expect(canEditContent(componentEditor)).toBe(false)
+    expect(canEditStyle(componentEditor)).toBe(false)
+    expect(canEditStructure(componentEditor)).toBe(false)
+    expect(canSaveDraftSite(componentEditor)).toBe(true)
+
     const contentEditor = user('content-editor', ['site.read', 'site.content.edit'])
     expect(canEditContent(contentEditor)).toBe(true)
     expect(canEditStyle(contentEditor)).toBe(false)
@@ -154,6 +162,7 @@ describe('admin capability access helpers', () => {
     expect(canEditStyle(structureEditor)).toBe(false)
 
     expect(canEditStructure(null)).toBe(true)
+    expect(canEditComponents(null)).toBe(true)
     expect(canEditContent(null)).toBe(true)
     expect(canEditStyle(null)).toBe(true)
     expect(canSaveDraftSite(null)).toBe(true)

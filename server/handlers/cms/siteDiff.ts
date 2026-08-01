@@ -34,7 +34,7 @@ import type {
   SiteShell,
 } from '@core/page-tree'
 
-type SiteChangeKind = 'structure' | 'content' | 'style'
+type SiteChangeKind = 'components' | 'structure' | 'content' | 'style'
 
 export class ForbiddenSiteChangeError extends Error {
   // The TS `erasableSyntaxOnly` lint forbids constructor-parameter properties,
@@ -53,6 +53,7 @@ export class ForbiddenSiteChangeError extends Error {
 }
 
 const CAP_FOR_KIND: Record<SiteChangeKind, CoreCapability> = {
+  components: 'site.components.edit',
   structure: 'site.structure.edit',
   content: 'site.content.edit',
   style: 'site.style.edit',
@@ -77,7 +78,8 @@ function requireChange(ctx: DiffContext, kind: SiteChangeKind, path: string, det
 /**
  * Validate the diff between `previous` and `next` shell against the caller's
  * capabilities. Throws `ForbiddenSiteChangeError` on the first disallowed
- * change. No-ops when the caller holds all three site-write capabilities.
+ * change. No-ops when the caller holds the three unrestricted shell
+ * capabilities; component-only changes are validated in pageDiff.ts.
  *
  * Pages are NOT included in the diff — they are managed by the /pages endpoint.
  */

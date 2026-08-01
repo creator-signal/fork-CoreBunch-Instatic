@@ -24,6 +24,11 @@ export type LoopEntitySource = {
    * `requestDependent`. Use for cookie/randomised/wall-clock content.
    */
   perVisitor?: boolean
-  fetch: (ctx: unknown) => Promise<{ items: unknown[]; totalItems: number }>
+  fetch: (ctx: unknown) => Promise<{
+    items: unknown[]
+    totalItems: number
+    nextCursor?: string
+    previousCursor?: string
+  }>
   preview: (ctx: unknown) => unknown[]
 }

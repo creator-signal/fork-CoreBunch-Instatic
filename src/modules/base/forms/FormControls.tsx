@@ -13,6 +13,7 @@ type LabelProps = Record<string, unknown> & {
 }
 
 type InputProps = Record<string, unknown> & {
+  fieldId: string
   inputType: string
   name: string
   id: string
@@ -22,9 +23,12 @@ type InputProps = Record<string, unknown> & {
   disabled: boolean
   readOnly: boolean
   autocomplete: string
+  accept: string
+  multiple: boolean
 }
 
 type TextareaProps = Record<string, unknown> & {
+  fieldId: string
   name: string
   id: string
   placeholder: string
@@ -36,6 +40,7 @@ type TextareaProps = Record<string, unknown> & {
 }
 
 type SelectProps = Record<string, unknown> & {
+  fieldId: string
   name: string
   id: string
   required: boolean
@@ -56,6 +61,7 @@ type OptionGroupProps = Record<string, unknown> & {
 }
 
 type ChoiceProps = Record<string, unknown> & {
+  fieldId: string
   name: string
   id: string
   value: string
@@ -65,6 +71,7 @@ type ChoiceProps = Record<string, unknown> & {
 }
 
 type SubmitProps = Record<string, unknown> & {
+  action: 'submit' | 'reset'
   label: string
   disabled: boolean
   formId: string
@@ -72,7 +79,8 @@ type SubmitProps = Record<string, unknown> & {
 
 type FormMessageProps = Record<string, unknown> & {
   formId: string
-  kind: 'status' | 'success' | 'error'
+  fieldId: string
+  kind: 'help' | 'status' | 'success' | 'error'
   text: string
   editorPreviewState?: FormPreviewState
   editorPreviewSuccessMessage?: string
@@ -113,14 +121,16 @@ export function InputEditor({ mcClassName, nodeWrapperProps, props }: ModuleComp
       {...nodeWrapperProps}
       className={mcClassName}
       type={props.inputType}
-      name={props.name}
-      id={props.id || undefined}
+      name={props.name || props.fieldId}
+      id={props.id || props.fieldId || undefined}
       placeholder={props.placeholder || undefined}
-      defaultValue={props.value || undefined}
+      defaultValue={props.inputType === 'file' ? undefined : props.value || undefined}
       required={props.required}
       disabled={props.disabled}
       readOnly={props.readOnly}
       autoComplete={props.autocomplete || undefined}
+      accept={props.inputType === 'file' ? props.accept || undefined : undefined}
+      multiple={props.inputType === 'file' ? props.multiple : undefined}
     />
   )
 }
@@ -130,8 +140,8 @@ export function TextareaEditor({ mcClassName, nodeWrapperProps, props }: ModuleC
     <textarea
       {...nodeWrapperProps}
       className={mcClassName}
-      name={props.name}
-      id={props.id || undefined}
+      name={props.name || props.fieldId}
+      id={props.id || props.fieldId || undefined}
       placeholder={props.placeholder || undefined}
       defaultValue={props.value || undefined}
       required={props.required}
@@ -147,8 +157,8 @@ export function SelectEditor({ children, mcClassName, nodeWrapperProps, props }:
     <select
       {...nodeWrapperProps}
       className={mcClassName}
-      name={props.name}
-      id={props.id || undefined}
+      name={props.name || props.fieldId}
+      id={props.id || props.fieldId || undefined}
       required={props.required}
       disabled={props.disabled}
       multiple={props.multiple}
@@ -180,8 +190,8 @@ export function CheckboxEditor({ mcClassName, nodeWrapperProps, props }: ModuleC
       {...nodeWrapperProps}
       className={mcClassName}
       type="checkbox"
-      name={props.name}
-      id={props.id || undefined}
+      name={props.name || props.fieldId}
+      id={props.id || props.fieldId || undefined}
       value={props.value}
       defaultChecked={props.checked}
       required={props.required}
@@ -196,8 +206,8 @@ export function RadioEditor({ mcClassName, nodeWrapperProps, props }: ModuleComp
       {...nodeWrapperProps}
       className={mcClassName}
       type="radio"
-      name={props.name}
-      id={props.id || undefined}
+      name={props.name || props.fieldId}
+      id={props.id || props.fieldId || undefined}
       value={props.value}
       defaultChecked={props.checked}
       required={props.required}
@@ -213,6 +223,7 @@ export function SubmitEditor({ mcClassName, nodeWrapperProps, props }: ModuleCom
       {...nodeWrapperProps}
       className={mcClassName}
       type="button"
+      data-instatic-form-action={props.action}
       disabled={props.disabled}
       form={formId || undefined}
     >
@@ -234,9 +245,23 @@ export function FormMessageEditor({ mcClassName, nodeWrapperProps, props }: Modu
       className={mcClassName}
       data-instatic-form-message={props.kind}
       data-instatic-form-id={normalizeIdentifierValue(props.formId)}
+      data-instatic-form-help-for={
+        props.kind === 'help'
+          ? normalizeIdentifierValue(props.fieldId)
+          : undefined
+      }
+      data-instatic-form-error-for={
+        props.kind === 'error' && props.fieldId
+          ? normalizeIdentifierValue(props.fieldId)
+          : undefined
+      }
       data-instatic-form-preview-active={previewActive ? 'true' : undefined}
-      hidden={previewKind !== null && props.kind !== previewKind ? true : undefined}
-      role={props.kind === 'error' ? 'alert' : 'status'}
+      hidden={
+        props.kind !== 'help' && previewKind !== null && props.kind !== previewKind
+          ? true
+          : undefined
+      }
+      role={props.kind === 'error' ? 'alert' : props.kind === 'help' ? undefined : 'status'}
     >
       {text}
     </div>
@@ -260,6 +285,7 @@ function previewTextForMessage(
   successMessage: string | undefined,
 ): string {
   if (text) return text
+  if (kind === 'help') return ''
   if (kind === 'status') return 'Sending...'
   if (kind === 'success') return successMessage || 'Thanks. Your submission was received.'
   return 'Please check the form and try again.'

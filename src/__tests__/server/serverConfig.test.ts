@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { mkdtempSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { normalizeOrigin, readServerConfig, resolvePublicOrigins } from '../../../server/config'
 
@@ -102,6 +102,32 @@ describe('readServerConfig', () => {
       staticDir: './dist',
       trustedProxyCidrs: [],
       publicOrigins: [],
+      attachments: {
+        directory: resolve('attachments'),
+        scannerUrl: null,
+        scannerToken: null,
+        policy: {
+          enabled: false,
+          allowedMimeTypes: [
+            'application/pdf',
+            'image/png',
+            'image/jpeg',
+            'image/gif',
+            'image/webp',
+            'text/plain',
+            'text/csv',
+          ],
+          maxFileBytes: 10 * 1024 * 1024,
+          maxFiles: 5,
+          temporaryTtlSeconds: 24 * 60 * 60,
+          retentionDays: 90,
+        },
+      },
+      formDrafts: {
+        enabled: false,
+        ttlDays: 30,
+        maxBytes: 256 * 1024,
+      },
       minio: null,
       starterSite: null,
     })
@@ -126,6 +152,32 @@ describe('readServerConfig', () => {
       staticDir: '/srv/instatic/dist',
       trustedProxyCidrs: ['10.0.0.0/8', '192.168.0.0/16'],
       publicOrigins: ['https://cms.example.com', 'http://localhost:5173'],
+      attachments: {
+        directory: '/srv/instatic/attachments',
+        scannerUrl: null,
+        scannerToken: null,
+        policy: {
+          enabled: false,
+          allowedMimeTypes: [
+            'application/pdf',
+            'image/png',
+            'image/jpeg',
+            'image/gif',
+            'image/webp',
+            'text/plain',
+            'text/csv',
+          ],
+          maxFileBytes: 10 * 1024 * 1024,
+          maxFiles: 5,
+          temporaryTtlSeconds: 24 * 60 * 60,
+          retentionDays: 90,
+        },
+      },
+      formDrafts: {
+        enabled: false,
+        ttlDays: 30,
+        maxBytes: 256 * 1024,
+      },
       minio: null,
       starterSite: null,
     })
@@ -173,6 +225,67 @@ describe('readServerConfig', () => {
   it('rejects partial MinIO configuration', () => {
     expect(() => readServerConfig({ MINIO_ENDPOINT: 'https://objects.example.test' }))
       .toThrow(/requires MINIO_ENDPOINT/)
+  })
+
+  it('reads the private attachment policy and scanner secret from a mounted file', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'instatic-attachment-config-'))
+    const tokenPath = join(directory, 'scanner-token')
+    writeFileSync(tokenPath, 'scanner-secret\n')
+
+    expect(readServerConfig({
+      ATTACHMENTS_ENABLED: 'true',
+      ATTACHMENTS_DIR: '/srv/private-attachments',
+      ATTACHMENT_SCANNER_URL: 'https://scanner.example.test/scan',
+      ATTACHMENT_SCANNER_TOKEN_FILE: tokenPath,
+      ATTACHMENT_ALLOWED_MIME_TYPES: 'application/pdf, image/png',
+      ATTACHMENT_MAX_FILE_BYTES: '2097152',
+      ATTACHMENT_MAX_FILES: '2',
+      ATTACHMENT_TEMPORARY_TTL_SECONDS: '1800',
+      ATTACHMENT_RETENTION_DAYS: '45',
+    }).attachments).toEqual({
+      directory: '/srv/private-attachments',
+      scannerUrl: 'https://scanner.example.test/scan',
+      scannerToken: 'scanner-secret',
+      policy: {
+        enabled: true,
+        allowedMimeTypes: ['application/pdf', 'image/png'],
+        maxFileBytes: 2097152,
+        maxFiles: 2,
+        temporaryTtlSeconds: 1800,
+        retentionDays: 45,
+      },
+    })
+  })
+
+  it('rejects unsupported attachment MIME types and invalid numeric limits', () => {
+    expect(() => readServerConfig({
+      ATTACHMENT_ALLOWED_MIME_TYPES: 'application/zip',
+    })).toThrow(/unsupported values/)
+    expect(() => readServerConfig({
+      ATTACHMENT_MAX_FILES: '0',
+    })).toThrow(/ATTACHMENT_MAX_FILES must be an integer between 1 and 20/)
+    expect(() => readServerConfig({
+      ATTACHMENT_MAX_FILES: '21',
+    })).toThrow(/ATTACHMENT_MAX_FILES must be an integer between 1 and 20/)
+    expect(() => readServerConfig({
+      ATTACHMENT_TEMPORARY_TTL_SECONDS: '59',
+    })).toThrow(/ATTACHMENT_TEMPORARY_TTL_SECONDS must be an integer at least 60/)
+  })
+
+  it('reads and bounds persistent form draft policy', () => {
+    expect(readServerConfig({
+      FORM_DRAFTS_ENABLED: 'true',
+      FORM_DRAFT_TTL_DAYS: '45',
+      FORM_DRAFT_MAX_BYTES: '131072',
+    }).formDrafts).toEqual({
+      enabled: true,
+      ttlDays: 45,
+      maxBytes: 131072,
+    })
+    expect(() => readServerConfig({ FORM_DRAFT_TTL_DAYS: '366' }))
+      .toThrow(/FORM_DRAFT_TTL_DAYS must be an integer between 1 and 365/)
+    expect(() => readServerConfig({ FORM_DRAFT_MAX_BYTES: '1048577' }))
+      .toThrow(/FORM_DRAFT_MAX_BYTES must be an integer between 1 and 1048576/)
   })
 
   it('loads complete starter-site bootstrap configuration from mounted files', () => {

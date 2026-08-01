@@ -32,6 +32,7 @@ export const permissions = {
   editorPanels: 'editor.panels',
   dashboardWidgetsRegister: 'dashboard.widgets.register',
   modulesRegister: 'modules.register',
+  componentLibraryRegister: 'componentLibrary.register',
   loopsRegister: 'loops.register',
   visualComponentsRegister: 'visualComponents.register',
   frontendAssets: 'frontend.assets',

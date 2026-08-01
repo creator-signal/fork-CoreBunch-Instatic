@@ -14,6 +14,11 @@ import type { SavedLayout } from '@core/layouts'
 import type { VisualComponent } from '@core/visualComponents'
 import type { InsertLocation } from '@site/store/insertLocation'
 import { selectActiveCanvasPage, useEditorStore } from '@site/store/store'
+import { useEditorPermissions } from '@site/editorPermissionsContext'
+import {
+  useComponentLibraryDependencyState,
+  useComponentLibraryEntries,
+} from '@site/component-library/useComponentLibraryCatalogue'
 import {
   dropPreviewStyle,
   resolveCanvasPointerInsertionDrop,
@@ -29,12 +34,14 @@ import { cn } from '@ui/cn'
 import { AppGridPlusGlyphIcon } from 'pixel-art-icons/icons/app-grid-plus-glyph'
 import { BoxStackSolidIcon } from 'pixel-art-icons/icons/box-stack-solid'
 import { CalendarSolidIcon } from 'pixel-art-icons/icons/calendar-solid'
+import { CheckboxSolidIcon } from 'pixel-art-icons/icons/checkbox-solid'
 import { Grid2x22SolidIcon } from 'pixel-art-icons/icons/grid-2x2-2-solid'
 import { LayoutSolidIcon } from 'pixel-art-icons/icons/layout-solid'
 import { ListBoxSolidIcon } from 'pixel-art-icons/icons/list-box-solid'
 import { PackageSolidIcon } from 'pixel-art-icons/icons/package-solid'
 import {
   buildModuleInserterItems,
+  composeComponentSection,
   composeLayoutsSection,
   filterInserterItems,
   itemDescription,
@@ -92,6 +99,7 @@ const SECTIONS: readonly SectionDefinition[] = [
   { id: 'modules', name: 'Modules', accent: 'lilac', icon: AppGridPlusGlyphIcon },
   { id: 'layouts', name: 'Layouts', accent: 'sky', icon: LayoutSolidIcon },
   { id: 'components', name: 'Components', accent: 'mint', icon: BoxStackSolidIcon },
+  { id: 'forms', name: 'Forms', accent: 'peach', icon: CheckboxSolidIcon },
   { id: 'recent', name: 'Recent', accent: 'rose', icon: CalendarSolidIcon },
 ]
 
@@ -119,6 +127,10 @@ export function ModuleInserterDialog({
   const setActiveBreakpoint = useEditorStore((s) => s.setActiveBreakpoint)
   const canvasPage = useEditorStore(selectActiveCanvasPage)
   const insertionContext = useModuleInsertionContext()
+  const permissions = useEditorPermissions()
+  const componentLibraryEntries = useComponentLibraryEntries()
+  const componentLibraryDependencyState =
+    useComponentLibraryDependencyState(true)
   const {
     isFavorite,
     toggleFavorite,
@@ -134,12 +146,26 @@ export function ModuleInserterDialog({
     context: insertionContext,
     savedLayouts,
     visualComponents,
+    componentLibraryEntries,
+    dependencyState: componentLibraryDependencyState,
+    canEditComponents: permissions.canEditComponents,
   })
   const recentItems = resolveRecentItems(recentRefs, allItems)
 
   const filteredModules = filterInserterItems(moduleItems, query)
   const filteredSavedLayouts = filterInserterItems(savedLayoutItems, query)
-  const filteredComponents = filterInserterItems(componentItems, query)
+  const filteredComponents = filterInserterItems(
+    componentItems.filter(
+      (item) => item.source === 'saved' || item.category !== 'Forms',
+    ),
+    query,
+  )
+  const filteredForms = filterInserterItems(
+    componentItems.filter(
+      (item) => item.source === 'catalogue' && item.category === 'Forms',
+    ),
+    query,
+  )
   const filteredRecent = filterInserterItems(recentItems, query)
   // Layouts section order: the user's saved layouts, then one group per plugin
   // (labelled with the plugin's display name). All sourced from `data_rows`.
@@ -147,15 +173,24 @@ export function ModuleInserterDialog({
     filteredSavedLayouts,
     (pluginId) => pluginRuntime.getPluginName(pluginId),
   )
+  const componentsSection = composeComponentSection(filteredComponents)
+  const formsSection = composeComponentSection(filteredForms)
   const items = itemsForSection(section, {
     modules: filteredModules,
     layouts: layoutsSection.items,
-    components: filteredComponents,
+    components: componentsSection.items,
+    forms: formsSection.items,
     recent: filteredRecent,
   })
 
-  // Group labels for the Layouts section, keyed by each group's first item.
-  const groupLabelByKey = section === 'layouts' ? layoutsSection.labelByKey : new Map<string, string>()
+  // Group labels act as folders within the composite inserter sections.
+  const groupLabelByKey = section === 'layouts'
+    ? layoutsSection.labelByKey
+    : section === 'components'
+      ? componentsSection.labelByKey
+      : section === 'forms'
+        ? formsSection.labelByKey
+        : new Map<string, string>()
   const selectedKey =
     selectedKeyOverride && items.some((item) => item.key === selectedKeyOverride)
       ? selectedKeyOverride
@@ -166,6 +201,7 @@ export function ModuleInserterDialog({
     modules: filteredModules.length,
     layouts: layoutsSection.items.length,
     components: filteredComponents.length,
+    forms: filteredForms.length,
     recent: filteredRecent.length,
   }
 
@@ -639,11 +675,13 @@ function itemsForSection(
     modules: ModuleInserterItem[]
     layouts: ModuleInserterItem[]
     components: ModuleInserterItem[]
+    forms: ModuleInserterItem[]
     recent: ModuleInserterItem[]
   },
 ): ModuleInserterItem[] {
   if (section === 'layouts') return groups.layouts
   if (section === 'components') return groups.components
+  if (section === 'forms') return groups.forms
   if (section === 'recent') return groups.recent
   return groups.modules
 }

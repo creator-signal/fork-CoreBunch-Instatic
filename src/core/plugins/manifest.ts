@@ -15,6 +15,7 @@ import {
   permissionLabel as sdkPermissionLabel,
 } from '@core/plugin-sdk'
 import { collectEnabledAdminPages, pluginAdminPageRoute } from './manifestAdminPages'
+import { assertComponentLibraryCoherent } from './manifestComponentLibrary'
 
 // Admin-page route helpers and resource-record helpers live in sibling
 // modules (responsibility split); re-exported here so
@@ -357,6 +358,9 @@ const manifestSchema = Type.Object({
   pack: Type.Optional(Type.Object({
     path: Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source }),
   })),
+  componentLibrary: Type.Optional(Type.Object({
+    path: Type.String({ pattern: SAFE_ASSET_PATH_PATTERN.source }),
+  })),
   settings: Type.Optional(Type.Array(settingDefinitionSchema, { maxItems: 50 })),
 })
 
@@ -439,6 +443,7 @@ export function parsePluginManifest(input: unknown): PluginManifest {
       `\`modules.register\` permission. Add "modules.register" to \`permissions\`.`,
     )
   }
+  assertComponentLibraryCoherent(data)
 
   const duplicateResources = new Set<string>()
   const resources: PluginResource[] = data.resources.map((resource) => {
@@ -666,6 +671,7 @@ export function parsePluginManifest(input: unknown): PluginManifest {
     resources,
     adminPages,
     pack: data.pack,
+    componentLibrary: data.componentLibrary,
     frontend: data.frontend
       ? { assets: data.frontend.assets.map((asset) => ({ ...asset })) } as PluginManifest['frontend']
       : undefined,
@@ -690,4 +696,3 @@ export function missingPluginPermissionGrants(
 export function permissionLabel(permission: PluginPermission): string {
   return sdkPermissionLabel(permission)
 }
-

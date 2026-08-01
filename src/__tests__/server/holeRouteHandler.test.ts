@@ -13,7 +13,7 @@
  *   - Runtime asset endpoint serves HOLE_RUNTIME_JS with correct headers
  */
 
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import type { DbClient, DbResult } from '../../../server/db'
 import {
   handleHoleRequest,
@@ -26,6 +26,10 @@ import { HOLE_RUNTIME_JS } from '../../../server/publish/holeRuntime'
 import { handleServerRequest } from '../../../server/router'
 import { makeModule } from '../publisher/helpers'
 import { registry } from '../../core/module-engine/registry'
+import { loopSourceRegistry } from '@core/loops/registry'
+import { searchRequestRateLimit } from '../../../server/search/rateLimit'
+import { SearchPagesSource } from '@core/loops'
+import { LoopModule } from '@modules/base/loop'
 
 // ---------------------------------------------------------------------------
 // Snapshot fixture
@@ -67,7 +71,17 @@ function makeSnapshot() {
       files: [],
       visualComponents: [],
       breakpoints: [{ id: 'desktop', label: 'Desktop', width: 1440, icon: 'monitor' }],
-      settings: { metaTitle: 'Test', shortcuts: {} },
+      settings: {
+        metaTitle: 'Test',
+        shortcuts: {},
+        search: undefined as {
+          enabled: boolean
+          queryParam: string
+          minQueryLength: number
+          maxQueryLength: number
+          maxResults: number
+        } | undefined,
+      },
       styleRules: {},
       createdAt: 1000,
       updatedAt: 2000,
@@ -178,6 +192,7 @@ beforeEach(() => {
   // which resets the publish version AND every version-keyed single-flight memo
   // — including the hole endpoint's snapshot cache. No bespoke hole reset hook.
   resetForTests()
+  searchRequestRateLimit.reset('search:unknown')
 
   // Register test-specific module IDs using registerOrReplace so these tests
   // never conflict with base module registrations in other test files.
@@ -191,6 +206,11 @@ beforeEach(() => {
       render: (p) => ({ html: `<span>${String(p['text'] ?? '')}</span>` }),
     }),
   )
+})
+
+afterEach(() => {
+  loopSourceRegistry.registerOrReplace(SearchPagesSource)
+  registry.registerOrReplace(LoopModule)
 })
 
 // ---------------------------------------------------------------------------
@@ -424,6 +444,84 @@ describe('handleHoleRequest — successful render', () => {
 
     const body = await res.text()
     expect(body).toContain('instatic-hole-stale')
+  })
+
+  it('bounds Search cache keys to its query and pagination inputs', async () => {
+    let fetches = 0
+    loopSourceRegistry.registerOrReplace({
+      id: 'search.pages',
+      label: 'Test search',
+      requestDependent: true,
+      filterSchema: {},
+      orderByOptions: [{ id: 'relevance', label: 'Relevance' }],
+      fields: [{ id: 'title', label: 'Title' }],
+      fetch: async (ctx) => {
+        fetches += 1
+        const query = ctx.request?.query.q ?? ''
+        return {
+          items: [{
+            id: 'result',
+            fields: {
+              title: `Result for ${query}`,
+              excerpt: 'Excerpt',
+              permalink: '/result',
+            },
+          }],
+          totalItems: 1,
+        }
+      },
+      preview: () => [],
+    })
+    registry.registerOrReplace(makeModule('base.loop', { canHaveChildren: true }))
+
+    const snapshot = makeSnapshot()
+    snapshot.site.settings.search = {
+      enabled: true,
+      queryParam: 'q',
+      minQueryLength: 2,
+      maxQueryLength: 120,
+      maxResults: 100,
+    }
+    snapshot.site.pages[0].nodes.root.children = ['search-loop']
+    snapshot.site.pages[0].nodes['search-loop'] = {
+      id: 'search-loop',
+      moduleId: 'base.loop',
+      props: {
+        sourceMode: 'dynamic',
+        sourceId: 'search.pages',
+        itemRenderer: 'search-result',
+        pagination: 'numbered',
+        pageSize: 10,
+      },
+      breakpointOverrides: {},
+      children: [],
+      classIds: [],
+    }
+
+    const version = getPublishVersion()
+    const endpoint = (tracking: string) => {
+      const url = new URL(`http://localhost/_instatic/hole/search-loop?v=${version}`)
+      url.searchParams.set('u', `/test?q=creator&utm_source=${tracking}`)
+      return url
+    }
+    const firstUrl = endpoint('first')
+    const first = await handleHoleRequest(
+      new Request(firstUrl),
+      firstUrl,
+      { db: makeFakeDb(snapshot) },
+    )
+    const secondUrl = endpoint('second')
+    const second = await handleHoleRequest(
+      new Request(secondUrl),
+      secondUrl,
+      { db: makeFakeDb(snapshot) },
+    )
+
+    expect(first.status).toBe(200)
+    expect(second.status).toBe(200)
+    expect(await first.text()).toContain('Result for creator')
+    expect(await second.text()).toContain('Result for creator')
+    expect(fetches).toBe(1)
   })
 })
 

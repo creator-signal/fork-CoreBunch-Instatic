@@ -89,6 +89,7 @@ export async function buildRuntimePreviewDocument(
     runtimePackageImportmap,
     loopData,
     mediaAssets,
+    robotsPolicy: 'noindex',
   }).html
 
   // Mirror the published-page path: pull each enabled plugin's

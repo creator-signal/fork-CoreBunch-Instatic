@@ -125,6 +125,7 @@ describe('site runtime build', () => {
     expect(result.html).toContain("script-src 'self'")
     expect(result.html).toContain('data-instatic-runtime-script="entry"')
     expect(result.html).toContain('/_instatic/preview/runtime/')
+    expect(result.html).toContain('<meta name="robots" content="noindex, nofollow, noarchive">')
   })
 
   it('resolves declared package imports from a dependency cache node_modules directory', async () => {

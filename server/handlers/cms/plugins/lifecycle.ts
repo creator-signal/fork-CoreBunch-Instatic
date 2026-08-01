@@ -18,6 +18,7 @@ import type {
 } from '@core/plugin-sdk'
 import {
   loadPluginModulePack,
+  loadPluginComponentLibraryPack,
   loadPluginServerEntrypoint,
   primePluginSettingsCache,
   runPluginLifecycle,
@@ -27,6 +28,10 @@ import {
   activateSandboxedPluginModulePack,
   deactivatePluginModulePack,
 } from '@core/plugins/modulePackLoader'
+import {
+  activatePluginComponentLibraryPack,
+  deactivatePluginComponentLibraryPack,
+} from '@core/plugins/componentLibraryPackLoader'
 import type { CmsHandlerOptions } from '../shared'
 import { lifecycleErrorMessage, pluginManifestWithGrants } from './shared'
 
@@ -65,8 +70,20 @@ export async function runPluginLifecycleHook(
         console.error(`[plugin:${plugin.id}] module pack activate failed`, err)
       }
     }
+    if (
+      hook === 'activate' &&
+      manifest.componentLibrary &&
+      manifest.grantedPermissions?.includes('componentLibrary.register')
+    ) {
+      const pack = await loadPluginComponentLibraryPack(
+        manifest,
+        options.uploadsDir,
+      )
+      if (pack) activatePluginComponentLibraryPack(manifest, pack)
+    }
     if (hook === 'deactivate' || hook === 'uninstall') {
       deactivatePluginModulePack(plugin.id)
+      deactivatePluginComponentLibraryPack(plugin.id)
     }
 
     // Server entrypoint — load into the worker (no-op for declarative
@@ -92,6 +109,7 @@ export async function runPluginLifecycleHook(
     if (hook === 'activate') {
       try { await unloadPlugin(plugin.id) } catch { /* noop */ }
       deactivatePluginModulePack(plugin.id)
+      deactivatePluginComponentLibraryPack(plugin.id)
     }
     const updatedResult = await setPluginLifecycleStatus(db, plugin.id, 'error', lifecycleErrorMessage(err))
     const updated = updatedResult?.kind === 'ok' ? updatedResult.plugin : null

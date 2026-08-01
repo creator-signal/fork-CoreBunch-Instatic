@@ -23,6 +23,8 @@ export type FrameworkPanelTab = 'home' | 'colors' | 'typography' | 'spacing'
  *   - `media`  — asset library (MediaExplorerPanel)
  */
 export type ExplorerPanelTab = 'layers' | 'site' | 'code' | 'media'
+/** Author-facing and implementation-facing projections of the active NodeTree. */
+export type LayersViewMode = 'components' | 'html'
 export type PropertiesPanelMode = 'docked' | 'floating'
 
 const PROPERTIES_PANEL_DEFAULT_WIDTH = 360
@@ -112,6 +114,8 @@ interface UiSlice {
   explorerPanelOpen: boolean
   /** Active tab inside the consolidated Explorer panel. */
   explorerPanelTab: ExplorerPanelTab
+  /** Active projection inside the Layers tab. This is editor UI state only. */
+  layersViewMode: LayersViewMode
   selectorsPanelOpen: boolean
   frameworkPanelOpen: boolean
   /** Active tab inside the consolidated Framework panel. */
@@ -163,6 +167,7 @@ interface UiSlice {
 
   setExplorerPanelOpen: (open: boolean) => void
   setExplorerPanelTab: (tab: ExplorerPanelTab) => void
+  setLayersViewMode: (mode: LayersViewMode) => void
   setSelectorsPanelOpen: (open: boolean) => void
   setFrameworkPanelOpen: (open: boolean) => void
   setFrameworkPanelTab: (tab: FrameworkPanelTab) => void
@@ -310,6 +315,7 @@ export const createUiSlice: EditorStoreSliceCreator<UiSlice> = (set, get) => ({
   layoutNameDialogRequest: null,
   explorerPanelOpen: true,
   explorerPanelTab: 'layers',
+  layersViewMode: 'html',
   selectorsPanelOpen: false,
   frameworkPanelOpen: false,
   frameworkPanelTab: 'home',
@@ -426,6 +432,11 @@ export const createUiSlice: EditorStoreSliceCreator<UiSlice> = (set, get) => ({
   setExplorerPanelOpen: (open) => set({ explorerPanelOpen: open }),
 
   setExplorerPanelTab: (tab) => set({ explorerPanelTab: tab }),
+
+  setLayersViewMode: (mode) => {
+    if (Object.is(get().layersViewMode, mode)) return
+    set({ layersViewMode: mode })
+  },
 
   setSelectorsPanelOpen: (open) => set({ selectorsPanelOpen: open }),
 

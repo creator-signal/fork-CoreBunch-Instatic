@@ -14,7 +14,12 @@ export const MCP_CAPABILITY_GROUPS: readonly CapabilityPickerGroup[] = [
   },
   {
     title: 'Site editing',
-    capabilities: ['site.structure.edit', 'site.content.edit', 'site.style.edit'],
+    capabilities: [
+      'site.components.edit',
+      'site.structure.edit',
+      'site.content.edit',
+      'site.style.edit',
+    ],
   },
   {
     title: 'Pages',

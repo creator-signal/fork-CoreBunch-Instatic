@@ -21,7 +21,9 @@ import type {
   SiteExplorerSectionId,
   SiteSettings,
   PageTemplateConfig,
+  PageSeo,
   ConditionDef,
+  CatalogueInstanceMetadata,
   StructuralExplorerRowOrder,
   StructuralSiteExplorerSectionId,
 } from '@core/page-tree'
@@ -38,6 +40,14 @@ import type { EditorStore } from '@site/store/types'
 // ---------------------------------------------------------------------------
 
 export type ColorVariantOptions = { enabled: boolean; count: number }
+
+export interface InsertNodeOptions {
+  /**
+   * Stable Component Library identity stamped in the same undoable mutation
+   * as the backing node. Ordinary HTML insertion leaves this unset.
+   */
+  catalogueInstance?: CatalogueInstanceMetadata
+}
 
 export interface CreateFrameworkColorTokenInput {
   category?: string
@@ -132,6 +142,7 @@ export interface SiteSlice {
   addPage: (title: string, slug?: string) => Page
   deletePage: (pageId: string) => void
   renamePage: (pageId: string, title: string, slug?: string) => void
+  updatePageSeo: (pageId: string, seo: PageSeo | undefined) => void
   duplicatePage: (sourcePageId: string, title: string, slug?: string) => Page
   reorderPages: (fromIndex: number, toIndex: number) => void
   convertPageToTemplate: (pageId: string, config: PageTemplateConfig) => void
@@ -182,7 +193,13 @@ export interface SiteSlice {
   setPageAsHomepage: (pageId: string) => void
 
   // Node mutations (operate on the active page)
-  insertNode: (moduleId: string, defaults: Record<string, unknown>, parentId: string, index?: number) => string
+  insertNode: (
+    moduleId: string,
+    defaults: Record<string, unknown>,
+    parentId: string,
+    index?: number,
+    options?: InsertNodeOptions,
+  ) => string
 
   /**
    * Insert a fragment of imported HTML nodes into the active tree under `parentId`.
@@ -213,7 +230,40 @@ export interface SiteSlice {
    *   pasting / right-clicking a leaf target).
    * - Returns the new node's id on success, or `null` on no-op / cycle prevented.
    */
-  insertComponentRef: (parentId: string, componentId: string, index?: number) => string | null
+  insertComponentRef: (
+    parentId: string,
+    componentId: string,
+    index?: number,
+    options?: InsertNodeOptions,
+  ) => string | null
+  /**
+   * Update one field declared by the selected node's retained Component
+   * Library definition. Returns false for freeform, stale or undeclared keys.
+   */
+  updateComponentLibraryField: (
+    nodeId: string,
+    fieldKey: string,
+    value: unknown,
+  ) => boolean
+  /**
+   * Apply a declared preset or variant and stamp its identity atomically.
+   * Option values are resolved from the registry, never accepted from UI.
+   */
+  applyComponentLibraryOption: (
+    nodeId: string,
+    kind: 'preset' | 'variant',
+    optionId: string,
+  ) => boolean
+  /**
+   * Losslessly stamp an eligible freeform primitive with catalogue identity.
+   * The store revalidates the entry/default contract and never accepts raw
+   * metadata from the UI.
+   */
+  convertFreeformPrimitiveToComponent: (
+    nodeId: string,
+    entryId: string,
+    presetId?: string,
+  ) => boolean
   deleteNode: (nodeId: string) => void
   /** Multi-delete: removes every id and its descendants in one undo step. */
   deleteNodes: (nodeIds: string[]) => void

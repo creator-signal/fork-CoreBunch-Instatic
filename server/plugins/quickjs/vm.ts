@@ -379,10 +379,21 @@ export async function createPluginVm(args: {
           [sourceId, JSON.stringify(loopCtx ?? null)],
           evalTimeoutMs,
         )
-        const parsed = JSON.parse(json) as { items?: unknown[]; totalItems?: number }
+        const parsed = JSON.parse(json) as {
+          items?: unknown[]
+          totalItems?: number
+          nextCursor?: unknown
+          previousCursor?: unknown
+        }
         return {
           items: Array.isArray(parsed.items) ? parsed.items : [],
           totalItems: typeof parsed.totalItems === 'number' ? parsed.totalItems : 0,
+          ...(typeof parsed.nextCursor === 'string'
+            ? { nextCursor: parsed.nextCursor }
+            : {}),
+          ...(typeof parsed.previousCursor === 'string'
+            ? { previousCursor: parsed.previousCursor }
+            : {}),
         }
       },
 

@@ -14,6 +14,7 @@
  */
 
 import { useAsyncResource } from '@admin/lib/useAsyncResource'
+import { nanoid } from 'nanoid'
 import { useEditorStore } from '@site/store/store'
 import { loopSourceRegistry } from '@core/loops/registry'
 import type { LoopEntitySource } from '@core/loops/types'
@@ -35,8 +36,37 @@ export function LoopPropertiesView({ nodeId, props }: LoopPropertiesViewProps) {
   const updateNodeProps = useEditorStore((s) => s.updateNodeProps)
 
   const sources = loopSourceRegistry.list()
+  const sourceMode = props.sourceMode === 'manual' ? 'manual' : 'dynamic'
   const sourceId = typeof props.sourceId === 'string' ? props.sourceId : ''
-  const source: LoopEntitySource | undefined = sources.find((s) => s.id === sourceId)
+  const source: LoopEntitySource | undefined = sourceMode === 'dynamic'
+    ? sources.find((s) => s.id === sourceId)
+    : undefined
+  const manualItems = Array.isArray(props.manualItems)
+    ? props.manualItems.flatMap((item): Array<{
+        id: string
+        fields: Record<string, unknown>
+      }> => {
+        if (!item || typeof item !== 'object' || Array.isArray(item)) return []
+        const candidate = item as Record<string, unknown>
+        if (
+          typeof candidate.id !== 'string' ||
+          !candidate.fields ||
+          typeof candidate.fields !== 'object' ||
+          Array.isArray(candidate.fields)
+        ) {
+          return []
+        }
+        return [{
+          id: candidate.id,
+          fields: candidate.fields as Record<string, unknown>,
+        }]
+      })
+    : []
+  const manualItemLines = manualItems.map((item) => {
+    const label =
+      item.fields.label ?? item.fields.title ?? item.fields.text ?? item.id
+    return String(label)
+  }).join('\n')
 
   const filters =
     props.filters && typeof props.filters === 'object' && !Array.isArray(props.filters)
@@ -47,8 +77,12 @@ export function LoopPropertiesView({ nodeId, props }: LoopPropertiesViewProps) {
   // Other sources resolve to `null` (no fetch); a failed load resolves to an
   // empty list so the picker degrades gracefully.
   const { data: tables } = useAsyncResource<Array<{ id: string; name: string }> | null>(
-    () => (sourceId === 'data.rows' ? listCmsDataTables().catch(() => []) : Promise.resolve(null)),
-    [sourceId],
+    () => (
+      sourceMode === 'dynamic' && sourceId === 'data.rows'
+        ? listCmsDataTables().catch(() => [])
+        : Promise.resolve(null)
+    ),
+    [sourceMode, sourceId],
   )
 
   // Build the per-source filter schema with dynamic options patched in.
@@ -94,6 +128,40 @@ export function LoopPropertiesView({ nodeId, props }: LoopPropertiesViewProps) {
     })
   }
 
+  function handleSourceModeChange(_key: string, value: unknown) {
+    updateNodeProps(nodeId, {
+      sourceMode: value === 'manual' ? 'manual' : 'dynamic',
+    })
+  }
+
+  function handleManualItemsChange(_key: string, value: unknown) {
+    const lines = (typeof value === 'string' ? value : '')
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+    const idsByLabel = new Map<string, string[]>()
+    for (const item of manualItems) {
+      const label = String(
+        item.fields.label ?? item.fields.title ?? item.fields.text ?? item.id,
+      )
+      idsByLabel.set(label, [...(idsByLabel.get(label) ?? []), item.id])
+    }
+    updateNodeProps(nodeId, {
+      manualItems: lines.map((line) => {
+        const matchingIds = idsByLabel.get(line)
+        const persistedId = matchingIds?.shift()
+        return {
+          id: persistedId ?? `manual-${nanoid(10)}`,
+          fields: {
+            label: line,
+            title: line,
+            text: line,
+          },
+        }
+      }),
+    })
+  }
+
   function handleFilterChange(key: string, value: unknown) {
     const nextFilters = { ...filters, [key]: value }
     updateNodeProps(nodeId, { filters: nextFilters })
@@ -105,6 +173,12 @@ export function LoopPropertiesView({ nodeId, props }: LoopPropertiesViewProps) {
 
   const tagValue = typeof props.tag === 'string' ? props.tag : 'div'
   const customTagValue = typeof props.customTag === 'string' ? props.customTag : ''
+  const paginationValue =
+    props.pagination === 'infinite'
+      ? 'load-more'
+      : typeof props.pagination === 'string'
+        ? props.pagination
+        : 'none'
 
   return (
     <>
@@ -124,18 +198,46 @@ export function LoopPropertiesView({ nodeId, props }: LoopPropertiesViewProps) {
       ) : null}
 
       <PropertyControlRenderer
-        propKey="sourceId"
+        propKey="sourceMode"
         control={{
           type: 'select',
-          label: 'Source',
+          label: 'Source type',
           options: [
-            { label: '— Pick a source —', value: '' },
-            ...sources.map((s) => ({ label: s.label, value: s.id })),
+            { label: 'Dynamic source', value: 'dynamic' },
+            { label: 'Manual items', value: 'manual' },
           ],
         }}
-        value={sourceId}
-        onChange={handleSourceChange}
+        value={sourceMode}
+        onChange={handleSourceModeChange}
       />
+
+      {sourceMode === 'dynamic' ? (
+        <PropertyControlRenderer
+          propKey="sourceId"
+          control={{
+            type: 'select',
+            label: 'Source',
+            options: [
+              { label: '— Pick a source —', value: '' },
+              ...sources.map((s) => ({ label: s.label, value: s.id })),
+            ],
+          }}
+          value={sourceId}
+          onChange={handleSourceChange}
+        />
+      ) : (
+        <PropertyControlRenderer
+          propKey="manualItems"
+          control={{
+            type: 'textarea',
+            label: 'Manual items',
+            rows: 6,
+            placeholder: 'One item per line',
+          }}
+          value={manualItemLines}
+          onChange={handleManualItemsChange}
+        />
+      )}
 
       {source
         ? Object.entries(filterSchema).map(([key, control]) => (
@@ -151,6 +253,16 @@ export function LoopPropertiesView({ nodeId, props }: LoopPropertiesViewProps) {
 
       {source ? (
         <>
+          <PropertyControlRenderer
+            propKey="query"
+            control={{
+              type: 'text',
+              label: 'Query',
+              placeholder: 'Optional search query',
+            }}
+            value={typeof props.query === 'string' ? props.query : ''}
+            onChange={handleScalarChange}
+          />
           <PropertyControlRenderer
             propKey="orderBy"
             control={orderOptions}
@@ -170,6 +282,11 @@ export function LoopPropertiesView({ nodeId, props }: LoopPropertiesViewProps) {
             value={typeof props.direction === 'string' ? props.direction : 'desc'}
             onChange={handleScalarChange}
           />
+        </>
+      ) : null}
+
+      {sourceMode === 'manual' || source ? (
+        <>
           <PropertyControlRenderer
             propKey="limit"
             control={{ type: 'number', label: 'Limit', min: 1, max: 200, step: 1 }}
@@ -189,13 +306,18 @@ export function LoopPropertiesView({ nodeId, props }: LoopPropertiesViewProps) {
               label: 'Pagination',
               options: [
                 { label: 'None', value: 'none' },
-                { label: 'Infinite scroll', value: 'infinite' },
+                { label: 'Numbered pages', value: 'numbered' },
+                { label: 'Previous / next', value: 'previous-next' },
+                { label: 'Load more', value: 'load-more' },
+                ...(sourceMode === 'dynamic'
+                  ? [{ label: 'Cursor previous / next', value: 'cursor' }]
+                  : []),
               ],
             }}
-            value={typeof props.pagination === 'string' ? props.pagination : 'none'}
+            value={paginationValue}
             onChange={handleScalarChange}
           />
-          {props.pagination === 'infinite' ? (
+          {paginationValue !== 'none' ? (
             <PropertyControlRenderer
               propKey="pageSize"
               control={{ type: 'number', label: 'Page size', min: 1, max: 100, step: 1 }}

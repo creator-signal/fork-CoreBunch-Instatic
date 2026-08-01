@@ -23,7 +23,14 @@ const LOOP_PLUGIN_SOURCE = `
       await api.cms.loops.registerSource({
         id: 'acme.loop.ok',
         label: 'OK',
-        fetch: function () { return { items: [{ id: 'a' }], totalItems: 1 }; },
+        fetch: function () {
+          return {
+            items: [{ id: 'a' }],
+            totalItems: 1,
+            previousCursor: 'before:a',
+            nextCursor: 'after:a',
+          };
+        },
         preview: function () { return [{ id: 'a' }]; },
       });
       await api.cms.loops.registerSource({
@@ -72,7 +79,12 @@ describe('VM loop-source dispatch fallbacks', () => {
     const vm = await makeLoopVm()
     try {
       const result = await vm.runLoopFetch('acme.loop.ok', {})
-      expect(result).toEqual({ items: [{ id: 'a' }], totalItems: 1 })
+      expect(result).toEqual({
+        items: [{ id: 'a' }],
+        totalItems: 1,
+        previousCursor: 'before:a',
+        nextCursor: 'after:a',
+      })
     } finally {
       vm.dispose()
     }

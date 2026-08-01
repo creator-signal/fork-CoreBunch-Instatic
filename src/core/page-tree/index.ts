@@ -11,6 +11,10 @@
 // Schemas — exported as both runtime constants (for parse/compiled validation)
 // and types (via Static<typeof X>).
 export { BaseNodeSchema,  parseBaseNodeFields } from './baseNode'
+export {
+  CatalogueInstanceMetadataSchema,
+  parseCatalogueInstanceMetadata,
+} from './catalogueInstance'
 export { asPlainObject } from './parseHelpers'
 export { NodeTreeSchema } from './treeSchema'
 export { PageNodeSchema, parsePageNode } from './pageNode'
@@ -21,6 +25,14 @@ export {
   parsePageNodeTree,
 } from './operationSchema'
 export { PageSchema } from './page'
+export {
+  PageSeoSchema,
+  PageRobotsSchema,
+  PageLanguageAlternateSchema,
+  PageOpenGraphSchema,
+  PageTwitterSchema,
+  parsePageSeo,
+} from './pageSeo'
 export {
   CSSDeclarationPriorityBagSchema,
   StyleRuleSchema,
@@ -38,6 +50,13 @@ export type { PageTemplateConfig, TemplateTarget } from './pageTemplate'
 export type { PageNode } from './pageNode'
 export type { TreeOperation, TreeMutateResult } from './operationSchema'
 export type { Page } from './page'
+export type {
+  PageSeo,
+  PageRobots,
+  PageLanguageAlternate,
+  PageOpenGraph,
+  PageTwitter,
+} from './pageSeo'
 export type { CSSPropertyBag } from './cssPropertyBag'
 export type {
   CSSDeclarationPriorityBag,
@@ -46,7 +65,11 @@ export type {
   StyleRuleKind,
 } from './styleRule'
 export type { Condition, ConditionDef } from './condition'
-export type { SiteSettings } from './siteSettings'
+export type {
+  SiteAccessibilityPolicy,
+  SiteSearchSettings,
+  SiteSettings,
+} from './siteSettings'
 export type { SiteShell, SiteDocument } from './siteDocument'
 export type {
   DecorativeSiteExplorerSectionId,
@@ -60,7 +83,12 @@ export type {
 
 // Defaults
 export { DEFAULT_BREAKPOINTS, breakpointMediaQuery, defaultBreakpointMediaQuery } from './breakpoint'
-export { DEFAULT_SITE_SETTINGS } from './siteSettings'
+export {
+  DEFAULT_SITE_SETTINGS,
+  DEFAULT_SITE_SEARCH_SETTINGS,
+  SiteAccessibilityPolicySchema,
+  SiteSearchSettingsSchema,
+} from './siteSettings'
 
 // Condition helpers
 export { conditionId, conditionLabel, makeConditionDef, parseConditions } from './condition'
@@ -68,6 +96,7 @@ export { conditionId, conditionLabel, makeConditionDef, parseConditions } from '
 // Tolerant parsers — boundary helpers for persisted data.
 export { parseBreakpoint } from './breakpoint'
 export { parsePage } from './page'
+export { parseSiteSettings } from './siteSettings'
 export { parseSiteDocument } from './siteDocument'
 export {
   SITE_EXPLORER_SECTION_IDS,
@@ -113,6 +142,7 @@ export {
 
 
 export type { BaseNode } from './baseNode'
+export type { CatalogueInstanceMetadata } from './catalogueInstance'
 
 export type { NodeTree } from './treeSchema'
 

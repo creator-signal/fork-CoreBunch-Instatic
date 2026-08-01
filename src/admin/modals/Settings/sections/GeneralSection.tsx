@@ -1,10 +1,9 @@
 /**
  * GeneralSection — site-level metadata.
  *
- * Fields: site name, meta title, meta description, language, favicon (picked
- * from the CMS media library — the same modal Content / Site property
- * controls use). All changes are persisted immediately to the Zustand store
- * and ultimately to the CMS draft via the autosave pipeline.
+ * Fields: site name, meta title, meta description, language, public origin,
+ * and favicon. All changes are persisted immediately to the Zustand store and
+ * ultimately to the CMS draft via the autosave pipeline.
  *
  * Inputs use onBlur + onKeyDown(Enter) so intermediate keystrokes don't
  * push undo-history entries on every keystroke (performance pattern). The
@@ -117,6 +116,59 @@ export function GeneralSection() {
           placeholder="en"
           onBlur={(e) =>
             updateSiteSettings({ language: e.target.value.trim() || 'en' })
+          }
+          onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+        />
+      </div>
+
+      {/* ── Public origin ─────────────────────────────────────────────────── */}
+      <div className={s.genFieldRow}>
+        <label htmlFor="gen-public-origin" className={s.label}>
+          Public Origin
+        </label>
+        <Input
+          id="gen-public-origin"
+          type="url"
+          defaultValue={settings.publicOrigin ?? ''}
+          placeholder="https://www.example.com"
+          onBlur={(e) =>
+            updateSiteSettings({ publicOrigin: e.target.value.trim() || undefined })
+          }
+          onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+        />
+        <p className={s.fieldHint}>
+          Used to build absolute canonical, social image and language-alternate URLs.
+        </p>
+      </div>
+
+      {/* ── Social preview defaults ───────────────────────────────────────── */}
+      <div className={s.genFieldRow}>
+        <label htmlFor="gen-social-image" className={s.label}>
+          Social Preview Image
+        </label>
+        <Input
+          id="gen-social-image"
+          type="text"
+          defaultValue={settings.socialImageUrl ?? ''}
+          placeholder="/media/social-card.jpg"
+          onBlur={(e) =>
+            updateSiteSettings({ socialImageUrl: e.target.value.trim() || undefined })
+          }
+          onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+        />
+      </div>
+
+      <div className={s.genFieldRow}>
+        <label htmlFor="gen-social-image-alt" className={s.label}>
+          Social Image Alternative
+        </label>
+        <Input
+          id="gen-social-image-alt"
+          type="text"
+          defaultValue={settings.socialImageAlt ?? ''}
+          placeholder="Describe the image for people who cannot see it"
+          onBlur={(e) =>
+            updateSiteSettings({ socialImageAlt: e.target.value.trim() || undefined })
           }
           onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
         />

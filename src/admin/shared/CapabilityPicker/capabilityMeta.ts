@@ -25,6 +25,10 @@ export const CAPABILITY_META: Record<CoreCapability, CapabilityMeta> = {
     label: 'View site',
     description: 'Open the Site workspace; view pages, components, and classes.',
   },
+  'site.components.edit': {
+    label: 'Edit approved components',
+    description: 'Insert, move, remove, and configure governed Component Library instances without access to raw HTML or CSS.',
+  },
   'site.structure.edit': {
     label: 'Edit site structure',
     description: 'Add, remove, move, and rename nodes; manage pages, components, and classes.',

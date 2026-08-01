@@ -20,6 +20,7 @@
 
 import { normalizeImportedText } from './text'
 import { normalizeIdentifierValue } from '@core/utils/identifier'
+import { normalizeCollectionPaginationMode } from '@core/collections'
 
 export interface ImportRule {
   /** CSS selector tested via `el.matches()`. */
@@ -120,7 +121,10 @@ function mapLoopProps(el: Element): Record<string, unknown> {
     direction: normalizedAttr(el, 'data-direction') === 'asc' ? 'asc' : 'desc',
     limit: integerAttr(el, 'data-limit', 10, 1),
     offset: integerAttr(el, 'data-offset', 0, 0),
-    pagination: normalizedAttr(el, 'data-pagination') === 'infinite' ? 'infinite' : 'none',
+    query: attr(el, 'data-query'),
+    pagination: normalizeCollectionPaginationMode(
+      normalizedAttr(el, 'data-pagination'),
+    ),
     pageSize: integerAttr(el, 'data-page-size', 10, 1),
     ...(customTag ? { tag: 'custom', customTag } : tag ? { tag } : {}),
   }

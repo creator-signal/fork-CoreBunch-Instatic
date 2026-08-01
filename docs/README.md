@@ -23,6 +23,7 @@ docs/
 │   ├── plugin-system.md            ← plugin SDK, sandbox, lifecycle, permissions
 │   ├── publisher.md                ← page tree → static HTML/CSS pipeline
 │   ├── visual-components.md        ← VCs, slots, params, instantiation
+│   ├── component-library.md         ← governed catalogue metadata + registry
 │   ├── content-storage.md          ← data_tables + data_rows (the universal store)
 │   ├── content-workspace.md        ← Content workspace: collections, entries, body editor
 │   ├── auth-and-access.md          ← sessions, MFA, capabilities, roles
@@ -35,6 +36,8 @@ docs/
 │   ├── templates.md                ← entry templates + dynamic bindings
 │   ├── loops.md                    ← base.loop + loop sources
 │   ├── cms-native-forms.md         ← visual form primitives + data_rows submissions
+│   ├── file-attachments.md         ← private form upload, scan, claim + retention
+│   ├── form-drafts.md              ← persistent Save Draft + wizard recovery
 │   ├── media.md                    ← Media workspace + storage adapters
 │   ├── audit-log.md                ← audit_events catalog
 │   ├── site-transfer.md            ← export / import CMS bundles
@@ -139,6 +142,8 @@ Three categories, three voices:
 | [features/plugin-system.md](features/plugin-system.md)           | The plugin system end-to-end: package shape, lifecycle, sandbox, SDK, permissions, CLI |
 | [features/publisher.md](features/publisher.md)                   | The page-tree-to-HTML/CSS renderer + server-side publishing wrappers |
 | [features/visual-components.md](features/visual-components.md)   | VCs, slots, params, instantiation, recursion guard                   |
+| [features/component-library.md](features/component-library.md)   | Governed catalogue metadata, registry, search and dependency health |
+| [features/plain-text-component.md](features/plain-text-component.md) | Plain Text governed properties, sample pages and isolated acceptance |
 | [features/content-storage.md](features/content-storage.md)       | `data_tables` + `data_rows` — the universal content store           |
 | [features/content-workspace.md](features/content-workspace.md)   | Content workspace UI: collections, entries, body editor, settings panel |
 | [features/data-workspace.md](features/data-workspace.md)         | Data workspace UI: DataInspector, field management, DataGrid        |
@@ -152,6 +157,8 @@ Three categories, three voices:
 | [features/templates.md](features/templates.md)                   | Entry templates + dynamic bindings + token interpolation             |
 | [features/loops.md](features/loops.md)                           | `base.loop` + loop entity sources                                    |
 | [features/cms-native-forms.md](features/cms-native-forms.md)     | Visual form primitives and secure public submissions                 |
+| [features/file-attachments.md](features/file-attachments.md)     | Private form upload, malware scanning, claims and retention           |
+| [features/form-drafts.md](features/form-drafts.md)               | Save Draft, wizard recovery, conflicts, expiry and privacy             |
 | [features/media.md](features/media.md)                           | Media workspace, upload pipeline, storage adapters                  |
 | [features/audit-log.md](features/audit-log.md)                   | Audit event catalog + recording new actions                         |
 | [features/site-transfer.md](features/site-transfer.md)           | Export / import CMS bundle (JSON round-trip between instances)      |

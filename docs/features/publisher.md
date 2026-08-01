@@ -113,7 +113,7 @@ The walker is recursive. Each node's HTML output is a pure function of its node 
 
 - **`RenderConfig` (read-only inputs).** `page`, `site`, `registry`, `breakpointId`, `templateContext`, `dynamicNodeIds`, `publishVersion`, `annotateNodeIds`, plus the pre-fetched I/O (`loopData`, `mediaAssets`). Every field is `readonly`; collections are `ReadonlyMap` / `ReadonlySet`. A renderer that needs a different page (VC ref) or a different template frame (loop iteration) **derives a new child config** via `{ ...config, page }` — it never mutates the one it received. A function that takes only a `RenderConfig` is genuinely a pure string transform.
 
-- **`RenderAccumulators` (mutable outputs).** `cssMap` (deduped module CSS), `jsMap` (deduped render-emitted module JS), `cspSources` (per-page module CSP requirements), `infiniteLoopIds` (loops that requested the infinite runtime), and `holeNodeIds` (nodes that actually emitted a `<instatic-hole>`). `publishPage` owns this bag, initialises all five up-front (no lazy `undefined`), and threads the **same instances** by reference down the whole walk; renderers append to them. After the walk, head/body builders read the relevant maps and sets.
+- **`RenderAccumulators` (mutable outputs).** `cssMap` (deduped module CSS), `jsMap` (deduped render-emitted module JS), `cspSources` (per-page module requirements), `infiniteLoopIds` (legacy internal name for loops that requested the load-more runtime), and `holeNodeIds` (nodes that actually emitted a `<instatic-hole>`). `publishPage` owns this bag, initialises all five up-front (no lazy `undefined`), and threads the **same instances** by reference down the whole walk; renderers append to them. After the walk, head/body builders read the relevant maps and sets.
 
 This split is why the loop and VC renderers are honest about their effects: `renderLoop` extends the entry stack by constructing a child config (no shared-array push/pop), and `renderVisualComponentRef` shares `cssMap` by passing the same `acc` through — both visible at the call site instead of smuggled through a cloned god-object.
 
@@ -165,7 +165,11 @@ When the walker hits a `base.loop` node, it calls `renderLoop`:
 1. Resolves the loop's entity source (a built-in source like `data.rows`, `site.pages`, `site.media`, or a plugin-registered source).
 2. Pulls items from the loop fetch result (pre-warmed by `loopPrefetch.ts` during publish).
 3. Walks the loop's child variants in round-robin. For each item it derives a fresh child `RenderConfig` whose `templateContext.entryStack` is a **new array** `[...baseStack, item]` — there is no in-place push/pop on a shared array, so child nodes' `dynamicBindings` resolve `currentEntry.<field>` against that item while a VC ref (or nested loop) in the body sees an immutable per-iteration snapshot. The outer config is never mutated, so the loop's siblings keep seeing the outer template entry.
-4. Concatenates the rendered variant HTML and returns it. If `pagination === 'infinite'`, the loop id is added to `acc.infiniteLoopIds` so `publishPage` knows to inject the loop runtime.
+4. Concatenates the rendered variant HTML and returns it. Numbered,
+   previous/next and cursor modes append accessible server-rendered navigation.
+   If pagination normalizes to `load-more`, the loop id is added to the
+   legacy-named `acc.infiniteLoopIds` set so `publishPage` knows to inject the
+   loop runtime.
 
 See [docs/features/loops.md](loops.md) for sources, filters, and registration.
 

@@ -352,5 +352,11 @@ export async function runLoopFetchInWorker(
   return {
     items: result.value.items as LoopItem[],
     totalItems: result.value.totalItems,
+    ...(result.value.nextCursor
+      ? { nextCursor: result.value.nextCursor }
+      : {}),
+    ...(result.value.previousCursor
+      ? { previousCursor: result.value.previousCursor }
+      : {}),
   }
 }

@@ -57,9 +57,12 @@ export const BaseNodeSchema = Type.Object({
   hidden:              Type.Optional(Type.Boolean()),
   classIds:            withFallback(Type.Array(Type.String()), []),
   inlineStyles:        Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+  catalogueInstance:   Type.Optional(CatalogueInstanceMetadataSchema),
   // ... propBindings, etc.
 })
 ```
+
+`catalogueInstance` is optional authoring identity for the Component Library projection. Its schema lives in `src/core/page-tree/catalogueInstance.ts` and records a namespaced entry id and version plus optional preset, pattern authorable-node ids, capability id, and provider-adapter id. It does not store rendered HTML, duplicate a subtree, or replace `props.componentId` on `base.visual-component-ref`. Invalid optional metadata is dropped by `parseCatalogueInstanceMetadata(...)`; the backing node remains available through the HTML projection.
 
 #### The `parentId` invariant
 

@@ -12,6 +12,10 @@
 
 import { nanoid } from 'nanoid'
 import { registry } from '@core/module-engine'
+import {
+  analyseComponentLibraryPrimitiveConversion,
+  componentLibraryRegistry,
+} from '@core/component-library'
 
 import {
   cloneScopedClassesForNodeMap,
@@ -30,6 +34,7 @@ import {
   wrapNode,
   wrapNodes,
   reindexNodeParents,
+  selectVisualComponentById,
 } from '@core/page-tree'
 import type { NodeTree, PageNode, SiteDocument } from '@core/page-tree'
 import { subtreeHasOutlet, treeHasOutlet } from '@core/templates'
@@ -38,6 +43,11 @@ import { pushToast } from '@ui/components/Toast'
 import { depthInTree, resolveActiveTreeTarget } from './helpers'
 import { pruneCanvasSelectionDraft } from '../selectionSlice'
 import { indexStyleRulesByName, linkImportedClassNames, mergeImportedStyleRules } from './importLinking'
+import {
+  backingComponentLibraryImplementation,
+  initialComponentLibraryVariantValues,
+  safeComponentLibraryOverrides,
+} from './componentLibraryNodeOptions'
 import type { SiteSlice, SiteSliceHelpers } from './types'
 
 type NodeActions = Pick<
@@ -45,6 +55,9 @@ type NodeActions = Pick<
   | 'insertNode'
   | 'insertComponentRef'
   | 'insertImportedNodes'
+  | 'updateComponentLibraryField'
+  | 'applyComponentLibraryOption'
+  | 'convertFreeformPrimitiveToComponent'
   | 'deleteNode'
   | 'deleteNodes'
   | 'updateNodeProps'
@@ -151,14 +164,21 @@ function coalesceKeyForPatch(
   return { coalesceKey: `${scope}:${nodeId}:${keys[0]}` }
 }
 
+function componentLibraryDefinitionForInstance(entryId: string, version: string) {
+  return componentLibraryRegistry.getVersion(entryId, version)
+}
+
 export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
   const { get, set, mutateActiveTree, mutateActiveTreeAndSite } = helpers
 
   const actions: NodeActions = {
-    insertNode: (moduleId, defaults, parentId, index) => {
+    insertNode: (moduleId, defaults, parentId, index, options) => {
       const mod = registry.get(moduleId)
       const resolvedDefaults = { ...(mod?.defaults ?? {}), ...defaults }
       const newNode = createNode(moduleId, resolvedDefaults)
+      if (options?.catalogueInstance) {
+        newNode.catalogueInstance = options.catalogueInstance
+      }
       let inserted = false
       let blockedByOutlet = false
       mutateActiveTree((tree) => {
@@ -251,7 +271,7 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
       return insertedRootIds
     },
 
-    insertComponentRef: (parentId, componentId, index) => {
+    insertComponentRef: (parentId, componentId, index, options) => {
       if (!componentId) return null
 
       const { activeDocument, site } = get()
@@ -266,7 +286,9 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
 
       // Resolve the referenced VC up-front (read-only) so its slot-instance
       // children can be materialized in the SAME mutation as the ref insertion.
-      const vc = site?.visualComponents.find((v) => v.id === componentId)
+      const vc = site
+        ? selectVisualComponentById(site, componentId)
+        : undefined
 
       // Build the ref node with the module's registry defaults plus the
       // ref-specific props. `index` forwards to insertNode so callers using
@@ -275,8 +297,11 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
       const newNode = createNode('base.visual-component-ref', {
         ...(mod?.defaults ?? {}),
         componentId,
-        propOverrides: {},
+        propOverrides: initialComponentLibraryVariantValues(options?.catalogueInstance),
       })
+      if (options?.catalogueInstance) {
+        newNode.catalogueInstance = options.catalogueInstance
+      }
 
       // Insert the VC ref AND materialize its slot-instance children inside ONE
       // mutateActiveTree recipe, so both writes land in a single patch set →
@@ -297,6 +322,91 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
 
       return inserted ? newNode.id : null
     },
+
+    updateComponentLibraryField: (nodeId, fieldKey, value) =>
+      mutateActiveTree((tree) => {
+        const node = tree.nodes[nodeId]
+        const metadata = node?.catalogueInstance
+        if (!node || !metadata) return false
+        const entry = componentLibraryDefinitionForInstance(metadata.entryId, metadata.entryVersion)
+        if (!entry?.fields.some((field) => field.key === fieldKey)) return false
+        const implementation = backingComponentLibraryImplementation(
+          entry.implementation,
+        )
+        if (implementation.type === 'primitive') {
+          if (implementation.moduleId !== node.moduleId) return false
+          node.props[fieldKey] = value
+        } else if (implementation.type === 'visual-component') {
+          if (
+            node.moduleId !== 'base.visual-component-ref' ||
+            node.props.componentId !== implementation.componentId
+          ) {
+            return false
+          }
+          node.props.propOverrides = {
+            ...safeComponentLibraryOverrides(node.props.propOverrides),
+            [fieldKey]: value,
+          }
+        } else if (implementation.type === 'pattern') node.props[fieldKey] = value
+        else {
+          return false
+        }
+        return true
+      }),
+
+    applyComponentLibraryOption: (nodeId, kind, optionId) =>
+      mutateActiveTree((tree) => {
+        const node = tree.nodes[nodeId]
+        const metadata = node?.catalogueInstance
+        if (!node || !metadata) return false
+        const entry = componentLibraryDefinitionForInstance(metadata.entryId, metadata.entryVersion)
+        if (!entry) return false
+        const options = kind === 'preset' ? entry.presets : entry.variants
+        const option = options.find((candidate) => candidate.id === optionId)
+        if (!option) return false
+        const implementation = backingComponentLibraryImplementation(
+          entry.implementation,
+        )
+        if (implementation.type === 'primitive') {
+          if (implementation.moduleId !== node.moduleId) return false
+          Object.assign(node.props, option.values)
+        } else if (implementation.type === 'visual-component') {
+          if (
+            node.moduleId !== 'base.visual-component-ref' ||
+            node.props.componentId !== implementation.componentId
+          ) {
+            return false
+          }
+          node.props.propOverrides = {
+            ...safeComponentLibraryOverrides(node.props.propOverrides),
+            ...option.values,
+          }
+        } else if (implementation.type === 'pattern') {
+          Object.assign(node.props, option.values)
+        } else {
+          return false
+        }
+        if (kind === 'preset') metadata.presetId = optionId
+        else metadata.variantId = optionId
+        return true
+      }),
+
+    convertFreeformPrimitiveToComponent: (nodeId, entryId, presetId) =>
+      mutateActiveTree((tree) => {
+        const node = tree.nodes[nodeId]
+        const entry = componentLibraryRegistry.get(entryId)
+        const definition = node ? registry.get(node.moduleId) : undefined
+        if (!node || !entry || !definition) return false
+        const analysis = analyseComponentLibraryPrimitiveConversion(
+          node,
+          entry,
+          definition.defaults,
+          presetId,
+        )
+        if (!analysis.eligible) return false
+        node.catalogueInstance = analysis.candidate.metadata
+        return true
+      }),
 
     deleteNode: (nodeId) => {
       const deleted = mutateActiveTree((tree) => {

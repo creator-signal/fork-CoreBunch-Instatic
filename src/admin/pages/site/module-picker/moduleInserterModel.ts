@@ -1,6 +1,10 @@
 import type { AnyModuleDefinition } from '@core/module-engine'
 import type { SavedLayout } from '@core/layouts'
 import {
+  type ComponentLibraryDependencyState,
+  type ComponentLibraryEntry,
+} from '@core/component-library'
+import {
   DEFAULT_MODULE_INSERTER_PREFERENCE,
   type ModuleInserterItemRef,
 } from '@core/persistence/userPreferences'
@@ -11,12 +15,18 @@ import {
   wireFromTree,
   type WireNode,
 } from './moduleWireframes'
+import {
+  composeCatalogueComponentGroups,
+  getCatalogueComponentItems,
+  type CatalogueInserterItem,
+} from './component-library/catalogueInserterItems'
 
 export type ModuleInserterAccent = 'mint' | 'lilac' | 'sky' | 'peach' | 'rose'
 export type ModuleInserterSectionId =
   | 'modules'
   | 'layouts'
   | 'components'
+  | 'forms'
   | 'recent'
 type ModuleInserterItemKind = 'module' | 'savedLayout' | 'component'
 type ModuleInserterRecentRef = ModuleInserterItemRef
@@ -66,11 +76,16 @@ interface ModuleInserterSavedLayoutItem extends BaseInserterItem {
   pluginId: string | null
 }
 
-interface ModuleInserterComponentItem extends BaseInserterItem {
+interface ModuleInserterSavedComponentItem extends BaseInserterItem {
   kind: 'component'
+  source: 'saved'
   component: VisualComponent
   uses: number
 }
+
+type ModuleInserterComponentItem =
+  | ModuleInserterSavedComponentItem
+  | CatalogueInserterItem
 
 export type ModuleInserterItem =
   | ModuleInserterModuleItem
@@ -305,13 +320,14 @@ export function composeLayoutsSection(
   return { items, labelByKey }
 }
 
-function getComponentItems(
+function getSavedComponentItems(
   components: readonly VisualComponent[],
 ): ModuleInserterComponentItem[] {
   return components.map((component) => ({
     key: recentKey({ kind: 'component', id: component.id }),
     id: component.id,
     kind: 'component',
+    source: 'saved',
     name: component.name,
     description: 'Saved Visual Component',
     accent: 'mint',
@@ -320,6 +336,29 @@ function getComponentItems(
     wire: wireFromTree(component.tree),
     searchText: searchText([component.name, component.id, 'visual component']),
   }))
+}
+
+export function composeComponentSection(
+  items: readonly ModuleInserterComponentItem[],
+): {
+  items: ModuleInserterComponentItem[]
+  labelByKey: Map<string, string>
+} {
+  const saved = items.filter(
+    (item): item is ModuleInserterSavedComponentItem => item.source === 'saved',
+  )
+  const catalogue = items.filter(
+    (item): item is CatalogueInserterItem =>
+      item.source === 'catalogue',
+  )
+  const grouped = composeCatalogueComponentGroups(catalogue)
+  const ordered = [
+    ...saved,
+    ...grouped.items,
+  ]
+  const labelByKey = new Map(grouped.labelByKey)
+  if (saved[0]) labelByKey.set(saved[0].key, 'Site components')
+  return { items: ordered, labelByKey }
 }
 
 interface BuiltModuleInserterItems {
@@ -336,15 +375,29 @@ export function buildModuleInserterItems({
   context,
   savedLayouts,
   visualComponents,
+  componentLibraryEntries = [],
+  dependencyState,
+  canEditComponents = true,
 }: {
   modules: readonly AnyModuleDefinition[]
   context: ModuleInsertionContext
   savedLayouts: readonly SavedLayout[]
   visualComponents: readonly VisualComponent[]
+  componentLibraryEntries?: readonly ComponentLibraryEntry[]
+  dependencyState?: ComponentLibraryDependencyState
+  canEditComponents?: boolean
 }): BuiltModuleInserterItems {
   const moduleItems = getVisibleModuleItems(modules, context)
   const savedLayoutItems = getSavedLayoutItems(savedLayouts, context, visualComponents)
-  const componentItems = getComponentItems(visualComponents)
+  const componentItems = [
+    ...getSavedComponentItems(visualComponents),
+    ...getCatalogueComponentItems(
+      componentLibraryEntries,
+      visualComponents,
+      dependencyState,
+      canEditComponents,
+    ),
+  ]
   return {
     moduleItems,
     savedLayoutItems,
@@ -416,6 +469,9 @@ export function itemDescription(item: ModuleInserterItem): string {
     return item.blocks === 1 ? `1 block · ${item.description}` : `${item.blocks} blocks · ${item.description}`
   }
   if (item.kind === 'component') {
+    if (item.source === 'catalogue') {
+      return `${item.entry.category} · ${item.entry.implementation.type.replaceAll('-', ' ')}`
+    }
     const count = item.component.params.length
     return count === 1 ? '1 param · Saved component' : `${count} params · Saved component`
   }

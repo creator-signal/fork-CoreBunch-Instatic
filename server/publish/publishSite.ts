@@ -22,7 +22,12 @@ import type { PublishedPageRuntimeAssets } from '@core/site-runtime'
 import type { PublishedRuntimePackageImportmap, SiteCssBundle } from '@core/publisher'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import { registry } from '@core/module-engine'
+import {
+  assertComponentLibraryAccessibilityPublishable,
+  componentLibraryRegistry,
+} from '@core/component-library'
 import { isTemplatePage, resolveNotFoundTemplate } from '@core/templates'
+import { searchIndexService } from '@core/search'
 import type { DbClient } from '../db/client'
 import { nextDataRowVersionNumber } from '../repositories/data'
 import {
@@ -100,6 +105,15 @@ async function publishDraftSiteLocked(
   // paths under that same lock, so reading outside the transaction is stable.
   const site = await getDraftSiteDocument(db)
   if (!site) throw new Error('draft site not found')
+
+  assertComponentLibraryAccessibilityPublishable(
+    site,
+    componentLibraryRegistry,
+    {
+      blockingRuleIds:
+        site.settings.accessibility?.blockingRuleIds ?? [],
+    },
+  )
 
   const runtime = normalizeSiteRuntimeConfig(site.runtime)
   const dependencyCache = Object.keys(runtime.dependencyLock.packages).length > 0
@@ -301,6 +315,15 @@ async function publishDraftSiteLocked(
   // window where the freshly-swapped shells (stamped nextPublishVersion) are
   // live while the version counter still reads the old value.
   bumpPublishVersion()
+  try {
+    searchIndexService.reindex(publishedSite)
+  } catch (err) {
+    // Search is derived state just like Layer A artefacts. A failed refresh
+    // must not roll back a committed publication; the request path will retry
+    // against the exact published snapshot and otherwise fail closed.
+    searchIndexService.markStale(publishedSite.id)
+    console.error('[publish:site] search index refresh failed:', err)
+  }
 
   return { publishedPages }
 }

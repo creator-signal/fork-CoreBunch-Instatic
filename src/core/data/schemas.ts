@@ -80,6 +80,8 @@ export type DataTableKind = Static<typeof DataTableKindSchema>
 //   multiSelect                               → option ids (string[])
 //   media (single)                            → media id (string) | null
 //   media (multi)                             → media ids (string[])
+//   attachment (single)                       → private attachment id (string) | null
+//   attachment (multi)                        → private attachment ids (string[])
 //   relation (single)                         → row id (string) | null
 //   relation (multi)                          → row ids (string[])
 // ---------------------------------------------------------------------------
@@ -193,6 +195,17 @@ const MediaFieldSchema = Type.Object({
   allowMultiple: Type.Optional(Type.Boolean()),
 })
 
+const AttachmentFieldSchema = Type.Object({
+  type: Type.Literal('attachment'),
+  ...FieldCommonProps,
+  /**
+   * Private form attachments are resolved through the authenticated
+   * attachment download route. They are deliberately not media asset ids and
+   * never become public `/uploads/*` URLs.
+   */
+  allowMultiple: Type.Optional(Type.Boolean()),
+})
+
 const RelationFieldSchema = Type.Object({
   type: Type.Literal('relation'),
   ...FieldCommonProps,
@@ -238,6 +251,7 @@ export const DataFieldSchema = Type.Union([
   UrlFieldSchema,
   EmailFieldSchema,
   MediaFieldSchema,
+  AttachmentFieldSchema,
   RelationFieldSchema,
   PageTreeFieldSchema,
   FieldSchemaFieldSchema,
@@ -266,6 +280,7 @@ export const DATA_FIELD_TYPES = [
   'url',
   'email',
   'media',
+  'attachment',
   'relation',
   'pageTree',
   'fieldSchema',
@@ -559,7 +574,7 @@ const DataMetaFieldSchema = Type.Object({
     Type.Literal('date'), Type.Literal('dateTime'),
     Type.Literal('select'), Type.Literal('multiSelect'),
     Type.Literal('url'), Type.Literal('email'),
-    Type.Literal('media'), Type.Literal('relation'),
+    Type.Literal('media'), Type.Literal('attachment'), Type.Literal('relation'),
   ]),
   mediaKind: Type.Optional(Type.Union([
     Type.Literal('image'), Type.Literal('video'), Type.Literal('any'),

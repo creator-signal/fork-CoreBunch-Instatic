@@ -329,9 +329,27 @@
   font-family: var(--font-mono);
 }
 
+.searchSettingsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-l);
+  margin-top: var(--space-l);
+}
+
+.searchSettingField {
+  min-width: 0;
+}
+
 /* ── GeneralSection ───────────────────────────────────────────────────────── */
 .genFieldRow {
   margin-bottom: var(--space-2xl);
+}
+
+.fieldHint {
+  margin: var(--space-xs) 0 0;
+  color: var(--text-subtle);
+  font-size: var(--text-xs);
+  line-height: 1.45;
 }
 
 /* ── GeneralSection → Favicon picker ────────────────────────────────────── */
@@ -427,6 +445,10 @@
 }
 
 @media (max-width: 640px) {
+  .searchSettingsGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .dialogWrapper {
     padding: var(--space-l);
     align-items: stretch;

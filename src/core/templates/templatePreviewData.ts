@@ -81,6 +81,8 @@ function previewValueForField(field: DataField): unknown {
     case 'email': return 'hello@example.com'
     // No synthetic media URL — modules that render a media field must handle null gracefully.
     case 'media': return null
+    // Private attachments never appear in public/template preview data.
+    case 'attachment': return field.allowMultiple ? [] : null
     case 'relation': return null
     // Structural types: pageTree and fieldSchema hold whole documents, not scalar values.
     // Preview data generation has no meaningful value to produce for them.

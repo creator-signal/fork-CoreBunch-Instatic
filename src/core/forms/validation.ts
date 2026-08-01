@@ -135,6 +135,35 @@ function coerceFieldValue(field: DataField, value: unknown): CoerceResult {
           : { ok: true, value: [String(value)] }
       }
       return { ok: true, value: String(value) }
+    case 'attachment':
+      if (field.allowMultiple) {
+        const values = Array.isArray(value) ? value : [value]
+        if (values.some((entry) => typeof entry !== 'string' || entry.length === 0)) {
+          return {
+            ok: false,
+            code: 'invalid_attachment',
+            message: 'Choose valid scanned attachments.',
+          }
+        }
+        return { ok: true, value: values }
+      }
+      if (Array.isArray(value)) {
+        if (value.length !== 1 || typeof value[0] !== 'string') {
+          return {
+            ok: false,
+            code: 'too_many_attachments',
+            message: 'Choose one attachment.',
+          }
+        }
+        return { ok: true, value: value[0] }
+      }
+      return typeof value === 'string'
+        ? { ok: true, value }
+        : {
+            ok: false,
+            code: 'invalid_attachment',
+            message: 'Choose a valid scanned attachment.',
+          }
     case 'relation':
       if (field.allowMultiple) {
         return Array.isArray(value)
@@ -162,7 +191,7 @@ function validateCoercedValue(
   maxStringLength: number,
 ): FormValidationError | null {
   const required = control.required ?? Boolean(field.required)
-  if (required && (value === null || value === '')) {
+  if (required && (value === null || value === '' || (Array.isArray(value) && value.length === 0))) {
     return { fieldId: field.id, code: 'required', message: 'This field is required.' }
   }
   if (value === null) return null
@@ -228,6 +257,24 @@ function validateCoercedValue(
     const allowed = new Set(field.options.map((option) => option.id))
     if (value.some((item) => !allowed.has(String(item)))) {
       return { fieldId: field.id, code: 'invalid_option', message: 'Choose one of the allowed options.' }
+    }
+  }
+
+  if (field.type === 'attachment') {
+    const values = Array.isArray(value) ? value : [value]
+    if (!field.allowMultiple && values.length > 1) {
+      return {
+        fieldId: field.id,
+        code: 'too_many_attachments',
+        message: 'Choose one attachment.',
+      }
+    }
+    if (values.some((entry) => typeof entry !== 'string' || entry.length === 0)) {
+      return {
+        fieldId: field.id,
+        code: 'invalid_attachment',
+        message: 'Choose valid scanned attachments.',
+      }
     }
   }
 

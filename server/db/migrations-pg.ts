@@ -61,8 +61,8 @@ export const pgMigrations: Migration[] = [
       -- UI are preserved.
       insert into roles (id, slug, name, description, is_system, capabilities_json)
       values
-        ('owner', 'owner', 'Owner', 'Permanent installation owner with full system access.', true, '["dashboard.read","site.read","site.structure.edit","site.content.edit","site.style.edit","pages.edit","pages.publish","content.create","content.edit.own","content.edit.any","content.publish.own","content.publish.any","content.manage","media.read","media.write","media.replace","media.delete","runtime.dependencies","storage.elect","storage.migrate","plugins.read","plugins.configure","plugins.install","plugins.lifecycle","users.manage","roles.manage","audit.read","data.custom.tables.read","data.custom.tables.manage","data.system.tables.read","data.system.tables.manage","data.rows.move","data.export","data.import","ai.chat","ai.tools.write","ai.providers.manage","ai.audit.read"]'::jsonb),
-        ('admin', 'admin', 'Admin', 'Full admin access (cannot manage roles).', true, '["dashboard.read","site.read","site.structure.edit","site.content.edit","site.style.edit","pages.edit","pages.publish","content.create","content.edit.own","content.edit.any","content.publish.own","content.publish.any","content.manage","media.read","media.write","media.replace","media.delete","runtime.dependencies","storage.elect","storage.migrate","plugins.read","plugins.configure","plugins.install","plugins.lifecycle","users.manage","audit.read","data.custom.tables.read","data.custom.tables.manage","data.system.tables.read","data.system.tables.manage","data.rows.move","data.export","data.import","ai.chat","ai.tools.write","ai.providers.manage","ai.audit.read"]'::jsonb),
+        ('owner', 'owner', 'Owner', 'Permanent installation owner with full system access.', true, '["dashboard.read","site.read","site.components.edit","site.structure.edit","site.content.edit","site.style.edit","pages.edit","pages.publish","content.create","content.edit.own","content.edit.any","content.publish.own","content.publish.any","content.manage","media.read","media.write","media.replace","media.delete","runtime.dependencies","storage.elect","storage.migrate","plugins.read","plugins.configure","plugins.install","plugins.lifecycle","users.manage","roles.manage","audit.read","data.custom.tables.read","data.custom.tables.manage","data.system.tables.read","data.system.tables.manage","data.rows.move","data.export","data.import","ai.chat","ai.tools.write","ai.providers.manage","ai.audit.read"]'::jsonb),
+        ('admin', 'admin', 'Admin', 'Full admin access (cannot manage roles).', true, '["dashboard.read","site.read","site.components.edit","site.structure.edit","site.content.edit","site.style.edit","pages.edit","pages.publish","content.create","content.edit.own","content.edit.any","content.publish.own","content.publish.any","content.manage","media.read","media.write","media.replace","media.delete","runtime.dependencies","storage.elect","storage.migrate","plugins.read","plugins.configure","plugins.install","plugins.lifecycle","users.manage","audit.read","data.custom.tables.read","data.custom.tables.manage","data.system.tables.read","data.system.tables.manage","data.rows.move","data.export","data.import","ai.chat","ai.tools.write","ai.providers.manage","ai.audit.read"]'::jsonb),
         ('client', 'client', 'Client', 'Can edit page copy (text, images, links) but not structure or styles.', true, '["dashboard.read","site.read","site.content.edit","media.read","data.custom.tables.read"]'::jsonb),
         ('member', 'member', 'Member', 'Public-facing member account — no admin access by default.', true, '[]'::jsonb)
       on conflict (id) do update
@@ -1135,6 +1135,87 @@ export const pgMigrations: Migration[] = [
         where oidc_issuer is not null
           and oidc_subject is not null
           and deleted_at is null;
+    `,
+  },
+  {
+    // Private form attachments. Bytes live in a non-public storage adapter;
+    // this table owns quarantine/scan/claim/retention state and the scoped
+    // bearer hash used by public form submissions.
+    id: '023_form_attachments',
+    sql: `
+      create table if not exists form_attachments (
+        id text primary key,
+        page_id text not null,
+        form_id text not null,
+        field_id text not null,
+        original_name text not null,
+        extension text not null,
+        mime_type text not null,
+        size_bytes bigint not null,
+        sha256 text not null,
+        status text not null,
+        scan_status text not null,
+        scan_message text,
+        storage_adapter_id text not null,
+        storage_path text,
+        reference_token_hash text not null unique,
+        data_row_id text references data_rows(id) on delete set null,
+        created_at timestamptz not null default current_timestamp,
+        scanned_at timestamptz,
+        expires_at timestamptz not null,
+        claimed_at timestamptz,
+        retention_until timestamptz,
+        deleted_at timestamptz,
+        constraint form_attachments_status_check
+          check (status in ('quarantined', 'active', 'rejected', 'claimed', 'deleted')),
+        constraint form_attachments_scan_status_check
+          check (scan_status in ('pending', 'clean', 'rejected', 'unavailable', 'error')),
+        constraint form_attachments_size_check check (size_bytes > 0)
+      );
+
+      create index if not exists form_attachments_scope_idx
+        on form_attachments (page_id, form_id, field_id, status);
+      create index if not exists form_attachments_expiry_idx
+        on form_attachments (status, expires_at);
+      create index if not exists form_attachments_retention_idx
+        on form_attachments (status, retention_until);
+      create index if not exists form_attachments_data_row_idx
+        on form_attachments (data_row_id);
+    `,
+  },
+  {
+    // Recoverable public form drafts. Anonymous drafts use only a hashed,
+    // scoped bearer token; authenticated drafts are owned by the CMS user.
+    id: '024_form_drafts',
+    sql: `
+      create table if not exists form_drafts (
+        id text primary key,
+        page_id text not null,
+        form_id text not null,
+        target_table_id text not null,
+        owner_user_id text references users(id) on delete cascade,
+        recovery_token_hash text unique,
+        values_json text not null,
+        wizard_state_json text not null,
+        schema_json text not null,
+        schema_hash text not null,
+        schema_version integer not null,
+        revision integer not null default 1,
+        created_at timestamptz not null default current_timestamp,
+        updated_at timestamptz not null default current_timestamp,
+        expires_at timestamptz not null,
+        deleted_at timestamptz,
+        constraint form_drafts_identity_check check (
+          (owner_user_id is not null and recovery_token_hash is null)
+          or (owner_user_id is null and recovery_token_hash is not null)
+        ),
+        constraint form_drafts_revision_check check (revision > 0)
+      );
+
+      create index if not exists form_drafts_owner_scope_idx
+        on form_drafts (owner_user_id, page_id, form_id, updated_at desc);
+      create index if not exists form_drafts_expiry_idx
+        on form_drafts (expires_at) where deleted_at is null;
     `,
   },
 ]

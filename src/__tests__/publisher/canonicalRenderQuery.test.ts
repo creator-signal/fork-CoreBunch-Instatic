@@ -22,6 +22,12 @@ describe('canonicalRenderQuery', () => {
     expect(q('loop_abc_page=2')).toBe('?loop_abc_page=2')
   })
 
+  test('keeps opaque loop cursor params', () => {
+    expect(canonicalRenderQuery(new URLSearchParams(
+      'q=cards&loop_results_cursor=after%3A42',
+    ))).toBe('?loop_results_cursor=after%3A42')
+  })
+
   test('strips junk but keeps loop params', () => {
     expect(q('utm=foo&loop_abc_page=3&x=9')).toBe('?loop_abc_page=3')
   })

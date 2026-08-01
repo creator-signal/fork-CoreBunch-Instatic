@@ -14,6 +14,7 @@ import { ImageSolidIcon } from 'pixel-art-icons/icons/image-solid'
 import { LinkIcon } from 'pixel-art-icons/icons/link'
 import { LayoutSolidIcon } from 'pixel-art-icons/icons/layout-solid'
 import { BracesIcon } from 'pixel-art-icons/icons/braces'
+import { FileTextSolidIcon } from 'pixel-art-icons/icons/file-text-solid'
 
 const FIELD_ICONS: Record<DataFieldType, IconComponent> = {
   text: TextStartTIcon,
@@ -28,6 +29,7 @@ const FIELD_ICONS: Record<DataFieldType, IconComponent> = {
   select: ListBoxSolidIcon,
   multiSelect: BulletlistSolidIcon,
   media: ImageSolidIcon,
+  attachment: FileTextSolidIcon,
   relation: LinkIcon,
   // Structural field types: visual page-node tree and component parameter schema.
   pageTree: LayoutSolidIcon,

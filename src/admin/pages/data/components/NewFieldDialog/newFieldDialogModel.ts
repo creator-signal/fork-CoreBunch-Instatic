@@ -19,6 +19,7 @@ export const FIELD_TYPE_OPTIONS: ReadonlyArray<{ value: DataFieldType; label: st
   { value: 'url', label: 'URL' },
   { value: 'email', label: 'Email' },
   { value: 'media', label: 'Media' },
+  { value: 'attachment', label: 'Attachment' },
   { value: 'relation', label: 'Relation' },
 ]
 

@@ -125,6 +125,7 @@ export async function handleRowPreview(
     loopData,
     mediaAssets,
     loopEndpointBaseUrl: LOOP_ENDPOINT_BASE_URL,
+    robotsPolicy: 'noindex',
   })
   const moduleJsMap = buildPublishedSiteModuleJsMap(snapshot.site, registry)
 

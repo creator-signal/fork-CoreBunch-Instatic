@@ -17,3 +17,10 @@ export type {
   VCParamType,
   VisualComponent,
 } from '../visualComponents/schemas'
+
+export {
+  builtInVisualComponentRegistry,
+  resolvableVisualComponentIds,
+  resolvableVisualComponents,
+  resolveVisualComponent,
+} from './registry'

@@ -32,6 +32,10 @@
 import { assertValidNodeTree, parseSiteDocument, parsePage, removeNodeSubtrees, type SiteShell } from '@core/page-tree'
 import type { SiteDocument, Page } from '@core/page-tree'
 import type { VisualComponent } from '@core/visualComponents'
+import {
+  resolvableVisualComponentIds,
+  resolvableVisualComponents,
+} from '@core/visual-components-schema'
 import { isSafePath, normalizePath } from '@core/files/pathValidation'
 import {
   parseVisualComponent,
@@ -161,8 +165,13 @@ export function validatePages(
   }
   validatePageSlugList(pages)
   pages = validatePageNodeTreesList(pages, tolerant)
-  syncVCSlotInstancesInTrees(pages.map((p) => p.nodes as Record<string, BaseNode>), visualComponents)
-  const knownVcIds = storedVcIds ?? new Set(visualComponents.map((vc) => vc.id))
+  syncVCSlotInstancesInTrees(
+    pages.map((p) => p.nodes as Record<string, BaseNode>),
+    resolvableVisualComponents(visualComponents),
+  )
+  const knownVcIds = storedVcIds
+    ? new Set([...storedVcIds, ...resolvableVisualComponentIds()])
+    : resolvableVisualComponentIds(visualComponents)
   stripDanglingVCRefsInPages(pages, knownVcIds)
   sanitizePageNodeRichtextProps(pages)
   return pages
@@ -210,8 +219,11 @@ export function validatePagesForPartialSave(
     takenSlugs.set(slug, id)
   }
   pages = validatePageNodeTreesList(pages, false)
-  syncVCSlotInstancesInTrees(pages.map((p) => p.nodes as Record<string, BaseNode>), visualComponents)
-  stripDanglingVCRefsInPages(pages, new Set(visualComponents.map((vc) => vc.id)))
+  syncVCSlotInstancesInTrees(
+    pages.map((p) => p.nodes as Record<string, BaseNode>),
+    resolvableVisualComponents(visualComponents),
+  )
+  stripDanglingVCRefsInPages(pages, resolvableVisualComponentIds(visualComponents))
   sanitizePageNodeRichtextProps(pages)
   return pages
 }
@@ -325,7 +337,7 @@ export function validateVisualComponents(rawVCs: unknown[]): VisualComponent[] {
  * directly by `validatePages` and `validateVisualComponents`.
  */
 export function stripDanglingVCRefs(site: SiteDocument): void {
-  const knownVcIds = new Set(site.visualComponents.map((vc) => vc.id))
+  const knownVcIds = resolvableVisualComponentIds(site.visualComponents)
   stripDanglingRefsFromNodeMaps(
     site.pages.map((p) => p.nodes as Record<string, BaseNode>),
     knownVcIds,
@@ -343,7 +355,7 @@ function stripDanglingVCRefsInPages(pages: Page[], knownVcIds: ReadonlySet<strin
 
 /** Strip dangling VC refs from VC tree node maps only. */
 function stripDanglingVCRefsInVCs(vcs: VisualComponent[]): void {
-  const knownVcIds = new Set(vcs.map((vc) => vc.id))
+  const knownVcIds = resolvableVisualComponentIds(vcs)
   stripDanglingRefsFromNodeMaps(
     vcs.map((vc) => vc.tree.nodes as Record<string, BaseNode>),
     knownVcIds,

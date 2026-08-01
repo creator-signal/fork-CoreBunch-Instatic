@@ -28,7 +28,7 @@ const page: Page = {
       honeypotName: 'company',
       minSubmitSeconds: 2,
     }, ['field', 'submit', 'message']),
-    field: node('field', 'base.container', {}, ['label', 'input']),
+    field: node('field', 'base.container', {}, ['label', 'input', 'help', 'error']),
     label: node('label', 'base.label', { text: 'Email', targetMode: 'auto', targetId: '' }),
     input: node('input', 'base.input', {
       fieldId: 'email',
@@ -37,6 +37,18 @@ const page: Page = {
       inputType: 'email',
       required: true,
       maxLength: 320,
+    }),
+    help: node('help', 'base.form-message', {
+      formId: '',
+      fieldId: 'email',
+      kind: 'help',
+      text: 'Use your work address.',
+    }),
+    error: node('error', 'base.form-message', {
+      formId: '',
+      fieldId: 'email',
+      kind: 'error',
+      text: '',
     }),
     submit: node('submit', 'base.submit', { label: 'Subscribe', formId: '' }),
     message: node('message', 'base.form-message', { formId: '', kind: 'success', text: 'Thanks' }),
@@ -80,6 +92,13 @@ describe('derivePageFormSnapshots', () => {
       { nodeId: 'submit', label: 'Subscribe' },
     ])
     expect(snapshot.messages).toEqual([
+      {
+        nodeId: 'help',
+        fieldId: 'email',
+        kind: 'help',
+        text: 'Use your work address.',
+      },
+      { nodeId: 'error', fieldId: 'email', kind: 'error', text: '' },
       { nodeId: 'message', kind: 'success', text: 'Thanks' },
     ])
   })

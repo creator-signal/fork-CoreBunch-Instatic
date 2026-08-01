@@ -74,6 +74,7 @@ import type {
 } from '@core/plugin-sdk'
 import { assertPluginPermission } from '@core/plugin-sdk'
 import { dashboardWidgetRegistry } from '@core/dashboard'
+import { deactivatePluginComponentLibraryPack } from './componentLibraryPackLoader'
 
 /**
  * Icon-name → component resolver injected by the admin shell at boot.
@@ -200,6 +201,7 @@ class PluginRuntime {
    * case (e.g. admin disabling a plugin from the Plugins page).
    */
   deactivatePlugin(pluginId: string): void {
+    deactivatePluginComponentLibraryPack(pluginId)
     for (const [key, cmd] of this.commands) {
       if (cmd.pluginId === pluginId) this.commands.delete(key)
     }

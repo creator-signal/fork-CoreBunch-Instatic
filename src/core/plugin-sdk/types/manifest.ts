@@ -28,6 +28,11 @@ export interface PluginPackManifest {
   path: string
 }
 
+export interface PluginComponentLibraryManifest {
+  /** JSON array of governed Component Library entry definitions. */
+  path: string
+}
+
 export interface PluginAuthorMetadata {
   name: string
   email?: string
@@ -59,6 +64,8 @@ export interface PluginManifest {
   adminPages: PluginAdminPage[]
   /** Optional Visual Component / template / class pack. */
   pack?: PluginPackManifest
+  /** Optional governed Component Library package. */
+  componentLibrary?: PluginComponentLibraryManifest
   /**
    * Declarative frontend tag list — scripts, styles, meta, link, and shared
    * host-runtime references that the host injects into every published page

@@ -33,17 +33,58 @@ import { SiteFontsSettingsSchema, parseSiteFontsSettings } from '@core/fonts'
 // SiteSettingsSchema
 // ---------------------------------------------------------------------------
 
+export const SiteAccessibilityPolicySchema = Type.Object(
+  {
+    /**
+     * Component Library accessibility rule IDs that are allowed to block
+     * publication. An empty or absent policy keeps diagnostics advisory.
+     */
+    blockingRuleIds: Type.Array(Type.String(), { uniqueItems: true }),
+  },
+  { additionalProperties: false },
+)
+
+export type SiteAccessibilityPolicy = Static<
+  typeof SiteAccessibilityPolicySchema
+>
+
+export const SiteSearchSettingsSchema = Type.Object(
+  {
+    enabled: Type.Boolean(),
+    queryParam: Type.String({
+      minLength: 1,
+      maxLength: 32,
+      pattern: '^[A-Za-z][A-Za-z0-9_-]*$',
+    }),
+    minQueryLength: Type.Integer({ minimum: 1, maximum: 32 }),
+    maxQueryLength: Type.Integer({ minimum: 1, maximum: 256 }),
+    maxResults: Type.Integer({ minimum: 1, maximum: 200 }),
+  },
+  { additionalProperties: false },
+)
+
+export type SiteSearchSettings = Static<typeof SiteSearchSettingsSchema>
+
 export const SiteSettingsSchema = Type.Object({
   metaTitle: Type.Optional(Type.String()),
   metaDescription: Type.Optional(Type.String()),
   faviconUrl: Type.Optional(Type.String()),
   language: Type.Optional(Type.String()),
+  /** Absolute public origin used for canonical and social metadata URLs. */
+  publicOrigin: Type.Optional(Type.String()),
+  /** Site-wide social preview image fallback and its meaningful alternative. */
+  socialImageUrl: Type.Optional(Type.String()),
+  socialImageAlt: Type.Optional(Type.String()),
   /** Structured framework token settings — absent means framework disabled. */
   framework: Type.Optional(FrameworkSettingsSchema),
   /** Library of installed fonts — absent when no fonts added. */
   fonts: Type.Optional(SiteFontsSettingsSchema),
   /** Keyboard shortcut overrides — defaults to {} — handled in parseSiteSettings. */
   shortcuts: Type.Record(Type.String(), Type.String()),
+  /** Optional site-owned publication policy for accessibility diagnostics. */
+  accessibility: Type.Optional(SiteAccessibilityPolicySchema),
+  /** Optional published-page search capability. Absent/disabled means unavailable. */
+  search: Type.Optional(SiteSearchSettingsSchema),
 })
 
 export type SiteSettings = Static<typeof SiteSettingsSchema>
@@ -54,6 +95,14 @@ export type SiteSettings = Static<typeof SiteSettingsSchema>
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   shortcuts: {},
+}
+
+export const DEFAULT_SITE_SEARCH_SETTINGS: SiteSearchSettings = {
+  enabled: false,
+  queryParam: 'q',
+  minQueryLength: 2,
+  maxQueryLength: 120,
+  maxResults: 100,
 }
 
 // ---------------------------------------------------------------------------
@@ -85,14 +134,28 @@ export function parseSiteSettings(raw: unknown): SiteSettings {
     : undefined
 
   const fonts = r.fonts != null ? parseSiteFontsSettings(r.fonts) : undefined
+  const accessibility = compiledCheck(
+    SiteAccessibilityPolicySchema,
+    r.accessibility,
+  )
+    ? (r.accessibility as SiteAccessibilityPolicy)
+    : undefined
+  const search = compiledCheck(SiteSearchSettingsSchema, r.search)
+    ? (r.search as SiteSearchSettings)
+    : undefined
 
   return {
     ...(typeof r.metaTitle === 'string' ? { metaTitle: r.metaTitle } : {}),
     ...(typeof r.metaDescription === 'string' ? { metaDescription: r.metaDescription } : {}),
     ...(typeof r.faviconUrl === 'string' ? { faviconUrl: r.faviconUrl } : {}),
     ...(typeof r.language === 'string' ? { language: r.language } : {}),
+    ...(typeof r.publicOrigin === 'string' ? { publicOrigin: r.publicOrigin } : {}),
+    ...(typeof r.socialImageUrl === 'string' ? { socialImageUrl: r.socialImageUrl } : {}),
+    ...(typeof r.socialImageAlt === 'string' ? { socialImageAlt: r.socialImageAlt } : {}),
     framework,
     fonts,
+    ...(accessibility ? { accessibility } : {}),
+    ...(search ? { search } : {}),
     shortcuts,
   }
 }

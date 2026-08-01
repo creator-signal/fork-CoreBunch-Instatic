@@ -18,6 +18,8 @@ export const TextPropsSchema = Type.Object({
       Type.Literal('small'),
       Type.Literal('strong'),
       Type.Literal('em'),
+      Type.Literal('figcaption'),
+      Type.Literal('legend'),
     ],
     { default: 'p' },
   ),

@@ -330,6 +330,16 @@ export function FieldEditForm({
         </>
       )}
 
+      {!labelLocked && field.type === 'attachment' && (
+        <div className={styles.switchRow}>
+          <span className={styles.switchLabel}>Allow multiple</span>
+          <Switch
+            checked={state.attachmentAllowMultiple}
+            onCheckedChange={(value) => onChange('attachmentAllowMultiple', value)}
+          />
+        </div>
+      )}
+
       {/* Error */}
       {error && (
         <p role="alert" className={styles.errorBanner}>{error}</p>

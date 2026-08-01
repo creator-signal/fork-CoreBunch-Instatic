@@ -521,12 +521,13 @@ The primary rail group is, in order: **Explorer** (`database-solid` icon, `gold`
 
 Opens the rail-selected panel:
 
-- `ExplorerPanel` — the consolidated navigation panel. One `<Panel>` shell hosting a top `SegmentedControl` with **Layers / Site / Code / Media** tabs (default **Layers**). Each tab renders the corresponding panel in its headerless `tab` variant — the ExplorerPanel shell owns the chrome (header + tabs + close):
-  - **Layers** → `DomPanel` (layer tree of the current page). The search row has an **Insert module** button beside it that opens the shared `ModuleInserterDialog` via `useInsertInserterItem` — same command surface and selection-relative target resolution as the canvas `+` and toolbar `+ Add`.
+- `ExplorerPanel` — the consolidated navigation panel. One `<Panel>` shell hosts a top `SegmentedControl` with **Layers / Site / Code / Media** tabs (default **Layers**). While Layers is active, a second **Components / HTML** control selects the projection rendered by `src/admin/pages/site/panels/LayersPanel/LayersPanel.tsx`:
+  - **Components** → `ComponentLayersTree`, an author-facing hierarchy projected by the pure `componentTreeProjection.ts` function from the same active `NodeTree`. Visual Component references and named slots retain their backing node ids; catalogue pattern implementation nodes collapse behind their boundary; unclassified content remains visible as read-only **Component Block** rows. `layerSelection.ts` maps a canvas selection inside a collapsed pattern to its nearest visible boundary and restores the exact HTML selection when the user switches back. The add action opens the governed Component Library, while Properties switches to `ComponentPropertiesView` and exposes only registered fields, approved presets/variants, lifecycle state, slots and guidance.
+  - **HTML** → the existing `DomPanel` module/DOM hierarchy. Its search row has an **Insert module** button beside it that opens the shared `ModuleInserterDialog` via `useInsertInserterItem` — the same command surface and selection-relative target resolution as the canvas `+` and toolbar `+ Add`.
   - **Site** → `SiteExplorerPanel` with `sectionGroup="site"` (Pages, Templates, Components — the renderable site structure).
   - **Code** → the SAME `SiteExplorerPanel` instance with `sectionGroup="code"` (Styles, Scripts — raw source files opened in the editor). Site and Code share one mount so they share one DnD scope + selection; two instances would each register `useDndMonitor` and double-handle every explorer drag.
   - **Media** → `MediaExplorerPanel` (quick media insert / asset library).
-  - Active tab is held in `explorerPanelTab` (`uiSlice`, `'layers' | 'site' | 'code' | 'media'`) and persisted per-workspace via `siteEditorLayoutPersistence` (stored field `explorerPanelTab`).
+  - Active tab and Layers projection are held in `explorerPanelTab` and `layersViewMode` in `src/admin/pages/site/store/slices/uiSlice.ts`. Both are editor-only state persisted per workspace by `src/admin/pages/site/layout/siteEditorLayoutPersistence.ts`; changing either never dirties the site document.
 - `FrameworkPanel` — site-level design tokens (the Core Framework) in one panel with **Overview / Colors / Type / Space** tabs. Its "Manage framework" button opens `FrameworkManagerDialog`, a declarative state picker (Full framework / Variables only / None) that reconciles the framework to the chosen target. Sits **above** Selectors in the rail.
 - `SelectorsPanel` — CSS class library
 - `DependenciesPanel` — site package.json / `bun install`
@@ -749,7 +750,8 @@ See [docs/features/plugin-system.md](features/plugin-system.md) for the plugin S
   - `src/admin/pages/site/panels/PropertiesPanel/ClassRenameDialog.tsx` — rename dialog for class selectors
   - `src/admin/pages/site/panels/PropertiesPanel/selectorPickerModel.ts` — selector picker derivation model (`deriveSelectorPickerModel`)
   - `src/core/page-tree/styleRule.ts` — selector creation classifier (`classifySelectorCreateInput`) shared by the Properties picker and Selectors panel
-  - `src/admin/pages/site/panels/ExplorerPanel/ExplorerPanel.tsx` — consolidated navigation panel (Layers / Site / Code / Media tabs); owns the shell + `SegmentedControl`, renders DomPanel / SiteExplorerPanel (one instance for both Site+Code tabs via `sectionGroup`) / MediaExplorerPanel in their headerless `tab` variant
+  - `src/admin/pages/site/panels/ExplorerPanel/ExplorerPanel.tsx` — consolidated navigation panel (Layers / Site / Code / Media tabs plus the Components / HTML Layers control); owns the shell and mounts LayersPanel / SiteExplorerPanel / MediaExplorerPanel
+  - `src/admin/pages/site/panels/LayersPanel/` — Components / HTML view router, pure Components projection, nearest-visible selection mapping, and the Component Layers tree
   - `src/admin/pages/site/panels/SiteExplorerPanel/SiteExplorerPanel.tsx` — site explorer panel mount (the Explorer panel's **Pages** tab body)
   - `src/admin/pages/site/panels/SiteExplorerPanel/SiteExplorerTreeSection.tsx` — generic tree section renderer used by all explorer categories
   - `src/admin/pages/site/panels/SiteExplorerPanel/siteExplorerModel.ts` — `buildSiteExplorerTreeSection` (placement arrays → typed tree model)

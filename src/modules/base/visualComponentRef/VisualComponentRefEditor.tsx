@@ -21,7 +21,10 @@ import React from 'react'
 import type { ModuleComponentProps } from '@core/module-engine'
 import { useEditorStore } from '@site/store/store'
 import { instantiateVCAtRef, resolveSlotName, safePropOverrides } from '@core/visualComponents'
-import type { BaseNode } from '@core/page-tree'
+import {
+  selectVisualComponentById,
+  type BaseNode,
+} from '@core/page-tree'
 import { BracesIcon } from 'pixel-art-icons/icons/braces'
 import { CanvasModulePlaceholder } from '@ui/components/CanvasModulePlaceholder'
 import { VCInlineTree } from './VCInlineTree'
@@ -37,7 +40,9 @@ export const VisualComponentRefEditor: React.FC<ModuleComponentProps<VisualCompo
   const propOverrides = safePropOverrides(props)
 
   const vc = useEditorStore(
-    (s) => s.site?.visualComponents?.find((v) => v.id === componentId) ?? null,
+    (s) => s.site
+      ? selectVisualComponentById(s.site, componentId) ?? null
+      : null,
   )
 
   // Subscribe to the active canvas tree nodes so we can resolve slot-instance children.

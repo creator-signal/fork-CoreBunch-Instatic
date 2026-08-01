@@ -2,7 +2,38 @@
 
 The `base.loop` module — iterates a **loop entity source** and renders its child variants per item. Powers post listings, product grids, related-articles sections, media galleries, anything that displays a collection.
 
-Loop sources are pluggable: built-in sources (`data.rows`, `site.pages`, `site.media`) cover the universal store; plugins can register more via the SDK.
+Loop sources are pluggable: built-in sources (`data.rows`, `site.pages`,
+`site.media`, `search.pages`) cover the universal store and opt-in published
+search; plugins can register more via the SDK.
+
+## Shared collection contract
+
+`src/core/collections/contract.ts` is the consumer-neutral contract used by
+loop-backed List, Card Grid, Gallery, Search and Structured Content List
+entries. It defines:
+
+- manual items or a dynamic namespaced source with shared filters, free-text
+  query and ordered sort clauses;
+- `none`, `numbered`, `previous-next`, `load-more` and `cursor` pagination as
+  collection configuration rather than an insertable component;
+- deterministic per-instance page/cursor query keys and history URLs;
+- loading, empty, error and populated states with author-facing `aria-live`
+  announcement text;
+- opaque next/previous cursor tokens on `LoopFetchResult`.
+
+The legacy `base.loop` value `pagination: 'infinite'` normalizes to
+`load-more`; persisted sites remain readable while new collection consumers
+share the current vocabulary. Search capabilities receive their free-text
+query through the same source fetch context and may return opaque cursors
+without a search-specific renderer or pagination model.
+
+Authors can switch a loop's **Source type** to **Manual items** and enter one
+item per line. Each line is persisted as a `LoopItem` with a durable id and
+`label`, `title`, and `text` fields, then travels through the same canvas,
+publisher, offset, limit, numbered, previous/next, and load-more pipeline as a
+dynamic source. Reordering unchanged lines preserves their ids. Cursor
+pagination is intentionally dynamic-source-only because manual items already
+have a deterministic offset.
 
 ---
 
@@ -24,10 +55,11 @@ src/core/loops/
 ├── types.ts                 — LoopItem, LoopEntitySource, LoopSourceField, LoopFetchResult, ...
 ├── registry.ts              — LoopSourceRegistry singleton (`loopSourceRegistry`)
 └── sources/
-    ├── index.ts             — register the three built-ins at boot
+    ├── index.ts             — register the four built-ins at boot
     ├── dataRows.ts          — data.rows (any data_table)
     ├── sitePages.ts         — site.pages (+ shared helpers re-exported via barrel)
-    └── siteMedia.ts         — site.media
+    ├── siteMedia.ts         — site.media
+    └── searchPages.ts       — search.pages (published index capability)
 
 src/modules/base/loop/        — the base.loop module definition
 
@@ -71,9 +103,10 @@ interface LoopEntitySource {
    * A `requestDependent` (non-perVisitor) hole is rendered at request time and
    * cached by Layer B per `(nodeId, query, publishVersion)`.
    *
-   * Built-in sources (`data.rows`, `site.pages`, `site.media`) are
-   * publish-time-deterministic — leave this unset. Plugin sources that hit
-   * live external APIs should set it.
+   * Most built-in sources (`data.rows`, `site.pages`, `site.media`) are
+   * publish-time-deterministic — leave this unset. `search.pages` is
+   * request-dependent because it consumes the originating page's configured
+   * query parameter. Plugin sources that hit live external APIs should set it.
    */
   requestDependent?: boolean
 
@@ -99,6 +132,8 @@ interface LoopItem {
 interface LoopFetchResult {
   items:      LoopItem[]
   totalItems: number         // total across all pages — used for hasMore + paginators
+  nextCursor?: string        // opaque; only for cursor sources
+  previousCursor?: string
 }
 ```
 
@@ -406,19 +441,34 @@ Use **two `base.loop` nodes** side by side, one filtered by `featured: true` and
 
 ### Pagination
 
-Two modes are available via the loop node's `pagination` prop:
+The shared modes are available through the loop node's `pagination` prop:
 
 **`pagination: 'none'` (default)** — renders up to `limit` items at publish time. No load-more affordance.
 
-**`pagination: 'infinite'`** — renders the first `pageSize` items and appends a **"Load more"** button. Each click fetches the next page from `/_instatic/loop/<loopId>?page=N&pagePath=<path>` and appends the returned HTML before the button. When `hasMore` is false the button is removed automatically.
+**`pagination: 'numbered'`** — server-renders a bounded page-number window with
+canonical per-loop query links and `aria-current="page"`.
 
-To enable infinite loading:
-1. Set `props.pagination = 'infinite'` on the loop node.
+**`pagination: 'previous-next'`** — server-renders no-JavaScript previous and
+next links.
+
+**`pagination: 'cursor'`** — forwards an opaque cursor to the source and
+server-renders previous/next links only when that source returns the
+corresponding cursor.
+
+**`pagination: 'load-more'`** — renders the first `pageSize` items and appends a
+**Load more** button. Each click fetches the next page from
+`/_instatic/loop/<loopId>?page=N` and appends the returned HTML. When
+`hasMore` is false the button is removed automatically. Loading, success and
+retry failures update the shared polite status announcement.
+
+To enable load-more:
+1. Set `props.pagination = 'load-more'` on the loop node.
 2. Set `props.pageSize` (items per click; defaults to 10).
-3. The publisher auto-injects `<script type="module" src="/_instatic/assets/loop-runtime.js">` when at least one infinite loop exists on the page (see `server/publish/loopRuntime.ts`). The runtime is < 2 KB and ships only when needed.
+3. The publisher auto-injects `<script type="module" src="/_instatic/assets/loop-runtime.js">` when at least one load-more loop exists on the page (see `server/publish/loopRuntime.ts`). The runtime ships only when needed.
 
-For static multi-page navigation (no JS required):
-- Use separate `base.loop` nodes with an `offset` filter — one per "page" — and static links between pages.
+Numbered, previous/next and cursor navigation belong to the shared collection
+configuration. They are not separate insertable modules. The legacy persisted
+value `infinite` remains readable as `load-more`.
 
 ---
 
@@ -443,11 +493,14 @@ For static multi-page navigation (no JS required):
 - [docs/features/templates.md](templates.md) — `currentEntry` resolves the same way for templates and loops
 - [docs/features/content-storage.md](content-storage.md) — `data_tables` + `data_rows` is the source for `data.rows`
 - [docs/features/plugin-system.md](plugin-system.md) — plugin loop sources
+- [docs/features/site-search.md](site-search.md) — the capability-backed
+  `search.pages` source and published index lifecycle
 - Source-of-truth files:
   - `src/core/loops/index.ts` — public barrel (`pageToLoopItem`, `filterPagesForLoop`, types)
   - `src/core/loops/types.ts` — `LoopEntitySource`, `LoopItem`, `LoopFetchResult`
   - `src/core/loops/registry.ts` — registry singleton
-  - `src/core/loops/sources/dataRows.ts`, `sitePages.ts`, `siteMedia.ts` — built-in sources
+  - `src/core/loops/sources/dataRows.ts`, `sitePages.ts`, `siteMedia.ts`,
+    `searchPages.ts` — built-in sources
   - `src/modules/base/loop/` — the `base.loop` module
   - `src/core/publisher/renderLoop.ts` — render walker
   - `server/publish/loopPrefetch.ts` — pre-fetch

@@ -212,6 +212,19 @@
   text-overflow: ellipsis;
 }
 
+.attachmentLinks {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3xs);
+  min-width: 0;
+}
+
+.attachmentLink {
+  color: var(--accent);
+  font-size: var(--text-s);
+  white-space: nowrap;
+}
+
 /* ===========================================================================
  * Display-mode renderers (CellDisplayRenderer.tsx)
  * The grid is read-only: each field type renders as a presentational chip,

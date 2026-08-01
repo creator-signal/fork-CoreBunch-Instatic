@@ -4,6 +4,8 @@ MCP connections let external AI clients operate an Instatic instance through the
 
 This is the inverse of the **Providers** tab. Providers let Instatic call model APIs; MCP connections let outside clients call Instatic.
 
+For end-user setup commands and troubleshooting, read [`docs/reference/claude-mcp.md`](../reference/claude-mcp.md).
+
 The wire server uses `@modelcontextprotocol/sdk`. That dependency remains allowed only under `server/ai/mcp/`; provider drivers continue to use their direct REST implementations.
 
 ## Connection modes
@@ -12,8 +14,8 @@ The UI exposes two credential lifecycles instead of a cosmetic local/remote swit
 
 | Mode | Intended client | Authentication | Lifecycle |
 |---|---|---|---|
-| Hosted OAuth | Claude custom connectors and other remote MCP clients | OAuth authorization code with S256 PKCE | The client discovers the authorization server, dynamically registers, and sends the user to Instatic for consent. Access tokens last up to one hour; refresh tokens rotate; the grant expires after 90 days. |
-| Personal access token | Claude Code, Codex, Cursor, local bridges, and clients that accept an explicit header | `Authorization: Bearer imcp_pat_…` | Created after step-up authentication, shown once, scoped to selected capabilities, configurable expiry, independently revocable. |
+| Hosted OAuth | Claude Code, Claude custom connectors, and other remote MCP clients | OAuth authorization code with S256 PKCE | The client discovers the authorization server, dynamically registers, and sends the user to Instatic for consent. Access tokens last up to one hour; refresh tokens rotate; the grant expires after 90 days. |
+| Personal access token | Local development, automation, and clients that accept an explicit header | `Authorization: Bearer imcp_pat_…` | Created after step-up authentication, shown once, scoped to selected capabilities, configurable expiry, independently revocable. |
 
 Both modes resolve to the same persistent connection grant and the same `toolAllowedForCapabilities` gate. OAuth does not create a wider tool path.
 
@@ -74,6 +76,30 @@ Security properties:
 
 The resulting OAuth connection appears automatically under **Authorized connections**. No Instatic token is copied into Claude.
 
+### Claude Code
+
+Add a deployed Instatic server, then start its OAuth flow:
+
+```sh
+claude mcp add --transport http instatic https://<your-host>/_instatic/mcp
+claude mcp login instatic
+```
+
+Claude Code can also authenticate from the interactive `/mcp` panel. Instatic dynamically registers Claude's loopback callback, authenticates the user, and presents the same capability-selection consent screen as a hosted custom connector.
+
+The complete user workflow is documented in [`docs/reference/claude-mcp.md`](../reference/claude-mcp.md).
+
+### Component Library boundary
+
+The MCP registry does not currently expose catalogue-native list or insert
+tools. `site_insert_html` creates freeform nodes and requires
+`site.structure.edit`; a grant containing only `site.components.edit` does not
+make a governed component insertion tool available. Authors must insert those
+entries from the Site editor's Component Library to retain catalogue identity,
+declared fields, placement rules, presets and variants. MCP may then inspect the
+document and use whichever generic edit and publish tools its broader grant
+allows.
+
 ## Personal access tokens
 
 In **AI → MCP**, choose **Create access token**, name the device/client, choose an expiry and capabilities, then complete step-up. The plaintext `imcp_pat_…` token is returned once; only its SHA-256 hash is stored.
@@ -81,7 +107,7 @@ In **AI → MCP**, choose **Create access token**, name the device/client, choos
 Claude Code example:
 
 ```sh
-claude mcp add instatic --transport http http://localhost:3000/_instatic/mcp \
+claude mcp add --transport http instatic http://localhost:3000/_instatic/mcp \
   --header "Authorization: Bearer imcp_pat_…"
 ```
 
@@ -183,3 +209,11 @@ Create and manual revoke actions retain the existing `ai.mcp_connector.created` 
 - `src/__tests__/ai/mcpConnectorsHandler.test.ts` covers connection listing, personal-token creation, step-up, revoke, and privilege floors.
 - `server/ai/mcp/e2e.test.ts`, `transports/http.test.ts`, and `publishTool.test.ts` cover the real MCP request flow and publish path.
 - `src/__tests__/architecture/ai-mcp-connectors-never-leak.test.ts` gates the token-free connection projection.
+
+## Related
+
+- `docs/reference/claude-mcp.md` — user setup for Claude Code and Claude custom connectors.
+- `docs/features/auth-and-access.md` — sessions, capabilities, MFA, and step-up authentication.
+- `server/ai/mcp/paths.ts` — canonical MCP and OAuth paths.
+- `server/ai/mcp/registry.ts` — capability-filtered tool catalog.
+- `server/ai/mcp/e2e.test.ts` — real MCP initialize, list, read, and capability filtering.

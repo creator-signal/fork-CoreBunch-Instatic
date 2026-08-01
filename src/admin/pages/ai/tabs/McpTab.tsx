@@ -554,7 +554,7 @@ function AccessTokenResultDialog({
   onClose: () => void
 }) {
   const accessToken = result.accessToken
-  const claudeCommand = `claude mcp add instatic --transport http ${endpoint} --header "Authorization: Bearer ${accessToken}"`
+  const claudeCommand = `claude mcp add --transport http instatic ${endpoint} --header "Authorization: Bearer ${accessToken}"`
   const bridgeArgs = [
     '-y',
     'mcp-remote@latest',

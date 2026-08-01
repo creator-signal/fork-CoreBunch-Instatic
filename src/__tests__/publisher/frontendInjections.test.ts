@@ -35,6 +35,7 @@ function emptyPlan(): FrontendInjections {
     hasExternalScript: false,
     hasInlineStyle: false,
     networkAllowedHosts: [],
+    publicConnectOrigins: [],
     mediaCspOrigins: [],
   }
 }
@@ -133,5 +134,23 @@ describe('frontend injection — CSP relaxation', () => {
     expect(out).toContain("img-src 'self' data: http://localhost:48141;")
     expect(out).toContain("media-src 'self' http://localhost:48141;")
     expect(out).not.toContain('https://http://')
+  })
+
+  it('adds operator-approved browser origins without changing plugin network hosts', () => {
+    const plan = emptyPlan()
+    plan.hasExternalScript = true
+    plan.tags['body-end'] = ['<script src="/uploads/plugins/acme.analytics/tracker.js"></script>']
+    plan.publicConnectOrigins = [
+      'http://localhost:48201',
+      'http://localhost:48211',
+      'http://localhost:48220',
+    ]
+
+    const out = injectFrontendAssets(PAGE_WITH_CSP_META, plan)
+
+    expect(out).toContain(
+      "connect-src 'self' http://localhost:48201 http://localhost:48211 http://localhost:48220;",
+    )
+    expect(plan.networkAllowedHosts).toEqual([])
   })
 })

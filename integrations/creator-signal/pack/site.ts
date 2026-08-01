@@ -42,6 +42,17 @@ const footer = `<footer class="site-footer">
 
 const chrome = (main: string) => `${header}<main>${main}</main>${footer}`
 
+const legalRelease = {
+  version: '2026-08-02',
+  effectiveDate: '2 August 2026',
+  operator: 'Creator Signal is operated by INSIGHT VISION PTY LTD (ACN 601 335 460), Australia.',
+}
+
+const legalReleaseParagraphs = () => [
+  `Version ${legalRelease.version}. Effective ${legalRelease.effectiveDate}.`,
+  legalRelease.operator,
+]
+
 const signalVisual = `<div class="signal-visual" aria-hidden="true"><span></span><span></span><span></span><span></span></div>`
 
 const hero = (
@@ -119,7 +130,7 @@ const publicDocument = (
   title,
   html: chrome(`<article class="public-document">
     <header class="public-document-header"><p class="eyebrow">Creator Signal</p><h1>${title}</h1><p>${summary}</p></header>
-    <div class="prose-content">${paragraphs.map((text) => `<p>${text}</p>`).join('')}</div>
+    <div class="prose-content">${[...legalReleaseParagraphs(), ...paragraphs].map((text) => `<p>${text}</p>`).join('')}</div>
   </article>`),
 })
 
@@ -203,11 +214,11 @@ const entries: PagePackEntry[] = [
   },
   {
     id: 'privacy', slug: 'legal/privacy', title: 'Privacy',
-    html: chrome(hero('Legal', 'Privacy should be understandable.', 'This notice explains the information Creator Signal uses to operate its services and the choices available to you.', '/contact', 'Contact us') + prose('Information we use', ['We process account and authentication information to provide secure access, subscription and entitlement information to operate paid features, and data you choose to connect to provide Sales Pulse.', 'When you contact us, we use the details you submit to respond. Optional product journey analytics is disabled until you grant consent. Aggregate traffic measurement is configured to avoid advertising profiles.', 'We retain information only for operational, security, legal and support needs, apply access controls, and use service providers only for defined platform functions.', 'This launch copy must receive final jurisdiction-specific legal approval before production activation.'])),
+    html: chrome(hero('Legal', 'Privacy should be understandable.', 'This notice explains the information Creator Signal uses to operate its services and the choices available to you.', '/contact', 'Contact us') + prose('Information we use', [...legalReleaseParagraphs(), 'We process account and authentication information to provide secure access, subscription and entitlement information to operate paid features, and data you choose to connect to provide Sales Pulse.', 'When you contact us, we use the details you submit to respond. Optional product journey analytics is disabled until you grant consent. Aggregate traffic measurement is configured to avoid advertising profiles.', 'We retain information only for operational, security, legal and support needs, apply access controls, and use service providers only for defined platform functions.'])),
   },
   {
     id: 'terms', slug: 'legal/terms', title: 'Terms',
-    html: chrome(hero('Legal', 'Clear expectations for using Creator Signal.', 'These terms describe acceptable use, subscriptions, connected data and service responsibilities.', '/contact', 'Contact us') + prose('Service terms', ['You are responsible for your account, the authority to connect marketplace information, and the accuracy of information you provide. Do not misuse the service or attempt unauthorised access.', 'Subscription prices, included capabilities and renewal terms are shown before checkout. You retain ownership of your connected business information.', 'Services may change as they improve. Material changes and important limitations will be communicated where practical.', 'This launch copy must receive final jurisdiction-specific legal approval before production activation.'])),
+    html: chrome(hero('Legal', 'Clear expectations for using Creator Signal.', 'These terms describe acceptable use, subscriptions, connected data and service responsibilities.', '/contact', 'Contact us') + prose('Service terms', [...legalReleaseParagraphs(), 'You are responsible for your account, the authority to connect marketplace information, and the accuracy of information you provide. Do not misuse the service or attempt unauthorised access.', 'Subscription prices, included capabilities and renewal terms are shown before checkout. You retain ownership of your connected business information.', 'Services may change as they improve. Material changes and important limitations will be communicated where practical.'])),
   },
   ...publicDocuments,
 ]

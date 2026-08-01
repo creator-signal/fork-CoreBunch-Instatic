@@ -28,7 +28,7 @@ describe('Creator Signal site pack', () => {
   })
 
   it('injects the Creator Signal favicon and PWA manifest into published pages', () => {
-    expect(creatorSignalPlugin.manifest.version).toBe('0.1.8')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.1.9')
     expect(creatorSignalPlugin.manifest.frontend?.assets).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -55,6 +55,26 @@ describe('Creator Signal site pack', () => {
         }),
       ]),
     )
+  })
+
+  it('ships operator-approved initial legal pages without draft activation copy', () => {
+    const legalPages = pack.pages.filter((page) =>
+      page.slug.startsWith('legal/') ||
+      page.slug.startsWith('trust/') ||
+      page.slug === 'support' ||
+      page.slug === 'help/account-data' ||
+      page.slug === 'status')
+    const pageText = (page: (typeof pack.pages)[number]) => Object.values(page.nodes)
+      .map((node) => typeof node.props.text === 'string' ? node.props.text : '')
+      .join(' ')
+
+    expect(legalPages).toHaveLength(12)
+    for (const page of legalPages) {
+      const text = pageText(page)
+      expect(text).toContain('Version 2026-08-02. Effective 2 August 2026.')
+      expect(text).toContain('INSIGHT VISION PTY LTD (ACN 601 335 460), Australia')
+      expect(text).not.toMatch(/draft|must receive final jurisdiction-specific legal approval/i)
+    }
   })
 
   it('turns the contact placeholder into the configurable Mautic module', () => {

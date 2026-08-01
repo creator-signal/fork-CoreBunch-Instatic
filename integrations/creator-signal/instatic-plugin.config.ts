@@ -5,7 +5,7 @@ import { pack } from './pack/site'
 export default definePlugin({
   id: 'creator-signal.site',
   name: 'Creator Signal public site',
-  version: '0.1.8',
+  version: '0.1.9',
   description: 'Creator Signal starter pages, author layouts, Mautic forms, consent and analytics integrations.',
   author: { name: 'Creator Signal', url: 'https://creatorsignal.me' },
   license: 'MIT',

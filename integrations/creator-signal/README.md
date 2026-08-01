@@ -20,6 +20,9 @@ blank setup homepage, and publish the complete site automatically.
 - The host-level MinIO adapter for originals, variants, avatars, and fonts.
 - Plausible pageviews, consent-gated OpenPanel events, GlitchTip browser monitoring, consent UI, and hashed Mautic attribution.
 - Header, footer, legal copy, and navigation links represented as editable page nodes.
+- Operator-approved initial legal, trust, support, and account-data copy marked
+  with version `2026-08-02`, its effective date, and the verified operating
+  company. External legal advice remains outside the site-pack contract.
 - One shared public stylesheet across all launch routes, so authoring and
   published output use the same bounded, responsive page layout without
   duplicate ambient rules.

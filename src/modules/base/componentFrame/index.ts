@@ -3,8 +3,8 @@
  *
  * It owns no authored content. Built-in Visual Component definitions compose
  * ordinary modules beneath it and bind the frame's kind/variant parameters.
- * Static CSS consumes the site's generated design-token variables with
- * conservative fallbacks, so a token update flows through every instance.
+ * Static CSS consumes the site's generated design-token variables, so a
+ * token update flows through every instance.
  */
 import type { ModuleDefinition } from '@core/module-engine'
 import { registry } from '@core/module-engine'
@@ -23,8 +23,8 @@ export const COMPONENT_FRAME_CSS = `
 }
 [data-instatic-component="hero"] {
   display: grid;
-  gap: var(--space-l, 1.5rem);
-  padding-block: var(--space-2xl, 4rem);
+  gap: var(--space-l);
+  padding-block: var(--space-2xl);
   align-items: center;
 }
 [data-instatic-component="hero"][data-variant="image-right"] > :first-child {
@@ -39,49 +39,49 @@ export const COMPONENT_FRAME_CSS = `
 [data-instatic-component="download"],
 [data-instatic-component="notice"] {
   display: grid;
-  gap: var(--space-s, 0.75rem);
-  padding: var(--space-l, 1.5rem);
-  border: 1px solid var(--color-border, currentColor);
-  border-radius: var(--radius-m, 0.5rem);
+  gap: var(--space-s);
+  padding: var(--space-l);
+  border: 1px solid var(--border-primary);
+  border-radius: 0.5rem;
 }
 [data-instatic-component="notice"] {
-  border-inline-start-width: var(--space-2xs, 0.25rem);
+  border-inline-start-width: var(--space-2xs);
 }
 [data-instatic-component="badge"] {
   display: inline-flex;
-  gap: var(--space-2xs, 0.25rem);
+  gap: var(--space-2xs);
   align-items: center;
-  padding: var(--space-2xs, 0.25rem) var(--space-xs, 0.5rem);
-  border-radius: var(--radius-pill, 999px);
-  background: var(--color-surface-muted, Canvas);
-  color: var(--color-text, CanvasText);
+  padding: var(--space-2xs) var(--space-xs);
+  border-radius: 999px;
+  background: var(--bg-surface);
+  color: var(--text-body);
 }
 [data-instatic-component="quote"],
 [data-instatic-component="person-profile"] {
   display: grid;
-  gap: var(--space-m, 1rem);
+  gap: var(--space-m);
 }
 [data-instatic-component="quote"] {
   margin-inline: 0;
-  padding-inline-start: var(--space-l, 1.5rem);
-  border-inline-start: var(--space-2xs, 0.25rem) solid var(--color-border, currentColor);
+  padding-inline-start: var(--space-l);
+  border-inline-start: var(--space-2xs) solid var(--border-primary);
 }
 [data-instatic-component="breadcrumb"] ol,
 [data-instatic-component="table-of-contents"] ul {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-xs, 0.5rem) var(--space-m, 1rem);
+  gap: var(--space-xs) var(--space-m);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 [data-instatic-component="breadcrumb"] li:not(:last-child)::after {
   content: "/";
-  margin-inline-start: var(--space-m, 1rem);
+  margin-inline-start: var(--space-m);
 }
 [data-instatic-component="navigation"] {
   display: flex;
-  gap: var(--space-m, 1rem);
+  gap: var(--space-m);
   align-items: center;
 }
 [data-instatic-component="navigation"][data-variant="vertical"] {
@@ -94,7 +94,7 @@ export const COMPONENT_FRAME_CSS = `
 [data-instatic-component="statistics"],
 [data-instatic-component="logo-cloud"] {
   display: grid;
-  gap: var(--space-l, 1.5rem);
+  gap: var(--space-l);
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
 }
 [data-instatic-component="icon-list"],
@@ -103,13 +103,13 @@ export const COMPONENT_FRAME_CSS = `
 [data-instatic-component="comparison-table"],
 [data-instatic-component="empty-state"] {
   display: grid;
-  gap: var(--space-m, 1rem);
+  gap: var(--space-m);
 }
 [data-instatic-component="empty-state"] {
   justify-items: start;
-  padding: var(--space-xl, 2rem);
-  border: 1px solid var(--color-border, currentColor);
-  border-radius: var(--radius-m, 0.5rem);
+  padding: var(--space-xl);
+  border: 1px solid var(--border-primary);
+  border-radius: 0.5rem;
 }
 `.trim()
 
@@ -162,9 +162,13 @@ export const ComponentFrameModule: ModuleDefinition<ComponentFrameStoredProps> =
     const variant = normalizeComponentFrameToken(props.variant, 'default')
     const label = String(props.label ?? '').trim()
     const bindingPrefix = String(props.bindingPrefix ?? '').trim()
+    const structuredData = kind === 'navigation'
+      ? ' itemscope itemtype="https://schema.org/SiteNavigationElement"'
+      : ''
     return {
       html:
         `<${tag} data-instatic-component="${kind}" data-variant="${variant}"` +
+        structuredData +
         `${label ? ` aria-label="${label}"` : ''}` +
         `${bindingPrefix ? ` data-instatic-binding-prefix="${bindingPrefix}"` : ''}>` +
         `${children.join('')}</${tag}>`,

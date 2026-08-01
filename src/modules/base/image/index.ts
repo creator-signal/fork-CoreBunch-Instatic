@@ -226,7 +226,15 @@ export const ImageModule: ModuleDefinition<ImageProps> = {
       attrs.push(`style="background-image:${blurBg};background-size:cover;background-position:center"`)
     }
 
-    return { html: `<img${htmlAttrs} ${attrs.join(' ')}>` }
+    const caption = escapeHtml(media?.caption?.trim() ?? '')
+    const structuredData =
+      '<span data-instatic-structured-data="image" hidden itemscope ' +
+      'itemtype="https://schema.org/ImageObject">' +
+      `<meta itemprop="contentUrl" content="${src}">` +
+      `${caption ? `<meta itemprop="caption" content="${caption}">` : ''}` +
+      '</span>'
+
+    return { html: `<img${htmlAttrs} ${attrs.join(' ')}>${structuredData}` }
   },
 }
 

@@ -8,6 +8,10 @@ const specificationPath = resolve(
   import.meta.dir,
   '../../../docs/features/component-library-specification.md',
 )
+const htmlContractPath = resolve(
+  import.meta.dir,
+  '../../../docs/reference/component-html-seo-contract.md',
+)
 
 describe('Component Library specification', () => {
   it('is generated from every executable built-in definition', () => {
@@ -23,5 +27,19 @@ describe('Component Library specification', () => {
         expect(rendered).toContain(`| \`${field.key}\` | ${field.label} |`)
       }
     }
+  })
+
+  it('assigns every built-in entry to the published HTML and SEO contract', () => {
+    const contract = readFileSync(htmlContractPath, 'utf8')
+
+    for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
+      expect(contract).toContain(`\`${entry.id}\``)
+    }
+
+    expect(contract).toContain('https://schema.org/BreadcrumbList')
+    expect(contract).toContain('https://schema.org/SiteNavigationElement')
+    expect(contract).toContain('ImageObject')
+    expect(contract).toContain('var(--border-primary)')
+    expect(contract).not.toMatch(/\bcmp-[a-z0-9_-]+/i)
   })
 })

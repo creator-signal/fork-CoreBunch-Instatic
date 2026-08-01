@@ -1,4 +1,7 @@
-import { componentLibraryRegistry } from '@core/component-library'
+import {
+  componentLibraryRegistry,
+  type ComponentLibraryImplementation,
+} from '@core/component-library'
 import type { CatalogueInstanceMetadata } from '@core/page-tree'
 
 export function initialComponentLibraryVariantValues(
@@ -9,4 +12,18 @@ export function initialComponentLibraryVariantValues(
     .getVersion(metadata.entryId, metadata.entryVersion)
     ?.variants.find((variant) => variant.id === metadata.variantId)
     ?.values ?? {}
+}
+
+export function backingComponentLibraryImplementation(
+  implementation: ComponentLibraryImplementation,
+): Exclude<ComponentLibraryImplementation, { type: 'capability-backed' }> {
+  return implementation.type === 'capability-backed'
+    ? implementation.backing
+    : implementation
+}
+
+export function safeComponentLibraryOverrides(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {}
 }

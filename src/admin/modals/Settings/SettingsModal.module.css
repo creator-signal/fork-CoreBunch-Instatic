@@ -345,6 +345,13 @@
   margin-bottom: var(--space-2xl);
 }
 
+.fieldHint {
+  margin: var(--space-xs) 0 0;
+  color: var(--text-subtle);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+}
+
 /* ── GeneralSection → Favicon picker ────────────────────────────────────── */
 .faviconCurrent {
   display: flex;

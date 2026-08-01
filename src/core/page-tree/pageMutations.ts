@@ -129,6 +129,7 @@ export function duplicatePage(
     slug: uniquePageSlug(slug ?? title, site.pages),
     rootNodeId: newRootId,
     nodes: newNodes,
+    ...(source.seo ? { seo: structuredClone(source.seo) } : {}),
   }
   site.pages.push(newPage)
   return newPage

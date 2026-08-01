@@ -15,7 +15,6 @@ import { registry } from '@core/module-engine'
 import {
   analyseComponentLibraryPrimitiveConversion,
   componentLibraryRegistry,
-  type ComponentLibraryImplementation,
 } from '@core/component-library'
 
 import {
@@ -44,7 +43,11 @@ import { pushToast } from '@ui/components/Toast'
 import { depthInTree, resolveActiveTreeTarget } from './helpers'
 import { pruneCanvasSelectionDraft } from '../selectionSlice'
 import { indexStyleRulesByName, linkImportedClassNames, mergeImportedStyleRules } from './importLinking'
-import { initialComponentLibraryVariantValues } from './componentLibraryNodeOptions'
+import {
+  backingComponentLibraryImplementation,
+  initialComponentLibraryVariantValues,
+  safeComponentLibraryOverrides,
+} from './componentLibraryNodeOptions'
 import type { SiteSlice, SiteSliceHelpers } from './types'
 
 type NodeActions = Pick<
@@ -685,18 +688,4 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
   }
 
   return actions
-}
-
-function backingComponentLibraryImplementation(
-  implementation: ComponentLibraryImplementation,
-): Exclude<ComponentLibraryImplementation, { type: 'capability-backed' }> {
-  return implementation.type === 'capability-backed'
-    ? implementation.backing
-    : implementation
-}
-
-function safeComponentLibraryOverrides(value: unknown): Record<string, unknown> {
-  return value && typeof value === 'object' && !Array.isArray(value)
-    ? value as Record<string, unknown>
-    : {}
 }

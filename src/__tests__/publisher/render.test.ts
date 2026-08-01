@@ -1030,4 +1030,118 @@ describe('publishPage', () => {
     expect(html).not.toContain('<script>')
     expect(html).toContain('&lt;script&gt;')
   })
+
+  it('publishes canonical, robots, social and language-alternate metadata from page settings', () => {
+    const page = makePage({ root: { moduleId: 'base.text', props: { text: 'Metadata' } } })
+    page.slug = 'guides/metadata'
+    page.seo = {
+      title: 'Metadata guide',
+      description: 'A complete metadata guide.',
+      language: 'en-AU',
+      canonicalUrl: '/guides/canonical-metadata',
+      robots: { index: false, follow: true, archive: false },
+      alternates: [
+        { language: 'en-AU', url: '/guides/canonical-metadata' },
+        { language: 'fr', url: '/fr/guides/metadata' },
+        { language: 'x-default', url: '/guides/canonical-metadata' },
+      ],
+      openGraph: {
+        type: 'article',
+        title: 'Open Graph guide',
+        imageUrl: '/media/metadata-card.jpg',
+        imageAlt: 'Metadata fields shown in a page editor',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: 'Twitter guide',
+      },
+    }
+    const project = makeSite({
+      settings: {
+        ...makeSite().settings,
+        publicOrigin: 'https://www.example.test/cms-path-is-ignored',
+      },
+    })
+
+    const { html } = publishPage(page, project, registry)
+
+    expect(html).toContain('<html lang="en-AU">')
+    expect(html).toContain('<title>Metadata guide</title>')
+    expect(html).toContain('<meta name="description" content="A complete metadata guide.">')
+    expect(html).toContain('<meta name="robots" content="noindex, follow, noarchive">')
+    expect(html).toContain('<link rel="canonical" href="https://www.example.test/guides/canonical-metadata">')
+    expect(html).toContain('<link rel="alternate" hreflang="fr" href="https://www.example.test/fr/guides/metadata">')
+    expect(html).toContain('<meta property="og:title" content="Open Graph guide">')
+    expect(html).toContain('<meta property="og:type" content="article">')
+    expect(html).toContain('<meta property="og:image" content="https://www.example.test/media/metadata-card.jpg">')
+    expect(html).toContain('<meta property="og:image:alt" content="Metadata fields shown in a page editor">')
+    expect(html).toContain('<meta property="og:locale" content="en_AU">')
+    expect(html).toContain('<meta property="og:locale:alternate" content="fr">')
+    expect(html).toContain('<meta name="twitter:card" content="summary_large_image">')
+    expect(html).toContain('<meta name="twitter:title" content="Twitter guide">')
+    expect(html).toContain('<meta name="twitter:description" content="A complete metadata guide.">')
+    expect(html).toContain('<meta name="twitter:image" content="https://www.example.test/media/metadata-card.jpg">')
+    expect(html).toContain('<meta name="twitter:image:alt" content="Metadata fields shown in a page editor">')
+  })
+
+  it('builds a canonical URL from the page slug when a public origin is configured', () => {
+    const page = makePage({ root: { moduleId: 'base.text', props: { text: 'About' } } })
+    page.slug = 'about'
+    const project = makeSite({
+      settings: { ...makeSite().settings, publicOrigin: 'https://example.test/' },
+    })
+
+    const { html } = publishPage(page, project, registry)
+
+    expect(html).toContain('<link rel="canonical" href="https://example.test/about">')
+    expect(html).toContain('<meta property="og:url" content="https://example.test/about">')
+  })
+
+  it('drops unsafe metadata URLs while escaping author-controlled metadata copy', () => {
+    const page = makePage({ root: { moduleId: 'base.text', props: { text: 'Safe' } } })
+    page.seo = {
+      title: '<img src=x onerror=alert(1)>',
+      canonicalUrl: 'javascript:alert(1)',
+      alternates: [{ language: 'fr" onload="alert(1)', url: 'data:text/html,bad' }],
+      openGraph: { imageUrl: 'vbscript:bad' },
+      twitter: { imageUrl: 'file:///secret' },
+    }
+
+    const { html } = publishPage(page, site, registry)
+
+    expect(html).toContain('<title>&lt;img src=x onerror=alert(1)&gt;</title>')
+    expect(html).not.toContain('javascript:')
+    expect(html).not.toContain('vbscript:')
+    expect(html).not.toContain('file:///')
+    expect(html).not.toContain('rel="canonical"')
+    expect(html).not.toContain('rel="alternate"')
+  })
+
+  it('uses the site social image and alternative when the page has no override', () => {
+    const page = makePage({ root: { moduleId: 'base.text', props: { text: 'Social' } } })
+    const project = makeSite({
+      settings: {
+        ...makeSite().settings,
+        publicOrigin: 'https://example.test',
+        socialImageUrl: '/media/site-card.jpg',
+        socialImageAlt: 'Instatic site preview',
+      },
+    })
+
+    const { html } = publishPage(page, project, registry)
+
+    expect(html).toContain('<meta property="og:image" content="https://example.test/media/site-card.jpg">')
+    expect(html).toContain('<meta property="og:image:alt" content="Instatic site preview">')
+    expect(html).toContain('<meta name="twitter:image" content="https://example.test/media/site-card.jpg">')
+    expect(html).toContain('<meta name="twitter:image:alt" content="Instatic site preview">')
+  })
+
+  it('forces previews and private responses to noindex, nofollow and noarchive', () => {
+    const page = makePage({ root: { moduleId: 'base.text', props: { text: 'Preview' } } })
+    page.seo = { robots: { index: true, follow: true, archive: true } }
+
+    const { html } = publishPage(page, site, registry, { robotsPolicy: 'noindex' })
+
+    expect(html).toContain('<meta name="robots" content="noindex, nofollow, noarchive">')
+  })
 })

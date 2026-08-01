@@ -70,6 +70,11 @@ export const SiteSettingsSchema = Type.Object({
   metaDescription: Type.Optional(Type.String()),
   faviconUrl: Type.Optional(Type.String()),
   language: Type.Optional(Type.String()),
+  /** Absolute public origin used for canonical and social metadata URLs. */
+  publicOrigin: Type.Optional(Type.String()),
+  /** Site-wide social preview image fallback and its meaningful alternative. */
+  socialImageUrl: Type.Optional(Type.String()),
+  socialImageAlt: Type.Optional(Type.String()),
   /** Structured framework token settings — absent means framework disabled. */
   framework: Type.Optional(FrameworkSettingsSchema),
   /** Library of installed fonts — absent when no fonts added. */
@@ -144,6 +149,9 @@ export function parseSiteSettings(raw: unknown): SiteSettings {
     ...(typeof r.metaDescription === 'string' ? { metaDescription: r.metaDescription } : {}),
     ...(typeof r.faviconUrl === 'string' ? { faviconUrl: r.faviconUrl } : {}),
     ...(typeof r.language === 'string' ? { language: r.language } : {}),
+    ...(typeof r.publicOrigin === 'string' ? { publicOrigin: r.publicOrigin } : {}),
+    ...(typeof r.socialImageUrl === 'string' ? { socialImageUrl: r.socialImageUrl } : {}),
+    ...(typeof r.socialImageAlt === 'string' ? { socialImageAlt: r.socialImageAlt } : {}),
     framework,
     fonts,
     ...(accessibility ? { accessibility } : {}),

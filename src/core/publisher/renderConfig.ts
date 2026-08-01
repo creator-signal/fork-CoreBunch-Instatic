@@ -63,6 +63,8 @@ export interface RenderResolvedMedia {
   width: number | null
   height: number | null
   altText: string
+  /** Optional Media Library caption used by semantic image metadata. */
+  caption?: string
   blurHash: string | null
   variants: ReadonlyArray<{
     width: number

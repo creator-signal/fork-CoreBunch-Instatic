@@ -31,6 +31,7 @@ import { SiteExplorerContextMenu, type SiteExplorerContextMenuState } from './Si
 import { SiteExplorerPathConfirmDialog } from './SiteExplorerPathConfirmDialog'
 import { SiteExplorerPanelSections } from './SiteExplorerPanelSections'
 import type { SiteExplorerAnySectionModel, SiteExplorerContextTarget, SiteExplorerSectionGroup } from './siteExplorerPanelTypes'
+import { usePageSeoSettingsDialog } from './usePageSeoSettingsDialog'
 import styles from './SiteExplorerPanel.module.css'
 
 interface SiteExplorerPanelProps {
@@ -124,6 +125,7 @@ export function SiteExplorerPanel({
   const [templateSettingsTarget, setTemplateSettingsTarget] = useState<Page | null>(null)
   const [pathConfirmPlan, setPathConfirmPlan] = useState<ExplorerPathChangePlan | null>(null)
   const explorerSelection = useSiteExplorerSelection<SiteExplorerContextTarget>()
+  const { openPageSeoSettings, pageSeoSettingsDialog } = usePageSeoSettingsDialog()
 
   const files = site?.files ?? EMPTY_FILES
   const fileBuckets = groupSiteFiles(files)
@@ -409,6 +411,14 @@ export function SiteExplorerPanel({
           setContextMenu(null)
         },
       }] : []),
+      ...(!page.template ? [{
+        label: 'SEO settings',
+        icon: <GlobeSolidIcon size={13} />,
+        action: () => {
+          openPageSeoSettings(page)
+          setContextMenu(null)
+        },
+      }] : []),
       {
         label: 'Open in new tab',
         icon: <ExternalLinkSolidIcon size={13} />,
@@ -660,6 +670,7 @@ export function SiteExplorerPanel({
             onSave={handleSaveTemplateSettings}
           />
         )}
+        {pageSeoSettingsDialog}
         {pathConfirmPlan && (
           <SiteExplorerPathConfirmDialog
             plan={pathConfirmPlan}

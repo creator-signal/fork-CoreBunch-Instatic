@@ -271,7 +271,15 @@ describe('built-in Visual Components', () => {
       '<nav data-instatic-component="breadcrumb" data-variant="default" aria-label="Page path">',
     )
     expect(result.html).toContain(
-      '<ol><li><a href="/" target="_self">Home</a></li><li><a href="/news" target="_self">News</a></li></ol>',
+      '<ol itemscope itemtype="https://schema.org/BreadcrumbList">' +
+      '<li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">' +
+      '<a itemprop="item" href="/" target="_self">' +
+      '<span itemprop="name">Home</span></a>' +
+      '<meta itemprop="position" content="1"></li>' +
+      '<li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">' +
+      '<a itemprop="item" href="/news" target="_self" aria-current="page">' +
+      '<span itemprop="name">News</span></a>' +
+      '<meta itemprop="position" content="2"></li></ol>',
     )
   })
 

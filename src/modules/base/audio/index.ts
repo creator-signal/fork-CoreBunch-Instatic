@@ -9,7 +9,7 @@ import { AudioPropsSchema, type AudioStoredProps } from './props'
 const AUDIO_CSS = `
 [data-instatic-audio] {
   display: grid;
-  gap: var(--space-xs, 0.5rem);
+  gap: var(--space-xs);
   margin-inline: 0;
 }
 [data-instatic-audio] audio {

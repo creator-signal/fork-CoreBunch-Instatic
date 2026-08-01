@@ -8,7 +8,31 @@ export const NavigationListEditor: React.FC<
   const tag = props.ordered ? 'ol' : 'ul'
   return React.createElement(
     tag,
-    { ...nodeWrapperProps, className: mcClassName },
-    React.Children.map(children, (child) => <li>{child}</li>),
+    {
+      ...nodeWrapperProps,
+      className: mcClassName,
+      ...(props.structuredData === 'breadcrumb'
+        ? {
+            itemScope: true,
+            itemType: 'https://schema.org/BreadcrumbList',
+          }
+        : {}),
+    },
+    React.Children.map(children, (child, index) => (
+      <li
+        {...(props.structuredData === 'breadcrumb'
+          ? {
+              itemProp: 'itemListElement',
+              itemScope: true,
+              itemType: 'https://schema.org/ListItem',
+            }
+          : {})}
+      >
+        {child}
+        {props.structuredData === 'breadcrumb'
+          ? <meta itemProp="position" content={String(index + 1)} />
+          : null}
+      </li>
+    )),
   )
 }

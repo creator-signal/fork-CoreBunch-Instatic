@@ -20,6 +20,12 @@ export const ComponentFrameEditor: React.FC<
         'section',
       ),
       'data-variant': normalizeComponentFrameToken(props.variant, 'default'),
+      ...(props.kind === 'navigation'
+        ? {
+            itemScope: true,
+            itemType: 'https://schema.org/SiteNavigationElement',
+          }
+        : {}),
       ...(props.label ? { 'aria-label': props.label } : {}),
       ...(props.bindingPrefix
         ? { 'data-instatic-binding-prefix': props.bindingPrefix }

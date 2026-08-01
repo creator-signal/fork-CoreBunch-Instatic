@@ -24,6 +24,10 @@ The registry is metadata over Instatic's existing modules, Visual Components, pa
   Structure entries as Layout, and gives all form entries their own Forms
   section.
 - The registry does not own page trees, rendering, component instances or plugin lifecycle.
+- Page SEO settings remain a document-publisher concern: site defaults and the
+  public origin live in General settings, while each page can govern search,
+  robots, language-alternate, Open Graph and Twitter overrides. See
+  [Component HTML and SEO contract](../reference/component-html-seo-contract.md#document-metadata).
 
 ## Architecture
 
@@ -404,6 +408,7 @@ opens either boundary before focusing an invalid descendant.
 - `docs/features/site-search.md` — published index and Search Results capability.
 - `docs/features/file-attachments.md` — private form upload and scanner capability.
 - `docs/features/component-library-catalogue.md` — complete issue #11 catalogue traceability matrix and capability gates.
+- `docs/reference/component-html-seo-contract.md` — semantic HTML, structured data, SEO, native hooks and design-token contract for every built-in entry.
 - `docs/reference/typebox-patterns.md` — boundary validation.
 - Source-of-truth files: `src/core/component-library/`
 - Focused tests: `src/__tests__/component-library/componentLibraryRegistry.test.ts`

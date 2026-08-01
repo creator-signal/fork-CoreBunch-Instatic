@@ -26,6 +26,14 @@ export {
 } from './operationSchema'
 export { PageSchema } from './page'
 export {
+  PageSeoSchema,
+  PageRobotsSchema,
+  PageLanguageAlternateSchema,
+  PageOpenGraphSchema,
+  PageTwitterSchema,
+  parsePageSeo,
+} from './pageSeo'
+export {
   CSSDeclarationPriorityBagSchema,
   StyleRuleSchema,
   classKindSelector,
@@ -42,6 +50,13 @@ export type { PageTemplateConfig, TemplateTarget } from './pageTemplate'
 export type { PageNode } from './pageNode'
 export type { TreeOperation, TreeMutateResult } from './operationSchema'
 export type { Page } from './page'
+export type {
+  PageSeo,
+  PageRobots,
+  PageLanguageAlternate,
+  PageOpenGraph,
+  PageTwitter,
+} from './pageSeo'
 export type { CSSPropertyBag } from './cssPropertyBag'
 export type {
   CSSDeclarationPriorityBag,

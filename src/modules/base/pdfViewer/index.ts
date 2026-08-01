@@ -12,13 +12,13 @@ import {
 const PDF_VIEWER_CSS = `
 [data-instatic-pdf-viewer] {
   display: grid;
-  gap: var(--space-xs, 0.5rem);
+  gap: var(--space-xs);
   margin-inline: 0;
 }
 [data-instatic-pdf-viewer] object {
   width: 100%;
   min-height: 30rem;
-  border: 1px solid var(--color-border, currentColor);
+  border: 1px solid var(--border-primary);
 }
 [data-instatic-pdf-viewer][data-height="compact"] object { min-height: 20rem; }
 [data-instatic-pdf-viewer][data-height="tall"] object { min-height: 50rem; }

@@ -20,6 +20,7 @@ type PageActions = Pick<
   | 'addPage'
   | 'deletePage'
   | 'renamePage'
+  | 'updatePageSeo'
   | 'duplicatePage'
   | 'reorderPages'
   | 'convertPageToTemplate'
@@ -64,6 +65,22 @@ export function createPageActions({
         const page = p.pages.find((candidate) => candidate.id === pageId)
         if (!page) return false
         renamePage(p, pageId, title, slug)
+        return true
+      })
+    },
+
+    updatePageSeo: (pageId, seo) => {
+      mutateSite((site) => {
+        const page = site.pages.find((candidate) => candidate.id === pageId)
+        if (!page) return false
+        const current = page.seo === undefined ? undefined : JSON.stringify(page.seo)
+        const next = seo === undefined ? undefined : JSON.stringify(seo)
+        if (current === next) return false
+        if (seo === undefined) {
+          delete page.seo
+        } else {
+          page.seo = structuredClone(seo)
+        }
         return true
       })
     },

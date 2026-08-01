@@ -24,7 +24,7 @@ import type { Page, SiteDocument } from '@core/page-tree'
 import type { IModuleRegistry } from '@core/module-engine'
 import type { TemplateRenderDataContext } from '@core/templates/dynamicBindings'
 import { buildPageFrame, buildSiteFrame, buildRouteFrame } from '@core/templates/contextFrames'
-import { classNamesForClassIds } from '@core/page-tree'
+import { classNamesForClassIds, pagePublicPath } from '@core/page-tree'
 import {
   normalizeHtmlAttributeName,
   sanitizeRenderableHtmlAttribute,
@@ -147,6 +147,8 @@ interface PublishPageOptions {
    * HTML representation the agent targets nodes through.
    */
   annotateNodeIds?: boolean
+  /** Force non-public previews and private responses out of search indexes. */
+  robotsPolicy?: 'page' | 'noindex'
 }
 
 /**
@@ -308,25 +310,133 @@ function bodyHtmlAttributes(value: unknown): string {
  */
 interface DocumentMetaTags {
   pageTitle: string
-  metaDesc: string
+  metadataHead: string
   favicon: string
   langAttr: string
 }
 
-function buildDocumentMetaTags(site: SiteDocument, page: Page): DocumentMetaTags {
+function normalizedPublicOrigin(value: string | undefined): string | undefined {
+  if (!value?.trim()) return undefined
+  try {
+    const parsed = new URL(value.trim())
+    if (!['http:', 'https:'].includes(parsed.protocol)) return undefined
+    if (parsed.username || parsed.password) return undefined
+    return parsed.origin
+  } catch {
+    return undefined
+  }
+}
+
+function resolveMetadataUrl(
+  value: string | undefined,
+  publicOrigin: string | undefined,
+): string | undefined {
+  if (!value?.trim()) return undefined
+  try {
+    const parsed = publicOrigin
+      ? new URL(value.trim(), `${publicOrigin}/`)
+      : new URL(value.trim())
+    if (!['http:', 'https:'].includes(parsed.protocol)) return undefined
+    if (parsed.username || parsed.password) return undefined
+    return parsed.href
+  } catch {
+    return undefined
+  }
+}
+
+function metadataTag(
+  attribute: 'name' | 'property',
+  key: string,
+  content: string | undefined,
+): string {
+  if (!content) return ''
+  return `\n  <meta ${attribute}="${key}" content="${escapeHtml(content)}">`
+}
+
+function buildDocumentMetaTags(
+  site: SiteDocument,
+  page: Page,
+  robotsPolicy: PublishPageOptions['robotsPolicy'],
+): DocumentMetaTags {
   const { settings } = site
-  const metaDesc = settings.metaDescription
-    ? `\n  <meta name="description" content="${escapeHtml(settings.metaDescription)}">`
-    : ''
+  const seo = page.seo
+  const rawTitle = seo?.title?.trim() || settings.metaTitle?.trim() || page.title || site.name
+  const rawDescription = seo?.description?.trim() || settings.metaDescription?.trim()
+  const rawLanguage = seo?.language?.trim() || settings.language?.trim() || 'en'
+  const publicOrigin = normalizedPublicOrigin(settings.publicOrigin)
+  const canonicalUrl = resolveMetadataUrl(seo?.canonicalUrl, publicOrigin)
+    ?? (publicOrigin ? resolveMetadataUrl(pagePublicPath(page.slug), publicOrigin) : undefined)
+  const robots = robotsPolicy === 'noindex'
+    ? { index: false, follow: false, archive: false }
+    : seo?.robots ?? { index: true, follow: true, archive: true }
+  const robotsContent = [
+    robots.index ? 'index' : 'noindex',
+    robots.follow ? 'follow' : 'nofollow',
+    ...(!robots.archive ? ['noarchive'] : []),
+  ].join(', ')
+
+  const alternateLinks: string[] = []
+  const alternateLanguages = new Map<string, string>()
+  for (const alternate of seo?.alternates ?? []) {
+    const language = alternate.language.trim()
+    const url = resolveMetadataUrl(alternate.url, publicOrigin)
+    const languageKey = language.toLowerCase()
+    if (!language || !url || alternateLanguages.has(languageKey)) continue
+    alternateLanguages.set(languageKey, language)
+    alternateLinks.push(
+      `\n  <link rel="alternate" hreflang="${escapeHtml(language)}" href="${escapeHtml(url)}">`,
+    )
+  }
+
+  const openGraphTitle = seo?.openGraph?.title?.trim() || rawTitle
+  const openGraphDescription = seo?.openGraph?.description?.trim() || rawDescription
+  const openGraphImage = resolveMetadataUrl(
+    seo?.openGraph?.imageUrl ?? settings.socialImageUrl,
+    publicOrigin,
+  )
+  const openGraphImageAlt = seo?.openGraph?.imageAlt?.trim() || settings.socialImageAlt?.trim()
+  const openGraphType = seo?.openGraph?.type ?? 'website'
+  const twitterImage = resolveMetadataUrl(seo?.twitter?.imageUrl, publicOrigin) ?? openGraphImage
+  const twitterImageAlt = seo?.twitter?.imageAlt?.trim() || openGraphImageAlt
+  const twitterTitle = seo?.twitter?.title?.trim() || openGraphTitle
+  const twitterDescription = seo?.twitter?.description?.trim() || openGraphDescription
+  const twitterCard = seo?.twitter?.card ?? (twitterImage ? 'summary_large_image' : 'summary')
+
+  const metadataHead =
+    metadataTag('name', 'description', rawDescription)
+    + metadataTag('name', 'robots', robotsContent)
+    + (canonicalUrl
+      ? `\n  <link rel="canonical" href="${escapeHtml(canonicalUrl)}">`
+      : '')
+    + alternateLinks.join('')
+    + metadataTag('property', 'og:title', openGraphTitle)
+    + metadataTag('property', 'og:description', openGraphDescription)
+    + metadataTag('property', 'og:type', openGraphType)
+    + metadataTag('property', 'og:url', canonicalUrl)
+    + metadataTag('property', 'og:site_name', site.name)
+    + metadataTag('property', 'og:locale', rawLanguage.replaceAll('-', '_'))
+    + [...alternateLanguages.entries()]
+      .filter(([languageKey]) => languageKey !== 'x-default' && languageKey !== rawLanguage.toLowerCase())
+      .map(([, language]) => language)
+      .map((language) => metadataTag('property', 'og:locale:alternate', language.replaceAll('-', '_')))
+      .join('')
+    + metadataTag('property', 'og:image', openGraphImage)
+    + metadataTag('property', 'og:image:alt', openGraphImage ? openGraphImageAlt : undefined)
+    + metadataTag('name', 'twitter:card', twitterCard)
+    + metadataTag('name', 'twitter:title', twitterTitle)
+    + metadataTag('name', 'twitter:description', twitterDescription)
+    + metadataTag('name', 'twitter:image', twitterImage)
+    + metadataTag('name', 'twitter:image:alt', twitterImage ? twitterImageAlt : undefined)
+
   const favicon =
     settings.faviconUrl && isSafeUrl(settings.faviconUrl)
       ? `\n  <link rel="icon" href="${escapeHtml(settings.faviconUrl)}">`
       : ''
   return {
-    pageTitle: escapeHtml(settings.metaTitle ?? page.title ?? site.name),
-    metaDesc,
+    pageTitle: escapeHtml(rawTitle),
+    metadataHead,
     favicon,
-    langAttr: escapeHtml(settings.language ?? 'en'),
+    langAttr: escapeHtml(rawLanguage),
   }
 }
 
@@ -438,7 +548,7 @@ interface AssembledDocumentParts {
   langAttr: string
   csp: string
   pageTitle: string
-  metaDesc: string
+  metadataHead: string
   favicon: string
   styleHeadHtml: string
   importmapTag: string
@@ -458,7 +568,7 @@ function assembleHtmlDocument(parts: AssembledDocumentParts): string {
     `<head>\n` +
     `  <meta charset="UTF-8">\n` +
     `  <meta name="viewport" content="width=device-width, initial-scale=1.0">${parts.csp}\n` +
-    `  <title>${parts.pageTitle}</title>${parts.metaDesc}${parts.favicon}\n` +
+    `  <title>${parts.pageTitle}</title>${parts.metadataHead}${parts.favicon}\n` +
     parts.styleHeadHtml +
     lineOrEmpty(parts.importmapTag) +
     lineOrEmpty(parts.headRuntimeScripts) +
@@ -555,7 +665,7 @@ export function publishPage(
     acc.cssMap,
   )
 
-  const meta = buildDocumentMetaTags(site, page)
+  const meta = buildDocumentMetaTags(site, page, options.robotsPolicy)
   const runtime = buildRuntimeAssetsBlock(options, acc)
   const csp = buildContentSecurityPolicy(runtime.anyScriptTag, runtime.importmap, acc.cspSources)
 
@@ -563,7 +673,7 @@ export function publishPage(
     langAttr: meta.langAttr,
     csp,
     pageTitle: meta.pageTitle,
-    metaDesc: meta.metaDesc,
+    metadataHead: meta.metadataHead,
     favicon: meta.favicon,
     styleHeadHtml,
     importmapTag: runtime.importmapTag,

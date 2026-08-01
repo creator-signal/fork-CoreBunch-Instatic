@@ -21,6 +21,7 @@ import { Type, type Static } from '@core/utils/typeboxHelpers'
 import { NodeTreeSchema } from './treeSchema'
 import { PageNodeSchema, type PageNode, parsePageNode } from './pageNode'
 import { PageTemplateConfigSchema, parsePageTemplate } from './pageTemplate'
+import { PageSeoSchema, parsePageSeo } from './pageSeo'
 import { reindexNodeParents } from './parentIndex'
 
 // ---------------------------------------------------------------------------
@@ -36,6 +37,8 @@ export const PageSchema = Type.Object({
   slug: Type.String(),
   /** Display title e.g. "Home", "About Us" */
   title: Type.String(),
+  /** Optional page-specific search, robots, language and social metadata. */
+  seo: Type.Optional(PageSeoSchema),
   /** Owning user for admin/editor workflows; server-owned when persisted in CMS. */
   ownerUserId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   /** User who originally created this page; server-owned when persisted in CMS. */
@@ -92,6 +95,7 @@ export function parsePage(raw: unknown, pageIndex: number): Page {
   reindexNodeParents(nodes)
 
   const template = parsePageTemplate(r.template)
+  const seo = parsePageSeo(r.seo)
 
   return {
     id: r.id,
@@ -106,6 +110,7 @@ export function parsePage(raw: unknown, pageIndex: number): Page {
       : {}),
     nodes,
     rootNodeId: r.rootNodeId,
+    ...(seo ? { seo } : {}),
     ...(template !== null ? { template } : {}),
   }
 }

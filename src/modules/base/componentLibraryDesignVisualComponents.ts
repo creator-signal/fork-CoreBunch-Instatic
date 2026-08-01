@@ -190,7 +190,7 @@ const BREADCRUMB = visualComponent(
       'breadcrumb.list',
       NavigationListModule.id,
       NavigationListModule.defaults,
-      { ordered: true },
+      { ordered: true, structuredData: 'breadcrumb' },
       ['breadcrumb.items'],
     ),
     visualNode(

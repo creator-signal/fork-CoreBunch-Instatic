@@ -14,26 +14,26 @@ import {
 
 export const INTERACTIVE_CSS = `
 [data-instatic-overlay] > [data-instatic-overlay-panel] {
-  padding: var(--space-l, 1.5rem);
-  border: 1px solid var(--color-border, currentColor);
-  border-radius: var(--radius-m, 0.5rem);
-  background: var(--color-surface, Canvas);
-  color: var(--color-text, CanvasText);
+  padding: var(--space-l);
+  border: 1px solid var(--border-primary);
+  border-radius: 0.5rem;
+  background: var(--bg-surface);
+  color: var(--text-body);
 }
 [data-instatic-overlay-header] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-m, 1rem);
+  gap: var(--space-m);
 }
 [data-instatic-overlay][data-instatic-overlay-enhanced][open] {
   position: fixed;
   inset: 0;
-  z-index: var(--layer-modal, 1000);
+  z-index: 1000;
   display: grid;
   place-items: center;
-  padding: var(--space-l, 1.5rem);
-  background: color-mix(in srgb, CanvasText 45%, transparent);
+  padding: var(--space-l);
+  background: color-mix(in srgb, var(--text-body) 45%, transparent);
 }
 [data-instatic-overlay][data-instatic-overlay-enhanced] > summary {
   cursor: pointer;
@@ -66,12 +66,12 @@ export const INTERACTIVE_CSS = `
 }
 [data-instatic-carousel-track] {
   display: grid;
-  gap: var(--space-m, 1rem);
+  gap: var(--space-m);
 }
 [data-instatic-carousel-controls] {
   display: none;
-  gap: var(--space-s, 0.75rem);
-  margin-block-start: var(--space-m, 1rem);
+  gap: var(--space-s);
+  margin-block-start: var(--space-m);
 }
 [data-instatic-carousel][data-instatic-carousel-enhanced] [data-instatic-carousel-controls] {
   display: flex;

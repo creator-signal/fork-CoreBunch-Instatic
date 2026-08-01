@@ -239,10 +239,30 @@ describe('base accessible media and design modules', () => {
 
   it('wraps every navigation child in a semantic list item', () => {
     expect(NavigationListModule.render(
-      { ordered: true },
+      { ...NavigationListModule.defaults, ordered: true },
       ['<a href="/">Home</a>', '<a href="/news">News</a>'],
     ).html).toBe(
       '<ol><li><a href="/">Home</a></li><li><a href="/news">News</a></li></ol>',
+    )
+  })
+
+  it('publishes complete breadcrumb structured data from governed links', () => {
+    expect(NavigationListModule.render(
+      {
+        ...NavigationListModule.defaults,
+        ordered: true,
+        structuredData: 'breadcrumb',
+      },
+      ['<a href="/">Home</a>', '<a href="/news">News</a>'],
+    ).html).toBe(
+      '<ol itemscope itemtype="https://schema.org/BreadcrumbList">' +
+      '<li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">' +
+      '<a itemprop="item" href="/"><span itemprop="name">Home</span></a>' +
+      '<meta itemprop="position" content="1"></li>' +
+      '<li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">' +
+      '<a itemprop="item" href="/news" aria-current="page">' +
+      '<span itemprop="name">News</span></a>' +
+      '<meta itemprop="position" content="2"></li></ol>',
     )
   })
 })
@@ -989,6 +1009,42 @@ describe('base.image — render() specifics', () => {
       [],
     ).html
     expect(html).toContain('alt="Profile photo"')
+  })
+
+  it('publishes ImageObject metadata from the resolved Media Library asset', () => {
+    const safeProps = escapeProps(
+      { ...ImageModule.defaults, src: '/img.jpg' },
+      ImageModule.schema,
+    )
+    const html = ImageModule.render(
+      {
+        ...safeProps,
+        _resolvedMediaByKey: {
+          src: {
+            publicPath: '/img.jpg',
+            mimeType: 'image/jpeg',
+            width: 100,
+            height: 100,
+            altText: 'Profile photo',
+            caption: 'A profile image & portrait',
+            blurHash: null,
+            variants: [],
+            posterPath: null,
+          },
+        },
+      },
+      [],
+    ).html
+
+    expect(html).toContain(
+      'itemscope itemtype="https://schema.org/ImageObject"',
+    )
+    expect(html).toContain(
+      '<meta itemprop="contentUrl" content="/img.jpg">',
+    )
+    expect(html).toContain(
+      '<meta itemprop="caption" content="A profile image &amp; portrait">',
+    )
   })
 
   it('emits empty alt attribute when no library asset is resolved', () => {

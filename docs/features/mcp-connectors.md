@@ -89,16 +89,29 @@ Claude Code can also authenticate from the interactive `/mcp` panel. Instatic dy
 
 The complete user workflow is documented in [`docs/reference/claude-mcp.md`](../reference/claude-mcp.md).
 
-### Component Library boundary
+### Governed Component Library authoring
 
-The MCP registry does not currently expose catalogue-native list or insert
-tools. `site_insert_html` creates freeform nodes and requires
-`site.structure.edit`; a grant containing only `site.components.edit` does not
-make a governed component insertion tool available. Authors must insert those
-entries from the Site editor's Component Library to retain catalogue identity,
-declared fields, placement rules, presets and variants. MCP may then inspect the
-document and use whichever generic edit and publish tools its broader grant
-allows.
+MCP exposes the same live Component Library registry used by the Site editor,
+including plugin-owned entries:
+
+| Tool | Purpose | Required capabilities |
+|---|---|---|
+| `site_list_component_library` | Search current entries and read their version, source, fields, options, slots, constraints, requirements and accessibility contract. | `site.read` |
+| `site_insert_component` | Insert a registered entry through its canonical backing implementation and placement policy. | `ai.tools.write`, `site.components.edit` |
+| `site_update_component_field` | Change one field declared by the retained entry version. | `ai.tools.write`, `site.components.edit` |
+| `site_apply_component_option` | Resolve and apply one registered preset or variant by ID. | `ai.tools.write`, `site.components.edit` |
+
+These tools retain catalogue identity and version, plugin ownership,
+capability/provider metadata, slots, presets and variants. They reject unknown
+entries, fields, options and invalid placement. Registered option values remain
+inside Instatic and are applied by ID; callers cannot use these tools to inject
+arbitrary props, styles or bindings.
+
+`site_insert_html` remains the freeform HTML surface and requires
+`site.structure.edit`. It is not a substitute when a requested component exists
+in the governed catalogue. Component operations update the authoring draft and
+never publish implicitly; publication remains the explicit `site_publish` tool
+and requires `pages.publish`.
 
 ## Personal access tokens
 
@@ -161,7 +174,7 @@ MCP exposes the full deduplicated tool catalog, filtered by the connection's cap
 
 Server-resolved tools work without an editor open. They include content reads, `get_context`, `site_list_documents`, `site_read_styles`, `site_list_breakpoints`, and explicit `site_publish`. Publishing requires `ai.tools.write` plus `pages.publish`, runs the canonical full-site pipeline, swaps the static slot atomically, and records the connection id in the publish audit event.
 
-Browser tools run against the connection owner's live workspace. Site structure, HTML/CSS, page lifecycle, design-token, content mutation, code-asset, and live-DOM tools route to the matching open Site or Content workspace. If that workspace is not open, the tool returns a scope-specific error while headless tools remain available.
+Browser tools run against the connection owner's live workspace. Site structure, governed Component Library authoring, HTML/CSS, page lifecycle, design-token, content mutation, code-asset, and live-DOM tools route to the matching open Site or Content workspace. If that workspace is not open, the tool returns a scope-specific error while headless tools remain available.
 
 There is intentionally no headless page-tree mutation path. The open editor store is the single source of truth for draft edits; a second DB mutation path would desynchronize node state and risk autosave overwrites. Successful relayed edits flush the draft before returning, so a following headless read or explicit publish sees the saved result.
 
@@ -207,7 +220,7 @@ Create and manual revoke actions retain the existing `ai.mcp_connector.created` 
 - `server/ai/mcp/auth.test.ts` covers personal and OAuth bearer resolution plus the protected-resource challenge.
 - `src/__tests__/ai/mcpOAuthAuthorizationHandler.test.ts` covers signed-in consent, capability selection, exact callback redirects, denial, and privilege floors.
 - `src/__tests__/ai/mcpConnectorsHandler.test.ts` covers connection listing, personal-token creation, step-up, revoke, and privilege floors.
-- `server/ai/mcp/e2e.test.ts`, `transports/http.test.ts`, and `publishTool.test.ts` cover the real MCP request flow and publish path.
+- `server/ai/mcp/e2e.test.ts`, `registry.test.ts`, `transports/http.test.ts`, and `publishTool.test.ts` cover the real MCP request flow, Component Library capability filtering and publish path.
 - `src/__tests__/architecture/ai-mcp-connectors-never-leak.test.ts` gates the token-free connection projection.
 
 ## Related

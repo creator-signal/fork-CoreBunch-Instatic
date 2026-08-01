@@ -22,6 +22,7 @@ const READ_ONLY_NAMES_IN_WRITE_FILE = new Set([
   'site_read_code_asset',
   'site_inspect_code_runtime',
   'site_render_snapshot',
+  'site_list_component_library',
 ])
 
 function stampMutationFlag(tools: AiTool[], isMutating: boolean): AiTool[] {

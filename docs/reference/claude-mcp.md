@@ -94,22 +94,32 @@ The picker in **AI → MCP connections** groups the available grants. Its source
 | Inspect site pages and content | `site.read` and the required content/data read capabilities |
 | Edit site structure or page content | `ai.tools.write`, `site.structure.edit`, `site.content.edit`, and `pages.edit` as required |
 | Edit site styling | `ai.tools.write` and `site.style.edit` |
+| List governed Component Library entries | `site.read` |
+| Insert or configure a governed Component Library entry | `ai.tools.write` and `site.components.edit` |
 | Edit content entries | `ai.tools.write` plus the applicable `content.create` or `content.edit.*` capability |
 | Publish the public site | `ai.tools.write` and `pages.publish` |
-| Insert a governed Component Library entry | Not currently exposed as an MCP tool; insert it from the Site editor |
 
 Start read-only and reconnect with a wider grant only when the workflow needs it. Instatic filters the MCP tool catalog before Claude sees it through `server/ai/mcp/registry.ts`.
 
-### Component Library boundary
+### Use governed Component Library entries
 
-MCP does not currently expose catalogue-native list or insert tools. The generic
-`site_insert_html` tool creates freeform page-tree nodes and requires
-`site.structure.edit`; granting only `site.components.edit` does not expose a
-governed component insertion tool. Insert governed entries through the Site
-editor's Component Library so their catalogue identity, field schema, placement
-rules, presets and variants are retained. MCP can still inspect the resulting
-document, use the generic tools permitted by a broader grant, and publish the
-reviewed draft.
+1. Call `site_list_component_library` with an optional search/category filter.
+2. Choose a returned entry ID and, if needed, a returned preset or variant ID.
+3. Call `site_insert_component` with the entry ID and a real parent node ID from
+   the current document.
+4. Configure the instance with `site_update_component_field` for declared
+   fields and `site_apply_component_option` for registered presets or variants.
+
+The insertion uses the same registry, placement checks and backing
+implementation as the Site editor. Catalogue identity/version, plugin source,
+slots, accessibility contract and capability/provider metadata remain attached
+to the authored instance. Unknown fields/options and disallowed parents are
+rejected. Registered preset and variant values are resolved inside Instatic and
+are not supplied by Claude.
+
+Do not recreate a catalogue component with `site_insert_html`; that tool is for
+freeform structure and requires `site.structure.edit`. Component edits remain a
+draft until an explicit `site_publish` call is made with `pages.publish`.
 
 ## Edit and publish safely
 

@@ -292,6 +292,15 @@ variant metadata whose approved values move in the same request. Raw nodes,
 catalogue identity changes, arbitrary props, bindings, classes and inline or
 breakpoint styles still require their existing structural or style capability.
 
+The browser-bridged MCP surface honours this same boundary. A connection with
+`site.read` can search the live registry through
+`site_list_component_library`; writes require both `ai.tools.write` and
+`site.components.edit`. `site_insert_component`,
+`site_update_component_field`, and `site_apply_component_option` reuse the
+registry, placement policy, page-tree actions and retained definition version.
+They include plugin-owned entries, reject undeclared fields and option IDs, and
+never publish implicitly. See [MCP connections](mcp-connectors.md).
+
 `resolveComponentLibraryPlacement()` is the shared composition policy for
 catalogue insertion, governed moves and server diff validation. It enforces an
 entry's allowed parents, a parent's allowed children, named-slot entry and

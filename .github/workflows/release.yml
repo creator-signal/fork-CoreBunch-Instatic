@@ -123,31 +123,45 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Resolve private source-map upload
+        id: source-map-config
+        shell: bash
+        run: |
+          missing=()
+          for name in SENTRY_URL SENTRY_ORG SENTRY_PROJECT SENTRY_AUTH_TOKEN SENTRY_RELEASE; do
+            if [ -z "${!name}" ]; then
+              missing+=("$name")
+            fi
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Private source-map upload skipped; configure: ${missing[*]}"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up Bun
+        if: steps.source-map-config.outputs.enabled == 'true'
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.3.11
 
       - name: Install dependencies
+        if: steps.source-map-config.outputs.enabled == 'true'
         run: bun install --frozen-lockfile
 
-      - name: Validate protected GlitchTip configuration
-        shell: bash
-        run: |
-          test -n "$SENTRY_URL"
-          test -n "$SENTRY_ORG"
-          test -n "$SENTRY_PROJECT"
-          test -n "$SENTRY_AUTH_TOKEN"
-          test -n "$SENTRY_RELEASE"
-
       - name: Build hidden source maps
+        if: steps.source-map-config.outputs.enabled == 'true'
         run: bun run build:monitoring
 
       - name: Upload and finalize release
+        if: steps.source-map-config.outputs.enabled == 'true'
         shell: bash
         run: |
           bunx sentry-cli releases new "$SENTRY_RELEASE" \
             || bunx sentry-cli releases info "$SENTRY_RELEASE"
+          # Sentry URL prefixes intentionally use a literal ~/.
+          # shellcheck disable=SC2088
           bunx sentry-cli sourcemaps upload \
             --release "$SENTRY_RELEASE" \
             --url-prefix "~/assets" \
@@ -155,6 +169,7 @@ jobs:
           bunx sentry-cli releases finalize "$SENTRY_RELEASE"
 
       - name: Assert source maps stay out of runtime artifacts
+        if: steps.source-map-config.outputs.enabled == 'true'
         shell: bash
         run: |
           find dist -type f -name '*.map' -delete

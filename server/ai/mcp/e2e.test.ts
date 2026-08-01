@@ -31,7 +31,7 @@ beforeEach(async () => {
   token = generatePersonalAccessToken()
   await createBearerConnection(db, {
     userId: 'u1', label: 'Claude Code',
-    capabilities: ['ai.chat', 'ai.tools.write', 'site.read', 'site.structure.edit', 'content.manage', 'data.system.tables.read'],
+    capabilities: ['ai.chat', 'ai.tools.write', 'site.read', 'site.structure.edit', 'site.components.edit', 'content.manage', 'data.system.tables.read'],
     tokenHash: await hashMcpSecret(token),
   })
 })
@@ -83,6 +83,8 @@ describe('MCP end-to-end (stateless multi-request, real handler)', () => {
     expect(names).toContain('content_list_collections') // headless content read
     expect(names).toContain('site_read_styles') // headless design-system read
     expect(names).toContain('site_insert_html') // browser editing tool, relayed to the editor
+    expect(names).toContain('site_list_component_library')
+    expect(names).toContain('site_insert_component')
 
     const read = await rpc('tools/call', { name: 'content_list_collections', arguments: {} })
     expect(read.json.result?.isError).toBeFalsy()
@@ -113,7 +115,9 @@ describe('MCP end-to-end (stateless multi-request, real handler)', () => {
     const names = tools.map((t) => t.name)
     expect(names).toContain('content_list_collections')
     expect(names).toContain('site_read_styles')
+    expect(names).toContain('site_list_component_library')
     expect(names).not.toContain('site_insert_html') // write tool gated out (no ai.tools.write)
+    expect(names).not.toContain('site_insert_component')
     expect(names).not.toContain('mutate_page_tree') // removed entirely
   })
 })

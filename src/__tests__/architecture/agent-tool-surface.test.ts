@@ -90,7 +90,18 @@ describe('agent-tool-surface gate', () => {
     expect(toolNames).toContain('site_clear_page_template')
   })
 
-  it('total tool count is 29 (document, HTML, node, CSS, code asset, page, template, token, and snapshot tools)', () => {
-    expect(toolNames).toHaveLength(29)
+  it('governed Component Library tools are present with read/write mutation flags', () => {
+    expect(toolNames).toContain('site_list_component_library')
+    expect(toolNames).toContain('site_insert_component')
+    expect(toolNames).toContain('site_update_component_field')
+    expect(toolNames).toContain('site_apply_component_option')
+    expect(stampedToolByName.get('site_list_component_library')?.mutates).toBe(false)
+    expect(stampedToolByName.get('site_insert_component')?.mutates).toBe(true)
+    expect(stampedToolByName.get('site_update_component_field')?.mutates).toBe(true)
+    expect(stampedToolByName.get('site_apply_component_option')?.mutates).toBe(true)
+  })
+
+  it('total tool count is 33 (including governed Component Library authoring)', () => {
+    expect(toolNames).toHaveLength(33)
   })
 })

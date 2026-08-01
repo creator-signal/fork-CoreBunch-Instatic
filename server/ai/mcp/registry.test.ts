@@ -8,6 +8,7 @@ const FULL: Parameters<typeof mcpToolsForCapabilities>[0] = [
   'site.structure.edit',
   'site.content.edit',
   'site.style.edit',
+  'site.components.edit',
   'pages.publish',
   'content.manage',
   'content.create',
@@ -31,6 +32,10 @@ describe('mcp registry', () => {
     expect(names).toContain('site_delete_node')
     expect(names).toContain('site_apply_css')
     expect(names).toContain('site_set_color_tokens')
+    expect(names).toContain('site_list_component_library')
+    expect(names).toContain('site_insert_component')
+    expect(names).toContain('site_update_component_field')
+    expect(names).toContain('site_apply_component_option')
     expect(tools.some((t) => t.execution === 'browser')).toBe(true)
   })
 
@@ -67,6 +72,26 @@ describe('mcp registry', () => {
     expect(tools.some((t) => t.mutates)).toBe(false)
     expect(tools.some((t) => t.name === 'mutate_page_tree')).toBe(false)
     expect(tools.some((t) => t.name === 'site_insert_html')).toBe(false)
+    expect(tools.some((t) => t.name === 'site_list_component_library')).toBe(true)
+    expect(tools.some((t) => t.name === 'site_insert_component')).toBe(false)
+  })
+
+  it('requires the component capability for governed component writes', () => {
+    const withoutComponentEdit = FULL.filter((c) => c !== 'site.components.edit')
+    const names = mcpToolsForCapabilities(withoutComponentEdit).map((tool) => tool.name)
+    expect(names).toContain('site_list_component_library')
+    expect(names).not.toContain('site_insert_component')
+    expect(names).not.toContain('site_update_component_field')
+    expect(names).not.toContain('site_apply_component_option')
+
+    const componentOnly = mcpToolsForCapabilities([
+      'ai.chat',
+      'ai.tools.write',
+      'site.read',
+      'site.components.edit',
+    ]).map((tool) => tool.name)
+    expect(componentOnly).toContain('site_insert_component')
+    expect(componentOnly).not.toContain('site_insert_html')
   })
 
   it('only exposes full-site publish when both write and publish capabilities are granted', () => {

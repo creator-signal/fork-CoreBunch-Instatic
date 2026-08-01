@@ -121,6 +121,70 @@ export const DuplicateNodeInputSchema = Type.Object({
 export type DuplicateNodeInput = Static<typeof DuplicateNodeInputSchema>
 
 // ---------------------------------------------------------------------------
+// Governed Component Library tools
+// ---------------------------------------------------------------------------
+
+const ComponentLibraryImplementationTypeInputSchema = Type.Union([
+  Type.Literal('primitive'),
+  Type.Literal('visual-component'),
+  Type.Literal('pattern'),
+  Type.Literal('template-component'),
+  Type.Literal('capability-backed'),
+])
+
+const ComponentLibrarySourceTypeInputSchema = Type.Union([
+  Type.Literal('built-in'),
+  Type.Literal('site'),
+  Type.Literal('design-system'),
+  Type.Literal('plugin'),
+])
+
+const ComponentLibraryStatusInputSchema = Type.Union([
+  Type.Literal('stable'),
+  Type.Literal('experimental'),
+  Type.Literal('deprecated'),
+])
+
+export const ListComponentLibraryInputSchema = Type.Object({
+  search: Type.Optional(Type.String()),
+  category: Type.Optional(Type.String({ minLength: 1 })),
+  implementationType: Type.Optional(ComponentLibraryImplementationTypeInputSchema),
+  sourceType: Type.Optional(ComponentLibrarySourceTypeInputSchema),
+  status: Type.Optional(ComponentLibraryStatusInputSchema),
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 200 })),
+}, { additionalProperties: false })
+export type ListComponentLibraryInput = Static<typeof ListComponentLibraryInputSchema>
+
+export const InsertComponentLibraryEntryInputSchema = Type.Object({
+  entryId: Type.String({ minLength: 1 }),
+  parentId: Type.String({ minLength: 1 }),
+  index: Type.Optional(Type.Integer({ minimum: 0 })),
+  presetId: Type.Optional(Type.String({ minLength: 1 })),
+  variantId: Type.Optional(Type.String({ minLength: 1 })),
+}, { additionalProperties: false })
+export type InsertComponentLibraryEntryInput = Static<
+  typeof InsertComponentLibraryEntryInputSchema
+>
+
+export const UpdateComponentLibraryFieldInputSchema = Type.Object({
+  nodeId: Type.String({ minLength: 1 }),
+  fieldKey: Type.String({ minLength: 1 }),
+  value: Type.Unknown(),
+}, { additionalProperties: false })
+export type UpdateComponentLibraryFieldInput = Static<
+  typeof UpdateComponentLibraryFieldInputSchema
+>
+
+export const ApplyComponentLibraryOptionInputSchema = Type.Object({
+  nodeId: Type.String({ minLength: 1 }),
+  kind: Type.Union([Type.Literal('preset'), Type.Literal('variant')]),
+  optionId: Type.String({ minLength: 1 }),
+}, { additionalProperties: false })
+export type ApplyComponentLibraryOptionInput = Static<
+  typeof ApplyComponentLibraryOptionInputSchema
+>
+
+// ---------------------------------------------------------------------------
 // CSS + class-assignment write tools
 // ---------------------------------------------------------------------------
 

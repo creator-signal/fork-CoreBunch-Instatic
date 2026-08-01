@@ -2,7 +2,12 @@ import { describe, expect, it } from 'bun:test'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
-import { normalizeOrigin, readServerConfig, resolvePublicOrigins } from '../../../server/config'
+import {
+  normalizeOrigin,
+  readServerConfig,
+  resolvePublicConnectOrigins,
+  resolvePublicOrigins,
+} from '../../../server/config'
 
 describe('normalizeOrigin', () => {
   it('lowercases scheme and host and strips the trailing slash', () => {
@@ -102,6 +107,11 @@ describe('readServerConfig', () => {
       staticDir: './dist',
       trustedProxyCidrs: [],
       publicOrigins: [],
+      publicConnectOrigins: [],
+      monitoring: {
+        adminBrowser: null,
+        server: null,
+      },
       attachments: {
         directory: resolve('attachments'),
         scannerUrl: null,
@@ -142,6 +152,7 @@ describe('readServerConfig', () => {
         STATIC_DIR: '/srv/instatic/dist',
         TRUSTED_PROXY_CIDRS: '10.0.0.0/8, 192.168.0.0/16, ',
         PUBLIC_ORIGIN: 'https://CMS.example.com/, http://localhost:5173',
+        INSTATIC_PUBLIC_CONNECT_ORIGINS: 'https://events.example.com, http://localhost:48201',
         RENDER_EXTERNAL_URL: 'https://ignored.onrender.com',
         RAILWAY_PUBLIC_DOMAIN: 'ignored.up.railway.app',
       }),
@@ -152,6 +163,11 @@ describe('readServerConfig', () => {
       staticDir: '/srv/instatic/dist',
       trustedProxyCidrs: ['10.0.0.0/8', '192.168.0.0/16'],
       publicOrigins: ['https://cms.example.com', 'http://localhost:5173'],
+      publicConnectOrigins: ['https://events.example.com', 'http://localhost:48201'],
+      monitoring: {
+        adminBrowser: null,
+        server: null,
+      },
       attachments: {
         directory: '/srv/instatic/attachments',
         scannerUrl: null,
@@ -320,5 +336,95 @@ describe('readServerConfig', () => {
     expect(() => readServerConfig({
       INSTATIC_BOOTSTRAP_SITE_NAME: 'Creator Signal',
     })).toThrow(/Starter-site bootstrap requires/)
+  })
+
+  it('loads separate Admin-browser and server monitoring DSNs from mounted files', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'instatic-monitoring-'))
+    const adminDsnPath = join(directory, 'admin-browser-dsn')
+    const serverDsnPath = join(directory, 'server-dsn')
+    writeFileSync(adminDsnPath, 'https://admin-key@errors.example.test/101\n')
+    writeFileSync(serverDsnPath, 'https://server-key@errors.example.test/102\n')
+
+    expect(readServerConfig({
+      INSTATIC_ADMIN_GLITCHTIP_DSN_FILE: adminDsnPath,
+      INSTATIC_SERVER_GLITCHTIP_DSN_FILE: serverDsnPath,
+      INSTATIC_ENVIRONMENT: 'production',
+      INSTATIC_RELEASE: 'sha-abc123',
+    }).monitoring).toEqual({
+      adminBrowser: {
+        dsn: 'https://admin-key@errors.example.test/101',
+        environment: 'production',
+        release: 'sha-abc123',
+      },
+      server: {
+        dsn: 'https://server-key@errors.example.test/102',
+        environment: 'production',
+        release: 'sha-abc123',
+      },
+    })
+  })
+
+  it('uses the immutable image revision as the default monitoring release', () => {
+    const config = readServerConfig({
+      INSTATIC_ADMIN_GLITCHTIP_DSN: 'https://public@errors.example.com/1',
+      INSTATIC_BUILD_RELEASE: '0123456789abcdef',
+    })
+
+    expect(config.monitoring.adminBrowser?.release).toBe('0123456789abcdef')
+  })
+
+  it('rejects a shared monitoring DSN and malformed labels', () => {
+    const shared = 'https://same-key@errors.example.test/101'
+    expect(() => readServerConfig({
+      INSTATIC_ADMIN_GLITCHTIP_DSN: shared,
+      INSTATIC_SERVER_GLITCHTIP_DSN: shared,
+    })).toThrow(/require separate GlitchTip DSNs/)
+    expect(() => readServerConfig({
+      INSTATIC_ENVIRONMENT: 'production<script>',
+    })).toThrow(/safe release\/environment label/)
+  })
+})
+
+describe('resolvePublicConnectOrigins', () => {
+  it('accepts and deduplicates HTTPS origins', () => {
+    expect(resolvePublicConnectOrigins({
+      PUBLIC_ORIGIN: 'https://cms.example.com',
+      INSTATIC_PUBLIC_CONNECT_ORIGINS: 'https://events.example.com/, https://events.example.com',
+    })).toEqual(['https://events.example.com'])
+  })
+
+  it('accepts HTTP localhost collectors for an HTTP localhost site', () => {
+    expect(resolvePublicConnectOrigins({
+      PUBLIC_ORIGIN: 'http://localhost:4330',
+      INSTATIC_PUBLIC_CONNECT_ORIGINS: 'http://localhost:48201, http://127.0.0.1:48211',
+    })).toEqual(['http://localhost:48201', 'http://127.0.0.1:48211'])
+  })
+
+  it('rejects HTTP non-local collector origins', () => {
+    expect(() => resolvePublicConnectOrigins({
+      PUBLIC_ORIGIN: 'http://localhost:4330',
+      INSTATIC_PUBLIC_CONNECT_ORIGINS: 'http://events.example.com',
+    })).toThrow(/requires HTTPS/)
+  })
+
+  it('rejects HTTP localhost collectors for a production public origin', () => {
+    expect(() => resolvePublicConnectOrigins({
+      PUBLIC_ORIGIN: 'https://cms.example.com',
+      INSTATIC_PUBLIC_CONNECT_ORIGINS: 'http://localhost:48201',
+    })).toThrow(/require an HTTP localhost PUBLIC_ORIGIN/)
+  })
+
+  it('rejects origins containing credentials or URL components', () => {
+    for (const origin of [
+      'https://user@example.com',
+      'https://events.example.com/path',
+      'https://events.example.com?token=value',
+      'https://events.example.com#fragment',
+    ]) {
+      expect(() => resolvePublicConnectOrigins({
+        PUBLIC_ORIGIN: 'https://cms.example.com',
+        INSTATIC_PUBLIC_CONNECT_ORIGINS: origin,
+      })).toThrow(/without credentials, path, query, or fragment/)
+    }
   })
 })

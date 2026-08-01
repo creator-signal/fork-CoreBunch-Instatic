@@ -6,6 +6,18 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.21 - 2026-08-02
+
+### Creator Signal legal publication
+
+- Published version `2026-08-02` of the concise Creator Signal legal, trust,
+  support, status, and account-data page set with a shared effective date and
+  verified operating-company disclosure.
+- Removed the pre-activation disclaimer from Terms and Privacy after operator
+  approval, without representing the page pack as external legal advice.
+- Bumped the embedded Creator Signal plugin to `0.1.9` so managed existing
+  installations upgrade and republish the reviewed page pack on deployment.
+
 ## 0.0.20 - 2026-08-02
 
 ### MCP Component Library authoring

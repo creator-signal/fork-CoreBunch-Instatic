@@ -52,6 +52,7 @@ function resetStore() {
     selectedNodeId: null,
     selectedNodeIds: [],
     hoveredNodeId: null,
+    layersViewMode: 'html',
     activeBreakpointId: 'desktop',
     activeClassId: null,
     previewClassAssignment: null,

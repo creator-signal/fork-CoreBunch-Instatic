@@ -16,7 +16,10 @@ import { useEditorStore } from '@site/store/store'
 import { makeNode, makePage, makeSite, makeVC } from '../fixtures'
 import '@modules/base/index'
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  useEditorStore.setState({ layersViewMode: 'html' })
+})
 
 function loadSite(): void {
   const page = makePage({

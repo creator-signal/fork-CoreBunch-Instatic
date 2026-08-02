@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import type { DataField } from '@core/data/schemas'
+import type { DataField, DataTable } from '@core/data/schemas'
 import type { CellEditorProps } from '@admin/pages/data/types'
 import type { RelationCellProps } from './RelationCell'
 import type { PageTreeCellProps } from './PageTreeCell'
@@ -20,6 +20,7 @@ import { RelationCell } from './RelationCell'
 import { PageTreeCell } from './PageTreeCell'
 import { FieldSchemaCell } from './FieldSchemaCell'
 import { AttachmentCell } from './AttachmentCell'
+import { RepeaterCell } from './RepeaterCell'
 
 
 /**
@@ -33,6 +34,8 @@ interface CellEditorRendererExtras {
   onOpenEditor?: PageTreeCellProps['onOpenEditor']
   /** Forwarded to FieldSchemaCell — opens the field-editor dialog. */
   onOpenFieldEditor?: FieldSchemaCellProps['onOpenFieldEditor']
+  /** Forwarded to RepeaterCell for nested relation fields. */
+  tables?: DataTable[]
 }
 
 type CellEditorRendererProps = CellEditorProps<DataField> & CellEditorRendererExtras
@@ -47,6 +50,7 @@ export function CellEditorRenderer({
   onOpenPicker,
   onOpenEditor,
   onOpenFieldEditor,
+  tables,
   ...rest
 }: CellEditorRendererProps): ReactElement {
   switch (field.type) {
@@ -91,6 +95,9 @@ export function CellEditorRenderer({
 
     case 'relation':
       return <RelationCell field={field} {...rest} onOpenPicker={onOpenPicker} />
+
+    case 'repeater':
+      return <RepeaterCell field={field} {...rest} tables={tables} />
 
     case 'pageTree':
       return <PageTreeCell field={field} {...rest} onOpenEditor={onOpenEditor} />

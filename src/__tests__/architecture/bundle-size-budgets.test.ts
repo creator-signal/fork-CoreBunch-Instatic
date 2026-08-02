@@ -131,9 +131,10 @@ const BUDGETS: ChunkBudget[] = [
   },
   {
     prefix: 'AdminCanvasEditorBody-',
-    maxBytes: 780_000,
+    maxBytes: 785_000,
     rationale:
-      'post-paint Site editor body (canvas + panels + modules + publisher). ' +
+      'post-paint Site editor body including collaboration, governed catalogue, ' +
+      'repeater and private-attachment authoring (canvas + panels + modules + publisher). ' +
       'Current ~724 KB raw / ~228 KB gzipped after moving Import HTML behind ' +
       'its own open-state lazy boundary. This is still the main Site runtime ' +
       'cost, but it must remain behind the shell lazy boundary.',
@@ -157,9 +158,9 @@ const BUDGETS: ChunkBudget[] = [
 
   {
     prefix: 'ContentPage-',
-    maxBytes: 90_000,
+    maxBytes: 91_000,
     rationale:
-      'content workspace route after Tiptap/LiveCanvas lazy split. Current ' +
+      'content workspace route after Tiptap/LiveCanvas and collaboration merge. Current ' +
       '~81 KB raw / ~27 KB gzipped.',
   },
 

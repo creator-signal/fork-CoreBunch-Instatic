@@ -84,6 +84,7 @@ function previewValueForField(field: DataField): unknown {
     // Private attachments never appear in public/template preview data.
     case 'attachment': return field.allowMultiple ? [] : null
     case 'relation': return null
+    case 'repeater': return []
     // Structural types: pageTree and fieldSchema hold whole documents, not scalar values.
     // Preview data generation has no meaningful value to produce for them.
     case 'pageTree': return null

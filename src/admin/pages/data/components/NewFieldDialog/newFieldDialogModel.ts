@@ -21,6 +21,7 @@ export const FIELD_TYPE_OPTIONS: ReadonlyArray<{ value: DataFieldType; label: st
   { value: 'media', label: 'Media' },
   { value: 'attachment', label: 'Attachment' },
   { value: 'relation', label: 'Relation' },
+  { value: 'repeater', label: 'Repeater' },
 ]
 
 export const RICH_TEXT_FORMAT_OPTIONS = [
@@ -48,6 +49,14 @@ export function slugifyOptionValue(label: string): string {
     .trim()
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '')
+}
+
+export function fieldIdFromLabel(label: string): string {
+  const normalized = slugifyOptionValue(
+    label.normalize('NFKD').replace(/\p{Diacritic}/gu, ''),
+  )
+  if (!normalized) return ''
+  return /^[a-z]/.test(normalized) ? normalized : `field_${normalized}`
 }
 
 export function makeOption(label: string): DraftOption {

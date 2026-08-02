@@ -7,6 +7,8 @@ import { useEditorStore } from '@site/store/store'
 import '@modules/base/index'
 
 beforeEach(() => {
+  // clearSite resets the collaboration documents and their undo managers.
+  useEditorStore.getState().clearSite()
   useEditorStore.setState({
     site: null,
     activePageId: null,
@@ -15,11 +17,8 @@ beforeEach(() => {
     selectedNodeIds: [],
     hoveredNodeId: null,
     packageJson: {},
-    _historyPast: [],
-    _historyFuture: [],
     canUndo: false,
     canRedo: false,
-    hasUnsavedChanges: false,
   })
 })
 
@@ -43,12 +42,6 @@ describe('useInsertComponentLibraryEntry', () => {
       },
     )
     store.selectNode(formId)
-    useEditorStore.setState({
-      _historyPast: [],
-      _historyFuture: [],
-      canUndo: false,
-      canRedo: false,
-    })
     const entry = componentLibraryRegistry.getOrThrow('base.email-input')
     const { result } = renderHook(() => useInsertComponentLibraryEntry())
     let nodeId: string | null = null
@@ -66,7 +59,7 @@ describe('useInsertComponentLibraryEntry', () => {
       entryVersion: '1.0.0',
       presetId: 'email',
     })
-    expect(useEditorStore.getState()._historyPast).toHaveLength(1)
+    expect(useEditorStore.getState().canUndo).toBe(true)
 
     act(() => useEditorStore.getState().undo())
     expect(useEditorStore.getState().site?.pages[0]?.nodes[nodeId!]).toBeUndefined()
@@ -90,7 +83,6 @@ describe('useInsertComponentLibraryEntry', () => {
     expect(Object.keys(useEditorStore.getState().site!.pages[0]!.nodes)).toHaveLength(
       initialNodeCount,
     )
-    expect(useEditorStore.getState()._historyPast).toHaveLength(0)
   })
 
   it('inserts a built-in Visual Component and its governed slots atomically', () => {
@@ -116,7 +108,7 @@ describe('useInsertComponentLibraryEntry', () => {
     const slot = state.site?.pages[0]?.nodes[inserted!.children[0]!]
     expect(slot?.moduleId).toBe('base.slot-instance')
     expect(slot?.props.slotName).toBe('actions')
-    expect(state._historyPast).toHaveLength(1)
+    expect(state.canUndo).toBe(true)
 
     act(() => useEditorStore.getState().undo())
     expect(
@@ -149,7 +141,7 @@ describe('useInsertComponentLibraryEntry', () => {
       items?.children.map((childId) =>
         state.site?.pages[0]?.nodes[childId]?.props.componentId),
     ).toEqual(['base.vc.card', 'base.vc.card', 'base.vc.card'])
-    expect(state._historyPast).toHaveLength(1)
+    expect(state.canUndo).toBe(true)
 
     act(() => useEditorStore.getState().undo())
     expect(
@@ -174,12 +166,6 @@ describe('useInsertComponentLibraryEntry', () => {
       },
     )
     store.selectNode(formId)
-    useEditorStore.setState({
-      _historyPast: [],
-      _historyFuture: [],
-      canUndo: false,
-      canRedo: false,
-    })
     const entry = componentLibraryRegistry.getOrThrow('base.form-tabs')
     const { result } = renderHook(() => useInsertComponentLibraryEntry())
     let nodeId: string | null = null
@@ -192,6 +178,9 @@ describe('useInsertComponentLibraryEntry', () => {
     expect(root?.moduleId).toBe('base.tabs')
     expect(root?.props.orientation).toBe('vertical')
     expect(root?.catalogueInstance?.variantId).toBe('vertical')
-    expect(useEditorStore.getState()._historyPast).toHaveLength(1)
+    expect(useEditorStore.getState().canUndo).toBe(true)
+
+    act(() => useEditorStore.getState().undo())
+    expect(useEditorStore.getState().site?.pages[0]?.nodes[nodeId!]).toBeUndefined()
   })
 })

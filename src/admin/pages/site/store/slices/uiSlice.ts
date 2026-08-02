@@ -4,6 +4,9 @@ import {
   LEFT_SIDEBAR_DEFAULT_WIDTH,
   clampSidebarWidth,
 } from '@admin/state/workspaceLayout'
+import type { PanelMode } from '@admin/state/workspaceLayoutStorage'
+
+export type { PanelMode } from '@admin/state/workspaceLayoutStorage'
 
 export type FocusedPanel = 'canvas' | 'domTree' | 'properties' | null
 type FormPreviewState = 'default' | 'submitting' | 'success' | 'error'
@@ -25,8 +28,6 @@ export type FrameworkPanelTab = 'home' | 'colors' | 'typography' | 'spacing'
 export type ExplorerPanelTab = 'layers' | 'site' | 'code' | 'media'
 /** Author-facing and implementation-facing projections of the active NodeTree. */
 export type LayersViewMode = 'components' | 'html'
-export type PropertiesPanelMode = 'docked' | 'floating'
-
 const PROPERTIES_PANEL_DEFAULT_WIDTH = 360
 
 /**
@@ -79,9 +80,10 @@ export type LayoutNameDialogRequest =
 interface UiSlice {
   // Panel visibility / layout
   propertiesPanel: PanelState
-  propertiesPanelMode: PropertiesPanelMode
+  propertiesPanelMode: PanelMode
   propertiesPanelAutoOpenSuppressed: boolean
   leftSidebarWidth: number
+  leftSidebarMode: PanelMode
   focusedPanel: FocusedPanel
 
   // Settings modal state lives in `settingsSlice` (single source of truth) —
@@ -147,8 +149,9 @@ interface UiSlice {
   // Actions
   setPropertiesPanel: (state: Partial<PanelState>) => void
   consumePropertiesPanelAutoOpenSuppression: () => boolean
-  setPropertiesPanelMode: (mode: PropertiesPanelMode) => void
+  setPropertiesPanelMode: (mode: PanelMode) => void
   setLeftSidebarWidth: (width: number) => void
+  setLeftSidebarMode: (mode: PanelMode) => void
   togglePropertiesPanel: () => void
   setFocusedPanel: (panel: FocusedPanel) => void
   cycleFocusedPanel: () => void
@@ -291,7 +294,6 @@ function getActiveLeftSidebarPanel(state: EditorStore): LeftSidebarPanelId | nul
   if (state.selectorsPanelOpen) return 'selectors'
   if (state.frameworkPanelOpen) return 'framework'
   if (state.dependenciesPanelOpen) return 'dependencies'
-  if (state.isAgentOpen) return 'agent'
   return null
 }
 
@@ -306,6 +308,7 @@ export const createUiSlice: EditorStoreSliceCreator<UiSlice> = (set, get) => ({
   propertiesPanelMode: 'docked',
   propertiesPanelAutoOpenSuppressed: false,
   leftSidebarWidth: LEFT_SIDEBAR_DEFAULT_WIDTH,
+  leftSidebarMode: 'docked',
   focusedPanel: 'canvas',
   previewOpen: false,
   formPreviewStates: {},
@@ -367,6 +370,11 @@ export const createUiSlice: EditorStoreSliceCreator<UiSlice> = (set, get) => ({
     const nextWidth = clampSidebarWidth(width)
     if (Object.is(get().leftSidebarWidth, nextWidth)) return
     set({ leftSidebarWidth: nextWidth })
+  },
+
+  setLeftSidebarMode: (mode) => {
+    if (Object.is(get().leftSidebarMode, mode)) return
+    set({ leftSidebarMode: mode })
   },
 
   togglePropertiesPanel: () =>
@@ -450,16 +458,25 @@ export const createUiSlice: EditorStoreSliceCreator<UiSlice> = (set, get) => ({
 
   setLeftSidebarPanel: (panel) =>
     set((state) => {
+      if (panel === 'agent') {
+        state.isAgentOpen = true
+        return
+      }
       state.explorerPanelOpen = panel === 'explorer'
       state.selectorsPanelOpen = panel === 'selectors'
       state.frameworkPanelOpen = panel === 'framework'
       state.dependenciesPanelOpen = panel === 'dependencies'
-      state.isAgentOpen = panel === 'agent'
       // Built-in panels are mutually exclusive with plugin panels.
       state.activePluginPanelId = null
     }),
 
   toggleLeftSidebarPanel: (panel) => {
+    if (panel === 'agent') {
+      set((state) => {
+        state.isAgentOpen = !state.isAgentOpen
+      })
+      return
+    }
     // Account for the plugin-panel-takes-precedence rule in
     // getActiveLeftSidebarPanel: if a plugin panel is currently active
     // and the user clicks a built-in rail item, that should open the
@@ -477,7 +494,6 @@ export const createUiSlice: EditorStoreSliceCreator<UiSlice> = (set, get) => ({
       state.selectorsPanelOpen = false
       state.frameworkPanelOpen = false
       state.dependenciesPanelOpen = false
-      state.isAgentOpen = false
       state.activePluginPanelId = panelId
     }),
 

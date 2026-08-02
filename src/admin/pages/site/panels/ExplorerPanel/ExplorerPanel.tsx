@@ -15,7 +15,7 @@
 import { useEffect } from 'react'
 import { useEditorPermissions } from '@site/editorPermissionsContext'
 import { useEditorStore } from '@site/store/store'
-import { Panel } from '@admin/shared/Panel'
+import { Panel, type DockablePanelProps } from '@admin/shared/Panel'
 import { SegmentedControl } from '@ui/components/SegmentedControl'
 import { LayersPanel } from '@site/panels/LayersPanel'
 import { SiteExplorerPanel } from '@site/panels/SiteExplorerPanel'
@@ -38,12 +38,17 @@ const LAYER_VIEWS: ReadonlyArray<{ value: LayersViewMode; label: string }> = [
   { value: 'html', label: 'HTML' },
 ]
 
-interface ExplorerPanelProps {
+interface ExplorerPanelProps extends DockablePanelProps {
   /** Whether the caller can perform structural edits (drives DnD/insert). */
   editable?: boolean
 }
 
-export function ExplorerPanel({ editable = true }: ExplorerPanelProps) {
+export function ExplorerPanel({
+  editable = true,
+  mode,
+  dragHandleProps,
+  onToggleMode,
+}: ExplorerPanelProps) {
   const permissions = useEditorPermissions()
   const tab = useEditorStore((s) => s.explorerPanelTab)
   const setTab = useEditorStore((s) => s.setExplorerPanelTab)
@@ -66,6 +71,10 @@ export function ExplorerPanel({ editable = true }: ExplorerPanelProps) {
       title="Explorer"
       testId="explorer-panel"
       onClose={() => setOpen(false)}
+      mode={mode}
+      dragHandleProps={dragHandleProps}
+      onToggleMode={onToggleMode}
+      dockLocation="left sidebar"
       body="bare"
     >
       <div className={styles.tabsRow}>

@@ -6,7 +6,7 @@ import {
 import { registry } from '@core/module-engine'
 import type { Page, PageNode } from '@core/page-tree'
 import { makeNode, makePage } from '../fixtures'
-import { validatePageWriteDiff } from '../../../server/handlers/cms/pageDiff'
+import { validatePageWriteDiff } from '../../../server/writePolicy/pageDiff'
 import { BUILT_IN_PATTERN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibraryPatterns'
 import { BUILT_IN_FORM_PATTERN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibraryFormPatternEntries'
 

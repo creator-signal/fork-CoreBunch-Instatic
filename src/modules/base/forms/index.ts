@@ -30,6 +30,11 @@ import {
   TextareaEditor,
 } from './FormControls'
 import './wizard'
+import {
+  htmlAttributesAttr,
+  htmlAttributesControl,
+  HtmlAttributesPropSchemaOptions,
+} from '@modules/base/shared/htmlAttributes'
 
 const FormPropsSchema = Type.Object({
   mode: Type.Union([Type.Literal('cms'), Type.Literal('custom')], { default: 'cms' }),
@@ -48,6 +53,7 @@ const FormPropsSchema = Type.Object({
     Type.Literal('persistent'),
   ], { default: 'none' }),
   draftTtlDays: Type.Number({ default: 30 }),
+  htmlAttributes: Type.Record(Type.String(), Type.String(), HtmlAttributesPropSchemaOptions),
 })
 
 type FormProps = Static<typeof FormPropsSchema>
@@ -234,6 +240,7 @@ export const FormModule: ModuleDefinition<FormProps> = {
       { label: 'Persistent recovery', value: 'persistent' },
     ] },
     draftTtlDays: { type: 'number', label: 'Draft expiry days', condition: { field: 'draftMode', eq: 'persistent' } },
+    htmlAttributes: htmlAttributesControl(),
   },
   propsSchema: FormPropsSchema,
   defaults: Value.Create(FormPropsSchema),
@@ -252,11 +259,14 @@ export const FormModule: ModuleDefinition<FormProps> = {
       props.draftMode && props.draftMode !== 'none' ? `data-instatic-draft-mode="${props.draftMode}"` : '',
       props.draftMode === 'persistent' ? `data-instatic-draft-ttl-days="${positiveNumber(props.draftTtlDays ?? 30) ?? 30}"` : '',
     ].filter(Boolean).join(' ')
+    // Authored attributes (progressive-enhancement hooks, ARIA, data-*) ride
+    // alongside the generated form wiring instead of being dropped.
+    const authored = htmlAttributesAttr(props.htmlAttributes)
     const honeypot = props.mode === 'cms'
       ? `<input type="text" name="${props.honeypotName}" autocomplete="off" tabindex="-1" data-instatic-honeypot hidden>`
       : ''
     return {
-      html: `<form ${attrs}>${honeypot}${renderedChildren.join('')}</form>`,
+      html: `<form ${attrs}${authored}>${honeypot}${renderedChildren.join('')}</form>`,
       // CMS-native forms need the browser runtime; custom-action forms are
       // plain HTML form submissions and ship zero JS.
       ...(props.mode === 'cms'
@@ -438,7 +448,10 @@ export const OptionModule: ModuleDefinition<OptionProps> = {
   defaults: Value.Create(OptionPropsSchema),
   component: OptionEditor,
   htmlTag: 'option',
-  render: (props) => ({ html: `<option${attrs([['value', props.value]])}${booleanAttrs(props, ['selected', 'disabled'])}>${props.label}</option>` }),
+  // `value` is emitted even when empty: an option with no value attribute
+  // submits its own text instead, so dropping `value=""` turns the neutral
+  // "any" choice into a filter value named after its label.
+  render: (props) => ({ html: `<option value="${String(props.value ?? '')}"${booleanAttrs(props, ['selected', 'disabled'])}>${props.label}</option>` }),
 }
 
 export const OptionGroupModule: ModuleDefinition<OptionGroupProps> = {

@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'bun:test'
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
-import { Client } from '@modelcontextprotocol/sdk/client/index.js'
+import { InMemoryTransport } from '@modelcontextprotocol/server'
+import { Client } from '@modelcontextprotocol/client'
 import { createSqliteClient } from '../../db/sqlite'
 import { sqliteMigrations } from '../../db/migrations-sqlite'
 import { runMigrations } from '../../db/runMigrations'
@@ -78,7 +78,8 @@ describe('mcp server', () => {
     const result = await client.callTool({ name: 'content_list_collections', arguments: {} })
     expect(result.isError).toBeFalsy()
     const text = (result.content as Array<{ type: string; text: string }>)[0].text
-    expect(text).toContain('pages') // the seeded system table
+    expect(text).toContain('posts') // the seeded Content-workspace post type
+    expect(text).not.toContain('"id":"pages"')
     await client.close()
   })
 
@@ -92,6 +93,23 @@ describe('mcp server', () => {
     expect(result.isError).toBe(true)
     const text = (result.content as Array<{ type: string; text: string }>)[0].text
     expect(text).toContain('Site editor')
+    await client.close()
+  })
+
+  it('advertises the open-workspace requirement on browser tools, not on headless ones', async () => {
+    const client = await connectClient(db, ['ai.chat', 'ai.tools.write', 'site.structure.edit', 'content.manage'])
+    const { tools } = await client.listTools()
+
+    const sitePage = tools.find((t) => t.name === 'site_add_page')
+    expect(sitePage?.description).toContain('Requires the Instatic Site editor to be open')
+
+    const contentTool = tools.find((t) => t.name === 'content_set_document_field')
+    expect(contentTool?.description).toContain('Requires the Instatic Content workspace to be open')
+
+    // Headless tools must stay free of the hint — they work with no editor open.
+    const headless = tools.find((t) => t.name === 'site_read_styles')
+    expect(headless?.description).not.toContain('Requires the Instatic')
+
     await client.close()
   })
 

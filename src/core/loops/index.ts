@@ -12,3 +12,9 @@
 export type { LoopItem } from './types'
 export { pageToLoopItem, filterPagesForLoop } from './sources/sitePages'
 export { SearchPagesSource } from './sources/searchPages'
+export {
+  ENTRY_FIELD_FILTER_KEY,
+  ENTRY_FIELD_SOURCE_ID,
+  resolveEntryFieldItems,
+  type EntryFieldMedia,
+} from './sources/entryField'

@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it } from 'bun:test'
 import { useEditorStore } from '@site/store/store'
 
 function resetStore() {
+  // clearSite resets the collaboration documents and their undo managers.
+  useEditorStore.getState().clearSite()
   useEditorStore.setState({
     site: null,
     activePageId: null,
@@ -9,11 +11,8 @@ function resetStore() {
     selectedNodeIds: [],
     hoveredNodeId: null,
     activeDocument: null,
-    _historyPast: [],
-    _historyFuture: [],
     canUndo: false,
     canRedo: false,
-    hasUnsavedChanges: false,
   } as Parameters<typeof useEditorStore.setState>[0])
 }
 
@@ -35,7 +34,10 @@ describe('page SEO authoring action', () => {
       robots: { index: false, follow: true, archive: false },
       openGraph: { type: 'article', imageUrl: '/media/card.jpg' },
     })
-    expect(useEditorStore.getState().hasUnsavedChanges).toBe(true)
+    expect(useEditorStore.getState().canUndo).toBe(true)
+
+    useEditorStore.getState().undo()
+    expect(useEditorStore.getState().site?.pages[0].seo).toBeUndefined()
   })
 
   it('removes page overrides when the author resets to site defaults', () => {

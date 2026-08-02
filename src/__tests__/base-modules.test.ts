@@ -531,7 +531,7 @@ describe('base.text — unified text module', () => {
     expect(container.querySelector('.ist-x')).toBeNull()
   })
 
-  it('renders tag "none" multiline as bare text with <br> breaks and no wrapper', () => {
+  it('renders tag "none" multiline as one literal bare text node', () => {
     const { container } = renderReact(
       React.createElement(TextModule.component, {
         props: { text: 'a\nb', tag: 'none', htmlAttributes: {} },
@@ -543,8 +543,8 @@ describe('base.text — unified text module', () => {
     )
 
     expect(container.querySelector('span')).toBeNull()
-    expect(container.querySelector('br')).not.toBeNull()
-    expect(container.textContent).toBe('ab')
+    expect(container.querySelector('br')).toBeNull()
+    expect(container.textContent).toBe('a\nb')
   })
 
   it('still wraps a non-none tag in its element carrying the canvas identity', () => {
@@ -571,7 +571,14 @@ describe('base.text — unified text module', () => {
 
 describe('base.button — render() specifics', () => {
   it('has only content and behavior module settings', () => {
-    expect(Object.keys(ButtonModule.schema).sort()).toEqual(['disabled', 'href', 'htmlAttributes', 'label', 'target'])
+    expect(Object.keys(ButtonModule.schema).sort()).toEqual([
+      'buttonType',
+      'disabled',
+      'href',
+      'htmlAttributes',
+      'label',
+      'target',
+    ])
   })
 
   it('renders an <a> element when href is set', () => {

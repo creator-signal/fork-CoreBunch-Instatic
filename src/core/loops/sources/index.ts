@@ -12,8 +12,10 @@ import { DataRowsSource } from './dataRows'
 import { SitePagesSource } from './sitePages'
 import { SiteMediaSource } from './siteMedia'
 import { SearchPagesSource } from './searchPages'
+import { EntryFieldSource } from './entryField'
 
 loopSourceRegistry.registerOrReplace(DataRowsSource)
 loopSourceRegistry.registerOrReplace(SitePagesSource)
 loopSourceRegistry.registerOrReplace(SiteMediaSource)
 loopSourceRegistry.registerOrReplace(SearchPagesSource)
+loopSourceRegistry.registerOrReplace(EntryFieldSource)

@@ -7,14 +7,14 @@ import {
 import '@modules/base/index'
 
 beforeEach(() => {
+  // clearSite resets the collaboration documents and their undo managers.
+  useEditorStore.getState().clearSite()
   useEditorStore.setState({
     site: null,
     activePageId: null,
     activeDocument: null,
     selectedNodeId: null,
     selectedNodeIds: [],
-    _historyPast: [],
-    _historyFuture: [],
     canUndo: false,
     canRedo: false,
   })
@@ -36,13 +36,6 @@ describe('Component Library governed mutations', () => {
     const before = structuredClone(
       useEditorStore.getState().site!.pages[0]!.nodes[nodeId]!,
     )
-    useEditorStore.setState({
-      _historyPast: [],
-      _historyFuture: [],
-      canUndo: false,
-      canRedo: false,
-    })
-
     expect(useEditorStore.getState().convertFreeformPrimitiveToComponent(
       nodeId,
       'base.email-input',
@@ -61,7 +54,7 @@ describe('Component Library governed mutations', () => {
       ...before,
       catalogueInstance: undefined,
     })
-    expect(useEditorStore.getState()._historyPast).toHaveLength(1)
+    expect(useEditorStore.getState().canUndo).toBe(true)
 
     useEditorStore.getState().undo()
     expect(useEditorStore.getState().site!.pages[0]!.nodes[nodeId]).toEqual(before)
@@ -76,14 +69,14 @@ describe('Component Library governed mutations', () => {
       { inputType: 'invented' },
       page.rootNodeId,
     )
-    const historyLength = useEditorStore.getState()._historyPast.length
+    const canUndoBefore = useEditorStore.getState().canUndo
 
     expect(useEditorStore.getState().convertFreeformPrimitiveToComponent(
       nodeId,
       'base.email-input',
       'email',
     )).toBe(false)
-    expect(useEditorStore.getState()._historyPast).toHaveLength(historyLength)
+    expect(useEditorStore.getState().canUndo).toBe(canUndoBefore)
     expect(useEditorStore.getState().site!.pages[0]!.nodes[nodeId]?.catalogueInstance)
       .toBeUndefined()
   })
@@ -114,13 +107,13 @@ describe('Component Library governed mutations', () => {
     expect(useEditorStore.getState().site?.pages[0]?.nodes[nodeId]?.props.placeholder)
       .toBe('name@example.com')
 
-    const historyLength = useEditorStore.getState()._historyPast.length
+    const canUndoBefore = useEditorStore.getState().canUndo
     expect(useEditorStore.getState().updateComponentLibraryField(
       nodeId,
       'htmlAttributes',
       { onclick: 'unsafe()' },
     )).toBe(false)
-    expect(useEditorStore.getState()._historyPast).toHaveLength(historyLength)
+    expect(useEditorStore.getState().canUndo).toBe(canUndoBefore)
     expect(useEditorStore.getState().site?.pages[0]?.nodes[nodeId]?.props.htmlAttributes)
       .toBeUndefined()
   })

@@ -41,7 +41,7 @@ src/core/publisher/
 ├── siteCssBundle.ts                — hash-named bundle composition (reset + framework + style)
 ├── sizesResolver.ts                — `<img sizes>` derived from the layout: linear width model (caps, fractions, grid tracks) per viewport tier
 ├── dynamicDetection.ts             — Single walker for the 4 auto-detection rules; powers Layers A and C
-└── utils.ts                        — escapeHtml, isSafeUrl, sanitiseCssValue (re-exported from @core/css-sanitize)
+└── utils.ts                        — escapeHtml, isSafeUrl, safeUrl (re-exported from @core/html-sanitize); sanitiseCssValue (from @core/css-sanitize)
 
 server/publish/
 ├── publicRouter.ts                 — gateway: Layer A disk fast-path → Layer B LRU → live resolver
@@ -209,6 +209,18 @@ framework-<hash>.css   = buildSiteFrameworkCss(site)               ← framework
 style-<hash>.css       = collectClassCSS(site)                     ← user-defined StyleRule entries, incl. raw @keyframes
 userStyles-<hash>.css  = collectUserStylesheetCss(site, page)      ← author stylesheets, scoped to this page
 ```
+
+`styleRuleTreeShake.ts` computes the site-wide used class-id set once across
+page and Visual Component trees. A class rule emits only when its id is used
+and every known class dependency in its preserved selector is used. Ambient
+selector fragments emit when at least one selector-list alternative has all of
+its known class dependencies in use; class-free selectors and supported raw
+blocks stay conservative. The editor canvas calls the same selector and
+memoizes the filtered registry by immutable registry identity + used-id
+signature, so large imported utility catalogs do not become large iframe
+stylesheets. A full precompiled Tailwind catalog can therefore remain
+picker-addressable while the `style` bundle contains only selected utilities
+plus global preflight.
 
 Media-library background images are optimized in the same publish pass as
 `<img srcset>`. `mediaPrefetch.ts` collects `/uploads/...` URLs from

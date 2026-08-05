@@ -6,6 +6,36 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.22 - 2026-08-05
+
+### Collaborative authoring and data
+
+- Added real-time Yjs collaboration for pages, components, layouts, and the
+  site shell, including presence, guarded writes, conflict recovery, and
+  persistent relay documents.
+- Expanded the Data workspace with repeater authoring, schema composition,
+  media galleries, entry-field loops, and safer row and post-type mutations.
+
+### Editor and governed components
+
+- Made Components layers and insertion catalogue-only: imported or freeform
+  HTML and raw Visual Components remain in HTML view until an author inserts a
+  governed catalogue entry.
+- Added provider identity and filtering to the Component Library, an explicit
+  empty state, and the governed Creator Signal Hero with MinIO-backed artwork.
+- Added resizable and undockable editor panels, site-explorer hover previews,
+  improved Tabs controls, and more reliable authoring persistence.
+
+### Publishing, import, and MCP reliability
+
+- Prevented author-bound account email values from leaking into published
+  output, scoped entry-route assets to their owning template, and prefetched
+  bound media without changing published markup.
+- Improved large CSS imports, loop-reference diagnostics, authored-structure
+  preservation, and URL-scheme validation.
+- Adopted stateless MCP transport behavior and hardened governed authoring,
+  workspace requirements, and multi-operation style changes.
+
 ## 0.0.21 - 2026-08-02
 
 ### Creator Signal legal publication

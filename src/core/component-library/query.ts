@@ -21,12 +21,29 @@ function normalize(value: string): string {
   return value.trim().toLocaleLowerCase('en-US')
 }
 
+/** Human-facing owner label shared by catalogue search and editor surfaces. */
+export function componentLibrarySourceLabel(entry: ComponentLibraryEntry): string {
+  if (entry.source.type === 'design-system') return entry.source.name
+  if (entry.source.type === 'plugin') return entry.source.name ?? entry.source.pluginId
+  return entry.source.type === 'built-in' ? 'Built-in' : 'Site'
+}
+
+/** Stable source owner key used for provider-level filtering. */
+export function componentLibrarySourceKey(entry: ComponentLibraryEntry): string {
+  if (entry.source.type === 'design-system') return entry.source.id
+  if (entry.source.type === 'plugin') return entry.source.pluginId
+  return entry.source.type
+}
+
 function entrySearchText(entry: ComponentLibraryEntry): string {
   return normalize([
     entry.id,
     entry.name,
     entry.description,
     entry.category,
+    entry.source.type,
+    componentLibrarySourceKey(entry),
+    componentLibrarySourceLabel(entry),
     ...entry.tags,
     ...entry.fields.flatMap((field) => [field.key, field.label, field.description ?? '']),
     ...entry.variants.flatMap((variant) => [variant.id, variant.name, variant.description ?? '']),

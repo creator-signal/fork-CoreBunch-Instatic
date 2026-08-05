@@ -64,6 +64,8 @@ export { resolveComponentLibraryAvailability } from './availability'
 
 export type { ComponentLibraryFilter } from './query'
 export {
+  componentLibrarySourceKey,
+  componentLibrarySourceLabel,
   compareComponentLibraryEntries,
   filterComponentLibraryEntries,
 } from './query'

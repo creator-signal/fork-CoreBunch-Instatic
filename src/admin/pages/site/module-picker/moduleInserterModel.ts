@@ -1,6 +1,7 @@
 import type { AnyModuleDefinition } from '@core/module-engine'
 import type { SavedLayout } from '@core/layouts'
 import {
+  componentLibrarySourceLabel,
   type ComponentLibraryDependencyState,
   type ComponentLibraryEntry,
 } from '@core/component-library'
@@ -76,16 +77,7 @@ interface ModuleInserterSavedLayoutItem extends BaseInserterItem {
   pluginId: string | null
 }
 
-interface ModuleInserterSavedComponentItem extends BaseInserterItem {
-  kind: 'component'
-  source: 'saved'
-  component: VisualComponent
-  uses: number
-}
-
-type ModuleInserterComponentItem =
-  | ModuleInserterSavedComponentItem
-  | CatalogueInserterItem
+type ModuleInserterComponentItem = CatalogueInserterItem
 
 export type ModuleInserterItem =
   | ModuleInserterModuleItem
@@ -320,45 +312,13 @@ export function composeLayoutsSection(
   return { items, labelByKey }
 }
 
-function getSavedComponentItems(
-  components: readonly VisualComponent[],
-): ModuleInserterComponentItem[] {
-  return components.map((component) => ({
-    key: recentKey({ kind: 'component', id: component.id }),
-    id: component.id,
-    kind: 'component',
-    source: 'saved',
-    name: component.name,
-    description: 'Saved Visual Component',
-    accent: 'mint',
-    component,
-    uses: 0,
-    wire: wireFromTree(component.tree),
-    searchText: searchText([component.name, component.id, 'visual component']),
-  }))
-}
-
 export function composeComponentSection(
   items: readonly ModuleInserterComponentItem[],
 ): {
   items: ModuleInserterComponentItem[]
   labelByKey: Map<string, string>
 } {
-  const saved = items.filter(
-    (item): item is ModuleInserterSavedComponentItem => item.source === 'saved',
-  )
-  const catalogue = items.filter(
-    (item): item is CatalogueInserterItem =>
-      item.source === 'catalogue',
-  )
-  const grouped = composeCatalogueComponentGroups(catalogue)
-  const ordered = [
-    ...saved,
-    ...grouped.items,
-  ]
-  const labelByKey = new Map(grouped.labelByKey)
-  if (saved[0]) labelByKey.set(saved[0].key, 'Site components')
-  return { items: ordered, labelByKey }
+  return composeCatalogueComponentGroups(items)
 }
 
 interface BuiltModuleInserterItems {
@@ -389,15 +349,16 @@ export function buildModuleInserterItems({
 }): BuiltModuleInserterItems {
   const moduleItems = getVisibleModuleItems(modules, context)
   const savedLayoutItems = getSavedLayoutItems(savedLayouts, context, visualComponents)
-  const componentItems = [
-    ...getSavedComponentItems(visualComponents),
-    ...getCatalogueComponentItems(
-      componentLibraryEntries,
-      visualComponents,
-      dependencyState,
-      canEditComponents,
-    ),
-  ]
+  // The Components and Forms sections are governed catalogue surfaces. A raw
+  // Visual Component definition is an implementation asset, not an authoring
+  // catalogue entry, and therefore never appears here until an explicit
+  // ComponentLibraryEntry owns it.
+  const componentItems = getCatalogueComponentItems(
+    componentLibraryEntries,
+    visualComponents,
+    dependencyState,
+    canEditComponents,
+  )
   return {
     moduleItems,
     savedLayoutItems,
@@ -469,11 +430,7 @@ export function itemDescription(item: ModuleInserterItem): string {
     return item.blocks === 1 ? `1 block · ${item.description}` : `${item.blocks} blocks · ${item.description}`
   }
   if (item.kind === 'component') {
-    if (item.source === 'catalogue') {
-      return `${item.entry.category} · ${item.entry.implementation.type.replaceAll('-', ' ')}`
-    }
-    const count = item.component.params.length
-    return count === 1 ? '1 param · Saved component' : `${count} params · Saved component`
+    return `${item.entry.category} · ${item.entry.implementation.type.replaceAll('-', ' ')} · ${componentLibrarySourceLabel(item.entry)}`
   }
   return item.description
 }

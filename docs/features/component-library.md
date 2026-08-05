@@ -23,6 +23,11 @@ The registry is metadata over Instatic's existing modules, Visual Components, pa
 - Add to canvas lists governed non-form entries under Components, groups
   Structure entries as Layout, and gives all form entries their own Forms
   section.
+- Insert → Components and the Components tree are catalogue-only. A raw Visual
+  Component definition is an implementation asset and stays out of both
+  surfaces until a site, design system or plugin registers an explicit entry.
+- Catalogue result rows and inserter descriptions show the owning provider;
+  the catalogue can also filter by the stable provider ID.
 - The registry does not own page trees, rendering, component instances or plugin lifecycle.
 - Page SEO settings remain a document-publisher concern: site defaults and the
   public origin live in General settings, while each page can govern search,
@@ -251,6 +256,13 @@ Insertion is one history transaction, so undo removes content and catalogue
 identity together. Template-role placement remains unavailable in an ordinary
 page canvas because template chrome is managed through the template workflow.
 
+The editor's Components view is catalogue-identity driven. It stays empty until
+an author inserts an item from this library. Imported/freeform nodes, raw Visual
+Component references and raw slots remain available in HTML view but do not
+become component rows merely because their module type can be inferred. A
+catalogue-inserted Visual Component reference records `catalogueInstance`
+metadata, so that instance and its governed slots do appear.
+
 Built-in patterns cover Columns / Grid, Card Grid, Gallery, Icon List,
 Statistics, Logo Cloud, Timeline, Steps, Comparison Table, FAQ List and Empty
 State. They compose the shared primitives and Visual Components rather than
@@ -266,7 +278,7 @@ The selected Layers projection governs the Properties surface:
 
 - **Components** renders `ComponentPropertiesView`. It shows only fields declared by the retained library definition, approved presets and variants, slot contracts, lifecycle state, usage guidance and accessibility guidance.
 - **HTML** retains the existing module settings, ClassPicker, CSS sections and raw Attributes surface.
-- Unmapped content is labelled **Component Block** in Components view. It and instances whose retained definition is unavailable stay intact but are read-only there; advanced users receive an explicit route to HTML view.
+- Unmapped imported/freeform content stays intact but is omitted from the Components hierarchy; it remains available in HTML view. A persisted instance whose retained definition is unavailable stays visible and read-only because its catalogue identity proves that it is an actual component boundary.
 
 Governance is also enforced at the mutation seam. `updateComponentLibraryField()` rejects keys not declared by the instance's retained definition. `applyComponentLibraryOption()` resolves the approved values inside the store and applies those values plus the preset or variant identity in one undoable mutation; the UI cannot submit an arbitrary option payload.
 
@@ -318,8 +330,9 @@ history. HTML Layers retains its existing independent drag-and-drop path.
 
 ### Freeform conversion
 
-Unmapped Component Block primitives are never rewritten automatically. Structural
-authors may open a conversion preview when
+Unmapped freeform primitives are never rewritten automatically. They are not
+invented as component rows. Structural authors may select one on the canvas
+while using Components view and open a conversion preview when
 `findComponentLibraryConversionCandidates()` finds a lossless match: the
 backing module must match, hidden implementation props must already equal
 module defaults or canonical preset values, and the node must not already have

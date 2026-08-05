@@ -7,6 +7,7 @@ import {
   dedupeModuleInserterRefs,
   getSavedLayoutItems,
   getVisibleModuleItems,
+  itemDescription,
   layoutPluginId,
   moduleAccentForCategory,
   moduleAvailability,
@@ -16,6 +17,7 @@ import {
 } from '@site/module-picker/moduleInserterModel'
 import { BUILT_IN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibrary'
 import type { SavedLayout } from '@core/layouts'
+import type { VisualComponent } from '@core/visualComponents'
 import { findCanvasViewportAtPoint } from '@site/canvas/canvasInsertionDrop'
 import { scrollSelectedItemIntoView } from '@site/module-picker/moduleInserterSelectionScroll'
 import {
@@ -62,6 +64,62 @@ describe('module inserter model', () => {
     expect(forms.map((item) => item.id)).toContain('base.email-input')
     expect(grouped.labelByKey.get('component:base.section')).toBe('Layout')
     expect(grouped.labelByKey.get('component:base.heading')).toBe('Typography')
+  })
+
+  it('never exposes an ungoverned Visual Component in the Components section', () => {
+    const rawComponent: VisualComponent = {
+      id: 'site-authored-hero',
+      name: 'Site-authored Hero',
+      tree: {
+        rootNodeId: 'root',
+        nodes: {
+          root: {
+            id: 'root',
+            moduleId: 'base.body',
+            props: {},
+            breakpointOverrides: {},
+            children: [],
+            classIds: [],
+          },
+        },
+      },
+      params: [],
+      classIds: [],
+      createdAt: 1,
+    }
+    const built = buildModuleInserterItems({
+      modules: [],
+      context: PAGE_CTX,
+      savedLayouts: [],
+      visualComponents: [rawComponent],
+      componentLibraryEntries: [],
+    })
+
+    expect(built.componentItems).toEqual([])
+    expect(built.allItems).toEqual([])
+  })
+
+  it('identifies the component owner in the insertion description', () => {
+    const pluginEntry = {
+      ...BUILT_IN_COMPONENT_LIBRARY_ENTRIES.find((entry) => entry.id === 'base.hero')!,
+      id: 'creator-signal.site.hero',
+      category: 'Creator Signal',
+      source: {
+        type: 'plugin' as const,
+        pluginId: 'creator-signal.site',
+        name: 'Creator Signal',
+      },
+    }
+    const built = buildModuleInserterItems({
+      modules: [],
+      context: PAGE_CTX,
+      savedLayouts: [],
+      visualComponents: [],
+      componentLibraryEntries: [pluginEntry],
+    })
+
+    expect(itemDescription(built.componentItems[0]!))
+      .toBe('Creator Signal · visual component · Creator Signal')
   })
 
   it('filters registry modules using the editor insertion rules', () => {

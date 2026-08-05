@@ -51,8 +51,8 @@ The optional starter contains:
 
 Every non-body node in the starter has valid Component Library metadata. The
 layout wrappers use governed Section or Container entries, while every visible
-copy sample uses Plain Text. This prevents the Components projection from
-falling back to **Component Block**.
+copy sample uses Plain Text. The Components projection therefore lists those
+governed instances instead of treating the starter as unrelated freeform HTML.
 
 ## Isolated Docker acceptance
 

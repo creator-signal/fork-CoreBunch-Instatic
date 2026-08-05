@@ -1,5 +1,5 @@
-import { useEditorStore, selectActiveCanvasPage } from '@site/store/store'
-import { resolveInsertLocation, type InsertLocation } from '@site/store/insertLocation'
+import type { InsertLocation } from '@site/store/insertLocation'
+import { useEditorStore } from '@site/store/store'
 import { pushToast } from '@ui/components/Toast'
 import type { ModuleInserterItem } from '@site/module-picker/moduleInserterModel'
 import { useInsertModule } from './useInsertModule'
@@ -8,7 +8,7 @@ import { useInsertComponentLibraryEntry } from './useInsertComponentLibraryEntry
 /**
  * Shared handler for the module inserter dialog's `onInsertItem` callback.
  *
- * Inserts the picked module / saved layout / Visual Component into the active
+ * Inserts the picked module, saved layout or governed component into the active
  * canvas document and surfaces a success toast. Both inserter entry points use
  * it — the main toolbar "+ Add" button (`ModulePickerDropdown`) and the canvas
  * selection toolbar's "Insert module" action — so the two flows stay identical.
@@ -19,26 +19,10 @@ import { useInsertComponentLibraryEntry } from './useInsertComponentLibraryEntry
  * new node as a last child, leaf targets get a sibling-after insertion).
  */
 export function useInsertInserterItem() {
-  const canvasPage = useEditorStore(selectActiveCanvasPage)
-  const insertComponentRef = useEditorStore((s) => s.insertComponentRef)
-  const selectedNodeId = useEditorStore((s) => s.selectedNodeId)
   const insertModule = useInsertModule()
   const insertCatalogueEntry = useInsertComponentLibraryEntry()
 
   const insertLayoutAction = useEditorStore((s) => s.insertLayout)
-
-  const insertVC = (vcId: string, explicitTarget?: InsertLocation): boolean => {
-    if (!canvasPage) return false
-    // Same target → location resolution as every other insert flow: explicit
-    // selection acts as the target, no selection drops at root, leaf targets
-    // become a sibling-after under their parent (see resolveInsertLocation).
-    const location =
-      explicitTarget ??
-      resolveInsertLocation(canvasPage, selectedNodeId ?? canvasPage.rootNodeId)
-    if (!location) return false
-    insertComponentRef(location.parentId, vcId, location.index)
-    return true
-  }
 
   return (
     item: ModuleInserterItem,
@@ -51,17 +35,15 @@ export function useInsertInserterItem() {
         : item.kind === 'savedLayout'
           ? Boolean(insertLayoutAction(item.id, target))
           : item.kind === 'component'
-            ? item.source === 'catalogue'
-              ? Boolean(insertCatalogueEntry(
-                  item.entry,
-                  {
-                    ...(item.presetId ? { presetId: item.presetId } : {}),
-                    ...(item.variantId ? { variantId: item.variantId } : {}),
-                    showSuccessToast: false,
-                  },
-                  target,
-                ))
-              : insertVC(item.id, target)
+            ? Boolean(insertCatalogueEntry(
+                item.entry,
+                {
+                  ...(item.presetId ? { presetId: item.presetId } : {}),
+                  ...(item.variantId ? { variantId: item.variantId } : {}),
+                  showSuccessToast: false,
+                },
+                target,
+              ))
             : false
 
     if (!inserted) return false

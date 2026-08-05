@@ -239,6 +239,22 @@ export function ComponentLayersTree({
                       />
                     ))
                   : <div className={styles.empty}>No component layers match</div>
+              ) : projection.roots.length === 0 ? (
+                <div className={styles.empty}>
+                  <strong>No catalogue components on this page</strong>
+                  <span>
+                    Components appear here only after you add one from the governed catalogue.
+                  </span>
+                  {canInsert ? (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={onOpenComponentLibrary}
+                    >
+                      Add from Component Library
+                    </Button>
+                  ) : null}
+                </div>
               ) : (
                 projection.roots.map((row) => (
                   <ComponentLayerBranch

@@ -34,6 +34,14 @@ function catalogueEntry(
 
 const catalogue: ComponentLibraryEntry[] = [
   catalogueEntry({
+    id: 'site.hero-component',
+    name: 'Site Hero',
+    implementation: {
+      type: 'visual-component',
+      componentId: 'hero-vc',
+    },
+  }),
+  catalogueEntry({
     id: 'site.hero',
     name: 'Hero',
     implementation: {
@@ -72,6 +80,10 @@ function componentPage() {
         moduleId: 'base.visual-component-ref',
         props: { componentId: 'hero-vc' },
         children: ['actions-slot'],
+        catalogueInstance: {
+          entryId: 'site.hero-component',
+          entryVersion: '1.0.0',
+        },
       }),
       'actions-slot': makeNode({
         id: 'actions-slot',
@@ -169,12 +181,117 @@ describe('Components Layers projection', () => {
       kind: 'primitive',
     })
 
-    expect(root.children[2]).toMatchObject({
-      nodeId: 'raw',
-      label: 'Component Block: Text',
-      kind: 'freeform',
-      readOnly: true,
+    expect(root.children.map((row) => row.nodeId)).toEqual([
+      'hero-ref',
+      'pattern',
+    ])
+    expect(root.children.find((row) => row.nodeId === 'raw')).toBeUndefined()
+  })
+
+  it('does not populate Components view for imported-only freeform content', () => {
+    const page = makePage({
+      id: 'imported-page',
+      title: 'Imported page',
+      rootNodeId: 'root',
+      nodes: {
+        root: makeNode({
+          id: 'root',
+          moduleId: 'base.body',
+          children: ['container', 'visual-ref'],
+        }),
+        container: makeNode({
+          id: 'container',
+          moduleId: 'base.container',
+          children: ['copy', 'link'],
+        }),
+        copy: makeNode({ id: 'copy', moduleId: 'base.text' }),
+        link: makeNode({ id: 'link', moduleId: 'base.link' }),
+        'visual-ref': makeNode({
+          id: 'visual-ref',
+          moduleId: 'base.visual-component-ref',
+          props: { componentId: 'hero-vc' },
+          children: ['raw-slot'],
+        }),
+        'raw-slot': makeNode({
+          id: 'raw-slot',
+          moduleId: 'base.slot-instance',
+          props: { slotName: 'actions' },
+        }),
+      },
     })
+
+    const projection = buildComponentTreeProjection({
+      page,
+      moduleNames: {
+        'base.body': 'Body',
+        'base.container': 'Container',
+        'base.link': 'Link',
+        'base.text': 'Text',
+      },
+      visualComponents: [makeVC({ id: 'hero-vc', name: 'Site Hero' })],
+      catalogueEntries: catalogue,
+    })
+
+    expect(projection.roots).toEqual([])
+    expect(resolveComponentLayerSelection(projection, 'container')).toBeNull()
+    expect(resolveComponentLayerSelection(projection, 'copy')).toBeNull()
+    expect(resolveComponentLayerSelection(projection, 'visual-ref')).toBeNull()
+    expect(resolveComponentLayerSelection(projection, 'raw-slot')).toBeNull()
+  })
+
+  it('finds explicit components nested beneath unclassified layout wrappers', () => {
+    const page = makePage({
+      id: 'nested-page',
+      title: 'Nested page',
+      rootNodeId: 'root',
+      nodes: {
+        root: makeNode({
+          id: 'root',
+          moduleId: 'base.body',
+          children: ['layout'],
+        }),
+        layout: makeNode({
+          id: 'layout',
+          moduleId: 'base.container',
+          children: ['governed-copy', 'visual-ref'],
+        }),
+        'governed-copy': makeNode({
+          id: 'governed-copy',
+          moduleId: 'base.text',
+          children: ['implementation-copy'],
+          catalogueInstance: {
+            entryId: 'instatic.heading',
+            entryVersion: '1.0.0',
+          },
+        }),
+        'implementation-copy': makeNode({
+          id: 'implementation-copy',
+          moduleId: 'base.text',
+        }),
+        'visual-ref': makeNode({
+          id: 'visual-ref',
+          moduleId: 'base.visual-component-ref',
+          props: { componentId: 'hero-vc' },
+        }),
+      },
+    })
+
+    const projection = buildComponentTreeProjection({
+      page,
+      moduleNames: {},
+      visualComponents: [makeVC({ id: 'hero-vc', name: 'Site Hero' })],
+      catalogueEntries: catalogue,
+    })
+
+    expect(projection.roots).toHaveLength(1)
+    expect(projection.roots[0].children.map((row) => row.nodeId)).toEqual([
+      'governed-copy',
+    ])
+    expect(resolveComponentLayerSelection(projection, 'layout')).toBeNull()
+    expect(resolveComponentLayerSelection(projection, 'visual-ref')).toBeNull()
+    expect(resolveComponentLayerSelection(projection, 'implementation-copy')).toBe(
+      'governed-copy',
+    )
   })
 
   it('maps hidden implementation descendants to their visible pattern boundary', () => {

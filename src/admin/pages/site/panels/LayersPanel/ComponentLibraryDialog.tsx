@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import {
+  componentLibrarySourceKey,
+  componentLibrarySourceLabel,
   filterComponentLibraryEntries,
   resolveComponentLibraryAvailability,
   type ComponentLibraryAvailability,
@@ -71,6 +73,7 @@ export function ComponentLibraryDialog({
   const [category, setCategory] = useState(ALL)
   const [implementationType, setImplementationType] = useState(ALL)
   const [source, setSource] = useState(ALL)
+  const [provider, setProvider] = useState(ALL)
   const [status, setStatus] = useState(ALL)
   const [selectedId, setSelectedId] = useState(entries[0]?.id ?? '')
   const [presetId, setPresetId] = useState(defaultPresetId(entries[0]))
@@ -82,6 +85,17 @@ export function ComponentLibraryDialog({
     { value: ALL, label: 'All' },
     ...categories.map((value) => ({ value, label: value })),
   ]
+  const providerOptions = [
+    { value: ALL, label: 'All providers' },
+    ...Array.from(
+      new Map(entries.map((entry) => [
+        componentLibrarySourceKey(entry),
+        componentLibrarySourceLabel(entry),
+      ])).entries(),
+    )
+      .map(([value, label]) => ({ value, label }))
+      .sort((left, right) => left.label.localeCompare(right.label)),
+  ]
   const filteredEntries = filterComponentLibraryEntries(entries, {
     search,
     categories: category === ALL ? [] : [category],
@@ -90,7 +104,8 @@ export function ComponentLibraryDialog({
       : [implementationType as ComponentLibraryImplementationType],
     sources: source === ALL ? [] : [source as ComponentLibrarySourceType],
     statuses: status === ALL ? [] : [status as ComponentLibraryStatus],
-  })
+  }).filter((entry) =>
+    provider === ALL || componentLibrarySourceKey(entry) === provider)
   const selectedEntry =
     filteredEntries.find((entry) => entry.id === selectedId) ??
     filteredEntries[0]
@@ -190,6 +205,13 @@ export function ComponentLibraryDialog({
             fieldSize="sm"
             onChange={(event) => setStatus(event.target.value)}
           />
+          <Select
+            value={provider}
+            options={providerOptions}
+            aria-label="Filter by provider"
+            fieldSize="sm"
+            onChange={(event) => setProvider(event.target.value)}
+          />
         </div>
       </div>
 
@@ -269,7 +291,10 @@ function ComponentLibraryResult({
         <span className={styles.resultName}>{entry.name}</span>
         <span className={styles.resultDescription}>{entry.description}</span>
       </span>
-      <TagPill label={entry.category} size="xs" muted aria-hidden="true" />
+      <span className={styles.resultBadges} aria-hidden="true">
+        <TagPill label={componentLibrarySourceLabel(entry)} size="xs" />
+        <TagPill label={entry.category} size="xs" muted />
+      </span>
     </Button>
   )
 }
@@ -305,7 +330,7 @@ function ComponentLibraryDetails({
       <p className={styles.detailDescription}>{entry.description}</p>
       <div className={styles.pills}>
         <TagPill label={implementationLabel(entry.implementation.type)} size="xs" />
-        <TagPill label={sourceLabel(entry)} size="xs" />
+        <TagPill label={componentLibrarySourceLabel(entry)} size="xs" />
         <TagPill label={entry.status} size="xs" muted={entry.status !== 'stable'} />
         <TagPill
           label={availability.health}
@@ -443,12 +468,6 @@ function moduleIdForEntry(entry: ComponentLibraryEntry): string | undefined {
 
 function implementationLabel(type: ComponentLibraryImplementationType): string {
   return type.replaceAll('-', ' ')
-}
-
-function sourceLabel(entry: ComponentLibraryEntry): string {
-  if (entry.source.type === 'design-system') return entry.source.name
-  if (entry.source.type === 'plugin') return entry.source.name ?? entry.source.pluginId
-  return entry.source.type.replaceAll('-', ' ')
 }
 
 function dependencyIssueLabel(

@@ -54,7 +54,7 @@ Stored in the `user_preferences` table — one row per `(user_id, key)`. Keys ar
 | Key                                       | Owner                                                                 | Source-of-truth file                                            |
 |-------------------------------------------|-----------------------------------------------------------------------|-----------------------------------------------------------------|
 | `dashboard-layout`                        | Dashboard widget positions / sizes                                     | `src/admin/pages/dashboard/hooks/useDashboardLayout.ts`         |
-| `module-inserter`                         | Module inserter notch favorites: ordered `{ kind, id }` refs for modules, layouts, and Visual Components | `src/admin/pages/site/module-picker/useModuleInserterPreference.ts` |
+| `module-inserter`                         | Module inserter notch favorites: ordered `{ kind, id }` refs for modules, layouts, and governed catalogue components | `src/admin/pages/site/module-picker/useModuleInserterPreference.ts` |
 
 ### Endpoint
 

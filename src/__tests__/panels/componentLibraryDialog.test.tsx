@@ -54,6 +54,28 @@ afterEach(() => {
 })
 
 describe('ComponentLibraryDialog dependency availability', () => {
+  it('shows component ownership and supports provider-level filtering', () => {
+    componentLibraryRegistry.register(dependencyEntry)
+    render(<ComponentLibraryDialog open onClose={() => {}} />)
+
+    const providerFilter = screen.getByLabelText('Filter by provider')
+      .closest('div')!
+      .querySelector('select')!
+    expect(Array.from(providerFilter.options).map((option) => option.textContent))
+      .toContain('Test delivery plugin')
+
+    fireEvent.change(providerFilter, {
+      target: { value: dependencyEntry.source.type === 'plugin'
+        ? dependencyEntry.source.pluginId
+        : '' },
+    })
+
+    const results = screen.getByRole('listbox', { name: 'Components' })
+    expect(within(results).getByText(dependencyEntry.name)).toBeDefined()
+    expect(within(results).getByText('Test delivery plugin')).toBeDefined()
+    expect(within(results).queryByText('Hero')).toBeNull()
+  })
+
   it('explains every unavailable dependency and blocks insertion', () => {
     componentLibraryRegistry.register(dependencyEntry)
     render(<ComponentLibraryDialog open onClose={() => {}} />)

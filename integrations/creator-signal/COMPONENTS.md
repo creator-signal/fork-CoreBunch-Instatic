@@ -20,6 +20,8 @@ media storage.
 - Bind node properties to parameter IDs through `node.propBindings`.
 - Reference compiled design-system class IDs, not unqualified CSS class names.
 - Register the component in `definePack({ visualComponents: [...] })`.
+- Register an explicit governed entry in `component-library.ts`; raw Visual
+  Component definitions never appear in Insert → Components.
 - Test the component shape, bindings, media behaviour, plugin build, and published output.
 
 ## Choose the right extension type
@@ -113,7 +115,7 @@ Parameter IDs survive display-name changes and are the binding contract:
 
 ```ts
 const headingParamId =
-  'creator-signal.site/component/example/param/heading'
+  'creator-signal.site.example.heading'
 
 component.params = [{
   id: headingParamId,
@@ -152,7 +154,7 @@ Use a `base.slot-outlet` when authors need to insert an arbitrary child subtree
 instead of editing a typed property. Slot behaviour and synchronisation are
 defined in `docs/features/visual-components.md`.
 
-### 5. Register the component
+### 5. Register the implementation and authoring contract
 
 Import the component in `integrations/creator-signal/pack/site.ts` and add it to
 the one pack definition:
@@ -169,6 +171,56 @@ const pack = definePack({
 
 The plugin already requests `visualComponents.register` in
 `integrations/creator-signal/instatic-plugin.config.ts`.
+
+Next, add a `ComponentLibraryEntry` to
+`integrations/creator-signal/component-library.ts`. This is the author-facing
+contract: its field keys must exactly match the Visual Component parameter IDs.
+
+```ts
+export const exampleEntry: ComponentLibraryEntry = {
+  id: 'creator-signal.site.example',
+  version: '1.0.0',
+  name: 'Creator Signal Example',
+  description: 'A governed Creator Signal example section.',
+  category: 'Creator Signal',
+  tags: ['creator signal', 'example'],
+  icon: 'layout-solid',
+  source: {
+    type: 'plugin',
+    pluginId: 'creator-signal.site',
+    name: 'Creator Signal',
+  },
+  status: 'stable',
+  implementation: {
+    type: 'visual-component',
+    componentId: component.id,
+  },
+  fields: [{
+    key: headingParamId,
+    label: 'Heading',
+    type: 'text',
+    required: true,
+  }],
+  variants: [],
+  presets: [],
+  slots: [],
+  constraints: {},
+  requirements: {
+    capabilities: [],
+    providerAdapters: [],
+    plugins: ['creator-signal.site'],
+  },
+  documentation: {
+    usage: 'Explain where authors should use the component.',
+    accessibility: 'Document the manual checks authors must complete.',
+  },
+}
+```
+
+Add the entry to `creatorSignalComponentLibraryEntries`. The plugin config
+passes that list to `componentLibrary` and requests
+`componentLibrary.register`. Instatic validates source ownership and prevents a
+plugin from registering entries outside its namespace.
 
 Always pass `compiled.conditions` with `compiled.pages`. This installs the
 media, container, and feature-query registry referenced by compiled class
@@ -202,7 +254,9 @@ bun run lint
 1. Install or re-sync the Creator Signal plugin from **Admin → Plugins**.
 2. Open **Site** and choose the page to edit.
 3. Insert **Creator Signal Hero** from the Components section.
-4. Select the component instance and edit its typed parameters.
+   The **Creator Signal** source badge distinguishes it from built-in and other
+   provider components; the provider filter can show only Creator Signal entries.
+4. Select the component instance and edit its governed fields.
 5. For **Artwork**, select or upload an image in the Media picker. The host
    stores it through the configured media adapter; Creator Signal production
    uses its site-specific MinIO bucket.
@@ -220,6 +274,7 @@ affect only the selected reference.
 | Bare CSS names in `VisualComponent.tree.nodes[*].classIds` | Full compiled class IDs such as `creator-signal.site/site/hero-section` |
 | A root element without `base.body` | `base.body` containing the rendered component root |
 | Looking up instance values by parameter name | Bind and override by stable parameter ID |
+| Exposing a raw Visual Component directly in Insert → Components | Register a governed `ComponentLibraryEntry` with an explicit owner and field contract |
 | Hard-coded object-storage URLs | An `image` parameter bound to `base.image.props.src` |
 | JavaScript embedded in a Visual Component | A registered module such as `integrations/creator-signal/modules/mautic-form.ts` |
 | Editing generated `pack/site.json` | Edit TypeScript sources and rebuild the plugin |
@@ -227,6 +282,7 @@ affect only the selected reference.
 ## Related
 
 - `integrations/creator-signal/pack/hero-component.ts` — reference component
+- `integrations/creator-signal/component-library.ts` — governed authoring entries
 - `integrations/creator-signal/pack/design-system.ts` — public design system
 - `integrations/creator-signal/pack/site.ts` — pack registration and saved layouts
 - `src/core/plugin-sdk/builders/tree.ts` — `defineComponent` and `h`

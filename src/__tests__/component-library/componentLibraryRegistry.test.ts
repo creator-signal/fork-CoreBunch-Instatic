@@ -2,6 +2,8 @@ import { describe, expect, it } from 'bun:test'
 import {
   ComponentLibraryDefinitionError,
   ComponentLibraryRegistry,
+  componentLibrarySourceKey,
+  componentLibrarySourceLabel,
   filterComponentLibraryEntries,
   parseComponentLibraryEntry,
   resolveComponentLibraryAvailability,
@@ -216,6 +218,10 @@ describe('Component Library discovery', () => {
       implementationTypes: ['pattern'],
       sources: ['design-system'],
     }).map((candidate) => candidate.id)).toEqual(['base.hero'])
+    expect(filterComponentLibraryEntries(entries, { search: 'acme design-system' })
+      .map((candidate) => candidate.id)).toEqual(['base.hero'])
+    expect(componentLibrarySourceKey(entries[1]!)).toBe('acme.design-system')
+    expect(componentLibrarySourceLabel(entries[1]!)).toBe('Acme')
   })
 
   it('resolves unavailable and degraded dependencies without exposing settings', () => {

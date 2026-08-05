@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 import '@modules/base'
 import creatorSignalPlugin from '../../../integrations/creator-signal/instatic-plugin.config'
+import { creatorSignalHeroEntry } from '../../../integrations/creator-signal/component-library'
 import { pack } from '../../../integrations/creator-signal/pack/site'
 
 describe('Creator Signal site pack', () => {
@@ -28,7 +29,7 @@ describe('Creator Signal site pack', () => {
   })
 
   it('injects the Creator Signal favicon and PWA manifest into published pages', () => {
-    expect(creatorSignalPlugin.manifest.version).toBe('0.1.9')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.1.10')
     expect(creatorSignalPlugin.manifest.frontend?.assets).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -183,7 +184,40 @@ describe('Creator Signal site pack', () => {
       fetchPriority: 'high',
     })
     expect(image?.propBindings?.src?.paramId).toBe(
-      'creator-signal.site/component/hero/param/artwork',
+      'creator-signal.site.hero.artwork',
     )
+  })
+
+  it('registers the Hero as an explicitly owned governed catalogue component', () => {
+    expect(creatorSignalPlugin.manifest.permissions).toContain('componentLibrary.register')
+    expect(creatorSignalPlugin.componentLibrary).toEqual([creatorSignalHeroEntry])
+    expect(creatorSignalHeroEntry).toMatchObject({
+      id: 'creator-signal.site.hero',
+      source: {
+        type: 'plugin',
+        pluginId: 'creator-signal.site',
+        name: 'Creator Signal',
+      },
+      implementation: {
+        type: 'visual-component',
+        componentId: 'creator-signal.site/component/hero',
+      },
+      requirements: {
+        plugins: ['creator-signal.site'],
+      },
+    })
+
+    const hero = pack.visualComponents.find((component) =>
+      component.id === 'creator-signal.site/component/hero')
+    expect(creatorSignalHeroEntry.fields.map((field) => field.key))
+      .toEqual(hero?.params.map((param) => param.id))
+    expect(creatorSignalHeroEntry.fields.map((field) => field.label)).toEqual([
+      'Eyebrow',
+      'Heading',
+      'Introduction',
+      'Action label',
+      'Action URL',
+      'Artwork',
+    ])
   })
 })

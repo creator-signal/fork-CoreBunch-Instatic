@@ -155,9 +155,7 @@ export function ModuleInserterDialog({
   const filteredModules = filterInserterItems(moduleItems, query)
   const filteredSavedLayouts = filterInserterItems(savedLayoutItems, query)
   const filteredComponents = filterInserterItems(
-    componentItems.filter(
-      (item) => item.source === 'saved' || item.category !== 'Forms',
-    ),
+    componentItems.filter((item) => item.category !== 'Forms'),
     query,
   )
   const filteredForms = filterInserterItems(
@@ -687,13 +685,15 @@ function itemsForSection(
 }
 
 function emptyTitleForSection(section: ModuleInserterSectionId): string {
-  if (section === 'components') return 'No components yet'
+  if (section === 'components') return 'No catalogue components available'
   if (section === 'recent') return 'No recent inserts'
   return 'Nothing to insert'
 }
 
 function emptyDescriptionForSection(section: ModuleInserterSectionId): string {
-  if (section === 'components') return 'Create a Visual Component to insert it from here.'
+  if (section === 'components') {
+    return 'Install or enable a plugin or design system that registers governed components.'
+  }
   if (section === 'recent') return 'Inserted modules and layouts will appear here.'
   return 'This section has no available items.'
 }

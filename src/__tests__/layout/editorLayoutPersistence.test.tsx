@@ -401,15 +401,11 @@ describe('AdminCanvasLayout — permanent panel rail', () => {
     const tree = within(sidebar).getByRole('tree', {
       name: /component page hierarchy/i,
     })
-    const treeRows = within(tree).getAllByRole('treeitem')
-    const selectedTreeRow =
-      treeRows.find((row) => row.getAttribute('aria-selected') === 'true') ??
-      treeRows[0]
-    if (!selectedTreeRow) throw new Error('Expected at least one component tree row')
-    fireEvent.keyDown(selectedTreeRow, { key: 'F2' })
-    expect(within(selectedTreeRow).queryByRole('textbox')).toBeNull()
-    fireEvent.contextMenu(selectedTreeRow, { clientX: 12, clientY: 12 })
-    expect(screen.queryByRole('menu')).toBeNull()
+    expect(within(tree).getByText('No catalogue components on this page')).toBeDefined()
+    expect(within(tree).queryByRole('treeitem')).toBeNull()
+    expect(
+      within(sidebar).queryByRole('button', { name: /open component library/i }),
+    ).toBeNull()
 
     const beforeNodeIds = Object.keys(useEditorStore.getState().site?.pages[0]?.nodes ?? {})
     fireEvent.keyDown(canvas, { key: 'Backspace' })

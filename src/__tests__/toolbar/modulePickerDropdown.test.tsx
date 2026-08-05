@@ -116,7 +116,7 @@ function clickSection(name: string) {
   fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${name}\\b`) }))
 }
 
-describe('ModulePickerDropdown — Visual Components', () => {
+describe('ModulePickerDropdown — governed components', () => {
   it('exposes stable names for inserter category buttons when labels are visually hidden', () => {
     loadSite()
     render(<ModulePickerDropdown />)
@@ -131,7 +131,7 @@ describe('ModulePickerDropdown — Visual Components', () => {
     }
   })
 
-  it('lists site VCs as items inside the Components section', () => {
+  it('does not infer raw site Visual Components into the Components section', () => {
     loadSite([
       makeVC('vc-1', 'HeroCard', 3),
       makeVC('vc-2', 'PricingTable', 1),
@@ -141,21 +141,23 @@ describe('ModulePickerDropdown — Visual Components', () => {
     const dialog = openInserter()
     clickSection('Components')
 
-    expect(within(dialog).getAllByText('HeroCard').length).toBeGreaterThan(0)
-    expect(within(dialog).getAllByText('PricingTable').length).toBeGreaterThan(0)
+    expect(within(dialog).queryByText('HeroCard')).toBeNull()
+    expect(within(dialog).queryByText('PricingTable')).toBeNull()
+    expect(dialog.querySelector('[data-component-library-id="base.hero"]')).not.toBeNull()
   })
 
-  it('renders data-vc-id attribute on VC items', () => {
+  it('identifies catalogue items by their governed entry id', () => {
     loadSite([makeVC('vc-abc', 'MyComponent', 0)])
     render(<ModulePickerDropdown />)
     const dialog = openInserter()
     clickSection('Components')
 
-    const vcItem = dialog.querySelector('[data-vc-id="vc-abc"]')
-    expect(vcItem?.getAttribute('data-vc-id')).toBe('vc-abc')
+    const componentItem = dialog.querySelector('[data-component-library-id="base.hero"]')
+    expect(componentItem?.getAttribute('data-component-library-id')).toBe('base.hero')
+    expect(dialog.querySelector('[data-vc-id]')).toBeNull()
   })
 
-  it('filters VCs by search query', () => {
+  it('filters governed catalogue components by search query', () => {
     loadSite([
       makeVC('vc-1', 'HeroCard', 2),
       makeVC('vc-2', 'PricingTable', 1),
@@ -167,20 +169,22 @@ describe('ModulePickerDropdown — Visual Components', () => {
     const searchBox = screen.getByRole('searchbox', { name: 'Search modules' })
     fireEvent.change(searchBox, { target: { value: 'hero' } })
 
-    expect(within(dialog).getAllByText('HeroCard').length).toBeGreaterThan(0)
-    expect(within(dialog).queryByText('PricingTable')).toBeNull()
+    expect(dialog.querySelector('[data-component-library-id="base.hero"]')).not.toBeNull()
+    expect(dialog.querySelector('[data-component-library-id="base.card"]')).toBeNull()
+    expect(within(dialog).queryByText('HeroCard')).toBeNull()
   })
 
-  it('calls insertComponentRef with correct parent when a VC item is clicked', () => {
+  it('inserts a governed Visual Component reference with catalogue identity', () => {
     loadSite([makeVC('vc-1', 'HeroCard', 0)])
     render(<ModulePickerDropdown />)
     const dialog = openInserter()
     clickSection('Components')
 
-    // Use the data-vc-id to find and click the VC item
-    const vcItem = dialog.querySelector('[data-vc-id="vc-1"]') as HTMLElement
-    expect(vcItem).not.toBeNull()
-    fireEvent.click(vcItem)
+    const componentItem = dialog.querySelector(
+      '[data-component-library-id="base.hero"]',
+    ) as HTMLElement
+    expect(componentItem).not.toBeNull()
+    fireEvent.click(componentItem)
 
     const state = useEditorStore.getState()
     const page = state.site?.pages.find((p) => p.id === 'page-home')
@@ -189,17 +193,24 @@ describe('ModulePickerDropdown — Visual Components', () => {
       ? Object.values(nodes).filter((n) => n.moduleId === 'base.visual-component-ref')
       : []
     expect(refs.length).toBe(1)
-    expect(refs[0]?.props.componentId).toBe('vc-1')
+    expect(refs[0]?.props.componentId).toBe('base.vc.hero')
+    expect(refs[0]?.catalogueInstance).toEqual({
+      entryId: 'base.hero',
+      entryVersion: '1.0.0',
+      variantId: 'image-left',
+    })
   })
 
-  it('closes the inserter after clicking a VC item', () => {
+  it('closes the inserter after clicking a governed component item', () => {
     loadSite([makeVC('vc-1', 'HeroCard', 0)])
     render(<ModulePickerDropdown />)
     const dialog = openInserter()
     clickSection('Components')
 
-    const vcItem = dialog.querySelector('[data-vc-id="vc-1"]') as HTMLElement
-    fireEvent.click(vcItem)
+    const componentItem = dialog.querySelector(
+      '[data-component-library-id="base.hero"]',
+    ) as HTMLElement
+    fireEvent.click(componentItem)
 
     expect(screen.queryByRole('dialog', { name: 'Add to canvas' })).toBeNull()
   })

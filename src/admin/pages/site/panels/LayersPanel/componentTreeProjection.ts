@@ -48,8 +48,9 @@ export interface ComponentLayerRow {
 export interface ComponentTreeProjection {
   roots: ComponentLayerRow[]
   /**
-   * Every backing node id maps to its visible Components-view boundary.
-   * Hidden implementation descendants of a pattern map to the pattern root.
+   * Visible rows map to themselves. Hidden implementation descendants map to
+   * their nearest governed owner; unrelated freeform nodes are intentionally
+   * absent because Components view does not invent a boundary for them.
    */
   selectionOwnerByNodeId: Readonly<Record<string, string>>
 }
@@ -71,6 +72,29 @@ interface BuildComponentTreeProjectionOptions {
  * pattern or authorable-region boundary through `selectionOwnerByNodeId`.
  */
 export function buildComponentTreeProjection({
+  page,
+  wrapperTemplates = [],
+  moduleNames,
+  visualComponents,
+  catalogueEntries = [],
+}: BuildComponentTreeProjectionOptions): ComponentTreeProjection {
+  const projection = buildUnfilteredComponentTreeProjection({
+    page,
+    wrapperTemplates,
+    moduleNames,
+    visualComponents,
+    catalogueEntries,
+  })
+  return retainCatalogueComponentRows(projection, page)
+}
+
+/**
+ * Build the complete compositional projection before the author-facing filter
+ * is applied. Keeping the template outlet in this intermediate tree lets the
+ * active page be spliced into wrapper templates without making ordinary HTML
+ * nodes visible in Components view.
+ */
+function buildUnfilteredComponentTreeProjection({
   page,
   wrapperTemplates = [],
   moduleNames,
@@ -181,7 +205,7 @@ export function buildComponentTreeProjection({
   let composedRoot = root
   for (let index = wrapperTemplates.length - 1; index >= 0; index -= 1) {
     const template = wrapperTemplates[index]
-    const templateProjection = buildComponentTreeProjection({
+    const templateProjection = buildUnfilteredComponentTreeProjection({
       page: template,
       moduleNames,
       visualComponents,
@@ -197,6 +221,76 @@ export function buildComponentTreeProjection({
     roots: [composedRoot],
     selectionOwnerByNodeId,
   }
+}
+
+/**
+ * Components view is an inventory of catalogue-stamped component instances,
+ * not a friendlier spelling of the DOM tree. Ordinary/freeform rows and raw
+ * Visual Component references are therefore removed while catalogue instances
+ * are hoisted through them in page order. Page and template roots remain only
+ * when they contain an instance inserted from the Component Library.
+ */
+function retainCatalogueComponentRows(
+  projection: ComponentTreeProjection,
+  page: Page,
+): ComponentTreeProjection {
+  const visibleNodeIds = new Set<string>()
+  const catalogueOwnerIds = new Set<string>()
+
+  const retainRow = (
+    row: ComponentLayerRow,
+    catalogueAncestorId: string | null,
+  ): ComponentLayerRow[] => {
+    const isContextRow = row.kind === 'page' || row.sourceRoot === true
+    const isCatalogueInstance = Boolean(row.entryId)
+    const isGovernedSlot = row.kind === 'slot' && catalogueAncestorId !== null
+    const isCatalogueRow = isCatalogueInstance || isGovernedSlot
+
+    if (!isContextRow && !isCatalogueRow) {
+      return row.children.flatMap((child) =>
+        retainRow(child, catalogueAncestorId),
+      )
+    }
+
+    const nextCatalogueAncestorId = isCatalogueRow
+      ? row.nodeId
+      : catalogueAncestorId
+    const children = row.children.flatMap((child) =>
+      retainRow(child, nextCatalogueAncestorId),
+    )
+
+    if (isContextRow && children.length === 0) return []
+
+    if (page.nodes[row.nodeId]) {
+      visibleNodeIds.add(row.nodeId)
+      if (isCatalogueRow) catalogueOwnerIds.add(row.nodeId)
+    }
+    return [{ ...row, children }]
+  }
+
+  const roots = projection.roots.flatMap((row) => retainRow(row, null))
+  const parentByNodeId = buildParentIndex(page.nodes)
+  const selectionOwnerByNodeId: Record<string, string> = {}
+
+  for (const nodeId of Object.keys(page.nodes)) {
+    if (visibleNodeIds.has(nodeId)) {
+      selectionOwnerByNodeId[nodeId] = nodeId
+      continue
+    }
+
+    let ancestorId = parentByNodeId.get(nodeId)
+    const seen = new Set<string>()
+    while (ancestorId && !seen.has(ancestorId)) {
+      if (catalogueOwnerIds.has(ancestorId)) {
+        selectionOwnerByNodeId[nodeId] = ancestorId
+        break
+      }
+      seen.add(ancestorId)
+      ancestorId = parentByNodeId.get(ancestorId)
+    }
+  }
+
+  return { roots, selectionOwnerByNodeId }
 }
 
 interface ProjectOrdinaryNodeOptions {

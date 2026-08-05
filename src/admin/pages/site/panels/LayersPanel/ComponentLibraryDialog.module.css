@@ -16,7 +16,7 @@
 
 .selectFilters {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--space-s);
 }
 
@@ -104,6 +104,12 @@
     line-height: 1.35;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+}
+
+.resultBadges {
+    display: grid;
+    justify-items: end;
+    gap: var(--space-3xs);
 }
 
 .details {

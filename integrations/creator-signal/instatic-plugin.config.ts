@@ -1,11 +1,12 @@
 import { definePlugin, permissions } from '@core/plugin-sdk'
+import { creatorSignalComponentLibraryEntries } from './component-library'
 import mauticForm from './modules/mautic-form'
 import { pack } from './pack/site'
 
 export default definePlugin({
   id: 'creator-signal.site',
   name: 'Creator Signal public site',
-  version: '0.1.9',
+  version: '0.1.10',
   description: 'Creator Signal starter pages, author layouts, Mautic forms, consent and analytics integrations.',
   author: { name: 'Creator Signal', url: 'https://creatorsignal.me' },
   license: 'MIT',
@@ -14,6 +15,7 @@ export default definePlugin({
   permissions: [
     permissions.modulesRegister,
     permissions.visualComponentsRegister,
+    permissions.componentLibraryRegister,
     permissions.frontendAssets,
     permissions.cmsRoutes,
     permissions.cmsRoutesPublic,
@@ -25,6 +27,7 @@ export default definePlugin({
     'errors-api.creatorsignal.me',
   ],
   modules: [mauticForm],
+  componentLibrary: creatorSignalComponentLibraryEntries,
   pack,
   settings: [
     { id: 'plausibleEnabled', type: 'toggle', label: 'Enable Plausible pageviews', default: false },

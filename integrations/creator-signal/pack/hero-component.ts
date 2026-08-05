@@ -4,12 +4,12 @@ const componentId = 'creator-signal.site/component/hero'
 const siteClass = (name: string) => `creator-signal.site/site/${name}`
 
 export const heroParamIds = {
-  eyebrow: `${componentId}/param/eyebrow`,
-  heading: `${componentId}/param/heading`,
-  body: `${componentId}/param/body`,
-  actionLabel: `${componentId}/param/action-label`,
-  actionUrl: `${componentId}/param/action-url`,
-  artwork: `${componentId}/param/artwork`,
+  eyebrow: 'creator-signal.site.hero.eyebrow',
+  heading: 'creator-signal.site.hero.heading',
+  body: 'creator-signal.site.hero.body',
+  actionLabel: 'creator-signal.site.hero.action-label',
+  actionUrl: 'creator-signal.site.hero.action-url',
+  artwork: 'creator-signal.site.hero.artwork',
 } as const
 
 const heroComponent = defineComponent(

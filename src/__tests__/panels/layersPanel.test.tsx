@@ -49,7 +49,7 @@ function loadSite(): void {
         moduleId: 'base.container',
         children: ['implementation'],
         catalogueInstance: {
-          entryId: 'site.hero',
+          entryId: 'base.container',
           entryVersion: '1.0.0',
           pattern: { authorableNodeIds: [] },
         },
@@ -145,8 +145,59 @@ describe('Explorer Layers projections', () => {
       expect(useEditorStore.getState().layersViewMode).toBe('components')
     })
     const componentTree = screen.getByTestId('component-layers-tree')
-    expect(within(componentTree).getByText('Hero')).toBeDefined()
-    expect(within(componentTree).getByText('Slot: actions')).toBeDefined()
+    expect(within(componentTree).getByText('Container')).toBeDefined()
+    expect(within(componentTree).queryByText('Hero')).toBeNull()
+    expect(within(componentTree).queryByText('Slot: actions')).toBeNull()
+  })
+
+  it('shows an empty Components view for an imported-only page', async () => {
+    const page = makePage({
+      id: 'imported',
+      title: 'Imported',
+      rootNodeId: 'root',
+      nodes: {
+        root: makeNode({
+          id: 'root',
+          moduleId: 'base.body',
+          children: ['container', 'visual-ref'],
+        }),
+        container: makeNode({
+          id: 'container',
+          moduleId: 'base.container',
+          children: ['copy'],
+        }),
+        copy: makeNode({ id: 'copy', moduleId: 'base.text' }),
+        'visual-ref': makeNode({
+          id: 'visual-ref',
+          moduleId: 'base.visual-component-ref',
+          props: { componentId: 'hero-vc' },
+          children: ['raw-slot'],
+        }),
+        'raw-slot': makeNode({
+          id: 'raw-slot',
+          moduleId: 'base.slot-instance',
+          props: { slotName: 'actions' },
+        }),
+      },
+    })
+    useEditorStore.setState({
+      site: makeSite({
+        pages: [page],
+        visualComponents: [makeVC({ id: 'hero-vc', name: 'Hero' })],
+      }),
+      activePageId: page.id,
+    } as Parameters<typeof useEditorStore.setState>[0])
+    render(<DndContext><ExplorerPanel /></DndContext>)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Components' }))
+
+    expect(await screen.findByText('No catalogue components on this page')).toBeDefined()
+    const componentTree = screen.getByTestId('component-layers-tree')
+    expect(within(componentTree).queryByText(/Component Block:/)).toBeNull()
+    expect(within(componentTree).queryByText('Hero')).toBeNull()
+    expect(within(componentTree).queryByText('Slot: actions')).toBeNull()
+    expect(screen.getByRole('button', { name: 'Open Component Library' })).toBeDefined()
+    expect(screen.getByRole('button', { name: 'Add from Component Library' })).toBeDefined()
   })
 
   it('maps hidden pattern selection to the boundary and restores the exact HTML node', async () => {

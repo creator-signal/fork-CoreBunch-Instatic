@@ -1,6 +1,7 @@
 import type { ComponentLibraryEntry } from '@core/component-library'
 import { registry } from '@core/module-engine'
 import {
+  creatorSignalCatalogueEntryId,
   reindexNodeParents,
   type CatalogueInstanceMetadata,
   type Page,
@@ -15,7 +16,8 @@ const entryById = new Map(
 )
 
 function entry(id: string): ComponentLibraryEntry {
-  const value = entryById.get(id)
+  const publicId = creatorSignalCatalogueEntryId(id)
+  const value = entryById.get(publicId)
   if (!value) throw new Error(`Missing showcase catalogue entry "${id}".`)
   return value
 }

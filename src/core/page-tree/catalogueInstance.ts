@@ -9,6 +9,13 @@
 import { Type, type Static } from '@core/utils/typeboxHelpers'
 import { compiledCheck } from '@core/utils/typeboxCompiler'
 
+export const CREATOR_SIGNAL_CATALOGUE_ENTRY_NAMESPACE =
+  'creator-signal.site.catalogue'
+
+const LEGACY_MAPPED_CATALOGUE_ENTRY_PREFIX = 'base.'
+const CREATOR_SIGNAL_CATALOGUE_ENTRY_PREFIX =
+  `${CREATOR_SIGNAL_CATALOGUE_ENTRY_NAMESPACE}.`
+
 const SEMVER_PATTERN =
   '^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$'
 
@@ -40,6 +47,18 @@ export const CatalogueInstanceMetadataSchema = Type.Object({
 export type CatalogueInstanceMetadata = Static<typeof CatalogueInstanceMetadataSchema>
 
 /**
+ * Resolve the public identity of an entry from the mapped component catalogue.
+ *
+ * The implementation modules remain first-party `base.*` modules. Only the
+ * author-facing catalogue identity belongs to the Creator Signal namespace.
+ */
+export function creatorSignalCatalogueEntryId(entryId: string): string {
+  if (entryId.startsWith(CREATOR_SIGNAL_CATALOGUE_ENTRY_PREFIX)) return entryId
+  if (!entryId.startsWith(LEGACY_MAPPED_CATALOGUE_ENTRY_PREFIX)) return entryId
+  return `${CREATOR_SIGNAL_CATALOGUE_ENTRY_PREFIX}${entryId.slice(LEGACY_MAPPED_CATALOGUE_ENTRY_PREFIX.length)}`
+}
+
+/**
  * Tolerantly parse optional catalogue metadata at the persisted-node boundary.
  * Invalid optional metadata is dropped while the backing page node remains
  * usable in the HTML projection.
@@ -47,7 +66,7 @@ export type CatalogueInstanceMetadata = Static<typeof CatalogueInstanceMetadataS
 export function parseCatalogueInstanceMetadata(
   raw: unknown,
 ): CatalogueInstanceMetadata | undefined {
-  return compiledCheck(CatalogueInstanceMetadataSchema, raw)
-    ? raw
-    : undefined
+  if (!compiledCheck(CatalogueInstanceMetadataSchema, raw)) return undefined
+  const entryId = creatorSignalCatalogueEntryId(raw.entryId)
+  return entryId === raw.entryId ? raw : { ...raw, entryId }
 }

@@ -38,6 +38,7 @@ import {
   projectLayoutDoc,
   projectPageDoc,
   projectSiteDoc,
+  migrateCreatorSignalCatalogueNamespace,
   seedComponentDoc,
   seedLayoutDoc,
   seedPageDoc,
@@ -337,8 +338,10 @@ export function createCollabRelay(
       const stored = await getCollabDocumentState(db, docId)
       let generation: string
       let minted: boolean
+      let migratedCatalogueNamespace = false
       if (stored) {
         Y.applyUpdate(doc, stored.state, 'hydrate')
+        migratedCatalogueNamespace = migrateCreatorSignalCatalogueNamespace(doc)
         // Rows written before migration 023 carry ''.
         minted = stored.generation === ''
         generation = minted ? nanoid() : stored.generation
@@ -361,11 +364,11 @@ export function createCollabRelay(
         persistChain: Promise.resolve(),
         detachUpdateHandler: () => doc.off('update', updateHandler),
       })
-      if (minted) {
-        // Persist the mint IMMEDIATELY rather than through the debounce. A doc
-        // that hydrated cleanly is not dirty, so a mint riding the debounce
-        // would never reach the DB — the next open would mint a DIFFERENT id
-        // and reset every bound client for a byte-identical lineage.
+      if (minted || migratedCatalogueNamespace) {
+        // Persist a minted generation or hydrated namespace migration
+        // IMMEDIATELY rather than through the debounce. Neither change is
+        // dirty after the update handler attaches, so a deferred persist would
+        // never reach the database.
         await putCollabDocumentState(db, docId, Y.encodeStateAsUpdate(doc), generation)
       }
       return { doc, generation }

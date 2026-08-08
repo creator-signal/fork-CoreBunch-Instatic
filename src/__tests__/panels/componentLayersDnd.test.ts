@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'bun:test'
 import { registry } from '@core/module-engine'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import { makeNode, makePage } from '../fixtures'
 import { resolveComponentLayerDrop } from '@site/panels/LayersPanel/componentLayersDnd'
 import '@modules/base/index'
+
+const publicId = creatorSignalCatalogueEntryId
 
 function governedText(id: string) {
   return makeNode({
@@ -14,7 +17,7 @@ function governedText(id: string) {
       tag: 'p',
     },
     catalogueInstance: {
-      entryId: 'base.plain-text',
+      entryId: publicId('base.plain-text'),
       entryVersion: '1.0.0',
       presetId: 'paragraph',
     },
@@ -30,7 +33,7 @@ function governedEmail(id = 'email') {
       inputType: 'email',
     },
     catalogueInstance: {
-      entryId: 'base.email-input',
+      entryId: publicId('base.email-input'),
       entryVersion: '1.0.0',
       presetId: 'email',
     },
@@ -91,7 +94,7 @@ describe('Components Layers drag and drop', () => {
       position: 'inside',
     })).toMatchObject({
       allowed: false,
-      reason: expect.stringContaining('base.form-container'),
+      reason: expect.stringContaining(publicId('base.form-container')),
     })
   })
 
@@ -109,7 +112,7 @@ describe('Components Layers drag and drop', () => {
           moduleId: 'base.form',
           props: { ...registry.get('base.form')!.defaults },
           catalogueInstance: {
-            entryId: 'base.form-container',
+            entryId: publicId('base.form-container'),
             entryVersion: '1.0.0',
           },
         }),

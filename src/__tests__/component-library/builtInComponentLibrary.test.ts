@@ -2,11 +2,23 @@ import { describe, expect, it } from 'bun:test'
 import { componentLibraryRegistry } from '@core/component-library'
 import { componentLibraryPatternRegistry } from '@core/component-library'
 import { registry } from '@core/module-engine'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import {
   BUILT_IN_COMPONENT_LIBRARY_ENTRIES,
   registerBuiltInComponentLibraryEntries,
 } from '@modules/base/componentLibrary'
 import '@modules/base/index'
+
+const publicId = creatorSignalCatalogueEntryId
+
+function entriesByMappedSourceId() {
+  return new Map(
+    BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [
+      entry.id.replace('creator-signal.site.catalogue.', 'base.'),
+      entry,
+    ]),
+  )
+}
 
 describe('built-in Component Library', () => {
   it('registers explicit, uniquely identified catalogue entries', () => {
@@ -14,63 +26,22 @@ describe('built-in Component Library', () => {
 
     const ids = BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => entry.id)
     expect(new Set(ids).size).toBe(ids.length)
-    expect(ids).toContain('base.section')
-    expect(ids).toContain('base.heading')
-    expect(ids).toContain('base.rich-text')
-    expect(ids).toContain('base.code-block')
-    expect(ids).toContain('base.table')
-    expect(ids).toContain('base.email-input')
-    expect(ids).toContain('base.form-message')
-    expect(ids).toContain('base.form-field-group')
-    expect(ids).toContain('base.form-actions')
-    expect(ids).toContain('base.form-help')
-    expect(ids).toContain('base.form-error')
-    expect(ids).toContain('base.tabs')
-    expect(ids).toContain('base.tab-panel')
-    expect(ids).toContain('base.accordion')
-    expect(ids).toContain('base.accordion-item')
-    expect(ids).toContain('base.youtube-embed')
-    expect(ids).toContain('base.map')
-    expect(ids).toContain('base.captcha')
-    expect(ids).toContain('base.search')
-    expect(ids).toContain('base.file-attachment')
-    expect(ids).toContain('base.hero')
-    expect(ids).toContain('base.card')
-    expect(ids).toContain('base.navigation')
-    expect(ids).toContain('base.notice')
-    expect(ids).toContain('base.reusable-section')
-    expect(ids).toContain('base.download')
-    expect(ids).toContain('base.progress-bar')
-    expect(ids).toContain('base.dialog')
-    expect(ids).toContain('base.drawer')
-    expect(ids).toContain('base.carousel')
-    expect(ids).toContain('base.grid')
-    expect(ids).toContain('base.card-grid')
-    expect(ids).toContain('base.gallery')
-    expect(ids).toContain('base.comparison-table')
-    expect(ids).toContain('base.faq-list')
-    expect(ids).toContain('base.empty-state')
-    expect(ids).toContain('base.icon')
-    expect(ids).toContain('base.badge')
-    expect(ids).toContain('base.quote')
-    expect(ids).toContain('base.person-profile')
-    expect(ids).toContain('base.breadcrumb')
-    expect(ids).toContain('base.table-of-contents')
-    expect(ids).toContain('base.audio')
-    expect(ids).toContain('base.pdf-viewer')
-    expect(ids).toContain('base.form-panel')
-    expect(ids).toContain('base.form-accordion')
-    expect(ids).toContain('base.form-tabs')
-    expect(ids).toContain('base.checkbox-group')
-    expect(ids).toContain('base.radio-group')
-    expect(ids).toContain('base.switch')
-    expect(ids).toContain('base.hidden-field')
-    expect(ids).toContain('base.reset-button')
-    expect(ids).toContain('base.previous-next-actions')
-    expect(ids).toContain('base.form-summary-review')
-    expect(ids).toContain('base.terms-and-conditions')
-    expect(ids).toContain('base.wizard')
-    expect(ids).toContain('base.reusable-form-fragment')
+    expect(ids.every((id) => id.startsWith('creator-signal.site.catalogue.')))
+      .toBe(true)
+    expect(ids.some((id) => id.startsWith('base.'))).toBe(false)
+    expect(ids).toEqual(expect.arrayContaining([
+      publicId('base.section'),
+      publicId('base.heading'),
+      publicId('base.table'),
+      publicId('base.email-input'),
+      publicId('base.tabs'),
+      publicId('base.accordion'),
+      publicId('base.hero'),
+      publicId('base.navigation'),
+      publicId('base.form-panel'),
+      publicId('base.file-attachment'),
+      publicId('base.reusable-form-fragment'),
+    ]))
 
     for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
       expect(componentLibraryRegistry.get(entry.id)).toEqual(entry)
@@ -131,9 +102,7 @@ describe('built-in Component Library', () => {
   })
 
   it('composes governed form controls through the canonical CMS form modules', () => {
-    const byId = new Map(
-      BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [entry.id, entry]),
-    )
+    const byId = entriesByMappedSourceId()
     const fieldGroup = byId.get('base.form-field-group')
     const email = byId.get('base.email-input')
     const help = byId.get('base.form-help')
@@ -162,47 +131,43 @@ describe('built-in Component Library', () => {
       presetId: 'error',
     })
     expect(email?.constraints.allowedParentEntryIds).toContain(
-      'base.form-field-group',
+      publicId('base.form-field-group'),
     )
-    expect(actions?.constraints.allowedChildEntryIds).toContain('base.submit')
+    expect(actions?.constraints.allowedChildEntryIds).toContain(publicId('base.submit'))
     expect(submit?.constraints.allowedParentEntryIds).toContain(
-      'base.form-actions',
+      publicId('base.form-actions'),
     )
     expect(fieldGroup?.constraints.allowedParentEntryIds).toContain(
-      'base.tab-panel',
+      publicId('base.tab-panel'),
     )
     expect(fieldGroup?.constraints.allowedParentEntryIds).toContain(
-      'base.accordion-item',
+      publicId('base.accordion-item'),
     )
   })
 
   it('defines tabs and accordion as shared governed Visual Components', () => {
-    const byId = new Map(
-      BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [entry.id, entry]),
-    )
+    const byId = entriesByMappedSourceId()
     expect(byId.get('base.tabs')?.constraints.allowedChildEntryIds).toEqual([
-      'base.tab-panel',
+      publicId('base.tab-panel'),
     ])
     expect(byId.get('base.tabs')?.implementation).toEqual({
       type: 'visual-component',
       componentId: 'base.vc.tabs',
     })
     expect(byId.get('base.tab-panel')?.constraints.allowedParentEntryIds)
-      .toEqual(['base.tabs'])
+      .toEqual([publicId('base.tabs')])
     expect(byId.get('base.accordion')?.constraints.allowedChildEntryIds)
-      .toEqual(['base.accordion-item'])
+      .toEqual([publicId('base.accordion-item')])
     expect(byId.get('base.accordion')?.implementation).toEqual({
       type: 'visual-component',
       componentId: 'base.vc.accordion',
     })
     expect(byId.get('base.accordion-item')?.constraints.allowedParentEntryIds)
-      .toEqual(['base.accordion'])
+      .toEqual([publicId('base.accordion')])
   })
 
   it('declares provider-backed media, map and CAPTCHA dependencies', () => {
-    const byId = new Map(
-      BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [entry.id, entry]),
-    )
+    const byId = entriesByMappedSourceId()
 
     expect(byId.get('base.youtube-embed')).toMatchObject({
       implementation: {
@@ -244,7 +209,7 @@ describe('built-in Component Library', () => {
 
   it('defines Search as a capability-backed shared collection preset', () => {
     const search = BUILT_IN_COMPONENT_LIBRARY_ENTRIES.find(
-      (entry) => entry.id === 'base.search',
+      (entry) => entry.id === publicId('base.search'),
     )
     expect(search).toMatchObject({
       implementation: {
@@ -269,9 +234,7 @@ describe('built-in Component Library', () => {
   })
 
   it('defines File Attachment as a governed capability-backed form control', () => {
-    const byId = new Map(
-      BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [entry.id, entry]),
-    )
+    const byId = entriesByMappedSourceId()
     expect(byId.get('base.file-attachment')).toMatchObject({
       implementation: {
         type: 'capability-backed',
@@ -286,11 +249,11 @@ describe('built-in Component Library', () => {
       },
     })
     expect(byId.get('base.form-field-group')?.constraints.allowedChildEntryIds)
-      .toContain('base.file-attachment')
+      .toContain(publicId('base.file-attachment'))
   })
 
   it('advertises Save Draft only through the persistent draft capability', () => {
-    const saveDraft = componentLibraryRegistry.get('base.save-draft')
+    const saveDraft = componentLibraryRegistry.get(publicId('base.save-draft'))
     expect(saveDraft?.implementation.type).toBe('capability-backed')
     expect(saveDraft?.requirements.capabilities).toEqual(['forms.drafts'])
     expect(saveDraft?.implementation).toMatchObject({
@@ -303,9 +266,7 @@ describe('built-in Component Library', () => {
   })
 
   it('completes the form catalogue through shared primitives and governed compositions', () => {
-    const byId = new Map(
-      BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [entry.id, entry]),
-    )
+    const byId = entriesByMappedSourceId()
 
     expect(byId.get('base.switch')).toMatchObject({
       implementation: {

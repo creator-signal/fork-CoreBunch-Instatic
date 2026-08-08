@@ -14,6 +14,8 @@ export type { BaseNode } from '../page-tree/baseNode'
 
 export {
   CatalogueInstanceMetadataSchema,
+  CREATOR_SIGNAL_CATALOGUE_ENTRY_NAMESPACE,
+  creatorSignalCatalogueEntryId,
   parseCatalogueInstanceMetadata,
 } from '../page-tree/catalogueInstance'
 export type { CatalogueInstanceMetadata } from '../page-tree/catalogueInstance'

@@ -4,9 +4,12 @@ import {
   findComponentLibraryConversionCandidates,
 } from '@core/component-library'
 import { registry } from '@core/module-engine'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import { publishPage } from '@core/publisher'
 import { makeNode, makePage, makeSite } from '../fixtures'
 import '@modules/base/index'
+
+const publicId = creatorSignalCatalogueEntryId
 
 describe('Component Library freeform conversion', () => {
   it('finds only lossless primitive/preset matches', () => {
@@ -26,9 +29,9 @@ describe('Component Library freeform conversion', () => {
     )
 
     expect(candidates.map((candidate) => candidate.entry.id))
-      .toEqual(['base.email-input'])
+      .toEqual([publicId('base.email-input')])
     expect(candidates[0]?.metadata).toEqual({
-      entryId: 'base.email-input',
+      entryId: publicId('base.email-input'),
       entryVersion: '1.0.0',
       presetId: 'email',
     })
@@ -72,7 +75,7 @@ describe('Component Library freeform conversion', () => {
     )).toEqual([])
 
     node.catalogueInstance = {
-      entryId: 'base.text-input',
+      entryId: publicId('base.text-input'),
       entryVersion: '1.0.0',
       presetId: 'text',
     }
@@ -107,7 +110,7 @@ describe('Component Library freeform conversion', () => {
     const before = publishPage(page, site, registry).html
     const convertedPage = structuredClone(page)
     convertedPage.nodes.email!.catalogueInstance = {
-      entryId: 'base.email-input',
+      entryId: publicId('base.email-input'),
       entryVersion: '1.0.0',
       presetId: 'email',
     }

@@ -18,6 +18,7 @@ import {
 import { BUILT_IN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibrary'
 import type { SavedLayout } from '@core/layouts'
 import type { VisualComponent } from '@core/visualComponents'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import { findCanvasViewportAtPoint } from '@site/canvas/canvasInsertionDrop'
 import { scrollSelectedItemIntoView } from '@site/module-picker/moduleInserterSelectionScroll'
 import {
@@ -26,6 +27,8 @@ import {
   trackModuleInserterRecent,
   writeModuleInserterView,
 } from '@site/module-picker/moduleInserterPrefs'
+
+const publicId = creatorSignalCatalogueEntryId
 
 function mod(id: string, category: string, name = id): RegistryModuleForInserter {
   return { id, category, name, description: `${name} description` }
@@ -57,13 +60,14 @@ describe('module inserter model', () => {
     )
     const grouped = composeComponentSection(components)
 
-    expect(components.map((item) => item.id)).toContain('base.hero')
-    expect(components.map((item) => item.id)).toContain('base.grid')
-    expect(components.map((item) => item.id)).toContain('base.plain-text')
-    expect(forms.map((item) => item.id)).toContain('base.form-container')
-    expect(forms.map((item) => item.id)).toContain('base.email-input')
-    expect(grouped.labelByKey.get('component:base.section')).toBe('Layout')
-    expect(grouped.labelByKey.get('component:base.heading')).toBe('Typography')
+    expect(components.map((item) => item.id)).toContain(publicId('base.hero'))
+    expect(components.map((item) => item.id)).toContain(publicId('base.grid'))
+    expect(components.map((item) => item.id)).toContain(publicId('base.plain-text'))
+    expect(forms.map((item) => item.id)).toContain(publicId('base.form-container'))
+    expect(forms.map((item) => item.id)).toContain(publicId('base.email-input'))
+    expect(grouped.labelByKey.get(`component:${publicId('base.section')}`)).toBe('Layout')
+    expect(grouped.labelByKey.get(`component:${publicId('base.heading')}`))
+      .toBe('Typography')
   })
 
   it('never exposes an ungoverned Visual Component in the Components section', () => {
@@ -101,7 +105,9 @@ describe('module inserter model', () => {
 
   it('identifies the component owner in the insertion description', () => {
     const pluginEntry = {
-      ...BUILT_IN_COMPONENT_LIBRARY_ENTRIES.find((entry) => entry.id === 'base.hero')!,
+      ...BUILT_IN_COMPONENT_LIBRARY_ENTRIES.find(
+        (entry) => entry.id === publicId('base.hero'),
+      )!,
       id: 'creator-signal.site.hero',
       category: 'Creator Signal',
       source: {

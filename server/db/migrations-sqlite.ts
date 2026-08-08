@@ -1322,4 +1322,58 @@ export const sqliteMigrations: Migration[] = [
        where trim(lower(display_name)) = trim(lower(email));
     `,
   },
+  {
+    // Keep stored author-facing catalogue identities aligned with the Creator
+    // Signal namespace without touching canonical `base.*` implementation IDs.
+    id: '028_creator_signal_catalogue_namespace',
+    sql: `
+      update data_rows
+         set cells_json = replace(
+           replace(
+             replace(
+               replace(cells_json,
+                 '"catalogueInstance":{"entryId":"base.',
+                 '"catalogueInstance":{"entryId":"creator-signal.site.catalogue.'),
+               '"catalogueInstance":{"entryId": "base.',
+               '"catalogueInstance":{"entryId": "creator-signal.site.catalogue.'),
+             '"catalogueInstance": {"entryId":"base.',
+             '"catalogueInstance": {"entryId":"creator-signal.site.catalogue.'),
+           '"catalogueInstance": {"entryId": "base.',
+           '"catalogueInstance": {"entryId": "creator-signal.site.catalogue.'
+         )
+       where cells_json like '%"catalogueInstance"%"entryId"%base.%'
+         and table_id in ('pages', 'components', 'layouts');
+
+      update data_row_versions
+         set cells_json = replace(
+           replace(
+             replace(
+               replace(cells_json,
+                 '"catalogueInstance":{"entryId":"base.',
+                 '"catalogueInstance":{"entryId":"creator-signal.site.catalogue.'),
+               '"catalogueInstance":{"entryId": "base.',
+               '"catalogueInstance":{"entryId": "creator-signal.site.catalogue.'),
+             '"catalogueInstance": {"entryId":"base.',
+             '"catalogueInstance": {"entryId":"creator-signal.site.catalogue.'),
+           '"catalogueInstance": {"entryId": "base.',
+           '"catalogueInstance": {"entryId": "creator-signal.site.catalogue.'
+         )
+       where cells_json like '%"catalogueInstance"%"entryId"%base.%'
+         and exists (
+           select 1 from data_rows
+            where data_rows.id = data_row_versions.row_id
+              and data_rows.table_id in ('pages', 'components', 'layouts')
+         );
+
+      update form_drafts
+         set schema_json = replace(
+           replace(schema_json,
+             '"catalogueEntryId": "base.',
+             '"catalogueEntryId": "creator-signal.site.catalogue.'),
+           '"catalogueEntryId":"base.',
+           '"catalogueEntryId":"creator-signal.site.catalogue.'
+         )
+       where schema_json like '%"catalogueEntryId"%base.%';
+    `,
+  },
 ]

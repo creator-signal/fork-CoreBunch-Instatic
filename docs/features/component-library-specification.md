@@ -31,7 +31,7 @@ the canonical implementation.
 
 Template-owned site footer, legal and supplementary navigation chrome.
 
-- Registry ID: `base.template-footer`
+- Registry ID: `creator-signal.site.catalogue.template-footer`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -55,7 +55,7 @@ No additional platform dependency.
 
 Template-owned site header and primary navigation chrome.
 
-- Registry ID: `base.template-header`
+- Registry ID: `creator-signal.site.catalogue.template-header`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -87,7 +87,7 @@ No additional platform dependency.
 
 Template-owned keyboard shortcut to the primary content region.
 
-- Registry ID: `base.template-skip-link`
+- Registry ID: `creator-signal.site.catalogue.template-skip-link`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -122,7 +122,7 @@ No additional platform dependency.
 
 A responsive two-column authored layout.
 
-- Registry ID: `base.grid`
+- Registry ID: `creator-signal.site.catalogue.grid`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -146,7 +146,7 @@ No additional platform dependency.
 
 A neutral content container with a controlled semantic element.
 
-- Registry ID: `base.container`
+- Registry ID: `creator-signal.site.catalogue.container`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -172,7 +172,7 @@ No additional platform dependency.
 
 A centrally defined section frame with governed content.
 
-- Registry ID: `base.reusable-section`
+- Registry ID: `creator-signal.site.catalogue.reusable-section`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -204,7 +204,7 @@ No additional platform dependency.
 
 A semantic section that groups related page content.
 
-- Registry ID: `base.section`
+- Registry ID: `creator-signal.site.catalogue.section`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -234,7 +234,7 @@ No additional platform dependency.
 
 A semantic thematic break using approved width, colour and spacing tokens.
 
-- Registry ID: `base.separator`
+- Registry ID: `creator-signal.site.catalogue.separator`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -265,7 +265,7 @@ No additional platform dependency.
 
 An ordered navigation trail for the current page hierarchy.
 
-- Registry ID: `base.breadcrumb`
+- Registry ID: `creator-signal.site.catalogue.breadcrumb`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -287,7 +287,7 @@ An ordered navigation trail for the current page hierarchy.
 
 | Slot | Purpose | Cardinality | Allowed content |
 |---|---|---|---|
-| `items` (Links) | Ordered, descriptive links in the navigation sequence. | 1–many | `base.link` |
+| `items` (Links) | Ordered, descriptive links in the navigation sequence. | 1–many | `creator-signal.site.catalogue.link` |
 
 #### Dependencies
 
@@ -304,7 +304,7 @@ No additional platform dependency.
 
 A locale switcher supplied by the configured localisation capability.
 
-- Registry ID: `base.language-navigation`
+- Registry ID: `creator-signal.site.catalogue.language-navigation`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -342,7 +342,7 @@ This entry exposes no instance properties.
 
 A labelled navigation region with governed link content.
 
-- Registry ID: `base.navigation`
+- Registry ID: `creator-signal.site.catalogue.navigation`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -371,7 +371,7 @@ A labelled navigation region with governed link content.
 
 | Slot | Purpose | Cardinality | Allowed content |
 |---|---|---|---|
-| `items` (Navigation items) | Links and approved supplementary actions. | 1–many | `base.link`, `base.button` |
+| `items` (Navigation items) | Links and approved supplementary actions. | 1–many | `creator-signal.site.catalogue.link`, `creator-signal.site.catalogue.button` |
 
 #### Dependencies
 
@@ -387,7 +387,7 @@ No additional platform dependency.
 
 Privacy-preserving share destinations supplied by an approved policy capability.
 
-- Registry ID: `base.share-links`
+- Registry ID: `creator-signal.site.catalogue.share-links`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -425,7 +425,7 @@ This entry exposes no instance properties.
 
 A labelled set of links to headings on the current page.
 
-- Registry ID: `base.table-of-contents`
+- Registry ID: `creator-signal.site.catalogue.table-of-contents`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -448,7 +448,7 @@ A labelled set of links to headings on the current page.
 
 | Slot | Purpose | Cardinality | Allowed content |
 |---|---|---|---|
-| `items` (Links) | Ordered, descriptive links in the navigation sequence. | 1–many | `base.link` |
+| `items` (Links) | Ordered, descriptive links in the navigation sequence. | 1–many | `creator-signal.site.catalogue.link` |
 
 #### Dependencies
 
@@ -467,7 +467,7 @@ No additional platform dependency.
 
 A contained summary with optional media and action.
 
-- Registry ID: `base.card`
+- Registry ID: `creator-signal.site.catalogue.card`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -503,7 +503,7 @@ A contained summary with optional media and action.
 
 | Slot | Purpose | Cardinality | Allowed content |
 |---|---|---|---|
-| `actions` (Actions) | Approved buttons and links. | 0–3 | `base.button`, `base.link` |
+| `actions` (Actions) | Approved buttons and links. | 0–3 | `creator-signal.site.catalogue.button`, `creator-signal.site.catalogue.link` |
 
 #### Dependencies
 
@@ -519,7 +519,7 @@ No additional platform dependency.
 
 A responsive collection composed from the shared Card definition.
 
-- Registry ID: `base.card-grid`
+- Registry ID: `creator-signal.site.catalogue.card-grid`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -543,7 +543,7 @@ No additional platform dependency.
 
 A described link to a downloadable site asset.
 
-- Registry ID: `base.download`
+- Registry ID: `creator-signal.site.catalogue.download`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -578,7 +578,7 @@ No additional platform dependency.
 
 A major page introduction with optional media and actions.
 
-- Registry ID: `base.hero`
+- Registry ID: `creator-signal.site.catalogue.hero`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -611,7 +611,7 @@ A major page introduction with optional media and actions.
 
 | Slot | Purpose | Cardinality | Allowed content |
 |---|---|---|---|
-| `actions` (Actions) | Approved buttons and links. | 0–3 | `base.button`, `base.link` |
+| `actions` (Actions) | Approved buttons and links. | 0–3 | `creator-signal.site.catalogue.button`, `creator-signal.site.catalogue.link` |
 
 #### Dependencies
 
@@ -628,7 +628,7 @@ No additional platform dependency.
 
 A static or generated collection using one governed item template.
 
-- Registry ID: `base.list`
+- Registry ID: `creator-signal.site.catalogue.list`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -661,7 +661,7 @@ No additional platform dependency.
 
 Highlights important information with an approved semantic type.
 
-- Registry ID: `base.notice`
+- Registry ID: `creator-signal.site.catalogue.notice`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -693,7 +693,7 @@ Highlights important information with an approved semantic type.
 
 | Slot | Purpose | Cardinality | Allowed content |
 |---|---|---|---|
-| `actions` (Actions) | Approved buttons and links. | 0–3 | `base.button`, `base.link` |
+| `actions` (Actions) | Approved buttons and links. | 0–3 | `creator-signal.site.catalogue.button`, `creator-signal.site.catalogue.link` |
 
 #### Dependencies
 
@@ -709,7 +709,7 @@ No additional platform dependency.
 
 A named person with portrait, role, biography and governed links.
 
-- Registry ID: `base.person-profile`
+- Registry ID: `creator-signal.site.catalogue.person-profile`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -742,7 +742,7 @@ A named person with portrait, role, biography and governed links.
 
 | Slot | Purpose | Cardinality | Allowed content |
 |---|---|---|---|
-| `links` (Profile links) | Approved links associated with this person. | 0–5 | `base.link` |
+| `links` (Profile links) | Approved links associated with this person. | 0–5 | `creator-signal.site.catalogue.link` |
 
 #### Dependencies
 
@@ -758,7 +758,7 @@ No additional platform dependency.
 
 A quotation with a required visible citation.
 
-- Registry ID: `base.quote`
+- Registry ID: `creator-signal.site.catalogue.quote`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -798,7 +798,7 @@ No additional platform dependency.
 
 A promotional Card preset that reuses the Card definition.
 
-- Registry ID: `base.teaser`
+- Registry ID: `creator-signal.site.catalogue.teaser`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -846,7 +846,7 @@ No additional platform dependency.
 
 Whitespace-preserving text with safe language metadata.
 
-- Registry ID: `base.code-block`
+- Registry ID: `creator-signal.site.catalogue.code-block`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -881,7 +881,7 @@ No additional platform dependency.
 
 A section heading using the shared text implementation.
 
-- Registry ID: `base.heading`
+- Registry ID: `creator-signal.site.catalogue.heading`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -921,7 +921,7 @@ No additional platform dependency.
 
 A semantic paragraph or short text fragment.
 
-- Registry ID: `base.plain-text`
+- Registry ID: `creator-signal.site.catalogue.plain-text`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -954,7 +954,7 @@ No additional platform dependency.
 
 Sanitised formatted editorial content with one semantic wrapper.
 
-- Registry ID: `base.rich-text`
+- Registry ID: `creator-signal.site.catalogue.rich-text`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -981,7 +981,7 @@ No additional platform dependency.
 
 An ordered or unordered semantic list.
 
-- Registry ID: `base.semantic-list`
+- Registry ID: `creator-signal.site.catalogue.semantic-list`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1010,7 +1010,7 @@ No additional platform dependency.
 
 A labelled native progress indicator.
 
-- Registry ID: `base.progress-bar`
+- Registry ID: `creator-signal.site.catalogue.progress-bar`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1045,7 +1045,7 @@ No additional platform dependency.
 
 Index-backed search across eligible published pages.
 
-- Registry ID: `base.search`
+- Registry ID: `creator-signal.site.catalogue.search`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1083,7 +1083,7 @@ This entry exposes no instance properties.
 
 References centrally managed content fields without owning page layout.
 
-- Registry ID: `base.shared-content-fragment`
+- Registry ID: `creator-signal.site.catalogue.shared-content-fragment`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1117,7 +1117,7 @@ References centrally managed content fields without owning page layout.
 
 Renders one governed CMS record through an approved display component.
 
-- Registry ID: `base.structured-content`
+- Registry ID: `creator-signal.site.catalogue.structured-content`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1152,7 +1152,7 @@ Renders one governed CMS record through an approved display component.
 
 Queries governed CMS records through the shared collection contract.
 
-- Registry ID: `base.structured-content-list`
+- Registry ID: `creator-signal.site.catalogue.structured-content-list`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1197,7 +1197,7 @@ Queries governed CMS records through the shared collection contract.
 
 A captioned semantic table for genuinely tabular editorial data.
 
-- Registry ID: `base.table`
+- Registry ID: `creator-signal.site.catalogue.table`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1234,7 +1234,7 @@ No additional platform dependency.
 
 A short status or category label using approved semantic variants.
 
-- Registry ID: `base.badge`
+- Registry ID: `creator-signal.site.catalogue.badge`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1276,7 +1276,7 @@ No additional platform dependency.
 
 A captioned table comparing any set of options or features.
 
-- Registry ID: `base.comparison-table`
+- Registry ID: `creator-signal.site.catalogue.comparison-table`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1300,7 +1300,7 @@ No additional platform dependency.
 
 Explains an empty collection or unavailable result with a next action.
 
-- Registry ID: `base.empty-state`
+- Registry ID: `creator-signal.site.catalogue.empty-state`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1324,7 +1324,7 @@ No additional platform dependency.
 
 Frequently asked questions composed from native Accordion items.
 
-- Registry ID: `base.faq-list`
+- Registry ID: `creator-signal.site.catalogue.faq-list`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1348,7 +1348,7 @@ No additional platform dependency.
 
 An approved symbolic icon with controlled semantics and size.
 
-- Registry ID: `base.icon`
+- Registry ID: `creator-signal.site.catalogue.icon`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1383,7 +1383,7 @@ No additional platform dependency.
 
 A concise repeated list ready for approved icon decoration.
 
-- Registry ID: `base.icon-list`
+- Registry ID: `creator-signal.site.catalogue.icon-list`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1407,7 +1407,7 @@ No additional platform dependency.
 
 A governed group of partner or organisation logos.
 
-- Registry ID: `base.logo-cloud`
+- Registry ID: `creator-signal.site.catalogue.logo-cloud`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1431,7 +1431,7 @@ No additional platform dependency.
 
 A responsive group of key measurements.
 
-- Registry ID: `base.statistics`
+- Registry ID: `creator-signal.site.catalogue.statistics`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1455,7 +1455,7 @@ No additional platform dependency.
 
 A semantic ordered sequence of actions.
 
-- Registry ID: `base.steps`
+- Registry ID: `creator-signal.site.catalogue.steps`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1479,7 +1479,7 @@ No additional platform dependency.
 
 A semantic ordered sequence of dated milestones.
 
-- Registry ID: `base.timeline`
+- Registry ID: `creator-signal.site.catalogue.timeline`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1505,7 +1505,7 @@ No additional platform dependency.
 
 A labelled group of native disclosure sections.
 
-- Registry ID: `base.accordion`
+- Registry ID: `creator-signal.site.catalogue.accordion`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1527,7 +1527,7 @@ A labelled group of native disclosure sections.
 
 | Slot | Purpose | Cardinality | Allowed content |
 |---|---|---|---|
-| `items` (Items) | Native disclosure sections. | 1–many | `base.accordion-item` |
+| `items` (Items) | Native disclosure sections. | 1–many | `creator-signal.site.catalogue.accordion-item` |
 
 #### Dependencies
 
@@ -1545,7 +1545,7 @@ No additional platform dependency.
 
 One native disclosure section inside an Accordion.
 
-- Registry ID: `base.accordion-item`
+- Registry ID: `creator-signal.site.catalogue.accordion-item`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1578,7 +1578,7 @@ No additional platform dependency.
 
 A call to action rendered as a button or link.
 
-- Registry ID: `base.button`
+- Registry ID: `creator-signal.site.catalogue.button`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1615,7 +1615,7 @@ No additional platform dependency.
 
 A controlled sequence of governed content slides.
 
-- Registry ID: `base.carousel`
+- Registry ID: `creator-signal.site.catalogue.carousel`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1661,7 +1661,7 @@ No additional platform dependency.
 
 Supporting content presented from a governed viewport edge.
 
-- Registry ID: `base.drawer`
+- Registry ID: `creator-signal.site.catalogue.drawer`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1695,7 +1695,7 @@ Supporting content presented from a governed viewport edge.
 | Slot | Purpose | Cardinality | Allowed content |
 |---|---|---|---|
 | `content` (Content) | Governed content shown inside the overlay. | 1–many | Any permitted entry |
-| `actions` (Actions) | Approved dialog or drawer actions. | 0–3 | `base.button`, `base.link` |
+| `actions` (Actions) | Approved dialog or drawer actions. | 0–3 | `creator-signal.site.catalogue.button`, `creator-signal.site.catalogue.link` |
 
 #### Dependencies
 
@@ -1714,7 +1714,7 @@ No additional platform dependency.
 
 An inline or grouped navigation link.
 
-- Registry ID: `base.link`
+- Registry ID: `creator-signal.site.catalogue.link`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1748,7 +1748,7 @@ No additional platform dependency.
 
 A consent-delayed OpenStreetMap embed.
 
-- Registry ID: `base.map`
+- Registry ID: `creator-signal.site.catalogue.map`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1790,7 +1790,7 @@ A consent-delayed OpenStreetMap embed.
 
 Focused interactive content with governed dismissal and focus.
 
-- Registry ID: `base.dialog`
+- Registry ID: `creator-signal.site.catalogue.dialog`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1825,7 +1825,7 @@ Focused interactive content with governed dismissal and focus.
 | Slot | Purpose | Cardinality | Allowed content |
 |---|---|---|---|
 | `content` (Content) | Governed content shown inside the overlay. | 1–many | Any permitted entry |
-| `actions` (Actions) | Approved dialog or drawer actions. | 0–3 | `base.button`, `base.link` |
+| `actions` (Actions) | Approved dialog or drawer actions. | 0–3 | `creator-signal.site.catalogue.button`, `creator-signal.site.catalogue.link` |
 
 #### Dependencies
 
@@ -1844,7 +1844,7 @@ No additional platform dependency.
 
 One labelled panel inside Tabs.
 
-- Registry ID: `base.tab-panel`
+- Registry ID: `creator-signal.site.catalogue.tab-panel`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1879,7 +1879,7 @@ No additional platform dependency.
 
 A labelled set of progressively enhanced content panels.
 
-- Registry ID: `base.tabs`
+- Registry ID: `creator-signal.site.catalogue.tabs`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1908,7 +1908,7 @@ A labelled set of progressively enhanced content panels.
 
 | Slot | Purpose | Cardinality | Allowed content |
 |---|---|---|---|
-| `panels` (Panels) | Labelled peer content panels. | 1–many | `base.tab-panel` |
+| `panels` (Panels) | Labelled peer content panels. | 1–many | `creator-signal.site.catalogue.tab-panel` |
 
 #### Dependencies
 
@@ -1928,7 +1928,7 @@ No additional platform dependency.
 
 A native audio player with an accessible title and transcript link.
 
-- Registry ID: `base.audio`
+- Registry ID: `creator-signal.site.catalogue.audio`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1966,7 +1966,7 @@ No additional platform dependency.
 
 An ordered responsive collection of governed images.
 
-- Registry ID: `base.gallery`
+- Registry ID: `creator-signal.site.catalogue.gallery`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -1996,7 +1996,7 @@ No additional platform dependency.
 
 An image selected from the Media Library.
 
-- Registry ID: `base.image`
+- Registry ID: `creator-signal.site.catalogue.image`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2030,7 +2030,7 @@ No additional platform dependency.
 
 Accessible hosted audio or video using one governed display definition.
 
-- Registry ID: `base.media`
+- Registry ID: `creator-signal.site.catalogue.media`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2078,7 +2078,7 @@ No additional platform dependency.
 
 An embedded PDF with a native fallback and direct download link.
 
-- Registry ID: `base.pdf-viewer`
+- Registry ID: `creator-signal.site.catalogue.pdf-viewer`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2115,7 +2115,7 @@ No additional platform dependency.
 
 A consent-delayed privacy-enhanced YouTube video.
 
-- Registry ID: `base.youtube-embed`
+- Registry ID: `creator-signal.site.catalogue.youtube-embed`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2160,7 +2160,7 @@ A consent-delayed privacy-enhanced YouTube video.
 
 A consent-delayed third-party embed resolved through an approved adapter.
 
-- Registry ID: `base.embed`
+- Registry ID: `creator-signal.site.catalogue.embed`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2206,7 +2206,7 @@ A consent-delayed third-party embed resolved through an approved adapter.
 
 A provider-neutral form verification boundary.
 
-- Registry ID: `base.captcha`
+- Registry ID: `creator-signal.site.catalogue.captcha`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2248,7 +2248,7 @@ A provider-neutral form verification boundary.
 
 A form control for an independent yes/no choice.
 
-- Registry ID: `base.checkbox`
+- Registry ID: `creator-signal.site.catalogue.checkbox`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2286,7 +2286,7 @@ No additional platform dependency.
 
 A fieldset of independently selectable Checkbox controls.
 
-- Registry ID: `base.checkbox-group`
+- Registry ID: `creator-signal.site.catalogue.checkbox-group`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2310,7 +2310,7 @@ No additional platform dependency.
 
 A calendar date.
 
-- Registry ID: `base.date-input`
+- Registry ID: `creator-signal.site.catalogue.date-input`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2354,7 +2354,7 @@ No additional platform dependency.
 
 Delete the current persistent recovery record.
 
-- Registry ID: `base.delete-draft`
+- Registry ID: `creator-signal.site.catalogue.delete-draft`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2394,7 +2394,7 @@ Delete the current persistent recovery record.
 
 An email address.
 
-- Registry ID: `base.email-input`
+- Registry ID: `creator-signal.site.catalogue.email-input`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2438,7 +2438,7 @@ No additional platform dependency.
 
 A validation message associated with one form control.
 
-- Registry ID: `base.form-error`
+- Registry ID: `creator-signal.site.catalogue.form-error`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2477,7 +2477,7 @@ No additional platform dependency.
 
 Persistent instructions associated with one form control.
 
-- Registry ID: `base.form-help`
+- Registry ID: `creator-signal.site.catalogue.form-help`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2517,7 +2517,7 @@ No additional platform dependency.
 
 A private, malware-scanned file upload for CMS-native forms.
 
-- Registry ID: `base.file-attachment`
+- Registry ID: `creator-signal.site.catalogue.file-attachment`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2564,7 +2564,7 @@ A private, malware-scanned file upload for CMS-native forms.
 
 Form-aware sections composed from native Accordion items.
 
-- Registry ID: `base.form-accordion`
+- Registry ID: `creator-signal.site.catalogue.form-accordion`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2594,7 +2594,7 @@ No additional platform dependency.
 
 A governed layout boundary for submit and secondary actions.
 
-- Registry ID: `base.form-actions`
+- Registry ID: `creator-signal.site.catalogue.form-actions`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2624,7 +2624,7 @@ No additional platform dependency.
 
 A CMS-native or custom form boundary.
 
-- Registry ID: `base.form-container`
+- Registry ID: `creator-signal.site.catalogue.form-container`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2664,7 +2664,7 @@ No additional platform dependency.
 
 An approved internal or provider form embedded behind consent and sandbox policy.
 
-- Registry ID: `base.form-embed`
+- Registry ID: `creator-signal.site.catalogue.form-embed`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2717,7 +2717,7 @@ An approved internal or provider form embedded behind consent and sandbox policy
 
 A governed layout boundary for one field, its label, help and error.
 
-- Registry ID: `base.form-field-group`
+- Registry ID: `creator-signal.site.catalogue.form-field-group`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2747,7 +2747,7 @@ No additional platform dependency.
 
 A submission status or result message for a form.
 
-- Registry ID: `base.form-message`
+- Registry ID: `creator-signal.site.catalogue.form-message`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2788,7 +2788,7 @@ No additional platform dependency.
 
 A recoverable, progressively enhanced wizard step.
 
-- Registry ID: `base.form-step`
+- Registry ID: `creator-signal.site.catalogue.form-step`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2816,7 +2816,7 @@ No additional platform dependency.
 
 Form-aware sections using the shared Tabs keyboard and fallback contract.
 
-- Registry ID: `base.form-tabs`
+- Registry ID: `creator-signal.site.catalogue.form-tabs`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2854,7 +2854,7 @@ No additional platform dependency.
 
 A fixed or context-derived value submitted without a visible control.
 
-- Registry ID: `base.hidden-field`
+- Registry ID: `creator-signal.site.catalogue.hidden-field`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2889,7 +2889,7 @@ No additional platform dependency.
 
 A visible label for a form control.
 
-- Registry ID: `base.form-label`
+- Registry ID: `creator-signal.site.catalogue.form-label`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2923,7 +2923,7 @@ No additional platform dependency.
 
 Move to the next authored form step.
 
-- Registry ID: `base.next-step`
+- Registry ID: `creator-signal.site.catalogue.next-step`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -2961,7 +2961,7 @@ No additional platform dependency.
 
 A numeric value.
 
-- Registry ID: `base.number-input`
+- Registry ID: `creator-signal.site.catalogue.number-input`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3005,7 +3005,7 @@ No additional platform dependency.
 
 One selectable value inside a Select.
 
-- Registry ID: `base.option`
+- Registry ID: `creator-signal.site.catalogue.option`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3033,7 +3033,7 @@ No additional platform dependency.
 
 A labelled group of related Select options.
 
-- Registry ID: `base.option-group`
+- Registry ID: `creator-signal.site.catalogue.option-group`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3060,7 +3060,7 @@ No additional platform dependency.
 
 A titled semantic group for related form content.
 
-- Registry ID: `base.form-panel`
+- Registry ID: `creator-signal.site.catalogue.form-panel`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3084,7 +3084,7 @@ No additional platform dependency.
 
 A paired navigation action group for authored Wizard steps.
 
-- Registry ID: `base.previous-next-actions`
+- Registry ID: `creator-signal.site.catalogue.previous-next-actions`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3114,7 +3114,7 @@ No additional platform dependency.
 
 Move to the previous authored form step.
 
-- Registry ID: `base.previous-step`
+- Registry ID: `creator-signal.site.catalogue.previous-step`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3152,7 +3152,7 @@ No additional platform dependency.
 
 One mutually exclusive choice in a radio group.
 
-- Registry ID: `base.radio`
+- Registry ID: `creator-signal.site.catalogue.radio`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3190,7 +3190,7 @@ No additional platform dependency.
 
 A fieldset of mutually exclusive Radio controls sharing one name.
 
-- Registry ID: `base.radio-group`
+- Registry ID: `creator-signal.site.catalogue.radio-group`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3214,7 +3214,7 @@ No additional platform dependency.
 
 Resets the containing form through the shared form-action module.
 
-- Registry ID: `base.reset-button`
+- Registry ID: `creator-signal.site.catalogue.reset-button`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3253,7 +3253,7 @@ No additional platform dependency.
 
 A centrally governed form-field fragment with an explicit binding prefix.
 
-- Registry ID: `base.reusable-form-fragment`
+- Registry ID: `creator-signal.site.catalogue.reusable-form-fragment`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3276,7 +3276,7 @@ A centrally governed form-field fragment with an explicit binding prefix.
 
 | Slot | Purpose | Cardinality | Allowed content |
 |---|---|---|---|
-| `fields` (Fields) | Governed fields maintained by the fragment definition. | 1–many | `base.form-field-group`, `base.heading`, `base.rich-text`, `base.plain-text`, `base.image` |
+| `fields` (Fields) | Governed fields maintained by the fragment definition. | 1–many | `creator-signal.site.catalogue.form-field-group`, `creator-signal.site.catalogue.heading`, `creator-signal.site.catalogue.rich-text`, `creator-signal.site.catalogue.plain-text`, `creator-signal.site.catalogue.image` |
 
 #### Dependencies
 
@@ -3292,7 +3292,7 @@ No additional platform dependency.
 
 Persist recoverable form progress across sessions or devices.
 
-- Registry ID: `base.save-draft`
+- Registry ID: `creator-signal.site.catalogue.save-draft`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3332,7 +3332,7 @@ Persist recoverable form progress across sessions or devices.
 
 A select control containing approved options.
 
-- Registry ID: `base.select`
+- Registry ID: `creator-signal.site.catalogue.select`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3368,7 +3368,7 @@ No additional platform dependency.
 
 Submits the containing form.
 
-- Registry ID: `base.submit`
+- Registry ID: `creator-signal.site.catalogue.submit`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3401,7 +3401,7 @@ No additional platform dependency.
 
 A review step with editable summary content and final actions.
 
-- Registry ID: `base.form-summary-review`
+- Registry ID: `creator-signal.site.catalogue.form-summary-review`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3425,7 +3425,7 @@ No additional platform dependency.
 
 An on/off choice backed by the canonical checkbox control.
 
-- Registry ID: `base.switch`
+- Registry ID: `creator-signal.site.catalogue.switch`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3469,7 +3469,7 @@ No additional platform dependency.
 
 A telephone number.
 
-- Registry ID: `base.telephone-input`
+- Registry ID: `creator-signal.site.catalogue.telephone-input`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3513,7 +3513,7 @@ No additional platform dependency.
 
 Records agreement to an explicit versioned terms source.
 
-- Registry ID: `base.terms-and-conditions`
+- Registry ID: `creator-signal.site.catalogue.terms-and-conditions`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3539,7 +3539,7 @@ This entry exposes no instance properties.
 
 A multi-line form input.
 
-- Registry ID: `base.text-area`
+- Registry ID: `creator-signal.site.catalogue.text-area`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3577,7 +3577,7 @@ No additional platform dependency.
 
 General short text.
 
-- Registry ID: `base.text-input`
+- Registry ID: `creator-signal.site.catalogue.text-input`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3621,7 +3621,7 @@ No additional platform dependency.
 
 A web address.
 
-- Registry ID: `base.url-input`
+- Registry ID: `creator-signal.site.catalogue.url-input`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in
@@ -3665,7 +3665,7 @@ No additional platform dependency.
 
 A persistent multi-step CMS-native form with review and recovery.
 
-- Registry ID: `base.wizard`
+- Registry ID: `creator-signal.site.catalogue.wizard`
 - Version: `1.0.0`
 - Status: stable
 - Source: built-in

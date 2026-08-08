@@ -13,6 +13,8 @@
 export { BaseNodeSchema,  parseBaseNodeFields } from './baseNode'
 export {
   CatalogueInstanceMetadataSchema,
+  CREATOR_SIGNAL_CATALOGUE_ENTRY_NAMESPACE,
+  creatorSignalCatalogueEntryId,
   parseCatalogueInstanceMetadata,
 } from './catalogueInstance'
 export { asPlainObject } from './parseHelpers'

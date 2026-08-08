@@ -2,9 +2,12 @@ import { act, cleanup, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { componentLibraryRegistry } from '@core/component-library'
 import { registry } from '@core/module-engine'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import { useInsertComponentLibraryEntry } from '@site/hooks/useInsertComponentLibraryEntry'
 import { useEditorStore } from '@site/store/store'
 import '@modules/base/index'
+
+const publicId = creatorSignalCatalogueEntryId
 
 beforeEach(() => {
   // clearSite resets the collaboration documents and their undo managers.
@@ -36,13 +39,13 @@ describe('useInsertComponentLibraryEntry', () => {
       undefined,
       {
         catalogueInstance: {
-          entryId: 'base.form-container',
+          entryId: publicId('base.form-container'),
           entryVersion: '1.0.0',
         },
       },
     )
     store.selectNode(formId)
-    const entry = componentLibraryRegistry.getOrThrow('base.email-input')
+    const entry = componentLibraryRegistry.getOrThrow(publicId('base.email-input'))
     const { result } = renderHook(() => useInsertComponentLibraryEntry())
     let nodeId: string | null = null
 
@@ -55,7 +58,7 @@ describe('useInsertComponentLibraryEntry', () => {
     expect(inserted?.moduleId).toBe('base.input')
     expect(inserted?.props.inputType).toBe('email')
     expect(inserted?.catalogueInstance).toEqual({
-      entryId: 'base.email-input',
+      entryId: publicId('base.email-input'),
       entryVersion: '1.0.0',
       presetId: 'email',
     })
@@ -71,7 +74,7 @@ describe('useInsertComponentLibraryEntry', () => {
     const initialNodeCount = Object.keys(
       useEditorStore.getState().site!.pages[0]!.nodes,
     ).length
-    const entry = componentLibraryRegistry.getOrThrow('base.email-input')
+    const entry = componentLibraryRegistry.getOrThrow(publicId('base.email-input'))
     const { result } = renderHook(() => useInsertComponentLibraryEntry())
     let nodeId: string | null = null
 
@@ -88,7 +91,7 @@ describe('useInsertComponentLibraryEntry', () => {
   it('inserts a built-in Visual Component and its governed slots atomically', () => {
     const store = useEditorStore.getState()
     store.createSite('Built-in Visual Component')
-    const entry = componentLibraryRegistry.getOrThrow('base.hero')
+    const entry = componentLibraryRegistry.getOrThrow(publicId('base.hero'))
     const { result } = renderHook(() => useInsertComponentLibraryEntry())
     let nodeId: string | null = null
 
@@ -101,7 +104,7 @@ describe('useInsertComponentLibraryEntry', () => {
     expect(inserted?.moduleId).toBe('base.visual-component-ref')
     expect(inserted?.props.componentId).toBe('base.vc.hero')
     expect(inserted?.catalogueInstance).toEqual({
-      entryId: 'base.hero',
+      entryId: publicId('base.hero'),
       entryVersion: '1.0.0',
     })
     expect(inserted?.children).toHaveLength(1)
@@ -119,7 +122,7 @@ describe('useInsertComponentLibraryEntry', () => {
   it('materializes a governed pattern subtree in one undoable mutation', () => {
     const store = useEditorStore.getState()
     store.createSite('Built-in Pattern')
-    const entry = componentLibraryRegistry.getOrThrow('base.card-grid')
+    const entry = componentLibraryRegistry.getOrThrow(publicId('base.card-grid'))
     const { result } = renderHook(() => useInsertComponentLibraryEntry())
     let nodeId: string | null = null
 
@@ -130,7 +133,7 @@ describe('useInsertComponentLibraryEntry', () => {
     const state = useEditorStore.getState()
     const root = state.site?.pages[0]?.nodes[nodeId!]
     expect(root?.moduleId).toBe('base.component-frame')
-    expect(root?.catalogueInstance?.entryId).toBe('base.card-grid')
+    expect(root?.catalogueInstance?.entryId).toBe(publicId('base.card-grid'))
     expect(root?.children).toHaveLength(1)
     const itemsId = root!.children[0]!
     expect(root?.catalogueInstance?.pattern?.authorableNodeIds)
@@ -160,13 +163,13 @@ describe('useInsertComponentLibraryEntry', () => {
       undefined,
       {
         catalogueInstance: {
-          entryId: 'base.form-container',
+          entryId: publicId('base.form-container'),
           entryVersion: '1.0.0',
         },
       },
     )
     store.selectNode(formId)
-    const entry = componentLibraryRegistry.getOrThrow('base.form-tabs')
+    const entry = componentLibraryRegistry.getOrThrow(publicId('base.form-tabs'))
     const { result } = renderHook(() => useInsertComponentLibraryEntry())
     let nodeId: string | null = null
 

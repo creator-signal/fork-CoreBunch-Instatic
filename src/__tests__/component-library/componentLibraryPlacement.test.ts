@@ -4,12 +4,15 @@ import {
   resolveComponentLibraryPlacement,
   type ComponentLibraryEntry,
 } from '@core/component-library'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import '@modules/base/index'
+
+const publicId = creatorSignalCatalogueEntryId
 
 describe('Component Library placement policy', () => {
   it('enforces child-required parents and parent child allow-lists', () => {
-    const email = componentLibraryRegistry.getOrThrow('base.email-input')
-    const form = componentLibraryRegistry.getOrThrow('base.form-container')
+    const email = componentLibraryRegistry.getOrThrow(publicId('base.email-input'))
+    const form = componentLibraryRegistry.getOrThrow(publicId('base.form-container'))
 
     expect(resolveComponentLibraryPlacement(email, {
       existingChildCount: 0,
@@ -22,14 +25,14 @@ describe('Component Library placement policy', () => {
       existingChildCount: 0,
     })).toEqual({ allowed: true })
     expect(resolveComponentLibraryPlacement(
-      componentLibraryRegistry.getOrThrow('base.plain-text'),
+      componentLibraryRegistry.getOrThrow(publicId('base.plain-text')),
       { existingChildCount: 0 },
     )).toMatchObject({
       allowed: false,
       code: 'parent-ungoverned',
     })
     expect(resolveComponentLibraryPlacement(
-      componentLibraryRegistry.getOrThrow('base.plain-text'),
+      componentLibraryRegistry.getOrThrow(publicId('base.plain-text')),
       { parentIsPageRoot: true, existingChildCount: 0 },
     )).toEqual({ allowed: true })
     const restrictedForm = {
@@ -46,9 +49,9 @@ describe('Component Library placement policy', () => {
   })
 
   it('enforces named-slot entry, implementation and cardinality contracts', () => {
-    const text = componentLibraryRegistry.getOrThrow('base.plain-text')
+    const text = componentLibraryRegistry.getOrThrow(publicId('base.plain-text'))
     const slotOwner: ComponentLibraryEntry = {
-      ...componentLibraryRegistry.getOrThrow('base.container'),
+      ...componentLibraryRegistry.getOrThrow(publicId('base.container')),
       id: 'test.slot-owner',
       slots: [{
         id: 'items',

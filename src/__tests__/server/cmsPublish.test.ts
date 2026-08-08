@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'bun:test'
-import type { Page, SiteDocument, SiteShell } from '@core/page-tree'
+import {
+  creatorSignalCatalogueEntryId,
+  type Page,
+  type SiteDocument,
+  type SiteShell,
+} from '@core/page-tree'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import type { DbResult } from '../../../server/db'
 import { saveDraftSite } from '../../../server/repositories/site'
@@ -290,7 +295,7 @@ describe('CMS publishing', () => {
     await saveDraftSite(db, shell)
     const page = makeHomePage('')
     page.nodes.text_1.catalogueInstance = {
-      entryId: 'base.heading',
+      entryId: creatorSignalCatalogueEntryId('base.heading'),
       entryVersion: '1.0.0',
       presetId: 'heading',
     }

@@ -4,6 +4,7 @@ import {
   type ComponentLibraryPatternDefinition,
   type ComponentLibraryPatternNode,
 } from '@core/component-library'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import { AccordionItemModule, AccordionModule } from './disclosure'
 import { ComponentFrameModule } from './componentFrame'
 import { ContainerModule } from './container'
@@ -21,7 +22,10 @@ import {
 } from './componentLibraryDefinitions'
 
 function metadata(entryId: string) {
-  return { entryId, entryVersion: '1.0.0' }
+  return {
+    entryId: creatorSignalCatalogueEntryId(entryId),
+    entryVersion: '1.0.0',
+  }
 }
 
 function patternNode(

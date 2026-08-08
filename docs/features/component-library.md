@@ -78,7 +78,7 @@ External consumers import through `@core/component-library`.
 import type { ComponentLibraryEntry } from '@core/component-library'
 
 const emailInput: ComponentLibraryEntry = {
-  id: 'base.email-input',
+  id: 'creator-signal.site.catalogue.email-input',
   version: '1.0.0',
   name: 'Email Input',
   description: 'Collects an email address.',
@@ -105,7 +105,7 @@ const emailInput: ComponentLibraryEntry = {
   ],
   slots: [],
   constraints: {
-    allowedParentEntryIds: ['base.form-container'],
+    allowedParentEntryIds: ['creator-signal.site.catalogue.form-container'],
     allowedChildEntryIds: [],
   },
   requirements: {
@@ -121,6 +121,10 @@ const emailInput: ComponentLibraryEntry = {
 ```
 
 The definition carries authoring identity and governance metadata. The referenced module, Visual Component, pattern or template remains the rendering implementation.
+
+The mapped catalogue uses `creator-signal.site.catalogue.*` for its public
+authoring IDs. Internal `base.*` module, Visual Component and pattern IDs stay
+unchanged so the rendering engine keeps one canonical implementation identity.
 
 An omitted parent, child or slot allow-list means unrestricted. A present empty allow-list means none are permitted. This preserves the difference between an unconstrained container and a deliberately closed boundary.
 

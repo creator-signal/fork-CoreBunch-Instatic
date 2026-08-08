@@ -17,7 +17,10 @@ import { useEditorStore } from '@site/store/store'
 import { __resetModuleInserterPreferenceForTests } from '@site/module-picker/useModuleInserterPreference'
 import { makeNode, makePage, makeSite } from '../fixtures'
 import type { VisualComponent } from '@core/visualComponents'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import '@modules/base/index'
+
+const publicId = creatorSignalCatalogueEntryId
 
 const originalFetch = globalThis.fetch
 
@@ -143,7 +146,9 @@ describe('ModulePickerDropdown — governed components', () => {
 
     expect(within(dialog).queryByText('HeroCard')).toBeNull()
     expect(within(dialog).queryByText('PricingTable')).toBeNull()
-    expect(dialog.querySelector('[data-component-library-id="base.hero"]')).not.toBeNull()
+    expect(dialog.querySelector(
+      `[data-component-library-id="${publicId('base.hero')}"]`,
+    )).not.toBeNull()
   })
 
   it('identifies catalogue items by their governed entry id', () => {
@@ -152,8 +157,11 @@ describe('ModulePickerDropdown — governed components', () => {
     const dialog = openInserter()
     clickSection('Components')
 
-    const componentItem = dialog.querySelector('[data-component-library-id="base.hero"]')
-    expect(componentItem?.getAttribute('data-component-library-id')).toBe('base.hero')
+    const componentItem = dialog.querySelector(
+      `[data-component-library-id="${publicId('base.hero')}"]`,
+    )
+    expect(componentItem?.getAttribute('data-component-library-id'))
+      .toBe(publicId('base.hero'))
     expect(dialog.querySelector('[data-vc-id]')).toBeNull()
   })
 
@@ -169,8 +177,12 @@ describe('ModulePickerDropdown — governed components', () => {
     const searchBox = screen.getByRole('searchbox', { name: 'Search modules' })
     fireEvent.change(searchBox, { target: { value: 'hero' } })
 
-    expect(dialog.querySelector('[data-component-library-id="base.hero"]')).not.toBeNull()
-    expect(dialog.querySelector('[data-component-library-id="base.card"]')).toBeNull()
+    expect(dialog.querySelector(
+      `[data-component-library-id="${publicId('base.hero')}"]`,
+    )).not.toBeNull()
+    expect(dialog.querySelector(
+      `[data-component-library-id="${publicId('base.card')}"]`,
+    )).toBeNull()
     expect(within(dialog).queryByText('HeroCard')).toBeNull()
   })
 
@@ -181,7 +193,7 @@ describe('ModulePickerDropdown — governed components', () => {
     clickSection('Components')
 
     const componentItem = dialog.querySelector(
-      '[data-component-library-id="base.hero"]',
+      `[data-component-library-id="${publicId('base.hero')}"]`,
     ) as HTMLElement
     expect(componentItem).not.toBeNull()
     fireEvent.click(componentItem)
@@ -195,7 +207,7 @@ describe('ModulePickerDropdown — governed components', () => {
     expect(refs.length).toBe(1)
     expect(refs[0]?.props.componentId).toBe('base.vc.hero')
     expect(refs[0]?.catalogueInstance).toEqual({
-      entryId: 'base.hero',
+      entryId: publicId('base.hero'),
       entryVersion: '1.0.0',
       variantId: 'image-left',
     })
@@ -208,7 +220,7 @@ describe('ModulePickerDropdown — governed components', () => {
     clickSection('Components')
 
     const componentItem = dialog.querySelector(
-      '[data-component-library-id="base.hero"]',
+      `[data-component-library-id="${publicId('base.hero')}"]`,
     ) as HTMLElement
     fireEvent.click(componentItem)
 

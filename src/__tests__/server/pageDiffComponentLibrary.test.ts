@@ -4,13 +4,18 @@ import {
   componentLibraryRegistry,
 } from '@core/component-library'
 import { registry } from '@core/module-engine'
-import type { Page, PageNode } from '@core/page-tree'
+import {
+  creatorSignalCatalogueEntryId,
+  type Page,
+  type PageNode,
+} from '@core/page-tree'
 import { makeNode, makePage } from '../fixtures'
 import { validatePageWriteDiff } from '../../../server/writePolicy/pageDiff'
 import { BUILT_IN_PATTERN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibraryPatterns'
 import { BUILT_IN_FORM_PATTERN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibraryFormPatternEntries'
 
 const COMPONENT_CAPABILITIES = ['site.components.edit'] as const
+const publicId = creatorSignalCatalogueEntryId
 
 function governedEmailNode(id = 'email'): PageNode {
   const definition = registry.get('base.input')
@@ -23,7 +28,7 @@ function governedEmailNode(id = 'email'): PageNode {
       inputType: 'email',
     },
     catalogueInstance: {
-      entryId: 'base.email-input',
+      entryId: publicId('base.email-input'),
       entryVersion: '1.0.0',
       presetId: 'email',
     },
@@ -42,7 +47,7 @@ function governedPlainTextNode(id = 'text'): PageNode {
       tag: 'p',
     },
     catalogueInstance: {
-      entryId: 'base.plain-text',
+      entryId: publicId('base.plain-text'),
       entryVersion: '1.0.0',
       presetId: 'paragraph',
     },
@@ -88,7 +93,7 @@ function governedHeroPage(): Page {
         },
         children: ['hero-actions'],
         catalogueInstance: {
-          entryId: 'base.hero',
+          entryId: publicId('base.hero'),
           entryVersion: '1.0.0',
         },
       }),
@@ -106,11 +111,12 @@ function governedPatternPage(
   patternId = 'base.pattern.card-grid',
   parentEntryId?: string,
 ): Page {
-  const entry = componentLibraryRegistry.getOrThrow(entryId)
+  const publicEntryId = publicId(entryId)
+  const entry = componentLibraryRegistry.getOrThrow(publicEntryId)
   const capabilityId = entry.requirements.capabilities[0]
   const providerAdapterId = entry.requirements.providerAdapters[0]
   const fragment = componentLibraryPatternRegistry.materialize(patternId, {
-    entryId,
+    entryId: publicEntryId,
     entryVersion: '1.0.0',
     ...(capabilityId ? { capabilityId } : {}),
     ...(providerAdapterId ? { providerAdapterId } : {}),
@@ -133,12 +139,12 @@ function governedPatternPage(
       props: { ...formDefinition.defaults },
       children: fragment.rootIds,
       catalogueInstance: {
-        entryId: 'base.form-container',
+        entryId: publicId('base.form-container'),
         entryVersion: '1.0.0',
       },
     })
     nodes.root!.children = ['form']
-    if (parentEntryId === 'base.form-step') {
+    if (publicId(parentEntryId) === publicId('base.form-step')) {
       const stepDefinition = registry.get('base.form-step')
       if (!stepDefinition) throw new Error('base.form-step is not registered')
       nodes.step = makeNode({
@@ -147,7 +153,7 @@ function governedPatternPage(
         props: { ...stepDefinition.defaults },
         children: fragment.rootIds,
         catalogueInstance: {
-          entryId: 'base.form-step',
+          entryId: publicId('base.form-step'),
           entryVersion: '1.0.0',
         },
       })
@@ -173,12 +179,12 @@ function governedPatternParentPage(parentEntryId?: string): Page {
       props: { ...formDefinition.defaults },
       children: [],
       catalogueInstance: {
-        entryId: 'base.form-container',
+        entryId: publicId('base.form-container'),
         entryVersion: '1.0.0',
       },
     }),
   }
-  if (parentEntryId === 'base.form-step') {
+  if (publicId(parentEntryId) === publicId('base.form-step')) {
     const stepDefinition = registry.get('base.form-step')
     if (!stepDefinition) throw new Error('base.form-step is not registered')
     nodes.step = makeNode({
@@ -187,7 +193,7 @@ function governedPatternParentPage(parentEntryId?: string): Page {
       props: { ...stepDefinition.defaults },
       children: [],
       catalogueInstance: {
-        entryId: 'base.form-step',
+        entryId: publicId('base.form-step'),
         entryVersion: '1.0.0',
       },
     })
@@ -225,7 +231,7 @@ describe('Component Library page diff policy', () => {
     const previous = makePage()
     const invalid = pageWith(governedEmailNode())
     expect(() => validate(previous, invalid)).toThrow(
-      /Email Input must be placed inside base\.form-container/,
+      /Email Input must be placed inside creator-signal\.site\.catalogue\.form-container/,
     )
 
     const formDefinition = registry.get('base.form')
@@ -236,7 +242,7 @@ describe('Component Library page diff policy', () => {
       props: { ...formDefinition.defaults },
       children: [],
       catalogueInstance: {
-        entryId: 'base.form-container',
+        entryId: publicId('base.form-container'),
         entryVersion: '1.0.0',
       },
     })
@@ -263,7 +269,7 @@ describe('Component Library page diff policy', () => {
 
     const identityEdit = structuredClone(previous)
     identityEdit.nodes.email!.catalogueInstance = {
-      entryId: 'base.text-input',
+      entryId: publicId('base.text-input'),
       entryVersion: '1.0.0',
       presetId: 'text',
     }
@@ -292,7 +298,7 @@ describe('Component Library page diff policy', () => {
 
   it('requires option metadata and values to move together', () => {
     componentLibraryRegistry.registerOrReplace({
-      ...componentLibraryRegistry.getOrThrow('base.email-input'),
+      ...componentLibraryRegistry.getOrThrow(publicId('base.email-input')),
       id: 'test.governed-input',
       implementation: {
         type: 'primitive',

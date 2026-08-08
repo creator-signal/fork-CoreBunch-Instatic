@@ -35,7 +35,7 @@ function overviewPage() {
     builder,
     'Governed component reference',
     'One Plain Text component, exercised end to end.',
-    'Every visible sentence is a base.plain-text catalogue instance backed by base.text. Select a sentence in Components view to edit its Text and Semantic element properties.',
+    'Every visible sentence is a creator-signal.site.catalogue.plain-text instance backed by the Plain Text engine module. Select a sentence in Components view to edit its Text and Semantic element properties.',
   )
   const content = builder.addSection(['content'], 'main')
   builder.addText(content, 'What this proves', {

@@ -2,10 +2,13 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { componentLibraryRegistry } from '@core/component-library'
 import { registry } from '@core/module-engine'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import { ComponentPropertiesView } from '@site/panels/PropertiesPanel/ComponentPropertiesView'
 import { EditorPermissionsContext } from '@site/editorPermissionsContext'
 import { useEditorStore } from '@site/store/store'
 import '@modules/base/index'
+
+const publicId = creatorSignalCatalogueEntryId
 
 beforeEach(() => {
   const site = useEditorStore.getState().createSite('Properties Test')
@@ -17,7 +20,7 @@ beforeEach(() => {
     undefined,
     {
       catalogueInstance: {
-        entryId: 'base.email-input',
+        entryId: publicId('base.email-input'),
         entryVersion: '1.0.0',
         presetId: 'email',
       },
@@ -32,7 +35,7 @@ describe('ComponentPropertiesView', () => {
   it('renders approved fields and guidance without raw implementation controls', () => {
     const state = useEditorStore.getState()
     const node = state.site!.pages[0]!.nodes[state.selectedNodeId!]!
-    const entry = componentLibraryRegistry.getOrThrow('base.email-input')
+    const entry = componentLibraryRegistry.getOrThrow(publicId('base.email-input'))
     const definition = registry.get('base.input')!
 
     render(
@@ -59,7 +62,7 @@ describe('ComponentPropertiesView', () => {
   it('enables approved fields for a component-only author', () => {
     const state = useEditorStore.getState()
     const node = state.site!.pages[0]!.nodes[state.selectedNodeId!]!
-    const entry = componentLibraryRegistry.getOrThrow('base.email-input')
+    const entry = componentLibraryRegistry.getOrThrow(publicId('base.email-input'))
     const definition = registry.get('base.input')!
 
     render(
@@ -96,7 +99,7 @@ describe('ComponentPropertiesView', () => {
       undefined,
       {
         catalogueInstance: {
-          entryId: 'base.plain-text',
+          entryId: publicId('base.plain-text'),
           entryVersion: '1.0.0',
           presetId: 'paragraph',
         },
@@ -104,7 +107,7 @@ describe('ComponentPropertiesView', () => {
     )
     store.selectNode(nodeId)
     const node = useEditorStore.getState().site!.pages[0]!.nodes[nodeId]!
-    const entry = componentLibraryRegistry.getOrThrow('base.plain-text')
+    const entry = componentLibraryRegistry.getOrThrow(publicId('base.plain-text'))
 
     render(
       <ComponentPropertiesView
@@ -178,7 +181,7 @@ describe('ComponentPropertiesView', () => {
     expect(
       useEditorStore.getState().site!.pages[0]!.nodes[node.id]?.catalogueInstance,
     ).toEqual({
-      entryId: 'base.email-input',
+      entryId: publicId('base.email-input'),
       entryVersion: '1.0.0',
       presetId: 'email',
     })
@@ -193,7 +196,7 @@ describe('ComponentPropertiesView', () => {
       undefined,
       {
         catalogueInstance: {
-          entryId: 'base.hero',
+          entryId: publicId('base.hero'),
           entryVersion: '1.0.0',
         },
       },
@@ -201,7 +204,7 @@ describe('ComponentPropertiesView', () => {
     if (!nodeId) throw new Error('Hero insertion failed')
     store.selectNode(nodeId)
     const node = useEditorStore.getState().site!.pages[0]!.nodes[nodeId]!
-    const entry = componentLibraryRegistry.getOrThrow('base.hero')
+    const entry = componentLibraryRegistry.getOrThrow(publicId('base.hero'))
     const definition = registry.get('base.visual-component-ref')!
 
     render(

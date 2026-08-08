@@ -4,7 +4,10 @@ import {
   componentLibraryPatternRegistry,
   componentLibraryRegistry,
 } from '@core/component-library'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import '@modules/base/index'
+
+const publicId = creatorSignalCatalogueEntryId
 
 beforeEach(() => {
   // clearSite resets the collaboration documents and their undo managers.
@@ -38,12 +41,12 @@ describe('Component Library governed mutations', () => {
     )
     expect(useEditorStore.getState().convertFreeformPrimitiveToComponent(
       nodeId,
-      'base.email-input',
+      publicId('base.email-input'),
       'email',
     )).toBe(true)
     const converted = useEditorStore.getState().site!.pages[0]!.nodes[nodeId]!
     expect(converted.catalogueInstance).toEqual({
-      entryId: 'base.email-input',
+      entryId: publicId('base.email-input'),
       entryVersion: '1.0.0',
       presetId: 'email',
     })
@@ -73,7 +76,7 @@ describe('Component Library governed mutations', () => {
 
     expect(useEditorStore.getState().convertFreeformPrimitiveToComponent(
       nodeId,
-      'base.email-input',
+      publicId('base.email-input'),
       'email',
     )).toBe(false)
     expect(useEditorStore.getState().canUndo).toBe(canUndoBefore)
@@ -92,7 +95,7 @@ describe('Component Library governed mutations', () => {
       undefined,
       {
         catalogueInstance: {
-          entryId: 'base.email-input',
+          entryId: publicId('base.email-input'),
           entryVersion: '1.0.0',
           presetId: 'email',
         },
@@ -122,7 +125,7 @@ describe('Component Library governed mutations', () => {
     const store = useEditorStore.getState()
     const site = store.createSite('Pattern Governance Test')
     const page = site.pages[0]!
-    const entry = componentLibraryRegistry.get('base.list')
+    const entry = componentLibraryRegistry.get(publicId('base.list'))
     if (!entry || entry.implementation.type !== 'pattern') {
       throw new Error('base.list pattern is not registered')
     }
@@ -160,7 +163,7 @@ describe('Component Library governed mutations', () => {
       undefined,
       {
         catalogueInstance: {
-          entryId: 'base.email-input',
+          entryId: publicId('base.email-input'),
           entryVersion: '1.0.0',
         },
       },
@@ -187,7 +190,7 @@ describe('Component Library governed mutations', () => {
     const store = useEditorStore.getState()
     const site = store.createSite('Pattern Variant Test')
     const page = site.pages[0]!
-    const entry = componentLibraryRegistry.get('base.form-tabs')
+    const entry = componentLibraryRegistry.get(publicId('base.form-tabs'))
     if (!entry || entry.implementation.type !== 'pattern') {
       throw new Error('base.form-tabs pattern is not registered')
     }

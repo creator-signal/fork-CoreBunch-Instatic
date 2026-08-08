@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { componentLibraryRegistry } from '@core/component-library'
-import { PageSchema } from '@core/page-tree'
+import { creatorSignalCatalogueEntryId, PageSchema } from '@core/page-tree'
 import { Value } from '@core/utils/typeboxHelpers'
 import {
   pack,
@@ -32,7 +32,7 @@ describe('Plain Text component showcase pack', () => {
     for (const page of textShowcasePages) {
       expect(Value.Check(PageSchema, page)).toBe(true)
       const entryIds = catalogueEntriesForPage(page)
-      expect(entryIds).toContain('base.plain-text')
+      expect(entryIds).toContain(creatorSignalCatalogueEntryId('base.plain-text'))
       expect(entryIds).not.toContain('Custom / Freeform')
       for (const node of Object.values(page.nodes)) {
         if (node.id === page.rootNodeId) continue
@@ -50,7 +50,8 @@ describe('Plain Text component showcase pack', () => {
   it('uses the canonical module, preset and all documented semantic samples', () => {
     const textNodes = textShowcasePages.flatMap((page) =>
       Object.values(page.nodes).filter(
-        (node) => node.catalogueInstance?.entryId === 'base.plain-text',
+        (node) => node.catalogueInstance?.entryId ===
+          creatorSignalCatalogueEntryId('base.plain-text'),
       ))
     expect(textNodes.length).toBeGreaterThan(20)
     expect(textNodes.every((node) => node.moduleId === 'base.text')).toBe(true)

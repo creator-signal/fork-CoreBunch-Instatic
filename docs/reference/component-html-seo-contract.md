@@ -209,78 +209,78 @@ schema.
 
 | Content model | Registry entries | Required published structure |
 |---|---|---|
-| Template landmarks | `base.template-header`, `base.template-footer` | one inherited `header` or `footer`, with governed slots |
-| Skip navigation | `base.template-skip-link` | first-focusable anchor targeting the main content ID |
-| Structural sections | `base.grid`, `base.reusable-section`, `base.section` | labelled or headed `section`; no wrapper-only heading levels |
-| Neutral container | `base.container` | author-selected safe semantic element, or `div` when neutral |
-| Thematic break | `base.separator` | native `hr` |
-| Breadcrumb trail | `base.breadcrumb` | labelled `nav`, ordered `BreadcrumbList`, linked `ListItem` entries |
-| Navigation regions | `base.language-navigation`, `base.navigation`, `base.share-links`, `base.table-of-contents` | labelled `nav` containing a list of descriptive links |
-| Content cards | `base.card`, `base.teaser` | `article` with logical heading, optional media, summary and action |
-| Card collection | `base.card-grid` | headed `section` containing sibling Card articles |
-| Download | `base.download` | `article` with description and a native download link |
-| Hero | `base.hero` | headed `section`; media order may change visually without changing reading order |
-| Collection list | `base.list` | collection region containing repeated semantic items and shared pagination |
-| Notice | `base.notice` | `aside` for supplementary content; live status only when the message changes dynamically |
-| Person profile | `base.person-profile` | `article` with portrait, name heading, role, biography and governed links |
-| Quotation | `base.quote` | `figure` containing `blockquote` and `figcaption` |
-| Preformatted content | `base.code-block` | labelled `pre` containing `code` |
-| Heading | `base.heading` | one governed `h1`–`h6` selected for outline position |
-| Plain text | `base.plain-text` | escaped text in a governed semantic text element |
-| Rich text | `base.rich-text` | sanitised editorial HTML in one governed wrapper |
-| Semantic list | `base.semantic-list` | native `ul` or `ol` with `li` children |
-| Progress | `base.progress-bar` | visible label and native `progress` value |
-| Search results | `base.search` | search form/status, result list and shared pagination with degraded fallback |
-| Referenced content | `base.shared-content-fragment`, `base.structured-content`, `base.structured-content-list` | approved display component output; no raw record dump |
-| Data table | `base.table` | `table` with visible `caption`, header cells and correct scope |
-| Badge | `base.badge` | short text in `span`; meaning never depends on colour |
-| Comparison table | `base.comparison-table` | headed `section` containing the canonical Table structure |
-| Empty state | `base.empty-state` | labelled or headed `section`, explanation and optional action |
-| FAQ | `base.faq-list` | headed `section` containing native disclosure items |
-| Icon | `base.icon` | decorative SVG hidden from accessibility APIs, or named SVG with `role="img"` |
-| Icon list | `base.icon-list` | headed `section` and semantic list; decorative icons do not duplicate text |
-| Logo cloud | `base.logo-cloud` | labelled `section` with images whose alternatives identify the organisations |
-| Statistics | `base.statistics` | headed or labelled `section` with value/label pairs in reading order |
-| Steps and timeline | `base.steps`, `base.timeline` | labelled `section` containing an ordered list |
-| Accordion | `base.accordion`, `base.accordion-item` | labelled group of native `details` and `summary` elements |
-| Actions and links | `base.button`, `base.link` | native `button` for actions and `a` for destinations |
-| Carousel | `base.carousel` | labelled region, ordered slides, native controls and polite status |
-| Overlays | `base.dialog`, `base.drawer` | usable native fallback upgraded to a focus-managed modal or drawer |
-| Map | `base.map` | provider surface plus ordinary-text location and destination fallback |
-| Tabs | `base.tabs`, `base.tab-panel` | complete stacked sections without JavaScript; tablist behavior after enhancement |
-| Hosted audio | `base.audio` | `figure`, named native `audio`, optional transcript link |
-| Gallery | `base.gallery` | labelled `section` containing responsive Image entries |
-| Image | `base.image` | responsive `img`, alternative text and `ImageObject` metadata |
-| Hosted media | `base.media` | `figure` containing native audio or video and accessible alternatives |
-| PDF | `base.pdf-viewer` | `figure`, named PDF object, direct link and text fallback |
-| Provider video | `base.youtube-embed` | consent/provider facade, titled embed and ordinary link fallback |
-| Generic embed | `base.embed` | allow-listed sandboxed provider output with title, consent and fallback |
+| Template landmarks | `creator-signal.site.catalogue.template-header`, `creator-signal.site.catalogue.template-footer` | one inherited `header` or `footer`, with governed slots |
+| Skip navigation | `creator-signal.site.catalogue.template-skip-link` | first-focusable anchor targeting the main content ID |
+| Structural sections | `creator-signal.site.catalogue.grid`, `creator-signal.site.catalogue.reusable-section`, `creator-signal.site.catalogue.section` | labelled or headed `section`; no wrapper-only heading levels |
+| Neutral container | `creator-signal.site.catalogue.container` | author-selected safe semantic element, or `div` when neutral |
+| Thematic break | `creator-signal.site.catalogue.separator` | native `hr` |
+| Breadcrumb trail | `creator-signal.site.catalogue.breadcrumb` | labelled `nav`, ordered `BreadcrumbList`, linked `ListItem` entries |
+| Navigation regions | `creator-signal.site.catalogue.language-navigation`, `creator-signal.site.catalogue.navigation`, `creator-signal.site.catalogue.share-links`, `creator-signal.site.catalogue.table-of-contents` | labelled `nav` containing a list of descriptive links |
+| Content cards | `creator-signal.site.catalogue.card`, `creator-signal.site.catalogue.teaser` | `article` with logical heading, optional media, summary and action |
+| Card collection | `creator-signal.site.catalogue.card-grid` | headed `section` containing sibling Card articles |
+| Download | `creator-signal.site.catalogue.download` | `article` with description and a native download link |
+| Hero | `creator-signal.site.catalogue.hero` | headed `section`; media order may change visually without changing reading order |
+| Collection list | `creator-signal.site.catalogue.list` | collection region containing repeated semantic items and shared pagination |
+| Notice | `creator-signal.site.catalogue.notice` | `aside` for supplementary content; live status only when the message changes dynamically |
+| Person profile | `creator-signal.site.catalogue.person-profile` | `article` with portrait, name heading, role, biography and governed links |
+| Quotation | `creator-signal.site.catalogue.quote` | `figure` containing `blockquote` and `figcaption` |
+| Preformatted content | `creator-signal.site.catalogue.code-block` | labelled `pre` containing `code` |
+| Heading | `creator-signal.site.catalogue.heading` | one governed `h1`–`h6` selected for outline position |
+| Plain text | `creator-signal.site.catalogue.plain-text` | escaped text in a governed semantic text element |
+| Rich text | `creator-signal.site.catalogue.rich-text` | sanitised editorial HTML in one governed wrapper |
+| Semantic list | `creator-signal.site.catalogue.semantic-list` | native `ul` or `ol` with `li` children |
+| Progress | `creator-signal.site.catalogue.progress-bar` | visible label and native `progress` value |
+| Search results | `creator-signal.site.catalogue.search` | search form/status, result list and shared pagination with degraded fallback |
+| Referenced content | `creator-signal.site.catalogue.shared-content-fragment`, `creator-signal.site.catalogue.structured-content`, `creator-signal.site.catalogue.structured-content-list` | approved display component output; no raw record dump |
+| Data table | `creator-signal.site.catalogue.table` | `table` with visible `caption`, header cells and correct scope |
+| Badge | `creator-signal.site.catalogue.badge` | short text in `span`; meaning never depends on colour |
+| Comparison table | `creator-signal.site.catalogue.comparison-table` | headed `section` containing the canonical Table structure |
+| Empty state | `creator-signal.site.catalogue.empty-state` | labelled or headed `section`, explanation and optional action |
+| FAQ | `creator-signal.site.catalogue.faq-list` | headed `section` containing native disclosure items |
+| Icon | `creator-signal.site.catalogue.icon` | decorative SVG hidden from accessibility APIs, or named SVG with `role="img"` |
+| Icon list | `creator-signal.site.catalogue.icon-list` | headed `section` and semantic list; decorative icons do not duplicate text |
+| Logo cloud | `creator-signal.site.catalogue.logo-cloud` | labelled `section` with images whose alternatives identify the organisations |
+| Statistics | `creator-signal.site.catalogue.statistics` | headed or labelled `section` with value/label pairs in reading order |
+| Steps and timeline | `creator-signal.site.catalogue.steps`, `creator-signal.site.catalogue.timeline` | labelled `section` containing an ordered list |
+| Accordion | `creator-signal.site.catalogue.accordion`, `creator-signal.site.catalogue.accordion-item` | labelled group of native `details` and `summary` elements |
+| Actions and links | `creator-signal.site.catalogue.button`, `creator-signal.site.catalogue.link` | native `button` for actions and `a` for destinations |
+| Carousel | `creator-signal.site.catalogue.carousel` | labelled region, ordered slides, native controls and polite status |
+| Overlays | `creator-signal.site.catalogue.dialog`, `creator-signal.site.catalogue.drawer` | usable native fallback upgraded to a focus-managed modal or drawer |
+| Map | `creator-signal.site.catalogue.map` | provider surface plus ordinary-text location and destination fallback |
+| Tabs | `creator-signal.site.catalogue.tabs`, `creator-signal.site.catalogue.tab-panel` | complete stacked sections without JavaScript; tablist behavior after enhancement |
+| Hosted audio | `creator-signal.site.catalogue.audio` | `figure`, named native `audio`, optional transcript link |
+| Gallery | `creator-signal.site.catalogue.gallery` | labelled `section` containing responsive Image entries |
+| Image | `creator-signal.site.catalogue.image` | responsive `img`, alternative text and `ImageObject` metadata |
+| Hosted media | `creator-signal.site.catalogue.media` | `figure` containing native audio or video and accessible alternatives |
+| PDF | `creator-signal.site.catalogue.pdf-viewer` | `figure`, named PDF object, direct link and text fallback |
+| Provider video | `creator-signal.site.catalogue.youtube-embed` | consent/provider facade, titled embed and ordinary link fallback |
+| Generic embed | `creator-signal.site.catalogue.embed` | allow-listed sandboxed provider output with title, consent and fallback |
 
 ### Form catalogue
 
 | Content model | Registry entries | Required published structure |
 |---|---|---|
-| Form root | `base.form-container` | one native `form` with labelled content and submission status |
-| Input presets | `base.date-input`, `base.email-input`, `base.number-input`, `base.telephone-input`, `base.text-input`, `base.url-input` | shared native `input` implementation with the preset `type` |
-| Boolean choices | `base.checkbox`, `base.radio`, `base.switch` | native labelled inputs; switch adds state semantics without replacing the checkbox |
-| Choice composition | `base.checkbox-group`, `base.radio-group`, `base.option-group`, `base.option`, `base.select` | `fieldset`/`legend` where grouped, and native `select`/`option` where applicable |
-| Multiline text | `base.text-area` | labelled native `textarea` |
-| Hidden value | `base.hidden-field` | native hidden input; never used as visible instructions |
-| Labels and help | `base.form-label`, `base.form-help` | native `label` and stable help ID referenced by the control |
-| Validation and status | `base.form-error`, `base.form-message` | stable message elements, field association and appropriate live announcement |
-| Field grouping | `base.form-field-group`, `base.form-panel` | semantic group, `fieldset`/`legend` when it groups related controls |
-| Form actions | `base.form-actions`, `base.submit`, `base.reset-button`, `base.next-step`, `base.previous-step`, `base.previous-next-actions` | native button group with explicit button types |
-| Form disclosure | `base.form-accordion` | native disclosure fallback that opens before focusing an invalid field |
-| Form tabs | `base.form-tabs` | stacked form sections without JavaScript and tab behavior after enhancement |
-| Form step | `base.form-step` | labelled `section` with stable step identity |
-| Wizard | `base.wizard` | ordered form steps, progress, validation focus and recoverable state |
-| Summary | `base.form-summary-review` | headed definition or list structure with edit links |
-| Consent | `base.terms-and-conditions` | versioned terms reference and required labelled consent control |
-| Draft actions | `base.save-draft`, `base.delete-draft` | explicit native buttons and announced persistent result |
-| File attachment | `base.file-attachment` | labelled file input, constraints, upload state and secure retained reference |
-| CAPTCHA | `base.captcha` | provider-neutral challenge with accessible error and unavailable fallback |
-| Embedded form | `base.form-embed` | titled allow-listed provider output with focus, height and fallback contracts |
-| Reusable form fragment | `base.reusable-form-fragment` | governed field subtree with collision-free prefixed field IDs |
+| Form root | `creator-signal.site.catalogue.form-container` | one native `form` with labelled content and submission status |
+| Input presets | `creator-signal.site.catalogue.date-input`, `creator-signal.site.catalogue.email-input`, `creator-signal.site.catalogue.number-input`, `creator-signal.site.catalogue.telephone-input`, `creator-signal.site.catalogue.text-input`, `creator-signal.site.catalogue.url-input` | shared native `input` implementation with the preset `type` |
+| Boolean choices | `creator-signal.site.catalogue.checkbox`, `creator-signal.site.catalogue.radio`, `creator-signal.site.catalogue.switch` | native labelled inputs; switch adds state semantics without replacing the checkbox |
+| Choice composition | `creator-signal.site.catalogue.checkbox-group`, `creator-signal.site.catalogue.radio-group`, `creator-signal.site.catalogue.option-group`, `creator-signal.site.catalogue.option`, `creator-signal.site.catalogue.select` | `fieldset`/`legend` where grouped, and native `select`/`option` where applicable |
+| Multiline text | `creator-signal.site.catalogue.text-area` | labelled native `textarea` |
+| Hidden value | `creator-signal.site.catalogue.hidden-field` | native hidden input; never used as visible instructions |
+| Labels and help | `creator-signal.site.catalogue.form-label`, `creator-signal.site.catalogue.form-help` | native `label` and stable help ID referenced by the control |
+| Validation and status | `creator-signal.site.catalogue.form-error`, `creator-signal.site.catalogue.form-message` | stable message elements, field association and appropriate live announcement |
+| Field grouping | `creator-signal.site.catalogue.form-field-group`, `creator-signal.site.catalogue.form-panel` | semantic group, `fieldset`/`legend` when it groups related controls |
+| Form actions | `creator-signal.site.catalogue.form-actions`, `creator-signal.site.catalogue.submit`, `creator-signal.site.catalogue.reset-button`, `creator-signal.site.catalogue.next-step`, `creator-signal.site.catalogue.previous-step`, `creator-signal.site.catalogue.previous-next-actions` | native button group with explicit button types |
+| Form disclosure | `creator-signal.site.catalogue.form-accordion` | native disclosure fallback that opens before focusing an invalid field |
+| Form tabs | `creator-signal.site.catalogue.form-tabs` | stacked form sections without JavaScript and tab behavior after enhancement |
+| Form step | `creator-signal.site.catalogue.form-step` | labelled `section` with stable step identity |
+| Wizard | `creator-signal.site.catalogue.wizard` | ordered form steps, progress, validation focus and recoverable state |
+| Summary | `creator-signal.site.catalogue.form-summary-review` | headed definition or list structure with edit links |
+| Consent | `creator-signal.site.catalogue.terms-and-conditions` | versioned terms reference and required labelled consent control |
+| Draft actions | `creator-signal.site.catalogue.save-draft`, `creator-signal.site.catalogue.delete-draft` | explicit native buttons and announced persistent result |
+| File attachment | `creator-signal.site.catalogue.file-attachment` | labelled file input, constraints, upload state and secure retained reference |
+| CAPTCHA | `creator-signal.site.catalogue.captcha` | provider-neutral challenge with accessible error and unavailable fallback |
+| Embedded form | `creator-signal.site.catalogue.form-embed` | titled allow-listed provider output with focus, height and fallback contracts |
+| Reusable form fragment | `creator-signal.site.catalogue.reusable-form-fragment` | governed field subtree with collision-free prefixed field IDs |
 
 ## JavaScript enhancement matrix
 
@@ -290,8 +290,8 @@ JavaScript is self-contained vanilla code, delegated from stable
 | Runtime level | Entries |
 |---|---|
 | No JavaScript required | text, headings, links, images, tables, lists, cards, navigation, breadcrumbs, downloads, native media and ordinary form controls |
-| Progressive enhancement | `base.tabs`, `base.form-tabs`, `base.carousel`, `base.dialog`, `base.drawer`, `base.form-container`, `base.wizard` |
-| Capability runtime | `base.search`, `base.structured-content-list`, `base.file-attachment`, `base.save-draft`, `base.delete-draft`, `base.captcha`, `base.embed`, `base.form-embed`, `base.map`, `base.youtube-embed` |
+| Progressive enhancement | `creator-signal.site.catalogue.tabs`, `creator-signal.site.catalogue.form-tabs`, `creator-signal.site.catalogue.carousel`, `creator-signal.site.catalogue.dialog`, `creator-signal.site.catalogue.drawer`, `creator-signal.site.catalogue.form-container`, `creator-signal.site.catalogue.wizard` |
+| Capability runtime | `creator-signal.site.catalogue.search`, `creator-signal.site.catalogue.structured-content-list`, `creator-signal.site.catalogue.file-attachment`, `creator-signal.site.catalogue.save-draft`, `creator-signal.site.catalogue.delete-draft`, `creator-signal.site.catalogue.captcha`, `creator-signal.site.catalogue.embed`, `creator-signal.site.catalogue.form-embed`, `creator-signal.site.catalogue.map`, `creator-signal.site.catalogue.youtube-embed` |
 
 If enhancement fails, content remains readable and native controls remain
 usable. A capability-backed component additionally presents its documented

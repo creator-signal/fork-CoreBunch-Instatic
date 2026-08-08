@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test'
 import { create } from 'mutative'
-import type { Page } from '@core/page-tree'
+import { creatorSignalCatalogueEntryId, type Page } from '@core/page-tree'
 import {
   createNode,
   insertNode,
@@ -198,7 +198,7 @@ describe('duplicateNode', () => {
     const patternId = addChildToPage(page, rootId)
     const regionId = addChildToPage(page, patternId)
     page.nodes[patternId].catalogueInstance = {
-      entryId: 'base.grid',
+      entryId: creatorSignalCatalogueEntryId('base.grid'),
       entryVersion: '1.0.0',
       pattern: { authorableNodeIds: [regionId] },
     }

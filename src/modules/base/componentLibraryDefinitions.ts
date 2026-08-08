@@ -5,6 +5,7 @@ import type {
   ComponentLibraryEntry,
   ComponentLibraryField,
 } from '@core/component-library'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 
 interface PrimitiveEntryOptions {
   id: string
@@ -87,11 +88,26 @@ interface TemplateComponentEntryOptions {
   accessibility: string
 }
 
+function catalogueEntryIds(ids: readonly string[] | undefined): string[] | undefined {
+  return ids?.map(creatorSignalCatalogueEntryId)
+}
+
+function catalogueSlots(
+  slots: ComponentLibraryEntry['slots'] | undefined,
+): ComponentLibraryEntry['slots'] {
+  return (slots ?? []).map((slot) => ({
+    ...slot,
+    ...(slot.allowedEntryIds
+      ? { allowedEntryIds: slot.allowedEntryIds.map(creatorSignalCatalogueEntryId) }
+      : {}),
+  }))
+}
+
 export function primitiveEntry(
   options: PrimitiveEntryOptions,
 ): ComponentLibraryEntry {
   return {
-    id: options.id,
+    id: creatorSignalCatalogueEntryId(options.id),
     version: '1.0.0',
     name: options.name,
     description: options.description,
@@ -126,10 +142,10 @@ export function primitiveEntry(
     slots: [],
     constraints: {
       ...(options.allowedParentEntryIds
-        ? { allowedParentEntryIds: options.allowedParentEntryIds }
+        ? { allowedParentEntryIds: catalogueEntryIds(options.allowedParentEntryIds) }
         : {}),
       ...(options.allowedChildEntryIds
-        ? { allowedChildEntryIds: options.allowedChildEntryIds }
+        ? { allowedChildEntryIds: catalogueEntryIds(options.allowedChildEntryIds) }
         : {}),
     },
     requirements: options.requirements ?? {
@@ -151,7 +167,7 @@ export function templateComponentEntry(
   options: TemplateComponentEntryOptions,
 ): ComponentLibraryEntry {
   return {
-    id: options.id,
+    id: creatorSignalCatalogueEntryId(options.id),
     version: '1.0.0',
     name: options.name,
     description: options.description,
@@ -188,7 +204,7 @@ export function visualComponentEntry(
   options: VisualComponentEntryOptions,
 ): ComponentLibraryEntry {
   return {
-    id: options.id,
+    id: creatorSignalCatalogueEntryId(options.id),
     version: '1.0.0',
     name: options.name,
     description: options.description,
@@ -204,13 +220,13 @@ export function visualComponentEntry(
     fields: options.fields ?? [],
     variants: options.variants ?? [],
     presets: [],
-    slots: options.slots ?? [],
+    slots: catalogueSlots(options.slots),
     constraints: {
       ...(options.allowedParentEntryIds
-        ? { allowedParentEntryIds: options.allowedParentEntryIds }
+        ? { allowedParentEntryIds: catalogueEntryIds(options.allowedParentEntryIds) }
         : {}),
       ...(options.allowedChildEntryIds
-        ? { allowedChildEntryIds: options.allowedChildEntryIds }
+        ? { allowedChildEntryIds: catalogueEntryIds(options.allowedChildEntryIds) }
         : {}),
     },
     requirements: {
@@ -232,7 +248,7 @@ export function patternEntry(
   options: PatternEntryOptions,
 ): ComponentLibraryEntry {
   return {
-    id: options.id,
+    id: creatorSignalCatalogueEntryId(options.id),
     version: '1.0.0',
     name: options.name,
     description: options.description,
@@ -259,10 +275,10 @@ export function patternEntry(
     slots: [],
     constraints: {
       ...(options.allowedParentEntryIds
-        ? { allowedParentEntryIds: options.allowedParentEntryIds }
+        ? { allowedParentEntryIds: catalogueEntryIds(options.allowedParentEntryIds) }
         : {}),
       ...(options.allowedChildEntryIds
-        ? { allowedChildEntryIds: options.allowedChildEntryIds }
+        ? { allowedChildEntryIds: catalogueEntryIds(options.allowedChildEntryIds) }
         : {}),
     },
     requirements: options.requirements ?? {

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'bun:test'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import { BUILT_IN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibrary'
 
-const EXPECTED_BY_TYPE = {
+const EXPECTED_SOURCE_IDS_BY_TYPE = {
   'template-component': [
     'base.template-header',
     'base.template-footer',
@@ -97,21 +98,26 @@ const EXPECTED_BY_TYPE = {
 } as const
 
 describe('issue #11 complete default catalogue', () => {
-  const byId = new Map(
-    BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [entry.id, entry]),
+  const bySourceId = new Map(
+    BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [
+      entry.id.replace('creator-signal.site.catalogue.', 'base.'),
+      entry,
+    ]),
   )
 
-  for (const [type, entryIds] of Object.entries(EXPECTED_BY_TYPE)) {
+  for (const [type, entryIds] of Object.entries(EXPECTED_SOURCE_IDS_BY_TYPE)) {
     it(`represents every requested ${type} entry with that taxonomy`, () => {
       for (const entryId of entryIds) {
-        expect(byId.get(entryId)?.implementation.type, entryId).toBe(type)
+        const entry = bySourceId.get(entryId)
+        expect(entry?.id, entryId).toBe(creatorSignalCatalogueEntryId(entryId))
+        expect(entry?.implementation.type, entryId).toBe(type)
       }
     })
   }
 
   it('keeps capability contracts explicit and unavailable by default', () => {
-    for (const entryId of EXPECTED_BY_TYPE['capability-backed']) {
-      const entry = byId.get(entryId)
+    for (const entryId of EXPECTED_SOURCE_IDS_BY_TYPE['capability-backed']) {
+      const entry = bySourceId.get(entryId)
       expect(entry?.implementation.type, entryId).toBe('capability-backed')
       expect(
         (entry?.requirements.capabilities.length ?? 0) +
@@ -124,9 +130,9 @@ describe('issue #11 complete default catalogue', () => {
 
   it('keeps the distinct structured-content semantics on one loop foundation', () => {
     const entries = [
-      byId.get('base.structured-content'),
-      byId.get('base.structured-content-list'),
-      byId.get('base.shared-content-fragment'),
+      bySourceId.get('base.structured-content'),
+      bySourceId.get('base.structured-content-list'),
+      bySourceId.get('base.shared-content-fragment'),
     ]
     expect(entries.map((entry) => entry?.name)).toEqual([
       'Structured Content',
@@ -145,7 +151,7 @@ describe('issue #11 complete default catalogue', () => {
   })
 
   it('represents Form Embed once with governed height variants', () => {
-    const formEmbed = byId.get('base.form-embed')
+    const formEmbed = bySourceId.get('base.form-embed')
     expect(
       BUILT_IN_COMPONENT_LIBRARY_ENTRIES.filter(
         (entry) => entry.name === 'Form Embed',
@@ -164,9 +170,9 @@ describe('issue #11 complete default catalogue', () => {
         (entry) => entry.name === 'Pagination',
       ),
     ).toBe(false)
-    expect(byId.get('base.list')?.fields.map((field) => field.key))
+    expect(bySourceId.get('base.list')?.fields.map((field) => field.key))
       .toContain('pagination')
-    expect(byId.get('base.structured-content-list')?.fields.map(
+    expect(bySourceId.get('base.structured-content-list')?.fields.map(
       (field) => field.key,
     )).toContain('pagination')
   })

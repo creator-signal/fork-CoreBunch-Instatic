@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import { escapeProps } from '@core/publisher'
 import { CodeBlockModule } from '@modules/base/codeBlock'
 import { RichTextModule } from '@modules/base/richText'
@@ -9,19 +10,25 @@ import '../matchers'
 
 describe('governed editorial primitives', () => {
   it('registers rich text and code as primitives and Table as a governed definition', () => {
-    const byId = new Map(
-      BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [entry.id, entry]),
+    const bySourceId = new Map(
+      BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => [
+        entry.id.replace('creator-signal.site.catalogue.', 'base.'),
+        entry,
+      ]),
     )
 
-    expect(byId.get('base.rich-text')?.implementation).toEqual({
+    expect(bySourceId.get('base.rich-text')?.id).toBe(
+      creatorSignalCatalogueEntryId('base.rich-text'),
+    )
+    expect(bySourceId.get('base.rich-text')?.implementation).toEqual({
       type: 'primitive',
       moduleId: 'base.rich-text',
     })
-    expect(byId.get('base.code-block')?.implementation).toEqual({
+    expect(bySourceId.get('base.code-block')?.implementation).toEqual({
       type: 'primitive',
       moduleId: 'base.code-block',
     })
-    expect(byId.get('base.table')?.implementation).toEqual({
+    expect(bySourceId.get('base.table')?.implementation).toEqual({
       type: 'visual-component',
       componentId: 'base.vc.table',
     })

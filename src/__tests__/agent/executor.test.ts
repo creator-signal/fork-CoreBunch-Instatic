@@ -14,9 +14,12 @@ import { describe, it, expect } from 'bun:test'
 import { useEditorStore } from '@site/store/store'
 import { executeAgentTool } from '@site/agent'
 import type { AiToolOutput } from '@core/ai'
-import { classNamesForClassIds } from '@core/page-tree'
+import { classNamesForClassIds, creatorSignalCatalogueEntryId } from '@core/page-tree'
 import { componentLibraryRegistry } from '@core/component-library'
+import { BUILT_IN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibrary'
 import '@modules/base'
+
+const publicId = creatorSignalCatalogueEntryId
 
 describe('executeAgentTool — governed Component Library', () => {
   it('lists live plugin-owned entries without exposing registered option values', async () => {
@@ -82,19 +85,35 @@ describe('executeAgentTool — governed Component Library', () => {
 
   it('inserts a governed entry and updates only its declared fields', async () => {
     const { rootId } = freshStore()
+    const listed = expectToolData<{
+      entries: Array<{ id: string; source: { type: string } }>
+    }>(await executeAgentTool('site_list_component_library', { limit: 200 }))
+    const mapped = listed.entries.filter((entry) => entry.source.type === 'built-in')
+    expect(mapped.map((entry) => entry.id)).toEqual(expect.arrayContaining(
+      BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => entry.id),
+    ))
+    expect(mapped.every((entry) => (
+      entry.id.startsWith('creator-signal.site.catalogue.')
+    ))).toBe(true)
+    expect(mapped.some((entry) => entry.id.startsWith('base.'))).toBe(false)
+    expectToolError(await executeAgentTool('site_insert_component', {
+      entryId: 'base.button',
+      parentId: rootId,
+    }))
+
     const inserted = expectToolData<{
       nodeId: string
       entryId: string
       entryVersion: string
     }>(await executeAgentTool('site_insert_component', {
-      entryId: 'base.button',
+      entryId: publicId('base.button'),
       parentId: rootId,
     }))
 
     const node = activePage().nodes[inserted.nodeId]
     expect(node?.moduleId).toBe('base.button')
     expect(node?.catalogueInstance).toEqual({
-      entryId: 'base.button',
+      entryId: publicId('base.button'),
       entryVersion: '1.0.0',
     })
 
@@ -125,14 +144,14 @@ describe('executeAgentTool — governed Component Library', () => {
   it('enforces placement and resolves registered variants by id', async () => {
     const { rootId } = freshStore()
     const blocked = await executeAgentTool('site_insert_component', {
-      entryId: 'base.email-input',
+      entryId: publicId('base.email-input'),
       parentId: rootId,
     })
     expectToolError(blocked)
 
     const hero = expectToolData<{ nodeId: string }>(
       await executeAgentTool('site_insert_component', {
-        entryId: 'base.hero',
+        entryId: publicId('base.hero'),
         parentId: rootId,
       }),
     )

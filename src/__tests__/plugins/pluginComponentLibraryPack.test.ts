@@ -10,8 +10,11 @@ import {
   listPluginComponentLibraryEntryIds,
 } from '@core/plugins/componentLibraryPackLoader'
 import type { PluginManifest } from '@core/plugin-sdk'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import { makeNode, makePage, makeSite, makeVC } from '../fixtures'
 import '@modules/base/index'
+
+const publicId = creatorSignalCatalogueEntryId
 
 const pluginId = 'acme.catalogue'
 const manifest: PluginManifest = {
@@ -192,7 +195,7 @@ describe('plugin Component Library package lifecycle', () => {
 
   it('reports a safe external replacement as remediation without clearing the blocker', () => {
     activatePluginComponentLibraryPack(manifest, [
-      entry({ replacementEntryId: 'base.plain-text' }),
+      entry({ replacementEntryId: publicId('base.plain-text') }),
     ])
     const site = makeSite({
       pages: [makePage({
@@ -217,7 +220,7 @@ describe('plugin Component Library package lifecycle', () => {
       .toEqual([expect.objectContaining({
         entryId: `${pluginId}.callout`,
         entryName: 'Callout',
-        replacementEntryId: 'base.plain-text',
+        replacementEntryId: publicId('base.plain-text'),
         replacementAvailable: true,
         usages: [expect.objectContaining({ nodeId: 'callout' })],
       })])

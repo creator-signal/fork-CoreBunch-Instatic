@@ -3,6 +3,7 @@ import {
   type ComponentLibraryPatternDefinition,
   type ComponentLibraryPatternNode,
 } from '@core/component-library'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import { ComponentFrameModule } from './componentFrame'
 import { ContainerModule } from './container'
 import {
@@ -25,7 +26,7 @@ import { TextModule } from './text'
 
 function metadata(entryId: string, presetId?: string) {
   return {
-    entryId,
+    entryId: creatorSignalCatalogueEntryId(entryId),
     entryVersion: '1.0.0',
     ...(presetId ? { presetId } : {}),
   }

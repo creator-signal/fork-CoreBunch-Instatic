@@ -7,7 +7,11 @@ import {
 import { publishPage } from '@core/publisher'
 import { validatePages } from '@core/persistence/validate'
 import { registry } from '@core/module-engine'
-import type { Page, SiteDocument } from '@core/page-tree'
+import {
+  creatorSignalCatalogueEntryId,
+  type Page,
+  type SiteDocument,
+} from '@core/page-tree'
 import {
   BUILT_IN_VISUAL_COMPONENT_LIBRARY_ENTRIES,
   BUILT_IN_VISUAL_COMPONENTS,
@@ -30,6 +34,8 @@ import {
 } from '@modules/base/componentLibraryCanonicalVisualComponents'
 import '@modules/base'
 import { makePage, makeSite } from '../fixtures'
+
+const publicId = creatorSignalCatalogueEntryId
 
 describe('built-in Visual Components', () => {
   it('registers valid immutable definitions for every catalogue entry', () => {
@@ -100,7 +106,7 @@ describe('built-in Visual Components', () => {
           classIds: [],
           parentId: 'root',
           catalogueInstance: {
-            entryId: 'base.hero',
+            entryId: publicId('base.hero'),
             entryVersion: '1.0.0',
             variantId: 'image-left',
           },
@@ -147,7 +153,7 @@ describe('built-in Visual Components', () => {
           classIds: [],
           parentId: 'root',
           catalogueInstance: {
-            entryId: 'base.dialog',
+            entryId: publicId('base.dialog'),
             entryVersion: '1.0.0',
           },
         },
@@ -222,7 +228,7 @@ describe('built-in Visual Components', () => {
           classIds: [],
           parentId: 'root',
           catalogueInstance: {
-            entryId: 'base.breadcrumb',
+            entryId: publicId('base.breadcrumb'),
             entryVersion: '1.0.0',
           },
         },
@@ -312,7 +318,7 @@ describe('built-in Visual Components', () => {
           classIds: [],
           parentId: 'root',
           catalogueInstance: {
-            entryId: 'base.table',
+            entryId: publicId('base.table'),
             entryVersion: '1.0.0',
           },
         },
@@ -335,7 +341,7 @@ describe('built-in Visual Components', () => {
           classIds: [],
           parentId: 'root',
           catalogueInstance: {
-            entryId: 'base.media',
+            entryId: publicId('base.media'),
             entryVersion: '1.0.0',
             variantId: 'hosted-video',
           },
@@ -376,7 +382,7 @@ describe('built-in Visual Components', () => {
           children: [],
           classIds: [],
           catalogueInstance: {
-            entryId: 'base.hero',
+            entryId: publicId('base.hero'),
             entryVersion: '1.0.0',
           },
         },

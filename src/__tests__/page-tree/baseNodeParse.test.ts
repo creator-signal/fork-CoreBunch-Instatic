@@ -125,6 +125,22 @@ describe('parseBaseNodeFields — page/VC parse equivalence', () => {
     expect(parsedViaVC(raw).catalogueInstance).toBeUndefined()
   })
 
+  it('normalises legacy mapped catalogue identities to Creator Signal', () => {
+    const raw = {
+      ...rawStoredNode(),
+      catalogueInstance: {
+        entryId: 'base.heading',
+        entryVersion: '1.0.0',
+      },
+    }
+    const expected = {
+      entryId: 'creator-signal.site.catalogue.heading',
+      entryVersion: '1.0.0',
+    }
+    expect(parsedViaPage(raw).catalogueInstance).toEqual(expected)
+    expect(parsedViaVC(raw).catalogueInstance).toEqual(expected)
+  })
+
   it('VC path drops a structurally invalid node (missing moduleId) rather than throwing', () => {
     const vc = parseVisualComponent({
       id: 'vc1',

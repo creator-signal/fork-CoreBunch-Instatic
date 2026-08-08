@@ -27,6 +27,7 @@ export {
   treeMap,
 } from './schema'
 export { reconcileTreeIntegrity } from './integrity'
+export { migrateCreatorSignalCatalogueNamespace } from './catalogueNamespaceMigration'
 export { applyTextDiff } from './textDiff'
 export {
   decodeCollabFrame,

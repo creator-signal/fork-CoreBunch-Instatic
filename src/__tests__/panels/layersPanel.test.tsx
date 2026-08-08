@@ -13,8 +13,11 @@ import { DndContext } from '@dnd-kit/core'
 import { ExplorerPanel } from '@site/panels/ExplorerPanel'
 import { EditorPermissionsContext } from '@site/editorPermissionsContext'
 import { useEditorStore } from '@site/store/store'
+import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import { makeNode, makePage, makeSite, makeVC } from '../fixtures'
 import '@modules/base/index'
+
+const publicId = creatorSignalCatalogueEntryId
 
 afterEach(() => {
   cleanup()
@@ -49,7 +52,7 @@ function loadSite(): void {
         moduleId: 'base.container',
         children: ['implementation'],
         catalogueInstance: {
-          entryId: 'base.container',
+          entryId: publicId('base.container'),
           entryVersion: '1.0.0',
           pattern: { authorableNodeIds: [] },
         },
@@ -90,7 +93,7 @@ function addWrapperTemplate(): void {
         id: 'layout-header',
         moduleId: 'base.container',
         catalogueInstance: {
-          entryId: 'base.container',
+          entryId: publicId('base.container'),
           entryVersion: '1.0.0',
         },
       }),
@@ -102,7 +105,7 @@ function addWrapperTemplate(): void {
         id: 'layout-footer',
         moduleId: 'base.container',
         catalogueInstance: {
-          entryId: 'base.container',
+          entryId: publicId('base.container'),
           entryVersion: '1.0.0',
         },
       }),

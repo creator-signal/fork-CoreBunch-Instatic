@@ -11,6 +11,7 @@ import {
   type Page,
   type PageNode,
   type SiteDocument,
+  creatorSignalCatalogueEntryId,
 } from '@core/page-tree'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import '@modules/base/index'
@@ -38,7 +39,7 @@ describe('Component Library accessibility diagnostics', () => {
     expect(diagnostics[0]).toMatchObject({
       pageId: 'page',
       nodeId: 'heading-three',
-      entryId: 'base.heading',
+      entryId: creatorSignalCatalogueEntryId('base.heading'),
       rule: 'a11y.accessible-name',
       category: 'naming',
       blocking: true,
@@ -123,7 +124,7 @@ function governedNode(
     parentId: 'root',
     classIds: [],
     catalogueInstance: {
-      entryId,
+      entryId: creatorSignalCatalogueEntryId(entryId),
       entryVersion: '1.0.0',
     },
   }

@@ -2,7 +2,7 @@
 
 This optional starter plugin is the first end-to-end component reference. It is
 deliberately separate from product starter sites and focuses on the governed
-Plain Text entry (`base.plain-text`) until its complete author workflow works.
+Plain Text entry (`creator-signal.site.catalogue.plain-text`) until its complete author workflow works.
 
 The six pages cover insertion and properties, semantic elements, composition,
 hard line breaks and escaping, accessibility guidance, styles and publishing.

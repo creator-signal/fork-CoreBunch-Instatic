@@ -1,9 +1,13 @@
 import type { ComponentLibraryEntry } from '@core/component-library'
 import { heroComponent, heroParamIds } from './pack/hero-component'
+import {
+  creatorSignalPublicAuthoringContract,
+  isCreatorSignalComponentPermitted,
+} from './public-authoring-contract'
 
 export const creatorSignalHeroEntry: ComponentLibraryEntry = {
   id: 'creator-signal.site.hero',
-  version: '1.0.0',
+  version: '1.1.0',
   name: 'Creator Signal Hero',
   description: 'The governed Creator Signal page introduction with one primary action and optional artwork.',
   category: 'Creator Signal',
@@ -63,7 +67,14 @@ export const creatorSignalHeroEntry: ComponentLibraryEntry = {
       required: false,
     },
   ],
-  variants: [],
+  variants: [
+    {
+      id: 'default',
+      name: 'Default',
+      description: 'The single governed Creator Signal Hero treatment.',
+      values: {},
+    },
+  ],
   presets: [],
   slots: [],
   constraints: {},
@@ -73,7 +84,7 @@ export const creatorSignalHeroEntry: ComponentLibraryEntry = {
     plugins: ['creator-signal.site'],
   },
   documentation: {
-    usage: 'Use once near the start of a Creator Signal landing page. Keep the primary action specific and task-oriented.',
+    usage: `Use once near the start of a Creator Signal landing page. Keep the primary action specific and task-oriented. Styling is governed by ${creatorSignalPublicAuthoringContract.designSystem.packageName}; authors do not choose raw colour, font, spacing, radius, shadow, motion, or breakpoint values.`,
     accessibility: 'Keep one page-level H1, preserve a logical heading order, and choose artwork that does not carry essential text.',
   },
   accessibility: {
@@ -103,3 +114,11 @@ export const creatorSignalHeroEntry: ComponentLibraryEntry = {
 export const creatorSignalComponentLibraryEntries: readonly ComponentLibraryEntry[] = [
   creatorSignalHeroEntry,
 ]
+
+for (const entry of creatorSignalComponentLibraryEntries) {
+  if (!isCreatorSignalComponentPermitted(entry.id)) {
+    throw new Error(
+      `[creator-signal] Component Library entry "${entry.id}" is not permitted by the public authoring contract.`,
+    )
+  }
+}

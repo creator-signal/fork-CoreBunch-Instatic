@@ -25,6 +25,8 @@ beforeEach(() => {
     activeDocument: null,
     activePageId: null,
     activeBreakpointId: 'desktop',
+    canvasView: 'design',
+    runScripts: false,
     propertiesPanel: { collapsed: false, x: 0, y: 0, width: 360 },
     propertiesPanelMode: 'docked',
     hasUnsavedChanges: false,

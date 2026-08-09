@@ -14,7 +14,7 @@ prove from behavior tests and context-dependent manual review.
 - the backing fields used by an automated check, where applicable;
 - a concise requirement and remediation.
 
-The built-in catalogue declares rules for accessible names, heading order,
+The Creator Signal catalogue declares rules for accessible names, heading order,
 visible form labels, unique field IDs, provider fallbacks, keyboard and focus
 behavior, announcements, no-JavaScript fallbacks, image alternatives, motion,
 contrast and touch targets.

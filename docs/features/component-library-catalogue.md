@@ -1,4 +1,4 @@
-# Built-in Component Library catalogue
+# Creator Signal Component Library catalogue
 
 This document is the traceability matrix for the complete default catalogue in
 issue #11. The registry IDs are stable authoring identities. They point to
@@ -8,6 +8,8 @@ store copied rendered HTML.
 All mapped authoring identities use the `creator-signal.site.catalogue.*`
 namespace. Canonical engine modules, Visual Components and patterns retain
 their internal `base.*` implementation IDs.
+The registry attributes every mapped entry to the `creator-signal.site` design
+system with the provider label `Creator Signal`.
 
 The executable matrix is
 `src/__tests__/component-library/componentLibraryCatalogueCoverage.test.ts`.

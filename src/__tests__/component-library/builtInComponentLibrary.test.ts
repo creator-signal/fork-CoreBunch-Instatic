@@ -20,7 +20,7 @@ function entriesByMappedSourceId() {
   )
 }
 
-describe('built-in Component Library', () => {
+describe('Creator Signal Component Library', () => {
   it('registers explicit, uniquely identified catalogue entries', () => {
     registerBuiltInComponentLibraryEntries()
 
@@ -44,6 +44,11 @@ describe('built-in Component Library', () => {
     ]))
 
     for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
+      expect(entry.source).toEqual({
+        type: 'design-system',
+        id: 'creator-signal.site',
+        name: 'Creator Signal',
+      })
       expect(componentLibraryRegistry.get(entry.id)).toEqual(entry)
     }
   })

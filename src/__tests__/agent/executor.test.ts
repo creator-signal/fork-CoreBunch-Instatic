@@ -86,12 +86,23 @@ describe('executeAgentTool — governed Component Library', () => {
   it('inserts a governed entry and updates only its declared fields', async () => {
     const { rootId } = freshStore()
     const listed = expectToolData<{
-      entries: Array<{ id: string; source: { type: string } }>
-    }>(await executeAgentTool('site_list_component_library', { limit: 200 }))
-    const mapped = listed.entries.filter((entry) => entry.source.type === 'built-in')
+      entries: Array<{
+        id: string
+        source: { type: string; id?: string; name?: string }
+      }>
+    }>(await executeAgentTool('site_list_component_library', {
+      limit: 200,
+      sourceType: 'design-system',
+    }))
+    const mapped = listed.entries
     expect(mapped.map((entry) => entry.id)).toEqual(expect.arrayContaining(
       BUILT_IN_COMPONENT_LIBRARY_ENTRIES.map((entry) => entry.id),
     ))
+    expect(mapped.every((entry) => (
+      entry.source.type === 'design-system'
+      && entry.source.id === 'creator-signal.site'
+      && entry.source.name === 'Creator Signal'
+    ))).toBe(true)
     expect(mapped.every((entry) => (
       entry.id.startsWith('creator-signal.site.catalogue.')
     ))).toBe(true)

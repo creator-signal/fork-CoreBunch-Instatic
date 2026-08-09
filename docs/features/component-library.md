@@ -18,7 +18,7 @@ The registry is metadata over Instatic's existing modules, Visual Components, pa
 - Entry-specific accessibility contracts distinguish automated diagnostics,
   behavior tests and manual review; site policy alone selects publication
   blockers.
-- The built-in catalogue is explicit in `src/modules/base/componentLibrary.ts`; it is not inferred from every registered HTML module.
+- The bundled Creator Signal catalogue is explicit in `src/modules/base/componentLibrary.ts`; it is not inferred from every registered HTML module.
 - Components view opens a searchable, filterable catalogue and stamps library identity on the inserted backing node in the same undo transaction.
 - Add to canvas lists governed non-form entries under Components, groups
   Structure entries as Layout, and gives all form entries their own Forms
@@ -61,7 +61,7 @@ module / Visual Component / pattern / template
 | Search, filters and deterministic ordering | `src/core/component-library/query.ts` |
 | Capability/provider/plugin health | `src/core/component-library/availability.ts` |
 | Retained versions, migration paths and impact previews | `src/core/component-library/version.ts`, `migration.ts` |
-| Explicit built-in definitions | `src/modules/base/componentLibrary.ts`, `componentLibraryForms.ts`, `componentLibraryVisualComponents.ts` |
+| Bundled Creator Signal definitions | `src/modules/base/componentLibrary.ts`, `componentLibraryForms.ts`, `componentLibraryVisualComponents.ts` |
 | Application-owned Visual Components | `src/core/visual-components-schema/registry.ts` |
 | Pattern definitions and materialization | `src/core/component-library/patterns.ts`, `src/modules/base/componentLibraryPatterns.ts` |
 | Catalogue dialog and Components projection | `src/admin/pages/site/panels/LayersPanel/` |
@@ -85,7 +85,11 @@ const emailInput: ComponentLibraryEntry = {
   category: 'Forms',
   tags: ['form', 'email'],
   icon: 'mail',
-  source: { type: 'built-in' },
+  source: {
+    type: 'design-system',
+    id: 'creator-signal.site',
+    name: 'Creator Signal',
+  },
   status: 'stable',
   implementation: {
     type: 'primitive',
@@ -125,6 +129,9 @@ The definition carries authoring identity and governance metadata. The reference
 The mapped catalogue uses `creator-signal.site.catalogue.*` for its public
 authoring IDs. Internal `base.*` module, Visual Component and pattern IDs stay
 unchanged so the rendering engine keeps one canonical implementation identity.
+Every mapped entry declares the `creator-signal.site` design-system source with
+the author-facing provider name `Creator Signal`. The Components provider filter
+and `site_list_component_library` MCP response read that same registry metadata.
 
 An omitted parent, child or slot allow-list means unrestricted. A present empty allow-list means none are permitted. This preserves the difference between an unconstrained container and a deliberately closed boundary.
 
@@ -167,7 +174,7 @@ componentLibraryRegistry.register(emailInput)
 
 `registerOrReplace()` also retains each validated semantic version. `getVersion()` and `listVersions()` expose those retained definitions for pinned instances, migration previews and rollback. Removing an entry or its owning source removes its retained versions too, so uninstall checks must inspect active usages first.
 
-### Built-in entries
+### Bundled Creator Signal entries
 
 `src/modules/base/componentLibrary.ts` registers the curated authoring catalogue during base-module startup. Shared entry builders live in `componentLibraryDefinitions.ts`, and the form catalogue is split into `componentLibraryForms.ts`. Each entry names its canonical module, author-facing fields, optional preset, constraints, usage and accessibility guidance. The list includes structural, content, action, media and form entries, with separate approved presets for each input type.
 

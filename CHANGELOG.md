@@ -6,6 +6,28 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.23 - 2026-08-10
+
+### Creator Signal catalogue ownership
+
+- Moved every mapped public catalogue identity into the
+  `creator-signal.site.catalogue.*` namespace while preserving the native
+  renderer, Visual Component, pattern, CSS, and plugin implementation IDs.
+- Migrated stored page, component, layout, collaboration, version, and form
+  draft references without rewriting unrelated properties.
+- Attributed the complete mapped catalogue to the Creator Signal design-system
+  provider in the authoring interface and MCP component-library responses.
+
+### Editor, collaboration, and publishing reliability
+
+- Adopted the latest upstream collaboration persistence lifecycle while
+  retaining catalogue namespace migration during document hydration.
+- Added selector usage filtering, improved floating-panel dock clearance and
+  shared data-binding selection, and made canvas form-control tests
+  deterministic across view modes.
+- Added published-page `HEAD` handling, surfaced runtime script diagnostics,
+  and improved deterministic collaborative publishing.
+
 ## 0.0.22 - 2026-08-05
 
 ### Collaborative authoring and data

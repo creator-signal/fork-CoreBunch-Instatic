@@ -26,12 +26,12 @@ export const creatorSignalPublicAuthoringContract = {
     },
   ],
   permittedPatterns: [
-    { layoutId: 'hero', role: 'hero' },
-    { layoutId: 'feature-grid', role: 'features' },
-    { layoutId: 'call-to-action', role: 'cta' },
-    { layoutId: 'prose', role: 'prose' },
-    { layoutId: 'testimonial', role: 'testimonial' },
-    { layoutId: 'faq', role: 'faq' },
+    { layoutId: 'creator-signal.site/hero', role: 'hero' },
+    { layoutId: 'creator-signal.site/feature-grid', role: 'features' },
+    { layoutId: 'creator-signal.site/call-to-action', role: 'cta' },
+    { layoutId: 'creator-signal.site/prose', role: 'prose' },
+    { layoutId: 'creator-signal.site/testimonial', role: 'testimonial' },
+    { layoutId: 'creator-signal.site/faq', role: 'faq' },
   ],
   semanticStyling: {
     colours: 'design-token-only',

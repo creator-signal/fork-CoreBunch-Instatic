@@ -43,6 +43,10 @@ import { PublishButton } from '@admin/pages/site/toolbar/PublishButton'
 import { PeerAvatarStack } from '@admin/pages/site/toolbar/PeerAvatarStack'
 import { useEditorAppearancePreferences } from '@admin/pages/site/preferences/editorPreferences'
 import { usePersistence } from '@admin/pages/site/hooks/usePersistence'
+import {
+  useRuntimeScriptDiagnostics,
+  type RuntimeScriptValidationState,
+} from '@admin/pages/site/hooks/useRuntimeScriptDiagnostics'
 import { useSiteEditorUrlSync } from '@admin/pages/site/hooks/useSiteEditorUrlSync'
 import { useEditorLayoutPersistence } from '@admin/pages/site/hooks/useEditorLayoutPersistence'
 import { useEditorStore } from '@admin/pages/site/store/store'
@@ -78,6 +82,7 @@ interface AdminCanvasEditorBodyProps {
   canSaveSite: boolean
   canUseAiChat: boolean
   loadError: string | null
+  runtimeValidation: RuntimeScriptValidationState
 }
 
 const AdminCanvasEditorBody = prewarmedLazy<AdminCanvasEditorBodyProps>(
@@ -166,6 +171,7 @@ export function AdminCanvasLayout() {
   // Boot the document lifecycle: HTTP load for first paint, then the collab
   // provider — every edit streams live and the server relay persists.
   const persistence = usePersistence('default', cmsAdapter, { enabled: true })
+  const runtimeValidation = useRuntimeScriptDiagnostics()
   // Keep the open page in lockstep with the URL: consume `?page=<slug>` on
   // load, and mirror the active page's slug back into the address bar so it's
   // directly linkable.
@@ -226,7 +232,12 @@ export function AdminCanvasLayout() {
             <>
               <PeerAvatarStack />
               <ZoomControls />
-              <PublishButton enabled={canPublishPages} saveStatus={persistence.saveStatus} />
+              <PublishButton
+                enabled={canPublishPages}
+                saveStatus={persistence.saveStatus}
+                runtimeDiagnostics={runtimeValidation.diagnostics}
+                runtimeValidationPending={runtimeValidation.status === 'validating'}
+              />
             </>
           )}
         />
@@ -243,6 +254,7 @@ export function AdminCanvasLayout() {
               canSaveSite={canSaveSite}
               canUseAiChat={canUseAgent}
               loadError={loadError}
+              runtimeValidation={runtimeValidation}
             />
           </LazyChunkBoundary>
         ) : (

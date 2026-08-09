@@ -7,6 +7,14 @@ import type {
 } from '@core/component-library'
 import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 
+function creatorSignalCatalogueSource(): ComponentLibraryEntry['source'] {
+  return {
+    type: 'design-system',
+    id: 'creator-signal.site',
+    name: 'Creator Signal',
+  }
+}
+
 interface PrimitiveEntryOptions {
   id: string
   name: string
@@ -114,7 +122,7 @@ export function primitiveEntry(
     category: options.category,
     tags: options.tags,
     icon: options.icon,
-    source: { type: 'built-in' },
+    source: creatorSignalCatalogueSource(),
     status: 'stable',
     implementation: options.requirements
       ? {
@@ -174,7 +182,7 @@ export function templateComponentEntry(
     category: options.category,
     tags: options.tags,
     icon: options.icon,
-    source: { type: 'built-in' },
+    source: creatorSignalCatalogueSource(),
     status: 'stable',
     implementation: {
       type: 'template-component',
@@ -211,7 +219,7 @@ export function visualComponentEntry(
     category: options.category,
     tags: options.tags,
     icon: options.icon,
-    source: { type: 'built-in' },
+    source: creatorSignalCatalogueSource(),
     status: 'stable',
     implementation: {
       type: 'visual-component',
@@ -255,7 +263,7 @@ export function patternEntry(
     category: options.category,
     tags: options.tags,
     icon: options.icon,
-    source: { type: 'built-in' },
+    source: creatorSignalCatalogueSource(),
     status: 'stable',
     implementation: options.requirements
       ? {

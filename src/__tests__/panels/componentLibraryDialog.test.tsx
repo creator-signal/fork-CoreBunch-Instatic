@@ -54,6 +54,26 @@ afterEach(() => {
 })
 
 describe('ComponentLibraryDialog dependency availability', () => {
+  it('shows the mapped catalogue under the Creator Signal provider', () => {
+    render(<ComponentLibraryDialog open onClose={() => {}} />)
+
+    const providerFilter = screen.getByLabelText('Filter by provider')
+      .closest('div')!
+      .querySelector('select')!
+    const providerLabels = Array.from(providerFilter.options)
+      .map((option) => option.textContent)
+    expect(providerLabels).toContain('Creator Signal')
+    expect(providerLabels).not.toContain('Built-in')
+
+    fireEvent.change(providerFilter, {
+      target: { value: 'creator-signal.site' },
+    })
+
+    const results = screen.getByRole('listbox', { name: 'Components' })
+    expect(within(results).getByText('Hero')).toBeDefined()
+    expect(within(results).getAllByText('Creator Signal').length).toBeGreaterThan(0)
+  })
+
   it('shows component ownership and supports provider-level filtering', () => {
     componentLibraryRegistry.register(dependencyEntry)
     render(<ComponentLibraryDialog open onClose={() => {}} />)

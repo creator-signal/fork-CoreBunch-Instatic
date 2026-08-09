@@ -1,6 +1,6 @@
 # Component HTML and SEO contract
 
-This is the published-output contract for the built-in Component Library. It
+This is the published-output contract for the Creator Signal Component Library. It
 covers semantic HTML, search metadata, structured data, accessibility,
 progressive enhancement, CSS hooks and design tokens. The catalogue registry
 continues to own author-facing fields, variants, slots and dependencies.

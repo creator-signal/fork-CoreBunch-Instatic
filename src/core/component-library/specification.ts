@@ -28,7 +28,7 @@ export function renderComponentLibrarySpecification(
     '> this file directly; run `bun run component-library:spec` after changing',
     '> a catalogue entry.',
     '',
-    `This specification covers all ${entries.length} registered built-in entries.`,
+    `This specification covers all ${entries.length} registered catalogue entries.`,
     'Each entry describes the author-facing contract independently of its rendered',
     'HTML. The backing module, Visual Component, pattern or template role remains',
     'the canonical implementation.',

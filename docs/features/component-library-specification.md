@@ -4,7 +4,7 @@
 > this file directly; run `bun run component-library:spec` after changing
 > a catalogue entry.
 
-This specification covers all 101 registered built-in entries.
+This specification covers all 101 registered catalogue entries.
 Each entry describes the author-facing contract independently of its rendered
 HTML. The backing module, Visual Component, pattern or template role remains
 the canonical implementation.
@@ -34,7 +34,7 @@ Template-owned site footer, legal and supplementary navigation chrome.
 - Registry ID: `creator-signal.site.catalogue.template-footer`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: template-component
 - Backing implementation: template role `footer`
 - Search tags: footer, template, legal, site chrome
@@ -58,7 +58,7 @@ Template-owned site header and primary navigation chrome.
 - Registry ID: `creator-signal.site.catalogue.template-header`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: template-component
 - Backing implementation: template role `header`
 - Search tags: header, template, navigation, site chrome
@@ -90,7 +90,7 @@ Template-owned keyboard shortcut to the primary content region.
 - Registry ID: `creator-signal.site.catalogue.template-skip-link`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: template-component
 - Backing implementation: template role `skip-link`
 - Search tags: skip link, template, keyboard, accessibility
@@ -125,7 +125,7 @@ A responsive two-column authored layout.
 - Registry ID: `creator-signal.site.catalogue.grid`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.grid`
 - Search tags: columns, grid, layout, responsive
@@ -149,7 +149,7 @@ A neutral content container with a controlled semantic element.
 - Registry ID: `creator-signal.site.catalogue.container`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.container`
 - Search tags: container, layout, group
@@ -175,7 +175,7 @@ A centrally defined section frame with governed content.
 - Registry ID: `creator-signal.site.catalogue.reusable-section`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.reusable-section`
 - Search tags: reusable, section, shared, layout
@@ -207,7 +207,7 @@ A semantic section that groups related page content.
 - Registry ID: `creator-signal.site.catalogue.section`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.container` with preset `section`
 - Search tags: section, layout, structure
@@ -237,7 +237,7 @@ A semantic thematic break using approved width, colour and spacing tokens.
 - Registry ID: `creator-signal.site.catalogue.separator`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.separator`
 - Search tags: separator, divider, rule, thematic break
@@ -268,7 +268,7 @@ An ordered navigation trail for the current page hierarchy.
 - Registry ID: `creator-signal.site.catalogue.breadcrumb`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.breadcrumb`
 - Search tags: breadcrumb, navigation, hierarchy, trail
@@ -307,7 +307,7 @@ A locale switcher supplied by the configured localisation capability.
 - Registry ID: `creator-signal.site.catalogue.language-navigation`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.loop` with preset `configured-locales`
 - Search tags: language, locale, translation, navigation
@@ -345,7 +345,7 @@ A labelled navigation region with governed link content.
 - Registry ID: `creator-signal.site.catalogue.navigation`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.navigation`
 - Search tags: navigation, menu, links, site
@@ -390,7 +390,7 @@ Privacy-preserving share destinations supplied by an approved policy capability.
 - Registry ID: `creator-signal.site.catalogue.share-links`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.loop` with preset `approved-networks`
 - Search tags: share, social, links, privacy
@@ -428,7 +428,7 @@ A labelled set of links to headings on the current page.
 - Registry ID: `creator-signal.site.catalogue.table-of-contents`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.table-of-contents`
 - Search tags: table of contents, on this page, anchors, navigation
@@ -470,7 +470,7 @@ A contained summary with optional media and action.
 - Registry ID: `creator-signal.site.catalogue.card`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.card`
 - Search tags: card, teaser, summary, content
@@ -522,7 +522,7 @@ A responsive collection composed from the shared Card definition.
 - Registry ID: `creator-signal.site.catalogue.card-grid`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.card-grid`
 - Search tags: cards, grid, collection, teasers
@@ -546,7 +546,7 @@ A described link to a downloadable site asset.
 - Registry ID: `creator-signal.site.catalogue.download`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.download`
 - Search tags: download, file, asset, document
@@ -581,7 +581,7 @@ A major page introduction with optional media and actions.
 - Registry ID: `creator-signal.site.catalogue.hero`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.hero`
 - Search tags: hero, introduction, banner, call to action
@@ -631,7 +631,7 @@ A static or generated collection using one governed item template.
 - Registry ID: `creator-signal.site.catalogue.list`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.list`
 - Search tags: list, collection, loop, pages, records
@@ -664,7 +664,7 @@ Highlights important information with an approved semantic type.
 - Registry ID: `creator-signal.site.catalogue.notice`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.notice`
 - Search tags: notice, callout, alert, message
@@ -712,7 +712,7 @@ A named person with portrait, role, biography and governed links.
 - Registry ID: `creator-signal.site.catalogue.person-profile`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.person-profile`
 - Search tags: person, profile, author, team
@@ -761,7 +761,7 @@ A quotation with a required visible citation.
 - Registry ID: `creator-signal.site.catalogue.quote`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.quote`
 - Search tags: quote, testimonial, citation, review
@@ -801,7 +801,7 @@ A promotional Card preset that reuses the Card definition.
 - Registry ID: `creator-signal.site.catalogue.teaser`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.card`
 - Search tags: teaser, campaign, article, promotion
@@ -849,7 +849,7 @@ Whitespace-preserving text with safe language metadata.
 - Registry ID: `creator-signal.site.catalogue.code-block`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.code-block`
 - Search tags: code, preformatted, snippet, example
@@ -884,7 +884,7 @@ A section heading using the shared text implementation.
 - Registry ID: `creator-signal.site.catalogue.heading`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.text` with preset `heading`
 - Search tags: heading, title, text
@@ -924,7 +924,7 @@ A semantic paragraph or short text fragment.
 - Registry ID: `creator-signal.site.catalogue.plain-text`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.text` with preset `paragraph`
 - Search tags: paragraph, copy, text
@@ -957,7 +957,7 @@ Sanitised formatted editorial content with one semantic wrapper.
 - Registry ID: `creator-signal.site.catalogue.rich-text`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.rich-text`
 - Search tags: rich text, editorial, formatting, quotation
@@ -984,7 +984,7 @@ An ordered or unordered semantic list.
 - Registry ID: `creator-signal.site.catalogue.semantic-list`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.list`
 - Search tags: list, ordered, unordered
@@ -1013,7 +1013,7 @@ A labelled native progress indicator.
 - Registry ID: `creator-signal.site.catalogue.progress-bar`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.progress`
 - Search tags: progress, completion, status, measurement
@@ -1048,7 +1048,7 @@ Index-backed search across eligible published pages.
 - Registry ID: `creator-signal.site.catalogue.search`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.loop` with preset `published-pages`
 - Search tags: search, results, index, collection
@@ -1086,7 +1086,7 @@ References centrally managed content fields without owning page layout.
 - Registry ID: `creator-signal.site.catalogue.shared-content-fragment`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.loop` with preset `content-fragment`
 - Search tags: shared content, fragment, reference, slots
@@ -1120,7 +1120,7 @@ Renders one governed CMS record through an approved display component.
 - Registry ID: `creator-signal.site.catalogue.structured-content`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.loop` with preset `single-record`
 - Search tags: structured content, record, reference, data
@@ -1155,7 +1155,7 @@ Queries governed CMS records through the shared collection contract.
 - Registry ID: `creator-signal.site.catalogue.structured-content-list`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.loop` with preset `record-collection`
 - Search tags: structured content, collection, loop, records
@@ -1200,7 +1200,7 @@ A captioned semantic table for genuinely tabular editorial data.
 - Registry ID: `creator-signal.site.catalogue.table`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.table`
 - Search tags: table, data, rows, columns
@@ -1237,7 +1237,7 @@ A short status or category label using approved semantic variants.
 - Registry ID: `creator-signal.site.catalogue.badge`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.badge`
 - Search tags: badge, label, status, tag
@@ -1279,7 +1279,7 @@ A captioned table comparing any set of options or features.
 - Registry ID: `creator-signal.site.catalogue.comparison-table`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.comparison-table`
 - Search tags: comparison, table, features, options
@@ -1303,7 +1303,7 @@ Explains an empty collection or unavailable result with a next action.
 - Registry ID: `creator-signal.site.catalogue.empty-state`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.empty-state`
 - Search tags: empty, no results, unavailable, fallback
@@ -1327,7 +1327,7 @@ Frequently asked questions composed from native Accordion items.
 - Registry ID: `creator-signal.site.catalogue.faq-list`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.faq`
 - Search tags: faq, questions, answers, accordion
@@ -1351,7 +1351,7 @@ An approved symbolic icon with controlled semantics and size.
 - Registry ID: `creator-signal.site.catalogue.icon`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.icon`
 - Search tags: icon, symbol, design, status
@@ -1386,7 +1386,7 @@ A concise repeated list ready for approved icon decoration.
 - Registry ID: `creator-signal.site.catalogue.icon-list`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.icon-list`
 - Search tags: icon, list, features, benefits
@@ -1410,7 +1410,7 @@ A governed group of partner or organisation logos.
 - Registry ID: `creator-signal.site.catalogue.logo-cloud`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.logo-cloud`
 - Search tags: logos, partners, organisations, trust
@@ -1434,7 +1434,7 @@ A responsive group of key measurements.
 - Registry ID: `creator-signal.site.catalogue.statistics`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.statistics`
 - Search tags: statistics, metrics, numbers, measurements
@@ -1458,7 +1458,7 @@ A semantic ordered sequence of actions.
 - Registry ID: `creator-signal.site.catalogue.steps`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.steps`
 - Search tags: steps, process, instructions, sequence
@@ -1482,7 +1482,7 @@ A semantic ordered sequence of dated milestones.
 - Registry ID: `creator-signal.site.catalogue.timeline`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.timeline`
 - Search tags: timeline, history, events, dates
@@ -1508,7 +1508,7 @@ A labelled group of native disclosure sections.
 - Registry ID: `creator-signal.site.catalogue.accordion`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.accordion`
 - Search tags: accordion, disclosure, interactive
@@ -1548,7 +1548,7 @@ One native disclosure section inside an Accordion.
 - Registry ID: `creator-signal.site.catalogue.accordion-item`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.accordion-item`
 - Search tags: accordion, details, summary, form
@@ -1581,7 +1581,7 @@ A call to action rendered as a button or link.
 - Registry ID: `creator-signal.site.catalogue.button`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.button`
 - Search tags: button, action, link, cta
@@ -1618,7 +1618,7 @@ A controlled sequence of governed content slides.
 - Registry ID: `creator-signal.site.catalogue.carousel`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.carousel`
 - Search tags: carousel, slides, gallery, featured
@@ -1664,7 +1664,7 @@ Supporting content presented from a governed viewport edge.
 - Registry ID: `creator-signal.site.catalogue.drawer`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.drawer`
 - Search tags: drawer, panel, overlay, edge
@@ -1717,7 +1717,7 @@ An inline or grouped navigation link.
 - Registry ID: `creator-signal.site.catalogue.link`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.link`
 - Search tags: link, navigation, anchor
@@ -1751,7 +1751,7 @@ A consent-delayed OpenStreetMap embed.
 - Registry ID: `creator-signal.site.catalogue.map`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.provider-embed` with preset `openstreetmap`
 - Search tags: map, openstreetmap, provider, consent
@@ -1793,7 +1793,7 @@ Focused interactive content with governed dismissal and focus.
 - Registry ID: `creator-signal.site.catalogue.dialog`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.dialog`
 - Search tags: modal, dialog, overlay, focus
@@ -1847,7 +1847,7 @@ One labelled panel inside Tabs.
 - Registry ID: `creator-signal.site.catalogue.tab-panel`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.tab-panel`
 - Search tags: tab, panel, interactive, form
@@ -1882,7 +1882,7 @@ A labelled set of progressively enhanced content panels.
 - Registry ID: `creator-signal.site.catalogue.tabs`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.tabs`
 - Search tags: tabs, panels, interactive
@@ -1931,7 +1931,7 @@ A native audio player with an accessible title and transcript link.
 - Registry ID: `creator-signal.site.catalogue.audio`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.audio`
 - Search tags: audio, media, recording, transcript
@@ -1969,7 +1969,7 @@ An ordered responsive collection of governed images.
 - Registry ID: `creator-signal.site.catalogue.gallery`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.gallery`
 - Search tags: gallery, images, collection, media
@@ -1999,7 +1999,7 @@ An image selected from the Media Library.
 - Registry ID: `creator-signal.site.catalogue.image`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.image`
 - Search tags: image, photo, media
@@ -2033,7 +2033,7 @@ Accessible hosted audio or video using one governed display definition.
 - Registry ID: `creator-signal.site.catalogue.media`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.media`
 - Search tags: media, audio, video, captions, transcript
@@ -2081,7 +2081,7 @@ An embedded PDF with a native fallback and direct download link.
 - Registry ID: `creator-signal.site.catalogue.pdf-viewer`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.pdf-viewer`
 - Search tags: pdf, document, viewer, download
@@ -2118,7 +2118,7 @@ A consent-delayed privacy-enhanced YouTube video.
 - Registry ID: `creator-signal.site.catalogue.youtube-embed`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.provider-embed` with preset `youtube`
 - Search tags: video, youtube, provider, consent
@@ -2163,7 +2163,7 @@ A consent-delayed third-party embed resolved through an approved adapter.
 - Registry ID: `creator-signal.site.catalogue.embed`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.provider-embed` with preset `provider-embed`
 - Search tags: embed, provider, iframe, consent
@@ -2209,7 +2209,7 @@ A provider-neutral form verification boundary.
 - Registry ID: `creator-signal.site.catalogue.captcha`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.provider-embed` with preset `hcaptcha`
 - Search tags: form, captcha, verification, provider
@@ -2251,7 +2251,7 @@ A form control for an independent yes/no choice.
 - Registry ID: `creator-signal.site.catalogue.checkbox`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.checkbox`
 - Search tags: form, checkbox, choice
@@ -2289,7 +2289,7 @@ A fieldset of independently selectable Checkbox controls.
 - Registry ID: `creator-signal.site.catalogue.checkbox-group`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.checkbox-group`
 - Search tags: form, checkbox, group, multiple choice
@@ -2313,7 +2313,7 @@ A calendar date.
 - Registry ID: `creator-signal.site.catalogue.date-input`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.input` with preset `date`
 - Search tags: form, field, date
@@ -2357,7 +2357,7 @@ Delete the current persistent recovery record.
 - Registry ID: `creator-signal.site.catalogue.delete-draft`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.form-draft-action` with preset `delete-draft`
 - Search tags: form, draft, delete, privacy
@@ -2397,7 +2397,7 @@ An email address.
 - Registry ID: `creator-signal.site.catalogue.email-input`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.input` with preset `email`
 - Search tags: form, field, email
@@ -2441,7 +2441,7 @@ A validation message associated with one form control.
 - Registry ID: `creator-signal.site.catalogue.form-error`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.form-message` with preset `error`
 - Search tags: form, field, error, validation
@@ -2480,7 +2480,7 @@ Persistent instructions associated with one form control.
 - Registry ID: `creator-signal.site.catalogue.form-help`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.form-message` with preset `help`
 - Search tags: form, field, help, description
@@ -2520,7 +2520,7 @@ A private, malware-scanned file upload for CMS-native forms.
 - Registry ID: `creator-signal.site.catalogue.file-attachment`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.input` with preset `private-scanned`
 - Search tags: form, file, attachment, upload, private
@@ -2567,7 +2567,7 @@ Form-aware sections composed from native Accordion items.
 - Registry ID: `creator-signal.site.catalogue.form-accordion`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.form-accordion`
 - Search tags: form, accordion, sections, validation
@@ -2597,7 +2597,7 @@ A governed layout boundary for submit and secondary actions.
 - Registry ID: `creator-signal.site.catalogue.form-actions`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.container` with preset `actions`
 - Search tags: form, actions, submit, layout
@@ -2627,7 +2627,7 @@ A CMS-native or custom form boundary.
 - Registry ID: `creator-signal.site.catalogue.form-container`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.form`
 - Search tags: form, submission, container
@@ -2667,7 +2667,7 @@ An approved internal or provider form embedded behind consent and sandbox policy
 - Registry ID: `creator-signal.site.catalogue.form-embed`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.provider-embed` with preset `provider-form`
 - Search tags: form, embed, provider, iframe
@@ -2720,7 +2720,7 @@ A governed layout boundary for one field, its label, help and error.
 - Registry ID: `creator-signal.site.catalogue.form-field-group`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.container` with preset `field-group`
 - Search tags: form, field, group, layout
@@ -2750,7 +2750,7 @@ A submission status or result message for a form.
 - Registry ID: `creator-signal.site.catalogue.form-message`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.form-message` with preset `status`
 - Search tags: form, status, error, success
@@ -2791,7 +2791,7 @@ A recoverable, progressively enhanced wizard step.
 - Registry ID: `creator-signal.site.catalogue.form-step`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.form-step`
 - Search tags: form, wizard, step, review
@@ -2819,7 +2819,7 @@ Form-aware sections using the shared Tabs keyboard and fallback contract.
 - Registry ID: `creator-signal.site.catalogue.form-tabs`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.form-tabs`
 - Search tags: form, tabs, sections, horizontal, vertical
@@ -2857,7 +2857,7 @@ A fixed or context-derived value submitted without a visible control.
 - Registry ID: `creator-signal.site.catalogue.hidden-field`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.input` with preset `hidden`
 - Search tags: form, field, hidden, metadata
@@ -2892,7 +2892,7 @@ A visible label for a form control.
 - Registry ID: `creator-signal.site.catalogue.form-label`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.label`
 - Search tags: form, label
@@ -2926,7 +2926,7 @@ Move to the next authored form step.
 - Registry ID: `creator-signal.site.catalogue.next-step`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.form-draft-action` with preset `next-step`
 - Search tags: form, wizard, next
@@ -2964,7 +2964,7 @@ A numeric value.
 - Registry ID: `creator-signal.site.catalogue.number-input`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.input` with preset `number`
 - Search tags: form, field, number
@@ -3008,7 +3008,7 @@ One selectable value inside a Select.
 - Registry ID: `creator-signal.site.catalogue.option`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.option`
 - Search tags: form, select, option
@@ -3036,7 +3036,7 @@ A labelled group of related Select options.
 - Registry ID: `creator-signal.site.catalogue.option-group`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.option-group`
 - Search tags: form, select, group
@@ -3063,7 +3063,7 @@ A titled semantic group for related form content.
 - Registry ID: `creator-signal.site.catalogue.form-panel`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.form-panel`
 - Search tags: form, panel, section, fields
@@ -3087,7 +3087,7 @@ A paired navigation action group for authored Wizard steps.
 - Registry ID: `creator-signal.site.catalogue.previous-next-actions`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.previous-next-actions`
 - Search tags: form, wizard, previous, next, actions
@@ -3117,7 +3117,7 @@ Move to the previous authored form step.
 - Registry ID: `creator-signal.site.catalogue.previous-step`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.form-draft-action` with preset `previous-step`
 - Search tags: form, wizard, previous
@@ -3155,7 +3155,7 @@ One mutually exclusive choice in a radio group.
 - Registry ID: `creator-signal.site.catalogue.radio`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.radio`
 - Search tags: form, radio, choice
@@ -3193,7 +3193,7 @@ A fieldset of mutually exclusive Radio controls sharing one name.
 - Registry ID: `creator-signal.site.catalogue.radio-group`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.radio-group`
 - Search tags: form, radio, group, single choice
@@ -3217,7 +3217,7 @@ Resets the containing form through the shared form-action module.
 - Registry ID: `creator-signal.site.catalogue.reset-button`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.submit` with preset `reset`
 - Search tags: form, reset, action, clear
@@ -3256,7 +3256,7 @@ A centrally governed form-field fragment with an explicit binding prefix.
 - Registry ID: `creator-signal.site.catalogue.reusable-form-fragment`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.reusable-form-fragment`
 - Search tags: form, fragment, reusable, fields, shared
@@ -3295,7 +3295,7 @@ Persist recoverable form progress across sessions or devices.
 - Registry ID: `creator-signal.site.catalogue.save-draft`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.form-draft-action` with preset `save-draft`
 - Search tags: form, draft, save, recovery
@@ -3335,7 +3335,7 @@ A select control containing approved options.
 - Registry ID: `creator-signal.site.catalogue.select`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.select`
 - Search tags: form, select, options
@@ -3371,7 +3371,7 @@ Submits the containing form.
 - Registry ID: `creator-signal.site.catalogue.submit`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.submit`
 - Search tags: form, submit, action
@@ -3404,7 +3404,7 @@ A review step with editable summary content and final actions.
 - Registry ID: `creator-signal.site.catalogue.form-summary-review`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.form-summary-review`
 - Search tags: form, wizard, summary, review, confirmation
@@ -3428,7 +3428,7 @@ An on/off choice backed by the canonical checkbox control.
 - Registry ID: `creator-signal.site.catalogue.switch`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.checkbox` with preset `switch`
 - Search tags: form, checkbox, switch, toggle
@@ -3472,7 +3472,7 @@ A telephone number.
 - Registry ID: `creator-signal.site.catalogue.telephone-input`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.input` with preset `tel`
 - Search tags: form, field, tel
@@ -3516,7 +3516,7 @@ Records agreement to an explicit versioned terms source.
 - Registry ID: `creator-signal.site.catalogue.terms-and-conditions`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed pattern `base.pattern.terms-and-conditions`
 - Search tags: form, terms, consent, versioned
@@ -3542,7 +3542,7 @@ A multi-line form input.
 - Registry ID: `creator-signal.site.catalogue.text-area`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.textarea`
 - Search tags: form, field, multiline
@@ -3580,7 +3580,7 @@ General short text.
 - Registry ID: `creator-signal.site.catalogue.text-input`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.input` with preset `text`
 - Search tags: form, field, text
@@ -3624,7 +3624,7 @@ A web address.
 - Registry ID: `creator-signal.site.catalogue.url-input`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.input` with preset `url`
 - Search tags: form, field, url
@@ -3668,7 +3668,7 @@ A persistent multi-step CMS-native form with review and recovery.
 - Registry ID: `creator-signal.site.catalogue.wizard`
 - Version: `1.0.0`
 - Status: stable
-- Source: built-in
+- Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed pattern `base.pattern.form-wizard`
 - Search tags: form, wizard, steps, draft, recovery

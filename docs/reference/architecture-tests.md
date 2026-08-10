@@ -6,7 +6,7 @@ Catalog of every test in `src/__tests__/architecture/`. These are structural gat
 
 ## TL;DR
 
-- 95 gate files across structural domains: SQL, JSON columns, migrations, CSS, icons, primitives, page tree, sandbox, agent, router, content storage, boundary validation, module size, AI, auth, error handling, etc.
+- 100 gate files across structural domains: SQL, JSON columns, migrations, CSS, icons, primitives, page tree, sandbox, agent, router, content storage, boundary validation, module size, AI, auth, error handling, delivery, etc.
 - Naming convention: `<topic>.test.ts` (kebab-case) or `<group>-<topic>.test.ts`. A few legacy `task<N>-*` ids remain for live invariants; new gates should use topic names.
 - Run them all: `bun test src/__tests__/architecture/`.
 - Most are **import / source scans** — they parse the files in scope and assert / reject patterns. Some are unit-style (a small in-test database, a synthesized page tree).
@@ -14,6 +14,16 @@ Catalog of every test in `src/__tests__/architecture/`. These are structural gat
 ---
 
 ## Catalog by domain
+
+### Repository delivery
+
+| Test                                          | What it enforces                                                                 |
+|-----------------------------------------------|----------------------------------------------------------------------------------|
+| `creator-signal-branch-contract.test.ts`      | CI, release ancestry checks, contributor rules, and branch docs use `creator-signal/main`; upstream refreshes use `fork-origin/main`. |
+| `release-image-security.test.ts`              | Release images, scanner inputs, action revisions, digest scans, and promotion ordering remain pinned and gated. |
+
+See [docs/reference/repository-branches.md](repository-branches.md) and
+[docs/deployment/release-workflow.md](../deployment/release-workflow.md).
 
 ### Barrel imports
 

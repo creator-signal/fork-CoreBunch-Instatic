@@ -3,9 +3,11 @@ name: CI
 on:
   pull_request:
     branches:
+      - creator-signal/main
       - main
   push:
     branches:
+      - creator-signal/main
       - main
 
 permissions:

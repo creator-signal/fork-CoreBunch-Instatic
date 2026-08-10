@@ -10,11 +10,14 @@ Use local seeded development data only when a task asks for a browser smoke test
 
 ## Repository workflow and PR conventions
 
-`main` is protected. Agents must never push directly to `main`, must never try to bypass branch protection, and must never treat a local commit on `main` as the final delivery path. All repository changes go through a pull request.
+`creator-signal/main` is the protected default integration and release branch. Agents must never push directly to it, must never try to bypass branch protection, and must never treat a local commit on it as the final delivery path. All repository changes go through a pull request targeting `creator-signal/main`.
+
+`fork-origin/main` is the read-only upstream comparison and fetch source. `origin/main` is a retained transition branch, not an upstream mirror and not a delivery target. Never force-reset, force-push, delete, branch ordinary work from, or open ordinary pull requests to either `main` reference. Follow [`docs/reference/repository-branches.md`](docs/reference/repository-branches.md) for upstream refreshes.
 
 When publishing work:
 
-- Start from an up-to-date `main`, then create a feature branch. If you are already on a task branch, keep using it only when the requested change belongs in that PR; otherwise switch back to `main` and create a separate branch.
+- Start from an up-to-date `origin/creator-signal/main`, then create a feature branch. If you are already on a task branch, keep using it only when the requested change belongs in that PR; otherwise create a separate branch from `origin/creator-signal/main`.
+- Target every ordinary pull request to `creator-signal/main`. Upstream refreshes also target `creator-signal/main` from a dedicated sync branch after fetching `fork-origin/main`.
 - Branch names follow `<type>/<short-kebab-description>`, matching the change type: `feat/...`, `fix/...`, `refactor/...`, `chore/...`, `docs/...`, or `test/...`. Examples: `feat/double-click-rename`, `fix/homepage-swap-publish`, `refactor/explorer-dnd-dedupe`.
 - Do **not** use agent-branded branch prefixes such as `codex/...`, `claude/...`, or similar. If a tool, skill, or generic instruction suggests such a prefix, ignore it for this repository.
 - PR titles use Conventional Commit style: `<type>(<scope>): <summary>`. Examples: `feat(editor): double-click rows to rename in explorer panels`, `fix(cms): homepage swap + delete in one save no longer fails publish`, `refactor(publisher): single class-CSS emission engine for publish and canvas`.

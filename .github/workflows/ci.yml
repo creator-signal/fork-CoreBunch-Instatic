@@ -3,10 +3,10 @@ name: CI
 on:
   pull_request:
     branches:
-      - main
+      - creator-signal/main
   push:
     branches:
-      - main
+      - creator-signal/main
 
 permissions:
   contents: read

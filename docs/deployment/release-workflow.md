@@ -4,8 +4,8 @@ This maintainer guide covers publishing the Creator Signal Instatic runtime,
 media-edge image, and release bundle.
 
 The source of truth is `.github/workflows/release.yml`. A release tag selects a
-commit already contained by protected `main`; publishing the tag does not
-deploy either image to a running environment.
+commit already contained by protected `creator-signal/main`; publishing the
+tag does not deploy either image to a running environment.
 
 ---
 
@@ -30,8 +30,8 @@ ghcr.io/creator-signal/instatic-media-edge:latest
 Release flow:
 
 1. Update `package.json` and `CHANGELOG.md` to the new version.
-2. Merge the release change through a pull request to protected `main`.
-3. Tag that exact `main` commit, for example `v0.0.24`.
+2. Merge the release change through a pull request to protected `creator-signal/main`.
+3. Tag that exact `creator-signal/main` commit, for example `v0.0.24`.
 4. Run the Bun build, test, and lint gates.
 5. Build each image once and push only its `sha-<commit>` candidate tag.
 6. Scan both exact candidate digests for HIGH and CRITICAL OS/library findings.
@@ -42,7 +42,8 @@ Release flow:
 
 ## Tag a release
 
-Create a tag only after the version change is merged and exact-main CI passes:
+Create a tag only after the version change is merged and exact
+`creator-signal/main` CI passes:
 
 ```sh
 git tag v0.0.24
@@ -50,7 +51,8 @@ git push origin v0.0.24
 ```
 
 The workflow rejects a tag whose semantic version differs from
-`package.json`, or whose commit is not contained by `origin/main`. Existing
+`package.json`, or whose commit is not contained by
+`origin/creator-signal/main`. Existing
 semver image tags are immutable: a retry may reuse a tag only when it already
 resolves to the exact candidate digest.
 
@@ -131,5 +133,6 @@ authorised operations.
 - `deploy/creator-signal-media-edge/go.mod` — Caddy and Go dependency selection
 - `.github/workflows/release.yml` — release job ordering and permissions
 - `src/__tests__/architecture/release-image-security.test.ts` — regression gate
+- [repository-branches.md](../reference/repository-branches.md) — branch and upstream-sync contract
 - [creator-signal-stack.md](creator-signal-stack.md) — deployment boundary
 - [docker-image.md](docker-image.md) — generic runtime image contract

@@ -20,6 +20,29 @@ only `/media/*` and proxies reads to the `instatic-creator-signal-media` MinIO
 bucket. The deployment mounts the Creator Signal private CA certificate at
 `/run/creator-signal/ca/root_ca.crt`.
 
+## Release artifact security
+
+`.github/workflows/release.yml` builds both images once under commit-addressed
+candidate tags. The workflow scans their exact registry digests for OS and
+library vulnerabilities before it creates the immutable version tag or updates
+the minor and `latest` aliases. Any HIGH or CRITICAL Trivy result blocks the
+promotion.
+
+After immutable version promotion, a separate job resolves the version tags
+back to the expected digests and scans those `repository@sha256` references
+again. Only a successful independent scan can update the minor and `latest`
+aliases. Both scan jobs retain JSON reports as 90-day workflow artifacts. The
+release bundle is created only after that published-digest scan and alias
+promotion succeed.
+
+The runtime build uses the pinned Bun build and Alpine runtime images in
+`Dockerfile`. The media edge builds the Caddy version selected in
+`deploy/creator-signal-media-edge/go.mod` with the pinned Go builder, then
+copies the binary into the pinned Alpine image declared in
+`deploy/creator-signal-media-edge/Dockerfile`. Base-image and dependency
+updates always publish a new version; existing image tags and release bundles
+are never rebuilt in place.
+
 Production uses mounted files for sensitive values:
 
 | Setting | Purpose |
@@ -110,3 +133,4 @@ Do not activate the apex or `www` routes until all of these pass:
 - `server/media/minioStorageAdapter.ts`
 - `server/config.ts`
 - `src/__tests__/server/serverConfig.test.ts`
+- `src/__tests__/architecture/release-image-security.test.ts`

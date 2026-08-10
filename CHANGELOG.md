@@ -6,6 +6,21 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.24 - 2026-08-10
+
+### Release image security
+
+- Moved the production runtime to a patched, digest-pinned Alpine Bun image and
+  updated `brace-expansion`, `nanoid`, and `ws` to fixed versions.
+- Rebuilt the media edge from Caddy 2.11.4 with Go 1.26.5 and fixed `x/text`
+  and gRPC dependencies, then copied it into a patched minimal Alpine runtime
+  without curl.
+- Added mandatory zero-HIGH/CRITICAL Trivy gates for both commit-addressed
+  candidates and independently resolved published digests before release
+  bundle creation.
+- Pinned every third-party action in the privileged release workflow to an
+  immutable commit and retained complete scan reports as release evidence.
+
 ## 0.0.23 - 2026-08-10
 
 ### Creator Signal catalogue ownership

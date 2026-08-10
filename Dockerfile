@@ -1,6 +1,14 @@
 # syntax=docker/dockerfile:1
 
-FROM oven/bun:1.3.11 AS build
+ARG BUN_BUILD_IMAGE=oven/bun:1.3.11-slim@sha256:478281fdd196871c7e51ba6a820b7803a8ae97042ec86cdbc2e1c6b6626442d9
+ARG BUN_RUNTIME_IMAGE=oven/bun:1.3.11-alpine@sha256:7ed9f74c326d1c260abe247ac423ccbf5ac92af62bb442d515d1f92f21e8ea9b
+
+FROM ${BUN_BUILD_IMAGE} AS base
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+FROM base AS build
 WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends zip \
@@ -15,14 +23,16 @@ RUN bun run build
 RUN bun run instatic-plugin build integrations/creator-signal
 RUN bun run instatic-plugin build integrations/component-showcase
 
-FROM oven/bun:1.3.11 AS production-deps
+FROM base AS production-deps
 WORKDIR /app
 COPY package.json bun.lock ./
 COPY vendor ./vendor
 RUN bun install --frozen-lockfile --production
 
-FROM oven/bun:1.3.11 AS runtime
+FROM ${BUN_RUNTIME_IMAGE} AS runtime
 WORKDIR /app
+
+RUN apk upgrade --no-cache
 
 ARG INSTATIC_VERSION=dev
 ARG INSTATIC_REVISION=unknown

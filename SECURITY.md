@@ -11,7 +11,7 @@ Security fixes target the latest `main` branch and the latest tagged release. Be
 Use GitHub's private vulnerability reporting for this repository:
 
 ```txt
-https://github.com/corebunch/instatic/security/advisories/new
+https://github.com/creator-signal/fork-CoreBunch-Instatic/security/advisories/new
 ```
 
 If private vulnerability reporting is unavailable, open a minimal public issue asking for a private reporting channel. Do not include exploit details, secret material, vulnerable URLs, or proof-of-concept payloads in that public issue.

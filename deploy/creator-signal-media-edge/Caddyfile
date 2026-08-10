@@ -1,28 +1,28 @@
 {
-  admin off
-  auto_https off
+	admin off
+	auto_https off
 }
 
 :8080 {
-  log {
-    output stdout
-    format json
-  }
+	log {
+		output stdout
+		format json
+	}
 
-  @health path /healthz
-  respond @health 200
+	@health path /healthz
+	respond @health 200
 
-  @media path_regexp media ^/media/(.*)$
-  handle @media {
-    rewrite * /instatic-creator-signal-media/{re.media.1}
-    reverse_proxy https://objects.creatorsignal.me:14100 {
-      transport http {
-        tls
-        tls_server_name objects.creatorsignal.me
-        tls_trust_pool file /run/creator-signal/ca/root_ca.crt
-      }
-    }
-  }
+	@media path_regexp media ^/media/(.*)$
+	handle @media {
+		rewrite * /instatic-creator-signal-media/{re.media.1}
+		reverse_proxy https://objects.creatorsignal.me:14100 {
+			transport http {
+				tls
+				tls_server_name objects.creatorsignal.me
+				tls_trust_pool file /run/creator-signal/ca/root_ca.crt
+			}
+		}
+	}
 
-  respond 404
+	respond 404
 }

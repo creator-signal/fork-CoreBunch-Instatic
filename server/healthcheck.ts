@@ -2,7 +2,7 @@
  * Container healthcheck — used by both the Dockerfile HEALTHCHECK and
  * compose.prod.yml's `healthcheck:` block.
  *
- * The base oven/bun image is slim and ships neither `curl` nor `wget`, so we
+ * The runtime Bun image intentionally ships neither `curl` nor `wget`, so we
  * use Bun's built-in fetch instead. Extracting this into a small script keeps
  * the YAML/Dockerfile readable (no JSON-escaped JS one-liners) and makes the
  * healthcheck logic discoverable in the codebase.

@@ -27,7 +27,8 @@ request.
 | `<type>/<short-kebab-description>` | Contributor | One Issue-scoped change | Contributor pushes, then PR |
 
 `AGENTS.md` defines the contributor rules. `.github/workflows/ci.yml` runs CI
-for pull requests and pushes on `creator-signal/main`.
+for pull requests and pushes on `creator-signal/main`. It also monitors the
+retained `main` branch so accidental activity cannot bypass CI.
 `.github/workflows/release.yml` rejects release tags whose commit is not an
 ancestor of `origin/creator-signal/main`.
 

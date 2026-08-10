@@ -24,9 +24,9 @@ describe('Creator Signal repository branch contract', () => {
   const agentRules = read('AGENTS.md')
   const branchDocs = read('docs/reference/repository-branches.md')
 
-  it('runs ordinary CI only for the Creator Signal integration branch', () => {
-    expect(ci.on.pull_request.branches).toEqual(['creator-signal/main'])
-    expect(ci.on.push.branches).toEqual(['creator-signal/main'])
+  it('runs ordinary CI for Creator Signal main and monitors the retained branch', () => {
+    expect(ci.on.pull_request.branches).toEqual(['creator-signal/main', 'main'])
+    expect(ci.on.push.branches).toEqual(['creator-signal/main', 'main'])
   })
 
   it('accepts release tags only from Creator Signal main', () => {

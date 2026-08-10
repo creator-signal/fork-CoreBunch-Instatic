@@ -1,150 +1,135 @@
 # Release Workflow
 
-This maintainer guide covers publishing Instatic Docker images.
+This maintainer guide covers publishing the Creator Signal Instatic runtime,
+media-edge image, and release bundle.
 
-End users do not need this page to deploy Instatic. They follow [railway.md](railway.md), [render.md](render.md), [vps.md](vps.md), or [docker-image.md](docker-image.md). Maintainers use this page to keep `ghcr.io/corebunch/instatic` release tags aligned with source tags and deployment templates.
+The source of truth is `.github/workflows/release.yml`. A release tag selects a
+commit already contained by protected `main`; publishing the tag does not
+deploy either image to a running environment.
 
 ---
 
 ## TL;DR
 
-Release image tags:
+The workflow publishes the same accepted digest under these runtime tags:
 
 ```txt
-ghcr.io/corebunch/instatic:latest
-ghcr.io/corebunch/instatic:<semver>
-ghcr.io/corebunch/instatic:<major>.<minor>
+ghcr.io/creator-signal/fork-corebunch-instatic:<semver>
+ghcr.io/creator-signal/fork-corebunch-instatic:<major>.<minor>
+ghcr.io/creator-signal/fork-corebunch-instatic:latest
+```
+
+It publishes matching tags for the media edge:
+
+```txt
+ghcr.io/creator-signal/instatic-media-edge:<semver>
+ghcr.io/creator-signal/instatic-media-edge:<major>.<minor>
+ghcr.io/creator-signal/instatic-media-edge:latest
 ```
 
 Release flow:
 
-1. Keep `main` releasable.
-2. Update deployment docs that intentionally pin the semver image tag.
-3. Tag a version, e.g. `v0.0.1`.
-4. GitHub Actions runs `bun run build`, `bun test`, and `bun run lint`.
-5. GitHub Actions builds `Dockerfile`.
-6. GitHub Actions pushes the semver image, minor image, and `latest` to GHCR.
-7. GitHub Actions creates the GitHub Release and uploads the release bundle.
+1. Update `package.json` and `CHANGELOG.md` to the new version.
+2. Merge the release change through a pull request to protected `main`.
+3. Tag that exact `main` commit, for example `v0.0.24`.
+4. Run the Bun build, test, and lint gates.
+5. Build each image once and push only its `sha-<commit>` candidate tag.
+6. Scan both exact candidate digests for HIGH and CRITICAL OS/library findings.
+7. Apply the immutable semver tag to those accepted digests.
+8. Resolve and scan both published digests again in a separate job.
+9. Update the minor and `latest` aliases only after that independent scan passes.
+10. Create the GitHub Release and upload the release bundle and site plugin.
 
-## Pre-Tag Template Updates
+## Tag a release
 
-Before tagging a release, update the package/changelog version and every checked-in deployment surface that intentionally pins the release image:
-
-```txt
-package.json
-CHANGELOG.md
-docs/deployment/README.md
-docs/deployment/docker-image.md
-docs/deployment/railway.md
-```
-
-The checked-in Render Blueprints use `ghcr.io/corebunch/instatic:latest` for new one-click installs. `scripts/build-release-bundle.ts` rewrites the release-bundle copies to the semver image tag automatically.
-
-After the release image is published, copy the two Render Blueprint files into the dedicated template repositories as their root `render.yaml` files when their non-versioned template configuration changes:
-
-```txt
-corebunch/instatic-render-sqlite
-corebunch/instatic-render-postgres
-```
-
-## Tag A Release
+Create a tag only after the version change is merged and exact-main CI passes:
 
 ```sh
-git tag v0.0.1
-git push origin v0.0.1
+git tag v0.0.24
+git push origin v0.0.24
 ```
 
-The release workflow publishes:
+The workflow rejects a tag whose semantic version differs from
+`package.json`, or whose commit is not contained by `origin/main`. Existing
+semver image tags are immutable: a retry may reuse a tag only when it already
+resolves to the exact candidate digest.
+
+## Image security gate
+
+`Dockerfile` pins separate Bun build and Alpine runtime images by digest and
+refreshes their installed OS packages. The runtime image contains production
+dependencies only.
+
+`deploy/creator-signal-media-edge/Dockerfile` builds the Caddy release selected
+by `deploy/creator-signal-media-edge/go.mod` with pinned Go dependencies, then
+copies the static binary into a pinned Alpine runtime. The media image does not
+install curl or build tooling.
+
+The release workflow runs the digest-pinned Trivy image with:
 
 ```txt
-ghcr.io/corebunch/instatic:0.0.1
-ghcr.io/corebunch/instatic:0.0
-ghcr.io/corebunch/instatic:latest
+--scanners vuln
+--severity HIGH,CRITICAL
+--exit-code 1
 ```
 
-It also uploads:
+The first gate scans the commit-addressed candidate digests before semver or
+rolling tags exist. The independent gate then verifies that the semver tags
+resolve to those same digests and scans the `repository@sha256` references on
+a separate runner. Only then can the workflow move the minor and `latest`
+aliases. Both scan jobs retain full JSON reports for 90 days. The release
+bundle job cannot run until the independent scan and alias promotion succeed.
 
-```txt
-instatic-0.0.1-release-bundle.tar.gz
+Private Admin source-map publication remains conditional on its protected
+monitoring configuration. A missing optional source-map setting produces a
+workflow notice; it does not weaken or skip either image scan.
+
+## Local candidate verification
+
+Run repository verification with the pinned Bun version:
+
+```sh
+bun install --frozen-lockfile
+bun run build
+bun test
+bun run lint
 ```
 
-Release notes should link to:
+Build both images from the same checkout:
 
-- [railway.md](railway.md)
-- [render.md](render.md)
-- [vps.md](vps.md)
-- [docker-image.md](docker-image.md)
-- [backup-restore.md](backup-restore.md)
+```sh
+docker build -t creator-signal-instatic:candidate .
+docker build \
+  -f deploy/creator-signal-media-edge/Dockerfile \
+  -t creator-signal-instatic-media-edge:candidate \
+  .
+```
 
-## Operator Update Command
+Scan the locally built images with the exact scanner reference declared by
+`TRIVY_IMAGE` in `.github/workflows/release.yml`. A valid candidate produces no
+HIGH or CRITICAL rows for either image.
 
-Image-based VPS Compose installs update the app container without touching DB/uploads volumes:
+## Operator update command
+
+Digest-pinned deployments update their image selection separately from this
+publication workflow. After that reviewed configuration change, Compose pulls
+and recreates the application without removing database or upload volumes:
 
 ```sh
 docker compose -f compose.prod.yml pull app
 docker compose -f compose.prod.yml up -d
 ```
 
-SQLite installs include the SQLite override when running commands:
-
-```sh
-docker compose -f compose.prod.yml -f compose.sqlite.yml pull app
-docker compose -f compose.prod.yml -f compose.sqlite.yml up -d
-```
-
-Railway installs should use Docker image source and Railway Image Auto Updates rather than connecting to this GitHub repository as a service source.
-
-Render installs use image-backed Blueprints. Operators upgrade by changing the image tag in their Render service or by redeploying from an updated template repository.
-
-## Source Build Testing
-
-When testing a release candidate before publishing GHCR images, build from a source checkout:
-
-```sh
-docker compose -f compose.prod.yml -f compose.build.yml up -d --build
-```
-
-Or build and tag an image manually:
-
-```sh
-docker build -t ghcr.io/corebunch/instatic:dev .
-INSTATIC_IMAGE=ghcr.io/corebunch/instatic:dev docker compose -f compose.prod.yml up -d
-```
-
-## GitHub Actions Shape
-
-The release workflow should:
-
-- run tests and build checks
-- log in to GitHub Container Registry with `GITHUB_TOKEN`
-- build `Dockerfile` for `linux/amd64`
-- push a semver tag for `v*` tags
-- push `latest` for tagged releases
-- create a release bundle with the Compose files and deployment docs
-- include the Render Blueprint templates in the release bundle
-
-The first release targets `linux/amd64` because QEMU-based arm64 publishing made the tagged workflow too slow to use as a release gate. Add arm64 as a separate native-runner build before advertising multi-arch images.
-
-## Image Registry
-
-GHCR (`ghcr.io/corebunch/instatic`) is the only published registry. It is produced directly by the release workflow, is public, and has no aggressive anonymous pull-rate limits — use it in every Compose file, template, and deployment guide. There is no Docker Hub mirror; if one is ever wanted, add a `Mirror To Docker Hub` job plus `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` repository secrets.
-
-## GHCR Visibility
-
-After the first successful tagged release, open the package page for `ghcr.io/corebunch/instatic` in GitHub Packages and set visibility to public.
-
-Verify anonymous pulls work:
-
-```sh
-docker logout ghcr.io
-docker pull ghcr.io/corebunch/instatic:latest
-```
+SQLite installs include `compose.sqlite.yml` in both commands. Production
+promotion, provider changes, routing, and deployment remain separately
+authorised operations.
 
 ## Related
 
-- [deployment/README.md](README.md) — deployment overview
-- [docker-image.md](docker-image.md) — runtime image contract
-- [render.md](render.md) — Render Blueprint contract
-- `Dockerfile` — image build
-- `compose.prod.yml` — production image consumer
-- `docs/deployment/render/sqlite/render.yaml`, `docs/deployment/render/postgres/render.yaml` — Render Blueprint templates
+- `Dockerfile` — runtime build and base-image contract
+- `deploy/creator-signal-media-edge/Dockerfile` — media-edge build contract
+- `deploy/creator-signal-media-edge/go.mod` — Caddy and Go dependency selection
+- `.github/workflows/release.yml` — release job ordering and permissions
+- `src/__tests__/architecture/release-image-security.test.ts` — regression gate
+- [creator-signal-stack.md](creator-signal-stack.md) — deployment boundary
+- [docker-image.md](docker-image.md) — generic runtime image contract

@@ -1,14 +1,35 @@
-ARG CADDY_IMAGE=caddy:2.11.4-alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648
-FROM ${CADDY_IMAGE}
+ARG GO_IMAGE=golang:1.26.5-alpine3.23@sha256:622e56dbc11a8cfe87cafa2331e9a201877271cbff918af53d3be315f3da88cc
+ARG ALPINE_IMAGE=alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
+
+FROM ${GO_IMAGE} AS build
+WORKDIR /src
+
+COPY deploy/creator-signal-media-edge/go.mod deploy/creator-signal-media-edge/go.sum ./
+RUN go mod download
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -trimpath \
+    -ldflags="-s -w -X github.com/caddyserver/caddy/v2.CustomVersion=v2.11.4-creator-signal.1" \
+    -o /out/caddy \
+    github.com/caddyserver/caddy/v2/cmd/caddy
+
+FROM ${ALPINE_IMAGE}
 
 LABEL org.opencontainers.image.title="Creator Signal Instatic media edge"
 LABEL org.opencontainers.image.description="Read-only media route from Creator Signal Instatic to its MinIO bucket."
 LABEL org.opencontainers.image.source="https://github.com/creator-signal/fork-CoreBunch-Instatic"
 
-COPY deploy/creator-signal-media-edge/Caddyfile /etc/caddy/Caddyfile
+RUN apk upgrade --no-cache \
+    && apk add --no-cache ca-certificates \
+    && mkdir -p /config /data /etc/caddy /srv
 
-USER root
-RUN setcap -r /usr/bin/caddy
+ENV XDG_CONFIG_HOME=/config
+ENV XDG_DATA_HOME=/data
+
+WORKDIR /srv
+COPY --from=build /out/caddy /usr/bin/caddy
+COPY deploy/creator-signal-media-edge/Caddyfile /etc/caddy/Caddyfile
 
 USER 1000:1000
 EXPOSE 8080
+
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]

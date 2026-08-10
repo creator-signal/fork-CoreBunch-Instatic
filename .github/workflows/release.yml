@@ -6,8 +6,8 @@ on:
       - 'v*.*.*'
 
 permissions:
-  contents: write
-  packages: write
+  contents: read
+  packages: read
 
 jobs:
   verify:
@@ -15,10 +15,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Require the release commit on protected main
+        run: |
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
 
       - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: 1.3.11
 
@@ -35,78 +42,303 @@ jobs:
         run: bun run lint
 
   image:
-    name: Publish GHCR Image
+    name: Build and scan immutable candidates
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     needs:
       - verify
       - source-maps
+    permissions:
+      contents: read
+      packages: write
     outputs:
       version: ${{ steps.version.outputs.version }}
+      runtime_digest: ${{ steps.runtime-image.outputs.digest }}
+      media_digest: ${{ steps.media-image.outputs.digest }}
+    env:
+      TRIVY_IMAGE: aquasec/trivy:0.73.0@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Resolve release version
         id: version
         shell: bash
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
+          test "$VERSION" = "$(jq -r '.version' package.json)"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/creator-signal/fork-corebunch-instatic
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest
-
-      - name: Extract media edge Docker metadata
-        id: media-meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/creator-signal/instatic-media-edge
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest
-
-      - name: Build and push image
-        uses: docker/build-push-action@v6
+      - name: Build and push runtime candidate
+        id: runtime-image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
           platforms: linux/amd64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ghcr.io/creator-signal/fork-corebunch-instatic:sha-${{ github.sha }}
           build-args: |
             INSTATIC_VERSION=${{ steps.version.outputs.version }}
             INSTATIC_REVISION=${{ github.sha }}
             INSTATIC_CREATED=${{ steps.version.outputs.created }}
 
-      - name: Build and push media edge image
-        uses: docker/build-push-action@v6
+      - name: Build and push media edge candidate
+        id: media-image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
           file: deploy/creator-signal-media-edge/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ steps.media-meta.outputs.tags }}
-          labels: ${{ steps.media-meta.outputs.labels }}
+          tags: ghcr.io/creator-signal/instatic-media-edge:sha-${{ github.sha }}
+
+      - name: Scan both candidate digests
+        shell: bash
+        env:
+          RUNTIME_DIGEST: ${{ steps.runtime-image.outputs.digest }}
+          MEDIA_DIGEST: ${{ steps.media-image.outputs.digest }}
+        run: |
+          mkdir -p scan-reports .trivy-cache
+          runtime_ref="ghcr.io/creator-signal/fork-corebunch-instatic@${RUNTIME_DIGEST}"
+          media_ref="ghcr.io/creator-signal/instatic-media-edge@${MEDIA_DIGEST}"
+          docker pull "$runtime_ref"
+          docker pull "$media_ref"
+
+          scan_image() {
+            local name="$1"
+            local ref="$2"
+            local report_status
+            local gate_status
+            docker run --rm \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              -v "$PWD/.trivy-cache:/root/.cache/trivy" \
+              -v "$PWD/scan-reports:/reports" \
+              "$TRIVY_IMAGE" image \
+              --scanners vuln \
+              --severity HIGH,CRITICAL \
+              --format json \
+              --output "/reports/${name}.json" \
+              "$ref"
+            report_status=$?
+            docker run --rm \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              -v "$PWD/.trivy-cache:/root/.cache/trivy" \
+              "$TRIVY_IMAGE" image \
+              --scanners vuln \
+              --severity HIGH,CRITICAL \
+              --exit-code 1 \
+              "$ref"
+            gate_status=$?
+            test "$report_status" -eq 0 && test "$gate_status" -eq 0
+          }
+
+          set +e
+          scan_image runtime "$runtime_ref"
+          runtime_status=$?
+          scan_image media-edge "$media_ref"
+          media_status=$?
+          set -e
+          test "$runtime_status" -eq 0
+          test "$media_status" -eq 0
+
+      - name: Upload candidate scan evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: candidate-image-trivy-reports
+          path: scan-reports
+          if-no-files-found: warn
+          retention-days: 90
+
+  promote-images:
+    name: Publish immutable version tags
+    runs-on: ubuntu-latest
+    needs: image
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Apply immutable version tags
+        shell: bash
+        env:
+          VERSION: ${{ needs.image.outputs.version }}
+          RUNTIME_DIGEST: ${{ needs.image.outputs.runtime_digest }}
+          MEDIA_DIGEST: ${{ needs.image.outputs.media_digest }}
+        run: |
+          promote_image() {
+            local repository="$1"
+            local digest="$2"
+            local existing
+            existing="$(docker buildx imagetools inspect \
+              "${repository}:${VERSION}" \
+              --format '{{.Manifest.Digest}}' 2>/dev/null || true)"
+            if [ -n "$existing" ]; then
+              test "$existing" = "$digest"
+            else
+              docker buildx imagetools create \
+                --tag "${repository}:${VERSION}" \
+                "${repository}@${digest}"
+            fi
+          }
+
+          promote_image \
+            ghcr.io/creator-signal/fork-corebunch-instatic \
+            "$RUNTIME_DIGEST"
+          promote_image \
+            ghcr.io/creator-signal/instatic-media-edge \
+            "$MEDIA_DIGEST"
+
+  published-scan:
+    name: Independently scan published digests
+    runs-on: ubuntu-latest
+    needs:
+      - image
+      - promote-images
+    permissions:
+      contents: read
+      packages: read
+    env:
+      TRIVY_IMAGE: aquasec/trivy:0.73.0@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Verify tags and scan exact published digests
+        shell: bash
+        env:
+          VERSION: ${{ needs.image.outputs.version }}
+          RUNTIME_DIGEST: ${{ needs.image.outputs.runtime_digest }}
+          MEDIA_DIGEST: ${{ needs.image.outputs.media_digest }}
+        run: |
+          mkdir -p scan-reports .trivy-cache
+          runtime_repository=ghcr.io/creator-signal/fork-corebunch-instatic
+          media_repository=ghcr.io/creator-signal/instatic-media-edge
+          test "$(docker buildx imagetools inspect \
+            "${runtime_repository}:${VERSION}" \
+            --format '{{.Manifest.Digest}}')" = "$RUNTIME_DIGEST"
+          test "$(docker buildx imagetools inspect \
+            "${media_repository}:${VERSION}" \
+            --format '{{.Manifest.Digest}}')" = "$MEDIA_DIGEST"
+
+          scan_published() {
+            local name="$1"
+            local ref="$2"
+            local report_status
+            local gate_status
+            docker pull "$ref"
+            docker run --rm \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              -v "$PWD/.trivy-cache:/root/.cache/trivy" \
+              -v "$PWD/scan-reports:/reports" \
+              "$TRIVY_IMAGE" image \
+              --scanners vuln \
+              --severity HIGH,CRITICAL \
+              --format json \
+              --output "/reports/${name}.json" \
+              "$ref"
+            report_status=$?
+            docker run --rm \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              -v "$PWD/.trivy-cache:/root/.cache/trivy" \
+              "$TRIVY_IMAGE" image \
+              --scanners vuln \
+              --severity HIGH,CRITICAL \
+              --exit-code 1 \
+              "$ref"
+            gate_status=$?
+            test "$report_status" -eq 0 && test "$gate_status" -eq 0
+          }
+
+          set +e
+          scan_published runtime "${runtime_repository}@${RUNTIME_DIGEST}"
+          runtime_status=$?
+          scan_published media-edge "${media_repository}@${MEDIA_DIGEST}"
+          media_status=$?
+          set -e
+          test "$runtime_status" -eq 0
+          test "$media_status" -eq 0
+
+      - name: Upload published digest scan evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: published-image-trivy-reports
+          path: scan-reports
+          if-no-files-found: warn
+          retention-days: 90
+
+  promote-aliases:
+    name: Update accepted rolling aliases
+    runs-on: ubuntu-latest
+    needs:
+      - image
+      - published-scan
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Apply rolling aliases to independently scanned digests
+        shell: bash
+        env:
+          VERSION: ${{ needs.image.outputs.version }}
+          RUNTIME_DIGEST: ${{ needs.image.outputs.runtime_digest }}
+          MEDIA_DIGEST: ${{ needs.image.outputs.media_digest }}
+        run: |
+          minor="${VERSION%.*}"
+
+          promote_aliases() {
+            local repository="$1"
+            local digest="$2"
+            docker buildx imagetools create \
+              --tag "${repository}:${minor}" \
+              --tag "${repository}:latest" \
+              "${repository}@${digest}"
+          }
+
+          promote_aliases \
+            ghcr.io/creator-signal/fork-corebunch-instatic \
+            "$RUNTIME_DIGEST"
+          promote_aliases \
+            ghcr.io/creator-signal/instatic-media-edge \
+            "$MEDIA_DIGEST"
 
   source-maps:
     name: Upload private Admin source maps
@@ -121,7 +353,7 @@ jobs:
       SENTRY_RELEASE: ${{ github.sha }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Resolve private source-map upload
         id: source-map-config
@@ -142,7 +374,7 @@ jobs:
 
       - name: Set up Bun
         if: steps.source-map-config.outputs.enabled == 'true'
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: 1.3.11
 
@@ -181,12 +413,17 @@ jobs:
     needs:
       - verify
       - image
+      - published-scan
+      - promote-aliases
+    permissions:
+      contents: write
+      packages: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: 1.3.11
 

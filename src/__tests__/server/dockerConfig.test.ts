@@ -22,9 +22,16 @@ describe('self-host docker config', () => {
   it('defines a production Docker image that builds assets before runtime startup', () => {
     const dockerfile = readFileSync('Dockerfile', 'utf8')
 
-    expect(dockerfile).toContain('FROM oven/bun:1.3.11 AS build')
+    expect(dockerfile).toMatch(
+      /ARG BUN_BUILD_IMAGE=oven\/bun:1\.3\.11-slim@sha256:[0-9a-f]{64}/,
+    )
+    expect(dockerfile).toContain('FROM ${BUN_BUILD_IMAGE} AS base')
+    expect(dockerfile).toContain('FROM base AS build')
     expect(dockerfile).toContain('RUN bun run build')
-    expect(dockerfile).toContain('FROM oven/bun:1.3.11 AS runtime')
+    expect(dockerfile).toMatch(
+      /ARG BUN_RUNTIME_IMAGE=oven\/bun:1\.3\.11-alpine@sha256:[0-9a-f]{64}/,
+    )
+    expect(dockerfile).toContain('FROM ${BUN_RUNTIME_IMAGE} AS runtime')
     expect(dockerfile).toContain('ARG INSTATIC_VERSION=dev')
     expect(dockerfile).toContain('LABEL org.opencontainers.image.version="${INSTATIC_VERSION}"')
     expect(dockerfile).toContain('CMD ["bun", "run", "server/index.ts"]')

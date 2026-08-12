@@ -2,6 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import '@modules/base'
 import creatorSignalPlugin from '../../../integrations/creator-signal/instatic-plugin.config'
 import { creatorSignalHeroEntry } from '../../../integrations/creator-signal/component-library'
+import mauticForm from '../../../integrations/creator-signal/modules/mautic-form'
 import { pack } from '../../../integrations/creator-signal/pack/site'
 
 describe('Creator Signal site pack', () => {
@@ -13,6 +14,11 @@ describe('Creator Signal site pack', () => {
       'features',
       'pricing',
       'contact',
+      'feedback',
+      'wishlist',
+      'ask-a-question',
+      'feature-request',
+      'report-an-error',
       'legal/privacy',
       'legal/terms',
       'legal/billing',
@@ -29,7 +35,7 @@ describe('Creator Signal site pack', () => {
   })
 
   it('injects the Creator Signal favicon and PWA manifest into published pages', () => {
-    expect(creatorSignalPlugin.manifest.version).toBe('0.1.10')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.1.11')
     expect(creatorSignalPlugin.manifest.frontend?.assets).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -78,17 +84,47 @@ describe('Creator Signal site pack', () => {
     }
   })
 
-  it('turns the contact placeholder into the configurable Mautic module', () => {
-    const contact = pack.pages.find((page) => page.slug === 'contact')
-    const formNode = Object.values(contact?.nodes ?? {}).find(
-      (node) => node.moduleId === 'creator-signal.site.mautic-form',
-    )
+  it('turns every public intake placeholder into an alias-resolved Mautic module', () => {
+    const forms = [
+      ['contact', 'creator_signal_contact'],
+      ['feedback', 'creator_signal_feedback'],
+      ['wishlist', 'creator_signal_wishlist'],
+      ['ask-a-question', 'creator_signal_question'],
+      ['feature-request', 'creator_signal_feature_request'],
+      ['report-an-error', 'creator_signal_error_report'],
+    ]
 
-    expect(formNode?.props).toMatchObject({
-      mauticBaseUrl: 'https://marketing.creatorsignal.me',
-      formApiName: 'creatorsignalcontactenquiry',
-      formCode: 'creator_signal_contact',
-    })
+    for (const [slug, alias] of forms) {
+      const page = pack.pages.find((candidate) => candidate.slug === slug)
+      const formNode = Object.values(page?.nodes ?? {}).find(
+        (node) => node.moduleId === 'creator-signal.site.mautic-form',
+      )
+      expect(formNode?.props).toMatchObject({
+        mauticBaseUrl: 'https://marketing.creatorsignal.me',
+        formAlias: alias,
+        registryPath: '/media/creator-signal/forms-v1.js',
+        formCode: alias,
+      })
+      expect(formNode?.props).not.toHaveProperty('formId')
+      expect(formNode?.props).not.toHaveProperty('formApiName')
+    }
+  })
+
+  it('loads only governed Mautic registry entries and rejects missing generated markup', () => {
+    const output = mauticForm.render(mauticForm.defaults, [])
+
+    expect(output.html).toContain('data-form-alias="creator_signal_contact"')
+    expect(output.html).toContain('data-registry-path="/media/creator-signal/forms-v1.js"')
+    expect(output.html).not.toContain('data-form-id=')
+    expect(output.html).not.toContain('data-form-api-name=')
+    expect(output.js).toContain("registry.schema !== 'creator-signal.mautic-forms/v1'")
+    expect(output.js).toContain("new Error('form_markup_missing')")
+    expect(output.js).toContain("dispatch(root, 'failure', 'registry_invalid')")
+    expect(output.cspSources).toEqual([
+      { directive: 'script-src', sources: ['https://marketing.creatorsignal.me'] },
+      { directive: 'connect-src', sources: ['https://marketing.creatorsignal.me'] },
+      { directive: 'form-action', sources: ['https://marketing.creatorsignal.me'] },
+    ])
   })
 
   it('offers the shared author layouts used across the launch pages', () => {

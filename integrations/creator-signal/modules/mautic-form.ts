@@ -3,18 +3,44 @@ import { control, defineModule, html, safeUrl } from '@core/plugin-sdk'
 const runtime = String.raw`(() => {
   const selector = '[data-cs-mautic-form]';
   const loaded = new Map();
-  const loadScript = (src, key) => {
-    if (loaded.has(key)) return loaded.get(key);
+  const loadScript = (src, key, parent = document.head, cache = true) => {
+    if (cache && loaded.has(key)) return loaded.get(key);
     const pending = new Promise((resolve, reject) => {
       const script = document.createElement('script');
       script.src = src;
       script.async = true;
       script.onload = resolve;
       script.onerror = () => reject(new Error('script_load_failed'));
-      document.head.appendChild(script);
+      parent.appendChild(script);
     });
-    loaded.set(key, pending);
+    if (cache) loaded.set(key, pending);
     return pending;
+  };
+  const formEntry = (alias) => {
+    const registry = window.CreatorSignalMauticForms;
+    if (!registry || registry.schema !== 'creator-signal.mautic-forms/v1' || !registry.forms) return null;
+    const entry = registry.forms[alias];
+    if (!entry || !Number.isInteger(entry.id) || entry.id < 1 ||
+      !/^[a-zA-Z0-9_-]+$/.test(String(entry.apiName || '')) || entry.code !== alias) return null;
+    if (entry.consentTimestampField !== undefined &&
+      !/^[a-zA-Z0-9_-]+$/.test(String(entry.consentTimestampField))) return null;
+    return entry;
+  };
+  const waitForForm = (target) => {
+    if (target.querySelector('form')) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const observer = new MutationObserver(() => {
+        if (!target.querySelector('form')) return;
+        observer.disconnect();
+        clearTimeout(timeout);
+        resolve();
+      });
+      const timeout = setTimeout(() => {
+        observer.disconnect();
+        reject(new Error('form_markup_missing'));
+      }, 5000);
+      observer.observe(target, { childList: true, subtree: true });
+    });
   };
   const dispatch = (root, result, safeErrorCode) => {
     document.dispatchEvent(new CustomEvent('creator-signal:form-result', {
@@ -31,15 +57,32 @@ const runtime = String.raw`(() => {
     if (root.dataset.mounted === 'true') return;
     root.dataset.mounted = 'true';
     const base = String(root.dataset.baseUrl || '').replace(/\/+$/, '');
-    const formId = String(root.dataset.formId || '');
-    const apiName = String(root.dataset.formApiName || '');
+    const alias = String(root.dataset.formAlias || '');
+    const registryPath = String(root.dataset.registryPath || '');
     const status = root.querySelector('[data-form-status]');
     const target = root.querySelector('[data-form-mount]');
-    if (!/^https:\/\//.test(base) || !/^\d+$/.test(formId) || !/^[a-zA-Z0-9_-]+$/.test(apiName) || !target) {
+    if (!/^https:\/\//.test(base) || !/^[a-zA-Z0-9_-]+$/.test(alias) ||
+      !/^\/[a-zA-Z0-9_./-]+\.js$/.test(registryPath) || registryPath.includes('..') || !target) {
       if (status) status.textContent = 'This form is not configured yet.';
       dispatch(root, 'failure', 'invalid_configuration');
       return;
     }
+    try {
+      if (status) status.textContent = 'Loading form…';
+      await loadScript(base + registryPath, 'mautic-registry:' + base + ':' + registryPath);
+    } catch {
+      if (status) status.textContent = 'The form is temporarily unavailable.';
+      dispatch(root, 'failure', 'registry_load_failed');
+      return;
+    }
+    const entry = formEntry(alias);
+    if (!entry) {
+      if (status) status.textContent = 'The form is temporarily unavailable.';
+      dispatch(root, 'failure', 'registry_invalid');
+      return;
+    }
+    const formId = String(entry.id);
+    const apiName = String(entry.apiName);
     window.MauticFormCallback = window.MauticFormCallback || {};
     window.MauticFormCallback[apiName] = {
       onResponse(response) {
@@ -56,13 +99,25 @@ const runtime = String.raw`(() => {
       },
     };
     try {
-      if (status) status.textContent = 'Loading form…';
       await loadScript(base + '/media/js/mautic-form.js', 'mautic-runtime:' + base);
-      await loadScript(base + '/form/generate.js?id=' + encodeURIComponent(formId), 'mautic-form:' + base + ':' + formId);
+      window.MauticSDKLoaded = true;
+      await loadScript(
+        base + '/form/generate.js?id=' + encodeURIComponent(formId),
+        'mautic-form:' + base + ':' + formId,
+        target,
+        false,
+      );
+      await waitForForm(target);
+      if (entry.consentTimestampField) {
+        const timestamp = target.querySelector('input[name="mauticform[' + entry.consentTimestampField + ']"]');
+        if (timestamp && !timestamp.value) timestamp.value = new Date().toISOString().replace('T', ' ').slice(0, 19);
+      }
       if (status) status.textContent = '';
-    } catch {
+    } catch (error) {
       if (status) status.textContent = 'The form is temporarily unavailable.';
-      dispatch(root, 'failure', 'script_load_failed');
+      dispatch(root, 'failure', error instanceof Error && error.message === 'form_markup_missing'
+        ? 'form_markup_missing'
+        : 'form_script_load_failed');
     }
   };
   const scan = () => document.querySelectorAll(selector).forEach(mount);
@@ -217,22 +272,24 @@ export default defineModule({
   category: 'Creator Signal',
   htmlTag: 'section',
   defaults: {
+    eyebrow: 'Contact',
     heading: 'Send a message',
     introduction: 'Required fields are identified in the form.',
     successMessage: 'Thanks — your message has been received.',
     mauticBaseUrl: 'https://marketing.creatorsignal.me',
-    formId: '3',
-    formApiName: 'creatorsignalcontactenquiry',
+    formAlias: 'creator_signal_contact',
+    registryPath: '/media/creator-signal/forms-v1.js',
     formCode: 'creator_signal_contact',
     campaignCode: 'contact',
   },
   schema: {
+    eyebrow: control.text('Eyebrow'),
     heading: control.text('Heading'),
     introduction: control.textarea('Introduction', { rows: 3 }),
     successMessage: control.textarea('Success message', { rows: 2 }),
     mauticBaseUrl: control.url('Mautic public URL'),
-    formId: control.text('Mautic form ID'),
-    formApiName: control.text('Mautic API name'),
+    formAlias: control.text('Governed form alias'),
+    registryPath: control.text('Mautic form registry path'),
     formCode: control.text('Analytics form code'),
     campaignCode: control.text('Analytics campaign code'),
   },
@@ -242,12 +299,12 @@ export default defineModule({
       html: html`
         <section class="cs-mautic" data-cs-mautic-form
           data-base-url="${safeUrl(props.mauticBaseUrl)}"
-          data-form-id="${props.formId}"
-          data-form-api-name="${props.formApiName}"
+          data-form-alias="${props.formAlias}"
+          data-registry-path="${props.registryPath}"
           data-form-code="${props.formCode}"
           data-campaign-code="${props.campaignCode}"
           data-success-message="${props.successMessage}">
-          <div class="cs-mautic-copy"><p class="cs-eyebrow">Contact</p><h2>${props.heading}</h2><p>${props.introduction}</p></div>
+          <div class="cs-mautic-copy"><p class="cs-eyebrow">${props.eyebrow}</p><h2>${props.heading}</h2><p>${props.introduction}</p></div>
           <div class="cs-mautic-form-shell">
             <div data-form-mount></div>
             <p role="status" aria-live="polite" data-form-status></p>

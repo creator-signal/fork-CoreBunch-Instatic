@@ -31,7 +31,7 @@ import type { DbClient } from '../db/client'
 import { listInstalledPlugins, type InstalledPluginResult } from '../repositories/plugins'
 import { mediaStorageRegistry } from '@core/plugins/mediaStorageRegistry'
 import { listElectedAdapters } from '../repositories/mediaStorageAdapters'
-import { addCspSources, rewriteCspMeta, setCspDirective } from '@core/publisher'
+import { addCspSources, rewriteCspMeta } from '@core/publisher'
 import { frontendConnectOrigins } from './frontendConnectOrigins'
 import type {
   FrontendAsset,
@@ -433,17 +433,17 @@ function relaxCspForPlan(html: string, plan: FrontendInjections, hasTags: boolea
       //   • Worker spawn from any plugin script → relax `worker-src`
       //     to `'self' blob:`
       if (plan.hasExternalScript || plan.hasInlineScript) {
-        setCspDirective(
+        addCspSources(
           csp,
           'script-src',
           plan.hasInlineScript ? ["'self'", "'unsafe-inline'"] : ["'self'"],
         )
-        setCspDirective(csp, 'worker-src', ["'self'", 'blob:'])
+        addCspSources(csp, 'worker-src', ["'self'", 'blob:'])
       }
 
       // Style: relax to `'unsafe-inline'` only when an inline style is present.
       if (plan.hasInlineStyle) {
-        setCspDirective(csp, 'style-src', ["'self'", "'unsafe-inline'"])
+        addCspSources(csp, 'style-src', ["'self'", "'unsafe-inline'"])
       }
 
       // Connect: union per-plugin `networkAllowedHosts`, plus the standard

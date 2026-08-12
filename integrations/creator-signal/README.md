@@ -9,14 +9,15 @@ blank setup homepage, and publish the complete site automatically.
 
 ## Included experience
 
-- Eighteen launch, legal, trust, support, and status pages.
+- Twenty-three launch, form, legal, trust, support, and status pages.
 - The warm Creator Signal editorial design system shared by the editor canvas
   and published pages.
 - A parameterised Hero Visual Component with optional MinIO-backed artwork.
 - Creator Signal favicon, touch icon, maskable icon, and web app manifest
   injected into every published page from versioned plugin assets.
 - Editable hero, feature-grid, call-to-action, prose, testimonial, and FAQ layouts.
-- A Mautic form module with configurable form identity and typed success/failure events.
+- Six Mautic-backed public forms that resolve governed aliases through the
+  Mautic-generated registry and emit typed success/failure events.
 - The host-level MinIO adapter for originals, variants, avatars, and fonts.
 - Plausible pageviews, consent-gated OpenPanel events, GlitchTip browser monitoring, consent UI, and hashed Mautic attribution.
 - Header, footer, legal copy, and navigation links represented as editable page nodes.
@@ -46,7 +47,11 @@ approve all declared permissions. The pack owns the `index` route. On a managed
 empty installation, configure the starter-site bootstrap so Instatic removes
 the generated blank homepage before importing and publishing this pack.
 
-Verify the live Mautic form ID and API name before publishing Contact. The comparison default uses form ID `3` and API name `creatorsignalcontactenquiry`; these are author-editable module properties.
+Deploy Mautic first and verify
+`https://marketing.creatorsignal.me/media/creator-signal/forms-v1.js` exposes
+the `creator-signal.mautic-forms/v1` schema and all six governed aliases. Do not
+copy numeric form IDs or generated API names into Instatic: the module resolves
+those deployment-specific values from the registry on every page load.
 
 ## Replacement boundary
 

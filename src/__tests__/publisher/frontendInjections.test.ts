@@ -104,6 +104,20 @@ describe('frontend injection — CSP relaxation', () => {
     expect(out).toContain("worker-src 'self' blob:;")
   })
 
+  it('preserves module-declared provider origins when plugin scripts are injected', () => {
+    const page = PAGE_WITH_CSP_META.replace(
+      "script-src 'none'",
+      "script-src https://marketing.creatorsignal.me",
+    )
+    const plan = emptyPlan()
+    plan.hasExternalScript = true
+    plan.tags['body-end'] = [`<script src="/uploads/plugins/acme.analytics/1.0.0/frontend/tracker.js" defer></script>`]
+
+    const out = injectFrontendAssets(page, plan)
+
+    expect(out).toContain("script-src 'self' https://marketing.creatorsignal.me;")
+  })
+
   it('relaxes script-src to `self` + `unsafe-inline` for inline scripts', () => {
     const plan = emptyPlan()
     plan.hasInlineScript = true

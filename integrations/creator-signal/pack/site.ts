@@ -27,6 +27,11 @@ const footer = `<footer class="site-footer">
     <a href="/features">Features</a>
     <a href="/pricing">Pricing</a>
     <a href="/contact">Contact</a>
+    <a href="/feedback">Feedback</a>
+    <a href="/wishlist">Join wishlist</a>
+    <a href="/ask-a-question">Ask a question</a>
+    <a href="/feature-request">Feature request</a>
+    <a href="/report-an-error">Report an error</a>
     <a href="/legal/privacy">Privacy</a>
     <a href="/legal/terms">Terms</a>
     <a href="https://status.creatorsignal.me">Status</a>
@@ -41,6 +46,9 @@ const footer = `<footer class="site-footer">
 </aside>`
 
 const chrome = (main: string) => `${header}<main>${main}</main>${footer}`
+
+const mauticFormPlaceholder = (alias: string) =>
+  `<section class="content-section"><div data-creator-signal-mautic-form="${alias}"></div></section>`
 
 const legalRelease = {
   version: '2026-08-02',
@@ -210,7 +218,27 @@ const entries: PagePackEntry[] = [
   },
   {
     id: 'contact', slug: 'contact', title: 'Contact',
-    html: chrome(hero('Contact Creator Signal', 'Tell us what you are trying to understand.', 'Send a short note about your creative business, Sales Pulse or a support question. We will use the details only to respond and follow up as requested.', '/legal/privacy', 'Read our privacy notice') + '<section class="content-section"><div data-creator-signal-mautic-form="true"></div></section>'),
+    html: chrome(hero('Contact Creator Signal', 'Tell us what you are trying to understand.', 'Send a short note about your creative business, Sales Pulse or a support question. We will use the details only to respond and follow up as requested.', '/legal/privacy', 'Read our privacy notice') + mauticFormPlaceholder('creator_signal_contact')),
+  },
+  {
+    id: 'feedback', slug: 'feedback', title: 'Feedback',
+    html: chrome(hero('Feedback', 'Help us make Creator Signal more useful.', 'Tell us what worked, what felt unclear and what would improve your experience. You can choose whether we may follow up about your feedback.', '/legal/privacy', 'Read our privacy notice') + mauticFormPlaceholder('creator_signal_feedback')),
+  },
+  {
+    id: 'wishlist', slug: 'wishlist', title: 'Join the wishlist',
+    html: chrome(hero('Join the wishlist', 'Tell us what you want to use next.', 'Join a product wishlist and give purpose-specific permission for availability and early-access updates. This does not subscribe you to general marketing.', '/legal/privacy', 'Read our privacy notice') + mauticFormPlaceholder('creator_signal_wishlist')),
+  },
+  {
+    id: 'ask-a-question', slug: 'ask-a-question', title: 'Ask a question',
+    html: chrome(hero('Ask a question', 'What would you like to know?', 'Ask about Sales Pulse, your account, Creator Signal or working with us. We will use your details to answer your question.', '/legal/privacy', 'Read our privacy notice') + mauticFormPlaceholder('creator_signal_question')),
+  },
+  {
+    id: 'feature-request', slug: 'feature-request', title: 'Feature request',
+    html: chrome(hero('Feature request', 'Describe the outcome you need.', 'Tell us about the problem, workflow and outcome behind your idea so we can evaluate it in context.', '/legal/privacy', 'Read our privacy notice') + mauticFormPlaceholder('creator_signal_feature_request')),
+  },
+  {
+    id: 'report-an-error', slug: 'report-an-error', title: 'Report an error',
+    html: chrome(hero('Error report', 'Tell us what went wrong.', 'Share steps we can use to reproduce the problem. Do not include passwords, access keys, payment details or customer data.', 'https://status.creatorsignal.me', 'Check service status') + mauticFormPlaceholder('creator_signal_error_report')),
   },
   {
     id: 'privacy', slug: 'legal/privacy', title: 'Privacy',
@@ -224,27 +252,39 @@ const entries: PagePackEntry[] = [
 ]
 
 const compiled = compilePackPages('creator-signal.site', entries, creatorSignalCss)
-const contact = compiled.pages.find((page) => page.id.endsWith('/contact'))!
-const mauticNode = Object.values(contact.nodes).find((node) => {
-  const attributes = node.props.htmlAttributes
-  return typeof attributes === 'object' && attributes !== null &&
-    (attributes as Record<string, unknown>)['data-creator-signal-mautic-form'] === 'true'
-})
-if (!mauticNode) {
-  throw new Error('Creator Signal contact page is missing its Mautic form placeholder.')
+const publicFormPages = [
+  { slug: 'contact', alias: 'creator_signal_contact', eyebrow: 'Contact', heading: 'Send a message', introduction: 'Required fields are identified in the form.', successMessage: 'Thanks — your message has been received.', campaignCode: 'contact' },
+  { slug: 'feedback', alias: 'creator_signal_feedback', eyebrow: 'Feedback', heading: 'Share your feedback', introduction: 'Required fields are identified in the form. Choose the follow-up option only if we may contact you about this feedback.', successMessage: 'Thanks — your feedback helps us improve Creator Signal.', campaignCode: 'feedback' },
+  { slug: 'wishlist', alias: 'creator_signal_wishlist', eyebrow: 'Wishlist', heading: 'Join the wishlist', introduction: 'Required fields are identified in the form. Your permission covers availability and early-access updates for this request, not general marketing.', successMessage: 'You are on the wishlist — thanks for your interest.', campaignCode: 'wishlist' },
+  { slug: 'ask-a-question', alias: 'creator_signal_question', eyebrow: 'Question', heading: 'Ask a question', introduction: 'Required fields are identified in the form.', successMessage: 'Thanks — we have received your question.', campaignCode: 'question' },
+  { slug: 'feature-request', alias: 'creator_signal_feature_request', eyebrow: 'Feature request', heading: 'Request a feature', introduction: 'Required fields are identified in the form. Describe the problem and the outcome you need.', successMessage: 'Thanks — your feature request has been recorded.', campaignCode: 'feature_request' },
+  { slug: 'report-an-error', alias: 'creator_signal_error_report', eyebrow: 'Error report', heading: 'Report an error', introduction: 'Required fields are identified in the form. Do not include passwords, access keys, payment details or customer data.', successMessage: 'Thanks — your error report has been recorded.', campaignCode: 'error_report' },
+]
+
+for (const formPage of publicFormPages) {
+  const page = compiled.pages.find((candidate) => candidate.slug === formPage.slug)
+  const mauticNode = Object.values(page?.nodes ?? {}).find((node) => {
+    const attributes = node.props.htmlAttributes
+    return typeof attributes === 'object' && attributes !== null &&
+      (attributes as Record<string, unknown>)['data-creator-signal-mautic-form'] === formPage.alias
+  })
+  if (!mauticNode) {
+    throw new Error(`Creator Signal ${formPage.slug} page is missing its Mautic form placeholder.`)
+  }
+  mauticNode.moduleId = 'creator-signal.site.mautic-form'
+  mauticNode.props = {
+    eyebrow: formPage.eyebrow,
+    heading: formPage.heading,
+    introduction: formPage.introduction,
+    successMessage: formPage.successMessage,
+    mauticBaseUrl: 'https://marketing.creatorsignal.me',
+    formAlias: formPage.alias,
+    registryPath: '/media/creator-signal/forms-v1.js',
+    formCode: formPage.alias,
+    campaignCode: formPage.campaignCode,
+  }
+  mauticNode.classIds = []
 }
-mauticNode.moduleId = 'creator-signal.site.mautic-form'
-mauticNode.props = {
-  heading: 'Send a message',
-  introduction: 'Required fields are identified in the form.',
-  successMessage: 'Thanks — your message has been received.',
-  mauticBaseUrl: 'https://marketing.creatorsignal.me',
-  formId: '3',
-  formApiName: 'creatorsignalcontactenquiry',
-  formCode: 'creator_signal_contact',
-  campaignCode: 'contact',
-}
-mauticNode.classIds = []
 
 const authorLayouts = [
   { id: 'hero', name: 'Creator Signal hero', html: hero('Eyebrow', 'A clear headline.', 'Add a useful, plain-language introduction for this page.', '#', 'Primary action'), css: creatorSignalCss },

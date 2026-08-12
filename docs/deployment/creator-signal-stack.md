@@ -97,11 +97,15 @@ installation, set `INSTATIC_BOOTSTRAP_SITE_NAME`,
 `INSTATIC_BOOTSTRAP_PLUGIN_PACKAGE`, and optionally
 `INSTATIC_BOOTSTRAP_PLUGIN_SETTINGS_FILE`. Startup then creates the first
 owner, replaces the blank homepage, installs the trusted embedded package, and
-publishes all 18 routes. The bootstrap password is dormant when Zitadel mode
+publishes all 23 routes. The bootstrap password is dormant when Zitadel mode
 is enabled; first login links the verified Zitadel identity to that owner.
 Existing installations are never reset.
 
-Plausible, OpenPanel, and GlitchTip are disabled by default. Enable each plugin setting only after its collector and consent gate are accepted. Confirm the live Mautic form ID and API name on the Contact module before publishing.
+Plausible, OpenPanel, and GlitchTip are disabled by default. Enable each plugin
+setting only after its collector and consent gate are accepted. Deploy Mautic
+first, then confirm its `creator-signal.mautic-forms/v1` registry exposes the
+six governed aliases before publishing. Instatic must not store numeric Mautic
+form IDs or generated API names.
 
 ## Platform Provisioner boundary
 

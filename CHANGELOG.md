@@ -6,6 +6,35 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.25 - 2026-08-13
+
+### Creator Signal public forms
+
+- Published governed Contact, Feedback, Join Wishlist, Ask a Question,
+  Feature Request, and Error Report routes in the Creator Signal starter site.
+- Replaced environment-specific Mautic form IDs and generated callback names
+  with a validated, versioned alias registry that fails visibly when its
+  contract is missing or malformed.
+- Preserved module-declared Mautic origins when plugin scripts relax a
+  published page's Content Security Policy, and added regression coverage for
+  the combined module/plugin publishing path.
+- Bumped the embedded Creator Signal plugin to `0.1.11` so preserved
+  installations upgrade and can republish the expanded 23-page public site.
+
+### Governed public authoring
+
+- Added a machine-readable Creator Signal public-authoring contract and bound
+  governed Component Library identities and variants to its allow-list.
+- Recorded canonical generated design-system adapter identities without
+  duplicating raw token values, and governed public theme, responsive, asset,
+  and content roles.
+
+### Creator Signal release governance
+
+- Established protected `creator-signal/develop` integration and
+  `creator-signal/main` release branches, with CI and upstream-refresh rules
+  that preserve the fork's accepted release ancestry.
+
 ## 0.0.24 - 2026-08-10
 
 ### Release image security

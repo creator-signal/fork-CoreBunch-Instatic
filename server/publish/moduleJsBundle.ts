@@ -10,16 +10,19 @@
  *   object — the same pattern (and the same invalidation via
  *   `bumpPublishVersion()` / `registerVersionedCacheReset`) as
  *   `buildPublishedSiteCssBundle` in `siteCssBundle.ts`.
+ * - `resolvePublishedModuleJsAssets` binds each page moduleId to the SHA-256
+ *   identity of the exact body that will be served.
  * - `injectModuleScripts` is the post-render pipeline step: appends one
- *   `<script src="/_instatic/module-js/<id>.js?v=<version>" defer>` tag per
- *   moduleId (sorted for determinism) before `</body>` and relaxes the page
- *   CSP `script-src` to `'self'` iff at least one tag was injected.
+ *   `<script src="/_instatic/module-js/<id>.js?v=<sha256>" defer>` tag per
+ *   asset (sorted for determinism) before `</body>` and relaxes the page CSP
+ *   `script-src` to `'self'` iff at least one tag was injected.
  *
  * The matching asset route lives in `server/handlers/cms/moduleJs.ts`.
  */
 import type { SiteDocument } from '@core/page-tree'
 import type { IModuleRegistry } from '@core/module-engine'
 import { addCspSources, escapeHtml, rewriteCspMeta } from '@core/publisher'
+import { createHash } from 'node:crypto'
 import { collectSiteModuleAssets } from './siteModuleAssets'
 import { getPublishVersion, registerVersionedCacheReset } from './publishState'
 
@@ -61,26 +64,51 @@ export function buildPublishedSiteModuleJsMap(
   return map
 }
 
+export interface PublishedModuleJsAsset {
+  id: string
+  contentHash: string
+}
+
+/** Stable content identity used by both HTML injection and the asset route. */
+export function moduleJsContentHash(body: string): string {
+  return createHash('sha256').update(body).digest('hex')
+}
+
+/**
+ * Intersect page candidates with the published map and bind each surviving
+ * module to the exact body hash its URL must request.
+ */
+export function resolvePublishedModuleJsAssets(
+  jsModuleIds: readonly string[],
+  moduleJsMap: ReadonlyMap<string, string>,
+): PublishedModuleJsAsset[] {
+  return [...new Set(jsModuleIds)]
+    .sort()
+    .flatMap((id) => {
+      const body = moduleJsMap.get(id)
+      return body === undefined ? [] : [{ id, contentHash: moduleJsContentHash(body) }]
+    })
+}
+
 /**
  * Append the page's module-JS `<script>` tags before `</body>` and relax the
  * CSP `script-src` to `'self'` iff at least one tag was injected.
  *
- * `jsModuleIds` must already be intersected with the site module-JS map (the
- * renderer does this — see `publicRenderer.ts`), so every emitted URL is
- * guaranteed to resolve. Sorted + de-duplicated here for deterministic output;
- * idempotent under repeated pipeline passes.
+ * Assets are resolved against the site module-JS map by the renderer, so every
+ * emitted URL identifies the exact body it expects. Sorted + de-duplicated here
+ * for deterministic output; idempotent under repeated pipeline passes.
  */
 export function injectModuleScripts(
   html: string,
-  jsModuleIds: readonly string[],
-  publishVersion: number,
+  assets: readonly PublishedModuleJsAsset[],
 ): string {
-  if (jsModuleIds.length === 0 || html.includes('data-instatic-module-js=')) return html
-  const ids = [...new Set(jsModuleIds)].sort()
-  const tags = ids
+  if (assets.length === 0 || html.includes('data-instatic-module-js=')) return html
+  const uniqueAssets = [...new Map(assets.map((asset) => [asset.id, asset])).values()]
+    .sort((left, right) => left.id.localeCompare(right.id))
+  const tags = uniqueAssets
     .map(
-      (id) =>
-        `<script src="/_instatic/module-js/${encodeURIComponent(id)}.js?v=${publishVersion}" defer data-instatic-module-js="${escapeHtml(id)}"></script>`,
+      ({ id, contentHash }) =>
+        `<script src="/_instatic/module-js/${encodeURIComponent(id)}.js?v=${contentHash}" defer data-instatic-module-js="${escapeHtml(id)}"></script>`,
     )
     .join('\n')
   const withScripts = html.includes('</body>')

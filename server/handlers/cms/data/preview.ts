@@ -24,7 +24,10 @@ import { resolveTemplateChain, composeTemplateChain } from '@core/templates'
 import { buildRouteFrame } from '@core/templates/contextFrames'
 import { publishPage } from '@core/publisher'
 import { buildSiteCssBundle } from '../../../publish/siteCssBundle'
-import { buildPublishedSiteModuleJsMap } from '../../../publish/moduleJsBundle'
+import {
+  buildPublishedSiteModuleJsMap,
+  resolvePublishedModuleJsAssets,
+} from '../../../publish/moduleJsBundle'
 import { getPublishVersion } from '../../../publish/publishState'
 import { prefetchLoopData, publishedDataRowToLoopItem } from '../../../publish/loopPrefetch'
 import { prefetchMediaAssets } from '../../../publish/mediaPrefetch'
@@ -137,7 +140,7 @@ export async function handleRowPreview(
       slug: merged.slug,
       siteId: snapshot.site.id,
       cssBundle,
-      jsModuleIds: published.jsModuleIds.filter((id) => moduleJsMap.has(id)),
+      jsModuleAssets: resolvePublishedModuleJsAssets(published.jsModuleIds, moduleJsMap),
       publishVersion: getPublishVersion(),
     },
     db,

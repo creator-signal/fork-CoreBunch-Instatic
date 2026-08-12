@@ -55,8 +55,7 @@ export async function applyPublishedHtmlPipeline(
   // needs; relaxes CSP script-src to 'self' iff at least one tag landed.
   const withModuleScripts = injectModuleScripts(
     withFormTokens,
-    rendered.jsModuleIds,
-    rendered.publishVersion,
+    rendered.jsModuleAssets,
   )
   const filtered = await hookBus.applyFilter('publish.html', withModuleScripts, {
     siteId: rendered.siteId,

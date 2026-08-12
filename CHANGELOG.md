@@ -6,6 +6,19 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.26 - 2026-08-13
+
+### Published module JavaScript cache safety
+
+- Replaced process-local publish counters in module JavaScript URLs with the
+  SHA-256 identity of the exact published script body.
+- Rejected missing, malformed, and stale content identities at the asset route
+  so one cache key can never serve different JavaScript after a restart or
+  deployment.
+- Made successfully verified module JavaScript assets immutable and added
+  regression coverage for body changes, stale URLs, previews, and public
+  rendering.
+
 ## 0.0.25 - 2026-08-13
 
 ### Creator Signal public forms

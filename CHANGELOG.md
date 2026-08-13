@@ -6,6 +6,17 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.27 - 2026-08-13
+
+### Media-edge security
+
+- Updated the media-edge Caddy build to `golang.org/x/net` 0.56.0, fixing
+  CVE-2026-46600 in DNS record parsing after the v0.0.26 candidate scan stopped
+  publication.
+- Retained the v0.0.26 content-addressed published module JavaScript repair in
+  this replacement release; v0.0.26 was never published to immutable image
+  tags or deployed.
+
 ## 0.0.26 - 2026-08-13
 
 ### Published module JavaScript cache safety

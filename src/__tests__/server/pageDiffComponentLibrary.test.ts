@@ -91,16 +91,11 @@ function governedHeroPage(): Page {
           componentId: 'base.vc.hero',
           propOverrides: {},
         },
-        children: ['hero-actions'],
+        children: [],
         catalogueInstance: {
           entryId: publicId('base.hero'),
-          entryVersion: '1.0.0',
+          entryVersion: '2.0.0',
         },
-      }),
-      'hero-actions': makeNode({
-        id: 'hero-actions',
-        moduleId: 'base.slot-instance',
-        props: { slotName: 'actions' },
       }),
     },
   })
@@ -331,7 +326,7 @@ describe('Component Library page diff policy', () => {
     }
   })
 
-  it('allows a built-in Visual Component and managed slots to be added and removed', () => {
+  it('allows a built-in leaf Visual Component to be added and removed without slots', () => {
     const empty = makePage()
     const hero = governedHeroPage()
 

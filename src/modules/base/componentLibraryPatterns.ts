@@ -12,7 +12,6 @@ import { ImageModule } from './image'
 import { LinkModule } from './link'
 import { ListModule } from './list'
 import { LoopModule } from './loop'
-import { SlotInstanceModule } from './slotInstance'
 import { TableModule } from './table'
 import { TextModule } from './text'
 import { VisualComponentRefModule } from './visualComponentRef'
@@ -21,10 +20,10 @@ import {
   patternEntry,
 } from './componentLibraryDefinitions'
 
-function metadata(entryId: string) {
+function metadata(entryId: string, entryVersion = '1.0.0') {
   return {
     entryId: creatorSignalCatalogueEntryId(entryId),
-    entryVersion: '1.0.0',
+    entryVersion,
   }
 }
 
@@ -35,13 +34,14 @@ function patternNode(
   props: Record<string, unknown> = {},
   children: string[] = [],
   entryId?: string,
+  entryVersion?: string,
 ): ComponentLibraryPatternNode {
   return {
     key,
     moduleId,
     props: { ...defaults, ...props },
     children,
-    ...(entryId ? { catalogueInstance: metadata(entryId) } : {}),
+    ...(entryId ? { catalogueInstance: metadata(entryId, entryVersion) } : {}),
   }
 }
 
@@ -67,14 +67,9 @@ function cardNodes(key: string, title: string): ComponentLibraryPatternNode[] {
           description: '<p>Add a concise description.</p>',
         },
       },
-      [`${key}.actions`],
+      [],
       'base.card',
-    ),
-    patternNode(
-      `${key}.actions`,
-      SlotInstanceModule.id,
-      SlotInstanceModule.defaults,
-      { slotName: 'actions' },
+      '2.0.0',
     ),
   ]
 }

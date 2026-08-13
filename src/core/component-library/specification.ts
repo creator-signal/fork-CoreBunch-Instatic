@@ -88,6 +88,7 @@ function entrySpecification(entry: ComponentLibraryEntry): string[] {
     `- Registry ID: \`${entry.id}\``,
     `- Version: \`${entry.version}\``,
     `- Status: ${entry.status}`,
+    `- Composition: ${entry.composition ?? 'unspecified'}`,
     `- Source: ${source(entry)}`,
     `- Taxonomy: ${entry.implementation.type}`,
     `- Backing implementation: ${implementation(entry.implementation)}`,
@@ -118,7 +119,7 @@ function fieldSpecification(entry: ComponentLibraryEntry): string[] {
   if (entry.fields.length === 0) {
     return ['#### Properties', '', 'This entry exposes no instance properties.', '']
   }
-  return [
+  const lines = [
     '#### Properties',
     '',
     '| Field | Author label | Control | Required | Advanced | Purpose |',
@@ -129,6 +130,25 @@ function fieldSpecification(entry: ComponentLibraryEntry): string[] {
       `${cell(field.description ?? inferredFieldPurpose(entry, field.label))} |`),
     '',
   ]
+  for (const field of entry.fields) {
+    if (field.type !== 'repeater') continue
+    lines.push(
+      `##### ${field.label} item contract`,
+      '',
+      `Cardinality: ${field.minItems}–${field.maxItems ?? 'many'} ` +
+        `${field.itemLabel.toLowerCase()} records, kept in author order.`,
+      '',
+      '| Property | Author label | Type | Required | Allowed values |',
+      '|---|---|---|:---:|---|',
+      ...field.itemFields.map((itemField) =>
+        `| \`${cell(itemField.key)}\` | ${cell(itemField.label)} | ` +
+        `${cell(itemField.type)} | ${itemField.required ? 'Yes' : 'No'} | ` +
+        `${itemField.options?.map((option) => `\`${cell(option.value)}\``).join(', ') ?? 'Any valid value'} |`,
+      ),
+      '',
+    )
+  }
+  return lines
 }
 
 function inferredFieldPurpose(

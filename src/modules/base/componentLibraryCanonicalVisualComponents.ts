@@ -335,6 +335,7 @@ readonly ComponentLibraryEntry[] = [
   }),
   visualComponentEntry({
     id: 'base.tabs',
+    container: true,
     name: 'Tabs',
     description: 'A labelled set of progressively enhanced content panels.',
     category: 'Interactive',
@@ -362,6 +363,7 @@ readonly ComponentLibraryEntry[] = [
   }),
   visualComponentEntry({
     id: 'base.accordion',
+    container: true,
     name: 'Accordion',
     description: 'A labelled group of native disclosure sections.',
     category: 'Interactive',

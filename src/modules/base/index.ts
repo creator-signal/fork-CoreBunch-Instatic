@@ -44,6 +44,7 @@ import './interactive'
 import './providerEmbed'
 import './icon'
 import './navigationList'
+import './linkCollection'
 
 // Form modules
 import './forms'

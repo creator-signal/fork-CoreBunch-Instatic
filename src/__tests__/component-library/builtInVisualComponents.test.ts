@@ -4,6 +4,7 @@ import {
   parseVisualComponent,
   resolveVisualComponent,
 } from '@core/visual-components-schema'
+import { collectSlotOutletNames } from '@core/visualComponents'
 import { publishPage } from '@core/publisher'
 import { validatePages } from '@core/persistence/validate'
 import { registry } from '@core/module-engine'
@@ -32,6 +33,7 @@ import {
   BUILT_IN_CANONICAL_VISUAL_COMPONENT_LIBRARY_ENTRIES,
   BUILT_IN_CANONICAL_VISUAL_COMPONENTS,
 } from '@modules/base/componentLibraryCanonicalVisualComponents'
+import { BUILT_IN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibrary'
 import '@modules/base'
 import { makePage, makeSite } from '../fixtures'
 
@@ -68,6 +70,30 @@ describe('built-in Visual Components', () => {
       expect(entry.implementation.type).toBe('visual-component')
       if (entry.implementation.type === 'visual-component') {
         expect(componentIds.has(entry.implementation.componentId)).toBe(true)
+      }
+    }
+  })
+
+  it('only exposes slots on explicit composition containers', () => {
+    const definitions = [
+      ...BUILT_IN_VISUAL_COMPONENTS,
+      ...BUILT_IN_INTERACTIVE_VISUAL_COMPONENTS,
+      ...BUILT_IN_DESIGN_VISUAL_COMPONENTS,
+      ...BUILT_IN_FORM_VISUAL_COMPONENTS,
+      ...BUILT_IN_CANONICAL_VISUAL_COMPONENTS,
+    ]
+    const byId = new Map(definitions.map((definition) => [definition.id, definition]))
+
+    for (const entry of BUILT_IN_COMPONENT_LIBRARY_ENTRIES) {
+      if (entry.slots.length > 0) expect(entry.composition).toBe('container')
+      if (entry.composition === 'leaf') expect(entry.slots).toEqual([])
+      if ((entry.constraints.allowedChildEntryIds?.length ?? 0) > 0) {
+        expect(entry.composition).toBe('container')
+      }
+      if (entry.implementation.type !== 'visual-component') continue
+      const definition = byId.get(entry.implementation.componentId)
+      if (entry.composition === 'leaf' && definition) {
+        expect(collectSlotOutletNames(definition.tree)).toEqual([])
       }
     }
   })
@@ -204,7 +230,7 @@ describe('built-in Visual Components', () => {
     expect(result.jsModuleIds).toContain('base.overlay')
   })
 
-  it('publishes breadcrumb slot links as one labelled ordered navigation list', () => {
+  it('migrates breadcrumb slot links into one typed ordered navigation list', () => {
     const page = makePage({
       nodes: {
         root: {
@@ -271,13 +297,26 @@ describe('built-in Visual Components', () => {
     }) as Page
     const site = makeSite({ pages: [page], visualComponents: [] }) as SiteDocument
 
-    const result = publishPage(page, site, registry)
+    const [migratedPage] = validatePages(site, [page], [])
+    expect(migratedPage).toBeDefined()
+    const migratedBreadcrumb = migratedPage!.nodes.breadcrumb!
+    expect(migratedBreadcrumb.catalogueInstance?.entryVersion).toBe('2.0.0')
+    expect(migratedBreadcrumb.children).toEqual([])
+    expect(migratedBreadcrumb.props.propOverrides).toMatchObject({
+      items: [
+        { label: 'Home', href: '/', current: false },
+        { label: 'News', href: '/news', current: true },
+      ],
+    })
+
+    const migratedSite = { ...site, pages: [migratedPage!] }
+    const result = publishPage(migratedPage!, migratedSite, registry)
 
     expect(result.html).toContain(
       '<nav data-instatic-component="breadcrumb" data-variant="default" aria-label="Page path">',
     )
     expect(result.html).toContain(
-      '<ol itemscope itemtype="https://schema.org/BreadcrumbList">' +
+      '<ol data-instatic-link-collection="breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList">' +
       '<li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">' +
       '<a itemprop="item" href="/" target="_self">' +
       '<span itemprop="name">Home</span></a>' +
@@ -360,7 +399,7 @@ describe('built-in Visual Components', () => {
     )
   })
 
-  it('preserves built-in references and reconciles their managed slots on load', () => {
+  it('upgrades empty legacy leaf slots without materializing new slots', () => {
     const page = makePage({
       nodes: {
         root: {
@@ -394,9 +433,59 @@ describe('built-in Visual Components', () => {
     const hero = validated!.nodes.hero!
 
     expect(hero).toBeDefined()
-    expect(hero.children).toHaveLength(1)
-    const slot = validated!.nodes[hero.children[0]!]!
-    expect(slot.moduleId).toBe('base.slot-instance')
-    expect(slot.props.slotName).toBe('actions')
+    expect(hero.children).toEqual([])
+    expect(hero.catalogueInstance?.entryVersion).toBe('2.0.0')
+    expect(hero.props.propOverrides).toMatchObject({ actions: [] })
+  })
+
+  it('preserves an unexpected legacy slot subtree instead of deleting it', () => {
+    const page = makePage({
+      nodes: {
+        root: {
+          id: 'root',
+          moduleId: 'base.body',
+          props: {},
+          breakpointOverrides: {},
+          children: ['navigation'],
+          classIds: [],
+        },
+        navigation: {
+          id: 'navigation',
+          moduleId: 'base.visual-component-ref',
+          props: { componentId: 'base.vc.navigation', propOverrides: {} },
+          breakpointOverrides: {},
+          children: ['items-slot'],
+          classIds: [],
+          catalogueInstance: {
+            entryId: publicId('base.navigation'),
+            entryVersion: '1.0.0',
+          },
+        },
+        'items-slot': {
+          id: 'items-slot',
+          moduleId: 'base.slot-instance',
+          props: { slotName: 'items' },
+          breakpointOverrides: {},
+          children: ['unexpected'],
+          classIds: [],
+        },
+        unexpected: {
+          id: 'unexpected',
+          moduleId: 'base.text',
+          props: { text: 'Preserve me', tag: 'p' },
+          breakpointOverrides: {},
+          children: [],
+          classIds: [],
+        },
+      },
+    })
+    const site = makeSite({ pages: [page], visualComponents: [] })
+
+    const [validated] = validatePages(site, [page], [])
+
+    expect(validated!.nodes.navigation?.catalogueInstance?.entryVersion).toBe('1.0.0')
+    expect(validated!.nodes.navigation?.children).toEqual(['items-slot'])
+    expect(validated!.nodes['items-slot']?.children).toEqual(['unexpected'])
+    expect(validated!.nodes.unexpected?.props.text).toBe('Preserve me')
   })
 })

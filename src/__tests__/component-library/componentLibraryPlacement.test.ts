@@ -48,6 +48,19 @@ describe('Component Library placement policy', () => {
     })
   })
 
+  it('rejects direct children under opinionated leaf components', () => {
+    const text = componentLibraryRegistry.getOrThrow(publicId('base.plain-text'))
+    const link = componentLibraryRegistry.getOrThrow(publicId('base.link'))
+
+    expect(resolveComponentLibraryPlacement(text, {
+      parentEntry: link,
+      existingChildCount: 0,
+    })).toMatchObject({
+      allowed: false,
+      code: 'parent-is-leaf',
+    })
+  })
+
   it('enforces named-slot entry, implementation and cardinality contracts', () => {
     const text = componentLibraryRegistry.getOrThrow(publicId('base.plain-text'))
     const slotOwner: ComponentLibraryEntry = {

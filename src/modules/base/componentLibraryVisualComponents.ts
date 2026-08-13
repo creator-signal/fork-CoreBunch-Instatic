@@ -7,6 +7,7 @@ import { ComponentFrameModule } from './componentFrame'
 import { ContainerModule } from './container'
 import { ImageModule } from './image'
 import { LinkModule } from './link'
+import { LinkCollectionModule } from './linkCollection'
 import { ProgressModule } from './progress'
 import { RichTextModule } from './richText'
 import { SlotOutletModule } from './slotOutlet'
@@ -16,6 +17,10 @@ import {
   accessibilityCheck,
   visualComponentEntry,
 } from './componentLibraryDefinitions'
+import {
+  actionRepeaterField,
+  linkRepeaterField,
+} from './componentLibraryRepeaters'
 import {
   visualComponent as component,
   visualNode as node,
@@ -34,7 +39,7 @@ const HERO = component(
     param('variant', 'Variant', 'enum', 'image-right', {
       enumOptions: ['image-left', 'image-right', 'text-only'],
     }),
-    param('actions', 'Actions', 'slot', []),
+    param('actions', 'Actions', 'repeater', []),
   ],
   [
     node(
@@ -84,12 +89,9 @@ const HERO = component(
       [],
       { html: { paramId: 'body' } },
     ),
-    node(
-      'hero.actions',
-      SlotOutletModule.id,
-      SlotOutletModule.defaults,
-      { slotName: 'actions' },
-    ),
+    node('hero.actions', LinkCollectionModule.id, LinkCollectionModule.defaults, {
+      presentation: 'actions',
+    }, [], { items: { paramId: 'actions' } }),
   ],
 )
 
@@ -107,7 +109,7 @@ const CARD = component(
     param('variant', 'Variant', 'enum', 'vertical', {
       enumOptions: ['vertical', 'horizontal', 'compact', 'featured'],
     }),
-    param('actions', 'Actions', 'slot', []),
+    param('actions', 'Actions', 'repeater', []),
   ],
   [
     node(
@@ -134,12 +136,9 @@ const CARD = component(
       href: { paramId: 'href' },
       text: { paramId: 'actionLabel' },
     }),
-    node(
-      'card.actions',
-      SlotOutletModule.id,
-      SlotOutletModule.defaults,
-      { slotName: 'actions' },
-    ),
+    node('card.actions', LinkCollectionModule.id, LinkCollectionModule.defaults, {
+      presentation: 'actions',
+    }, [], { items: { paramId: 'actions' } }),
   ],
 )
 
@@ -152,7 +151,7 @@ const NAVIGATION = component(
     param('orientation', 'Orientation', 'enum', 'horizontal', {
       enumOptions: ['horizontal', 'vertical'],
     }),
-    param('items', 'Navigation items', 'slot', []),
+    param('items', 'Navigation items', 'repeater', []),
   ],
   [
     node(
@@ -166,12 +165,9 @@ const NAVIGATION = component(
         variant: { paramId: 'orientation' },
       },
     ),
-    node(
-      'navigation.items',
-      SlotOutletModule.id,
-      SlotOutletModule.defaults,
-      { slotName: 'items' },
-    ),
+    node('navigation.items', LinkCollectionModule.id, LinkCollectionModule.defaults, {
+      presentation: 'navigation',
+    }, [], { items: { paramId: 'items' } }),
   ],
 )
 
@@ -185,7 +181,7 @@ const NOTICE = component(
     param('variant', 'Type', 'enum', 'information', {
       enumOptions: ['information', 'success', 'warning', 'error'],
     }),
-    param('actions', 'Actions', 'slot', []),
+    param('actions', 'Actions', 'repeater', []),
   ],
   [
     node(
@@ -202,12 +198,9 @@ const NOTICE = component(
     node('notice.body', RichTextModule.id, RichTextModule.defaults, {}, [], {
       html: { paramId: 'body' },
     }),
-    node(
-      'notice.actions',
-      SlotOutletModule.id,
-      SlotOutletModule.defaults,
-      { slotName: 'actions' },
-    ),
+    node('notice.actions', LinkCollectionModule.id, LinkCollectionModule.defaults, {
+      presentation: 'actions',
+    }, [], { items: { paramId: 'actions' } }),
   ],
 )
 
@@ -309,19 +302,11 @@ for (const definition of BUILT_IN_VISUAL_COMPONENTS) {
   builtInVisualComponentRegistry.registerOrReplace(definition)
 }
 
-const actionSlot: ComponentLibraryEntry['slots'][number] = {
-  id: 'actions',
-  name: 'Actions',
-  description: 'Approved buttons and links.',
-  allowedEntryIds: ['base.button', 'base.link'],
-  minItems: 0,
-  maxItems: 3,
-}
-
 export const BUILT_IN_VISUAL_COMPONENT_LIBRARY_ENTRIES:
 readonly ComponentLibraryEntry[] = [
   visualComponentEntry({
     id: 'base.hero',
+    version: '2.0.0',
     name: 'Hero',
     description: 'A major page introduction with optional media and actions.',
     category: 'Editorial',
@@ -333,13 +318,13 @@ readonly ComponentLibraryEntry[] = [
       { key: 'heading', label: 'Heading', type: 'text', required: true },
       { key: 'body', label: 'Body', type: 'rich-text', required: false },
       { key: 'image', label: 'Image', type: 'image', required: false },
+      actionRepeaterField(),
     ],
     variants: [
       { id: 'image-left', name: 'Image left', values: { variant: 'image-left' } },
       { id: 'image-right', name: 'Image right', values: { variant: 'image-right' } },
       { id: 'text-only', name: 'Text only', values: { variant: 'text-only' } },
     ],
-    slots: [actionSlot],
     accessibilityChecks: [
       accessibleNameCheck('heading'),
       accessibilityCheck(
@@ -356,6 +341,7 @@ readonly ComponentLibraryEntry[] = [
   }),
   visualComponentEntry({
     id: 'base.card',
+    version: '2.0.0',
     name: 'Card',
     description: 'A contained summary with optional media and action.',
     category: 'Editorial',
@@ -369,6 +355,7 @@ readonly ComponentLibraryEntry[] = [
       { key: 'description', label: 'Description', type: 'rich-text', required: false },
       { key: 'href', label: 'Destination', type: 'url', required: false },
       { key: 'actionLabel', label: 'Action label', type: 'text', required: false },
+      actionRepeaterField(),
     ],
     variants: [
       { id: 'vertical', name: 'Vertical', values: { variant: 'vertical' } },
@@ -376,13 +363,13 @@ readonly ComponentLibraryEntry[] = [
       { id: 'compact', name: 'Compact', values: { variant: 'compact' } },
       { id: 'featured', name: 'Featured', values: { variant: 'featured' } },
     ],
-    slots: [actionSlot],
     accessibilityChecks: [accessibleNameCheck('title')],
     usage: 'Summarise one destination or record. Use Card Grid for repeated cards.',
     accessibility: 'Use a specific title and avoid duplicating competing links to the same destination.',
   }),
   visualComponentEntry({
     id: 'base.teaser',
+    version: '2.0.0',
     name: 'Teaser',
     description: 'A promotional Card preset that reuses the Card definition.',
     category: 'Editorial',
@@ -396,6 +383,7 @@ readonly ComponentLibraryEntry[] = [
       { key: 'description', label: 'Description', type: 'rich-text', required: false },
       { key: 'href', label: 'Destination', type: 'url', required: true },
       { key: 'actionLabel', label: 'Action label', type: 'text', required: false },
+      actionRepeaterField(),
     ],
     variants: [
       { id: 'banner', name: 'Banner', values: { variant: 'horizontal' } },
@@ -409,6 +397,7 @@ readonly ComponentLibraryEntry[] = [
   }),
   visualComponentEntry({
     id: 'base.navigation',
+    version: '2.0.0',
     name: 'Navigation',
     description: 'A labelled navigation region with governed link content.',
     category: 'Navigation',
@@ -417,24 +406,25 @@ readonly ComponentLibraryEntry[] = [
     tags: ['navigation', 'menu', 'links', 'site'],
     fields: [
       { key: 'label', label: 'Accessible label', type: 'text', required: true },
+      linkRepeaterField({
+        label: 'Navigation items',
+        itemLabel: 'Navigation link',
+        description: 'Ordered links rendered as one semantic navigation list.',
+        minItems: 1,
+        current: true,
+      }),
     ],
     variants: [
       { id: 'horizontal', name: 'Horizontal', values: { orientation: 'horizontal' } },
       { id: 'vertical', name: 'Vertical', values: { orientation: 'vertical' } },
     ],
-    slots: [{
-      id: 'items',
-      name: 'Navigation items',
-      description: 'Links and approved supplementary actions.',
-      allowedEntryIds: ['base.link', 'base.button'],
-      minItems: 1,
-    }],
     accessibilityChecks: [accessibleNameCheck('label')],
     usage: 'Use a distinct label when more than one navigation region appears on the page.',
     accessibility: 'Keep link text descriptive and identify the current page where applicable.',
   }),
   visualComponentEntry({
     id: 'base.notice',
+    version: '2.0.0',
     name: 'Notice / Callout',
     description: 'Highlights important information with an approved semantic type.',
     category: 'Editorial',
@@ -444,6 +434,7 @@ readonly ComponentLibraryEntry[] = [
     fields: [
       { key: 'title', label: 'Title', type: 'text', required: true },
       { key: 'body', label: 'Body', type: 'rich-text', required: false },
+      actionRepeaterField(),
     ],
     variants: [
       { id: 'information', name: 'Information', values: { variant: 'information' } },
@@ -451,13 +442,13 @@ readonly ComponentLibraryEntry[] = [
       { id: 'warning', name: 'Warning', values: { variant: 'warning' } },
       { id: 'error', name: 'Error', values: { variant: 'error' } },
     ],
-    slots: [actionSlot],
     accessibilityChecks: [accessibleNameCheck('title')],
     usage: 'Use for information that should stand apart from the surrounding flow.',
     accessibility: 'Do not rely on colour alone to communicate the notice type.',
   }),
   visualComponentEntry({
     id: 'base.reusable-section',
+    container: true,
     name: 'Reusable Section',
     description: 'A centrally defined section frame with governed content.',
     category: 'Structure',

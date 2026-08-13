@@ -10,6 +10,9 @@ The registry is metadata over Instatic's existing modules, Visual Components, pa
 
 - `src/core/component-library/schemas.ts` is the source of truth for entry metadata.
 - Every entry declares one implementation type: Primitive, Visual Component, Pattern, Template component or Capability-backed.
+- Creator Signal entries declare an authoring composition of `leaf` or
+  `container`. A leaf cannot expose slots; ordered child-like data uses a typed
+  repeater field instead.
 - IDs are stable and namespaced; entry versions are semantic versions.
 - Presets and variants store approved values and continue to reference one canonical implementation.
 - `ComponentLibraryRegistry` validates every registration, rejects accidental duplicates and provides deterministic ordering.
@@ -61,6 +64,7 @@ module / Visual Component / pattern / template
 | Search, filters and deterministic ordering | `src/core/component-library/query.ts` |
 | Capability/provider/plugin health | `src/core/component-library/availability.ts` |
 | Retained versions, migration paths and impact previews | `src/core/component-library/version.ts`, `migration.ts` |
+| Descendant-aware, non-destructive slot-to-data upgrades | `src/core/component-library/treeMigration.ts` |
 | Bundled Creator Signal definitions | `src/modules/base/componentLibrary.ts`, `componentLibraryForms.ts`, `componentLibraryVisualComponents.ts` |
 | Application-owned Visual Components | `src/core/visual-components-schema/registry.ts` |
 | Pattern definitions and materialization | `src/core/component-library/patterns.ts`, `src/modules/base/componentLibraryPatterns.ts` |
@@ -91,6 +95,7 @@ const emailInput: ComponentLibraryEntry = {
     name: 'Creator Signal',
   },
   status: 'stable',
+  composition: 'leaf',
   implementation: {
     type: 'primitive',
     moduleId: 'base.input',
@@ -147,6 +152,21 @@ An omitted parent, child or slot allow-list means unrestricted. A present empty 
 
 Capability-backed entries cannot register without a real dependency. This keeps incomplete UI-only entries out of the available catalogue.
 
+### Leaf data and composition containers
+
+`composition: 'leaf'` means the component owns its complete published HTML.
+Its fields may include a `repeater`, which stores an ordered array of records
+with declared text, URL, number, boolean and select properties. Navigation,
+Breadcrumb, Table of Contents, Person Profile, Hero, Card/Teaser and Notice use
+this model for links or actions. Authors edit the records in one component
+properties surface; the renderer owns the list, anchor, button, accessibility
+and structured-data markup.
+
+`composition: 'container'` is reserved for genuine arbitrary composition.
+Reusable Section, Accordion, Tabs, Carousel, Modal/Dialog, Drawer and Reusable
+Form Fragment retain slots because their children are independently authored
+components. Registration rejects a leaf that declares any slot.
+
 ### Sources and lifecycle status
 
 `source.type` is one of `built-in`, `site`, `design-system` or `plugin`. Design-system and plugin sources carry their stable owner ID so editor surfaces can identify ownership.
@@ -183,12 +203,19 @@ Registration is deliberately explicit. A low-level HTML module can remain availa
 Shared authored structures such as Hero, Card, Navigation, Notice, Reusable
 Section, Download and Progress Bar are application-owned Visual Components.
 Their immutable definitions live in `componentLibraryVisualComponents.ts` and
-are resolved through the same component-reference, slot, publisher and
+are resolved through the same component-reference and publisher paths as
 persistence paths as site-authored Visual Components. A site definition may
 explicitly override a built-in ID; otherwise authors insert the built-in
 definition without copying it into site data. Governed Properties write only
 declared parameter overrides and approved variants, and component-only server
 diff validation applies the same contract.
+
+Leaf component version 2 definitions replace their former Link/Button slots
+with typed repeaters. Load validation copies recognized legacy slot children
+into the new records before slot reconciliation and then removes the obsolete
+slot nodes. If a legacy subtree contains an unexpected module, the migration
+rolls back and destructive reconciliation is skipped, preserving stored
+content for explicit repair.
 
 Modal / Dialog and Drawer share the `base.overlay` implementation rather than
 forking focus and dismissal logic. Their unenhanced output is a native
@@ -321,7 +348,8 @@ The browser-bridged MCP surface honours this same boundary. A connection with
 `site.components.edit`. `site_insert_component`,
 `site_update_component_field`, and `site_apply_component_option` reuse the
 registry, placement policy, page-tree actions and retained definition version.
-They include plugin-owned entries, reject undeclared fields and option IDs, and
+They include plugin-owned entries, reject undeclared fields, nested repeater
+keys and option IDs, and
 never publish implicitly. See [MCP connections](mcp-connectors.md).
 
 `resolveComponentLibraryPlacement()` is the shared composition policy for

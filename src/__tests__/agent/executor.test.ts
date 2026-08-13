@@ -152,6 +152,45 @@ describe('executeAgentTool — governed Component Library', () => {
     expect(activePage().nodes[inserted.nodeId]?.props.label).toBe('Buy now')
   })
 
+  it('authors typed Navigation records through the shared Agent and MCP tool contract', async () => {
+    const { rootId } = freshStore()
+    const inserted = expectToolData<{ nodeId: string; entryVersion: string }>(
+      await executeAgentTool('site_insert_component', {
+        entryId: publicId('base.navigation'),
+        parentId: rootId,
+      }),
+    )
+    expect(inserted.entryVersion).toBe('2.0.0')
+
+    expectToolOk(await executeAgentTool('site_update_component_field', {
+      nodeId: inserted.nodeId,
+      fieldKey: 'items',
+      value: [{
+        label: 'About us',
+        href: '/about',
+        target: '_self',
+        current: true,
+      }],
+    }))
+    expect(activePage().nodes[inserted.nodeId]?.props.propOverrides).toMatchObject({
+      items: [{ label: 'About us', href: '/about', target: '_self', current: true }],
+    })
+
+    const undeclared = await executeAgentTool('site_update_component_field', {
+      nodeId: inserted.nodeId,
+      fieldKey: 'items',
+      value: [{
+        label: 'Unsafe',
+        href: '/unsafe',
+        target: '_self',
+        current: false,
+        onclick: 'run()',
+      }],
+    })
+    expectToolError(undeclared)
+    expect(undeclared.error).toContain('undeclared key')
+  })
+
   it('enforces placement and resolves registered variants by id', async () => {
     const { rootId } = freshStore()
     const blocked = await executeAgentTool('site_insert_component', {

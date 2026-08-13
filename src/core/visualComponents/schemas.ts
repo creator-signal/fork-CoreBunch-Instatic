@@ -31,13 +31,14 @@ const VCParamTypeSchema = Type.Union([
   Type.Literal('color'),
   Type.Literal('image'),
   Type.Literal('richText'),
+  Type.Literal('repeater'),
   Type.Literal('slot'),
 ])
 
 export type VCParamType = Static<typeof VCParamTypeSchema>
 
 const VC_PARAM_TYPE_VALUES: VCParamType[] = [
-  'string', 'number', 'boolean', 'url', 'enum', 'color', 'image', 'richText', 'slot',
+  'string', 'number', 'boolean', 'url', 'enum', 'color', 'image', 'richText', 'repeater', 'slot',
 ]
 
 // ---------------------------------------------------------------------------

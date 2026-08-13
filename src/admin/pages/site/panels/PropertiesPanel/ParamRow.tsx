@@ -230,6 +230,9 @@ export function ParamRow({
       case 'richText':
         return <span className={styles.slotCaption}>Use a content outlet</span>
 
+      case 'repeater':
+        return <span className={styles.slotCaption}>Edit through Component Library</span>
+
       case 'slot':
         // No value control for slot params — edit on canvas
         return <span className={styles.slotCaption}>Edit on canvas</span>

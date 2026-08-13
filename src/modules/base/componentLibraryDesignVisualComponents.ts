@@ -5,15 +5,15 @@ import {
 } from '@core/visual-components-schema'
 import { ComponentFrameModule } from './componentFrame'
 import { ImageModule } from './image'
-import { NavigationListModule } from './navigationList'
+import { LinkCollectionModule } from './linkCollection'
 import { RichTextModule } from './richText'
-import { SlotOutletModule } from './slotOutlet'
 import { TextModule } from './text'
 import {
   accessibleNameCheck,
   behaviorCheck,
   visualComponentEntry,
 } from './componentLibraryDefinitions'
+import { linkRepeaterField } from './componentLibraryRepeaters'
 import {
   visualComponent,
   visualNode,
@@ -109,7 +109,7 @@ const PERSON_PROFILE = visualComponent(
     visualParam('variant', 'Layout', 'enum', 'vertical', {
       enumOptions: ['vertical', 'horizontal', 'compact'],
     }),
-    visualParam('links', 'Profile links', 'slot', []),
+    visualParam('links', 'Profile links', 'repeater', []),
   ],
   [
     visualNode(
@@ -158,12 +158,9 @@ const PERSON_PROFILE = visualComponent(
       [],
       { html: { paramId: 'biography' } },
     ),
-    visualNode(
-      'profile.links',
-      SlotOutletModule.id,
-      SlotOutletModule.defaults,
-      { slotName: 'links' },
-    ),
+    visualNode('profile.links', LinkCollectionModule.id, LinkCollectionModule.defaults, {
+      presentation: 'profile',
+    }, [], { items: { paramId: 'links' } }),
   ],
 )
 
@@ -175,7 +172,7 @@ const BREADCRUMB = visualComponent(
     visualParam('label', 'Accessible label', 'string', 'Breadcrumb', {
       required: true,
     }),
-    visualParam('items', 'Breadcrumb items', 'slot', []),
+    visualParam('items', 'Breadcrumb items', 'repeater', []),
   ],
   [
     visualNode(
@@ -186,19 +183,9 @@ const BREADCRUMB = visualComponent(
       ['breadcrumb.list'],
       { label: { paramId: 'label' } },
     ),
-    visualNode(
-      'breadcrumb.list',
-      NavigationListModule.id,
-      NavigationListModule.defaults,
-      { ordered: true, structuredData: 'breadcrumb' },
-      ['breadcrumb.items'],
-    ),
-    visualNode(
-      'breadcrumb.items',
-      SlotOutletModule.id,
-      SlotOutletModule.defaults,
-      { slotName: 'items' },
-    ),
+    visualNode('breadcrumb.list', LinkCollectionModule.id, LinkCollectionModule.defaults, {
+      presentation: 'breadcrumb',
+    }, [], { items: { paramId: 'items' } }),
   ],
 )
 
@@ -213,7 +200,7 @@ const TABLE_OF_CONTENTS = visualComponent(
     visualParam('heading', 'Heading', 'string', 'On this page', {
       required: true,
     }),
-    visualParam('items', 'Section links', 'slot', []),
+    visualParam('items', 'Section links', 'repeater', []),
   ],
   [
     visualNode(
@@ -232,19 +219,9 @@ const TABLE_OF_CONTENTS = visualComponent(
       [],
       { text: { paramId: 'heading' } },
     ),
-    visualNode(
-      'toc.list',
-      NavigationListModule.id,
-      NavigationListModule.defaults,
-      { ordered: false },
-      ['toc.items'],
-    ),
-    visualNode(
-      'toc.items',
-      SlotOutletModule.id,
-      SlotOutletModule.defaults,
-      { slotName: 'items' },
-    ),
+    visualNode('toc.list', LinkCollectionModule.id, LinkCollectionModule.defaults, {
+      presentation: 'table-of-contents',
+    }, [], { items: { paramId: 'items' } }),
   ],
 )
 
@@ -259,14 +236,6 @@ readonly VisualComponent[] = [
 
 for (const definition of BUILT_IN_DESIGN_VISUAL_COMPONENTS) {
   builtInVisualComponentRegistry.registerOrReplace(definition)
-}
-
-const navigationItemSlot: ComponentLibraryEntry['slots'][number] = {
-  id: 'items',
-  name: 'Links',
-  description: 'Ordered, descriptive links in the navigation sequence.',
-  allowedEntryIds: ['base.link'],
-  minItems: 1,
 }
 
 export const BUILT_IN_DESIGN_COMPONENT_LIBRARY_ENTRIES:
@@ -315,6 +284,7 @@ readonly ComponentLibraryEntry[] = [
   }),
   visualComponentEntry({
     id: 'base.person-profile',
+    version: '2.0.0',
     name: 'Person Profile',
     description: 'A named person with portrait, role, biography and governed links.',
     category: 'Editorial',
@@ -326,26 +296,26 @@ readonly ComponentLibraryEntry[] = [
       { key: 'name', label: 'Name', type: 'text', required: true },
       { key: 'role', label: 'Role', type: 'text', required: false },
       { key: 'biography', label: 'Biography', type: 'rich-text', required: false },
+      linkRepeaterField({
+        key: 'links',
+        label: 'Profile links',
+        itemLabel: 'Profile link',
+        description: 'Ordered links associated with this person.',
+        maxItems: 5,
+      }),
     ],
     variants: [
       { id: 'vertical', name: 'Vertical', values: { variant: 'vertical' } },
       { id: 'horizontal', name: 'Horizontal', values: { variant: 'horizontal' } },
       { id: 'compact', name: 'Compact', values: { variant: 'compact' } },
     ],
-    slots: [{
-      id: 'links',
-      name: 'Profile links',
-      description: 'Approved links associated with this person.',
-      allowedEntryIds: ['base.link'],
-      minItems: 0,
-      maxItems: 5,
-    }],
     accessibilityChecks: [accessibleNameCheck('name')],
     usage: 'Use for a real person whose role or biography is relevant to the page.',
     accessibility: 'Use an informative portrait alternative in the media library, or leave it decorative.',
   }),
   visualComponentEntry({
     id: 'base.breadcrumb',
+    version: '2.0.0',
     name: 'Breadcrumb',
     description: 'An ordered navigation trail for the current page hierarchy.',
     category: 'Navigation',
@@ -354,8 +324,13 @@ readonly ComponentLibraryEntry[] = [
     tags: ['breadcrumb', 'navigation', 'hierarchy', 'trail'],
     fields: [
       { key: 'label', label: 'Accessible label', type: 'text', required: true },
+      linkRepeaterField({
+        description: 'Ordered links from the broadest page to the current page.',
+        minItems: 1,
+        current: true,
+        itemLabel: 'Breadcrumb link',
+      }),
     ],
-    slots: [navigationItemSlot],
     accessibilityChecks: [
       accessibleNameCheck('label'),
       behaviorCheck(
@@ -370,6 +345,7 @@ readonly ComponentLibraryEntry[] = [
   }),
   visualComponentEntry({
     id: 'base.table-of-contents',
+    version: '2.0.0',
     name: 'Table of Contents',
     description: 'A labelled set of links to headings on the current page.',
     category: 'Navigation',
@@ -379,8 +355,12 @@ readonly ComponentLibraryEntry[] = [
     fields: [
       { key: 'label', label: 'Accessible label', type: 'text', required: true },
       { key: 'heading', label: 'Visible heading', type: 'text', required: true },
+      linkRepeaterField({
+        description: 'Ordered fragment links to headings on this page.',
+        minItems: 1,
+        itemLabel: 'Section link',
+      }),
     ],
-    slots: [navigationItemSlot],
     accessibilityChecks: [
       accessibleNameCheck('label'),
       behaviorCheck(

@@ -15,6 +15,7 @@ import {
   type ComponentLibraryDependencyHealth,
   type ComponentLibraryDependencyState,
   type ComponentLibraryField,
+  type ComponentLibraryRepeaterItemField,
 } from '@core/component-library'
 import { AttachmentCapabilityStatusSchema } from '@core/attachments'
 import { FormDraftCapabilityStatusSchema } from '@core/forms'
@@ -175,6 +176,9 @@ function validatedFieldValue(
   field: ComponentLibraryField,
   value: unknown,
 ): { ok: true; value: unknown } | { ok: false; error: string } {
+  if (field.type === 'repeater') {
+    return validatedRepeaterValue(field, value)
+  }
   if (field.type === 'number') {
     return typeof value === 'number' && Number.isFinite(value)
       ? { ok: true, value }
@@ -192,6 +196,97 @@ function validatedFieldValue(
     ok: true,
     value: field.type === 'rich-text' ? sanitizeRichtext(value) : value,
   }
+}
+
+function validatedRepeaterValue(
+  field: Extract<ComponentLibraryField, { type: 'repeater' }>,
+  value: unknown,
+): { ok: true; value: unknown } | { ok: false; error: string } {
+  if (!Array.isArray(value)) {
+    return { ok: false, error: `Field "${field.key}" requires an array of records.` }
+  }
+  if (value.length < field.minItems) {
+    return {
+      ok: false,
+      error: `Field "${field.key}" requires at least ${field.minItems} item(s).`,
+    }
+  }
+  if (field.maxItems !== undefined && value.length > field.maxItems) {
+    return {
+      ok: false,
+      error: `Field "${field.key}" allows at most ${field.maxItems} item(s).`,
+    }
+  }
+
+  const declared = new Map(field.itemFields.map((itemField) => [itemField.key, itemField]))
+  const normalized: Array<Record<string, unknown>> = []
+  for (let index = 0; index < value.length; index += 1) {
+    const rawItem = value[index]
+    if (!rawItem || typeof rawItem !== 'object' || Array.isArray(rawItem)) {
+      return {
+        ok: false,
+        error: `Field "${field.key}" item ${index + 1} must be a record.`,
+      }
+    }
+    const item = rawItem as Record<string, unknown>
+    const unknownKey = Object.keys(item).find((key) => !declared.has(key))
+    if (unknownKey) {
+      return {
+        ok: false,
+        error: `Field "${field.key}" item ${index + 1} contains undeclared key "${unknownKey}".`,
+      }
+    }
+    const next: Record<string, unknown> = {}
+    for (const itemField of field.itemFields) {
+      const itemValue = item[itemField.key]
+      if (itemValue === undefined) {
+        if (itemField.required) {
+          return {
+            ok: false,
+            error: `Field "${field.key}" item ${index + 1} requires "${itemField.key}".`,
+          }
+        }
+        continue
+      }
+      const validated = validatedRepeaterItemValue(field.key, index, itemField, itemValue)
+      if (!validated.ok) return validated
+      next[itemField.key] = validated.value
+    }
+    normalized.push(next)
+  }
+  return { ok: true, value: normalized }
+}
+
+function validatedRepeaterItemValue(
+  fieldKey: string,
+  index: number,
+  itemField: ComponentLibraryRepeaterItemField,
+  value: unknown,
+): { ok: true; value: unknown } | { ok: false; error: string } {
+  const location = `Field "${fieldKey}" item ${index + 1} property "${itemField.key}"`
+  if (itemField.type === 'boolean') {
+    return typeof value === 'boolean'
+      ? { ok: true, value }
+      : { ok: false, error: `${location} requires a boolean.` }
+  }
+  if (itemField.type === 'number') {
+    return typeof value === 'number' && Number.isFinite(value)
+      ? { ok: true, value }
+      : { ok: false, error: `${location} requires a finite number.` }
+  }
+  if (typeof value !== 'string') {
+    return { ok: false, error: `${location} requires a string.` }
+  }
+  if (itemField.required && value.trim() === '') {
+    return { ok: false, error: `${location} cannot be empty.` }
+  }
+  if (
+    itemField.type === 'select' &&
+    !itemField.options?.some((option) => option.value === value)
+  ) {
+    return { ok: false, error: `${location} is not an allowed option.` }
+  }
+  return { ok: true, value }
 }
 
 export function runApplyComponentLibraryOption(
@@ -243,6 +338,7 @@ function describeEntry(entry: ComponentLibraryEntry) {
     category: entry.category,
     tags: entry.tags,
     status: entry.status,
+    composition: entry.composition,
     source: entry.source,
     implementation: entry.implementation,
     fields: entry.fields,

@@ -88,7 +88,7 @@ describe('useInsertComponentLibraryEntry', () => {
     )
   })
 
-  it('inserts a built-in Visual Component and its governed slots atomically', () => {
+  it('inserts a built-in leaf Visual Component without child slots atomically', () => {
     const store = useEditorStore.getState()
     store.createSite('Built-in Visual Component')
     const entry = componentLibraryRegistry.getOrThrow(publicId('base.hero'))
@@ -105,12 +105,9 @@ describe('useInsertComponentLibraryEntry', () => {
     expect(inserted?.props.componentId).toBe('base.vc.hero')
     expect(inserted?.catalogueInstance).toEqual({
       entryId: publicId('base.hero'),
-      entryVersion: '1.0.0',
+      entryVersion: '2.0.0',
     })
-    expect(inserted?.children).toHaveLength(1)
-    const slot = state.site?.pages[0]?.nodes[inserted!.children[0]!]
-    expect(slot?.moduleId).toBe('base.slot-instance')
-    expect(slot?.props.slotName).toBe('actions')
+    expect(inserted?.children).toEqual([])
     expect(state.canUndo).toBe(true)
 
     act(() => useEditorStore.getState().undo())

@@ -138,7 +138,7 @@ export const ComponentLibraryStatusSchema = Type.Union([
 
 export type ComponentLibraryStatus = Static<typeof ComponentLibraryStatusSchema>
 
-const ComponentLibraryFieldTypeSchema = Type.Union([
+const ComponentLibraryScalarFieldTypeSchema = Type.Union([
   Type.Literal('text'),
   Type.Literal('rich-text'),
   Type.Literal('number'),
@@ -151,20 +151,85 @@ const ComponentLibraryFieldTypeSchema = Type.Union([
   Type.Literal('design-token'),
 ])
 
-export const ComponentLibraryFieldSchema = Type.Object(
+const ComponentLibraryRepeaterItemFieldTypeSchema = Type.Union([
+  Type.Literal('text'),
+  Type.Literal('number'),
+  Type.Literal('boolean'),
+  Type.Literal('select'),
+  Type.Literal('url'),
+])
+
+const ComponentLibraryRepeaterOptionSchema = Type.Object(
+  {
+    label: Type.String({ minLength: 1 }),
+    value: Type.String(),
+  },
+  { additionalProperties: false },
+)
+
+export const ComponentLibraryRepeaterItemFieldSchema = Type.Object(
+  {
+    key: PropertyKeySchema,
+    label: Type.String({ minLength: 1 }),
+    description: Type.Optional(Type.String()),
+    type: ComponentLibraryRepeaterItemFieldTypeSchema,
+    required: Type.Boolean(),
+    options: Type.Optional(Type.Array(ComponentLibraryRepeaterOptionSchema)),
+  },
+  { additionalProperties: false },
+)
+
+export type ComponentLibraryRepeaterItemField = Static<
+  typeof ComponentLibraryRepeaterItemFieldSchema
+>
+
+const ComponentLibraryScalarFieldSchema = Type.Object(
   {
     /** Canonical backing prop key; camelCase module properties are valid. */
     key: PropertyKeySchema,
     label: Type.String({ minLength: 1 }),
     description: Type.Optional(Type.String()),
-    type: ComponentLibraryFieldTypeSchema,
+    type: ComponentLibraryScalarFieldTypeSchema,
     required: Type.Boolean(),
     advanced: Type.Optional(Type.Boolean()),
   },
   { additionalProperties: false },
 )
 
+const ComponentLibraryRepeaterFieldSchema = Type.Object(
+  {
+    /** Canonical backing prop key containing an ordered array of records. */
+    key: PropertyKeySchema,
+    label: Type.String({ minLength: 1 }),
+    description: Type.Optional(Type.String()),
+    type: Type.Literal('repeater'),
+    required: Type.Boolean(),
+    advanced: Type.Optional(Type.Boolean()),
+    itemLabel: Type.String({ minLength: 1 }),
+    itemFields: Type.Array(ComponentLibraryRepeaterItemFieldSchema, {
+      minItems: 1,
+    }),
+    minItems: Type.Integer({ minimum: 0 }),
+    maxItems: Type.Optional(Type.Integer({ minimum: 0 })),
+  },
+  { additionalProperties: false },
+)
+
+export const ComponentLibraryFieldSchema = Type.Union([
+  ComponentLibraryScalarFieldSchema,
+  ComponentLibraryRepeaterFieldSchema,
+])
+
 export type ComponentLibraryField = Static<typeof ComponentLibraryFieldSchema>
+
+export const ComponentLibraryCompositionSchema = Type.Union([
+  Type.Literal('leaf'),
+  Type.Literal('container'),
+])
+
+export type ComponentLibraryComposition = Static<
+  typeof ComponentLibraryCompositionSchema
+>
 
 const ComponentLibraryOptionSchema = Type.Object(
   {
@@ -329,6 +394,8 @@ export const ComponentLibraryEntrySchema = Type.Object(
     icon: LocalIdSchema,
     source: ComponentLibrarySourceSchema,
     status: ComponentLibraryStatusSchema,
+    /** Explicit authoring shape. Leaf components must never expose slots. */
+    composition: Type.Optional(ComponentLibraryCompositionSchema),
     replacementEntryId: Type.Optional(NamespacedIdSchema),
     implementation: ComponentLibraryImplementationSchema,
     fields: Type.Array(ComponentLibraryFieldSchema),

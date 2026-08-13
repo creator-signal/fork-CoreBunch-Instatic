@@ -209,6 +209,7 @@ export const BUILT_IN_INTERACTIVE_COMPONENT_LIBRARY_ENTRIES:
 readonly ComponentLibraryEntry[] = [
   visualComponentEntry({
     id: 'base.dialog',
+    container: true,
     name: 'Modal / Dialog',
     description: 'Focused interactive content with governed dismissal and focus.',
     category: 'Interactive',
@@ -234,6 +235,7 @@ readonly ComponentLibraryEntry[] = [
   }),
   visualComponentEntry({
     id: 'base.drawer',
+    container: true,
     name: 'Drawer',
     description: 'Supporting content presented from a governed viewport edge.',
     category: 'Interactive',
@@ -258,6 +260,7 @@ readonly ComponentLibraryEntry[] = [
   }),
   visualComponentEntry({
     id: 'base.carousel',
+    container: true,
     name: 'Carousel',
     description: 'A controlled sequence of governed content slides.',
     category: 'Interactive',

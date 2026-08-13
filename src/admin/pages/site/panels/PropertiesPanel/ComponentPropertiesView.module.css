@@ -159,6 +159,74 @@
     line-height: 1.45;
 }
 
+.repeater {
+    display: grid;
+    gap: var(--space-s);
+}
+
+.repeaterHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+}
+
+.repeaterHeader > div {
+    display: grid;
+    gap: var(--space-3xs);
+}
+
+.repeaterHeader span:first-child,
+.repeaterItem legend,
+.repeaterControl > span,
+.repeaterBoolean > span {
+    color: var(--text);
+    font-size: var(--text-xs);
+    font-weight: 700;
+}
+
+.repeaterHeader span:last-child {
+    color: var(--text-subtle);
+    font-size: var(--text-2xs);
+}
+
+.repeaterItems {
+    display: grid;
+    gap: var(--space-s);
+}
+
+.repeaterItem {
+    display: grid;
+    gap: var(--space-s);
+    min-width: 0;
+    margin: 0;
+    padding: var(--space-s);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface-2);
+}
+
+.repeaterItem legend {
+    padding-inline: var(--space-2xs);
+}
+
+.repeaterControl,
+.repeaterBoolean {
+    display: grid;
+    gap: var(--space-3xs);
+}
+
+.repeaterBoolean {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+}
+
+.repeaterActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3xs);
+}
+
 .unavailableField,
 .slotList li {
     display: grid;

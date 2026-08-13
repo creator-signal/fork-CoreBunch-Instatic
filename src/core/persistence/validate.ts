@@ -50,6 +50,7 @@ import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import { pageSlugDuplicateError, pageSlugError } from '@core/page-tree'
 import { generateDefaultDarkColor, normalizeFrameworkColorSlug } from '@core/framework'
 import type { BaseNode } from '@core/page-tree'
+import { migrateComponentLibraryTrees } from '../component-library/treeMigration'
 
 // ---------------------------------------------------------------------------
 // Error type
@@ -165,9 +166,12 @@ export function validatePages(
   }
   validatePageSlugList(pages)
   pages = validatePageNodeTreesList(pages, tolerant)
+  const pageNodeMaps = pages.map((p) => p.nodes as Record<string, BaseNode>)
+  const migrationReport = migrateComponentLibraryTrees(pageNodeMaps)
   syncVCSlotInstancesInTrees(
-    pages.map((p) => p.nodes as Record<string, BaseNode>),
+    pageNodeMaps,
     resolvableVisualComponents(visualComponents),
+    migrationReport.blockedNodeIds,
   )
   const knownVcIds = storedVcIds
     ? new Set([...storedVcIds, ...resolvableVisualComponentIds()])
@@ -219,9 +223,12 @@ export function validatePagesForPartialSave(
     takenSlugs.set(slug, id)
   }
   pages = validatePageNodeTreesList(pages, false)
+  const pageNodeMaps = pages.map((p) => p.nodes as Record<string, BaseNode>)
+  const migrationReport = migrateComponentLibraryTrees(pageNodeMaps)
   syncVCSlotInstancesInTrees(
-    pages.map((p) => p.nodes as Record<string, BaseNode>),
+    pageNodeMaps,
     resolvableVisualComponents(visualComponents),
+    migrationReport.blockedNodeIds,
   )
   stripDanglingVCRefsInPages(pages, resolvableVisualComponentIds(visualComponents))
   sanitizePageNodeRichtextProps(pages)
@@ -304,7 +311,9 @@ export function validateVisualComponents(rawVCs: unknown[]): VisualComponent[] {
   stripDanglingVCRefsInVCs(acyclic)
   // Heal slot-instances for VC refs nested inside other VC trees (ISS-026) —
   // refs are resolved against the surviving VC roster.
-  syncVCSlotInstancesInTrees(acyclic.map((vc) => vc.tree.nodes as Record<string, BaseNode>), acyclic)
+  const vcNodeMaps = acyclic.map((vc) => vc.tree.nodes as Record<string, BaseNode>)
+  const migrationReport = migrateComponentLibraryTrees(vcNodeMaps)
+  syncVCSlotInstancesInTrees(vcNodeMaps, acyclic, migrationReport.blockedNodeIds)
   sanitizeVCNodeRichtextProps(acyclic)
   return acyclic
 }
@@ -614,11 +623,13 @@ function validatePageNodeTreesList(pages: Page[], tolerant: boolean): Page[] {
 function syncVCSlotInstancesInTrees(
   nodeMaps: Array<Record<string, BaseNode>>,
   visualComponents: VisualComponent[],
+  blockedNodeIds: ReadonlySet<string> = new Set(),
 ): void {
   const vcById = new Map(visualComponents.map((vc) => [vc.id, vc]))
   for (const treeNodes of nodeMaps) {
     for (const node of Object.values(treeNodes)) {
       if (node.moduleId !== 'base.visual-component-ref') continue
+      if (blockedNodeIds.has(node.id)) continue
       const componentId = node.props.componentId
       if (typeof componentId !== 'string' || !componentId) continue
       const vc = vcById.get(componentId)

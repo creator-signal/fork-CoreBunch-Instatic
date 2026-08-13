@@ -21,6 +21,7 @@ import { BUILT_IN_DESIGN_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryDes
 import { BUILT_IN_CAPABILITY_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryCapabilityEntries'
 import { BUILT_IN_TEMPLATE_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryTemplateComponents'
 import { BUILT_IN_CANONICAL_VISUAL_COMPONENT_LIBRARY_ENTRIES } from './componentLibraryCanonicalVisualComponents'
+import './componentLibraryLeafMigrations'
 
 export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[] = [
   ...BUILT_IN_TEMPLATE_COMPONENT_LIBRARY_ENTRIES,
@@ -31,6 +32,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     category: 'Structure',
     icon: 'layout-columns',
     moduleId: 'base.container',
+    container: true,
     tags: ['section', 'layout', 'structure'],
     preset: {
       id: 'section',
@@ -47,6 +49,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     category: 'Structure',
     icon: 'layout-columns',
     moduleId: 'base.container',
+    container: true,
     tags: ['container', 'layout', 'group'],
     fields: [htmlTagField],
     usage: 'Group content when no more specific catalogue entry applies.',
@@ -374,6 +377,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     category: 'Interactive',
     icon: 'layout-solid',
     moduleId: 'base.tab-panel',
+    container: true,
     tags: ['tab', 'panel', 'interactive', 'form'],
     fields: [
       { key: 'tabId', label: 'Tab ID', type: 'text', required: true, advanced: true },
@@ -393,6 +397,7 @@ export const BUILT_IN_COMPONENT_LIBRARY_ENTRIES: readonly ComponentLibraryEntry[
     category: 'Interactive',
     icon: 'list-box-solid',
     moduleId: 'base.accordion-item',
+    container: true,
     tags: ['accordion', 'details', 'summary', 'form'],
     fields: [
       { key: 'title', label: 'Summary', type: 'text', required: true },

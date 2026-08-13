@@ -67,7 +67,10 @@ export const COMPONENT_FRAME_CSS = `
   border-inline-start: var(--space-2xs) solid var(--border-primary);
 }
 [data-instatic-component="breadcrumb"] ol,
-[data-instatic-component="table-of-contents"] ul {
+[data-instatic-component="table-of-contents"] ul,
+[data-instatic-link-collection="navigation"],
+[data-instatic-link-collection="profile"],
+[data-instatic-link-collection="actions"] {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-xs) var(--space-m);
@@ -87,6 +90,10 @@ export const COMPONENT_FRAME_CSS = `
 [data-instatic-component="navigation"][data-variant="vertical"] {
   flex-direction: column;
   align-items: stretch;
+}
+[data-instatic-component="navigation"][data-variant="vertical"]
+  [data-instatic-link-collection="navigation"] {
+  flex-direction: column;
 }
 [data-instatic-component="grid"],
 [data-instatic-component="card-grid"],

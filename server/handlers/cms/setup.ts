@@ -2,8 +2,8 @@
  * First-run setup endpoints + public site identity.
  *
  *   GET  /admin/api/cms/setup/status — does the install need setup?
- *   POST /admin/api/cms/setup        — create site + first owner + a
- *                                       starter homepage in one transaction.
+ *   POST /admin/api/cms/setup        — create site + first owner + a default
+ *                                       homepage in one transaction.
  *   GET  /admin/api/cms/public-site  — site name + favicon URL exposed
  *                                       without auth so the login / setup
  *                                       screen can render the configured
@@ -36,7 +36,16 @@ import {
   serializeCollabAwareWrite,
 } from '../../repositories/rowWriteEvents'
 
-export async function handleSetupRoutes(req: Request, db: DbClient): Promise<Response | null> {
+interface SetupRouteOptions {
+  /** Internal starter packs can provide the first pages in the same bootstrap. */
+  seedDefaultPage?: boolean
+}
+
+export async function handleSetupRoutes(
+  req: Request,
+  db: DbClient,
+  options: SetupRouteOptions = {},
+): Promise<Response | null> {
   const url = new URL(req.url)
 
   if (url.pathname === `${CMS_API_PREFIX}/setup/status`) {
@@ -79,7 +88,7 @@ export async function handleSetupRoutes(req: Request, db: DbClient): Promise<Res
     if (password.length < 12) return badRequest('Password must be at least 12 characters')
 
     return serializeCollabAwareWrite(async () => {
-      let homePageId = ''
+      let homePageId: string | null = null
       const response = await db.transaction(async (tx) => {
         await createSite(tx, siteName, {})
         const owner = await createUser(tx, {
@@ -98,27 +107,31 @@ export async function handleSetupRoutes(req: Request, db: DbClient): Promise<Res
           metadata: { roleId: 'owner', source: 'setup' },
           ...requestAuditContext(req),
         })
-        // Seed a starter homepage as a data_row in the 'pages' system table.
-        const rootNode = createNode('base.body')
-        const homePage: Page = {
-          id: nanoid(),
-          title: 'Home',
-          slug: 'index',
-          nodes: { [rootNode.id]: rootNode },
-          rootNodeId: rootNode.id,
+        if (options.seedDefaultPage !== false) {
+          // Seed a default homepage as a data_row in the 'pages' system table.
+          const rootNode = createNode('base.body')
+          const homePage: Page = {
+            id: nanoid(),
+            title: 'Home',
+            slug: 'index',
+            nodes: { [rootNode.id]: rootNode },
+            rootNodeId: rootNode.id,
+          }
+          homePageId = homePage.id
+          await createDataRow(
+            tx,
+            { id: homePage.id, tableId: 'pages', cells: pageToCells(homePage), slug: homePage.slug },
+            owner.id,
+            null,
+            { collabInternal: true },
+          )
         }
-        homePageId = homePage.id
-        await createDataRow(
-          tx,
-          { id: homePage.id, tableId: 'pages', cells: pageToCells(homePage), slug: homePage.slug },
-          owner.id,
-          null,
-          { collabInternal: true },
-        )
         return jsonResponse({ ok: true }, { status: 201 })
       })
       notifyShellWrite()
-      notifyRowWrite({ tableId: 'pages', rowIds: [homePageId], kind: 'create' })
+      if (homePageId) {
+        notifyRowWrite({ tableId: 'pages', rowIds: [homePageId], kind: 'create' })
+      }
       return response
     })
   }

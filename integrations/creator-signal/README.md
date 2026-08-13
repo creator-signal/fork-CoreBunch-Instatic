@@ -1,11 +1,12 @@
 # Creator Signal Site Pack
 
-This plugin packages the current Creator Signal launch pages and public-site integrations for an authoring comparison in Instatic.
+This plugin packages the Creator Signal public component catalogue, initial
+site content, and runtime integrations for Instatic.
 
 TL;DR: build the plugin, install its zip, approve the requested permissions,
 and publish the imported pages. Managed deployments can use the starter-site
-bootstrap variables to create the owner, install this package, replace the
-blank setup homepage, and publish the complete site automatically.
+bootstrap variables to create the owner, install this package into an empty
+page roster, and publish the complete site automatically.
 
 ## Included experience
 
@@ -43,9 +44,31 @@ bun run instatic-plugin build integrations/creator-signal
 ```
 
 Upload `integrations/creator-signal.plugin.zip` from **Admin → Plugins** and
-approve all declared permissions. The pack owns the `index` route. On a managed
-empty installation, configure the starter-site bootstrap so Instatic removes
-the generated blank homepage before importing and publishing this pack.
+approve all declared permissions. On a managed empty installation, configure
+the starter-site bootstrap so setup defers its default homepage and the pack
+can import and publish the complete initial site.
+
+## Content ownership and upgrades
+
+Pack pages are starter content, not a live production source of truth. They are
+imported atomically only when the site has no active pages. From that first
+import onward, page IDs, routes, order and node content belong to CMS authors.
+Installing a newer plugin version or using **Re-sync pack** skips every bundled
+page whenever any active page exists; it never replaces, deletes, reorders or
+publishes authored pages.
+
+The plugin continues to govern technical records that must follow its runtime
+contract: Component Library definitions, Visual Components, saved layouts,
+namespaced styles, Mautic validation, CSP inputs, analytics event schemas and
+integration behaviour. Pack installation applies its database changes in one
+transaction. A failure leaves both authored content and technical records at
+their prior state, and an empty managed installation retries the same-version
+starter import on its next bootstrap.
+
+Future changes to already-authored marketing or approved legal copy require an
+explicit, versioned CMS content migration with preview, backup and rollback.
+They must not be implemented by changing a deterministic starter page and
+relying on plugin upgrade reconciliation.
 
 Deploy Mautic first and verify
 `https://marketing.creatorsignal.me/media/creator-signal/forms-v1.js` exposes

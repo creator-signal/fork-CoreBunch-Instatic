@@ -36,6 +36,11 @@ import { layoutSlugFromName } from '@core/layouts'
 import { badRequest, jsonResponse, methodNotAllowed } from '../../../http'
 import { type CmsHandlerOptions, requestAuditContext } from '../shared'
 import { pluginNotFound } from './shared'
+import {
+  notifyRowWrite,
+  notifyShellWrite,
+  serializeCollabAwareWrite,
+} from '../../../repositories/rowWriteEvents'
 
 export interface PluginPackSummary {
   installed: {
@@ -46,6 +51,7 @@ export interface PluginPackSummary {
   }
   replaced: { visualComponents: string[]; pages: string[]; classes: string[]; layouts: string[] }
   removed: { classes: string[] }
+  skipped: { pages: string[] }
 }
 
 /**
@@ -67,103 +73,167 @@ async function installPluginPackToSite(
   const raw = await loadPluginPackFile(uploadsDir, plugin.manifest.assetBasePath, plugin.manifest.pack.path)
   const pack = parsePluginPack(plugin.id, raw)
 
-  const shell = await getDraftSite(db)
-  if (!shell) return null
+  return serializeCollabAwareWrite(async () => {
+    const shell = await getDraftSite(db)
+    if (!shell) return null
 
-  // Assemble a temporary SiteDocument for the pack merge function.
-  // VCs and layouts are included so applyPluginPackToSite can detect
-  // replaced ids.
-  const [pageRows, vcRows, layoutRows] = await Promise.all([
-    listDataRows(db, 'pages'),
-    listDataRows(db, 'components'),
-    listDataRows(db, 'layouts'),
-  ])
-  const { visualComponentFromRow } = await import('../../../../src/core/data/componentFromRow')
-  const existingVCs = vcRows.flatMap((r) => {
-    const vc = visualComponentFromRow(r)
-    return vc ? [vc] : []
-  })
-  const existingLayouts = layoutRows.flatMap((r) => {
-    const layout = savedLayoutFromRow(r)
-    return layout ? [layout] : []
-  })
-  const tempSiteDoc = {
-    ...shell,
-    pages: pageRows.map(pageFromRow),
-    visualComponents: existingVCs,
-    layouts: existingLayouts,
-  }
-
-  const { site: nextSiteDoc, replaced, removed } = applyPluginPackToSite(plugin.id, tempSiteDoc, pack)
-
-  // Extract shell (strip pages, visualComponents, and layouts) and save
-  const { pages: packPages, visualComponents: _vcs, layouts: _layouts, ...nextShell } = nextSiteDoc
-  await saveDraftSite(db, nextShell, actorUserId)
-
-  // Upsert pack pages as data_rows
-  const existingPagesById = new Map(pageRows.map((r) => [r.id, r]))
-  for (const page of packPages) {
-    const cells = pageToCells(page)
-    if (existingPagesById.has(page.id)) {
-      await saveDataRowDraft(db, page.id, { cells, slug: page.slug }, actorUserId)
-    } else {
-      await createDataRow(db, { id: page.id, tableId: 'pages', cells, slug: page.slug }, actorUserId)
+    // Read and write under one collaboration-aware lane. The database
+    // transaction below makes the shell, technical records, optional starter
+    // pages and audit event one atomic change: a conflict or write failure
+    // leaves the existing draft untouched and the next bootstrap can retry.
+    const [pageRows, vcRows, layoutRows] = await Promise.all([
+      listDataRows(db, 'pages'),
+      listDataRows(db, 'components'),
+      listDataRows(db, 'layouts'),
+    ])
+    const { visualComponentFromRow } = await import('../../../../src/core/data/componentFromRow')
+    const existingVCs = vcRows.flatMap((r) => {
+      const vc = visualComponentFromRow(r)
+      return vc ? [vc] : []
+    })
+    const existingLayouts = layoutRows.flatMap((r) => {
+      const layout = savedLayoutFromRow(r)
+      return layout ? [layout] : []
+    })
+    const tempSiteDoc = {
+      ...shell,
+      pages: pageRows.map(pageFromRow),
+      visualComponents: existingVCs,
+      layouts: existingLayouts,
     }
-  }
 
-  // Upsert pack VCs as data_rows
-  const existingVCsById = new Map(vcRows.map((r) => [r.id, r]))
-  for (const vc of pack.visualComponents) {
-    const cells = visualComponentToCells(vc)
-    const slug = vcSlugFromName(vc.name)
-    if (existingVCsById.has(vc.id)) {
-      await saveDataRowDraft(db, vc.id, { cells, slug }, actorUserId)
-    } else {
-      await createDataRow(db, { id: vc.id, tableId: 'components', cells, slug }, actorUserId)
+    const {
+      site: nextSiteDoc,
+      replaced,
+      removed,
+      pageImport,
+    } = applyPluginPackToSite(plugin.id, tempSiteDoc, pack)
+
+    const { pages: packPages, visualComponents: _vcs, layouts: _layouts, ...nextShell } = nextSiteDoc
+    const installedPageIds = new Set(pageImport.installedIds)
+    const existingVCsById = new Set(vcRows.map((row) => row.id))
+    const existingLayoutsById = new Set(layoutRows.map((row) => row.id))
+    const createdVCIds = pack.visualComponents.filter((vc) => !existingVCsById.has(vc.id)).map((vc) => vc.id)
+    const updatedVCIds = pack.visualComponents.filter((vc) => existingVCsById.has(vc.id)).map((vc) => vc.id)
+    const createdLayoutIds = pack.layouts.filter((layout) => !existingLayoutsById.has(layout.id)).map((layout) => layout.id)
+    const updatedLayoutIds = pack.layouts.filter((layout) => existingLayoutsById.has(layout.id)).map((layout) => layout.id)
+
+    await db.transaction(async (tx) => {
+      await saveDraftSite(tx, nextShell, actorUserId, { collabInternal: true })
+
+      // Starter pages are create-only and only when the site was empty. A
+      // pack upgrade/re-sync never calls saveDataRowDraft for page rows.
+      for (const page of packPages.filter((candidate) => installedPageIds.has(candidate.id))) {
+        await createDataRow(
+          tx,
+          { id: page.id, tableId: 'pages', cells: pageToCells(page), slug: page.slug },
+          actorUserId,
+          null,
+          { collabInternal: true },
+        )
+      }
+
+      for (const vc of pack.visualComponents) {
+        const cells = visualComponentToCells(vc)
+        const slug = vcSlugFromName(vc.name)
+        if (existingVCsById.has(vc.id)) {
+          const updated = await saveDataRowDraft(
+            tx,
+            vc.id,
+            { cells, slug },
+            actorUserId,
+            null,
+            { collabInternal: true },
+          )
+          if (!updated) throw new Error(`Plugin pack Visual Component "${vc.id}" disappeared during install`)
+        } else {
+          await createDataRow(
+            tx,
+            { id: vc.id, tableId: 'components', cells, slug },
+            actorUserId,
+            null,
+            { collabInternal: true },
+          )
+        }
+      }
+
+      for (const layout of pack.layouts) {
+        const cells = savedLayoutToCells(layout)
+        const slug = layoutSlugFromName(layout.name)
+        if (existingLayoutsById.has(layout.id)) {
+          const updated = await saveDataRowDraft(
+            tx,
+            layout.id,
+            { cells, slug },
+            actorUserId,
+            null,
+            { collabInternal: true },
+          )
+          if (!updated) throw new Error(`Plugin pack layout "${layout.id}" disappeared during install`)
+        } else {
+          await createDataRow(
+            tx,
+            { id: layout.id, tableId: 'layouts', cells, slug },
+            actorUserId,
+            null,
+            { collabInternal: true },
+          )
+        }
+      }
+
+      await createAuditEvent(tx, {
+        actorUserId,
+        action: 'plugin.pack.install',
+        targetType: 'plugin',
+        targetId: plugin.id,
+        metadata: {
+          pluginId: plugin.id,
+          installedVisualComponents: pack.visualComponents.length,
+          installedPages: pageImport.installedIds,
+          skippedPages: pageImport.skippedIds,
+          installedClasses: pack.classes.length,
+          installedLayouts: pack.layouts.length,
+          replacedVisualComponents: replaced.visualComponents,
+          replacedPages: replaced.pages,
+          replacedClasses: replaced.classes,
+          replacedLayouts: replaced.layouts,
+          removedClasses: removed.classes,
+        },
+        ...requestAuditContext(req),
+      })
+    })
+
+    notifyShellWrite()
+    if (pageImport.installedIds.length > 0) {
+      notifyRowWrite({ tableId: 'pages', rowIds: pageImport.installedIds, kind: 'create' })
     }
-  }
-
-  // Upsert pack layouts as data_rows
-  const existingLayoutRowsById = new Map(layoutRows.map((r) => [r.id, r]))
-  for (const layout of pack.layouts) {
-    const cells = savedLayoutToCells(layout)
-    const slug = layoutSlugFromName(layout.name)
-    if (existingLayoutRowsById.has(layout.id)) {
-      await saveDataRowDraft(db, layout.id, { cells, slug }, actorUserId)
-    } else {
-      await createDataRow(db, { id: layout.id, tableId: 'layouts', cells, slug }, actorUserId)
+    if (createdVCIds.length > 0) {
+      notifyRowWrite({ tableId: 'components', rowIds: createdVCIds, kind: 'create' })
     }
-  }
+    if (updatedVCIds.length > 0) {
+      notifyRowWrite({ tableId: 'components', rowIds: updatedVCIds, kind: 'update' })
+    }
+    if (createdLayoutIds.length > 0) {
+      notifyRowWrite({ tableId: 'layouts', rowIds: createdLayoutIds, kind: 'create' })
+    }
+    if (updatedLayoutIds.length > 0) {
+      notifyRowWrite({ tableId: 'layouts', rowIds: updatedLayoutIds, kind: 'update' })
+    }
 
-  await createAuditEvent(db, {
-    actorUserId,
-    action: 'plugin.pack.install',
-    targetType: 'plugin',
-    targetId: plugin.id,
-    metadata: {
-      pluginId: plugin.id,
-      installedVisualComponents: pack.visualComponents.length,
-      installedPages: pack.pages.length,
-      installedClasses: pack.classes.length,
-      installedLayouts: pack.layouts.length,
-      replacedVisualComponents: replaced.visualComponents,
-      replacedPages: replaced.pages,
-      replacedClasses: replaced.classes,
-      replacedLayouts: replaced.layouts,
-      removedClasses: removed.classes,
-    },
-    ...requestAuditContext(req),
+    return {
+      installed: {
+        visualComponents: pack.visualComponents.map((vc) => ({ id: vc.id, name: vc.name })),
+        pages: pack.pages
+          .filter((page) => installedPageIds.has(page.id))
+          .map((page) => ({ id: page.id, title: page.title })),
+        classes: pack.classes.map((c) => ({ id: c.id, name: c.name })),
+        layouts: pack.layouts.map((l) => ({ id: l.id, name: l.name })),
+      },
+      replaced,
+      removed,
+      skipped: { pages: pageImport.skippedIds },
+    }
   })
-  return {
-    installed: {
-      visualComponents: pack.visualComponents.map((vc) => ({ id: vc.id, name: vc.name })),
-      pages: pack.pages.map((p) => ({ id: p.id, title: p.title })),
-      classes: pack.classes.map((c) => ({ id: c.id, name: c.name })),
-      layouts: pack.layouts.map((l) => ({ id: l.id, name: l.name })),
-    },
-    replaced,
-    removed,
-  }
 }
 
 /**

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'bun:test'
 import { handleCmsRequest } from '../../../server/handlers/cms'
+import { handleSetupRoutes } from '../../../server/handlers/cms/setup'
 import type { DbClient, DbResult } from '../../../server/db'
 import { SESSION_COOKIE_NAME } from '../../../server/auth/tokens'
 import { loginRateLimit } from '../../../server/auth/rateLimit'
@@ -443,9 +444,6 @@ describe('CMS handlers', () => {
   })
 
   it('creates the first site and owner account', async () => {
-    // Step 2 of unified-content-storage: the legacy pages table is gone; the
-    // home page seed will be added back in Step 3 as a data_row in the
-    // seeded 'pages' data table. For now setup creates the site + owner only.
     const db = makeFakeDb()
     const res = await handleCmsRequest(new Request('http://localhost/admin/api/cms/setup', {
       method: 'POST',
@@ -456,8 +454,32 @@ describe('CMS handlers', () => {
     expect(await json(res)).toMatchObject({ ok: true })
     expect(db.site).toHaveLength(1)
     expect(db.users).toHaveLength(1)
+    expect(db.pages).toHaveLength(1)
+    expect(db.pages[0]).toMatchObject({ slug: 'index', status: 'draft' })
     expect(db.users[0]).toMatchObject({ email_normalized: 'owner@example.com', role_id: 'owner', status: 'active' })
     expect(db.auditEvents[0]?.ip_address).toBeNull()
+  })
+
+  it('lets the trusted starter bootstrap seed the first pages instead', async () => {
+    const db = makeFakeDb()
+    const response = await handleSetupRoutes(
+      new Request('http://localhost/admin/api/cms/setup', {
+        method: 'POST',
+        body: JSON.stringify({
+          siteName: 'Starter',
+          email: 'owner@example.com',
+          password: 'long-enough-password',
+        }),
+        headers: { 'content-type': 'application/json' },
+      }),
+      db,
+      { seedDefaultPage: false },
+    )
+
+    expect(response?.status).toBe(201)
+    expect(db.site).toHaveLength(1)
+    expect(db.users).toHaveLength(1)
+    expect(db.pages).toEqual([])
   })
 
   it('refuses setup after an owner exists', async () => {

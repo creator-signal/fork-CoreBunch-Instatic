@@ -1064,6 +1064,25 @@ page-namespaced. Re-syncing or upgrading a pack makes its namespaced class
 registry authoritative: plugin-owned rules omitted by the new package are
 removed, while user-owned rules are preserved.
 
+Pack pages have a deliberately different lifecycle from technical pack
+records. They are starter content and are imported only when the active page
+roster is empty. If any active page exists, installation, upgrade and explicit
+**Re-sync pack** skip the complete bundled page set. They never update a page by
+ID, delete or reorder an authored page, or publish content. Visual Components,
+saved layouts, plugin-owned styles and deterministic CSS conditions continue
+to reconcile by ID because those are executable/technical contracts.
+
+The shell, technical rows, optional starter pages and audit event are committed
+in one database transaction. A failed pack changes nothing. Managed empty-site
+bootstrap suppresses the ordinary blank homepage, imports starter pages once,
+and publishes only when that import reports new pages. If the plugin became
+active but the atomic import failed, the next same-version boot retries only
+while the page roster is still empty.
+
+Do not use a pack upgrade as a content migration. A product that must update
+existing authored pages needs a separate, explicitly versioned migration with
+preview, backup, rollback and an auditable operator action.
+
 ### Cookbook: a server route + storage collection
 
 ```js

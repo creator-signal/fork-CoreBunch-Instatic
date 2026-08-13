@@ -9,11 +9,10 @@
  *   1. Loads the pack JSON from disk (plus integrity / containment checks).
  *   2. Validates each entry against the canonical site-document schemas
  *      (`parseVisualComponent`, `parsePageNode` traversal, etc.).
- *   3. Reconciles the active draft site by id — ids that already exist on
- *      the site get replaced (idempotent re-install), and plugin-owned style
- *      rules omitted by the new pack are removed. Class ids prefixed with the
- *      plugin id stay namespaced; non-namespaced classes from the pack are
- *      rejected to keep ownership traceable.
+ *   3. Imports starter pages only when the active draft has no pages. Once any
+ *      page exists, page content belongs to the CMS and re-install/upgrade
+ *      skips every page in the pack. Technical records (Visual Components,
+ *      layouts and plugin-owned styles) continue to reconcile by id.
  *   4. Saves the updated site.
  *
  * Pack validation lives here so the route handler stays thin and the rules
@@ -58,6 +57,10 @@ interface PluginPackInstallResult {
   }
   removedIds: {
     classes: string[]
+  }
+  pageImport: {
+    installedIds: string[]
+    skippedIds: string[]
   }
 }
 
@@ -202,9 +205,9 @@ function suggestClassName(pluginId: string, classId: string): string {
 }
 
 /**
- * Merge a parsed pack's pages and classes into a site document, replacing
- * entries by id. Returns the next site document and a list of replaced ids
- * per category.
+ * Merge a parsed pack's technical records into a site document. Pack pages
+ * are one-time starter content: they are imported only when the site has no
+ * active pages and are never reconciled or replaced by id afterwards.
  *
  * NOTE: Visual Components and saved layouts are not merged into the shell —
  * both are row-backed (`data_rows` table_id 'components' / 'layouts'), so the
@@ -220,6 +223,7 @@ export function applyPluginPackToSite(
   site: SiteDocument
   replaced: PluginPackInstallResult['replacedIds']
   removed: PluginPackInstallResult['removedIds']
+  pageImport: PluginPackInstallResult['pageImport']
 } {
   const replaced: PluginPackInstallResult['replacedIds'] = {
     visualComponents: [],
@@ -241,10 +245,10 @@ export function applyPluginPackToSite(
     }
   }
 
-  const pagesById = new Map(site.pages.map((p) => [p.id, p]))
-  for (const page of pack.pages) {
-    if (pagesById.has(page.id)) replaced.pages.push(page.id)
-    pagesById.set(page.id, page)
+  const installStarterPages = site.pages.length === 0
+  const pageImport: PluginPackInstallResult['pageImport'] = {
+    installedIds: installStarterPages ? pack.pages.map((page) => page.id) : [],
+    skippedIds: installStarterPages ? [] : pack.pages.map((page) => page.id),
   }
 
   const incomingClassIds = new Set(pack.classes.map((cls) => cls.id))
@@ -269,13 +273,14 @@ export function applyPluginPackToSite(
   return {
     site: {
       ...site,
-      pages: [...pagesById.values()],
+      pages: installStarterPages ? [...pack.pages] : site.pages,
       styleRules: nextClasses,
       conditions: [...nextConditions.values()],
       updatedAt: Date.now(),
     },
     replaced,
     removed,
+    pageImport,
   }
 }
 

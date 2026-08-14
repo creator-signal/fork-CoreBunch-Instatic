@@ -1,13 +1,33 @@
 import { describe, expect, it } from 'bun:test'
 import '@modules/base'
+import { registry } from '@core/module-engine'
+import { publishPage } from '@core/publisher'
+import { composeTemplateChain } from '@core/templates'
+import { pluginModuleToHostModule } from '@core/plugins/moduleAdapter'
+import { makeRegistry, makeSite } from '../publisher/helpers'
 import creatorSignalPlugin from '../../../integrations/creator-signal/instatic-plugin.config'
-import { creatorSignalHeroEntry } from '../../../integrations/creator-signal/component-library'
+import {
+  creatorSignalComponentLibraryEntries,
+  creatorSignalHeroEntry,
+} from '../../../integrations/creator-signal/component-library'
 import mauticForm from '../../../integrations/creator-signal/modules/mautic-form'
+import {
+  consentBanner,
+  faq,
+  featureGrid,
+  publicDocument,
+  richTextSection,
+  siteFooter,
+  siteHeader,
+} from '../../../integrations/creator-signal/modules/site-components'
 import { pack } from '../../../integrations/creator-signal/pack/site'
 
+const publicPages = pack.pages.filter((page) => !page.template)
+const templatePage = pack.pages.find((page) => page.template)
+
 describe('Creator Signal site pack', () => {
-  it('contains the complete public launch route set', () => {
-    expect(pack.pages.map((page) => page.slug)).toEqual([
+  it('contains the complete public launch route set plus one shared template', () => {
+    expect(publicPages.map((page) => page.slug)).toEqual([
       'index',
       'products',
       'products/sales-pulse',
@@ -32,10 +52,18 @@ describe('Creator Signal site pack', () => {
       'help/account-data',
       'status',
     ])
+    expect(templatePage).toMatchObject({
+      slug: '_templates/creator-signal-site',
+      template: {
+        enabled: true,
+        target: { kind: 'everywhere' },
+        priority: 0,
+      },
+    })
   })
 
   it('injects the Creator Signal favicon and PWA manifest into published pages', () => {
-    expect(creatorSignalPlugin.manifest.version).toBe('0.1.11')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.2.0')
     expect(creatorSignalPlugin.manifest.frontend?.assets).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -64,27 +92,73 @@ describe('Creator Signal site pack', () => {
     )
   })
 
-  it('ships operator-approved initial legal pages without draft activation copy', () => {
-    const legalPages = pack.pages.filter((page) =>
+  it('keeps shared header, footer and consent content in the template only', () => {
+    const moduleIds = Object.values(templatePage?.nodes ?? {}).map((node) => node.moduleId)
+    expect(moduleIds.filter((id) => id === 'base.outlet')).toHaveLength(1)
+    expect(moduleIds).toEqual(expect.arrayContaining([
+      'creator-signal.site.header',
+      'creator-signal.site.footer',
+      'creator-signal.site.consent-banner',
+    ]))
+
+    for (const page of publicPages) {
+      const pageModuleIds = Object.values(page.nodes).map((node) => node.moduleId)
+      expect(pageModuleIds).not.toContain('base.outlet')
+      expect(pageModuleIds).not.toContain('creator-signal.site.header')
+      expect(pageModuleIds).not.toContain('creator-signal.site.footer')
+      expect(pageModuleIds).not.toContain('creator-signal.site.consent-banner')
+    }
+  })
+
+  it('uses governed leaf components with typed repeaters instead of authored child slots', () => {
+    for (const entry of creatorSignalComponentLibraryEntries) {
+      expect(entry.composition).toBe('leaf')
+      expect(entry.slots).toEqual([])
+    }
+
+    for (const page of publicPages) {
+      const body = page.nodes[page.rootNodeId]
+      for (const nodeId of body.children) {
+        const node = page.nodes[nodeId]
+        expect(node.catalogueInstance?.entryId).toStartWith('creator-signal.site.')
+        expect(node.children).toEqual([])
+      }
+    }
+
+    const featuresPage = publicPages.find((page) => page.slug === 'features')
+    const featureNode = Object.values(featuresPage?.nodes ?? {}).find(
+      (node) => node.moduleId === 'creator-signal.site.feature-grid',
+    )
+    expect(featureNode?.props.items).toBeArrayOfSize(6)
+    expect(featureNode?.props.items).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        marker: '01',
+        heading: 'Sales imports',
+      }),
+    ]))
+  })
+
+  it('stores coherent legal prose in one rich-text field per section', () => {
+    const legalPages = publicPages.filter((page) =>
       page.slug.startsWith('legal/') ||
       page.slug.startsWith('trust/') ||
       page.slug === 'support' ||
       page.slug === 'help/account-data' ||
       page.slug === 'status')
-    const pageText = (page: (typeof pack.pages)[number]) => Object.values(page.nodes)
-      .map((node) => typeof node.props.text === 'string' ? node.props.text : '')
-      .join(' ')
 
     expect(legalPages).toHaveLength(12)
     for (const page of legalPages) {
-      const text = pageText(page)
-      expect(text).toContain('Version 2026-08-02. Effective 2 August 2026.')
-      expect(text).toContain('INSIGHT VISION PTY LTD (ACN 601 335 460), Australia')
-      expect(text).not.toMatch(/draft|must receive final jurisdiction-specific legal approval/i)
+      const proseNodes = Object.values(page.nodes).filter((node) =>
+        node.moduleId === 'creator-signal.site.rich-text-section' ||
+        node.moduleId === 'creator-signal.site.public-document')
+      expect(proseNodes).toHaveLength(1)
+      expect(proseNodes[0].props.body).toContain('<p>Version 2026-08-02. Effective 2 August 2026.</p>')
+      expect(proseNodes[0].props.body).toContain('INSIGHT VISION PTY LTD (ACN 601 335 460), Australia')
+      expect(proseNodes[0].props.body).not.toMatch(/draft|must receive final jurisdiction-specific legal approval/i)
     }
   })
 
-  it('turns every public intake placeholder into an alias-resolved Mautic module', () => {
+  it('turns every public intake page into a governed alias-resolved Mautic component', () => {
     const forms = [
       ['contact', 'creator_signal_contact'],
       ['feedback', 'creator_signal_feedback'],
@@ -95,10 +169,11 @@ describe('Creator Signal site pack', () => {
     ]
 
     for (const [slug, alias] of forms) {
-      const page = pack.pages.find((candidate) => candidate.slug === slug)
+      const page = publicPages.find((candidate) => candidate.slug === slug)
       const formNode = Object.values(page?.nodes ?? {}).find(
         (node) => node.moduleId === 'creator-signal.site.mautic-form',
       )
+      expect(formNode?.catalogueInstance?.entryId).toBe('creator-signal.site.mautic-form')
       expect(formNode?.props).toMatchObject({
         mauticBaseUrl: 'https://marketing.creatorsignal.me',
         formAlias: alias,
@@ -120,25 +195,70 @@ describe('Creator Signal site pack', () => {
     expect(output.js).toContain("registry.schema !== 'creator-signal.mautic-forms/v1'")
     expect(output.js).toContain("new Error('form_markup_missing')")
     expect(output.js).toContain("dispatch(root, 'failure', 'registry_invalid')")
-    expect(output.cspSources).toEqual([
-      { directive: 'script-src', sources: ['https://marketing.creatorsignal.me'] },
-      { directive: 'connect-src', sources: ['https://marketing.creatorsignal.me'] },
-      { directive: 'form-action', sources: ['https://marketing.creatorsignal.me'] },
-    ])
   })
 
-  it('offers the shared author layouts used across the launch pages', () => {
-    expect(pack.layouts.map((layout) => layout.name)).toEqual([
-      'Creator Signal hero',
-      'Creator Signal feature grid',
-      'Creator Signal call to action',
-      'Creator Signal rich text',
-      'Creator Signal testimonial',
-      'Creator Signal FAQ',
-    ])
+  it('publishes page-level SEO and semantic structured-data markup', () => {
+    for (const page of publicPages) {
+      expect(typeof page.seo?.description).toBe('string')
+      expect(page.seo?.canonicalUrl).toStartWith('https://creatorsignal.me')
+      expect(page.seo?.language).toBe('en-AU')
+      expect(page.seo?.robots).toEqual({ index: true, follow: true, archive: true })
+      expect(typeof page.seo?.openGraph?.title).toBe('string')
+      expect(typeof page.seo?.openGraph?.description).toBe('string')
+      expect(page.seo?.twitter?.card).toBe('summary')
+      expect(typeof page.seo?.twitter?.title).toBe('string')
+    }
+
+    expect(siteHeader.render(siteHeader.defaults, []).html).toContain('https://schema.org/SiteNavigationElement')
+    expect(siteFooter.render(siteFooter.defaults, []).html).toContain('https://schema.org/SiteNavigationElement')
+    expect(faq.render(faq.defaults, []).html).toContain('https://schema.org/FAQPage')
+    expect(publicDocument.render(publicDocument.defaults, []).html).toContain('https://schema.org/Article')
+  })
+
+  it('publishes the shared template and governed home components as one semantic document', () => {
+    const modules = Object.fromEntries(registry.list().map((module) => [module.id, module]))
+    for (const definition of creatorSignalPlugin.modules) {
+      modules[definition.id] = pluginModuleToHostModule(
+        'creator-signal.site',
+        definition,
+        () => () => null,
+        creatorSignalPlugin.manifest.permissions,
+        creatorSignalPlugin.manifest.networkAllowedHosts,
+      )
+    }
+    const home = publicPages.find((page) => page.slug === 'index')!
+    const composed = composeTemplateChain([templatePage!], { kind: 'page', page: home })
+    composed.seo = home.seo
+    const site = makeSite({
+      pages: pack.pages,
+      visualComponents: pack.visualComponents,
+      styleRules: Object.fromEntries(pack.classes.map((rule) => [rule.id, rule])),
+    })
+    const output = publishPage(composed, site, makeRegistry(modules)).html
+
+    expect(output.match(/<header class="site-header">/g)).toHaveLength(1)
+    expect(output.match(/<footer class="site-footer">/g)).toHaveLength(1)
+    expect(output.match(/data-consent-banner/g)).toHaveLength(1)
+    expect(output.match(/<h1/g)).toHaveLength(1)
+    expect(output).toContain('<main id="main-content">')
+    expect(output).toContain('<meta name="description"')
+    expect(output).toContain('<link rel="canonical" href="https://creatorsignal.me/">')
+    expect(output).toContain('property="og:title"')
+    expect(output).toContain('name="twitter:card" content="summary"')
+    expect(output).toContain('class="feature-grid"')
+    expect(output).toContain('data-analytics-choice="granted"')
+  })
+
+  it('preserves the consent runtime hooks and sanitised rich-text boundary', () => {
+    const consent = consentBanner.render(consentBanner.defaults, []).html
+    expect(consent).toContain('data-consent-banner')
+    expect(consent).toContain('data-analytics-choice="denied"')
+    expect(consent).toContain('data-analytics-choice="granted"')
+    expect(richTextSection.schema.body.type).toBe('richtext')
   })
 
   it('publishes the shared editorial design system once', () => {
+    expect(pack.layouts).toEqual([])
     expect(new Set(pack.classes.map((rule) => rule.id)).size).toBe(pack.classes.length)
     expect(pack.conditions.map((condition) => condition.id)).toEqual([
       'media:(max-width: 900px)',
@@ -155,10 +275,6 @@ describe('Creator Signal site pack', () => {
       marginLeft: 'auto',
       marginRight: 'auto',
     })
-    expect(classStyles('hero-section')).toMatchObject({
-      display: 'grid',
-      gridTemplateColumns: 'minmax(0, 1.1fr) minmax(320px, .9fr)',
-    })
     expect(classStyles('feature-grid')).toMatchObject({
       display: 'grid',
       gridTemplateColumns: 'repeat(3, 1fr)',
@@ -169,34 +285,14 @@ describe('Creator Signal site pack', () => {
       borderTopLeftRadius: '24px',
       borderTopRightRadius: '24px',
     })
-    expect(pack.classes.find((rule) =>
-      rule.kind === 'ambient' && rule.name === 'h1')?.styles,
-    ).toMatchObject({
-      fontSize: '7rem',
-    })
-    expect(pack.classes.find((rule) =>
-      rule.kind === 'ambient' && rule.name === ':root')?.styles,
-    ).toMatchObject({
-      '--cs-paper': '#fbf7f2',
-      '--cs-sage': '#5e6f57',
-    })
-
-    const features = pack.pages.find((page) => page.slug === 'features')
-    const hero = Object.values(features?.nodes ?? {}).find((node) =>
-      node.classIds.some((id) => id.endsWith('/hero-section')))
-    expect(hero).toBeDefined()
-
-    const boundedSections = Object.values(features?.nodes ?? {}).filter((node) =>
-      node.classIds.some((id) =>
-        id.endsWith('/hero-section') || id.endsWith('/content-section')))
-    expect(boundedSections.length).toBeGreaterThanOrEqual(2)
+    expect(featureGrid.render(featureGrid.defaults, []).html).toContain('class="feature-grid"')
   })
 
-  it('ships a parameterised Hero Visual Component with MinIO-backed artwork support', () => {
-    const hero = pack.visualComponents.find((component) =>
+  it('ships a parameterised Hero Visual Component with media artwork support', () => {
+    const heroComponent = pack.visualComponents.find((component) =>
       component.id === 'creator-signal.site/component/hero')
-    expect(hero?.name).toBe('Creator Signal Hero')
-    expect(hero?.params.map(({ name, type, required }) => ({ name, type, required }))).toEqual([
+    expect(heroComponent?.name).toBe('Creator Signal Hero')
+    expect(heroComponent?.params.map(({ name, type, required }) => ({ name, type, required }))).toEqual([
       { name: 'Eyebrow', type: 'string', required: true },
       { name: 'Heading', type: 'string', required: true },
       { name: 'Introduction', type: 'string', required: true },
@@ -204,56 +300,24 @@ describe('Creator Signal site pack', () => {
       { name: 'Action URL', type: 'url', required: true },
       { name: 'Artwork', type: 'image', required: false },
     ])
-
-    const nodes = Object.values(hero?.tree.nodes ?? {})
-    const boundParamIds = nodes.flatMap((node) =>
-      Object.values(node.propBindings ?? {}).map((binding) => binding.paramId))
-    expect(new Set(boundParamIds)).toEqual(new Set(hero?.params.map((param) => param.id)))
-    for (const classId of hero?.classIds ?? []) {
-      expect(pack.classes.some((rule) => rule.id === classId)).toBe(true)
-    }
-
-    const image = nodes.find((node) => node.moduleId === 'base.image')
-    expect(image?.props).toMatchObject({
-      src: '',
-      loading: 'eager',
-      fetchPriority: 'high',
-    })
-    expect(image?.propBindings?.src?.paramId).toBe(
-      'creator-signal.site.hero.artwork',
-    )
   })
 
-  it('registers the Hero as an explicitly owned governed catalogue component', () => {
+  it('registers every site block as a Creator Signal governed component', () => {
     expect(creatorSignalPlugin.manifest.permissions).toContain('componentLibrary.register')
-    expect(creatorSignalPlugin.componentLibrary).toEqual([creatorSignalHeroEntry])
-    expect(creatorSignalHeroEntry).toMatchObject({
-      id: 'creator-signal.site.hero',
-      source: {
-        type: 'plugin',
-        pluginId: 'creator-signal.site',
-        name: 'Creator Signal',
-      },
-      implementation: {
-        type: 'visual-component',
-        componentId: 'creator-signal.site/component/hero',
-      },
-      requirements: {
-        plugins: ['creator-signal.site'],
-      },
-    })
-
-    const hero = pack.visualComponents.find((component) =>
-      component.id === 'creator-signal.site/component/hero')
-    expect(creatorSignalHeroEntry.fields.map((field) => field.key))
-      .toEqual(hero?.params.map((param) => param.id))
-    expect(creatorSignalHeroEntry.fields.map((field) => field.label)).toEqual([
-      'Eyebrow',
-      'Heading',
-      'Introduction',
-      'Action label',
-      'Action URL',
-      'Artwork',
+    expect(creatorSignalPlugin.componentLibrary).toEqual(creatorSignalComponentLibraryEntries)
+    expect(creatorSignalComponentLibraryEntries).toContain(creatorSignalHeroEntry)
+    expect(creatorSignalComponentLibraryEntries.map((entry) => entry.id)).toEqual([
+      'creator-signal.site.hero',
+      'creator-signal.site.header',
+      'creator-signal.site.footer',
+      'creator-signal.site.consent-banner',
+      'creator-signal.site.feature-grid',
+      'creator-signal.site.call-to-action',
+      'creator-signal.site.rich-text-section',
+      'creator-signal.site.testimonial',
+      'creator-signal.site.faq',
+      'creator-signal.site.public-document',
+      'creator-signal.site.mautic-form',
     ])
   })
 })

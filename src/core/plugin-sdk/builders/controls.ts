@@ -30,6 +30,10 @@ export const control = {
     return { type: 'textarea', label, ...options }
   },
 
+  richtext(label: string, options: { description?: string } = {}): PluginPropertyControl {
+    return { type: 'richtext', label, ...options }
+  },
+
   number(
     label: string,
     options: { min?: number; max?: number; step?: number; unit?: string; description?: string } = {},

@@ -1,0 +1,260 @@
+import { createHash } from 'node:crypto'
+import type { DataRow, DataTable } from '@core/data/schemas'
+import type { SiteBundleArchiveManifest } from '@core/data/bundleArchive'
+import { pageToCells } from '@core/data/pageFromRow'
+import { legacyCreatorSignalPageHashes0111 } from '../legacy-0.1.11-hashes'
+import { pack } from '../../pack/site'
+
+export const CREATOR_SIGNAL_CONTENT_MIGRATION = 'creator-signal.site/content/0.2.0'
+
+export type PageMigrationState =
+  | 'legacy-eligible'
+  | 'already-current'
+  | 'authored-content'
+  | 'missing'
+  | 'template-add'
+  | 'template-current'
+  | 'template-conflict'
+  | 'additional-page'
+
+export interface PageMigrationPreview {
+  id: string
+  slug: string
+  state: PageMigrationState
+  currentHash?: string
+  legacyHash?: string
+  targetHash?: string
+}
+
+export interface CreatorSignalMigrationReport {
+  schema: 'creator-signal.site/content-migration-report/v1'
+  migration: typeof CREATOR_SIGNAL_CONTENT_MIGRATION
+  ready: boolean
+  pages: PageMigrationPreview[]
+  blockers: string[]
+  summary: {
+    legacyEligible: number
+    alreadyCurrent: number
+    authoredContent: number
+    missing: number
+    additionalPages: number
+    template: 'add' | 'current' | 'conflict'
+    rowsInMigration: number
+  }
+  apply: {
+    strategy: 'merge-overwrite'
+    publishesAutomatically: false
+    instruction: string
+  }
+  rollback: {
+    archiveStrategy: 'replace'
+    instruction: string
+  }
+}
+
+export interface PreparedCreatorSignalMigration {
+  report: CreatorSignalMigrationReport
+  manifest: SiteBundleArchiveManifest | null
+}
+
+function canonical(value: unknown): string {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value)
+  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`
+  const record = value as Record<string, unknown>
+  return `{${Object.keys(record).sort().map((key) =>
+    `${JSON.stringify(key)}:${canonical(record[key])}`).join(',')}}`
+}
+
+export function canonicalSha256(value: unknown): string {
+  return createHash('sha256').update(canonical(value)).digest('hex')
+}
+
+function pageTableWithSeo(table: DataTable): DataTable {
+  if (table.fields.some((field) => field.id === 'seo')) return table
+  return {
+    ...table,
+    fields: [
+      ...table.fields,
+      { type: 'longText', id: 'seo', label: 'SEO metadata', builtIn: true },
+    ],
+  }
+}
+
+function newTemplateRow(page: (typeof pack.pages)[number], now: string): DataRow {
+  return {
+    id: page.id,
+    tableId: 'pages',
+    cells: pageToCells(page),
+    slug: page.slug,
+    status: 'draft',
+    seq: 0,
+    authorUserId: null,
+    createdByUserId: null,
+    updatedByUserId: null,
+    publishedByUserId: null,
+    author: null,
+    createdBy: null,
+    updatedBy: null,
+    publishedBy: null,
+    createdAt: now,
+    updatedAt: now,
+    publishedAt: null,
+    scheduledPublishAt: null,
+    deletedAt: null,
+  }
+}
+
+export function prepareCreatorSignalContentMigration(
+  source: SiteBundleArchiveManifest,
+  now = new Date().toISOString(),
+): PreparedCreatorSignalMigration {
+  const pageTable = source.tables.find((table) => table.id === 'pages')
+  if (!pageTable) {
+    const report = blockedReport('The export does not contain the pages table.')
+    return { report, manifest: null }
+  }
+
+  const sourceRows = source.rows.filter((row) => row.tableId === 'pages')
+  const rowById = new Map(sourceRows.map((row) => [row.id, row]))
+  const currentPages = pack.pages.filter((page) => !page.template)
+  const knownIds = new Set(currentPages.map((page) => page.id))
+  const template = pack.pages.find((page) => page.template)
+  if (!template) throw new Error('[creator-signal migration] Current pack has no site template.')
+  knownIds.add(template.id)
+
+  const previews: PageMigrationPreview[] = []
+  const migrationRows: DataRow[] = []
+  const blockers: string[] = []
+
+  for (const target of currentPages) {
+    const row = rowById.get(target.id)
+    const legacyHash = legacyCreatorSignalPageHashes0111[target.id]
+    if (!legacyHash) throw new Error(`[creator-signal migration] Missing 0.1.11 hash for "${target.id}".`)
+    const targetHash = canonicalSha256(pageToCells(target))
+    if (!row) {
+      previews.push({ id: target.id, slug: target.slug, state: 'missing', legacyHash, targetHash })
+      blockers.push(`Required page "${target.slug}" is missing.`)
+      continue
+    }
+
+    const currentHash = canonicalSha256(row.cells)
+    if (currentHash === legacyHash) {
+      previews.push({ id: target.id, slug: target.slug, state: 'legacy-eligible', currentHash, legacyHash, targetHash })
+      migrationRows.push({
+        ...row,
+        cells: pageToCells(target),
+        slug: target.slug,
+        updatedAt: now,
+        updatedByUserId: null,
+        updatedBy: null,
+      })
+    } else if (currentHash === targetHash) {
+      previews.push({ id: target.id, slug: target.slug, state: 'already-current', currentHash, legacyHash, targetHash })
+    } else {
+      previews.push({ id: target.id, slug: target.slug, state: 'authored-content', currentHash, legacyHash, targetHash })
+      blockers.push(`Page "${target.slug}" differs from both retained starter versions and requires manual mapping.`)
+    }
+  }
+
+  for (const row of sourceRows) {
+    if (knownIds.has(row.id)) continue
+    previews.push({
+      id: row.id,
+      slug: row.slug,
+      state: 'additional-page',
+      currentHash: canonicalSha256(row.cells),
+    })
+    blockers.push(`Additional page "${row.slug}" would inherit the new everywhere template; review it manually.`)
+  }
+
+  const templateRow = rowById.get(template.id)
+  let templateState: CreatorSignalMigrationReport['summary']['template']
+  if (!templateRow) {
+    templateState = 'add'
+    previews.push({
+      id: template.id,
+      slug: template.slug,
+      state: 'template-add',
+      targetHash: canonicalSha256(pageToCells(template)),
+    })
+    migrationRows.push(newTemplateRow(template, now))
+  } else {
+    const currentHash = canonicalSha256(templateRow.cells)
+    const targetHash = canonicalSha256(pageToCells(template))
+    if (currentHash === targetHash) {
+      templateState = 'current'
+      previews.push({ id: template.id, slug: template.slug, state: 'template-current', currentHash, targetHash })
+    } else {
+      templateState = 'conflict'
+      previews.push({ id: template.id, slug: template.slug, state: 'template-conflict', currentHash, targetHash })
+      blockers.push('The Creator Signal site-template ID already contains different authored content.')
+    }
+  }
+
+  const ready = blockers.length === 0
+  const report: CreatorSignalMigrationReport = {
+    schema: 'creator-signal.site/content-migration-report/v1',
+    migration: CREATOR_SIGNAL_CONTENT_MIGRATION,
+    ready,
+    pages: previews,
+    blockers,
+    summary: {
+      legacyEligible: previews.filter((page) => page.state === 'legacy-eligible').length,
+      alreadyCurrent: previews.filter((page) => page.state === 'already-current').length,
+      authoredContent: previews.filter((page) => page.state === 'authored-content').length,
+      missing: previews.filter((page) => page.state === 'missing').length,
+      additionalPages: previews.filter((page) => page.state === 'additional-page').length,
+      template: templateState,
+      rowsInMigration: ready ? migrationRows.length : 0,
+    },
+    apply: {
+      strategy: 'merge-overwrite',
+      publishesAutomatically: false,
+      instruction: 'Review the report, import the migration archive with merge-overwrite, then preview and publish deliberately.',
+    },
+    rollback: {
+      archiveStrategy: 'replace',
+      instruction: 'Use the untouched backup archive with replace only after reviewing its built-in import preview and step-up gate.',
+    },
+  }
+
+  if (!ready) return { report, manifest: null }
+  return {
+    report,
+    manifest: {
+      schemaVersion: 1,
+      exportedAt: now,
+      ...(source.sourceSiteName ? { sourceSiteName: source.sourceSiteName } : {}),
+      tables: [pageTableWithSeo(pageTable)],
+      rows: migrationRows,
+    },
+  }
+}
+
+function blockedReport(blocker: string): CreatorSignalMigrationReport {
+  return {
+    schema: 'creator-signal.site/content-migration-report/v1',
+    migration: CREATOR_SIGNAL_CONTENT_MIGRATION,
+    ready: false,
+    pages: [],
+    blockers: [blocker],
+    summary: {
+      legacyEligible: 0,
+      alreadyCurrent: 0,
+      authoredContent: 0,
+      missing: 0,
+      additionalPages: 0,
+      template: 'conflict',
+      rowsInMigration: 0,
+    },
+    apply: {
+      strategy: 'merge-overwrite',
+      publishesAutomatically: false,
+      instruction: 'No migration archive can be created until the blocker is resolved.',
+    },
+    rollback: {
+      archiveStrategy: 'replace',
+      instruction: 'No live content was changed.',
+    },
+  }
+}

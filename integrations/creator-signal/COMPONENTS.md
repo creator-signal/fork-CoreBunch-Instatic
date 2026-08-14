@@ -11,9 +11,11 @@ media storage.
 
 ## TL;DR
 
-- Use a **Visual Component** for reusable, parameterised page sections.
-- Use a **saved layout** for copyable starter markup whose instances may diverge.
-- Use a **module** for behaviour, runtime JavaScript, external services, or a specialised property schema.
+- Use a **Visual Component** for a reusable fixed tree with scalar parameters.
+- Use a governed **module component** for opinionated markup, repeatable typed
+  data, runtime behaviour or external services.
+- Only structural container components may expose child slots. Leaf components
+  use scalar fields and repeaters.
 - Build Visual Component trees with `defineComponent` and `h` from `@core/plugin-sdk`.
 - Wrap the component tree in `base.body`.
 - Give every component and parameter a stable, plugin-namespaced ID.
@@ -29,13 +31,13 @@ media storage.
 | Requirement | Instatic extension | Creator Signal example |
 | --- | --- | --- |
 | Reusable section with per-instance fields | Visual Component | `integrations/creator-signal/pack/hero-component.ts` |
-| Starter section authors freely restructure after insertion | Saved layout | `authorLayouts` in `integrations/creator-signal/pack/site.ts` |
+| Opinionated section with repeatable data | Governed module component | `integrations/creator-signal/modules/site-components.ts` |
 | Runtime JavaScript or an external integration | Module | `integrations/creator-signal/modules/mautic-form.ts` |
 | Shared typography, colour, spacing, and responsive rules | Pack stylesheet | `integrations/creator-signal/pack/design-system.ts` |
 
-The Hero is available both as a Visual Component and as a saved layout. Use the
-Visual Component when instances must retain one governed design. Use the layout
-when an author needs to change the section structure for one page.
+The Hero is a Visual Component. The other public blocks are governed module
+components so their typed properties can include repeaters while their HTML
+structure remains consistent.
 
 ## Hero component anatomy
 
@@ -150,9 +152,11 @@ Keep a design-time default in `node.props`. At render time the component
 instance value replaces that property, falling back to the parameter default
 when the instance has no override.
 
-Use a `base.slot-outlet` when authors need to insert an arbitrary child subtree
-instead of editing a typed property. Slot behaviour and synchronisation are
-defined in `docs/features/visual-components.md`.
+Use a `base.slot-outlet` only when the Component Library entry is explicitly a
+container. Navigation, cards, FAQs, calls to action, documents and other leaf
+components use repeaters or rich-text fields and must remain slot-free. Slot
+behaviour and synchronisation are defined in
+`docs/features/visual-components.md`.
 
 ### 5. Register the implementation and authoring contract
 
@@ -165,7 +169,6 @@ const pack = definePack({
   visualComponents: [heroComponent, exampleComponent],
   pages: compiled.pages,
   conditions: compiled.conditions,
-  layouts: authorLayouts,
 })
 ```
 
@@ -236,7 +239,8 @@ Extend `src/__tests__/plugins/creatorSignalSitePack.test.ts` to verify:
 - every parameter has a matching `propBindings` entry;
 - referenced class IDs exist in `pack.classes`;
 - image parameters bind to a `base.image` property;
-- required modules and layouts remain registered.
+- required modules and governed entries remain registered;
+- every leaf entry declares no slots and every starter instance has no children.
 
 Run the integration gates:
 
@@ -284,7 +288,8 @@ affect only the selected reference.
 - `integrations/creator-signal/pack/hero-component.ts` — reference component
 - `integrations/creator-signal/component-library.ts` — governed authoring entries
 - `integrations/creator-signal/pack/design-system.ts` — public design system
-- `integrations/creator-signal/pack/site.ts` — pack registration and saved layouts
+- `integrations/creator-signal/pack/site.ts` — governed starter pages and shared template
+- `integrations/creator-signal/modules/site-components.ts` — opinionated leaf renderers
 - `src/core/plugin-sdk/builders/tree.ts` — `defineComponent` and `h`
 - `src/core/plugin-sdk/builders/definePack.ts` — pack registration
 - `docs/features/visual-components.md` — component data model, slots, editor, and publisher

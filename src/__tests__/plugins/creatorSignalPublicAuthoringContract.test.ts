@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test'
+import '@modules/base'
 import { creatorSignalComponentLibraryEntries } from '../../../integrations/creator-signal/component-library'
 import {
   creatorSignalDesignSystemDependency,
@@ -40,7 +41,7 @@ describe('Creator Signal public authoring contract', () => {
     expect(isCreatorSignalVariantPermitted('creator-signal.site.hero', 'custom')).toBe(false)
   })
 
-  it('allow-lists the public starter patterns already exposed by the pack', () => {
+  it('does not expose freeform starter layouts outside the governed catalogue', () => {
     const permittedLayoutIds = creatorSignalPublicAuthoringContract.permittedPatterns
       .map((pattern) => pattern.layoutId)
 

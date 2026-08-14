@@ -21,6 +21,12 @@ const layout = (): Page => ({
 // Page: body > [p_heading]
 const aboutPage = (): Page => ({
   id: 'about', slug: 'about', title: 'About', rootNodeId: 'A_body',
+  seo: {
+    title: 'About Creator Signal',
+    description: 'About the Creator Signal service.',
+    canonicalUrl: 'https://creatorsignal.me/about',
+    language: 'en-AU',
+  },
   nodes: { A_body: body('A_body', ['A_heading']), A_heading: node('A_heading', 'base.text') },
 } as unknown as Page)
 
@@ -40,6 +46,16 @@ describe('composeTemplateChain', () => {
     const middleId = root.children[1]
     expect(merged.nodes[middleId].moduleId).toBe('base.text') // the spliced heading
     expect(Object.values(merged.nodes).some((n) => n.moduleId === 'base.outlet')).toBe(false)
+  })
+
+  it('preserves terminal page SEO when a template wraps the page', () => {
+    const page = aboutPage()
+    const merged = composeTemplateChain([layout()], { kind: 'page', page })
+
+    expect(merged.seo).toEqual(page.seo)
+    expect(merged.seo?.title).toBe('About Creator Signal')
+    expect(merged.seo?.canonicalUrl).toBe('https://creatorsignal.me/about')
+    expect(merged.seo?.language).toBe('en-AU')
   })
 
   it('migrates a styled page body onto a container instead of dropping its props', () => {

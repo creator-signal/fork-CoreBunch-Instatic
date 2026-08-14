@@ -18,4 +18,5 @@ export {
   type RouteResolutionContext,
 } from './templateMatching'
 export { composeTemplateChain } from './templateCompose'
+export { resolvePageWrapperTemplates } from './pageWrapperTemplates'
 export { firstOutletId, treeHasOutlet, subtreeHasOutlet } from './outlet'

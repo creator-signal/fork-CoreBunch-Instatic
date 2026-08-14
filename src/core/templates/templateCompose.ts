@@ -152,6 +152,12 @@ export function composeTemplateChain(chain: Page[], terminal: TerminalContent): 
     // terminals have no Page here; their caller overrides `title` from the
     // published row after composing.
     title: terminal.kind === 'page' ? terminal.page.title : innermost.title,
+    // Document metadata belongs to the terminal page, not to the wrapping
+    // template. Dropping it here made every wrapped page fall back to the
+    // site-wide title/language and omitted its description + canonical URL.
+    ...(terminal.kind === 'page' && terminal.page.seo
+      ? { seo: terminal.page.seo }
+      : {}),
     // Carry the innermost template's `template` config. `assetScopeAppliesToPage`
     // gates its `templates` branch on `Boolean(page.template)`, so dropping it
     // here meant a stylesheet scoped to an entry template never applied to that

@@ -71,6 +71,19 @@ describe('self-host docker config', () => {
     expect(serverIndex).toContain("'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS'")
   })
 
+  it('starts collaboration invalidation before managed starter reconciliation', () => {
+    const serverIndex = readFileSync('server/index.ts', 'utf8')
+    const relayStart = serverIndex.indexOf('const collabRelay = createCollabRelay(db)')
+    const starterReconcile = serverIndex.indexOf('if (config.starterSite)')
+    const relayDrain = serverIndex.indexOf('await collabRelay.flushAll()')
+    const socketStart = serverIndex.indexOf('const server = Bun.serve')
+
+    expect(relayStart).toBeGreaterThan(-1)
+    expect(relayStart).toBeLessThan(starterReconcile)
+    expect(relayDrain).toBeGreaterThan(starterReconcile)
+    expect(relayDrain).toBeLessThan(socketStart)
+  })
+
   it('defines a production compose stack with health checks and persistent data', () => {
     const compose = readFileSync('compose.prod.yml', 'utf8')
     const buildOverride = readFileSync('compose.build.yml', 'utf8')

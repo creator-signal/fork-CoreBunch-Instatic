@@ -6,6 +6,30 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.31 - 2026-08-14
+
+### Creator Signal authoring and SEO acceptance
+
+- Preserved each terminal page's title, description, canonical URL, locale,
+  robots policy and social metadata when shared templates wrap published pages.
+- Made draft Preview compose the same shared template chrome and Visual
+  Component overrides as public rendering while leaving non-routable component
+  edit surfaces unwrapped.
+- Started collaboration invalidation before managed starter reconciliation so
+  upgraded Visual Component parameter contracts replace stale editor lineages
+  before an author can bind to them.
+
+## 0.0.30 - 2026-08-14
+
+### Creator Signal shared-template persistence
+
+- Replaced the invalid shared-template slug with the authoring-safe
+  `creator-signal-site-template` slug.
+- Added a backup-first, exact-content repair for the previously generated
+  invalid template row while blocking automatic replacement of authored data.
+- Added full-pack persistence validation so every governed starter page and
+  shared template crosses the same boundary used by normal authoring.
+
 ## 0.0.29 - 2026-08-14
 
 ### Media-edge security

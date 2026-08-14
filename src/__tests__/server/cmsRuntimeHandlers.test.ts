@@ -210,6 +210,118 @@ function siteWithLoop(): SiteDocument {
   }
 }
 
+function siteWithTemplateAndOverriddenVC(): SiteDocument {
+  const base = site()
+  const paramId = 'creator-signal.site.hero.heading'
+  return {
+    ...base,
+    pages: [
+      {
+        ...base.pages[0],
+        seo: {
+          title: 'Authored home title',
+          description: 'Authored home description.',
+          canonicalUrl: 'https://creatorsignal.me/',
+          language: 'en-AU',
+        },
+        nodes: {
+          root: {
+            id: 'root',
+            moduleId: 'base.body',
+            props: {},
+            breakpointOverrides: {},
+            children: ['hero-ref'],
+          },
+          'hero-ref': {
+            id: 'hero-ref',
+            moduleId: 'base.visual-component-ref',
+            props: {
+              componentId: 'creator-signal.site/component/hero',
+              propOverrides: { [paramId]: 'Authored Hero heading' },
+            },
+            breakpointOverrides: {},
+            children: [],
+          },
+        },
+      },
+      {
+        id: 'creator-signal.site/page/site-template',
+        title: 'Creator Signal site template',
+        slug: 'creator-signal-site-template',
+        template: {
+          enabled: true,
+          target: { kind: 'everywhere' },
+          priority: 0,
+        },
+        rootNodeId: 'template-root',
+        nodes: {
+          'template-root': {
+            id: 'template-root',
+            moduleId: 'base.body',
+            props: {},
+            breakpointOverrides: {},
+            children: ['shared-header', 'template-outlet', 'shared-footer'],
+          },
+          'shared-header': {
+            id: 'shared-header',
+            moduleId: 'base.text',
+            props: { tag: 'p', text: 'Shared Creator Signal header' },
+            breakpointOverrides: {},
+            children: [],
+          },
+          'template-outlet': {
+            id: 'template-outlet',
+            moduleId: 'base.outlet',
+            props: {},
+            breakpointOverrides: {},
+            children: [],
+          },
+          'shared-footer': {
+            id: 'shared-footer',
+            moduleId: 'base.text',
+            props: { tag: 'p', text: 'Shared Creator Signal footer' },
+            breakpointOverrides: {},
+            children: [],
+          },
+        },
+      },
+    ],
+    visualComponents: [{
+      id: 'creator-signal.site/component/hero',
+      name: 'Creator Signal Hero',
+      tree: {
+        rootNodeId: 'hero-root',
+        nodes: {
+          'hero-root': {
+            id: 'hero-root',
+            moduleId: 'base.body',
+            props: {},
+            breakpointOverrides: {},
+            children: ['hero-heading'],
+          },
+          'hero-heading': {
+            id: 'hero-heading',
+            moduleId: 'base.text',
+            props: { tag: 'h1', text: 'Default Hero heading' },
+            propBindings: { text: { paramId } },
+            breakpointOverrides: {},
+            children: [],
+          },
+        },
+      },
+      params: [{
+        id: paramId,
+        name: 'Heading',
+        type: 'string',
+        defaultValue: 'Default Hero heading',
+        required: true,
+      }],
+      classIds: [],
+      createdAt: 1,
+    }],
+  }
+}
+
 describe('CMS runtime handlers', () => {
   it('resolves an empty runtime dependency manifest', async () => {
     const res = await handleCmsRequest(runtimeRequest(
@@ -264,6 +376,23 @@ describe('CMS runtime handlers', () => {
       runtimeAssets: { scripts: [] },
       diagnostics: [],
     })
+  })
+
+  it('previews a page with shared template chrome, SEO and saved VC overrides', async () => {
+    const res = await handleCmsRequest(runtimeRequest(
+      'http://localhost/admin/api/cms/runtime/preview',
+      { site: siteWithTemplateAndOverriddenVC(), pageId: 'page_1' },
+    ), makeFakeDb())
+
+    expect(res.status).toBe(200)
+    const payload = await res.json() as { html: string }
+    expect(payload.html).toContain('Shared Creator Signal header')
+    expect(payload.html).toContain('Shared Creator Signal footer')
+    expect(payload.html).toContain('Authored Hero heading')
+    expect(payload.html).not.toContain('Default Hero heading')
+    expect(payload.html).toContain('<html lang="en-AU">')
+    expect(payload.html).toContain('<meta name="description" content="Authored home description.">')
+    expect(payload.html).toContain('<link rel="canonical" href="https://creatorsignal.me/">')
   })
 
   it('prefetches and renders loop rows in the runtime preview (ISS-234)', async () => {

@@ -3,6 +3,7 @@ import type { IModuleRegistry } from '@core/module-engine'
 import type { TemplateRenderDataContext } from '@core/templates/dynamicBindings'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import { publishPage } from '@core/publisher'
+import { composeTemplateChain, resolvePageWrapperTemplates } from '@core/templates'
 import type { PublishedRuntimePackageImportmap } from '@core/publisher'
 import { prefetchLoopData } from '../loopPrefetch'
 import { prefetchMediaAssets } from '../mediaPrefetch'
@@ -49,9 +50,16 @@ interface RuntimePreviewDocumentResult extends SiteRuntimeBuildResult {
 export async function buildRuntimePreviewDocument(
   input: RuntimePreviewDocumentInput,
 ): Promise<RuntimePreviewDocumentResult> {
+  // Preview the active routable page through the same template composition
+  // used by public rendering. Synthetic Visual Component pages are not routes
+  // and therefore deliberately remain unwrapped.
+  const wrappers = resolvePageWrapperTemplates(input.site, input.page)
+  const previewPage = wrappers.length > 0
+    ? composeTemplateChain(wrappers, { kind: 'page', page: input.page })
+    : input.page
   const runtimeBuild = await buildSiteRuntimeScripts({
     site: input.site,
-    page: input.page,
+    page: previewPage,
     target: 'canvas',
     assetBasePath: input.assetBasePath,
     dependencyCache: input.dependencyCache,
@@ -77,15 +85,15 @@ export async function buildRuntimePreviewDocument(
     }
   }
   const loopData = input.db
-    ? await prefetchLoopData(input.page, input.site, input.db)
+    ? await prefetchLoopData(previewPage, input.site, input.db)
     : undefined
   const mediaAssets = input.db
-    ? await prefetchMediaAssets(input.page, input.site, input.registry, input.db, {
+    ? await prefetchMediaAssets(previewPage, input.site, input.registry, input.db, {
         templateContext: input.templateContext,
         loopData,
       })
     : undefined
-  const baseHtml = publishPage(input.page, input.site, input.registry, {
+  const baseHtml = publishPage(previewPage, input.site, input.registry, {
     breakpointId: input.breakpointId,
     templateContext: input.templateContext,
     runtimeAssets: runtimeBuild.runtimeAssets,

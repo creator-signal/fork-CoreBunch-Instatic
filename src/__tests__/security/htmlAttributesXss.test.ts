@@ -82,4 +82,17 @@ describe('resolveHtmlTag — custom-tag escape hatch rejects dangerous elements'
     expect(resolveHtmlTag('custom', 'my-widget')).toBe('my-widget')
     expect(resolveHtmlTag('section', undefined)).toBe('section')
   })
+
+  it('preserves safe direct tags from programmatic component builders', () => {
+    expect(resolveHtmlTag('span', undefined)).toBe('span')
+    expect(resolveHtmlTag('figure', undefined)).toBe('figure')
+    expect(resolveHtmlTag('my-widget', undefined)).toBe('div')
+  })
+
+  it.each(['iframe', 'script', 'object', 'embed', 'base', 'link', 'meta', 'style'])(
+    'rejects a dangerous direct programmatic tag: %s',
+    (tag) => {
+      expect(resolveHtmlTag(tag, undefined)).toBe('div')
+    },
+  )
 })

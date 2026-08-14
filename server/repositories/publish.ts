@@ -18,6 +18,7 @@
  *   persistSitePublish        — transactional write of one publish
  *   getPublishedPageBySlug    — look up a published page snapshot by slug
  *   getPublishedPageSnapshotById — same, by page row id
+ *   listPublishedPageSnapshots — every active published page, for technical rebakes
  *   getLatestPublishedSiteSnapshot — first published page snapshot (for 404s etc.)
  *   getDraftPublishStatus     — compare draft vs published state for the UI
  */
@@ -335,6 +336,31 @@ export async function getPublishedPageSnapshotById(
     limit 1
   `
   return rows[0] ? snapshotFromQueryRow(rows[0]) : null
+}
+
+/**
+ * Return every active published page snapshot in deterministic page order.
+ * Used by technical artefact rebuilds after a renderer/plugin upgrade: the
+ * stored published site is the input, never the potentially newer draft.
+ */
+export async function listPublishedPageSnapshots(
+  db: DbClient,
+): Promise<PublishedPageSnapshot[]> {
+  const { rows } = await db<SnapshotQueryRow>`
+    select data_rows.id as row_id,
+           site_snapshots.site_json,
+           data_row_versions.runtime_assets_json,
+           site_snapshots.importmap_body,
+           site_snapshots.importmap_sha256
+    from data_rows
+    join data_row_versions on data_row_versions.id = data_rows.active_version_id
+    join site_snapshots on site_snapshots.id = data_row_versions.site_snapshot_id
+    where data_rows.table_id = 'pages'
+      and data_rows.status = 'published'
+      and data_rows.deleted_at is null
+    order by data_rows.created_at asc, data_rows.id asc
+  `
+  return rows.map(snapshotFromQueryRow)
 }
 
 /**

@@ -57,6 +57,14 @@ export const VOID_HTML_ELEMENTS: ReadonlySet<string> = new Set([
 
 const BUILTIN_HTML_TAG_SET: ReadonlySet<string> = new Set(BUILTIN_HTML_TAGS)
 
+/** Safe standard tags accepted from typed programmatic component builders. */
+const PROGRAMMATIC_HTML_TAG_SET: ReadonlySet<string> = new Set([
+  ...BUILTIN_HTML_TAGS,
+  'span', 'figure', 'figcaption', 'p',
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'dl', 'dt', 'dd', 'address', 'blockquote',
+])
+
 /** HTML element names: ASCII letter, then letters/digits/hyphens. 1–32 chars. */
 const CUSTOM_TAG_PATTERN = /^[a-z][a-z0-9-]{0,31}$/i
 
@@ -80,7 +88,7 @@ const FORBIDDEN_CUSTOM_HTML_TAGS: ReadonlySet<string> = new Set([
  * Returns a safe lowercase tag name. Falls back to 'div' when:
  *   - `tag` is missing / not a string
  *   - `tag` is 'custom' but `customTag` is missing or fails the safe-name regex
- *   - `tag` is some non-built-in string we don't recognise
+ *   - `tag` is neither a built-in nor a safe direct programmatic tag
  */
 export function resolveHtmlTag(tag: unknown, customTag: unknown): string {
   if (typeof tag !== 'string') return 'div'
@@ -92,7 +100,14 @@ export function resolveHtmlTag(tag: unknown, customTag: unknown): string {
     if (FORBIDDEN_CUSTOM_HTML_TAGS.has(lower)) return 'div'
     return lower
   }
-  if (BUILTIN_HTML_TAG_SET.has(tag)) return tag.toLowerCase()
+  const trimmed = tag.trim()
+  const lower = trimmed.toLowerCase()
+  if (BUILTIN_HTML_TAG_SET.has(lower)) return lower
+  // Typed programmatic builders and older stored trees can carry a safe,
+  // standard HTML tag directly (for example `h.container({ tag: 'span' })`).
+  // Arbitrary/custom elements still require the explicit `custom` escape
+  // hatch so corrupt select values continue to fail closed.
+  if (PROGRAMMATIC_HTML_TAG_SET.has(lower)) return lower
   return 'div'
 }
 

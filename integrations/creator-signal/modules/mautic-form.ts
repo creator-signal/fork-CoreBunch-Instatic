@@ -1,4 +1,5 @@
 import { control, defineModule, html, safeUrl } from '@core/plugin-sdk'
+import { creatorSignalCss } from '../pack/design-system'
 
 const runtime = String.raw`(() => {
   const selector = '[data-cs-mautic-form]';
@@ -265,6 +266,9 @@ const formCss = String.raw`
 }
 `
 
+/** One byte-identical public stylesheet shared by every site component. */
+export const creatorSignalSiteCss = `${creatorSignalCss}\n${formCss}`
+
 export default defineModule({
   id: 'creator-signal.site.mautic-form',
   name: 'Mautic form',
@@ -297,20 +301,22 @@ export default defineModule({
     const origin = String(props.mauticBaseUrl).match(/^https:\/\/[^/]+/i)?.[0] ?? ''
     return {
       html: html`
-        <section class="cs-mautic" data-cs-mautic-form
-          data-base-url="${safeUrl(props.mauticBaseUrl)}"
-          data-form-alias="${props.formAlias}"
-          data-registry-path="${props.registryPath}"
-          data-form-code="${props.formCode}"
-          data-campaign-code="${props.campaignCode}"
-          data-success-message="${props.successMessage}">
-          <div class="cs-mautic-copy"><p class="cs-eyebrow">${props.eyebrow}</p><h2>${props.heading}</h2><p>${props.introduction}</p></div>
-          <div class="cs-mautic-form-shell">
-            <div data-form-mount></div>
-            <p role="status" aria-live="polite" data-form-status></p>
-          </div>
+        <section class="content-section">
+          <section class="cs-mautic" data-cs-mautic-form
+            data-base-url="${safeUrl(props.mauticBaseUrl)}"
+            data-form-alias="${props.formAlias}"
+            data-registry-path="${props.registryPath}"
+            data-form-code="${props.formCode}"
+            data-campaign-code="${props.campaignCode}"
+            data-success-message="${props.successMessage}">
+            <div class="cs-mautic-copy"><p class="cs-eyebrow">${props.eyebrow}</p><h2>${props.heading}</h2><p>${props.introduction}</p></div>
+            <div class="cs-mautic-form-shell">
+              <div data-form-mount></div>
+              <p role="status" aria-live="polite" data-form-status></p>
+            </div>
+          </section>
         </section>`,
-      css: formCss,
+      css: creatorSignalSiteCss,
       js: runtime,
       ...(origin ? {
         cspSources: [

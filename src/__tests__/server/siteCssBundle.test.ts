@@ -93,6 +93,28 @@ describe('buildSiteCssBundle', () => {
     expect(occurrences.length).toBe(1)
   })
 
+  it('framework.css dedupes a shared contract emitted by different module types', () => {
+    const sharedCss = ':root { --shared-contract: 1; }'
+    const sharedRegistry = makeRegistry({
+      'test.header': makeModule('test.header', {
+        render: () => ({ html: '<header></header>', css: sharedCss }),
+      }),
+      'test.section': makeModule('test.section', {
+        render: () => ({ html: '<section></section>', css: sharedCss }),
+      }),
+    })
+    const site = makeSite()
+    site.pages = [
+      makePage({
+        root: { moduleId: 'test.header', children: ['section'] },
+        section: { moduleId: 'test.section' },
+      }),
+    ]
+
+    const bundle = buildSiteCssBundle(site, sharedRegistry)
+    expect(bundle.framework.content.match(/--shared-contract/g)).toHaveLength(1)
+  })
+
   it('style.css carries user class CSS', () => {
     const site = makeSite()
     site.styleRules = {

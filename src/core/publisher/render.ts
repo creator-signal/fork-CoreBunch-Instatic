@@ -205,7 +205,10 @@ function buildStyleHead(
   }
 
   const frameworkCss = buildSiteFrameworkCss(site)
-  const moduleCss = Array.from(cssMap.values()).join('\n')
+  // Multiple governed module types may intentionally share one stylesheet
+  // contract. Deduplicate byte-identical CSS here so each contract is emitted
+  // once without requiring plugin-specific knowledge in the publisher.
+  const moduleCss = [...new Set(cssMap.values())].join('\n')
   const classCss = collectClassCSS(site, { mediaAssets: options.mediaAssets })
   const userCss = collectUserStylesheetCss(site, page)
   // Same cascade order as the external-link path: user CSS comes last so it

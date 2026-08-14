@@ -72,7 +72,6 @@ describe('Creator Signal site pack', () => {
   })
 
   it('injects the Creator Signal favicon and PWA manifest into published pages', () => {
-    expect(creatorSignalPlugin.manifest.version).toBe('0.2.0')
     expect(creatorSignalPlugin.manifest.frontend?.assets).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -99,6 +98,17 @@ describe('Creator Signal site pack', () => {
         }),
       ]),
     )
+  })
+
+  it('advances the technical-pack version for the preserved Hero lineage migration', () => {
+    const hero = pack.visualComponents.find(
+      (component) => component.id === 'creator-signal.site/component/hero',
+    )
+    const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
+
+    expect(creatorSignalPlugin.manifest.version).toBe('0.2.1')
+    expect(parameterIds).toContain('creator-signal.site.hero.heading')
+    expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
 
   it('keeps shared header, footer and consent content in the template only', () => {

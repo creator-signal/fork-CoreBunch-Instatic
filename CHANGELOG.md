@@ -6,6 +6,16 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.29 - 2026-08-14
+
+### Media-edge security
+
+- Updated the media-edge build toolchain from Go 1.26.5 to Go 1.26.6, fixing
+  CVE-2026-39821 and CVE-2026-46600 in the compiled standard library.
+- Retained the v0.0.28 governed Creator Signal authoring release content in
+  this replacement release; v0.0.28 was rejected by the candidate scan and
+  never published to immutable semver image tags or deployed.
+
 ## 0.0.28 - 2026-08-14
 
 ### Governed Creator Signal authoring

@@ -101,6 +101,7 @@ describe('Creator Signal 0.2.0 content migration', () => {
       row.id === 'creator-signal.site/page/site-template')
     expect(templateRow?.status).toBe('draft')
     expect(templateRow?.cells.templateEnabled).toBe(true)
+    expect(templateRow?.slug).toBe('creator-signal-site-template')
 
     const home = result.manifest?.rows.find((row) =>
       row.id === 'creator-signal.site/page/home')
@@ -109,6 +110,33 @@ describe('Creator Signal 0.2.0 content migration', () => {
       expect(body.nodes[nodeId].catalogueInstance?.entryId).toStartWith('creator-signal.site.')
       expect(body.nodes[nodeId].children).toEqual([])
     }
+  })
+
+  it('repairs only the exact invalid 0.0.29 shared template', () => {
+    const first = prepareCreatorSignalContentMigration(legacyManifest(), timestamp)
+    const source = structuredClone(first.manifest!)
+    const templateRow = source.rows.find((row) =>
+      row.id === 'creator-signal.site/page/site-template')!
+    templateRow.slug = '_templates/creator-signal-site'
+    templateRow.cells = {
+      ...templateRow.cells,
+      slug: '_templates/creator-signal-site',
+    }
+
+    const result = prepareCreatorSignalContentMigration(source, timestamp)
+
+    expect(result.report.ready).toBe(true)
+    expect(result.report.summary).toMatchObject({
+      alreadyCurrent: 23,
+      template: 'repair',
+      rowsInMigration: 1,
+    })
+    expect(result.manifest?.rows).toHaveLength(1)
+    expect(result.manifest?.rows[0]).toMatchObject({
+      id: 'creator-signal.site/page/site-template',
+      slug: 'creator-signal-site-template',
+      status: 'draft',
+    })
   })
 
   it('blocks the whole template migration when any page contains authored changes', () => {

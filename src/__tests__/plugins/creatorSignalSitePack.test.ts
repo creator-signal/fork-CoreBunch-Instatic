@@ -2,6 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import '@modules/base'
 import { registry } from '@core/module-engine'
 import { publishPage } from '@core/publisher'
+import { validateSite } from '@core/persistence/validate'
 import { composeTemplateChain } from '@core/templates'
 import { pluginModuleToHostModule } from '@core/plugins/moduleAdapter'
 import { makeRegistry, makeSite } from '../publisher/helpers'
@@ -53,13 +54,21 @@ describe('Creator Signal site pack', () => {
       'status',
     ])
     expect(templatePage).toMatchObject({
-      slug: '_templates/creator-signal-site',
+      slug: 'creator-signal-site-template',
       template: {
         enabled: true,
         target: { kind: 'everywhere' },
         priority: 0,
       },
     })
+  })
+
+  it('passes the authoring persistence boundary as a complete governed site', () => {
+    expect(() => validateSite(makeSite({
+      pages: pack.pages,
+      visualComponents: pack.visualComponents,
+      styleRules: Object.fromEntries(pack.classes.map((rule) => [rule.id, rule])),
+    }))).not.toThrow()
   })
 
   it('injects the Creator Signal favicon and PWA manifest into published pages', () => {

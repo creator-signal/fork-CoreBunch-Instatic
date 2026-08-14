@@ -373,7 +373,7 @@ const sharedBlocks: PageBlock[] = [
 
 entries.push({
   id: 'site-template',
-  slug: '_templates/creator-signal-site',
+  slug: 'creator-signal-site-template',
   title: 'Creator Signal site template',
   html: `${placeholder(0)}<main id="main-content"><instatic-outlet></instatic-outlet></main>${placeholder(1)}${placeholder(2)}`,
 })
@@ -423,8 +423,8 @@ for (const page of starterPages) {
   compiledPage.seo = pageSeo(page)
 }
 
-applyBlocks('_templates/creator-signal-site', sharedBlocks)
-const siteTemplate = compiled.pages.find((page) => page.slug === '_templates/creator-signal-site')!
+applyBlocks('creator-signal-site-template', sharedBlocks)
+const siteTemplate = compiled.pages.find((page) => page.slug === 'creator-signal-site-template')!
 siteTemplate.template = {
   enabled: true,
   target: { kind: 'everywhere' },

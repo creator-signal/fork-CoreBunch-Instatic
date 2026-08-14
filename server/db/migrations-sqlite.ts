@@ -1376,4 +1376,24 @@ export const sqliteMigrations: Migration[] = [
        where schema_json like '%"catalogueEntryId"%base.%';
     `,
   },
+  {
+    // Pages previously exposed title/description cells while PageSeo already
+    // carried canonical, language, robots and social metadata. Preserve the
+    // complete object in one built-in cell so export/import and pack installs
+    // no longer discard those author choices.
+    id: '029_page_seo_metadata',
+    sql: `
+      update data_tables
+         set fields_json = json_insert(
+           fields_json,
+           '$[#]',
+           json('{"type":"longText","id":"seo","label":"SEO metadata","builtIn":true}')
+         )
+       where id = 'pages'
+         and not exists (
+           select 1 from json_each(data_tables.fields_json)
+            where json_extract(json_each.value, '$.id') = 'seo'
+         );
+    `,
+  },
 ]

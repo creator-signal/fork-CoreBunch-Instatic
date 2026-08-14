@@ -26,6 +26,7 @@ import { useEditorPermissions } from '@site/editorPermissionsContext'
 import { ChevronRightIcon } from 'pixel-art-icons/icons/chevron-right'
 import { TextControl } from './TextControl'
 import { TextareaControl } from './TextareaControl'
+import { RichtextControl } from './RichtextControl'
 import { NumberControl } from './NumberControl'
 import { ColorControl } from './ColorControl'
 import { SelectControl } from './SelectControl'
@@ -86,6 +87,7 @@ function defaultLayoutFor(controlType: PropertyControl['type']): PropertyControl
     case 'media':
     case 'svg':
     case 'textarea':
+    case 'richtext':
       return 'stacked'
     default:
       return 'inline'
@@ -216,7 +218,8 @@ export function PropertyControlRenderer({
       break
 
     case 'richtext':
-      return null
+      inner = <RichtextControl {...shared} value={String(value ?? '')} />
+      break
 
     case 'group':
       inner = (

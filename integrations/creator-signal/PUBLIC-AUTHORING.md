@@ -18,9 +18,20 @@ Until the upstream design-system foundation is merged and distributable, the Ins
 
 ## Authorable public surface
 
-The contract explicitly allow-lists Component Library entries and saved public patterns. The initial governed reusable component is `creator-signal.site.hero`; the current saved patterns are Hero, Feature grid, Call to action, Prose, Testimonial and FAQ.
+The contract explicitly allow-lists every site-specific Component Library
+entry. The governed surface includes the Hero, shared Header, shared Footer,
+Privacy Choices, Feature Grid, Call to Action, Rich Text Section, Testimonial,
+FAQ, Public Document and Managed Form. Freeform starter layouts are not part of
+the public contract.
 
-A Component Library entry must be present in `permittedComponents` before the Creator Signal integration can register it. Variants are allow-listed per component. The Hero currently exposes one governed `default` variant.
+A Component Library entry must be present in `permittedComponents` before the
+Creator Signal integration can register it. Variants are allow-listed per
+component. All current entries expose one governed `default` variant.
+
+Only containers may expose slots. Site-specific leaf components declare
+`composition: 'leaf'`, keep `slots: []`, and use typed repeater fields for
+ordered links, feature cards and questions. Coherent prose is one rich-text
+field. These rules are shared by human authoring, Agent tools and MCP.
 
 ## Semantic styling
 

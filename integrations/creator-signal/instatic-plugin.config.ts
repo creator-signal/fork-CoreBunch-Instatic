@@ -7,7 +7,10 @@ import { pack } from './pack/site'
 export default definePlugin({
   id: 'creator-signal.site',
   name: 'Creator Signal public site',
-  version: '0.2.0',
+  // This version is also the bootstrap reconciliation boundary. Advance it
+  // whenever the bundled technical pack changes so preserved installations
+  // run the package upgrade and reseed managed collaboration documents.
+  version: '0.2.1',
   description: 'Creator Signal starter pages, author layouts, Mautic forms, consent and analytics integrations.',
   author: { name: 'Creator Signal', url: 'https://creatorsignal.me' },
   license: 'MIT',

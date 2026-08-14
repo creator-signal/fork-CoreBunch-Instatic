@@ -6,6 +6,19 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.32 - 2026-08-14
+
+### Preserved site-pack collaboration repair
+
+- Advanced the bundled Creator Signal plugin to 0.2.1 so installations that
+  already contain the 0.2.0 plugin execute the technical-pack upgrade instead
+  of incorrectly treating the changed component contract as current.
+- Reused the collaboration-aware pack reconciliation path to replace stale
+  managed component lineages from authoritative rows while starter and
+  authored pages remain create-only and are never overwritten or published.
+- Locked the bootstrap reconciliation version in the governed site-pack test
+  and documented that the authored-content migration remains version 0.2.0.
+
 ## 0.0.31 - 2026-08-14
 
 ### Creator Signal authoring and SEO acceptance

@@ -75,9 +75,10 @@ relying on plugin upgrade reconciliation.
 
 ### Upgrade existing 0.1.11 starter content
 
-Installing plugin 0.2.0 updates technical definitions only; it does not change
-existing pages. Export the complete site from **Admin → Export**, then run the
-read-only classifier:
+Installing plugin 0.2.1 runs the versioned technical-pack upgrade and does not
+change existing pages. The authored-content migration remains version 0.2.0.
+Export the complete site from **Admin → Export**, then run the read-only
+classifier:
 
 ```sh
 bun run integrations/creator-signal/migrations/0.2.0/prepare.ts preview \

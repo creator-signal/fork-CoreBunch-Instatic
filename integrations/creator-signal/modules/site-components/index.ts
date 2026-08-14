@@ -1,4 +1,5 @@
 import { control, defineModule, html, raw, safeUrl } from '@core/plugin-sdk'
+import { creatorSignalSiteCss } from '../mautic-form'
 
 export interface NavigationItem {
   label: string
@@ -23,6 +24,19 @@ const records = (value: unknown): Array<Record<string, unknown>> =>
     ? value.filter((item): item is Record<string, unknown> =>
         Boolean(item) && typeof item === 'object' && !Array.isArray(item))
     : []
+
+/**
+ * Every Creator Signal leaf module carries the same public design contract.
+ * The publisher deduplicates byte-identical module CSS before writing the
+ * site-wide bundle, so a page gets the complete contract once regardless of
+ * which governed components it contains. Keeping the CSS on each module also
+ * makes isolated Component Library previews faithful instead of depending on
+ * a header or template side effect.
+ */
+const withCreatorSignalCss = (markup: string) => ({
+  html: markup,
+  css: creatorSignalSiteCss,
+})
 
 function navigationItems(value: unknown, primaryClass = false): ReturnType<typeof raw>[] {
   return records(value).map((item) => {
@@ -57,8 +71,7 @@ export const siteHeader = defineModule({
     homeUrl: control.url('Home URL'),
     items: control.textarea('Navigation items'),
   },
-  render: ({ props }) => ({
-    html: html`<header class="site-header">
+  render: ({ props }) => withCreatorSignalCss(html`<header class="site-header">
       <a class="site-brand" href="${safeUrl(props.homeUrl)}" aria-label="${props.brandName} home">
         <span class="brand-signal" aria-hidden="true"><i></i><i></i><i></i></span>
         <span><strong>${props.brandName}</strong><small>${props.tagline}</small></span>
@@ -66,8 +79,7 @@ export const siteHeader = defineModule({
       <nav aria-label="Main navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
         ${navigationItems(props.items, true)}
       </nav>
-    </header>`,
-  }),
+    </header>`),
 })
 
 export const siteFooter = defineModule({
@@ -102,8 +114,7 @@ export const siteFooter = defineModule({
     copyright: control.text('Copyright'),
     items: control.textarea('Footer links'),
   },
-  render: ({ props }) => ({
-    html: html`<footer class="site-footer">
+  render: ({ props }) => withCreatorSignalCss(html`<footer class="site-footer">
       <div class="footer-meta">
         <div><strong>${props.brandName}</strong><p>${props.tagline}</p></div>
         <small>${props.copyright}</small>
@@ -111,8 +122,7 @@ export const siteFooter = defineModule({
       <nav aria-label="Footer navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
         ${navigationItems(props.items)}
       </nav>
-    </footer>`,
-  }),
+    </footer>`),
 })
 
 export const consentBanner = defineModule({
@@ -133,15 +143,13 @@ export const consentBanner = defineModule({
     essentialLabel: control.text('Essential choice label'),
     optionalLabel: control.text('Optional choice label'),
   },
-  render: ({ props }) => ({
-    html: html`<aside class="consent" data-consent-banner aria-label="Privacy choices">
+  render: ({ props }) => withCreatorSignalCss(html`<aside class="consent" data-consent-banner aria-label="Privacy choices">
       <div><strong>${props.heading}</strong><p>${props.body}</p></div>
       <div class="consent-actions">
         <button class="button button-secondary" type="button" data-analytics-choice="denied">${props.essentialLabel}</button>
         <button class="button button-primary" type="button" data-analytics-choice="granted">${props.optionalLabel}</button>
       </div>
-    </aside>`,
-  }),
+    </aside>`),
 })
 
 export const featureGrid = defineModule({
@@ -175,12 +183,10 @@ export const featureGrid = defineModule({
         <h3>${text(item.heading)}</h3>
         <p>${text(item.body)}</p>
       </article>`))
-    return {
-      html: html`<section class="content-section" aria-labelledby="${props.sectionId}">
+    return withCreatorSignalCss(html`<section class="content-section" aria-labelledby="${props.sectionId}">
         <div class="section-intro"><p class="eyebrow">${props.eyebrow}</p><h2 id="${props.sectionId}">${props.heading}</h2><p>${props.introduction}</p></div>
         <div class="feature-grid">${items}</div>
-      </section>`,
-    }
+      </section>`)
   },
 })
 
@@ -206,12 +212,10 @@ export const callToAction = defineModule({
     actionUrl: control.url('Action URL'),
     sectionId: control.text('Section anchor'),
   },
-  render: ({ props }) => ({
-    html: html`<section class="cta-section" aria-labelledby="${props.sectionId}">
+  render: ({ props }) => withCreatorSignalCss(html`<section class="cta-section" aria-labelledby="${props.sectionId}">
       <div class="cta-copy"><p class="eyebrow">${props.eyebrow}</p><h2 id="${props.sectionId}">${props.heading}</h2><p>${props.body}</p></div>
       <div class="actions"><a class="button button-primary" href="${safeUrl(props.actionUrl)}">${props.actionLabel}</a></div>
-    </section>`,
-  }),
+    </section>`),
 })
 
 export const richTextSection = defineModule({
@@ -230,12 +234,10 @@ export const richTextSection = defineModule({
     body: control.richtext('Content'),
     sectionId: control.text('Section anchor'),
   },
-  render: ({ props }) => ({
-    html: html`<section class="content-section narrow-content" aria-labelledby="${props.sectionId}">
+  render: ({ props }) => withCreatorSignalCss(html`<section class="content-section narrow-content" aria-labelledby="${props.sectionId}">
       <h2 id="${props.sectionId}">${props.heading}</h2>
       <div class="prose-content">${raw(text(props.body))}</div>
-    </section>`,
-  }),
+    </section>`),
 })
 
 export const testimonial = defineModule({
@@ -254,12 +256,10 @@ export const testimonial = defineModule({
     attribution: control.text('Attribution'),
     role: control.text('Role or business'),
   },
-  render: ({ props }) => ({
-    html: html`<figure class="testimonial">
+  render: ({ props }) => withCreatorSignalCss(html`<figure class="testimonial">
       <blockquote><p>“${props.quote}”</p></blockquote>
       <figcaption><strong>${props.attribution}</strong><span>${props.role}</span></figcaption>
-    </figure>`,
-  }),
+    </figure>`),
 })
 
 export const faq = defineModule({
@@ -287,12 +287,10 @@ export const faq = defineModule({
         <summary itemprop="name">${text(item.question)}</summary>
         <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">${text(item.answer)}</p></div>
       </details>`))
-    return {
-      html: html`<section class="content-section narrow-content" aria-labelledby="${props.sectionId}" itemscope itemtype="https://schema.org/FAQPage">
+    return withCreatorSignalCss(html`<section class="content-section narrow-content" aria-labelledby="${props.sectionId}" itemscope itemtype="https://schema.org/FAQPage">
         <h2 id="${props.sectionId}">${props.heading}</h2>
         <div class="faq-list">${items}</div>
-      </section>`,
-    }
+      </section>`)
   },
 })
 
@@ -316,13 +314,11 @@ export const publicDocument = defineModule({
     body: control.richtext('Document content'),
     dateModified: control.text('Date modified'),
   },
-  render: ({ props }) => ({
-    html: html`<article class="public-document" itemscope itemtype="https://schema.org/Article">
+  render: ({ props }) => withCreatorSignalCss(html`<article class="public-document" itemscope itemtype="https://schema.org/Article">
       <meta itemprop="dateModified" content="${props.dateModified}">
       <header class="public-document-header"><p class="eyebrow">${props.eyebrow}</p><h1 itemprop="headline">${props.heading}</h1><p itemprop="description">${props.summary}</p></header>
       <div class="prose-content" itemprop="articleBody">${raw(text(props.body))}</div>
-    </article>`,
-  }),
+    </article>`),
 })
 
 export const creatorSignalSiteModules = [

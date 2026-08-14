@@ -244,6 +244,14 @@ function makeFakeDb() {
     ) {
       return { rows: [], rowCount: 0 }
     }
+    // A successful plugin upgrade rebuilds derived public artefacts from the
+    // active published snapshot. This handler fixture has no published site.
+    if (
+      normalized.includes('join site_snapshots') &&
+      normalized.includes("data_rows.status = 'published'")
+    ) {
+      return { rows: [], rowCount: 0 }
+    }
     // Post-activation schedule ghost sweep (disableSchedulesNotReclaimedSince)
     // — these tests register no schedules, so the sweep matches nothing.
     if (normalized.includes('update plugin_schedules')) {
@@ -1534,10 +1542,12 @@ describe('CMS plugin handlers', () => {
       const upgradeBody = await upgrade.json() as {
         plugin: { version: string; lifecycleStatus: string }
         upgrade?: { fromVersion: string; toVersion: string }
+        rebuiltPublishedPages?: number
       }
       expect(upgradeBody.plugin.version).toBe('1.1.0')
       expect(upgradeBody.plugin.lifecycleStatus).toBe('active')
       expect(upgradeBody.upgrade).toEqual({ fromVersion: '1.0.0', toVersion: '1.1.0' })
+      expect(upgradeBody.rebuiltPublishedPages).toBe(0)
 
       // Lifecycle ordering: v1.activate → v1.deactivate → v2.migrate(1.0.0) → v2.activate
       expect(markers).toEqual([

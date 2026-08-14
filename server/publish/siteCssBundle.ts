@@ -175,7 +175,10 @@ function styleMediaSignature(site: SiteDocument, options: ResponsiveCssOptions):
  */
 function buildFrameworkCss(site: SiteDocument, registry: IModuleRegistry): string {
   const frameworkCss = buildSiteFrameworkCss(site)
-  const moduleCss = Array.from(collectSiteModuleAssets(site, registry).cssMap.values()).join('\n')
+  // A component family can share one design contract across several module
+  // types. Keep module-id deduplication during traversal, then collapse exact
+  // CSS duplicates before writing the site-wide bundle.
+  const moduleCss = [...new Set(collectSiteModuleAssets(site, registry).cssMap.values())].join('\n')
   return [frameworkCss, moduleCss].filter(Boolean).join('\n')
 }
 

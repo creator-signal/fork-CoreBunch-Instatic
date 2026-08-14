@@ -6,6 +6,25 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.33 - 2026-08-14
+
+### Creator Signal production parity
+
+- Restored the complete shared Creator Signal design contract across all 23
+  governed routes while keeping leaf components field-driven and reserving
+  slots for true containers.
+- Added route-by-route desktop, tablet and mobile visual, semantic, SEO and
+  structured-data parity verification, plus consent and form interaction
+  checks against the current public site.
+- Made plugin-owned component styles available in isolated previews and
+  deduplicated the shared stylesheet in public, preview and Agent/MCP output.
+- Rebuilt published static artifacts from active published snapshots during
+  technical plugin upgrades without replacing authored pages, publishing
+  drafts or discarding installed runtime assets.
+- Extended safe opinionated semantic markup support and locked the full
+  Creator Signal component, upgrade, publisher, security and Agent/MCP
+  contracts with regression coverage.
+
 ## 0.0.32 - 2026-08-14
 
 ### Preserved site-pack collaboration repair

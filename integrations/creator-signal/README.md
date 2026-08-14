@@ -90,6 +90,12 @@ page would inherit the new shared template, and the template ID is available.
 Any authored difference blocks the whole migration for manual mapping; it is
 never overwritten heuristically.
 
+The shared template uses the validator-compliant slug
+`creator-signal-site-template`. If an operator imported the unpublished 0.0.29
+migration archive, the classifier recognises and repairs only that release's
+exact `_templates/creator-signal-site` template. Any change to that template's
+content still blocks as authored content.
+
 After reviewing a ready preview, prepare the immutable evidence set:
 
 ```sh

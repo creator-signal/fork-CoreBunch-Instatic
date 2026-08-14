@@ -14,6 +14,7 @@ export type PageMigrationState =
   | 'missing'
   | 'template-add'
   | 'template-current'
+  | 'template-repair'
   | 'template-conflict'
   | 'additional-page'
 
@@ -38,7 +39,7 @@ export interface CreatorSignalMigrationReport {
     authoredContent: number
     missing: number
     additionalPages: number
-    template: 'add' | 'current' | 'conflict'
+    template: 'add' | 'current' | 'repair' | 'conflict'
     rowsInMigration: number
   }
   apply: {
@@ -120,6 +121,15 @@ export function prepareCreatorSignalContentMigration(
   const knownIds = new Set(currentPages.map((page) => page.id))
   const template = pack.pages.find((page) => page.template)
   if (!template) throw new Error('[creator-signal migration] Current pack has no site template.')
+  // 0.0.29 emitted this exact template with an underscore-prefixed slug that
+  // the page persistence contract rejects. Recognise only that exact faulty
+  // template so an attempted 0.0.29 migration can be repaired without treating
+  // authored template content as disposable.
+  const invalid029TemplateSlug = '_templates/creator-signal-site'
+  const invalid029TemplateHash = canonicalSha256(pageToCells({
+    ...template,
+    slug: invalid029TemplateSlug,
+  }))
   knownIds.add(template.id)
 
   const previews: PageMigrationPreview[] = []
@@ -184,6 +194,17 @@ export function prepareCreatorSignalContentMigration(
     if (currentHash === targetHash) {
       templateState = 'current'
       previews.push({ id: template.id, slug: template.slug, state: 'template-current', currentHash, targetHash })
+    } else if (currentHash === invalid029TemplateHash && templateRow.slug === invalid029TemplateSlug) {
+      templateState = 'repair'
+      previews.push({ id: template.id, slug: template.slug, state: 'template-repair', currentHash, targetHash })
+      migrationRows.push({
+        ...templateRow,
+        cells: pageToCells(template),
+        slug: template.slug,
+        updatedAt: now,
+        updatedByUserId: null,
+        updatedBy: null,
+      })
     } else {
       templateState = 'conflict'
       previews.push({ id: template.id, slug: template.slug, state: 'template-conflict', currentHash, targetHash })

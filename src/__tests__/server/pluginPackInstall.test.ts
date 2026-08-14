@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { PluginManifest } from '@core/plugin-sdk'
 import { createTestDb } from '../helpers/createTestDb'
-import { makePage, makeSite } from '../fixtures'
+import { makePage, makeSite, makeVC } from '../fixtures'
 import { saveDraftSite, getDraftSite } from '../../../server/repositories/site'
 import { createUser, findUserById } from '../../../server/repositories/users'
 import { installPlugin } from '../../../server/repositories/plugins'
@@ -15,6 +15,8 @@ import {
 } from '../../../server/repositories/data'
 import { pageFromRow, pageToCells } from '@core/data/pageFromRow'
 import { handlePluginPackInstall } from '../../../server/handlers/cms/plugins/pack'
+import { createCollabRelay } from '../../../server/collab/relay'
+import { encodeCollabDocId, projectComponentDoc } from '@core/collab'
 
 const PLUGIN_ID = 'creator-signal.test-pack'
 
@@ -72,6 +74,7 @@ async function seedPackHarness(pack: unknown) {
     db: testDb.db,
     owner,
     uploadsDir,
+    packPath: join(packDir, 'site.json'),
     cleanup: async () => {
       try {
         await testDb.cleanup()
@@ -83,6 +86,20 @@ async function seedPackHarness(pack: unknown) {
       await rm(uploadsDir, { recursive: true, force: true })
     },
   }
+}
+
+function managedHero(paramId: string) {
+  return makeVC({
+    id: `${PLUGIN_ID}/component/hero`,
+    name: 'Managed Hero',
+    params: [{
+      id: paramId,
+      name: 'Heading',
+      type: 'string',
+      defaultValue: 'Default heading',
+      required: true,
+    }],
+  })
 }
 
 function installRequest(): Request {
@@ -175,6 +192,61 @@ describe('plugin pack content safety', () => {
       const shell = await getDraftSite(harness.db)
       expect(shell?.styleRules[`${PLUGIN_ID}/marker`]?.styles.color).toBe('blue')
     } finally {
+      await harness.cleanup()
+    }
+  })
+
+  it('invalidates a stale component collaboration lineage when a pack replaces its definition', async () => {
+    const oldParamId = `${PLUGIN_ID}/component/hero/param/heading`
+    const nextParamId = `${PLUGIN_ID}.hero.heading`
+    const harness = await seedPackHarness({ visualComponents: [managedHero(oldParamId)] })
+    const docId = encodeCollabDocId({
+      kind: 'component',
+      rowId: `${PLUGIN_ID}/component/hero`,
+    })
+
+    let activeRelay: ReturnType<typeof createCollabRelay> | null = null
+    try {
+      const firstInstall = await handlePluginPackInstall(
+        installRequest(),
+        harness.db,
+        { uploadsDir: harness.uploadsDir },
+        harness.owner,
+        PLUGIN_ID,
+      )
+      expect(firstInstall.status).toBe(200)
+
+      // Simulate a collaboration lineage persisted by an earlier process.
+      const seedRelay = createCollabRelay(harness.db, { persistDebounceMs: 5 })
+      const stale = await seedRelay.openDoc(docId)
+      expect(projectComponentDoc(stale.doc, `${PLUGIN_ID}/component/hero`).params[0]?.id)
+        .toBe(oldParamId)
+      await seedRelay.destroy()
+
+      await writeFile(
+        harness.packPath,
+        JSON.stringify({ visualComponents: [managedHero(nextParamId)] }),
+        'utf8',
+      )
+
+      // This is the production startup order: the relay subscribes before
+      // starter/plugin reconciliation performs authoritative row writes.
+      activeRelay = createCollabRelay(harness.db, { persistDebounceMs: 5 })
+      const upgrade = await handlePluginPackInstall(
+        installRequest(),
+        harness.db,
+        { uploadsDir: harness.uploadsDir },
+        harness.owner,
+        PLUGIN_ID,
+      )
+      expect(upgrade.status).toBe(200)
+      await activeRelay.flushAll()
+
+      const reseeded = await activeRelay.openDoc(docId)
+      expect(projectComponentDoc(reseeded.doc, `${PLUGIN_ID}/component/hero`).params[0]?.id)
+        .toBe(nextParamId)
+    } finally {
+      await activeRelay?.destroy()
       await harness.cleanup()
     }
   })

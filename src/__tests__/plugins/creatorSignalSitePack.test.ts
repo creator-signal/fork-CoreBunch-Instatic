@@ -237,7 +237,6 @@ describe('Creator Signal site pack', () => {
     }
     const home = publicPages.find((page) => page.slug === 'index')!
     const composed = composeTemplateChain([templatePage!], { kind: 'page', page: home })
-    composed.seo = home.seo
     const site = makeSite({
       pages: pack.pages,
       visualComponents: pack.visualComponents,
@@ -251,6 +250,7 @@ describe('Creator Signal site pack', () => {
     expect(output.match(/<h1/g)).toHaveLength(1)
     expect(output).toContain('<main id="main-content">')
     expect(output).toContain('<meta name="description"')
+    expect(output).toContain('<html lang="en-AU">')
     expect(output).toContain('<link rel="canonical" href="https://creatorsignal.me/">')
     expect(output).toContain('property="og:title"')
     expect(output).toContain('name="twitter:card" content="summary"')

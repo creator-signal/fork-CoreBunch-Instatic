@@ -37,6 +37,38 @@ function assertEntryInvariants(entry: ComponentLibraryEntry): void {
     entry.accessibility?.checks.map((check) => check.rule) ?? [],
   )
 
+  if (entry.composition === 'leaf' && entry.slots.length > 0) {
+    throw new ComponentLibraryDefinitionError(
+      'slots',
+      'A leaf component cannot declare slots. Use typed fields for its authored data.',
+    )
+  }
+
+  for (const field of entry.fields) {
+    if (field.type !== 'repeater') continue
+    assertUniqueIds(
+      `fields.${field.key}.itemFields`,
+      field.itemFields.map((itemField) => itemField.key),
+    )
+    if (field.maxItems !== undefined && field.maxItems < field.minItems) {
+      throw new ComponentLibraryDefinitionError(
+        `fields.${field.key}.maxItems`,
+        'maxItems must be greater than or equal to minItems.',
+      )
+    }
+    for (const itemField of field.itemFields) {
+      if (
+        itemField.type === 'select' &&
+        (!itemField.options || itemField.options.length === 0)
+      ) {
+        throw new ComponentLibraryDefinitionError(
+          `fields.${field.key}.itemFields.${itemField.key}.options`,
+          'A repeater select field must declare at least one option.',
+        )
+      }
+    }
+  }
+
   if (entry.replacementEntryId === entry.id) {
     throw new ComponentLibraryDefinitionError(
       'replacementEntryId',

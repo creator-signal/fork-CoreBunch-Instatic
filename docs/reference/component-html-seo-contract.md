@@ -3,7 +3,9 @@
 This is the published-output contract for the Creator Signal Component Library. It
 covers semantic HTML, search metadata, structured data, accessibility,
 progressive enhancement, CSS hooks and design tokens. The catalogue registry
-continues to own author-facing fields, variants, slots and dependencies.
+continues to own author-facing fields, variants, composition and dependencies.
+Only composition containers expose slots; leaf components use scalar or typed
+repeatable data and own their complete HTML structure.
 
 The contract is normative for implementation and acceptance. A row in this
 document does not by itself prove editor, publisher or live-browser completion.
@@ -138,8 +140,8 @@ Schema.org type:
   itemscope
   itemtype="https://schema.org/SiteNavigationElement"
 >
-  <ul>
-    <li><a href="/about">About</a></li>
+  <ul data-instatic-link-collection="navigation">
+    <li><a href="/about" target="_self">About</a></li>
   </ul>
 </nav>
 ```
@@ -154,7 +156,11 @@ Breadcrumbs publish an ordered list. Each item supplies `name`, `item` and
 
 ```html
 <nav data-instatic-component="breadcrumb" aria-label="Breadcrumb">
-  <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+  <ol
+    data-instatic-link-collection="breadcrumb"
+    itemscope
+    itemtype="https://schema.org/BreadcrumbList"
+  >
     <li
       itemprop="itemListElement"
       itemscope
@@ -301,7 +307,8 @@ unavailable or degraded state.
 
 An entry is complete only when all applicable evidence exists:
 
-1. The catalogue exposes only governed fields, variants, presets and slots.
+1. The catalogue exposes only governed fields, variants, presets and slots on
+   explicit composition containers; leaf repeaters reject undeclared keys.
 2. Canvas output and published output preserve the same content and behavior.
 3. Published HTML matches the semantic structure in this document.
 4. Component CSS uses native data hooks and defined framework variables.

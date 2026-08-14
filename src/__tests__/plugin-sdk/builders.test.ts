@@ -63,6 +63,8 @@ describe('control factories', () => {
     expect(control.text('Title')).toEqual({ type: 'text', label: 'Title' })
     expect(control.textarea('Body', { rows: 4 }))
       .toEqual({ type: 'textarea', label: 'Body', rows: 4 })
+    expect(control.richtext('Formatted body'))
+      .toEqual({ type: 'richtext', label: 'Formatted body' })
     expect(control.select('Tone', [{ label: 'Info', value: 'info' }]))
       .toEqual({ type: 'select', label: 'Tone', options: [{ label: 'Info', value: 'info' }] })
     expect(control.toggle('Featured')).toEqual({ type: 'toggle', label: 'Featured' })

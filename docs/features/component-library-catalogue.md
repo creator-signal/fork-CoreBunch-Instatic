@@ -16,6 +16,34 @@ The executable matrix is
 The registered definitions are assembled in
 `src/modules/base/componentLibrary.ts`.
 
+## Creator Signal public-site implementations
+
+The public-site plugin also registers the following site-specific leaf
+components. These use the same Component Library and Agent/MCP field APIs as
+the mapped default catalogue, while owning the exact Creator Signal semantic
+HTML and design-system classes required by the public site.
+
+| Author entry | Registry ID | Authored data | HTML contract |
+|---|---|---|---|
+| Hero | `creator-signal.site.hero` | Scalar fields and optional artwork | One headed hero section and primary action |
+| Site Header | `creator-signal.site.header` | Brand fields and link repeater | Shared header and labelled `SiteNavigationElement` navigation |
+| Site Footer | `creator-signal.site.footer` | Brand fields and link repeater | Shared footer and labelled `SiteNavigationElement` navigation |
+| Privacy Choices | `creator-signal.site.consent-banner` | Notice and choice labels | Consent aside with stable analytics data hooks |
+| Feature Grid | `creator-signal.site.feature-grid` | Introduction and feature repeater | Headed section containing sibling feature articles |
+| Call to Action | `creator-signal.site.call-to-action` | Copy and one action | Headed section with one native link action |
+| Rich Text Section | `creator-signal.site.rich-text-section` | Heading and one rich-text value | Headed prose section with sanitised authored HTML |
+| Testimonial | `creator-signal.site.testimonial` | Quote and attribution fields | Native `figure`, `blockquote` and `figcaption` |
+| FAQ | `creator-signal.site.faq` | Question-and-answer repeater | Native disclosures with `FAQPage` structured data |
+| Public Document | `creator-signal.site.public-document` | Metadata and one rich-text document | Versioned `Article` structured data |
+| Managed Form | `creator-signal.site.mautic-form` | Copy and governed registry alias | Labelled form section with typed runtime events |
+
+Every entry above declares `composition: leaf`, exposes no slots, and renders
+opinionated HTML from its fields. The only site-level content outlet belongs to
+the shared `everywhere` template. Consequently, a navigation menu is edited as
+an ordered link repeater; it is never represented as a slot containing Link
+components. The 23 starter routes contain only page-specific governed
+instances. Header, footer and privacy choices exist once in the template.
+
 ## Template, structure and navigation
 
 | Author entry | Registry ID | Taxonomy | Canonical implementation |

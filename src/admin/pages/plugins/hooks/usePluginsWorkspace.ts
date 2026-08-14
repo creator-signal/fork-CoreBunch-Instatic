@@ -369,10 +369,14 @@ export function usePluginsWorkspace(): PluginsWorkspaceVM {
         summary.replaced.pages.length +
         summary.replaced.classes.length +
         summary.replaced.layouts.length
+      const skippedPageCount = summary.skipped.pages.length
       pushToast({
         kind: 'success',
         title: `Installed pack from ${plugin.name}`,
-        body: `${installedCount} item(s) installed, ${replacedCount} replaced.`,
+        body: `${installedCount} item(s) installed, ${replacedCount} replaced.` +
+          (skippedPageCount > 0
+            ? ` ${skippedPageCount} starter page(s) skipped to preserve authored content.`
+            : ''),
         location: 'plugins:install-pack',
       })
       notifyCmsPluginsChanged()

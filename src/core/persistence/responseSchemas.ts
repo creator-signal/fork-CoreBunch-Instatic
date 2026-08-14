@@ -355,6 +355,9 @@ export const CmsPluginPackInstallSummarySchema = Type.Object(
       classes: Type.Array(Type.String()),
       layouts: Type.Array(Type.String()),
     }),
+    skipped: Type.Object({
+      pages: Type.Array(Type.String()),
+    }),
   },
   { additionalProperties: true },
 )

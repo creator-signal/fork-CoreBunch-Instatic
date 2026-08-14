@@ -5,12 +5,14 @@ export {
   ComponentLibraryAccessibilityContractSchema,
   ComponentLibraryAccessibilityRuleSchema,
   ComponentLibraryConstraintsSchema,
+  ComponentLibraryCompositionSchema,
   ComponentLibraryDependencyHealthSchema,
   ComponentLibraryDependencyIssueSchema,
   ComponentLibraryDependencyStateSchema,
   ComponentLibraryDocumentationSchema,
   ComponentLibraryEntrySchema,
   ComponentLibraryFieldSchema,
+  ComponentLibraryRepeaterItemFieldSchema,
   ComponentLibraryImplementationSchema,
   ComponentLibraryImplementationTypeSchema,
   ComponentLibraryPreviewSchema,
@@ -28,11 +30,13 @@ export type {
   ComponentLibraryAccessibilityRule,
   ComponentLibraryAvailability,
   ComponentLibraryConstraints,
+  ComponentLibraryComposition,
   ComponentLibraryDependencyHealth,
   ComponentLibraryDependencyIssue,
   ComponentLibraryDependencyState,
   ComponentLibraryEntry,
   ComponentLibraryField,
+  ComponentLibraryRepeaterItemField,
   ComponentLibraryImplementation,
   ComponentLibraryImplementationType,
   ComponentLibraryRequirements,
@@ -109,6 +113,18 @@ export {
   planComponentLibraryMigration,
   resolveComponentLibraryInstanceStatus,
 } from './migration'
+
+export {
+  ComponentLibraryTreeMigrationRegistry,
+  componentLibraryTreeMigrationRegistry,
+  migrateComponentLibraryTrees,
+} from './treeMigration'
+
+export type {
+  ComponentLibraryTreeMigration,
+  ComponentLibraryTreeMigrationContext,
+  ComponentLibraryTreeMigrationReport,
+} from './treeMigration'
 
 export type {
   ComponentLibraryInstanceStatus,

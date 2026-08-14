@@ -142,6 +142,36 @@ describe('Component Library definitions', () => {
       },
     }))).toThrow('Preset "missing" is not declared by this entry')
   })
+
+  it('allows typed repeaters on leaves and rejects slots on leaves', () => {
+    expect(parseComponentLibraryEntry(entry({
+      composition: 'leaf',
+      fields: [{
+        key: 'items',
+        label: 'Items',
+        type: 'repeater',
+        required: true,
+        itemLabel: 'Link',
+        itemFields: [
+          { key: 'label', label: 'Label', type: 'text', required: true },
+          {
+            key: 'target',
+            label: 'Target',
+            type: 'select',
+            required: true,
+            options: [{ label: 'Same tab', value: '_self' }],
+          },
+        ],
+        minItems: 1,
+        maxItems: 5,
+      }],
+    })).fields[0]?.type).toBe('repeater')
+
+    expect(() => parseComponentLibraryEntry(entry({
+      composition: 'leaf',
+      slots: [{ id: 'items', name: 'Items', minItems: 0 }],
+    }))).toThrow('A leaf component cannot declare slots')
+  })
 })
 
 describe('ComponentLibraryRegistry', () => {

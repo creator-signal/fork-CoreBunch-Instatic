@@ -23,6 +23,7 @@ readonly ComponentLibraryEntry[] = [
     category: 'Forms',
     icon: 'file-text-solid',
     moduleId: 'base.form',
+    container: true,
     tags: ['form', 'submission', 'container'],
     fields: [
       { key: 'mode', label: 'Mode', type: 'select', required: true },
@@ -123,6 +124,7 @@ readonly ComponentLibraryEntry[] = [
     category: 'Forms',
     icon: 'layout-columns',
     moduleId: 'base.form-step',
+    container: true,
     tags: ['form', 'wizard', 'step', 'review'],
     fields: [
       { key: 'stepId', label: 'Step ID', type: 'text', required: true },

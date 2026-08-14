@@ -22,8 +22,9 @@ export interface PluginPackManifest {
   /**
    * Path inside the package zip (relative to plugin.json) of a JSON file
    * with the shape `{ visualComponents?: VisualComponent[]; pages?: Page[];
-   * classes?: StyleRule[]; }`. The host imports these into the active site
-   * on plugin activation.
+   * classes?: StyleRule[]; }`. The host reconciles technical records on
+   * activation; bundled pages are starter content imported only into an
+   * empty active page roster and never overwrite authored pages.
    */
   path: string
 }

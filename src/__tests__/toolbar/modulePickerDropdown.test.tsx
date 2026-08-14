@@ -208,7 +208,7 @@ describe('ModulePickerDropdown — governed components', () => {
     expect(refs[0]?.props.componentId).toBe('base.vc.hero')
     expect(refs[0]?.catalogueInstance).toEqual({
       entryId: publicId('base.hero'),
-      entryVersion: '1.0.0',
+      entryVersion: '2.0.0',
       variantId: 'image-left',
     })
   })

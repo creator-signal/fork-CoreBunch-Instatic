@@ -1,26 +1,30 @@
 # Creator Signal Site Pack
 
-This plugin packages the current Creator Signal launch pages and public-site integrations for an authoring comparison in Instatic.
+This plugin packages the Creator Signal public component catalogue, initial
+site content, and runtime integrations for Instatic.
 
 TL;DR: build the plugin, install its zip, approve the requested permissions,
 and publish the imported pages. Managed deployments can use the starter-site
-bootstrap variables to create the owner, install this package, replace the
-blank setup homepage, and publish the complete site automatically.
+bootstrap variables to create the owner, install this package into an empty
+page roster, and publish the complete site automatically.
 
 ## Included experience
 
-- Twenty-three launch, form, legal, trust, support, and status pages.
+- Twenty-three launch, form, legal, trust, support, and status pages plus one
+  shared `everywhere` site template.
 - The warm Creator Signal editorial design system shared by the editor canvas
   and published pages.
 - A parameterised Hero Visual Component with optional MinIO-backed artwork.
 - Creator Signal favicon, touch icon, maskable icon, and web app manifest
   injected into every published page from versioned plugin assets.
-- Editable hero, feature-grid, call-to-action, prose, testimonial, and FAQ layouts.
+- Governed Hero, Header, Footer, Privacy Choices, Feature Grid, Call to Action,
+  Rich Text Section, Testimonial, FAQ, Public Document, and Managed Form components.
 - Six Mautic-backed public forms that resolve governed aliases through the
   Mautic-generated registry and emit typed success/failure events.
 - The host-level MinIO adapter for originals, variants, avatars, and fonts.
 - Plausible pageviews, consent-gated OpenPanel events, GlitchTip browser monitoring, consent UI, and hashed Mautic attribution.
-- Header, footer, legal copy, and navigation links represented as editable page nodes.
+- Header, footer, navigation and consent edited once as typed shared-template
+  components. Ordinary pages contain only their page-specific components.
 - Operator-approved initial legal, trust, support, and account-data copy marked
   with version `2026-08-02`, its effective date, and the verified operating
   company. External legal advice remains outside the site-pack contract.
@@ -43,9 +47,71 @@ bun run instatic-plugin build integrations/creator-signal
 ```
 
 Upload `integrations/creator-signal.plugin.zip` from **Admin → Plugins** and
-approve all declared permissions. The pack owns the `index` route. On a managed
-empty installation, configure the starter-site bootstrap so Instatic removes
-the generated blank homepage before importing and publishing this pack.
+approve all declared permissions. On a managed empty installation, configure
+the starter-site bootstrap so setup defers its default homepage and the pack
+can import and publish the complete initial site.
+
+## Content ownership and upgrades
+
+Pack pages are starter content, not a live production source of truth. They are
+imported atomically only when the site has no active pages. From that first
+import onward, page IDs, routes, order and node content belong to CMS authors.
+Installing a newer plugin version or using **Re-sync pack** skips every bundled
+page whenever any active page exists; it never replaces, deletes, reorders or
+publishes authored pages.
+
+The plugin continues to govern technical records that must follow its runtime
+contract: Component Library definitions, Visual Components, saved layouts,
+namespaced styles, Mautic validation, CSP inputs, analytics event schemas and
+integration behaviour. Pack installation applies its database changes in one
+transaction. A failure leaves both authored content and technical records at
+their prior state, and an empty managed installation retries the same-version
+starter import on its next bootstrap.
+
+Future changes to already-authored marketing or approved legal copy require an
+explicit, versioned CMS content migration with preview, backup and rollback.
+They must not be implemented by changing a deterministic starter page and
+relying on plugin upgrade reconciliation.
+
+### Upgrade existing 0.1.11 starter content
+
+Installing plugin 0.2.0 updates technical definitions only; it does not change
+existing pages. Export the complete site from **Admin → Export**, then run the
+read-only classifier:
+
+```sh
+bun run integrations/creator-signal/migrations/0.2.0/prepare.ts preview \
+  --input ./creator-signal-export.zip
+```
+
+The preview is ready only when every one of the 23 known routes is either the
+exact retained 0.1.11 starter or already uses the 0.2.0 model, no unexpected
+page would inherit the new shared template, and the template ID is available.
+Any authored difference blocks the whole migration for manual mapping; it is
+never overwritten heuristically.
+
+After reviewing a ready preview, prepare the immutable evidence set:
+
+```sh
+bun run integrations/creator-signal/migrations/0.2.0/prepare.ts prepare \
+  --input ./creator-signal-export.zip \
+  --output-dir ./creator-signal-content-migration
+```
+
+This writes an untouched full backup, a JSON audit report with hashes, and a
+content-only migration archive. Review the archive through the normal import
+preview, apply it with `merge-overwrite`, preview the draft site, and publish
+deliberately. The archive does not publish. Exact rollback uses the untouched
+backup through the guarded `replace` import after its preview and step-up gate.
+
+## Component authoring model
+
+Only structural containers and templates own child composition. Every Creator
+Signal leaf component exposes scalar or repeatable typed fields and renders its
+own opinionated semantic HTML. Navigation links, feature cards and FAQ items are
+repeaters; complete prose and public documents use one sanitised rich-text
+value rather than a stack of paragraph nodes. The visual editor, Agent tools
+and MCP use the same Component Library entries and field validation.
 
 Deploy Mautic first and verify
 `https://marketing.creatorsignal.me/media/creator-signal/forms-v1.js` exposes

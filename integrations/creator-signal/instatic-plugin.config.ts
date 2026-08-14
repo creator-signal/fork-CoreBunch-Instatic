@@ -1,12 +1,13 @@
 import { definePlugin, permissions } from '@core/plugin-sdk'
 import { creatorSignalComponentLibraryEntries } from './component-library'
 import mauticForm from './modules/mautic-form'
+import { creatorSignalSiteModules } from './modules/site-components'
 import { pack } from './pack/site'
 
 export default definePlugin({
   id: 'creator-signal.site',
   name: 'Creator Signal public site',
-  version: '0.1.11',
+  version: '0.2.0',
   description: 'Creator Signal starter pages, author layouts, Mautic forms, consent and analytics integrations.',
   author: { name: 'Creator Signal', url: 'https://creatorsignal.me' },
   license: 'MIT',
@@ -26,7 +27,7 @@ export default definePlugin({
     'replay-api.creatorsignal.me',
     'errors-api.creatorsignal.me',
   ],
-  modules: [mauticForm],
+  modules: [mauticForm, ...creatorSignalSiteModules],
   componentLibrary: creatorSignalComponentLibraryEntries,
   pack,
   settings: [

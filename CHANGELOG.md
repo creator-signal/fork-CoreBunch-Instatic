@@ -6,6 +6,28 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.28 - 2026-08-14
+
+### Governed Creator Signal authoring
+
+- Replaced slots on non-container Creator Signal components with typed fields
+  and repeatable data, while retaining slots only for structural composition.
+- Added opinionated semantic output for the Creator Signal catalogue, including
+  authorable navigation, rich text, feature, testimonial, FAQ, document, form,
+  header, footer, consent, hero, and call-to-action content.
+- Added a sanitised rich-text editor, shared site chrome, page-level SEO and
+  structured metadata, and the same governed component model for Agent and MCP
+  authoring.
+
+### Safe starter-site lifecycle
+
+- Made starter pages an empty-site bootstrap only so plugin upgrades cannot
+  replace or publish authored pages.
+- Rebuilt the 23-page Creator Signal starter site as structured component data
+  with one shared template and preserved its existing public appearance.
+- Added a previewable, backup-first migration for exact legacy starter content;
+  authored or conflicting content is blocked from automatic replacement.
+
 ## 0.0.27 - 2026-08-13
 
 ### Media-edge security

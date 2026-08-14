@@ -7,6 +7,7 @@ import type {
 export type ComponentLibraryPlacementIssueCode =
   | 'parent-required'
   | 'parent-ungoverned'
+  | 'parent-is-leaf'
   | 'parent-rejects-child'
   | 'slot-rejects-entry'
   | 'slot-rejects-implementation'
@@ -48,6 +49,13 @@ export function resolveComponentLibraryPlacement(
     return denied(
       'parent-required',
       `${entry.name} must be placed inside ${formatEntryIds(allowedParents)}.`,
+    )
+  }
+
+  if (context.parentEntry?.composition === 'leaf') {
+    return denied(
+      'parent-is-leaf',
+      `${context.parentEntry.name} owns its complete content and cannot contain child components.`,
     )
   }
 

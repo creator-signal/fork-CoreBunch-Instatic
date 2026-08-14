@@ -26,6 +26,7 @@ import { TagPill } from '@ui/components/TagPill'
 import { pushToast } from '@ui/components/Toast'
 import { useState } from 'react'
 import styles from './ComponentPropertiesView.module.css'
+import { RepeaterFieldControl } from './RepeaterFieldControl'
 
 interface ComponentPropertiesViewProps {
   node: PageNode
@@ -179,6 +180,25 @@ export function ComponentPropertiesView({
         {entry.fields.length === 0 ? (
           <p className={styles.empty}>This component exposes no instance fields.</p>
         ) : entry.fields.map((field) => {
+          const disabled =
+            !permissions.canEditComponents ||
+            status === 'definition-missing' ||
+            status === 'version-ahead'
+          if (field.type === 'repeater') {
+            return (
+              <div key={field.key} className={styles.field}>
+                <RepeaterFieldControl
+                  field={field}
+                  value={componentLibraryFieldValue(entry, field, node, site)}
+                  disabled={disabled}
+                  onChange={(value) => updateField(node.id, field.key, value)}
+                />
+                {field.description ? (
+                  <p className={styles.fieldDescription}>{field.description}</p>
+                ) : null}
+              </div>
+            )
+          }
           const control = componentLibraryFieldControl(
             entry,
             field,
@@ -203,11 +223,7 @@ export function ComponentPropertiesView({
                 }}
                 value={componentLibraryFieldValue(entry, field, node, site)}
                 onChange={(key, value) => updateField(node.id, key, value)}
-                disabled={
-                  !permissions.canEditComponents ||
-                  status === 'definition-missing' ||
-                  status === 'version-ahead'
-                }
+                disabled={disabled}
                 permissionOverride={permissions.canEditComponents}
               />
               {field.description ? (

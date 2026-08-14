@@ -59,6 +59,7 @@ import { AudioModule } from '@modules/base/audio'
 import { PdfViewerModule } from '@modules/base/pdfViewer'
 import { IconModule } from '@modules/base/icon'
 import { NavigationListModule } from '@modules/base/navigationList'
+import { LinkCollectionModule } from '@modules/base/linkCollection'
 import { SeparatorModule } from '@modules/base/separator'
 import { MediaDisplayModule } from '@modules/base/mediaDisplay'
 
@@ -95,6 +96,7 @@ runModuleConformanceSuite(AudioModule)
 runModuleConformanceSuite(PdfViewerModule)
 runModuleConformanceSuite(IconModule)
 runModuleConformanceSuite(NavigationListModule)
+runModuleConformanceSuite(LinkCollectionModule)
 runModuleConformanceSuite(SeparatorModule)
 runModuleConformanceSuite(MediaDisplayModule)
 
@@ -180,6 +182,7 @@ describe('base module registration', () => {
       PdfViewerModule,
       IconModule,
       NavigationListModule,
+      LinkCollectionModule,
     ]) {
       // No module should declare CSS-only props as module schema fields.
       const cssOnlyPropNames = ['backgroundColor', 'color', 'fontSize', 'padding', 'margin', 'border']
@@ -264,6 +267,29 @@ describe('base accessible media and design modules', () => {
       '<span itemprop="name">News</span></a>' +
       '<meta itemprop="position" content="2"></li></ol>',
     )
+  })
+
+  it('publishes typed link records without arbitrary child HTML', () => {
+    const output = LinkCollectionModule.render({
+      presentation: 'breadcrumb',
+      items: [
+        { label: 'Home', href: '/', target: '_self', current: false, kind: 'link' },
+        {
+          label: '<Current>',
+          href: '/current?x=1&y=2',
+          target: '_blank',
+          current: true,
+          kind: 'link',
+        },
+      ],
+    }, ['<script>ignored()</script>'])
+
+    expect(output.html).toContain('itemtype="https://schema.org/BreadcrumbList"')
+    expect(output.html).toContain('<span itemprop="name">&lt;Current&gt;</span>')
+    expect(output.html).toContain('href="/current?x=1&amp;y=2"')
+    expect(output.html).toContain('rel="noopener noreferrer"')
+    expect(output.html).toContain('aria-current="page"')
+    expect(output.html).not.toContain('<script>')
   })
 })
 

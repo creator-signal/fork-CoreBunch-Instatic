@@ -6,6 +6,7 @@
  * responsive behaviour.
  */
 export const creatorSignalCss = String.raw`
+/* creator-signal-site-design-contract */
 :root {
   --cs-paper: #fbf7f2;
   --cs-cream: #f7f4ee;

@@ -11,8 +11,9 @@ import {
   creatorSignalComponentLibraryEntries,
   creatorSignalHeroEntry,
 } from '../../../integrations/creator-signal/component-library'
-import mauticForm from '../../../integrations/creator-signal/modules/mautic-form'
+import mauticForm, { creatorSignalSiteCss } from '../../../integrations/creator-signal/modules/mautic-form'
 import {
+  callToAction,
   consentBanner,
   faq,
   featureGrid,
@@ -20,39 +21,17 @@ import {
   richTextSection,
   siteFooter,
   siteHeader,
+  testimonial,
 } from '../../../integrations/creator-signal/modules/site-components'
 import { pack } from '../../../integrations/creator-signal/pack/site'
+import { creatorSignalPublicRouteSlugs } from '../../../integrations/creator-signal/pack/routes'
 
 const publicPages = pack.pages.filter((page) => !page.template)
 const templatePage = pack.pages.find((page) => page.template)
 
 describe('Creator Signal site pack', () => {
   it('contains the complete public launch route set plus one shared template', () => {
-    expect(publicPages.map((page) => page.slug)).toEqual([
-      'index',
-      'products',
-      'products/sales-pulse',
-      'features',
-      'pricing',
-      'contact',
-      'feedback',
-      'wishlist',
-      'ask-a-question',
-      'feature-request',
-      'report-an-error',
-      'legal/privacy',
-      'legal/terms',
-      'legal/billing',
-      'legal/acceptable-use',
-      'legal/browser-extension',
-      'legal/cookies',
-      'legal/dpa',
-      'trust/security',
-      'trust/subprocessors',
-      'support',
-      'help/account-data',
-      'status',
-    ])
+    expect(publicPages.map((page) => page.slug)).toEqual(creatorSignalPublicRouteSlugs)
     expect(templatePage).toMatchObject({
       slug: 'creator-signal-site-template',
       template: {
@@ -106,7 +85,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.2.1')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.2.5')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -208,6 +187,7 @@ describe('Creator Signal site pack', () => {
     const output = mauticForm.render(mauticForm.defaults, [])
 
     expect(output.html).toContain('data-form-alias="creator_signal_contact"')
+    expect(output.html).toMatch(/^\s*<section class="content-section">/)
     expect(output.html).toContain('data-registry-path="/media/creator-signal/forms-v1.js"')
     expect(output.html).not.toContain('data-form-id=')
     expect(output.html).not.toContain('data-form-api-name=')
@@ -266,6 +246,25 @@ describe('Creator Signal site pack', () => {
     expect(output).toContain('name="twitter:card" content="summary"')
     expect(output).toContain('class="feature-grid"')
     expect(output).toContain('data-analytics-choice="granted"')
+    expect(output.match(/creator-signal-site-design-contract/g)).toHaveLength(1)
+    expect(output).toContain('<div class="signal-visual"><span></span><span></span><span></span><span></span></div>')
+  })
+
+  it('makes every governed module independently previewable with the shared design contract', () => {
+    for (const definition of [
+      siteHeader,
+      siteFooter,
+      consentBanner,
+      featureGrid,
+      callToAction,
+      richTextSection,
+      testimonial,
+      faq,
+      publicDocument,
+      mauticForm,
+    ]) {
+      expect(definition.render(definition.defaults, []).css).toBe(creatorSignalSiteCss)
+    }
   })
 
   it('preserves the consent runtime hooks and sanitised rich-text boundary', () => {

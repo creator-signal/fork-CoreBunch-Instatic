@@ -70,6 +70,7 @@ import {
 } from './shared'
 import { runPluginLifecycleHook } from './lifecycle'
 import { maybeAutoInstallPluginPack, type PluginPackSummary } from './pack'
+import { rebuildPublishedSiteArtifacts } from '../../../publish/rebuildPublishedSite'
 
 // ---------------------------------------------------------------------------
 // GET / POST /admin/api/cms/plugins  (list + JSON install)
@@ -298,6 +299,7 @@ async function installUpgradeFromPackage(ctx: UpgradeContext): Promise<Response>
   const fromVersion = existing.version
   const newVersion = pluginPackage.manifest.version
   const pluginId = existing.id
+  let rebuiltPublishedPages: number
 
   // 1. Deactivate the old version. Best-effort — a deactivate failure
   //    shouldn't prevent the upgrade from proceeding (the new version is
@@ -354,6 +356,15 @@ async function installUpgradeFromPackage(ctx: UpgradeContext): Promise<Response>
       await runPluginLifecycle(db, pluginId, 'activate')
     }
     await setPluginLifecycleStatus(db, pluginId, 'active')
+
+    // Published HTML/CSS is derived from the active module implementation.
+    // Rebuild from the exact published snapshot so a plugin upgrade can fix
+    // rendering without publishing unrelated draft edits or replacing any
+    // authored page content. Failure is part of the upgrade transaction from
+    // the operator's perspective: the old plugin and live static slot remain
+    // authoritative through the rollback path below.
+    const rebuilt = await rebuildPublishedSiteArtifacts(db, options.uploadsDir)
+    rebuiltPublishedPages = rebuilt.rebuiltPages
   } catch (err) {
     const failureMessage = lifecycleErrorMessage(err)
     console.error(`[plugin:${pluginId}] upgrade ${fromVersion} → ${newVersion} failed:`, err)
@@ -387,6 +398,7 @@ async function installUpgradeFromPackage(ctx: UpgradeContext): Promise<Response>
   await recordPluginAuditEvent(db, user, req, 'plugin.update', pluginId, {
     fromVersion,
     toVersion: newVersion,
+    rebuiltPublishedPages,
   })
   broadcastPluginEvent({
     kind: 'updated',
@@ -401,6 +413,7 @@ async function installUpgradeFromPackage(ctx: UpgradeContext): Promise<Response>
       ...(await pluginsPayload(db)),
       pack: packSummary,
       upgrade: { fromVersion, toVersion: newVersion },
+      rebuiltPublishedPages,
     },
     { status: 200 },
   )

@@ -1,9 +1,11 @@
 import {
-  componentLibraryPatternRegistry,
   type ComponentLibraryEntry,
   type ComponentLibraryImplementation,
+} from './schemas'
+import {
+  componentLibraryPatternRegistry,
   type ComponentLibraryPatternDefinition,
-} from '@core/component-library'
+} from './patterns'
 import type { PageNode } from '@core/page-tree'
 
 type GovernedEntryResolver = (

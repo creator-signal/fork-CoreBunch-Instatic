@@ -23,7 +23,12 @@ const {
 } = await import('./attachments/scanner')
 const { configureFormDraftRuntime } = await import('./forms/drafts/runtime')
 const { createCollabRelay } = await import('./collab/relay')
-const { SITE_SOCKET_PATH, createCollabSocketLayer, handleCollabSocketUpgrade } =
+const {
+  SITE_SOCKET_PATH,
+  createCollabSocketLayer,
+  createPublicAuthoringPolicyResolver,
+  handleCollabSocketUpgrade,
+} =
   await import('./collab/socket')
 
 const config = readServerConfig()
@@ -102,7 +107,11 @@ startFormDraftCleanupTick(db)
 // Real-time co-editing: the relay owns live Y documents, their persistence,
 // and the reset protocol for out-of-relay writes. The socket layer speaks
 // the multiplexed y-protocols wire (see server/collab/socket.ts).
-const collabSocket = createCollabSocketLayer(collabRelay)
+const resolvePublicAuthoringPolicy = createPublicAuthoringPolicyResolver(db)
+const collabSocket = createCollabSocketLayer(
+  collabRelay,
+  resolvePublicAuthoringPolicy,
+)
 
 /**
  * Build the CORS response headers for an incoming request.
@@ -168,7 +177,12 @@ const server = Bun.serve({
     // available). Returning `undefined` hands the connection to the
     // `websocket` handlers below.
     if (pathname === SITE_SOCKET_PATH) {
-      const rejection = await handleCollabSocketUpgrade(req, db, server)
+      const rejection = await handleCollabSocketUpgrade(
+        req,
+        db,
+        server,
+        resolvePublicAuthoringPolicy,
+      )
       if (rejection === null) return undefined
       return applySecurityHeaders(rejection, pathname)
     }

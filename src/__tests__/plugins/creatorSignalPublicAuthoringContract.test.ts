@@ -10,6 +10,7 @@ import {
   creatorSignalDesignSystemDependency,
   creatorSignalPublicPatternCatalogue,
   creatorSignalPublicAuthoringContract,
+  creatorSignalPublicAuthoringPolicy,
   isCreatorSignalComponentPermitted,
   isCreatorSignalPatternPermitted,
   isCreatorSignalVariantPermitted,
@@ -113,7 +114,19 @@ describe('Creator Signal public authoring contract', () => {
     expect(creatorSignalPublicAuthoringContract.content).toMatchObject({
       headingHierarchy: 'semantic',
       pageTitleCount: 1,
-      primaryActionCount: 1,
+      primaryActionMaxCount: 1,
     })
+    expect(creatorSignalPublicAuthoringPolicy.content).toMatchObject({
+      pageTitleEntryIds: [
+        'creator-signal.site.hero',
+        'creator-signal.site.recovery-state',
+        'creator-signal.site.public-document',
+      ],
+      primaryActionEntryIds: [
+        'creator-signal.site.hero',
+        'creator-signal.site.recovery-state',
+      ],
+    })
+    expect(pack.publicAuthoring).toEqual(creatorSignalPublicAuthoringPolicy)
   })
 })

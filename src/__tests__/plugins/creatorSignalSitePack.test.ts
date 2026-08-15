@@ -120,7 +120,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.3.2')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.3.3')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -152,7 +152,8 @@ describe('Creator Signal site pack', () => {
       )
       expect(entry?.constraints.allowedDocumentKinds).toEqual(['template'])
       expect(entry?.constraints.maxInstancesPerDocument).toBe(1)
-      expect(entry?.documentation.usage).toContain('site template')
+      expect(entry?.documentation.usage).toContain('Read-only')
+      expect(entry?.documentation.usage).toContain('technical pack')
       expect(entry?.fields.every((field) => Boolean(field.description))).toBe(true)
     }
 
@@ -436,6 +437,12 @@ describe('Creator Signal site pack', () => {
       expect(output).toContain(label)
       expect(output).toContain('class="button button-primary"')
     }
+  })
+
+  it('keeps the later call-to-action treatment secondary to the page action', () => {
+    const output = callToAction.render(callToAction.defaults, []).html
+    expect(output).toContain('class="button button-secondary"')
+    expect(output).not.toContain('class="button button-primary"')
   })
 
   it('preserves the consent runtime hooks and sanitised rich-text boundary', () => {

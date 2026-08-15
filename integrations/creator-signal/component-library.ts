@@ -5,7 +5,6 @@ import {
   type ComponentLibraryPatternDefinition,
   type ComponentLibraryPatternNode,
 } from '@core/component-library'
-import { ContainerModule } from '@modules/base/container'
 import { VisualComponentRefModule } from '@modules/base/visualComponentRef'
 import { heroComponent, heroParamIds } from './pack/hero-component'
 import mauticForm from './modules/mautic-form'
@@ -20,6 +19,9 @@ import {
 } from './modules/site-components'
 import {
   creatorSignalPublicAuthoringContract,
+  creatorSignalPublicPatternCatalogue,
+  creatorSignalPublicPatternRootModuleId,
+  creatorSignalPublicPatternRootProps,
   isCreatorSignalComponentPermitted,
   isCreatorSignalPatternPermitted,
 } from './public-authoring-contract'
@@ -135,11 +137,11 @@ export const creatorSignalHeroEntry: ComponentLibraryEntry = {
 export const creatorSignalHeaderEntry = siteEntry({
   id: 'creator-signal.site.header',
   name: 'Site Header',
-  description: 'Shared brand identity and primary navigation edited once in the site template.',
+  description: 'Pack-owned brand identity and primary navigation inherited from the site template.',
   tags: ['header', 'navigation', 'brand', 'shared'],
   moduleId: 'creator-signal.site.header',
   constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 },
-  usage: 'Edit this shared header in the Creator Signal site template. Ordinary pages inherit it automatically.',
+  usage: 'Read-only public chrome reconciled by the Creator Signal technical pack and inherited by ordinary pages.',
   accessibilityGuidance: 'Use short navigation labels, one primary action, and a Home URL that returns to the site root.',
   fields: [
     { key: 'brandName', label: 'Brand name', description: 'Visible site name and home-link accessible name.', type: 'text', required: true },
@@ -167,7 +169,7 @@ export const creatorSignalFooterEntry = siteEntry({
   tags: ['footer', 'navigation', 'legal', 'shared'],
   moduleId: 'creator-signal.site.footer',
   constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 },
-  usage: 'Edit this shared footer in the Creator Signal site template. Ordinary pages inherit it automatically.',
+  usage: 'Read-only public chrome reconciled by the Creator Signal technical pack and inherited by ordinary pages.',
   accessibilityGuidance: 'Keep link labels unique enough to make sense when read out of context.',
   fields: [
     { key: 'brandName', label: 'Brand name', description: 'Visible site name in the shared footer.', type: 'text', required: true },
@@ -192,7 +194,7 @@ export const creatorSignalConsentEntry = siteEntry({
   tags: ['privacy', 'consent', 'analytics', 'shared'],
   moduleId: 'creator-signal.site.consent-banner',
   constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 },
-  usage: 'Edit the shared privacy choices in the Creator Signal site template. Ordinary pages inherit them automatically.',
+  usage: 'Read-only privacy chrome reconciled by the Creator Signal technical pack and inherited by ordinary pages.',
   accessibilityGuidance: 'Describe the optional purpose plainly and keep both choices equally understandable.',
   fields: [
     { key: 'heading', label: 'Heading', description: 'Short name for the privacy choice.', type: 'text', required: true },
@@ -469,25 +471,41 @@ const patternBlocks = {
   ),
 } satisfies Record<string, () => ComponentLibraryPatternNode>
 
-type PatternBlock = keyof typeof patternBlocks
+const patternBlockByEntryId: Readonly<Record<
+  string,
+  () => ComponentLibraryPatternNode
+>> = {
+  [creatorSignalHeroEntry.id]: patternBlocks.hero,
+  [creatorSignalFeatureGridEntry.id]: patternBlocks.features,
+  [creatorSignalRichTextEntry.id]: patternBlocks.content,
+  [creatorSignalComparisonEntry.id]: patternBlocks.comparison,
+  [creatorSignalFaqEntry.id]: patternBlocks.faq,
+  [creatorSignalCallToActionEntry.id]: patternBlocks.action,
+  [creatorSignalMauticFormEntry.id]: patternBlocks.form,
+  [creatorSignalPublicDocumentEntry.id]: patternBlocks.document,
+}
 
 function pagePattern(
   id: string,
-  blocks: readonly PatternBlock[],
+  childEntryIds: readonly string[],
 ): ComponentLibraryPatternDefinition {
-  const children = blocks.map((block) => patternBlocks[block]())
+  const children = childEntryIds.map((entryId) => {
+    const createBlock = patternBlockByEntryId[entryId]
+    if (!createBlock) {
+      throw new Error(
+        `[creator-signal] Pattern "${id}" references unsupported component "${entryId}".`,
+      )
+    }
+    return createBlock()
+  })
   return {
     id,
     rootKey: 'root',
     nodes: [
       {
         key: 'root',
-        moduleId: ContainerModule.id,
-        props: {
-          ...ContainerModule.defaults,
-          tag: 'div',
-          htmlAttributes: { 'data-creator-signal-pattern': id },
-        },
+        moduleId: creatorSignalPublicPatternRootModuleId,
+        props: creatorSignalPublicPatternRootProps(id),
         children: children.map((child) => child.key),
       },
       ...children,
@@ -499,6 +517,7 @@ function pagePattern(
 function recoveryPattern(
   id: string,
   state: 'empty' | 'error' | 'offline' | 'not-found',
+  childEntryIds: readonly string[],
 ): ComponentLibraryPatternDefinition {
   const defaults = state === 'not-found'
     ? {
@@ -527,6 +546,14 @@ function recoveryPattern(
           actionLabel: 'Return home',
           actionUrl: '/',
         }
+  if (
+    childEntryIds.length !== 1 ||
+    childEntryIds[0] !== creatorSignalRecoveryStateEntry.id
+  ) {
+    throw new Error(
+      `[creator-signal] Recovery pattern "${id}" must contain one Recovery State component.`,
+    )
+  }
   const definition = pagePattern(id, [])
   const stateNode = componentNode(
     'state',
@@ -544,19 +571,25 @@ function recoveryPattern(
   }
 }
 
+const recoveryPatternStates: Readonly<Record<
+  string,
+  'empty' | 'error' | 'offline' | 'not-found'
+>> = {
+  'creator-signal.site.pattern.empty-state': 'empty',
+  'creator-signal.site.pattern.error-state': 'error',
+  'creator-signal.site.pattern.offline-state': 'offline',
+  'creator-signal.site.pattern.not-found-state': 'not-found',
+}
+
 export const creatorSignalPatternDefinitions: readonly ComponentLibraryPatternDefinition[] = [
-  pagePattern('creator-signal.site.pattern.content-page', ['hero', 'content', 'action']),
-  pagePattern('creator-signal.site.pattern.product-page', ['hero', 'features', 'action']),
-  pagePattern('creator-signal.site.pattern.pricing-page', ['hero', 'comparison', 'action']),
-  pagePattern('creator-signal.site.pattern.features-page', ['hero', 'features']),
-  pagePattern('creator-signal.site.pattern.contact-page', ['hero', 'form']),
-  pagePattern('creator-signal.site.pattern.legal-trust-page', ['document']),
-  pagePattern('creator-signal.site.pattern.article-content-page', ['hero', 'content']),
-  pagePattern('creator-signal.site.pattern.comparison-section', ['comparison']),
-  recoveryPattern('creator-signal.site.pattern.empty-state', 'empty'),
-  recoveryPattern('creator-signal.site.pattern.error-state', 'error'),
-  recoveryPattern('creator-signal.site.pattern.offline-state', 'offline'),
-  recoveryPattern('creator-signal.site.pattern.not-found-state', 'not-found'),
+  ...creatorSignalPublicPatternCatalogue
+    .filter((entry) => entry.ownership === 'pattern')
+    .map((entry) => {
+      const state = recoveryPatternStates[entry.patternId]
+      return state
+        ? recoveryPattern(entry.patternId, state, entry.childEntryIds)
+        : pagePattern(entry.patternId, entry.childEntryIds)
+    }),
 ]
 
 for (const definition of creatorSignalPatternDefinitions) {

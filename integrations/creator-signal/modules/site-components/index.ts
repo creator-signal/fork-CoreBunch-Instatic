@@ -26,7 +26,7 @@ export interface ComparisonItem {
   thirdValue: string
 }
 
-export type RecoveryStateKind = 'empty' | 'error' | 'offline'
+export type RecoveryStateKind = 'empty' | 'error' | 'offline' | 'not-found'
 
 const text = (value: unknown): string => typeof value === 'string' ? value : ''
 const records = (value: unknown): Array<Record<string, unknown>> =>
@@ -35,7 +35,7 @@ const records = (value: unknown): Array<Record<string, unknown>> =>
         Boolean(item) && typeof item === 'object' && !Array.isArray(item))
     : []
 const recoveryStateKind = (value: unknown): RecoveryStateKind =>
-  value === 'error' || value === 'offline' ? value : 'empty'
+  value === 'error' || value === 'offline' || value === 'not-found' ? value : 'empty'
 
 /**
  * Every Creator Signal leaf module carries the same public design contract.
@@ -84,6 +84,7 @@ export const siteHeader = defineModule({
     items: control.textarea('Navigation items'),
   },
   render: ({ props }) => withCreatorSignalCss(html`<header class="site-header">
+      <a class="skip-link" href="#main-content">Skip to main content</a>
       <a class="site-brand" href="${safeUrl(props.homeUrl)}" aria-label="${props.brandName} home">
         <span class="brand-mark" aria-hidden="true">
           <img class="brand-mark-light" src="${safeUrl(creatorSignalBrandAssets.markLight)}" alt="" width="1024" height="688" decoding="async">
@@ -117,6 +118,7 @@ export const siteFooter = defineModule({
     brandName: 'Creator Signal',
     tagline: 'Clearer signals for independent creative businesses.',
     copyright: '© 2026 Creator Signal',
+    privacyLabel: 'Privacy choices',
     items: [
       { label: 'Products', url: '/products' },
       { label: 'Sales Pulse', url: '/products/sales-pulse' },
@@ -137,12 +139,14 @@ export const siteFooter = defineModule({
     brandName: control.text('Brand name'),
     tagline: control.text('Tagline'),
     copyright: control.text('Copyright'),
+    privacyLabel: control.text('Privacy choices label'),
     items: control.textarea('Footer links'),
   },
   render: ({ props }) => withCreatorSignalCss(html`<footer class="site-footer">
       <div class="footer-meta">
         <div><strong>${props.brandName}</strong><p>${props.tagline}</p></div>
         <small>${props.copyright}</small>
+        <button class="footer-privacy-choice" type="button" data-privacy-choices>${props.privacyLabel}</button>
       </div>
       <nav aria-label="Footer navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
         ${navigationItems(props.items)}
@@ -390,6 +394,7 @@ export const recoveryState = defineModule({
       { label: 'Empty', value: 'empty' },
       { label: 'Error', value: 'error' },
       { label: 'Offline', value: 'offline' },
+      { label: 'Not found', value: 'not-found' },
     ]),
     heading: control.text('Heading'),
     body: control.textarea('Explanation', { rows: 3 }),
@@ -399,7 +404,9 @@ export const recoveryState = defineModule({
   },
   render: ({ props }) => {
     const state = recoveryStateKind(props.state)
-    const stateLabel = state === 'error'
+    const stateLabel = state === 'not-found'
+      ? 'Page not found'
+      : state === 'error'
       ? 'Something went wrong'
       : state === 'offline'
         ? 'Connection unavailable'

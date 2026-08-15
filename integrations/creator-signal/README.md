@@ -10,8 +10,8 @@ page roster, and publish the complete site automatically.
 
 ## Included experience
 
-- Twenty-three launch, form, legal, trust, support, and status pages plus one
-  shared `everywhere` site template.
+- Twenty-three launch, form, legal, trust, support, and status pages plus a
+  shared `everywhere` template and governed `notFound` template.
 - The canonical Creator Signal Design System shared by the editor canvas and
   published pages, including self-hosted Fredoka, Mulish and Caveat fonts and
   system, light and dark theme preferences.
@@ -23,7 +23,7 @@ page roster, and publish the complete site automatically.
 - Governed Hero, Header, Footer, Privacy Choices, Feature Grid, Call to Action,
   Rich Text Section, Testimonial, FAQ, Comparison, Recovery State, Public
   Document, and Managed Form components.
-- Eleven stable page/section patterns plus explicit Hero, CTA and FAQ mappings;
+- Twelve stable page/section patterns plus explicit Hero, CTA and FAQ mappings;
   starter routes materialize the same registry definitions authors insert.
 - Six Mautic-backed public forms that resolve governed aliases through the
   Mautic-generated registry and emit typed success/failure events.
@@ -112,7 +112,7 @@ relying on plugin upgrade reconciliation.
 
 ### Upgrade existing 0.1.11 starter content
 
-Installing plugin 0.2.1 runs the versioned technical-pack upgrade and does not
+Installing plugin 0.3.2 runs the versioned technical-pack upgrade and does not
 change existing pages. The authored-content migration remains version 0.2.0.
 Export the complete site from **Admin → Export**, then run the read-only
 classifier:
@@ -124,7 +124,8 @@ bun run integrations/creator-signal/migrations/0.2.0/prepare.ts preview \
 
 The preview is ready only when every one of the 23 known routes is either the
 exact retained 0.1.11 starter or already uses the 0.2.0 model, no unexpected
-page would inherit the new shared template, and the template ID is available.
+page would inherit the new shared template, and both governed template IDs are
+available.
 Any authored difference blocks the whole migration for manual mapping; it is
 never overwritten heuristically.
 
@@ -165,6 +166,10 @@ component and shared-template reference. Its parity command generates a
 browsable production-versus-candidate report with full-page and per-section
 images at desktop, tablet and mobile widths.
 
+`integrations/creator-signal/ACCEPTANCE.md` defines the source-owned WCAG,
+keyboard, responsive, degraded-state and committed visual-baseline gate that
+runs against pages produced by Instatic's real public publishing pipeline.
+
 Deploy Mautic first and verify
 `https://marketing.creatorsignal.me/media/creator-signal/forms-v1.js` exposes
 the `creator-signal.mautic-forms/v1` schema and all six governed aliases. Do not
@@ -182,6 +187,7 @@ its own role-protected application boundary.
 - `docs/deployment/creator-signal-stack.md`
 - `integrations/creator-signal/COMPONENTS.md`
 - `integrations/creator-signal/AUTHORING.md`
+- `integrations/creator-signal/ACCEPTANCE.md`
 - `integrations/creator-signal/PARITY.md`
 - `integrations/creator-signal/instatic-plugin.config.ts`
 - `integrations/creator-signal/modules/mautic-form.ts`

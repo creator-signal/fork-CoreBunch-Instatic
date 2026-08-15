@@ -86,7 +86,8 @@ describe('Creator Signal 0.2.0 content migration', () => {
       missing: 0,
       additionalPages: 0,
       template: 'add',
-      rowsInMigration: 24,
+      notFoundTemplate: 'add',
+      rowsInMigration: 25,
     })
     expect(result.report.apply).toMatchObject({
       strategy: 'merge-overwrite',
@@ -94,7 +95,7 @@ describe('Creator Signal 0.2.0 content migration', () => {
     })
     expect(result.manifest?.site).toBeUndefined()
     expect(result.manifest?.media).toBeUndefined()
-    expect(result.manifest?.rows).toHaveLength(24)
+    expect(result.manifest?.rows).toHaveLength(25)
     expect(result.manifest?.tables[0].fields.some((field) => field.id === 'seo')).toBe(true)
 
     const templateRow = result.manifest?.rows.find((row) =>
@@ -102,6 +103,11 @@ describe('Creator Signal 0.2.0 content migration', () => {
     expect(templateRow?.status).toBe('draft')
     expect(templateRow?.cells.templateEnabled).toBe(true)
     expect(templateRow?.slug).toBe('creator-signal-site-template')
+
+    const notFoundTemplateRow = result.manifest?.rows.find((row) =>
+      row.id === 'creator-signal.site/page/not-found')
+    expect(notFoundTemplateRow?.status).toBe('draft')
+    expect(notFoundTemplateRow?.cells.templateTarget).toEqual({ kind: 'notFound' })
 
     const home = result.manifest?.rows.find((row) =>
       row.id === 'creator-signal.site/page/home')
@@ -134,6 +140,7 @@ describe('Creator Signal 0.2.0 content migration', () => {
     expect(result.report.summary).toMatchObject({
       alreadyCurrent: 23,
       template: 'repair',
+      notFoundTemplate: 'current',
       rowsInMigration: 1,
     })
     expect(result.manifest?.rows).toHaveLength(1)

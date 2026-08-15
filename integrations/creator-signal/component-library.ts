@@ -173,6 +173,7 @@ export const creatorSignalFooterEntry = siteEntry({
     { key: 'brandName', label: 'Brand name', description: 'Visible site name in the shared footer.', type: 'text', required: true },
     { key: 'tagline', label: 'Tagline', description: 'Short supporting brand line.', type: 'text', required: true },
     { key: 'copyright', label: 'Copyright', description: 'Current copyright notice displayed on every page.', type: 'text', required: true },
+    { key: 'privacyLabel', label: 'Privacy choices label', description: 'Persistent control that reopens the shared consent choices.', type: 'text', required: true },
     {
       key: 'items', label: 'Footer links', description: 'Ordered product, help, legal and service destinations shared by every page.', type: 'repeater', required: true,
       itemLabel: 'Link', minItems: 1, maxItems: 24,
@@ -318,13 +319,13 @@ export const creatorSignalComparisonEntry = siteEntry({
 export const creatorSignalRecoveryStateEntry = siteEntry({
   id: 'creator-signal.site.recovery-state',
   name: 'Recovery State',
-  description: 'A textual empty, error or offline state with one clear recovery action.',
-  tags: ['empty state', 'error', 'offline', 'recovery'],
+  description: 'A textual empty, error, offline or not-found state with one clear recovery action.',
+  tags: ['empty state', 'error', 'offline', 'not found', 'recovery'],
   moduleId: recoveryState.id,
-  constraints: { allowedDocumentKinds: ['page'], maxInstancesPerDocument: 1 },
+  constraints: { allowedDocumentKinds: ['page', 'template'], maxInstancesPerDocument: 1 },
   accessibilityGuidance: 'Name the state in text, explain what happened, and offer an action that works without relying on colour.',
   fields: [
-    { key: 'state', label: 'State', description: 'Governed empty, error or offline semantic treatment.', type: 'select', required: true },
+    { key: 'state', label: 'State', description: 'Governed empty, error, offline or not-found semantic treatment.', type: 'select', required: true },
     { key: 'heading', label: 'Heading', description: 'Plain-language page heading.', type: 'text', required: true },
     { key: 'body', label: 'Explanation', description: 'Explain the state and any safe next step.', type: 'text', required: true },
     { key: 'actionLabel', label: 'Recovery action', description: 'Specific visible action label.', type: 'text', required: true },
@@ -497,9 +498,16 @@ function pagePattern(
 
 function recoveryPattern(
   id: string,
-  state: 'empty' | 'error' | 'offline',
+  state: 'empty' | 'error' | 'offline' | 'not-found',
 ): ComponentLibraryPatternDefinition {
-  const defaults = state === 'error'
+  const defaults = state === 'not-found'
+    ? {
+        heading: 'We cannot find that page',
+        body: 'The address may have changed or the page may no longer exist.',
+        actionLabel: 'Return home',
+        actionUrl: '/',
+      }
+    : state === 'error'
     ? {
         heading: 'We could not complete that request',
         body: 'Try again, or return to a safe page if the problem continues.',
@@ -548,6 +556,7 @@ export const creatorSignalPatternDefinitions: readonly ComponentLibraryPatternDe
   recoveryPattern('creator-signal.site.pattern.empty-state', 'empty'),
   recoveryPattern('creator-signal.site.pattern.error-state', 'error'),
   recoveryPattern('creator-signal.site.pattern.offline-state', 'offline'),
+  recoveryPattern('creator-signal.site.pattern.not-found-state', 'not-found'),
 ]
 
 for (const definition of creatorSignalPatternDefinitions) {
@@ -562,6 +571,7 @@ function patternEntry(input: {
   usage: string
   accessibility: string
   maxInstancesPerDocument?: number
+  allowedDocumentKinds?: Array<'page' | 'template'>
 }): ComponentLibraryEntry {
   const definition = creatorSignalPatternDefinitions.find(
     (candidate) => candidate.id === input.id,
@@ -591,7 +601,7 @@ function patternEntry(input: {
     presets: [],
     slots: [],
     constraints: {
-      allowedDocumentKinds: ['page'],
+      allowedDocumentKinds: input.allowedDocumentKinds ?? ['page'],
       allowedChildEntryIds: [...new Set(allowedChildEntryIds)],
       ...(input.maxInstancesPerDocument
         ? { maxInstancesPerDocument: input.maxInstancesPerDocument }
@@ -627,6 +637,7 @@ export const creatorSignalPatternEntries: readonly ComponentLibraryEntry[] = [
   patternEntry({ id: 'creator-signal.site.pattern.empty-state', name: 'Empty State Page', description: 'Explains an empty result and offers a recovery route.', tags: ['empty', 'recovery', 'status'], usage: 'Use when a valid view has no content yet.', accessibility: 'Name the empty state in text and provide a useful action.', maxInstancesPerDocument: 1 }),
   patternEntry({ id: 'creator-signal.site.pattern.error-state', name: 'Error State Page', description: 'Explains a recoverable failure and offers a safe route.', tags: ['error', 'recovery', 'status'], usage: 'Use for a failed request that the visitor can safely recover from.', accessibility: 'Describe the failure without relying on colour and keep the recovery action specific.', maxInstancesPerDocument: 1 }),
   patternEntry({ id: 'creator-signal.site.pattern.offline-state', name: 'Offline State Page', description: 'Explains loss of connectivity and links to service status.', tags: ['offline', 'recovery', 'status'], usage: 'Use when the requested experience cannot continue without connectivity.', accessibility: 'State the connectivity problem in text and link to a reachable status or retry route.', maxInstancesPerDocument: 1 }),
+  patternEntry({ id: 'creator-signal.site.pattern.not-found-state', name: 'Not Found Page', description: 'Explains that a public route does not exist and offers a safe route home.', tags: ['404', 'not found', 'recovery'], usage: 'Use only for the site-wide not-found template.', accessibility: 'State that the page was not found in text and provide a useful recovery action.', maxInstancesPerDocument: 1, allowedDocumentKinds: ['template'] }),
 ]
 
 export const creatorSignalComponentLibraryEntries: readonly ComponentLibraryEntry[] = [

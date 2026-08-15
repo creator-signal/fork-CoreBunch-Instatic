@@ -21,19 +21,23 @@ import type { CoreCapability } from '../auth/capabilities'
 import { deepEqual } from '@core/utils/deepEqual'
 import { ForbiddenSiteChangeError } from './siteDiff'
 import {
+  assertPublicAuthoringPage,
   componentLibraryPatternRegistry,
   componentLibraryRegistry,
+  isManagedGovernedPatternNode,
+  isValidGovernedPatternBoundary,
   resolveComponentLibraryPlacement,
   type ComponentLibraryEntry,
   type ComponentLibraryImplementation,
 } from '@core/component-library'
 import { registry, resolvePropertyControlCategory } from '@core/module-engine'
-import type { CatalogueInstanceMetadata, Page, PageNode } from '@core/page-tree'
+import type {
+  CatalogueInstanceMetadata,
+  Page,
+  PageNode,
+  PublicAuthoringPolicy,
+} from '@core/page-tree'
 import '@modules/base'
-import {
-  isManagedGovernedPatternNode,
-  isValidGovernedPatternBoundary,
-} from './pageDiffPatterns'
 
 type PageChangeKind = 'components' | 'structure' | 'content' | 'style'
 
@@ -49,6 +53,7 @@ interface PageDiffInput {
   changedPages: readonly Page[]
   deletedPageIds: ReadonlySet<string>
   capabilities: readonly CoreCapability[]
+  publicAuthoringPolicy?: PublicAuthoringPolicy
 }
 
 function allowed(capabilities: readonly CoreCapability[], kind: PageChangeKind): boolean {
@@ -84,8 +89,35 @@ export function validatePageWriteDiff({
   changedPages,
   deletedPageIds,
   capabilities,
+  publicAuthoringPolicy,
 }: PageDiffInput): void {
+  if (publicAuthoringPolicy) {
+    const previousById = new Map(previousPages.map((page) => [page.id, page]))
+    for (const page of changedPages) {
+      assertPublicAuthoringPage(page, publicAuthoringPolicy, componentLibraryRegistry)
+      if (
+        publicAuthoringPolicy.templates.some((template) => template.pageId === page.id) &&
+        !deepEqual(previousById.get(page.id), page)
+      ) {
+        throw new ForbiddenSiteChangeError(
+          'structure',
+          `pages.${page.id}`,
+          'the template-controlled public chrome is reconciled by the owning plugin pack',
+        )
+      }
+    }
+    for (const template of publicAuthoringPolicy.templates) {
+      if (deletedPageIds.has(template.pageId)) {
+        throw new ForbiddenSiteChangeError(
+          'structure',
+          `pages.${template.pageId}`,
+          'the template-controlled public chrome cannot be deleted',
+        )
+      }
+    }
+  }
   if (
+    !publicAuthoringPolicy &&
     capabilities.includes('site.structure.edit') &&
     capabilities.includes('site.content.edit') &&
     capabilities.includes('site.style.edit')

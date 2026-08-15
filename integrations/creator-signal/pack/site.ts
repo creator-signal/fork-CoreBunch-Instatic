@@ -9,7 +9,10 @@ import type { PageSeo } from '@core/page-tree'
 import { creatorSignalComponentLibraryEntries } from '../component-library'
 import { creatorSignalBrandAssets } from '../design-system/contract'
 import { consentBanner, siteFooter, siteHeader } from '../modules/site-components'
-import { creatorSignalPatternForRole } from '../public-authoring-contract'
+import {
+  creatorSignalPatternForRole,
+  creatorSignalPublicAuthoringPolicy,
+} from '../public-authoring-contract'
 import { creatorSignalCss } from './design-system'
 import { heroComponent, heroParamIds } from './hero-component'
 
@@ -665,6 +668,7 @@ notFoundTemplate.template = {
 
 const pack = definePack({
   pluginId: 'creator-signal.site',
+  publicAuthoring: creatorSignalPublicAuthoringPolicy,
   visualComponents: [heroComponent],
   pages: compiled.pages,
   conditions: compiled.conditions,

@@ -145,6 +145,22 @@ export {
   componentLibraryPatternRegistry,
 } from './patterns'
 
+export {
+  isManagedGovernedPatternNode,
+  isValidGovernedPatternBoundary,
+} from './patternGovernance'
+
+export {
+  PublicAuthoringPolicyError,
+  analysePublicAuthoringPage,
+  analysePublicAuthoringPolicy,
+  assertPublicAuthoringPage,
+  assertPublicAuthoringPolicyPublishable,
+  isProtectedPublicAuthoringVisualComponent,
+} from './publicAuthoring'
+
+export type { PublicAuthoringDiagnostic } from './publicAuthoringTypes'
+
 export type {
   ComponentLibraryPatternDefinition,
   ComponentLibraryPatternNode,

@@ -17,7 +17,11 @@
  * are structural; the shell diff-validates per field.
  */
 import * as Y from 'yjs'
-import type { SiteShell } from '@core/page-tree'
+import type { PublicAuthoringPolicy, SiteShell } from '@core/page-tree'
+import {
+  PublicAuthoringPolicyError,
+  isProtectedPublicAuthoringVisualComponent,
+} from '@core/component-library'
 import { deepEqual } from '@core/utils/deepEqual'
 import {
   parseCollabDocId,
@@ -50,6 +54,7 @@ export function validateGuardedUpdate(
   doc: Y.Doc,
   update: Uint8Array,
   capabilities: readonly CoreCapability[],
+  publicAuthoringPolicy?: PublicAuthoringPolicy,
 ): UpdateGuardVerdict {
   const parsed = parseCollabDocId(docId)
   if (!parsed) return { ok: false, reason: `unknown doc id ${docId}` }
@@ -74,6 +79,7 @@ export function validateGuardedUpdate(
         changedPages: [next],
         deletedPageIds: new Set(),
         capabilities,
+        ...(publicAuthoringPolicy ? { publicAuthoringPolicy } : {}),
       })
       return { ok: true }
     }
@@ -87,6 +93,16 @@ export function validateGuardedUpdate(
         parsed.kind === 'component'
           ? projectComponentDoc(fork, parsed.rowId)
           : projectLayoutDoc(fork, parsed.rowId)
+      if (
+        parsed.kind === 'component' &&
+        !deepEqual(previous, next) &&
+        isProtectedPublicAuthoringVisualComponent(publicAuthoringPolicy, parsed.rowId)
+      ) {
+        return {
+          ok: false,
+          reason: `component ${parsed.rowId} is protected by the public-authoring policy`,
+        }
+      }
       if (!deepEqual(previous, next) && !hasStructure(capabilities)) {
         return {
           ok: false,
@@ -113,6 +129,9 @@ export function validateGuardedUpdate(
     return { ok: true }
   } catch (err) {
     if (err instanceof ForbiddenSiteChangeError) {
+      return { ok: false, reason: err.message }
+    }
+    if (err instanceof PublicAuthoringPolicyError) {
       return { ok: false, reason: err.message }
     }
     throw err

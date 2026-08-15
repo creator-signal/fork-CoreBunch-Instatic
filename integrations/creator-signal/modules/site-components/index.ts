@@ -243,7 +243,7 @@ export const callToAction = defineModule({
   },
   render: ({ props }) => withCreatorSignalCss(html`<section class="cta-section" aria-labelledby="${props.sectionId}">
       <div class="cta-copy"><p class="eyebrow">${props.eyebrow}</p><h2 id="${props.sectionId}">${props.heading}</h2><p>${props.body}</p></div>
-      <div class="actions"><a class="button button-primary" href="${safeUrl(props.actionUrl)}">${props.actionLabel}</a></div>
+      <div class="actions"><a class="button button-secondary" href="${safeUrl(props.actionUrl)}">${props.actionLabel}</a></div>
     </section>`),
 })
 

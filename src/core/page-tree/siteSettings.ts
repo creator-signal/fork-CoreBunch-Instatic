@@ -28,6 +28,10 @@ import { Type, type Static } from '@core/utils/typeboxHelpers'
 import { compiledCheck } from '@core/utils/typeboxCompiler'
 import { FrameworkSettingsSchema } from '@core/framework-schema'
 import { SiteFontsSettingsSchema, parseSiteFontsSettings } from '@core/fonts'
+import {
+  PublicAuthoringPolicySchema,
+  type PublicAuthoringPolicy,
+} from './publicAuthoringPolicy'
 
 // ---------------------------------------------------------------------------
 // SiteSettingsSchema
@@ -83,6 +87,8 @@ export const SiteSettingsSchema = Type.Object({
   shortcuts: Type.Record(Type.String(), Type.String()),
   /** Optional site-owned publication policy for accessibility diagnostics. */
   accessibility: Type.Optional(SiteAccessibilityPolicySchema),
+  /** Optional enforceable policy for a governed public authoring surface. */
+  publicAuthoring: Type.Optional(PublicAuthoringPolicySchema),
   /** Optional published-page search capability. Absent/disabled means unavailable. */
   search: Type.Optional(SiteSearchSettingsSchema),
 })
@@ -140,6 +146,12 @@ export function parseSiteSettings(raw: unknown): SiteSettings {
   )
     ? (r.accessibility as SiteAccessibilityPolicy)
     : undefined
+  const publicAuthoring = compiledCheck(
+    PublicAuthoringPolicySchema,
+    r.publicAuthoring,
+  )
+    ? (r.publicAuthoring as PublicAuthoringPolicy)
+    : undefined
   const search = compiledCheck(SiteSearchSettingsSchema, r.search)
     ? (r.search as SiteSearchSettings)
     : undefined
@@ -155,6 +167,7 @@ export function parseSiteSettings(raw: unknown): SiteSettings {
     framework,
     fonts,
     ...(accessibility ? { accessibility } : {}),
+    ...(publicAuthoring ? { publicAuthoring } : {}),
     ...(search ? { search } : {}),
     shortcuts,
   }

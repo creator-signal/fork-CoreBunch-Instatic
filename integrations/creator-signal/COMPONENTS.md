@@ -289,7 +289,8 @@ affect only the selected reference.
 - `integrations/creator-signal/component-library.ts` — governed authoring entries
 - `integrations/creator-signal/pack/design-system.ts` — public design system
 - `integrations/creator-signal/pack/site.ts` — governed starter pages and shared template
-- `integrations/creator-signal/modules/site-components.ts` — opinionated leaf renderers
+- `integrations/creator-signal/modules/site-components/index.ts` — opinionated leaf renderers
+- `integrations/creator-signal/AUTHORING.md` — shared-template, route, component and visual-report reference
 - `src/core/plugin-sdk/builders/tree.ts` — `defineComponent` and `h`
 - `src/core/plugin-sdk/builders/definePack.ts` — pack registration
 - `docs/features/visual-components.md` — component data model, slots, editor, and publisher

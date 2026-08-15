@@ -138,7 +138,14 @@ Every mapped entry declares the `creator-signal.site` design-system source with
 the author-facing provider name `Creator Signal`. The Components provider filter
 and `site_list_component_library` MCP response read that same registry metadata.
 
-An omitted parent, child or slot allow-list means unrestricted. A present empty allow-list means none are permitted. This preserves the difference between an unconstrained container and a deliberately closed boundary.
+An omitted document, parent, child or slot allow-list means unrestricted. A
+present empty allow-list means none are permitted. `allowedDocumentKinds`
+limits an entry to ordinary pages or templates, while
+`maxInstancesPerDocument` prevents duplicate singleton chrome such as a shared
+header. `src/core/component-library/placement.ts` applies these rules to the
+picker, drag-and-drop, Agent/MCP insertion and server write validation. This
+preserves the difference between an unconstrained container and a deliberately
+closed boundary.
 
 ### Implementation taxonomy
 

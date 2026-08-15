@@ -68,6 +68,12 @@ export function resolveComponentLayerDrop({
     ? parentEntry?.slots.find((candidate) => candidate.id === slotName)
     : undefined
   const placement = resolveComponentLibraryPlacement(draggedEntry, {
+    documentKind: page.template ? 'template' : 'page',
+    existingDocumentEntryCount: Object.values(page.nodes).filter(
+      (node) =>
+        node.id !== draggedId &&
+        node.catalogueInstance?.entryId === draggedEntry.id,
+    ).length,
     ...(parentEntry ? { parentEntry } : {}),
     ...(slot ? { slot } : {}),
     parentIsPageRoot: target.parentId === page.rootNodeId,

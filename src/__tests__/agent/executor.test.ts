@@ -22,6 +22,70 @@ import '@modules/base'
 const publicId = creatorSignalCatalogueEntryId
 
 describe('executeAgentTool — governed Component Library', () => {
+  it('shares template placement and singleton limits with Agent/MCP authoring', async () => {
+    const entryId = 'test.shared-chrome'
+    componentLibraryRegistry.register({
+      id: entryId,
+      version: '1.0.0',
+      name: 'Shared chrome',
+      description: 'A template-owned singleton component.',
+      category: 'Test',
+      tags: ['template', 'shared'],
+      icon: 'layout',
+      source: { type: 'built-in' },
+      status: 'stable',
+      composition: 'leaf',
+      implementation: { type: 'primitive', moduleId: 'base.text' },
+      fields: [],
+      variants: [],
+      presets: [],
+      slots: [],
+      constraints: {
+        allowedDocumentKinds: ['template'],
+        maxInstancesPerDocument: 1,
+      },
+      requirements: { capabilities: [], providerAdapters: [], plugins: [] },
+      documentation: { usage: 'Edit in the shared template.' },
+    })
+    try {
+      const { rootId } = freshStore()
+      const listed = expectToolData<{
+        entries: Array<{ constraints: Record<string, unknown> }>
+      }>(await executeAgentTool('site_list_component_library', {
+        search: 'Shared chrome',
+      }))
+      expect(listed.entries[0]?.constraints).toEqual({
+        allowedDocumentKinds: ['template'],
+        maxInstancesPerDocument: 1,
+      })
+
+      const pageInsert = await executeAgentTool('site_insert_component', {
+        entryId,
+        parentId: rootId,
+      })
+      expectToolError(pageInsert)
+      expect(pageInsert.error).toContain('can only be placed in a template')
+
+      const pageId = useEditorStore.getState().activePageId!
+      expectToolOk(await executeAgentTool('site_set_page_template', {
+        pageId,
+        target: { kind: 'everywhere' },
+      }))
+      expectToolOk(await executeAgentTool('site_insert_component', {
+        entryId,
+        parentId: rootId,
+      }))
+      const duplicate = await executeAgentTool('site_insert_component', {
+        entryId,
+        parentId: rootId,
+      })
+      expectToolError(duplicate)
+      expect(duplicate.error).toContain('at most 1 instance per template')
+    } finally {
+      componentLibraryRegistry.unregister(entryId)
+    }
+  })
+
   it('lists live plugin-owned entries without exposing registered option values', async () => {
     componentLibraryRegistry.register({
       id: 'test.mcp-plugin-button',

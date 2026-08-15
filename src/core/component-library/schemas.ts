@@ -231,6 +231,15 @@ export type ComponentLibraryComposition = Static<
   typeof ComponentLibraryCompositionSchema
 >
 
+export const ComponentLibraryDocumentKindSchema = Type.Union([
+  Type.Literal('page'),
+  Type.Literal('template'),
+])
+
+export type ComponentLibraryDocumentKind = Static<
+  typeof ComponentLibraryDocumentKindSchema
+>
+
 const ComponentLibraryOptionSchema = Type.Object(
   {
     id: LocalIdSchema,
@@ -263,6 +272,10 @@ export type ComponentLibrarySlot = Static<typeof ComponentLibrarySlotSchema>
 
 export const ComponentLibraryConstraintsSchema = Type.Object(
   {
+    allowedDocumentKinds: Type.Optional(
+      Type.Array(ComponentLibraryDocumentKindSchema, { uniqueItems: true }),
+    ),
+    maxInstancesPerDocument: Type.Optional(Type.Integer({ minimum: 1 })),
     allowedParentEntryIds: Type.Optional(
       Type.Array(NamespacedIdSchema, { uniqueItems: true }),
     ),

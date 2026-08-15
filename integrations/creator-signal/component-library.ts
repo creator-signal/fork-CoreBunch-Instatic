@@ -26,6 +26,9 @@ function siteEntry(input: {
   tags: string[]
   moduleId: string
   fields: ComponentLibraryField[]
+  constraints?: ComponentLibraryEntry['constraints']
+  usage?: string
+  accessibilityGuidance?: string
   accessibility?: ComponentLibraryEntry['accessibility']
 }): ComponentLibraryEntry {
   return {
@@ -48,11 +51,11 @@ function siteEntry(input: {
     variants: defaultVariant,
     presets: [],
     slots: [],
-    constraints: {},
+    constraints: input.constraints ?? { allowedDocumentKinds: ['page'] },
     requirements: pluginRequirement,
     documentation: {
-      usage: `Edit the typed content fields; the component owns its semantic HTML and uses ${creatorSignalPublicAuthoringContract.designSystem.packageName}.`,
-      accessibility: 'Keep labels descriptive and preserve the component heading hierarchy.',
+      usage: input.usage ?? `Edit the typed content fields; the component owns its semantic HTML and uses ${creatorSignalPublicAuthoringContract.designSystem.packageName}.`,
+      accessibility: input.accessibilityGuidance ?? 'Keep labels descriptive and preserve the component heading hierarchy.',
     },
     ...(input.accessibility ? { accessibility: input.accessibility } : {}),
   }
@@ -88,7 +91,10 @@ export const creatorSignalHeroEntry: ComponentLibraryEntry = {
   variants: defaultVariant,
   presets: [],
   slots: [],
-  constraints: {},
+  constraints: {
+    allowedDocumentKinds: ['page'],
+    maxInstancesPerDocument: 1,
+  },
   requirements: pluginRequirement,
   documentation: {
     usage: `Use once near the start of a landing page. Styling is governed by ${creatorSignalPublicAuthoringContract.designSystem.packageName}.`,
@@ -113,17 +119,20 @@ export const creatorSignalHeaderEntry = siteEntry({
   description: 'Shared brand identity and primary navigation edited once in the site template.',
   tags: ['header', 'navigation', 'brand', 'shared'],
   moduleId: 'creator-signal.site.header',
+  constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 },
+  usage: 'Edit this shared header in the Creator Signal site template. Ordinary pages inherit it automatically.',
+  accessibilityGuidance: 'Use short navigation labels, one primary action, and a Home URL that returns to the site root.',
   fields: [
-    { key: 'brandName', label: 'Brand name', type: 'text', required: true },
-    { key: 'tagline', label: 'Tagline', type: 'text', required: true },
-    { key: 'homeUrl', label: 'Home URL', type: 'url', required: true },
+    { key: 'brandName', label: 'Brand name', description: 'Visible site name and home-link accessible name.', type: 'text', required: true },
+    { key: 'tagline', label: 'Tagline', description: 'Short supporting line displayed with the brand.', type: 'text', required: true },
+    { key: 'homeUrl', label: 'Home URL', description: 'Destination used by the shared brand link.', type: 'url', required: true },
     {
-      key: 'items', label: 'Navigation links', type: 'repeater', required: true,
+      key: 'items', label: 'Navigation links', description: 'Ordered primary navigation shared by every page.', type: 'repeater', required: true,
       itemLabel: 'Link', minItems: 1, maxItems: 12,
       itemFields: [
-        { key: 'label', label: 'Label', type: 'text', required: true },
-        { key: 'url', label: 'URL', type: 'url', required: true },
-        { key: 'emphasis', label: 'Treatment', type: 'select', required: true, options: [
+        { key: 'label', label: 'Label', description: 'Concise visible link text.', type: 'text', required: true },
+        { key: 'url', label: 'URL', description: 'Internal path or approved external destination.', type: 'url', required: true },
+        { key: 'emphasis', label: 'Treatment', description: 'Use the primary treatment for one principal action only.', type: 'select', required: true, options: [
           { label: 'Standard', value: 'default' },
           { label: 'Primary action', value: 'primary' },
         ] },
@@ -138,16 +147,19 @@ export const creatorSignalFooterEntry = siteEntry({
   description: 'Shared footer identity, legal routes and service links.',
   tags: ['footer', 'navigation', 'legal', 'shared'],
   moduleId: 'creator-signal.site.footer',
+  constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 },
+  usage: 'Edit this shared footer in the Creator Signal site template. Ordinary pages inherit it automatically.',
+  accessibilityGuidance: 'Keep link labels unique enough to make sense when read out of context.',
   fields: [
-    { key: 'brandName', label: 'Brand name', type: 'text', required: true },
-    { key: 'tagline', label: 'Tagline', type: 'text', required: true },
-    { key: 'copyright', label: 'Copyright', type: 'text', required: true },
+    { key: 'brandName', label: 'Brand name', description: 'Visible site name in the shared footer.', type: 'text', required: true },
+    { key: 'tagline', label: 'Tagline', description: 'Short supporting brand line.', type: 'text', required: true },
+    { key: 'copyright', label: 'Copyright', description: 'Current copyright notice displayed on every page.', type: 'text', required: true },
     {
-      key: 'items', label: 'Footer links', type: 'repeater', required: true,
+      key: 'items', label: 'Footer links', description: 'Ordered product, help, legal and service destinations shared by every page.', type: 'repeater', required: true,
       itemLabel: 'Link', minItems: 1, maxItems: 24,
       itemFields: [
-        { key: 'label', label: 'Label', type: 'text', required: true },
-        { key: 'url', label: 'URL', type: 'url', required: true },
+        { key: 'label', label: 'Label', description: 'Concise visible link text.', type: 'text', required: true },
+        { key: 'url', label: 'URL', description: 'Internal path or approved external destination.', type: 'url', required: true },
       ],
     },
   ],
@@ -159,11 +171,14 @@ export const creatorSignalConsentEntry = siteEntry({
   description: 'Shared privacy notice and analytics choices.',
   tags: ['privacy', 'consent', 'analytics', 'shared'],
   moduleId: 'creator-signal.site.consent-banner',
+  constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 },
+  usage: 'Edit the shared privacy choices in the Creator Signal site template. Ordinary pages inherit them automatically.',
+  accessibilityGuidance: 'Describe the optional purpose plainly and keep both choices equally understandable.',
   fields: [
-    { key: 'heading', label: 'Heading', type: 'text', required: true },
-    { key: 'body', label: 'Explanation', type: 'text', required: true },
-    { key: 'essentialLabel', label: 'Essential choice label', type: 'text', required: true },
-    { key: 'optionalLabel', label: 'Optional choice label', type: 'text', required: true },
+    { key: 'heading', label: 'Heading', description: 'Short name for the privacy choice.', type: 'text', required: true },
+    { key: 'body', label: 'Explanation', description: 'Plain-language explanation of essential and optional processing.', type: 'text', required: true },
+    { key: 'essentialLabel', label: 'Essential choice label', description: 'Button label for declining optional analytics.', type: 'text', required: true },
+    { key: 'optionalLabel', label: 'Optional choice label', description: 'Button label for granting optional analytics.', type: 'text', required: true },
   ],
 })
 
@@ -174,17 +189,17 @@ export const creatorSignalFeatureGridEntry = siteEntry({
   tags: ['features', 'cards', 'list', 'marketing'],
   moduleId: 'creator-signal.site.feature-grid',
   fields: [
-    { key: 'eyebrow', label: 'Eyebrow', type: 'text', required: true },
-    { key: 'heading', label: 'Heading', type: 'text', required: true },
-    { key: 'introduction', label: 'Introduction', type: 'text', required: true },
-    { key: 'sectionId', label: 'Section anchor', type: 'text', required: true, advanced: true },
+    { key: 'eyebrow', label: 'Eyebrow', description: 'Short context label above the section heading.', type: 'text', required: true },
+    { key: 'heading', label: 'Heading', description: 'Outcome-focused heading for the complete card group.', type: 'text', required: true },
+    { key: 'introduction', label: 'Introduction', description: 'One concise explanation of what the group contains.', type: 'text', required: true },
+    { key: 'sectionId', label: 'Section anchor', description: 'Unique page anchor used by the section heading.', type: 'text', required: true, advanced: true },
     {
-      key: 'items', label: 'Feature cards', type: 'repeater', required: true,
+      key: 'items', label: 'Feature cards', description: 'Ordered cards; each card is data, not a nested component slot.', type: 'repeater', required: true,
       itemLabel: 'Feature', minItems: 1, maxItems: 12,
       itemFields: [
-        { key: 'marker', label: 'Marker', type: 'text', required: true },
-        { key: 'heading', label: 'Heading', type: 'text', required: true },
-        { key: 'body', label: 'Description', type: 'text', required: true },
+        { key: 'marker', label: 'Marker', description: 'Short sequence number or product code.', type: 'text', required: true },
+        { key: 'heading', label: 'Heading', description: 'Scannable card outcome.', type: 'text', required: true },
+        { key: 'body', label: 'Description', description: 'Supporting explanation for this card.', type: 'text', required: true },
       ],
     },
   ],
@@ -197,12 +212,12 @@ export const creatorSignalCallToActionEntry = siteEntry({
   tags: ['call to action', 'link', 'marketing'],
   moduleId: 'creator-signal.site.call-to-action',
   fields: [
-    { key: 'eyebrow', label: 'Eyebrow', type: 'text', required: true },
-    { key: 'heading', label: 'Heading', type: 'text', required: true },
-    { key: 'body', label: 'Explanation', type: 'text', required: true },
-    { key: 'actionLabel', label: 'Action label', type: 'text', required: true },
-    { key: 'actionUrl', label: 'Action URL', type: 'url', required: true },
-    { key: 'sectionId', label: 'Section anchor', type: 'text', required: true, advanced: true },
+    { key: 'eyebrow', label: 'Eyebrow', description: 'Short context label above the call to action.', type: 'text', required: true },
+    { key: 'heading', label: 'Heading', description: 'The single next step offered to the visitor.', type: 'text', required: true },
+    { key: 'body', label: 'Explanation', description: 'What happens after the visitor takes the action.', type: 'text', required: true },
+    { key: 'actionLabel', label: 'Action label', description: 'Specific visible link text.', type: 'text', required: true },
+    { key: 'actionUrl', label: 'Action URL', description: 'Internal path or approved external destination.', type: 'url', required: true },
+    { key: 'sectionId', label: 'Section anchor', description: 'Unique page anchor used by the section heading.', type: 'text', required: true, advanced: true },
   ],
 })
 
@@ -213,9 +228,9 @@ export const creatorSignalRichTextEntry = siteEntry({
   tags: ['rich text', 'prose', 'editorial'],
   moduleId: 'creator-signal.site.rich-text-section',
   fields: [
-    { key: 'heading', label: 'Heading', type: 'text', required: true },
-    { key: 'body', label: 'Content', type: 'rich-text', required: true },
-    { key: 'sectionId', label: 'Section anchor', type: 'text', required: true, advanced: true },
+    { key: 'heading', label: 'Heading', description: 'Heading for this complete prose section.', type: 'text', required: true },
+    { key: 'body', label: 'Content', description: 'Author the coherent formatted text here instead of stacking paragraph components.', type: 'rich-text', required: true },
+    { key: 'sectionId', label: 'Section anchor', description: 'Unique page anchor used by the section heading.', type: 'text', required: true, advanced: true },
   ],
 })
 
@@ -226,9 +241,9 @@ export const creatorSignalTestimonialEntry = siteEntry({
   tags: ['quote', 'testimonial', 'editorial'],
   moduleId: 'creator-signal.site.testimonial',
   fields: [
-    { key: 'quote', label: 'Quotation', type: 'text', required: true },
-    { key: 'attribution', label: 'Attribution', type: 'text', required: true },
-    { key: 'role', label: 'Role or business', type: 'text', required: true },
+    { key: 'quote', label: 'Quotation', description: 'Exact approved quotation without decorative quote marks.', type: 'text', required: true },
+    { key: 'attribution', label: 'Attribution', description: 'Person or organisation credited for the quotation.', type: 'text', required: true },
+    { key: 'role', label: 'Role or business', description: 'Context that makes the attribution meaningful.', type: 'text', required: true },
   ],
 })
 
@@ -239,14 +254,14 @@ export const creatorSignalFaqEntry = siteEntry({
   tags: ['faq', 'disclosure', 'structured data'],
   moduleId: 'creator-signal.site.faq',
   fields: [
-    { key: 'heading', label: 'Heading', type: 'text', required: true },
-    { key: 'sectionId', label: 'Section anchor', type: 'text', required: true, advanced: true },
+    { key: 'heading', label: 'Heading', description: 'Heading for the complete question list.', type: 'text', required: true },
+    { key: 'sectionId', label: 'Section anchor', description: 'Unique page anchor used by the section heading.', type: 'text', required: true, advanced: true },
     {
-      key: 'items', label: 'Questions and answers', type: 'repeater', required: true,
+      key: 'items', label: 'Questions and answers', description: 'Ordered native disclosures with FAQ structured data.', type: 'repeater', required: true,
       itemLabel: 'Question', minItems: 1, maxItems: 20,
       itemFields: [
-        { key: 'question', label: 'Question', type: 'text', required: true },
-        { key: 'answer', label: 'Answer', type: 'text', required: true },
+        { key: 'question', label: 'Question', description: 'The visitor question in natural language.', type: 'text', required: true },
+        { key: 'answer', label: 'Answer', description: 'Direct plain-language answer.', type: 'text', required: true },
       ],
     },
   ],
@@ -259,11 +274,11 @@ export const creatorSignalPublicDocumentEntry = siteEntry({
   tags: ['legal', 'trust', 'support', 'document', 'structured data'],
   moduleId: 'creator-signal.site.public-document',
   fields: [
-    { key: 'eyebrow', label: 'Eyebrow', type: 'text', required: true },
-    { key: 'heading', label: 'Document heading', type: 'text', required: true },
-    { key: 'summary', label: 'Summary', type: 'text', required: true },
-    { key: 'body', label: 'Document content', type: 'rich-text', required: true },
-    { key: 'dateModified', label: 'Date modified', type: 'text', required: true },
+    { key: 'eyebrow', label: 'Eyebrow', description: 'Document family such as Legal, Trust or Support.', type: 'text', required: true },
+    { key: 'heading', label: 'Document heading', description: 'Public H1 and structured-data headline.', type: 'text', required: true },
+    { key: 'summary', label: 'Summary', description: 'Short description shown below the document heading.', type: 'text', required: true },
+    { key: 'body', label: 'Document content', description: 'Complete approved formatted document in one authorable field.', type: 'rich-text', required: true },
+    { key: 'dateModified', label: 'Date modified', description: 'ISO date exposed through Article structured data.', type: 'text', required: true },
   ],
 })
 
@@ -274,15 +289,15 @@ export const creatorSignalMauticFormEntry = siteEntry({
   tags: ['form', 'contact', 'mautic', 'integration'],
   moduleId: 'creator-signal.site.mautic-form',
   fields: [
-    { key: 'eyebrow', label: 'Eyebrow', type: 'text', required: true },
-    { key: 'heading', label: 'Heading', type: 'text', required: true },
-    { key: 'introduction', label: 'Introduction', type: 'text', required: true },
-    { key: 'successMessage', label: 'Success message', type: 'text', required: true },
-    { key: 'mauticBaseUrl', label: 'Mautic public URL', type: 'url', required: true, advanced: true },
-    { key: 'formAlias', label: 'Governed form alias', type: 'text', required: true, advanced: true },
-    { key: 'registryPath', label: 'Registry path', type: 'text', required: true, advanced: true },
-    { key: 'formCode', label: 'Analytics form code', type: 'text', required: true, advanced: true },
-    { key: 'campaignCode', label: 'Analytics campaign code', type: 'text', required: true, advanced: true },
+    { key: 'eyebrow', label: 'Eyebrow', description: 'Short context label above the form heading.', type: 'text', required: true },
+    { key: 'heading', label: 'Heading', description: 'Purpose of this complete managed form.', type: 'text', required: true },
+    { key: 'introduction', label: 'Introduction', description: 'Instructions and privacy context shown before the fields.', type: 'text', required: true },
+    { key: 'successMessage', label: 'Success message', description: 'Confirmation announced after a successful submission.', type: 'text', required: true },
+    { key: 'mauticBaseUrl', label: 'Mautic public URL', description: 'Approved public form-provider origin.', type: 'url', required: true, advanced: true },
+    { key: 'formAlias', label: 'Governed form alias', description: 'Stable alias resolved through the generated registry; never use a numeric form ID.', type: 'text', required: true, advanced: true },
+    { key: 'registryPath', label: 'Registry path', description: 'Published path for the generated form registry.', type: 'text', required: true, advanced: true },
+    { key: 'formCode', label: 'Analytics form code', description: 'Stable analytics identifier for this form.', type: 'text', required: true, advanced: true },
+    { key: 'campaignCode', label: 'Analytics campaign code', description: 'Stable analytics identifier for this journey.', type: 'text', required: true, advanced: true },
   ],
 })
 

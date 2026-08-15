@@ -12,9 +12,12 @@ page roster, and publish the complete site automatically.
 
 - Twenty-three launch, form, legal, trust, support, and status pages plus one
   shared `everywhere` site template.
-- The warm Creator Signal editorial design system shared by the editor canvas
-  and published pages.
-- A parameterised Hero Visual Component with optional MinIO-backed artwork.
+- The canonical Creator Signal Design System shared by the editor canvas and
+  published pages, including self-hosted Fredoka, Mulish and Caveat fonts and
+  system, light and dark theme preferences.
+- A parameterised Hero Visual Component with optional MinIO-backed artwork,
+  governed brand fallback art and real generated design assets on the primary
+  starter marketing routes.
 - Creator Signal favicon, touch icon, maskable icon, and web app manifest
   injected into every published page from versioned plugin assets.
 - Governed Hero, Header, Footer, Privacy Choices, Feature Grid, Call to Action,
@@ -32,6 +35,36 @@ page roster, and publish the complete site automatically.
   published output use the same bounded, responsive page layout without
   duplicate ambient rules.
 
+## Design System source of truth
+
+`creator-signal/sales-pulse/packages/design-system` and its governed brand-asset
+pipeline are authoritative. This repository does not maintain an independent
+palette, font stack, theme algorithm or logo source. The exact upstream Git
+revision and SHA-256 of every consumed artifact are recorded in
+`design-system/lock.json`; CI rejects edited, missing or stale vendored files
+and rejects a stale generated canvas adapter.
+
+Verify the committed snapshot:
+
+```sh
+bun run creator-signal:design-system:check
+```
+
+To advance it, first generate the artifacts in a clean Sales Pulse checkout at
+the intended `develop` revision, then run:
+
+```sh
+bun run creator-signal:design-system:sync -- \
+  --source-root ../sales-pulse \
+  --revision <full-sales-pulse-git-sha>
+```
+
+Review the revision, lock diff, generated adapter and packaged assets together.
+Never edit files under `assets/design-system`, `design-system/foundation-css.ts`
+or the current `icon.svg` by hand. The frozen
+`migrations/legacy-0.1.11-design-system.ts` is historical classifier evidence,
+not a runtime styling source.
+
 The integrations are disabled by default. Configure and enable them in the plugin settings only after the corresponding collectors and consent policy are ready.
 
 Configure the host with the `MINIO_*` environment/file variables documented in
@@ -42,6 +75,7 @@ site uses a separate identity and bucket.
 ## Build and install
 
 ```sh
+bun run creator-signal:design-system:check
 bun run instatic-plugin lint integrations/creator-signal
 bun run instatic-plugin build integrations/creator-signal
 ```
@@ -62,8 +96,8 @@ publishes authored pages.
 
 The plugin continues to govern technical records that must follow its runtime
 contract: Component Library definitions, Visual Components, saved layouts,
-namespaced styles, Mautic validation, CSP inputs, analytics event schemas and
-integration behaviour. Pack installation applies its database changes in one
+namespaced styles, the locked Design System adapter, Mautic validation, CSP
+inputs, analytics event schemas and integration behaviour. Pack installation applies its database changes in one
 transaction. A failure leaves both authored content and technical records at
 their prior state, and an empty managed installation retries the same-version
 starter import on its next bootstrap.

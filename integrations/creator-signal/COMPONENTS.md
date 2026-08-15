@@ -53,16 +53,17 @@ base.body
     │   └── div.actions
     │       └── base.button
     └── div.hero-art
-        ├── base.image
-        └── div.signal-visual
+        └── base.image
 ```
 
 The component exposes `Eyebrow`, `Heading`, `Introduction`, `Action label`,
 `Action URL`, and `Artwork`. The first five bind to text or button properties.
 `Artwork` binds to `base.image.props.src`.
 
-An empty artwork value renders the CSS signal visual. Selecting an image from
-the Media workspace supplies the image value. On the Creator Signal production
+An empty artwork value renders the governed Creator Signal mark from the locked
+brand-asset pipeline. Selecting an image from the Media workspace supplies the
+image value. The primary starter marketing routes use governed generated social
+artwork rather than a synthetic placeholder. On the Creator Signal production
 stack that upload and its generated variants use the MinIO adapter configured
 in `server/media/minioStorageAdapter.ts`.
 
@@ -110,6 +111,11 @@ h.container({
 Do not pass `content-section` by itself. A Visual Component stores class IDs,
 whereas HTML compiled by `compilePackPages` starts with class names and links
 them to IDs during compilation.
+
+The token, typography, theme and brand values are owned by Sales Pulse and
+consumed through `integrations/creator-signal/design-system/lock.json`. Add only
+semantic `var(--cs-...)` declarations to the Instatic adapter. Do not copy a
+hex value, font family or theme algorithm into a component stylesheet.
 
 ### 3. Add stable typed parameters
 
@@ -245,6 +251,7 @@ Extend `src/__tests__/plugins/creatorSignalSitePack.test.ts` to verify:
 Run the integration gates:
 
 ```sh
+bun run creator-signal:design-system:check
 bun test src/__tests__/plugins/creatorSignalSitePack.test.ts
 bun run instatic-plugin lint integrations/creator-signal
 bun run instatic-plugin build integrations/creator-signal

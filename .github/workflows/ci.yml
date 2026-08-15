@@ -93,11 +93,20 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Verify Creator Signal Design System lock
+        run: bun run creator-signal:design-system:check
+
       - name: Lint site pack
         run: bun run instatic-plugin lint integrations/creator-signal
 
       - name: Build site pack
         run: bun run instatic-plugin build integrations/creator-signal
+
+      - name: Install browser for Design System acceptance
+        run: bunx playwright install --with-deps chromium
+
+      - name: Verify Design System in a browser
+        run: bun run verify:creator-signal-design-system:browser
 
       - name: Upload comparison plugin
         uses: actions/upload-artifact@v4

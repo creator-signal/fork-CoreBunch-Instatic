@@ -6,6 +6,7 @@ import {
 } from '@core/plugin-sdk'
 import type { PageSeo } from '@core/page-tree'
 import { creatorSignalComponentLibraryEntries } from '../component-library'
+import { creatorSignalBrandAssets } from '../design-system/contract'
 import { consentBanner, siteFooter, siteHeader } from '../modules/site-components'
 import { creatorSignalCss } from './design-system'
 import { heroComponent, heroParamIds } from './hero-component'
@@ -63,6 +64,7 @@ const hero = (
   body: string,
   actionUrl: string,
   actionLabel: string,
+  artwork = '',
 ): HeroBlock => ({
   kind: 'hero',
   entryId: 'creator-signal.site.hero',
@@ -72,7 +74,7 @@ const hero = (
     [heroParamIds.body]: body,
     [heroParamIds.actionLabel]: actionLabel,
     [heroParamIds.actionUrl]: actionUrl,
-    [heroParamIds.artwork]: '',
+    [heroParamIds.artwork]: artwork,
   },
 })
 
@@ -158,7 +160,7 @@ const starterPages: StarterPage[] = [
     title: 'Creator Signal',
     description: 'Calm, useful tools that help independent creators understand what is working and act with confidence.',
     blocks: [
-      hero('Creator Signal', 'Turn creative business data into a clearer next move.', 'Creator Signal builds calm, useful tools that help independent creators understand what is working and act with confidence.', '/products/sales-pulse', 'Explore Sales Pulse'),
+      hero('Creator Signal', 'Turn creative business data into a clearer next move.', 'Creator Signal builds calm, useful tools that help independent creators understand what is working and act with confidence.', '/products/sales-pulse', 'Explore Sales Pulse', creatorSignalBrandAssets.creatorSignalSocial),
       features('Built for working creators', 'Less spreadsheet archaeology. More useful signals.', 'Bring scattered marketplace activity into focused experiences without giving up control of your work or data.', [
         ['01', 'See the whole picture', 'Bring sales history and current activity into one considered view.'],
         ['02', 'Keep your data yours', 'Use private, exportable records with straightforward controls.'],
@@ -173,7 +175,7 @@ const starterPages: StarterPage[] = [
     title: 'Products',
     description: 'Focused products for clearer creative-business decisions.',
     blocks: [
-      hero('Creator Signal products', 'Products for clearer creative-business decisions.', 'Creator Signal products turn complex business information into focused, practical experiences. Start with Sales Pulse, with more products to follow.', '/products/sales-pulse', 'Explore Sales Pulse'),
+      hero('Creator Signal products', 'Products for clearer creative-business decisions.', 'Creator Signal products turn complex business information into focused, practical experiences. Start with Sales Pulse, with more products to follow.', '/products/sales-pulse', 'Explore Sales Pulse', creatorSignalBrandAssets.creatorSignalSocial),
       features('Products', 'Available now.', 'Our product catalogue will grow as we build more focused tools for independent creators.', [
         ['SP', 'Sales Pulse', 'Understand what is selling, what is changing and where to focus next.'],
       ]),
@@ -186,7 +188,7 @@ const starterPages: StarterPage[] = [
     title: 'Sales Pulse',
     description: 'Turn marketplace history into a calm view of what is selling, what is changing and where to look next.',
     blocks: [
-      hero('Sales Pulse', 'See the signal in your sales.', 'Sales Pulse turns marketplace history into a calm, useful view of what is selling, what is changing and where to look next.', '/pricing', 'View pricing'),
+      hero('Sales Pulse', 'See the signal in your sales.', 'Sales Pulse turns marketplace history into a calm, useful view of what is selling, what is changing and where to look next.', '/pricing', 'View pricing', creatorSignalBrandAssets.salesPulseSocial),
       features('What it does', 'A dashboard made for creative work.', 'Understand performance without rebuilding the same spreadsheet every week.', [
         ['01', 'Connected history', 'Import supported marketplace sales and keep a durable record.'],
         ['02', 'Useful comparisons', 'See products, periods and patterns in a consistent view.'],
@@ -201,7 +203,7 @@ const starterPages: StarterPage[] = [
     title: 'Features',
     description: 'Reliable imports, readable analysis and clear controls for independent creators.',
     blocks: [
-      hero('Features', 'Practical tools, deliberately focused.', 'Creator Signal prioritises reliable imports, readable analysis and clear controls over noisy dashboards.', '/pricing', 'See pricing'),
+      hero('Features', 'Practical tools, deliberately focused.', 'Creator Signal prioritises reliable imports, readable analysis and clear controls over noisy dashboards.', '/pricing', 'See pricing', creatorSignalBrandAssets.salesPulseSocial),
       features('Capabilities', 'Built around the work you already do.', 'Each capability is designed to reduce repeated administration and make the next decision easier.', [
         ['01', 'Sales imports', 'Bring supported marketplace history into a consistent ledger.'],
         ['02', 'Performance views', 'Compare products and time periods without manual cleanup.'],
@@ -218,7 +220,7 @@ const starterPages: StarterPage[] = [
     title: 'Pricing',
     description: 'Straightforward AUD monthly Sales Pulse plans with access boundaries shown before checkout.',
     blocks: [
-      hero('Pricing', 'Choose the Sales Pulse plan that fits your work.', 'Straightforward AUD monthly plans with the access boundary shown before checkout.', 'https://salespulse.creatorsignal.me', 'Open Sales Pulse'),
+      hero('Pricing', 'Choose the Sales Pulse plan that fits your work.', 'Straightforward AUD monthly plans with the access boundary shown before checkout.', 'https://salespulse.creatorsignal.me', 'Open Sales Pulse', creatorSignalBrandAssets.salesPulseSocial),
       features('Sales Pulse plans', 'Free, Starter and Pro.', 'Product access is funded by subscriptions, not advertising profiles.', [
         ['01', 'Free — $0', 'Start with the core workflow and understand whether Sales Pulse fits.'],
         ['02', 'Starter — $5 AUD monthly', 'Build a durable sales record and unlock the supported starter capabilities.'],

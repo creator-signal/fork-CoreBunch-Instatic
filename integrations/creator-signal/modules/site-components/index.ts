@@ -1,4 +1,5 @@
 import { control, defineModule, html, raw, safeUrl } from '@core/plugin-sdk'
+import { creatorSignalBrandAssets } from '../../design-system/contract'
 import { creatorSignalSiteCss } from '../mautic-form'
 
 export interface NavigationItem {
@@ -73,12 +74,25 @@ export const siteHeader = defineModule({
   },
   render: ({ props }) => withCreatorSignalCss(html`<header class="site-header">
       <a class="site-brand" href="${safeUrl(props.homeUrl)}" aria-label="${props.brandName} home">
-        <span class="brand-signal" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="brand-mark" aria-hidden="true">
+          <img class="brand-mark-light" src="${safeUrl(creatorSignalBrandAssets.markLight)}" alt="" width="1024" height="688" decoding="async">
+          <img class="brand-mark-reversed" src="${safeUrl(creatorSignalBrandAssets.markReversed)}" alt="" width="1024" height="688" decoding="async">
+        </span>
         <span><strong>${props.brandName}</strong><small>${props.tagline}</small></span>
       </a>
-      <nav aria-label="Main navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
-        ${navigationItems(props.items, true)}
-      </nav>
+      <div class="site-header-tools">
+        <label>
+          <span class="sr-only">Appearance</span>
+          <select class="theme-control" data-cs-theme-control aria-label="Appearance">
+            <option value="system" selected>System theme</option>
+            <option value="light">Light theme</option>
+            <option value="dark">Dark theme</option>
+          </select>
+        </label>
+        <nav aria-label="Main navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
+          ${navigationItems(props.items, true)}
+        </nav>
+      </div>
     </header>`),
 })
 

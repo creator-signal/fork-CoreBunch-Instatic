@@ -50,30 +50,34 @@ describe('Creator Signal site pack', () => {
     }))).not.toThrow()
   })
 
-  it('injects the Creator Signal favicon and PWA manifest into published pages', () => {
+  it('injects the governed identity and first-render theme runtime into published pages', () => {
     expect(creatorSignalPlugin.manifest.frontend?.assets).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({
+          kind: 'script',
+          src: 'frontend/theme-bootstrap.js',
+          placement: 'head',
+          strategy: 'sync',
+        }),
         expect.objectContaining({
           kind: 'link',
           attrs: expect.objectContaining({
             rel: 'icon',
-            sizes: '192x192',
-            href: 'assets/icons/creator-signal-192.png',
+            href: 'assets/design-system/brand/favicon.ico',
           }),
         }),
         expect.objectContaining({
           kind: 'link',
           attrs: expect.objectContaining({
             rel: 'manifest',
-            href: 'assets/icons/site.webmanifest',
+            href: 'assets/design-system/site.webmanifest',
           }),
         }),
         expect.objectContaining({
-          kind: 'meta',
-          attrs: expect.objectContaining({
-            name: 'theme-color',
-            content: '#3A4A2E',
-          }),
+          kind: 'script',
+          src: 'frontend/theme-control.js',
+          placement: 'body-end',
+          strategy: 'module',
         }),
       ]),
     )
@@ -85,7 +89,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.2.5')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.3.0')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -247,7 +251,10 @@ describe('Creator Signal site pack', () => {
     expect(output).toContain('class="feature-grid"')
     expect(output).toContain('data-analytics-choice="granted"')
     expect(output.match(/creator-signal-site-design-contract/g)).toHaveLength(1)
-    expect(output).toContain('<div class="signal-visual"><span></span><span></span><span></span><span></span></div>')
+    expect(output).toContain('data-cs-theme-control')
+    expect(output).toContain('creator-signal-mark-light.svg')
+    expect(output).toContain('creator-signal-social.png')
+    expect(output).not.toContain('class="signal-visual"')
   })
 
   it('makes every governed module independently previewable with the shared design contract', () => {
@@ -279,29 +286,29 @@ describe('Creator Signal site pack', () => {
     expect(pack.layouts).toEqual([])
     expect(new Set(pack.classes.map((rule) => rule.id)).size).toBe(pack.classes.length)
     expect(pack.conditions.map((condition) => condition.id)).toEqual([
-      'media:(max-width: 900px)',
-      'media:(max-width: 720px)',
-      'media:(max-width: 560px)',
       'media:(prefers-reduced-motion: reduce)',
+      'media:(forced-colors: active)',
+      'media:print',
+      'media:(max-width: 64rem)',
+      'media:(max-width: 48rem)',
+      'media:(max-width: 36rem)',
     ])
 
     const classStyles = (name: string) => pack.classes.find((rule) =>
       rule.kind === 'class' && rule.name === name)?.styles
     expect(classStyles('site-header')).toMatchObject({
-      width: 'calc(100% - 40px)',
-      maxWidth: '1240px',
+      width: 'min(calc(100% - (var(--cs-spacing-5) * 2)), var(--cs-size-content-max))',
       marginLeft: 'auto',
       marginRight: 'auto',
     })
     expect(classStyles('feature-grid')).toMatchObject({
       display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
+      gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
     })
     expect(classStyles('feature-card')).toMatchObject({
-      minHeight: '260px',
-      paddingTop: '32px',
-      borderTopLeftRadius: '24px',
-      borderTopRightRadius: '24px',
+      minHeight: '16rem',
+      padding: 'var(--cs-spacing-8)',
+      borderRadius: 'var(--cs-radius-lg)',
     })
     expect(featureGrid.render(featureGrid.defaults, []).html).toContain('class="feature-grid"')
   })

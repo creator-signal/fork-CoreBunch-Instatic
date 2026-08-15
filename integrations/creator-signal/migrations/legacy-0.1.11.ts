@@ -4,7 +4,7 @@
  * only those reviewed constants. This fixture is never installed or synced.
  */
 import { compilePackPages, type PagePackEntry } from '@core/plugin-sdk'
-import { creatorSignalCss } from '../pack/design-system'
+import { creatorSignalCss } from './legacy-0.1.11-design-system'
 import { heroParamIds } from '../pack/hero-component'
 import { starterPages } from '../pack/site'
 

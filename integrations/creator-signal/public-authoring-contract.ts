@@ -2,6 +2,8 @@ export const creatorSignalDesignSystemDependency = {
   packageName: '@creator-signal/design-system',
   repository: 'creator-signal/sales-pulse',
   packagePath: 'packages/design-system',
+  lockPath: 'integrations/creator-signal/design-system/lock.json',
+  syncCommand: 'bun run creator-signal:design-system:sync -- --source-root <sales-pulse-checkout>',
   adapters: {
     css: '@creator-signal/design-system/tokens.css',
     json: '@creator-signal/design-system/adapters.json',

@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "sourceVersion": "0.1.0",
+  "generatedFrom": "tokens/source.json",
+  "light": {
+    "email": {
+      "surface.canvas": "#FFF9F3",
+      "surface.base": "#FFFFFF",
+      "text.primary": "#420F20",
+      "text.secondary": "#6A4150",
+      "border.default": "#E7D5DD",
+      "action.link": "#5A1730",
+      "status.success.background": "#DDF5E3",
+      "status.success.foreground": "#245A31",
+      "status.warning.background": "#FFF0D7",
+      "status.warning.foreground": "#6D3A00",
+      "status.error.background": "#FCE5EA",
+      "status.error.foreground": "#7B1837"
+    },
+    "provider": {
+      "brand.cream": "#FFF9F3",
+      "brand.maroon": "#420F20",
+      "brand.orange": "#EA6A28",
+      "brand.salesPulseGreen": "#74BE86"
+    },
+    "charts": {
+      "chart.series.1": "#420F20",
+      "chart.series.2": "#EA6A28",
+      "chart.series.3": "#9AAEEF",
+      "chart.series.4": "#74BE86",
+      "chart.series.5": "#E895BE",
+      "chart.grid": "#E7D5DD",
+      "chart.axis": "#73505D"
+    }
+  },
+  "dark": {
+    "email": {
+      "surface.canvas": "#1D0B12",
+      "surface.base": "#291018",
+      "text.primary": "#FFF9F3",
+      "text.secondary": "#E7D5DD",
+      "border.default": "#73505D",
+      "action.link": "#9AAEEF",
+      "status.success.background": "#173B22",
+      "status.success.foreground": "#C9F2D2",
+      "status.warning.background": "#4D2D09",
+      "status.warning.foreground": "#FFE3B4",
+      "status.error.background": "#53172A",
+      "status.error.foreground": "#FFD5E0"
+    },
+    "provider": {
+      "brand.cream": "#FFF9F3",
+      "brand.maroon": "#420F20",
+      "brand.orange": "#EA6A28",
+      "brand.salesPulseGreen": "#74BE86"
+    },
+    "charts": {
+      "chart.series.1": "#FFF9F3",
+      "chart.series.2": "#EA6A28",
+      "chart.series.3": "#9AAEEF",
+      "chart.series.4": "#74BE86",
+      "chart.series.5": "#E895BE",
+      "chart.grid": "#73505D",
+      "chart.axis": "#C9AFBA"
+    }
+  },
+  "meaningHooks": {
+    "status.success": {
+      "label": "Success",
+      "icon": "check-circle"
+    },
+    "status.warning": {
+      "label": "Warning",
+      "icon": "warning-triangle"
+    },
+    "status.error": {
+      "label": "Error",
+      "icon": "error-circle"
+    },
+    "status.info": {
+      "label": "Information",
+      "icon": "information-circle"
+    },
+    "chart.series.1": {
+      "marker": "circle",
+      "dash": "solid"
+    },
+    "chart.series.2": {
+      "marker": "square",
+      "dash": "solid"
+    },
+    "chart.series.3": {
+      "marker": "triangle",
+      "dash": "solid"
+    },
+    "chart.series.4": {
+      "marker": "diamond",
+      "dash": "dash"
+    },
+    "chart.series.5": {
+      "marker": "cross",
+      "dash": "dot"
+    }
+  }
+}

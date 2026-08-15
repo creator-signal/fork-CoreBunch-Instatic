@@ -167,6 +167,11 @@ component and shared-template reference. Its parity command generates a
 browsable production-versus-candidate report with full-page and per-section
 images at desktop, tablet and mobile widths.
 
+`integrations/creator-signal/PREVIEW-PARITY.md` defines the shared render
+profile used by the editable canvas, full-page Preview and public publisher,
+including the narrow editor-safety differences that do not change content or
+visual semantics.
+
 `integrations/creator-signal/ACCEPTANCE.md` defines the source-owned WCAG,
 keyboard, responsive, degraded-state and committed visual-baseline gate that
 runs against pages produced by Instatic's real public publishing pipeline.
@@ -188,6 +193,7 @@ its own role-protected application boundary.
 - `docs/deployment/creator-signal-stack.md`
 - `integrations/creator-signal/COMPONENTS.md`
 - `integrations/creator-signal/AUTHORING.md`
+- `integrations/creator-signal/PREVIEW-PARITY.md`
 - `integrations/creator-signal/ACCEPTANCE.md`
 - `integrations/creator-signal/PARITY.md`
 - `integrations/creator-signal/instatic-plugin.config.ts`

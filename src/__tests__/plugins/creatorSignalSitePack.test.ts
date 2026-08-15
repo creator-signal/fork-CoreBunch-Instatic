@@ -35,6 +35,7 @@ import {
   creatorSignalNotFoundAuthoringReference,
   pack,
 } from '../../../integrations/creator-signal/pack/site'
+import { creatorSignalRenderProfile } from '../../../integrations/creator-signal/pack/design-system'
 import { creatorSignalPublicRouteSlugs } from '../../../integrations/creator-signal/pack/routes'
 
 const publicPages = pack.pages.filter((page) => !page.template)
@@ -112,6 +113,35 @@ describe('Creator Signal site pack', () => {
         }),
       ]),
     )
+    const themeScripts = creatorSignalPlugin.manifest.frontend?.assets
+      .filter((asset) => asset.kind === 'script')
+      .map((asset) => asset.src)
+    expect(themeScripts).toEqual(expect.arrayContaining([
+      creatorSignalRenderProfile.theme.bootstrapAsset,
+      creatorSignalRenderProfile.theme.controlAsset,
+    ]))
+  })
+
+  it('owns one render profile for pack compilation, canvas modules and public output', () => {
+    expect(creatorSignalRenderProfile.id).toBe('creator-signal.public/v1')
+    expect(creatorSignalSiteCss.startsWith(`${creatorSignalRenderProfile.stylesheet}\n`)).toBe(true)
+    expect(creatorSignalRenderProfile.stylesheet).toContain(
+      `/* ${creatorSignalRenderProfile.stylesheetMarker} */`,
+    )
+
+    for (const query of Object.values(creatorSignalRenderProfile.responsiveQueries)) {
+      expect(creatorSignalRenderProfile.stylesheet).toContain(`@media ${query}`)
+    }
+    for (const preference of creatorSignalRenderProfile.theme.preferences) {
+      expect(siteHeader.render(siteHeader.defaults, []).html).toContain(`value="${preference}"`)
+    }
+    expect(creatorSignalRenderProfile.stylesheet).toContain(
+      `[${creatorSignalRenderProfile.theme.themeAttribute}="dark"]`,
+    )
+    expect(creatorSignalRenderProfile.stylesheet).toContain('.hero-art img')
+    expect(creatorSignalRenderProfile.stylesheet).toContain('object-fit: cover')
+    expect(creatorSignalRenderProfile.stylesheet).toContain('.button-secondary')
+    expect(creatorSignalRenderProfile.stylesheet).toContain('[data-recovery-state="error"]')
   })
 
   it('advances the technical-pack version for the template authoring contract', () => {
@@ -413,7 +443,11 @@ describe('Creator Signal site pack', () => {
       publicDocument,
       mauticForm,
     ]) {
-      expect(definition.render(definition.defaults, []).css).toBe(creatorSignalSiteCss)
+      const published = definition.render(definition.defaults, [])
+      const previewed = (definition.preview ?? definition.render)(definition.defaults, [])
+      expect(published.css).toBe(creatorSignalSiteCss)
+      expect(previewed.html).toBe(published.html)
+      expect(previewed.css).toBe(published.css)
     }
   })
 

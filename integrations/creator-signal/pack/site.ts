@@ -13,7 +13,7 @@ import {
   creatorSignalPatternForRole,
   creatorSignalPublicAuthoringPolicy,
 } from '../public-authoring-contract'
-import { creatorSignalCss } from './design-system'
+import { creatorSignalRenderProfile } from './design-system'
 import { heroComponent, heroParamIds } from './hero-component'
 
 interface ModuleBlock {
@@ -534,7 +534,11 @@ entries.push({
   html: `${placeholder(0)}<main id="main-content" tabindex="-1"><instatic-outlet></instatic-outlet></main>${placeholder(1)}${placeholder(2)}`,
 })
 
-const compiled = compilePackPages('creator-signal.site', entries, creatorSignalCss)
+const compiled = compilePackPages(
+  'creator-signal.site',
+  entries,
+  creatorSignalRenderProfile.stylesheet,
+)
 const entryVersion = new Map(
   creatorSignalComponentLibraryEntries.map((entry) => [entry.id, entry.version]),
 )

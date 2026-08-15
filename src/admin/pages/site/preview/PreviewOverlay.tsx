@@ -13,7 +13,10 @@
  * - Backdrop click closes the overlay
  *
  * Security:
- * - iframe uses sandbox="" — all sandboxing restrictions applied
+ * - iframe allows scripts so the server-built preview can run the same
+ *   first-render theme and component runtime as published HTML
+ * - `allow-same-origin`, forms, popups and top navigation stay prohibited;
+ *   preview code therefore runs in an opaque, tightly sandboxed origin
  *
  * data-testid="preview-overlay" and data-testid="preview-iframe" for Playwright
  */
@@ -87,7 +90,7 @@ function PreviewDocument({ site, page, templatePreviewContext }: PreviewDocument
   return (
     <iframe
       srcDoc={html}
-      sandbox=""
+      sandbox="allow-scripts"
       title={`Preview: ${page.title}`}
       data-testid="preview-iframe"
       className={styles.iframe}

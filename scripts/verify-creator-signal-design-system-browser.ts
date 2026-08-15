@@ -6,7 +6,9 @@ import { creatorSignalBrandAssets, creatorSignalPluginVersion } from '../integra
 import { creatorSignalSiteCss } from '../integrations/creator-signal/modules/mautic-form'
 import {
   callToAction,
+  comparisonSection,
   featureGrid,
+  recoveryState,
   siteFooter,
   siteHeader,
 } from '../integrations/creator-signal/modules/site-components'
@@ -19,20 +21,36 @@ const requestedPort = Number.parseInt(process.env.CREATOR_SIGNAL_BROWSER_PORT ??
 
 const header = siteHeader.render(siteHeader.defaults, []).html
 const features = featureGrid.render(featureGrid.defaults, []).html
+const comparison = comparisonSection.render(comparisonSection.defaults, []).html
 const cta = callToAction.render(callToAction.defaults, []).html
+const recovery = recoveryState.render({
+  ...recoveryState.defaults,
+  state: 'offline',
+  heading: 'This page is unavailable offline',
+  body: 'Reconnect to the internet, then return to the Creator Signal home page.',
+  actionLabel: 'Return home',
+  actionUrl: '/',
+}, []).html
 const footer = siteFooter.render(siteFooter.defaults, []).html
 
-const fixture = `<!doctype html>
+const documentFixture = (main: string, title: string) => `<!doctype html>
 <html lang="en-AU">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Creator Signal Design System acceptance</title>
+  <title>${title}</title>
   <script src="${pluginAssetPrefix}/frontend/theme-bootstrap.js"></script>
   <style>${creatorSignalSiteCss}</style>
 </head>
 <body>
   ${header}
+  ${main}
+  ${footer}
+  <script type="module" src="${pluginAssetPrefix}/frontend/theme-control.js"></script>
+</body>
+</html>`
+
+const catalogueFixture = documentFixture(`
   <main id="main-content">
     <section class="hero-section">
       <div class="hero-copy">
@@ -44,12 +62,14 @@ const fixture = `<!doctype html>
       <div class="hero-art"><img src="${creatorSignalBrandAssets.creatorSignalSocial}" alt="" width="1200" height="630"></div>
     </section>
     ${features}
+    ${comparison}
     ${cta}
-  </main>
-  ${footer}
-  <script type="module" src="${pluginAssetPrefix}/frontend/theme-control.js"></script>
-</body>
-</html>`
+  </main>`, 'Creator Signal Design System acceptance')
+
+const recoveryFixture = documentFixture(`
+  <main id="main-content">
+    ${recovery}
+  </main>`, 'Creator Signal recovery-pattern acceptance')
 
 function contentType(path: string): string | undefined {
   if (path.endsWith('.js')) return 'text/javascript; charset=utf-8'
@@ -66,8 +86,10 @@ const server = Bun.serve({
   port: Number.isSafeInteger(requestedPort) && requestedPort > 0 ? requestedPort : 0,
   async fetch(request) {
     const url = new URL(request.url)
-    if (url.pathname === '/') {
-      return new Response(fixture, { headers: { 'content-type': 'text/html; charset=utf-8' } })
+    if (url.pathname === '/' || url.pathname === '/recovery') {
+      return new Response(url.pathname === '/recovery' ? recoveryFixture : catalogueFixture, {
+        headers: { 'content-type': 'text/html; charset=utf-8' },
+      })
     }
     if (url.pathname.startsWith(`${pluginAssetPrefix}/`)) {
       const relativePath = url.pathname.slice(pluginAssetPrefix.length + 1)
@@ -115,6 +137,16 @@ if (Bun.argv.includes('--serve')) {
     assert.match(fonts.heading, /Fredoka Variable/)
     assert.match(fonts.eyebrow, /Caveat Variable/)
 
+    const comparisonTable = page.getByRole('table', { name: 'Creator Signal option comparison' })
+    await assert.doesNotReject(comparisonTable.waitFor())
+    assert.deepEqual(await comparisonTable.getByRole('columnheader').allTextContents(), [
+      'Criteria',
+      'First option',
+      'Second option',
+      'Third option',
+    ])
+    assert.deepEqual(await comparisonTable.getByRole('rowheader').allTextContents(), ['Primary use', 'Availability'])
+
     await page.screenshot({ path: join(outputDirectory, 'desktop-system-dark.png'), fullPage: true })
     await page.getByLabel('Appearance').selectOption('light')
     assert.equal(await page.locator('html').getAttribute('data-cs-theme'), 'light')
@@ -130,6 +162,15 @@ if (Bun.argv.includes('--serve')) {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.screenshot({ path: join(outputDirectory, 'mobile-system-dark.png'), fullPage: true })
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false)
+
+    await page.goto(`http://127.0.0.1:${server.port}/recovery`, { waitUntil: 'networkidle' })
+    await page.evaluate(() => document.fonts.ready)
+    assert.equal(await page.locator('[data-recovery-state]').getAttribute('data-recovery-state'), 'offline')
+    await assert.doesNotReject(page.getByText('Connection unavailable', { exact: true }).waitFor())
+    await assert.doesNotReject(page.getByRole('heading', { level: 1, name: 'This page is unavailable offline' }).waitFor())
+    assert.equal(await page.getByRole('link', { name: 'Return home' }).getAttribute('href'), '/')
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false)
+    await page.screenshot({ path: join(outputDirectory, 'mobile-offline-state.png'), fullPage: true })
     await context.close()
   } finally {
     await browser.close()

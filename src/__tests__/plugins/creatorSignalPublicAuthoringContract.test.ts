@@ -1,9 +1,14 @@
 import { describe, expect, it } from 'bun:test'
 import '@modules/base'
-import { creatorSignalComponentLibraryEntries } from '../../../integrations/creator-signal/component-library'
+import {
+  creatorSignalComponentEntries,
+  creatorSignalComponentLibraryEntries,
+  creatorSignalPatternEntries,
+} from '../../../integrations/creator-signal/component-library'
 import { creatorSignalCompositionCss } from '../../../integrations/creator-signal/pack/design-system'
 import {
   creatorSignalDesignSystemDependency,
+  creatorSignalPublicPatternCatalogue,
   creatorSignalPublicAuthoringContract,
   isCreatorSignalComponentPermitted,
   isCreatorSignalPatternPermitted,
@@ -46,12 +51,16 @@ describe('Creator Signal public authoring contract', () => {
   })
 
   it('allow-lists every Creator Signal catalogue entry and only governed variants', () => {
-    for (const entry of creatorSignalComponentLibraryEntries) {
+    for (const entry of creatorSignalComponentEntries) {
       expect(isCreatorSignalComponentPermitted(entry.id)).toBe(true)
       expect(entry.variants.length).toBeGreaterThan(0)
       for (const variant of entry.variants) {
         expect(isCreatorSignalVariantPermitted(entry.id, variant.id)).toBe(true)
       }
+    }
+    for (const entry of creatorSignalPatternEntries) {
+      expect(isCreatorSignalPatternPermitted(entry.id)).toBe(true)
+      expect(entry.implementation).toEqual({ type: 'pattern', patternId: entry.id })
     }
 
     expect(isCreatorSignalComponentPermitted('creator-signal.site.unapproved')).toBe(false)
@@ -59,12 +68,23 @@ describe('Creator Signal public authoring contract', () => {
   })
 
   it('does not expose freeform starter layouts outside the governed catalogue', () => {
-    const permittedLayoutIds = creatorSignalPublicAuthoringContract.permittedPatterns
+    const patternOwnedIds = creatorSignalPublicPatternCatalogue
+      .filter((pattern) => pattern.ownership === 'pattern')
       .map((pattern) => pattern.layoutId)
+    const componentMappings = creatorSignalPublicPatternCatalogue
+      .filter((pattern) => pattern.ownership === 'component')
 
-    expect(pack.layouts.map((layout) => layout.id)).toEqual(permittedLayoutIds)
-    for (const layoutId of permittedLayoutIds) {
+    expect(pack.layouts).toEqual([])
+    expect(creatorSignalPatternEntries.map((entry) => entry.id)).toEqual(patternOwnedIds)
+    for (const layoutId of creatorSignalPublicAuthoringContract.permittedPatterns.map(
+      (pattern) => pattern.layoutId,
+    )) {
       expect(isCreatorSignalPatternPermitted(layoutId)).toBe(true)
+    }
+    for (const mapping of componentMappings) {
+      expect(creatorSignalComponentLibraryEntries.some(
+        (entry) => entry.id === mapping.entryId,
+      )).toBe(true)
     }
     expect(isCreatorSignalPatternPermitted('freeform-brand-experiment')).toBe(false)
   })

@@ -6,6 +6,7 @@ import {
   pageSlugDuplicateError,
   pageSlugError,
 } from '@core/page-tree'
+import { treeHasOutlet } from '@core/templates'
 import { Button } from '@ui/components/Button'
 import { Dialog } from '@ui/components/Dialog'
 import { Input } from '@ui/components/Input'
@@ -55,6 +56,7 @@ export function SiteCreateDialog({
   const slugError = isPage && trimmedName
     ? pageSlugError(pageSlug) || pageSlugDuplicateError(pageSlug, pages)
     : null
+  const sharedTemplate = isPage ? sharedPageTemplate(pages) : undefined
 
   // Focus the name field on mount. Dialog's first-focusable would otherwise
   // pick the close (X) button in the header.
@@ -112,30 +114,55 @@ export function SiteCreateDialog({
         </div>
 
         {isPage && (
-          <div className={styles.field}>
-            <label htmlFor={slugInputId} className={styles.label}>Slug</label>
-            <Input
-              id={slugInputId}
-              fieldSize="sm"
-              value={pageSlug}
-              onChange={(event) => {
-                setSlugTouched(true)
-                setSlug(normalizePageSlug(event.target.value))
-              }}
-              placeholder="about"
-              autoComplete="off"
-              spellCheck={false}
-              invalid={Boolean(slugError)}
-              aria-describedby={slugError ? 'site-create-slug-error' : undefined}
-            />
-            {slugError && (
-              <p id="site-create-slug-error" role="alert" className={styles.errorText}>
-                {slugError}
-              </p>
-            )}
-          </div>
+          <>
+            <div className={styles.field}>
+              <label htmlFor={slugInputId} className={styles.label}>Slug</label>
+              <Input
+                id={slugInputId}
+                fieldSize="sm"
+                value={pageSlug}
+                onChange={(event) => {
+                  setSlugTouched(true)
+                  setSlug(normalizePageSlug(event.target.value))
+                }}
+                placeholder="about"
+                autoComplete="off"
+                spellCheck={false}
+                invalid={Boolean(slugError)}
+                aria-describedby={slugError ? 'site-create-slug-error' : undefined}
+              />
+              {slugError && (
+                <p id="site-create-slug-error" role="alert" className={styles.errorText}>
+                  {slugError}
+                </p>
+              )}
+            </div>
+            {sharedTemplate ? (
+              <div className={styles.templateNotice} role="status">
+                <strong>Shared page frame</strong>
+                <p>
+                  <span>{sharedTemplate.title}</span> supplies the shared site chrome.
+                  Add only this page&apos;s content after creation.
+                </p>
+              </div>
+            ) : null}
+          </>
         )}
       </form>
     </Dialog>
   )
+}
+
+function sharedPageTemplate(pages: readonly Page[]): Page | undefined {
+  return pages
+    .map((page, index) => ({ page, index }))
+    .filter(({ page }) =>
+      page.template?.enabled === true &&
+      page.template.target.kind === 'everywhere' &&
+      treeHasOutlet(page))
+    .sort((left, right) =>
+      ((right.page.template?.priority ?? 0) -
+        (left.page.template?.priority ?? 0)) ||
+      left.index - right.index)[0]
+    ?.page
 }

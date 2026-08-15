@@ -33,10 +33,14 @@ do not treat expected old-versus-new brand pixels as a failure. The report cover
 - canonical, robots, Open Graph, Twitter and language metadata; and
 - preserved schema.org navigation markup.
 
-Differences write the baseline and candidate PNGs plus `report.json` under
-`.tmp/creator-signal-parity`. Metadata is intentionally a candidate quality
-gate rather than a production-equality check: the component-authored candidate
-retains complete SEO metadata even where the older public baseline omits it.
+Every run writes baseline and candidate full-page PNGs, per-section PNGs,
+`report.json`, and a browsable `index.html` under
+`.tmp/creator-signal-parity`. The HTML report shows the shared template,
+route-to-component map, authoring fields, desktop/tablet/mobile page pairs and
+section pairs even when they pass. Metadata is intentionally a candidate
+quality gate rather than a production-equality check: the component-authored
+candidate retains complete SEO metadata even where the older public baseline omits
+it.
 
 The same command also runs JavaScript-enabled comparisons for the essential-only
 consent choice and all six generated Mautic forms without submitting them.
@@ -48,3 +52,6 @@ runtime, navigation contracts, keyboard/accessibility rules and Agent/MCP
 component authoring. Epic surface #997 owns the final multi-viewport visual and
 browser acceptance baseline after #995 and #996 are integrated. Passing either
 this verifier or repository tests does not authorize a production deployment.
+
+The durable authoring and route reference is
+`integrations/creator-signal/AUTHORING.md`.

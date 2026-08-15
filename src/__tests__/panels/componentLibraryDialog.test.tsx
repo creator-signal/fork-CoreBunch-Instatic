@@ -47,13 +47,58 @@ const dependencyEntry: ComponentLibraryEntry = {
   },
 }
 
+const templateOnlyEntry: ComponentLibraryEntry = {
+  ...dependencyEntry,
+  id: 'test.shared-header',
+  name: 'Shared header',
+  description: 'Shared site chrome for the template.',
+  constraints: { allowedDocumentKinds: ['template'] },
+}
+
 afterEach(() => {
   cleanup()
   componentLibraryRegistry.unregister(dependencyEntry.id)
+  componentLibraryRegistry.unregister(templateOnlyEntry.id)
   useEditorStore.setState({ site: null })
 })
 
 describe('ComponentLibraryDialog dependency availability', () => {
+  it('explains template-only placement before an author tries to insert', () => {
+    componentLibraryRegistry.register(templateOnlyEntry)
+    const page = makePage({
+      root: { moduleId: 'base.body', children: [] },
+    })
+    useEditorStore.setState({
+      site: makeSite({ pages: [page] }),
+      activePageId: page.id,
+      activeDocument: { kind: 'page', pageId: page.id },
+      selectedNodeId: page.rootNodeId,
+    })
+
+    render(
+      <ComponentLibraryDialog
+        open
+        onClose={() => {}}
+        dependencyState={{
+          capabilities: { 'test.delivery': 'available' },
+          providerAdapters: { 'test.mailer': 'available' },
+          plugins: { 'test.delivery-plugin': 'available' },
+        }}
+      />,
+    )
+    fireEvent.change(screen.getByLabelText('Search Component Library'), {
+      target: { value: templateOnlyEntry.name },
+    })
+
+    const notice = screen.getByRole('status')
+    expect(within(notice).getByText('Choose the shared template')).toBeDefined()
+    expect(notice.textContent).toContain('can only be placed in a template')
+    expect(screen.getByRole('heading', { name: 'Placement' }).parentElement?.textContent)
+      .toContain('Shared templates only')
+    expect(screen.getByRole('button', { name: 'Insert component' }).getAttribute('aria-disabled'))
+      .toBe('true')
+  })
+
   it('shows the mapped catalogue under the Creator Signal provider', () => {
     render(<ComponentLibraryDialog open onClose={() => {}} />)
 

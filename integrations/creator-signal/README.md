@@ -154,6 +154,11 @@ repeaters; complete prose and public documents use one sanitised rich-text
 value rather than a stack of paragraph nodes. The visual editor, Agent tools
 and MCP use the same Component Library entries and field validation.
 
+`integrations/creator-signal/AUTHORING.md` is the complete route, section,
+component and shared-template reference. Its parity command generates a
+browsable production-versus-candidate report with full-page and per-section
+images at desktop, tablet and mobile widths.
+
 Deploy Mautic first and verify
 `https://marketing.creatorsignal.me/media/creator-signal/forms-v1.js` exposes
 the `creator-signal.mautic-forms/v1` schema and all six governed aliases. Do not
@@ -170,6 +175,8 @@ its own role-protected application boundary.
 
 - `docs/deployment/creator-signal-stack.md`
 - `integrations/creator-signal/COMPONENTS.md`
+- `integrations/creator-signal/AUTHORING.md`
+- `integrations/creator-signal/PARITY.md`
 - `integrations/creator-signal/instatic-plugin.config.ts`
 - `integrations/creator-signal/modules/mautic-form.ts`
 - `integrations/creator-signal/frontend/analytics.ts`

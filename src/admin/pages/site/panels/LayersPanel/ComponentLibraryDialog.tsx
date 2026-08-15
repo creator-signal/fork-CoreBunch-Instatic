@@ -15,6 +15,9 @@ import {
 import { ModuleIcon } from '@site/ui/ModuleIcon'
 import { useEditorPermissions } from '@site/editorPermissionsContext'
 import { useInsertComponentLibraryEntry } from '@site/hooks/useInsertComponentLibraryEntry'
+import { resolveInsertLocation } from '@site/store/insertLocation'
+import { selectActiveCanvasPage, useEditorStore } from '@site/store/store'
+import { resolveComponentLibraryEntryPlacement } from '@site/component-library/componentLibraryAuthoring'
 import {
   useComponentLibraryDependencyState,
   useComponentLibraryEntries,
@@ -79,6 +82,8 @@ export function ComponentLibraryDialog({
   const [presetId, setPresetId] = useState(defaultPresetId(entries[0]))
   const [variantId, setVariantId] = useState(defaultVariantId(entries[0]))
   const insertEntry = useInsertComponentLibraryEntry()
+  const canvasPage = useEditorStore(selectActiveCanvasPage)
+  const selectedNodeId = useEditorStore((state) => state.selectedNodeId)
 
   const categories = Array.from(new Set(entries.map((entry) => entry.category))).sort()
   const categoryItems: FilterBarItem<string>[] = [
@@ -115,11 +120,28 @@ export function ComponentLibraryDialog({
   const insertionSupported = selectedEntry
     ? supportsCanvasInsertion(selectedEntry.implementation)
     : false
+  const insertionLocation = canvasPage
+    ? resolveInsertLocation(
+        canvasPage,
+        selectedNodeId ?? canvasPage.rootNodeId,
+      )
+    : null
+  const placement = selectedEntry && canvasPage && insertionLocation
+    ? resolveComponentLibraryEntryPlacement(
+        canvasPage,
+        selectedEntry,
+        insertionLocation,
+      )
+    : null
+  const placementBlockReason = placement && !placement.allowed
+    ? placement.message
+    : undefined
   const insertionBlockReason = selectedEntry
     ? componentInsertionBlockReason({
         availability,
         insertionSupported,
         canEditComponents: permissions.canEditComponents,
+        placementBlockReason,
       })
     : undefined
 
@@ -160,7 +182,8 @@ export function ComponentLibraryDialog({
               !selectedEntry ||
               !permissions.canEditComponents ||
               availability?.health === 'unavailable' ||
-              !insertionSupported
+              !insertionSupported ||
+              Boolean(placementBlockReason)
             }
             tooltip={insertionBlockReason}
           >
@@ -243,6 +266,7 @@ export function ComponentLibraryDialog({
                 health: 'unavailable',
                 issues: [],
               }}
+              placementBlockReason={placementBlockReason}
               presetId={presetId}
               onPresetChange={setPresetId}
               variantId={variantId}
@@ -302,6 +326,7 @@ function ComponentLibraryResult({
 interface ComponentLibraryDetailsProps {
   entry: ComponentLibraryEntry
   availability: ComponentLibraryAvailability
+  placementBlockReason?: string
   presetId: string
   onPresetChange: (value: string) => void
   variantId: string
@@ -311,6 +336,7 @@ interface ComponentLibraryDetailsProps {
 function ComponentLibraryDetails({
   entry,
   availability,
+  placementBlockReason,
   presetId,
   onPresetChange,
   variantId,
@@ -338,6 +364,17 @@ function ComponentLibraryDetails({
           muted={availability.health !== 'available'}
         />
       </div>
+
+      {placementBlockReason ? (
+        <div
+          className={styles.availabilityNotice}
+          role="status"
+          data-health="unavailable"
+        >
+          <strong>Choose the shared template</strong>
+          <span>{placementBlockReason}</span>
+        </div>
+      ) : null}
 
       {availability.health !== 'available' ? (
         <div
@@ -384,6 +421,11 @@ function ComponentLibraryDetails({
         </label>
       ) : null}
 
+      <DetailSection
+        title="Placement"
+        items={componentPlacementLabels(entry)}
+        empty="This component can be placed in pages and templates."
+      />
       <DetailSection
         title="Author fields"
         items={entry.fields.map((field) =>
@@ -515,10 +557,12 @@ function componentInsertionBlockReason({
   availability,
   insertionSupported,
   canEditComponents,
+  placementBlockReason,
 }: {
   availability: ComponentLibraryAvailability | null
   insertionSupported: boolean
   canEditComponents: boolean
+  placementBlockReason?: string
 }): string | undefined {
   if (!canEditComponents) {
     return 'You do not have permission to insert governed components.'
@@ -526,8 +570,17 @@ function componentInsertionBlockReason({
   if (!insertionSupported) {
     return 'This implementation type is not available for canvas insertion yet.'
   }
+  if (placementBlockReason) return placementBlockReason
   if (availability?.health === 'unavailable') {
     return dependencyAvailabilitySummary(availability)
   }
   return undefined
+}
+
+function componentPlacementLabels(entry: ComponentLibraryEntry): string[] {
+  const kinds = entry.constraints.allowedDocumentKinds
+  if (!kinds) return []
+  return kinds.map((kind) => kind === 'template'
+    ? 'Shared templates only'
+    : 'Ordinary pages')
 }

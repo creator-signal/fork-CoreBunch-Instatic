@@ -83,7 +83,7 @@ describe('Creator Signal site pack', () => {
     )
   })
 
-  it('advances the technical-pack version for the preserved Hero lineage migration', () => {
+  it('advances the technical-pack version for the template authoring contract', () => {
     const hero = pack.visualComponents.find(
       (component) => component.id === 'creator-signal.site/component/hero',
     )
@@ -109,6 +109,26 @@ describe('Creator Signal site pack', () => {
       expect(pageModuleIds).not.toContain('creator-signal.site.header')
       expect(pageModuleIds).not.toContain('creator-signal.site.footer')
       expect(pageModuleIds).not.toContain('creator-signal.site.consent-banner')
+    }
+
+    for (const entryId of [
+      'creator-signal.site.header',
+      'creator-signal.site.footer',
+      'creator-signal.site.consent-banner',
+    ]) {
+      const entry = creatorSignalComponentLibraryEntries.find(
+        (candidate) => candidate.id === entryId,
+      )
+      expect(entry?.constraints.allowedDocumentKinds).toEqual(['template'])
+      expect(entry?.constraints.maxInstancesPerDocument).toBe(1)
+      expect(entry?.documentation.usage).toContain('site template')
+      expect(entry?.fields.every((field) => Boolean(field.description))).toBe(true)
+    }
+
+    for (const entry of creatorSignalComponentLibraryEntries.filter(
+      (candidate) => !candidate.constraints.allowedDocumentKinds?.includes('template'),
+    )) {
+      expect(entry.constraints.allowedDocumentKinds).toEqual(['page'])
     }
   })
 

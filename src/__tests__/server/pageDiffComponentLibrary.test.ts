@@ -198,6 +198,66 @@ function governedPatternParentPage(parentEntryId?: string): Page {
 }
 
 describe('Component Library page diff policy', () => {
+  it('enforces document placement and singleton limits at the server boundary', () => {
+    const entryId = 'test.shared-chrome'
+    componentLibraryRegistry.register({
+      id: entryId,
+      version: '1.0.0',
+      name: 'Shared chrome',
+      description: 'Template-owned singleton chrome.',
+      category: 'Test',
+      tags: ['shared'],
+      icon: 'layout',
+      source: { type: 'built-in' },
+      status: 'stable',
+      composition: 'leaf',
+      implementation: { type: 'primitive', moduleId: 'base.text' },
+      fields: [],
+      variants: [],
+      presets: [],
+      slots: [],
+      constraints: {
+        allowedDocumentKinds: ['template'],
+        maxInstancesPerDocument: 1,
+      },
+      requirements: { capabilities: [], providerAdapters: [], plugins: [] },
+      documentation: {},
+    })
+    try {
+      const definition = registry.get('base.text')
+      if (!definition) throw new Error('base.text is not registered')
+      const sharedNode = (id: string) => makeNode({
+        id,
+        moduleId: 'base.text',
+        props: { ...definition.defaults },
+        catalogueInstance: { entryId, entryVersion: '1.0.0' },
+      })
+      const emptyPage = makePage()
+      const invalidPage = pageWith(sharedNode('shared'))
+      expect(() => validate(emptyPage, invalidPage)).toThrow(
+        /can only be placed in a template/,
+      )
+
+      const templateConfig = {
+        enabled: true as const,
+        target: { kind: 'everywhere' as const },
+        priority: 0,
+      }
+      const emptyTemplate = { ...emptyPage, template: templateConfig }
+      const validTemplate = { ...invalidPage, template: templateConfig }
+      expect(() => validate(emptyTemplate, validTemplate)).not.toThrow()
+
+      const duplicateTemplate = structuredClone(validTemplate)
+      duplicateTemplate.nodes.root!.children.push('shared-2')
+      duplicateTemplate.nodes['shared-2'] = sharedNode('shared-2')
+      expect(() => validate(emptyTemplate, duplicateTemplate)).toThrow(
+        /at most 1 instance per template/,
+      )
+    } finally {
+      componentLibraryRegistry.unregister(entryId)
+    }
+  })
+
   it('allows a governed primitive to be added, moved, and removed', () => {
     const empty = makePage()
     const inserted = pageWith(governedPlainTextNode())

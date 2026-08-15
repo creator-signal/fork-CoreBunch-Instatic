@@ -30,6 +30,32 @@
     line-height: 1.3;
 }
 
+.templateNotice {
+    display: grid;
+    gap: var(--space-xs);
+    padding: var(--space-m);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface-2);
+    color: var(--text-muted);
+    font-size: var(--text-s);
+    line-height: 1.4;
+}
+
+.templateNotice strong {
+    color: var(--text);
+    font-size: var(--text-xs);
+}
+
+.templateNotice p {
+    margin: 0;
+}
+
+.templateNotice span {
+    color: var(--text);
+    font-weight: 600;
+}
+
 .checkboxRow {
     display: flex;
     align-items: center;

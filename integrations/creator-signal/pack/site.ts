@@ -371,6 +371,26 @@ const sharedBlocks: PageBlock[] = [
   moduleBlock('consent-banner', { ...consentBanner.defaults }),
 ]
 
+export interface CreatorSignalPageAuthoringReference {
+  route: string
+  title: string
+  description: string
+  componentEntryIds: string[]
+}
+
+/** Durable route-to-component contract consumed by tests and parity reports. */
+export const creatorSignalPageAuthoringReference: readonly CreatorSignalPageAuthoringReference[] =
+  starterPages.map((page) => ({
+    route: page.slug === 'index' ? '/' : `/${page.slug}`,
+    title: page.title,
+    description: page.description,
+    componentEntryIds: page.blocks.map((block) => block.entryId),
+  }))
+
+export const creatorSignalSharedTemplateEntryIds = sharedBlocks.map(
+  (block) => block.entryId,
+)
+
 entries.push({
   id: 'site-template',
   slug: 'creator-signal-site-template',

@@ -14,6 +14,7 @@ import {
   creatorSignalHeroEntry,
   creatorSignalPatternDefinitions,
   creatorSignalPatternEntries,
+  creatorSignalRecoveryStateEntry,
 } from '../../../integrations/creator-signal/component-library'
 import mauticForm, { creatorSignalSiteCss } from '../../../integrations/creator-signal/modules/mautic-form'
 import {
@@ -31,15 +32,17 @@ import {
 } from '../../../integrations/creator-signal/modules/site-components'
 import {
   creatorSignalPageAuthoringReference,
+  creatorSignalNotFoundAuthoringReference,
   pack,
 } from '../../../integrations/creator-signal/pack/site'
 import { creatorSignalPublicRouteSlugs } from '../../../integrations/creator-signal/pack/routes'
 
 const publicPages = pack.pages.filter((page) => !page.template)
-const templatePage = pack.pages.find((page) => page.template)
+const templatePage = pack.pages.find((page) => page.template?.target.kind === 'everywhere')
+const notFoundTemplate = pack.pages.find((page) => page.template?.target.kind === 'notFound')
 
 describe('Creator Signal site pack', () => {
-  it('contains the complete public launch route set plus one shared template', () => {
+  it('contains the complete public launch route set plus shared and not-found templates', () => {
     expect(publicPages.map((page) => page.slug)).toEqual(creatorSignalPublicRouteSlugs)
     expect(templatePage).toMatchObject({
       slug: 'creator-signal-site-template',
@@ -48,6 +51,25 @@ describe('Creator Signal site pack', () => {
         target: { kind: 'everywhere' },
         priority: 0,
       },
+    })
+    expect(notFoundTemplate).toMatchObject({
+      slug: 'creator-signal-not-found',
+      template: {
+        enabled: true,
+        target: { kind: 'notFound' },
+        priority: 0,
+      },
+      seo: {
+        canonicalUrl: 'https://creatorsignal.me/404',
+        robots: { index: false, follow: true, archive: false },
+      },
+    })
+    expect(creatorSignalNotFoundAuthoringReference).toEqual({
+      route: '/404',
+      title: 'Page not found',
+      description: 'The requested Creator Signal page could not be found.',
+      patternId: 'creator-signal.site.pattern.not-found-state',
+      componentEntryIds: ['creator-signal.site.recovery-state'],
     })
   })
 
@@ -98,7 +120,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.3.1')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.3.2')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -139,6 +161,12 @@ describe('Creator Signal site pack', () => {
     )) {
       expect(entry.constraints.allowedDocumentKinds).toEqual(['page'])
     }
+
+    expect(creatorSignalRecoveryStateEntry.constraints.allowedDocumentKinds)
+      .toEqual(['page', 'template'])
+    expect(creatorSignalPatternEntries.find(
+      (entry) => entry.id === 'creator-signal.site.pattern.not-found-state',
+    )?.constraints.allowedDocumentKinds).toEqual(['template'])
   })
 
   it('uses governed leaf components with typed repeaters instead of authored child slots', () => {
@@ -327,7 +355,7 @@ describe('Creator Signal site pack', () => {
     expect(output.match(/<footer class="site-footer">/g)).toHaveLength(1)
     expect(output.match(/data-consent-banner/g)).toHaveLength(1)
     expect(output.match(/<h1/g)).toHaveLength(1)
-    expect(output).toContain('<main id="main-content">')
+    expect(output).toContain('<main id="main-content" tabindex="-1">')
     expect(output).toContain('<meta name="description"')
     expect(output).toContain('<html lang="en-AU">')
     expect(output).toContain('<link rel="canonical" href="https://creatorsignal.me/">')
@@ -340,6 +368,33 @@ describe('Creator Signal site pack', () => {
     expect(output).toContain('creator-signal-mark-light.svg')
     expect(output).toContain('creator-signal-social.png')
     expect(output).not.toContain('class="signal-visual"')
+  })
+
+  it('publishes the governed not-found template through the shared site chrome', () => {
+    const modules = Object.fromEntries(registry.list().map((module) => [module.id, module]))
+    for (const definition of creatorSignalPlugin.modules) {
+      modules[definition.id] = pluginModuleToHostModule(
+        'creator-signal.site',
+        definition,
+        () => () => null,
+        creatorSignalPlugin.manifest.permissions,
+        creatorSignalPlugin.manifest.networkAllowedHosts,
+      )
+    }
+    const composed = composeTemplateChain([templatePage!], { kind: 'page', page: notFoundTemplate! })
+    const site = makeSite({
+      pages: pack.pages,
+      visualComponents: pack.visualComponents,
+      styleRules: Object.fromEntries(pack.classes.map((rule) => [rule.id, rule])),
+    })
+    const output = publishPage(composed, site, makeRegistry(modules)).html
+
+    expect(output).toContain('<main id="main-content" tabindex="-1">')
+    expect(output).toContain('data-recovery-state="not-found"')
+    expect(output).toContain('<h1 id="not-found-state">We cannot find that page</h1>')
+    expect(output).toContain('<meta name="robots" content="noindex, follow, noarchive">')
+    expect(output.match(/<header class="site-header">/g)).toHaveLength(1)
+    expect(output.match(/<footer class="site-footer">/g)).toHaveLength(1)
   })
 
   it('makes every governed module independently previewable with the shared design contract', () => {
@@ -371,6 +426,7 @@ describe('Creator Signal site pack', () => {
       ['empty', 'No content yet'],
       ['error', 'Something went wrong'],
       ['offline', 'Connection unavailable'],
+      ['not-found', 'Page not found'],
     ] as const) {
       const output = recoveryState.render(
         { ...recoveryState.defaults, state },
@@ -466,6 +522,7 @@ describe('Creator Signal site pack', () => {
       'creator-signal.site.pattern.empty-state',
       'creator-signal.site.pattern.error-state',
       'creator-signal.site.pattern.offline-state',
+      'creator-signal.site.pattern.not-found-state',
     ])
   })
 })

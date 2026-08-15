@@ -45,6 +45,7 @@ type OwnedPagePatternRole =
   | 'contact'
   | 'legal-trust'
   | 'article-content'
+  | 'not-found-state'
 
 function pagePatternId(role: OwnedPagePatternRole): string {
   const mapping = creatorSignalPatternForRole(role)
@@ -447,6 +448,23 @@ pricingPage.blocks = [
   pricingPage.blocks[2]!,
 ]
 
+const notFoundPage: StarterPage = {
+  id: 'not-found',
+  slug: 'creator-signal-not-found',
+  title: 'Page not found',
+  description: 'The requested Creator Signal page could not be found.',
+  patternId: pagePatternId('not-found-state'),
+  blocks: [moduleBlock('recovery-state', {
+    state: 'not-found',
+    heading: 'We cannot find that page',
+    body: 'The address may have changed or the page may no longer exist.',
+    actionLabel: 'Return home',
+    actionUrl: '/',
+    sectionId: 'not-found-state',
+  })],
+}
+const governedPages = [...starterPages, notFoundPage]
+
 function pageSeo(page: StarterPage): PageSeo {
   const pageTitle = page.slug === 'index' ? page.title : `${page.title} | Creator Signal`
   const path = page.slug === 'index' ? '' : `/${page.slug}`
@@ -463,7 +481,7 @@ function pageSeo(page: StarterPage): PageSeo {
 }
 
 const placeholder = (index: number): string => `<div data-creator-signal-block="${index}"></div>`
-const entries: PagePackEntry[] = starterPages.map((page) => ({
+const entries: PagePackEntry[] = governedPages.map((page) => ({
   id: page.id,
   slug: page.slug,
   title: page.title,
@@ -494,6 +512,14 @@ export const creatorSignalPageAuthoringReference: readonly CreatorSignalPageAuth
     componentEntryIds: page.blocks.map((block) => block.entryId),
   }))
 
+export const creatorSignalNotFoundAuthoringReference: CreatorSignalPageAuthoringReference = {
+  route: '/404',
+  title: notFoundPage.title,
+  description: notFoundPage.description,
+  patternId: notFoundPage.patternId,
+  componentEntryIds: notFoundPage.blocks.map((block) => block.entryId),
+}
+
 export const creatorSignalSharedTemplateEntryIds = sharedBlocks.map(
   (block) => block.entryId,
 )
@@ -502,7 +528,7 @@ entries.push({
   id: 'site-template',
   slug: 'creator-signal-site-template',
   title: 'Creator Signal site template',
-  html: `${placeholder(0)}<main id="main-content"><instatic-outlet></instatic-outlet></main>${placeholder(1)}${placeholder(2)}`,
+  html: `${placeholder(0)}<main id="main-content" tabindex="-1"><instatic-outlet></instatic-outlet></main>${placeholder(1)}${placeholder(2)}`,
 })
 
 const compiled = compilePackPages('creator-signal.site', entries, creatorSignalCss)
@@ -611,10 +637,16 @@ function applyPagePattern(page: StarterPage): void {
   }
 }
 
-for (const page of starterPages) {
+for (const page of governedPages) {
   applyPagePattern(page)
   const compiledPage = compiled.pages.find((candidate) => candidate.slug === page.slug)!
-  compiledPage.seo = pageSeo(page)
+  compiledPage.seo = page === notFoundPage
+    ? {
+        ...pageSeo(page),
+        canonicalUrl: 'https://creatorsignal.me/404',
+        robots: { index: false, follow: true, archive: false },
+      }
+    : pageSeo(page)
 }
 
 applyBlocks('creator-signal-site-template', sharedBlocks)
@@ -622,6 +654,12 @@ const siteTemplate = compiled.pages.find((page) => page.slug === 'creator-signal
 siteTemplate.template = {
   enabled: true,
   target: { kind: 'everywhere' },
+  priority: 0,
+}
+const notFoundTemplate = compiled.pages.find((page) => page.slug === notFoundPage.slug)!
+notFoundTemplate.template = {
+  enabled: true,
+  target: { kind: 'notFound' },
   priority: 0,
 }
 

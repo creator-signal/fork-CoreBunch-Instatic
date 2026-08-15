@@ -108,6 +108,17 @@ jobs:
       - name: Verify Design System in a browser
         run: bun run verify:creator-signal-design-system:browser
 
+      - name: Verify published public-site acceptance
+        run: bun run verify:creator-signal-public-acceptance
+
+      - name: Upload public-site acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: creator-signal-public-acceptance
+          path: .tmp/creator-signal-public-acceptance
+          if-no-files-found: warn
+
       - name: Upload comparison plugin
         uses: actions/upload-artifact@v4
         with:

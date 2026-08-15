@@ -26,6 +26,7 @@ export const creatorSignalPublicPatternCatalogue = [
   { layoutId: 'creator-signal.site.pattern.empty-state', role: 'empty-state', ownership: 'pattern', patternId: 'creator-signal.site.pattern.empty-state' },
   { layoutId: 'creator-signal.site.pattern.error-state', role: 'error-state', ownership: 'pattern', patternId: 'creator-signal.site.pattern.error-state' },
   { layoutId: 'creator-signal.site.pattern.offline-state', role: 'offline-state', ownership: 'pattern', patternId: 'creator-signal.site.pattern.offline-state' },
+  { layoutId: 'creator-signal.site.pattern.not-found-state', role: 'not-found-state', ownership: 'pattern', patternId: 'creator-signal.site.pattern.not-found-state' },
 ] as const
 
 export const creatorSignalPublicAuthoringContract = {

@@ -19,6 +19,38 @@ function safeCode(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 80)
 }
 
+function bindPrivacyControls(): void {
+  const banner = document.querySelector<HTMLElement>('[data-consent-banner]')
+  let opener: HTMLElement | null = null
+
+  document.querySelectorAll<HTMLButtonElement>('[data-privacy-choices]').forEach((button) => {
+    button.addEventListener('click', () => {
+      if (!banner) return
+      opener = button
+      banner.removeAttribute('hidden')
+      banner.querySelector<HTMLButtonElement>('[data-analytics-choice]')?.focus()
+    })
+  })
+
+  document.querySelectorAll<HTMLButtonElement>('[data-analytics-choice]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const value = button.dataset.analyticsChoice === 'granted' ? 'granted' : 'denied'
+      const secure = location.protocol === 'https:' ? '; Secure' : ''
+      document.cookie = `cs_optional_analytics=${value}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`
+      banner?.setAttribute('hidden', '')
+      dispatchEvent(new CustomEvent(preferenceEvent, { detail: { preference: value } }))
+      if (value === 'denied' && openPanel) {
+        void openPanel.clear()
+        openPanel = null
+      }
+      opener?.focus()
+      opener = null
+    })
+  })
+
+  if (document.cookie.includes('cs_optional_analytics=')) banner?.setAttribute('hidden', '')
+}
+
 async function storeAttribution(): Promise<void> {
   const url = new URL(location.href)
   const value = url.searchParams.get('cs_attribution') ?? url.searchParams.get('mauticUserTrackingId')
@@ -33,6 +65,7 @@ async function storeAttribution(): Promise<void> {
 
 async function init(): Promise<void> {
   void storeAttribution()
+  bindPrivacyControls()
   const response = await fetch(configPath, { credentials: 'same-origin' })
   if (!response.ok) return
   const config = await response.json() as Config
@@ -85,22 +118,6 @@ async function init(): Promise<void> {
     })
   })
 
-  document.querySelectorAll<HTMLButtonElement>('[data-analytics-choice]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const value = button.dataset.analyticsChoice === 'granted' ? 'granted' : 'denied'
-      const secure = location.protocol === 'https:' ? '; Secure' : ''
-      document.cookie = `cs_optional_analytics=${value}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`
-      document.querySelector<HTMLElement>('[data-consent-banner]')?.setAttribute('hidden', '')
-      dispatchEvent(new CustomEvent(preferenceEvent, { detail: { preference: value } }))
-      if (value === 'denied' && openPanel) {
-        void openPanel.clear()
-        openPanel = null
-      }
-    })
-  })
-  if (document.cookie.includes('cs_optional_analytics=')) {
-    document.querySelector<HTMLElement>('[data-consent-banner]')?.setAttribute('hidden', '')
-  }
 }
 
 void init().catch((error) => Sentry.captureException(error, { tags: { integration: 'creator-signal-site' } }))

@@ -40,6 +40,7 @@ export interface CreatorSignalMigrationReport {
     missing: number
     additionalPages: number
     template: 'add' | 'current' | 'repair' | 'conflict'
+    notFoundTemplate: 'add' | 'current' | 'conflict'
     rowsInMigration: number
   }
   apply: {
@@ -119,8 +120,10 @@ export function prepareCreatorSignalContentMigration(
   const rowById = new Map(sourceRows.map((row) => [row.id, row]))
   const currentPages = pack.pages.filter((page) => !page.template)
   const knownIds = new Set(currentPages.map((page) => page.id))
-  const template = pack.pages.find((page) => page.template)
+  const template = pack.pages.find((page) => page.template?.target.kind === 'everywhere')
+  const notFoundTemplate = pack.pages.find((page) => page.template?.target.kind === 'notFound')
   if (!template) throw new Error('[creator-signal migration] Current pack has no site template.')
+  if (!notFoundTemplate) throw new Error('[creator-signal migration] Current pack has no not-found template.')
   // 0.0.29 emitted this exact template with an underscore-prefixed slug that
   // the page persistence contract rejects. Recognise only that exact faulty
   // template so an attempted 0.0.29 migration can be repaired without treating
@@ -131,6 +134,7 @@ export function prepareCreatorSignalContentMigration(
     slug: invalid029TemplateSlug,
   }))
   knownIds.add(template.id)
+  knownIds.add(notFoundTemplate.id)
 
   const previews: PageMigrationPreview[] = []
   const migrationRows: DataRow[] = []
@@ -212,6 +216,42 @@ export function prepareCreatorSignalContentMigration(
     }
   }
 
+  const notFoundTemplateRow = rowById.get(notFoundTemplate.id)
+  let notFoundTemplateState: CreatorSignalMigrationReport['summary']['notFoundTemplate']
+  if (!notFoundTemplateRow) {
+    notFoundTemplateState = 'add'
+    previews.push({
+      id: notFoundTemplate.id,
+      slug: notFoundTemplate.slug,
+      state: 'template-add',
+      targetHash: canonicalSha256(pageToCells(notFoundTemplate)),
+    })
+    migrationRows.push(newTemplateRow(notFoundTemplate, now))
+  } else {
+    const currentHash = canonicalSha256(notFoundTemplateRow.cells)
+    const targetHash = canonicalSha256(pageToCells(notFoundTemplate))
+    if (currentHash === targetHash) {
+      notFoundTemplateState = 'current'
+      previews.push({
+        id: notFoundTemplate.id,
+        slug: notFoundTemplate.slug,
+        state: 'template-current',
+        currentHash,
+        targetHash,
+      })
+    } else {
+      notFoundTemplateState = 'conflict'
+      previews.push({
+        id: notFoundTemplate.id,
+        slug: notFoundTemplate.slug,
+        state: 'template-conflict',
+        currentHash,
+        targetHash,
+      })
+      blockers.push('The Creator Signal not-found template ID already contains different authored content.')
+    }
+  }
+
   const ready = blockers.length === 0
   const report: CreatorSignalMigrationReport = {
     schema: 'creator-signal.site/content-migration-report/v1',
@@ -226,6 +266,7 @@ export function prepareCreatorSignalContentMigration(
       missing: previews.filter((page) => page.state === 'missing').length,
       additionalPages: previews.filter((page) => page.state === 'additional-page').length,
       template: templateState,
+      notFoundTemplate: notFoundTemplateState,
       rowsInMigration: ready ? migrationRows.length : 0,
     },
     apply: {
@@ -266,6 +307,7 @@ function blockedReport(blocker: string): CreatorSignalMigrationReport {
       missing: 0,
       additionalPages: 0,
       template: 'conflict',
+      notFoundTemplate: 'conflict',
       rowsInMigration: 0,
     },
     apply: {

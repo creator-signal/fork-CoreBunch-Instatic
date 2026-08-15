@@ -48,10 +48,11 @@ When the production baseline's generated script does not attach in headless
 Chromium, the gate records that diagnostic, matches the governed alias, and
 still requires the candidate to render labelled fields and a submit control.
 Repository tests separately verify the pinned Design System snapshot, theme
-runtime, navigation contracts, keyboard/accessibility rules and Agent/MCP
-component authoring. Epic surface #997 owns the final multi-viewport visual and
-browser acceptance baseline after #995 and #996 are integrated. Passing either
-this verifier or repository tests does not authorize a production deployment.
+runtime, navigation contracts and Agent/MCP component authoring. The completed
+source-owned multi-viewport, WCAG, keyboard, degraded-state and visual gate is
+documented in `integrations/creator-signal/ACCEPTANCE.md` and runs through
+`bun run verify:creator-signal-public-acceptance`. Passing either verifier or
+repository tests does not authorize a production deployment.
 
 The durable authoring and route reference is
 `integrations/creator-signal/AUTHORING.md`.

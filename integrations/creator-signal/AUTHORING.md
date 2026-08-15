@@ -2,7 +2,10 @@
 
 This reference maps the public site to the shared template and governed components authors edit in Instatic.
 
-The source of truth is `integrations/creator-signal/pack/site.ts`. It defines the 23 route documents as page content only and one everywhere template that owns the shared header, footer and privacy choices.
+The source of truth is `integrations/creator-signal/pack/site.ts`. It defines
+the 23 route documents as page content only, one everywhere template that owns
+shared header/footer/privacy choices, and one not-found template that owns the
+unknown-route recovery content.
 
 ---
 
@@ -10,12 +13,17 @@ The source of truth is `integrations/creator-signal/pack/site.ts`. It defines th
 
 - New pages inherit `Creator Signal site template` automatically.
 - The template owns Site Header, Site Footer and Privacy Choices around one content outlet.
+- Unknown routes compose that shared chrome with the governed `notFound`
+  template and publish `noindex, follow, noarchive` metadata.
 - Authors creating an ordinary page add only page-content components.
 - Shared chrome is template-only and limited to one instance of each component per template.
 - Page-content components are page-only; the Hero is limited to one instance per page.
 - Every starter route materializes one stable `creator-signal.site.pattern.*` catalogue entry; its authorable children are governed components.
 - Creator Signal components are opinionated leaves. Pattern roots are governed containers; neither model exposes arbitrary child slots.
 - `bun run verify:creator-signal-parity` writes the browsable side-by-side report to `.tmp/creator-signal-parity/index.html`.
+- `bun run verify:creator-signal-public-acceptance` verifies the locally
+  published pack against the committed responsive, accessibility and visual
+  baseline.
 
 ## Shared template
 
@@ -31,6 +39,10 @@ Creator Signal site template
 ```
 
 The page-creation dialog in `src/admin/shared/dialogs/SiteCreateDialog/SiteCreateDialog.tsx` identifies the active shared page frame before creation. The new page starts with an empty `base.body`; `src/core/templates/pageWrapperTemplates.ts` resolves the shared template for canvas preview and publication.
+
+The separate `Creator Signal not found` template contains one governed
+Recovery State with the `not-found` kind. It is not an ordinary route seed and
+is excluded from the public route roster and sitemap inputs.
 
 In Components view, template rows are read-only while an ordinary page is active. The owning-template action in `src/admin/pages/site/panels/LayersPanel/ComponentLayersTree.tsx` opens the shared template for editing. One edit therefore propagates to every wrapped route without copying header or footer nodes into those pages.
 
@@ -89,6 +101,7 @@ instead of duplicating it as a second implementation.
 | Empty state | `creator-signal.site.pattern.empty-state` | Textual Recovery State with action |
 | Error state | `creator-signal.site.pattern.error-state` | Textual Recovery State with action |
 | Offline state | `creator-signal.site.pattern.offline-state` | Textual Recovery State with status action |
+| Not-found state | `creator-signal.site.pattern.not-found-state` | Noindex Recovery State with return-home action |
 
 Use a Visual Component when a reusable fixed tree needs scalar parameters.
 Use a governed module component when one opinionated semantic renderer owns
@@ -111,7 +124,7 @@ pack: they are for copyable structures that may diverge after insertion.
 | Testimonial | Page | Quotation, attribution, role or business | None | None |
 | FAQ | Page | Heading and section anchor | Question and answer | None |
 | Comparison Section | Page | Heading, introduction, caption and three option labels | Criterion and three option values | None |
-| Recovery State | Page; maximum one | Empty/error/offline kind, heading, explanation and recovery action | None | None |
+| Recovery State | Page or not-found template; maximum one | Empty/error/offline/not-found kind, heading, explanation and recovery action | None | None |
 | Public Document | Page | Eyebrow, document heading, summary, one formatted document field, date modified | None | None |
 | Managed Form | Page | Eyebrow, heading, introduction and success message | Provider fields are resolved from the governed registry | None |
 
@@ -181,11 +194,13 @@ The visual report is evidence, not deployment authority. Production release and 
 
 ## Related
 
+- `integrations/creator-signal/ACCEPTANCE.md` — published-pack browser and visual gate
 - `integrations/creator-signal/PARITY.md` — parity command and thresholds
 - `integrations/creator-signal/COMPONENTS.md` — extending the component catalogue
 - `integrations/creator-signal/component-library.ts` — component authoring source of truth
 - `integrations/creator-signal/pack/site.ts` — route and shared-template source of truth
 - `scripts/verify-creator-signal-parity.ts` — side-by-side report generator
+- `scripts/verify-creator-signal-public-acceptance.ts` — source-owned public browser gate
 - `src/__tests__/plugins/creatorSignalSitePack.test.ts` — route, template and component gates
 - `src/__tests__/component-library/componentLibraryPlacement.test.ts` — placement-policy gate
 - `src/__tests__/panels/componentLibraryDialog.test.tsx` — author-facing placement explanation gate

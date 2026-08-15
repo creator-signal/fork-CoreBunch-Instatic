@@ -12,6 +12,8 @@ media storage.
 ## TL;DR
 
 - Use a **Visual Component** for a reusable fixed tree with scalar parameters.
+- Use a governed **pattern** for an approved multi-component page or section
+  composition whose child components remain authorable after insertion.
 - Use a governed **module component** for opinionated markup, repeatable typed
   data, runtime behaviour or external services.
 - Only structural container components may expose child slots. Leaf components
@@ -32,12 +34,21 @@ media storage.
 | --- | --- | --- |
 | Reusable section with per-instance fields | Visual Component | `integrations/creator-signal/pack/hero-component.ts` |
 | Opinionated section with repeatable data | Governed module component | `integrations/creator-signal/modules/site-components.ts` |
+| Approved page/section composition | Component Library pattern | `integrations/creator-signal/component-library.ts` |
+| Copyable structure intentionally allowed to diverge | Saved layout | Not used by the Creator Signal pack |
 | Runtime JavaScript or an external integration | Module | `integrations/creator-signal/modules/mautic-form.ts` |
 | Shared typography, colour, spacing, and responsive rules | Pack stylesheet | `integrations/creator-signal/pack/design-system.ts` |
 
 The Hero is a Visual Component. The other public blocks are governed module
 components so their typed properties can include repeaters while their HTML
 structure remains consistent.
+
+The public page and section patterns are registered beside those entries in
+`component-library.ts`. Their stable IDs use
+`creator-signal.site.pattern.*`, their roots record the catalogue instance,
+and only their declared child component nodes are authorable. Route seeds use
+the same registry materializer, so the Insert experience and installed site
+cannot drift into separate structures.
 
 ## Hero component anatomy
 
@@ -288,6 +299,7 @@ affect only the selected reference.
 | Exposing a raw Visual Component directly in Insert → Components | Register a governed `ComponentLibraryEntry` with an explicit owner and field contract |
 | Hard-coded object-storage URLs | An `image` parameter bound to `base.image.props.src` |
 | JavaScript embedded in a Visual Component | A registered module such as `integrations/creator-signal/modules/mautic-form.ts` |
+| Rebuilding an approved page sequence from ad hoc containers | Insert the stable `creator-signal.site.pattern.*` entry |
 | Editing generated `pack/site.json` | Edit TypeScript sources and rebuild the plugin |
 
 ## Related

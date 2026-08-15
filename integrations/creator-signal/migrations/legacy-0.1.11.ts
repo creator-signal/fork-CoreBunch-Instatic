@@ -6,7 +6,7 @@
 import { compilePackPages, type PagePackEntry } from '@core/plugin-sdk'
 import { creatorSignalCss } from './legacy-0.1.11-design-system'
 import { heroParamIds } from '../pack/hero-component'
-import { starterPages } from '../pack/site'
+import { legacyCreatorSignalStarterPages0111 as starterPages } from '../pack/site'
 
 const header = `<header class="site-header">
   <a class="site-brand" href="/" aria-label="Creator Signal home">

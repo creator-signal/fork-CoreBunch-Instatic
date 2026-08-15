@@ -1,8 +1,27 @@
-import type { ComponentLibraryEntry, ComponentLibraryField } from '@core/component-library'
+import {
+  componentLibraryPatternRegistry,
+  type ComponentLibraryEntry,
+  type ComponentLibraryField,
+  type ComponentLibraryPatternDefinition,
+  type ComponentLibraryPatternNode,
+} from '@core/component-library'
+import { ContainerModule } from '@modules/base/container'
+import { VisualComponentRefModule } from '@modules/base/visualComponentRef'
 import { heroComponent, heroParamIds } from './pack/hero-component'
+import mauticForm from './modules/mautic-form'
+import {
+  callToAction,
+  comparisonSection,
+  faq,
+  featureGrid,
+  publicDocument,
+  recoveryState,
+  richTextSection,
+} from './modules/site-components'
 import {
   creatorSignalPublicAuthoringContract,
   isCreatorSignalComponentPermitted,
+  isCreatorSignalPatternPermitted,
 } from './public-authoring-contract'
 
 const pluginRequirement = {
@@ -267,6 +286,53 @@ export const creatorSignalFaqEntry = siteEntry({
   ],
 })
 
+export const creatorSignalComparisonEntry = siteEntry({
+  id: 'creator-signal.site.comparison-section',
+  name: 'Comparison Section',
+  description: 'A captioned comparison table with consistent criteria across three options.',
+  tags: ['comparison', 'pricing', 'products', 'table'],
+  moduleId: comparisonSection.id,
+  accessibilityGuidance: 'Keep the caption specific and write row labels that make sense independently of visual position.',
+  fields: [
+    { key: 'eyebrow', label: 'Eyebrow', description: 'Short context label above the comparison.', type: 'text', required: true },
+    { key: 'heading', label: 'Heading', description: 'Outcome-focused heading for the complete comparison.', type: 'text', required: true },
+    { key: 'introduction', label: 'Introduction', description: 'Explain what is being compared and why.', type: 'text', required: true },
+    { key: 'sectionId', label: 'Section anchor', description: 'Unique page anchor used by the section heading.', type: 'text', required: true, advanced: true },
+    { key: 'caption', label: 'Table caption', description: 'Accessible name describing the comparison.', type: 'text', required: true },
+    { key: 'firstLabel', label: 'First option', description: 'Column heading for the first option.', type: 'text', required: true },
+    { key: 'secondLabel', label: 'Second option', description: 'Column heading for the second option.', type: 'text', required: true },
+    { key: 'thirdLabel', label: 'Third option', description: 'Column heading for the third option.', type: 'text', required: true },
+    {
+      key: 'items', label: 'Comparison rows', description: 'Ordered criteria with one value for each option.', type: 'repeater', required: true,
+      itemLabel: 'Criterion', minItems: 1, maxItems: 24,
+      itemFields: [
+        { key: 'label', label: 'Criterion', description: 'Row heading shared by all three values.', type: 'text', required: true },
+        { key: 'firstValue', label: 'First value', description: 'Value for the first option.', type: 'text', required: true },
+        { key: 'secondValue', label: 'Second value', description: 'Value for the second option.', type: 'text', required: true },
+        { key: 'thirdValue', label: 'Third value', description: 'Value for the third option.', type: 'text', required: true },
+      ],
+    },
+  ],
+})
+
+export const creatorSignalRecoveryStateEntry = siteEntry({
+  id: 'creator-signal.site.recovery-state',
+  name: 'Recovery State',
+  description: 'A textual empty, error or offline state with one clear recovery action.',
+  tags: ['empty state', 'error', 'offline', 'recovery'],
+  moduleId: recoveryState.id,
+  constraints: { allowedDocumentKinds: ['page'], maxInstancesPerDocument: 1 },
+  accessibilityGuidance: 'Name the state in text, explain what happened, and offer an action that works without relying on colour.',
+  fields: [
+    { key: 'state', label: 'State', description: 'Governed empty, error or offline semantic treatment.', type: 'select', required: true },
+    { key: 'heading', label: 'Heading', description: 'Plain-language page heading.', type: 'text', required: true },
+    { key: 'body', label: 'Explanation', description: 'Explain the state and any safe next step.', type: 'text', required: true },
+    { key: 'actionLabel', label: 'Recovery action', description: 'Specific visible action label.', type: 'text', required: true },
+    { key: 'actionUrl', label: 'Recovery URL', description: 'Safe destination for recovery.', type: 'url', required: true },
+    { key: 'sectionId', label: 'Heading anchor', description: 'Unique ID used by the page heading.', type: 'text', required: true, advanced: true },
+  ],
+})
+
 export const creatorSignalPublicDocumentEntry = siteEntry({
   id: 'creator-signal.site.public-document',
   name: 'Public Document',
@@ -301,7 +367,7 @@ export const creatorSignalMauticFormEntry = siteEntry({
   ],
 })
 
-export const creatorSignalComponentLibraryEntries: readonly ComponentLibraryEntry[] = [
+export const creatorSignalComponentEntries: readonly ComponentLibraryEntry[] = [
   creatorSignalHeroEntry,
   creatorSignalHeaderEntry,
   creatorSignalFooterEntry,
@@ -311,12 +377,271 @@ export const creatorSignalComponentLibraryEntries: readonly ComponentLibraryEntr
   creatorSignalRichTextEntry,
   creatorSignalTestimonialEntry,
   creatorSignalFaqEntry,
+  creatorSignalComparisonEntry,
+  creatorSignalRecoveryStateEntry,
   creatorSignalPublicDocumentEntry,
   creatorSignalMauticFormEntry,
 ]
 
+const componentEntryById = new Map(
+  creatorSignalComponentEntries.map((entry) => [entry.id, entry]),
+)
+
+function componentEntry(id: string): ComponentLibraryEntry {
+  const entry = componentEntryById.get(id)
+  if (!entry) throw new Error(`[creator-signal] Missing pattern component entry "${id}".`)
+  return entry
+}
+
+function componentNode(
+  key: string,
+  entryId: string,
+  moduleId: string,
+  props: Record<string, unknown>,
+): ComponentLibraryPatternNode {
+  const entry = componentEntry(entryId)
+  return {
+    key,
+    moduleId,
+    props,
+    children: [],
+    catalogueInstance: {
+      entryId: entry.id,
+      entryVersion: entry.version,
+      variantId: 'default',
+    },
+  }
+}
+
+const heroDefaults = Object.fromEntries(
+  heroComponent.params.map((parameter) => [parameter.id, parameter.defaultValue]),
+)
+
+const patternBlocks = {
+  hero: () => componentNode(
+    'hero',
+    creatorSignalHeroEntry.id,
+    VisualComponentRefModule.id,
+    { componentId: heroComponent.id, propOverrides: heroDefaults },
+  ),
+  features: () => componentNode(
+    'features',
+    creatorSignalFeatureGridEntry.id,
+    featureGrid.id,
+    { ...featureGrid.defaults },
+  ),
+  content: () => componentNode(
+    'content',
+    creatorSignalRichTextEntry.id,
+    richTextSection.id,
+    { ...richTextSection.defaults },
+  ),
+  comparison: () => componentNode(
+    'comparison',
+    creatorSignalComparisonEntry.id,
+    comparisonSection.id,
+    { ...comparisonSection.defaults },
+  ),
+  faq: () => componentNode(
+    'faq',
+    creatorSignalFaqEntry.id,
+    faq.id,
+    { ...faq.defaults },
+  ),
+  action: () => componentNode(
+    'action',
+    creatorSignalCallToActionEntry.id,
+    callToAction.id,
+    { ...callToAction.defaults },
+  ),
+  form: () => componentNode(
+    'form',
+    creatorSignalMauticFormEntry.id,
+    mauticForm.id,
+    { ...mauticForm.defaults },
+  ),
+  document: () => componentNode(
+    'document',
+    creatorSignalPublicDocumentEntry.id,
+    publicDocument.id,
+    { ...publicDocument.defaults },
+  ),
+} satisfies Record<string, () => ComponentLibraryPatternNode>
+
+type PatternBlock = keyof typeof patternBlocks
+
+function pagePattern(
+  id: string,
+  blocks: readonly PatternBlock[],
+): ComponentLibraryPatternDefinition {
+  const children = blocks.map((block) => patternBlocks[block]())
+  return {
+    id,
+    rootKey: 'root',
+    nodes: [
+      {
+        key: 'root',
+        moduleId: ContainerModule.id,
+        props: {
+          ...ContainerModule.defaults,
+          tag: 'div',
+          htmlAttributes: { 'data-creator-signal-pattern': id },
+        },
+        children: children.map((child) => child.key),
+      },
+      ...children,
+    ],
+    authorableNodeKeys: children.map((child) => child.key),
+  }
+}
+
+function recoveryPattern(
+  id: string,
+  state: 'empty' | 'error' | 'offline',
+): ComponentLibraryPatternDefinition {
+  const defaults = state === 'error'
+    ? {
+        heading: 'We could not complete that request',
+        body: 'Try again, or return to a safe page if the problem continues.',
+        actionLabel: 'Return home',
+        actionUrl: '/',
+      }
+    : state === 'offline'
+      ? {
+          heading: 'You appear to be offline',
+          body: 'Check your connection, then retry when the service is reachable.',
+          actionLabel: 'Check service status',
+          actionUrl: 'https://status.creatorsignal.me',
+        }
+      : {
+          heading: 'Nothing here yet',
+          body: 'There is no content to show here yet. Return to the main site to keep exploring.',
+          actionLabel: 'Return home',
+          actionUrl: '/',
+        }
+  const definition = pagePattern(id, [])
+  const stateNode = componentNode(
+    'state',
+    creatorSignalRecoveryStateEntry.id,
+    recoveryState.id,
+    { ...recoveryState.defaults, ...defaults, state, sectionId: `${state}-state` },
+  )
+  return {
+    ...definition,
+    nodes: [
+      { ...definition.nodes[0]!, children: [stateNode.key] },
+      stateNode,
+    ],
+    authorableNodeKeys: [stateNode.key],
+  }
+}
+
+export const creatorSignalPatternDefinitions: readonly ComponentLibraryPatternDefinition[] = [
+  pagePattern('creator-signal.site.pattern.content-page', ['hero', 'content', 'action']),
+  pagePattern('creator-signal.site.pattern.product-page', ['hero', 'features', 'action']),
+  pagePattern('creator-signal.site.pattern.pricing-page', ['hero', 'comparison', 'action']),
+  pagePattern('creator-signal.site.pattern.features-page', ['hero', 'features']),
+  pagePattern('creator-signal.site.pattern.contact-page', ['hero', 'form']),
+  pagePattern('creator-signal.site.pattern.legal-trust-page', ['document']),
+  pagePattern('creator-signal.site.pattern.article-content-page', ['hero', 'content']),
+  pagePattern('creator-signal.site.pattern.comparison-section', ['comparison']),
+  recoveryPattern('creator-signal.site.pattern.empty-state', 'empty'),
+  recoveryPattern('creator-signal.site.pattern.error-state', 'error'),
+  recoveryPattern('creator-signal.site.pattern.offline-state', 'offline'),
+]
+
+for (const definition of creatorSignalPatternDefinitions) {
+  componentLibraryPatternRegistry.registerOrReplace(definition)
+}
+
+function patternEntry(input: {
+  id: string
+  name: string
+  description: string
+  tags: string[]
+  usage: string
+  accessibility: string
+  maxInstancesPerDocument?: number
+}): ComponentLibraryEntry {
+  const definition = creatorSignalPatternDefinitions.find(
+    (candidate) => candidate.id === input.id,
+  )
+  if (!definition) throw new Error(`[creator-signal] Missing pattern definition "${input.id}".`)
+  const allowedChildEntryIds = definition.nodes
+    .map((node) => node.catalogueInstance?.entryId)
+    .filter((id): id is string => Boolean(id))
+  return {
+    id: input.id,
+    version: '1.0.0',
+    name: input.name,
+    description: input.description,
+    category: 'Creator Signal patterns',
+    tags: input.tags,
+    icon: 'layout-solid',
+    source: {
+      type: 'plugin',
+      pluginId: 'creator-signal.site',
+      name: 'Creator Signal',
+    },
+    status: 'stable',
+    composition: 'container',
+    implementation: { type: 'pattern', patternId: definition.id },
+    fields: [],
+    variants: defaultVariant,
+    presets: [],
+    slots: [],
+    constraints: {
+      allowedDocumentKinds: ['page'],
+      allowedChildEntryIds: [...new Set(allowedChildEntryIds)],
+      ...(input.maxInstancesPerDocument
+        ? { maxInstancesPerDocument: input.maxInstancesPerDocument }
+        : {}),
+    },
+    requirements: pluginRequirement,
+    documentation: {
+      usage: input.usage,
+      accessibility: input.accessibility,
+    },
+    accessibility: {
+      checks: [{
+        rule: 'a11y.heading-order',
+        category: 'heading',
+        enforcement: 'manual',
+        severity: 'warning',
+        summary: 'Keep the pattern heading hierarchy meaningful in its destination page.',
+        remediation: 'Use one page-level heading and preserve logical section heading levels.',
+      }],
+    },
+  }
+}
+
+export const creatorSignalPatternEntries: readonly ComponentLibraryEntry[] = [
+  patternEntry({ id: 'creator-signal.site.pattern.content-page', name: 'Content Page', description: 'Hero, long-form content and one next action.', tags: ['content page', 'editorial', 'cta'], usage: 'Use for an explanatory page that ends with one next step.', accessibility: 'Keep one H1 in the Hero and use semantic headings inside the rich-text section.', maxInstancesPerDocument: 1 }),
+  patternEntry({ id: 'creator-signal.site.pattern.product-page', name: 'Product Page', description: 'Hero, governed feature grid and one product action.', tags: ['product', 'features', 'cta'], usage: 'Use for a product overview with outcome-focused features and one primary journey.', accessibility: 'Keep card content scannable and the single page action specific.', maxInstancesPerDocument: 1 }),
+  patternEntry({ id: 'creator-signal.site.pattern.pricing-page', name: 'Pricing Page', description: 'Hero, semantic comparison and one next action.', tags: ['pricing', 'comparison'], usage: 'Use for plan or offer comparison; retain table captions and consistent row criteria.', accessibility: 'Keep row and column headings descriptive and avoid expressing availability through colour alone.', maxInstancesPerDocument: 1 }),
+  patternEntry({ id: 'creator-signal.site.pattern.features-page', name: 'Features Page', description: 'Hero and governed feature collection.', tags: ['features', 'capabilities', 'landing page'], usage: 'Use for a focused capability overview.', accessibility: 'Keep the Hero as H1 and feature headings as short H3 outcomes.', maxInstancesPerDocument: 1 }),
+  patternEntry({ id: 'creator-signal.site.pattern.contact-page', name: 'Contact Page', description: 'Hero and capability-backed managed Mautic form.', tags: ['contact', 'form', 'mautic'], usage: 'Use for contact and intake routes; choose a governed form alias rather than custom HTML.', accessibility: 'Preserve the managed form labels, status announcements and privacy context.', maxInstancesPerDocument: 1 }),
+  patternEntry({ id: 'creator-signal.site.pattern.legal-trust-page', name: 'Legal or Trust Page', description: 'One versioned semantic public document.', tags: ['legal', 'trust', 'document'], usage: 'Use for approved legal, trust, support and status documents that need version metadata.', accessibility: 'Use coherent rich text, meaningful headings and readable link labels.', maxInstancesPerDocument: 1 }),
+  patternEntry({ id: 'creator-signal.site.pattern.article-content-page', name: 'Article or Content Page', description: 'Hero and one coherent long-form content section.', tags: ['article', 'content', 'long form'], usage: 'Use for editorial content that needs an introduction and one coherent body.', accessibility: 'Keep a single H1 and a logical hierarchy inside the authored body.', maxInstancesPerDocument: 1 }),
+  patternEntry({ id: 'creator-signal.site.pattern.comparison-section', name: 'Comparison Section', description: 'A semantic three-option comparison section.', tags: ['comparison', 'table', 'section'], usage: 'Use inside a page for genuine row-and-column comparisons.', accessibility: 'Retain the visible caption and complete row and column headings.' }),
+  patternEntry({ id: 'creator-signal.site.pattern.empty-state', name: 'Empty State Page', description: 'Explains an empty result and offers a recovery route.', tags: ['empty', 'recovery', 'status'], usage: 'Use when a valid view has no content yet.', accessibility: 'Name the empty state in text and provide a useful action.', maxInstancesPerDocument: 1 }),
+  patternEntry({ id: 'creator-signal.site.pattern.error-state', name: 'Error State Page', description: 'Explains a recoverable failure and offers a safe route.', tags: ['error', 'recovery', 'status'], usage: 'Use for a failed request that the visitor can safely recover from.', accessibility: 'Describe the failure without relying on colour and keep the recovery action specific.', maxInstancesPerDocument: 1 }),
+  patternEntry({ id: 'creator-signal.site.pattern.offline-state', name: 'Offline State Page', description: 'Explains loss of connectivity and links to service status.', tags: ['offline', 'recovery', 'status'], usage: 'Use when the requested experience cannot continue without connectivity.', accessibility: 'State the connectivity problem in text and link to a reachable status or retry route.', maxInstancesPerDocument: 1 }),
+]
+
+export const creatorSignalComponentLibraryEntries: readonly ComponentLibraryEntry[] = [
+  ...creatorSignalComponentEntries,
+  ...creatorSignalPatternEntries,
+]
+
 for (const entry of creatorSignalComponentLibraryEntries) {
-  if (!isCreatorSignalComponentPermitted(entry.id)) {
+  const implementation = entry.implementation.type === 'capability-backed'
+    ? entry.implementation.backing
+    : entry.implementation
+  const permitted = implementation.type === 'pattern'
+    ? isCreatorSignalPatternPermitted(entry.id)
+    : isCreatorSignalComponentPermitted(entry.id)
+  if (!permitted) {
     throw new Error(
       `[creator-signal] Component Library entry "${entry.id}" is not permitted by the public authoring contract.`,
     )

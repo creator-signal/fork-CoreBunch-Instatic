@@ -106,7 +106,12 @@ describe('Creator Signal 0.2.0 content migration', () => {
     const home = result.manifest?.rows.find((row) =>
       row.id === 'creator-signal.site/page/home')
     const body = home?.cells.body as { nodes: Record<string, { children: string[]; catalogueInstance?: { entryId: string } }>; rootNodeId: string }
-    for (const nodeId of body.nodes[body.rootNodeId].children) {
+    expect(body.nodes[body.rootNodeId].children).toHaveLength(1)
+    const patternNode = body.nodes[body.nodes[body.rootNodeId].children[0]!]
+    expect(patternNode.catalogueInstance?.entryId).toBe(
+      'creator-signal.site.pattern.product-page',
+    )
+    for (const nodeId of patternNode.children) {
       expect(body.nodes[nodeId].catalogueInstance?.entryId).toStartWith('creator-signal.site.')
       expect(body.nodes[nodeId].children).toEqual([])
     }

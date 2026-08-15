@@ -298,6 +298,7 @@ function renderHtmlReport(input: {
     <tr>
       <td><a href="#${identifierStem(page.route)}">${escapeReportHtml(page.route)}</a></td>
       <td>${escapeReportHtml(page.title)}</td>
+      <td><code>${escapeReportHtml(componentNameById.get(page.patternId) ?? page.patternId)}</code></td>
       <td>${page.componentEntryIds.map((id) =>
         `<code>${escapeReportHtml(componentNameById.get(id) ?? id)}</code>`).join(' → ')}</td>
     </tr>`).join('')
@@ -351,6 +352,7 @@ function renderHtmlReport(input: {
       <details class="page-card" id="${identifierStem(page.route)}" ${pageIndex === 0 ? 'open' : ''}>
         <summary><strong>${escapeReportHtml(page.route)}</strong> · ${escapeReportHtml(page.title)} · ${comparisons.filter((result) => result.pass).length}/${comparisons.length} viewports</summary>
         <p>${escapeReportHtml(page.description)}</p>
+        <p class="sequence"><strong>Governed pattern:</strong> ${escapeReportHtml(componentNameById.get(page.patternId) ?? page.patternId)}</p>
         <p class="sequence"><strong>Page content:</strong> ${page.componentEntryIds.map((id) => escapeReportHtml(componentNameById.get(id) ?? id)).join(' → ')}</p>
         ${viewportHtml || '<p>No visual comparisons were requested.</p>'}
       </details>`
@@ -395,7 +397,7 @@ function renderHtmlReport(input: {
     <div class="metric"><strong>${passed}/${input.results.length}</strong>page/viewport comparisons</div>
     <div class="metric"><strong>${interactionsPassed}/${input.interactionResults.length}</strong>interaction comparisons</div>
     <div class="metric"><strong>${creatorSignalPageAuthoringReference.length}</strong>public routes</div>
-    <div class="metric"><strong>${creatorSignalComponentLibraryEntries.length}</strong>authorable components</div>
+    <div class="metric"><strong>${creatorSignalComponentLibraryEntries.length}</strong>authorable catalogue entries</div>
   </div>
   <section>
     <h2>Shared template</h2>
@@ -403,7 +405,7 @@ function renderHtmlReport(input: {
   </section>
   <section>
     <h2>Route and section reference</h2>
-    <div class="table-wrap"><table><thead><tr><th>Route</th><th>Page</th><th>Opinionated page components</th></tr></thead><tbody>${routeRows}</tbody></table></div>
+    <div class="table-wrap"><table><thead><tr><th>Route</th><th>Page</th><th>Governed pattern</th><th>Opinionated page components</th></tr></thead><tbody>${routeRows}</tbody></table></div>
   </section>
   <section>
     <h2>Authoring catalogue</h2>

@@ -21,7 +21,10 @@ page roster, and publish the complete site automatically.
 - Creator Signal favicon, touch icon, maskable icon, and web app manifest
   injected into every published page from versioned plugin assets.
 - Governed Hero, Header, Footer, Privacy Choices, Feature Grid, Call to Action,
-  Rich Text Section, Testimonial, FAQ, Public Document, and Managed Form components.
+  Rich Text Section, Testimonial, FAQ, Comparison, Recovery State, Public
+  Document, and Managed Form components.
+- Eleven stable page/section patterns plus explicit Hero, CTA and FAQ mappings;
+  starter routes materialize the same registry definitions authors insert.
 - Six Mautic-backed public forms that resolve governed aliases through the
   Mautic-generated registry and emit typed success/failure events.
 - The host-level MinIO adapter for originals, variants, avatars, and fonts.
@@ -153,6 +156,9 @@ own opinionated semantic HTML. Navigation links, feature cards and FAQ items are
 repeaters; complete prose and public documents use one sanitised rich-text
 value rather than a stack of paragraph nodes. The visual editor, Agent tools
 and MCP use the same Component Library entries and field validation.
+Registered `creator-signal.site.pattern.*` roots compose those leaves into
+approved page and section structures; saved layouts remain reserved for
+structures that authors are intentionally allowed to copy and diverge.
 
 `integrations/creator-signal/AUTHORING.md` is the complete route, section,
 component and shared-template reference. Its parity command generates a

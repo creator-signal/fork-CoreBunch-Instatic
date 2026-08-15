@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import '@modules/base'
+import { componentLibraryPatternRegistry } from '@core/component-library'
 import { registry } from '@core/module-engine'
 import { publishPage } from '@core/publisher'
 import { validateSite } from '@core/persistence/validate'
@@ -8,22 +9,30 @@ import { pluginModuleToHostModule } from '@core/plugins/moduleAdapter'
 import { makeRegistry, makeSite } from '../publisher/helpers'
 import creatorSignalPlugin from '../../../integrations/creator-signal/instatic-plugin.config'
 import {
+  creatorSignalComponentEntries,
   creatorSignalComponentLibraryEntries,
   creatorSignalHeroEntry,
+  creatorSignalPatternDefinitions,
+  creatorSignalPatternEntries,
 } from '../../../integrations/creator-signal/component-library'
 import mauticForm, { creatorSignalSiteCss } from '../../../integrations/creator-signal/modules/mautic-form'
 import {
   callToAction,
+  comparisonSection,
   consentBanner,
   faq,
   featureGrid,
   publicDocument,
+  recoveryState,
   richTextSection,
   siteFooter,
   siteHeader,
   testimonial,
 } from '../../../integrations/creator-signal/modules/site-components'
-import { pack } from '../../../integrations/creator-signal/pack/site'
+import {
+  creatorSignalPageAuthoringReference,
+  pack,
+} from '../../../integrations/creator-signal/pack/site'
 import { creatorSignalPublicRouteSlugs } from '../../../integrations/creator-signal/pack/routes'
 
 const publicPages = pack.pages.filter((page) => !page.template)
@@ -89,7 +98,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.3.0')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.3.1')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -133,17 +142,21 @@ describe('Creator Signal site pack', () => {
   })
 
   it('uses governed leaf components with typed repeaters instead of authored child slots', () => {
-    for (const entry of creatorSignalComponentLibraryEntries) {
+    for (const entry of creatorSignalComponentEntries) {
       expect(entry.composition).toBe('leaf')
       expect(entry.slots).toEqual([])
     }
 
     for (const page of publicPages) {
       const body = page.nodes[page.rootNodeId]
-      for (const nodeId of body.children) {
-        const node = page.nodes[nodeId]
-        expect(node.catalogueInstance?.entryId).toStartWith('creator-signal.site.')
-        expect(node.children).toEqual([])
+      expect(body.children).toHaveLength(1)
+      const pattern = page.nodes[body.children[0]!]
+      expect(pattern.catalogueInstance?.entryId).toStartWith('creator-signal.site.pattern.')
+      expect(pattern.catalogueInstance?.pattern?.authorableNodeIds).toEqual(pattern.children)
+      for (const nodeId of pattern.children) {
+        const component = page.nodes[nodeId]
+        expect(component.catalogueInstance?.entryId).toStartWith('creator-signal.site.')
+        expect(component.children).toEqual([])
       }
     }
 
@@ -158,6 +171,58 @@ describe('Creator Signal site pack', () => {
         heading: 'Sales imports',
       }),
     ]))
+  })
+
+  it('materializes every governed public pattern through the editor registry', () => {
+    expect(creatorSignalPatternDefinitions.map((definition) => definition.id))
+      .toEqual(creatorSignalPatternEntries.map((entry) => entry.id))
+
+    for (const entry of creatorSignalPatternEntries) {
+      const fragment = componentLibraryPatternRegistry.materialize(entry.id, {
+        entryId: entry.id,
+        entryVersion: entry.version,
+        variantId: 'default',
+      })
+      const root = fragment?.nodes[fragment.rootIds[0]!]
+      expect(root?.catalogueInstance?.entryId).toBe(entry.id)
+      expect(root?.catalogueInstance?.pattern?.authorableNodeIds).toHaveLength(
+        root?.children.length ?? 0,
+      )
+      expect(entry.constraints.allowedChildEntryIds).toEqual(
+        root?.children.map((nodeId) => fragment?.nodes[nodeId]?.catalogueInstance?.entryId),
+      )
+    }
+  })
+
+  it('seeds every public route from its registered governed page pattern', () => {
+    for (const reference of creatorSignalPageAuthoringReference) {
+      const slug = reference.route === '/' ? 'index' : reference.route.slice(1)
+      const page = publicPages.find((candidate) => candidate.slug === slug)!
+      const body = page.nodes[page.rootNodeId]
+      const pattern = page.nodes[body.children[0]!]
+      expect(pattern.catalogueInstance?.entryId).toBe(reference.patternId)
+      expect(pattern.children.map(
+        (nodeId) => page.nodes[nodeId]?.catalogueInstance?.entryId,
+      )).toEqual(reference.componentEntryIds)
+    }
+  })
+
+  it('replaces the legacy pricing feature grid with the governed comparison pattern', () => {
+    const pricing = creatorSignalPageAuthoringReference.find((page) => page.route === '/pricing')
+    expect(pricing?.patternId).toBe('creator-signal.site.pattern.pricing-page')
+    expect(pricing?.componentEntryIds).toEqual([
+      'creator-signal.site.hero',
+      'creator-signal.site.comparison-section',
+      'creator-signal.site.call-to-action',
+    ])
+  })
+
+  it('promotes privacy and terms from legacy prose layouts to the legal/trust pattern', () => {
+    for (const route of ['/legal/privacy', '/legal/terms']) {
+      const reference = creatorSignalPageAuthoringReference.find((page) => page.route === route)
+      expect(reference?.patternId).toBe('creator-signal.site.pattern.legal-trust-page')
+      expect(reference?.componentEntryIds).toEqual(['creator-signal.site.public-document'])
+    }
   })
 
   it('stores coherent legal prose in one rich-text field per section', () => {
@@ -287,10 +352,33 @@ describe('Creator Signal site pack', () => {
       richTextSection,
       testimonial,
       faq,
+      comparisonSection,
+      recoveryState,
       publicDocument,
       mauticForm,
     ]) {
       expect(definition.render(definition.defaults, []).css).toBe(creatorSignalSiteCss)
+    }
+  })
+
+  it('renders semantic comparison and recovery patterns without colour-only meaning', () => {
+    const comparison = comparisonSection.render(comparisonSection.defaults, []).html
+    expect(comparison).toContain('<caption>Creator Signal option comparison</caption>')
+    expect(comparison).toContain('<th scope="col">Criteria</th>')
+    expect(comparison).toContain('<th scope="row">Primary use</th>')
+
+    for (const [state, label] of [
+      ['empty', 'No content yet'],
+      ['error', 'Something went wrong'],
+      ['offline', 'Connection unavailable'],
+    ] as const) {
+      const output = recoveryState.render(
+        { ...recoveryState.defaults, state },
+        [],
+      ).html
+      expect(output).toContain(`data-recovery-state="${state}"`)
+      expect(output).toContain(label)
+      expect(output).toContain('class="button button-primary"')
     }
   })
 
@@ -351,7 +439,7 @@ describe('Creator Signal site pack', () => {
     expect(creatorSignalPlugin.manifest.permissions).toContain('componentLibrary.register')
     expect(creatorSignalPlugin.componentLibrary).toEqual(creatorSignalComponentLibraryEntries)
     expect(creatorSignalComponentLibraryEntries).toContain(creatorSignalHeroEntry)
-    expect(creatorSignalComponentLibraryEntries.map((entry) => entry.id)).toEqual([
+    expect(creatorSignalComponentEntries.map((entry) => entry.id)).toEqual([
       'creator-signal.site.hero',
       'creator-signal.site.header',
       'creator-signal.site.footer',
@@ -361,8 +449,23 @@ describe('Creator Signal site pack', () => {
       'creator-signal.site.rich-text-section',
       'creator-signal.site.testimonial',
       'creator-signal.site.faq',
+      'creator-signal.site.comparison-section',
+      'creator-signal.site.recovery-state',
       'creator-signal.site.public-document',
       'creator-signal.site.mautic-form',
+    ])
+    expect(creatorSignalPatternEntries.map((entry) => entry.id)).toEqual([
+      'creator-signal.site.pattern.content-page',
+      'creator-signal.site.pattern.product-page',
+      'creator-signal.site.pattern.pricing-page',
+      'creator-signal.site.pattern.features-page',
+      'creator-signal.site.pattern.contact-page',
+      'creator-signal.site.pattern.legal-trust-page',
+      'creator-signal.site.pattern.article-content-page',
+      'creator-signal.site.pattern.comparison-section',
+      'creator-signal.site.pattern.empty-state',
+      'creator-signal.site.pattern.error-state',
+      'creator-signal.site.pattern.offline-state',
     ])
   })
 })

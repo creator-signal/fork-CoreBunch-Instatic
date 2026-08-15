@@ -13,7 +13,8 @@ The source of truth is `integrations/creator-signal/pack/site.ts`. It defines th
 - Authors creating an ordinary page add only page-content components.
 - Shared chrome is template-only and limited to one instance of each component per template.
 - Page-content components are page-only; the Hero is limited to one instance per page.
-- All Creator Signal components are opinionated leaves. They expose typed fields, rich text and repeaters, never child slots.
+- Every starter route materializes one stable `creator-signal.site.pattern.*` catalogue entry; its authorable children are governed components.
+- Creator Signal components are opinionated leaves. Pattern roots are governed containers; neither model exposes arbitrary child slots.
 - `bun run verify:creator-signal-parity` writes the browsable side-by-side report to `.tmp/creator-signal-parity/index.html`.
 
 ## Shared template
@@ -43,15 +44,15 @@ Every row below is wrapped by the shared template. The sequence column lists onl
 | `/products` | Products | Hero → Feature Grid → Call to Action |
 | `/products/sales-pulse` | Sales Pulse | Hero → Feature Grid → Call to Action |
 | `/features` | Features | Hero → Feature Grid |
-| `/pricing` | Pricing | Hero → Feature Grid → Call to Action |
+| `/pricing` | Pricing | Hero → Comparison Section → Call to Action |
 | `/contact` | Contact | Hero → Managed Form |
 | `/feedback` | Feedback | Hero → Managed Form |
 | `/wishlist` | Join the wishlist | Hero → Managed Form |
 | `/ask-a-question` | Ask a question | Hero → Managed Form |
 | `/feature-request` | Feature request | Hero → Managed Form |
 | `/report-an-error` | Report an error | Hero → Managed Form |
-| `/legal/privacy` | Privacy | Hero → Rich Text Section |
-| `/legal/terms` | Terms | Hero → Rich Text Section |
+| `/legal/privacy` | Privacy | Public Document |
+| `/legal/terms` | Terms | Public Document |
 | `/legal/billing` | Subscriptions, Cancellation and Refunds | Public Document |
 | `/legal/acceptable-use` | Acceptable Use Policy | Public Document |
 | `/legal/browser-extension` | Browser Extension Privacy and Permissions | Public Document |
@@ -64,6 +65,37 @@ Every row below is wrapped by the shared template. The sequence column lists onl
 | `/status` | Service Status | Public Document |
 
 `creatorSignalPageAuthoringReference` in `integrations/creator-signal/pack/site.ts` exposes this mapping to tests and the visual report. `integrations/creator-signal/pack/routes.ts` owns the independent route roster so a route cannot silently disappear from verification.
+
+## Pattern catalogue
+
+`creatorSignalPublicPatternCatalogue` is the one role-to-implementation map. A
+pattern-owned role materializes an atomic subtree through Instatic's Component
+Library registry. A component-owned role points at an existing governed leaf
+instead of duplicating it as a second implementation.
+
+| Author need | Stable mapping | Implementation |
+| --- | --- | --- |
+| Hero | `creator-signal.site.pattern.hero` | Existing Hero Visual Component |
+| Content page | `creator-signal.site.pattern.content-page` | Hero → Rich Text Section → Call to Action |
+| Product page | `creator-signal.site.pattern.product-page` | Hero → Feature Grid → Call to Action |
+| Pricing page | `creator-signal.site.pattern.pricing-page` | Hero → Comparison Section → Call to Action |
+| Features page | `creator-signal.site.pattern.features-page` | Hero → Feature Grid |
+| CTA | `creator-signal.site.pattern.call-to-action` | Existing Call to Action component |
+| FAQ | `creator-signal.site.pattern.faq` | Existing native-disclosure FAQ component |
+| Contact/intake page | `creator-signal.site.pattern.contact-page` | Hero → capability-backed Managed Form |
+| Legal/trust document | `creator-signal.site.pattern.legal-trust-page` | Versioned Public Document |
+| Article/content page | `creator-signal.site.pattern.article-content-page` | Hero → Rich Text Section |
+| Comparison section | `creator-signal.site.pattern.comparison-section` | Captioned row-and-column Comparison Section |
+| Empty state | `creator-signal.site.pattern.empty-state` | Textual Recovery State with action |
+| Error state | `creator-signal.site.pattern.error-state` | Textual Recovery State with action |
+| Offline state | `creator-signal.site.pattern.offline-state` | Textual Recovery State with status action |
+
+Use a Visual Component when a reusable fixed tree needs scalar parameters.
+Use a governed module component when one opinionated semantic renderer owns
+repeaters, rich text or provider behaviour. Use a pattern when authors need an
+approved multi-component starting structure whose child components remain
+independently authorable. Saved layouts are intentionally not used by this
+pack: they are for copyable structures that may diverge after insertion.
 
 ## Component authoring map
 
@@ -78,6 +110,8 @@ Every row below is wrapped by the shared template. The sequence column lists onl
 | Rich Text Section | Page | Heading, one coherent formatted content field, section anchor | None | None |
 | Testimonial | Page | Quotation, attribution, role or business | None | None |
 | FAQ | Page | Heading and section anchor | Question and answer | None |
+| Comparison Section | Page | Heading, introduction, caption and three option labels | Criterion and three option values | None |
+| Recovery State | Page; maximum one | Empty/error/offline kind, heading, explanation and recovery action | None | None |
 | Public Document | Page | Eyebrow, document heading, summary, one formatted document field, date modified | None | None |
 | Managed Form | Page | Eyebrow, heading, introduction and success message | Provider fields are resolved from the governed registry | None |
 
@@ -142,6 +176,7 @@ The visual report is evidence, not deployment authority. Production release and 
 | Navigation or cards represented as child slots | Typed repeater items on the owning leaf component |
 | Numeric managed-form IDs in page content | Stable form aliases resolved from the generated registry |
 | Hand-edited HTML or CSS for routine content changes | Governed fields and Creator Signal design tokens |
+| A route seed assembled independently from string templates | A registered pattern plus its governed child components |
 | Declaring parity from one desktop screenshot | The complete desktop, tablet, mobile, section, interaction and metadata report |
 
 ## Related

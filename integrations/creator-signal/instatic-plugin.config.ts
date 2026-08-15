@@ -3,6 +3,7 @@ import { creatorSignalComponentLibraryEntries } from './component-library'
 import { creatorSignalPluginVersion } from './design-system/contract'
 import mauticForm from './modules/mautic-form'
 import { creatorSignalSiteModules } from './modules/site-components'
+import { creatorSignalRenderProfile } from './pack/design-system'
 import { pack } from './pack/site'
 
 export default definePlugin({
@@ -48,7 +49,7 @@ export default definePlugin({
     assets: [
       {
         kind: 'script',
-        src: 'frontend/theme-bootstrap.js',
+        src: creatorSignalRenderProfile.theme.bootstrapAsset,
         placement: 'head',
         strategy: 'sync',
       },
@@ -87,7 +88,7 @@ export default definePlugin({
       },
       {
         kind: 'script',
-        src: 'frontend/theme-control.js',
+        src: creatorSignalRenderProfile.theme.controlAsset,
         placement: 'body-end',
         strategy: 'module',
       },

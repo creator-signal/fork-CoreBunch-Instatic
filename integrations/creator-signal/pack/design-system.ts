@@ -1,6 +1,30 @@
 import { creatorSignalBrandAssets } from '../design-system/contract'
 import { creatorSignalFoundationCss } from '../design-system/foundation-css'
 
+export const CREATOR_SIGNAL_RENDER_PROFILE_ID = 'creator-signal.public/v1'
+
+/**
+ * Public responsive semantics shared by compiled pack classes, module
+ * previews, the full-page preview and published output. These values mirror
+ * the locked Design System breakpoint tokens; media queries cannot reference
+ * CSS custom properties, so the adapter owns this single executable mapping.
+ */
+export const creatorSignalResponsiveQueries = Object.freeze({
+  large: '(max-width: 64rem)',
+  medium: '(max-width: 48rem)',
+  small: '(max-width: 36rem)',
+})
+
+/** Theme selectors and public runtime assets; the algorithm stays vendored. */
+export const creatorSignalThemeContract = Object.freeze({
+  preferences: ['system', 'light', 'dark'] as const,
+  themeAttribute: 'data-cs-theme',
+  preferenceAttribute: 'data-cs-theme-preference',
+  controlSelector: '[data-cs-theme-control]',
+  bootstrapAsset: 'frontend/theme-bootstrap.js',
+  controlAsset: 'frontend/theme-control.js',
+})
+
 /**
  * Instatic's plain-HTML Creator Signal adapter. Tokens, typography and theme
  * declarations come from the locked @creator-signal/design-system snapshot.
@@ -486,7 +510,7 @@ p { line-height: var(--cs-type-body-line-height); }
 .public-document .prose-content { padding-bottom: var(--cs-spacing-16); }
 
 /* --cs-breakpoint-lg is 64rem; custom properties are invalid in media queries. */
-@media (max-width: 64rem) {
+@media ${creatorSignalResponsiveQueries.large} {
   .site-header { align-items: flex-start; flex-wrap: wrap; }
   .site-header-tools { width: 100%; flex-wrap: wrap; justify-content: space-between; }
   .site-header nav { width: 100%; justify-content: flex-start; gap: var(--cs-spacing-3); }
@@ -505,7 +529,7 @@ p { line-height: var(--cs-type-body-line-height); }
   .site-footer { grid-template-columns: 1fr; }
 }
 /* --cs-breakpoint-md is 48rem. */
-@media (max-width: 48rem) {
+@media ${creatorSignalResponsiveQueries.medium} {
   .site-header { flex-wrap: wrap; }
   .site-header-tools { width: 100%; justify-content: space-between; }
   .site-header nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -515,7 +539,7 @@ p { line-height: var(--cs-type-body-line-height); }
   .consent-actions { justify-content: flex-start; }
 }
 /* --cs-breakpoint-sm is 36rem. */
-@media (max-width: 36rem) {
+@media ${creatorSignalResponsiveQueries.small} {
   .site-brand small { display: none; }
   .site-header nav .button { min-height: var(--cs-size-control-min-target); padding-inline: var(--cs-spacing-4); }
   .theme-control { max-width: 8.5rem; }
@@ -550,3 +574,16 @@ p { line-height: var(--cs-type-body-line-height); }
 `
 
 export const creatorSignalCss = `${creatorSignalFoundationCss}\n${creatorSignalCompositionCss}`
+
+/**
+ * The one public rendering profile consumed by both authoring and publishing.
+ * Component-specific extensions (currently the managed-form rules) append to
+ * `stylesheet`; they never replace or fork this governed foundation.
+ */
+export const creatorSignalRenderProfile = Object.freeze({
+  id: CREATOR_SIGNAL_RENDER_PROFILE_ID,
+  stylesheetMarker: 'creator-signal-site-design-contract',
+  stylesheet: creatorSignalCss,
+  responsiveQueries: creatorSignalResponsiveQueries,
+  theme: creatorSignalThemeContract,
+})

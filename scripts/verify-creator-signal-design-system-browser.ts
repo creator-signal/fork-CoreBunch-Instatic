@@ -139,13 +139,13 @@ if (Bun.argv.includes('--serve')) {
 
     const comparisonTable = page.getByRole('table', { name: 'Creator Signal option comparison' })
     await assert.doesNotReject(comparisonTable.waitFor())
-    assert.equal(await comparisonTable.getByRole('columnheader').allTextContents(), [
+    assert.deepEqual(await comparisonTable.getByRole('columnheader').allTextContents(), [
       'Criteria',
       'First option',
       'Second option',
       'Third option',
     ])
-    assert.equal(await comparisonTable.getByRole('rowheader').allTextContents(), ['Primary use', 'Availability'])
+    assert.deepEqual(await comparisonTable.getByRole('rowheader').allTextContents(), ['Primary use', 'Availability'])
 
     await page.screenshot({ path: join(outputDirectory, 'desktop-system-dark.png'), fullPage: true })
     await page.getByLabel('Appearance').selectOption('light')

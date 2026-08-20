@@ -118,8 +118,10 @@ export function prepareCreatorSignalContentMigration(
 
   const sourceRows = source.rows.filter((row) => row.tableId === 'pages')
   const rowById = new Map(sourceRows.map((row) => [row.id, row]))
-  const currentPages = pack.pages.filter((page) => !page.template)
-  const knownIds = new Set(currentPages.map((page) => page.id))
+  const allCurrentPages = pack.pages.filter((page) => !page.template)
+  const currentPages = allCurrentPages.filter((page) =>
+    Boolean(legacyCreatorSignalPageHashes0111[page.id]))
+  const knownIds = new Set(allCurrentPages.map((page) => page.id))
   const template = pack.pages.find((page) => page.template?.target.kind === 'everywhere')
   const notFoundTemplate = pack.pages.find((page) => page.template?.target.kind === 'notFound')
   if (!template) throw new Error('[creator-signal migration] Current pack has no site template.')

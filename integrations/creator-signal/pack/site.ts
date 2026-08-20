@@ -357,7 +357,6 @@ for (const page of formPages) {
         heading: page.form[1],
         introduction: page.form[2],
         successMessage: page.form[3],
-        sectionId: `${page.form[5]}-form`,
         formAlias: page.form[4],
         formCode: page.form[4],
         campaignCode: page.form[5],
@@ -451,9 +450,18 @@ legacyCreatorSignalStarterPages0111.push(
   ]),
 )
 
+const formSectionIdByPageId = new Map(
+  formPages.map((page) => [page.id, `${page.form[5]}-form`] as const),
+)
+
 const starterPages: StarterPage[] = legacyCreatorSignalStarterPages0111.map((page) => ({
   ...page,
-  blocks: [...page.blocks],
+  blocks: page.blocks.map((block) => ({
+    ...block,
+    props: block.kind === 'module' && block.moduleId === 'creator-signal.site.mautic-form'
+      ? { ...block.props, sectionId: formSectionIdByPageId.get(page.id) }
+      : { ...block.props },
+  })),
 }))
 
 const homeV2Page = starterPages.find((page) => page.slug === 'index')

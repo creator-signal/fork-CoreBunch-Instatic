@@ -1,4 +1,4 @@
-import { control, defineModule, html, safeUrl } from '@core/plugin-sdk'
+import { control, defineModule, html, raw, safeUrl } from '@core/plugin-sdk'
 import { creatorSignalRenderProfile } from '../pack/design-system'
 
 const runtime = String.raw`(() => {
@@ -41,6 +41,23 @@ const runtime = String.raw`(() => {
         reject(new Error('form_markup_missing'));
       }, 5000);
       observer.observe(target, { childList: true, subtree: true });
+    });
+  };
+  const setBusy = (root, target, busy) => {
+    const shell = root.querySelector('.cs-mautic-form-shell');
+    const form = target.querySelector('form');
+    [root, shell, form].filter(Boolean).forEach((element) => {
+      if (busy) element.setAttribute('aria-busy', 'true');
+      else element.removeAttribute('aria-busy');
+    });
+    target.querySelectorAll('button[type="submit"], input[type="submit"], .mauticform-button').forEach((control) => {
+      if (busy && !control.disabled) {
+        control.disabled = true;
+        control.dataset.csBusyDisabled = 'true';
+      } else if (!busy && control.dataset.csBusyDisabled === 'true') {
+        control.disabled = false;
+        delete control.dataset.csBusyDisabled;
+      }
     });
   };
   const dispatch = (root, result, safeErrorCode) => {
@@ -88,6 +105,7 @@ const runtime = String.raw`(() => {
     window.MauticFormCallback[apiName] = {
       onResponse(response) {
         const success = response && (response.success === true || response.success === 1 || response.success === '1');
+        setBusy(root, target, false);
         if (success) {
           target.hidden = true;
           if (status) status.textContent = root.dataset.successMessage || 'Thanks — your message has been received.';
@@ -109,12 +127,22 @@ const runtime = String.raw`(() => {
         false,
       );
       await waitForForm(target);
+      const form = target.querySelector('form');
+      if (form && form.dataset.csSubmitBound !== 'true') {
+        form.dataset.csSubmitBound = 'true';
+        form.addEventListener('submit', () => {
+          if (!form.checkValidity()) return;
+          setBusy(root, target, true);
+          if (status) status.textContent = 'Sending...';
+        });
+      }
       if (entry.consentTimestampField) {
         const timestamp = target.querySelector('input[name="mauticform[' + entry.consentTimestampField + ']"]');
         if (timestamp && !timestamp.value) timestamp.value = new Date().toISOString().replace('T', ' ').slice(0, 19);
       }
       if (status) status.textContent = '';
     } catch (error) {
+      setBusy(root, target, false);
       if (status) status.textContent = 'The form is temporarily unavailable.';
       dispatch(root, 'failure', error instanceof Error && error.message === 'form_markup_missing'
         ? 'form_markup_missing'
@@ -161,8 +189,17 @@ const formCss = String.raw`
   box-shadow: var(--cs-shadow-md);
 }
 .cs-mautic [data-form-mount][hidden] { display: none; }
+.cs-mautic-form-shell[aria-busy="true"] :is(button[type="submit"], input[type="submit"], .mauticform-button) {
+  cursor: wait;
+  opacity: .72;
+}
 .cs-mautic [data-form-mount] form { display: grid; gap: var(--cs-spacing-5); }
 .cs-mautic .mauticform-row { margin: 0; }
+.cs-mautic fieldset.mauticform-row {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
 .cs-mautic label, .cs-mautic .mauticform-label {
   display: block;
   margin: 0 0 var(--cs-spacing-2);
@@ -170,6 +207,19 @@ const formCss = String.raw`
   font-size: var(--cs-type-label-size);
   font-weight: var(--cs-type-label-weight);
   line-height: var(--cs-type-label-line-height);
+}
+.cs-mautic fieldset.mauticform-row legend {
+  margin: 0 0 var(--cs-spacing-2);
+  color: var(--cs-component-field-foreground);
+  font-size: var(--cs-type-label-size);
+  font-weight: var(--cs-type-label-weight);
+  line-height: var(--cs-type-label-line-height);
+}
+.cs-mautic fieldset.mauticform-row label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cs-spacing-1);
+  margin-bottom: var(--cs-spacing-2);
 }
 .cs-mautic input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
 .cs-mautic textarea,
@@ -207,6 +257,7 @@ const formCss = String.raw`
   font-size: var(--cs-type-body-small-size);
   font-weight: var(--cs-type-label-weight);
 }
+.cs-mautic .mauticform-errormsg[hidden] { display: none; }
 .cs-mautic .mauticform-helpmessage {
   display: block;
   margin: 0 0 var(--cs-spacing-2);
@@ -259,6 +310,10 @@ const formCss = String.raw`
 /** One byte-identical public stylesheet shared by every site component. */
 export const creatorSignalSiteCss = `${creatorSignalRenderProfile.stylesheet}\n${formCss}`
 
+// Scalar text controls arrive HTML-escaped from the publisher. The SDK html
+// tag would escape them a second time unless they are explicitly marked safe.
+const escapedProp = (value: unknown) => raw(typeof value === 'string' ? value : '')
+
 export default defineModule({
   id: 'creator-signal.site.mautic-form',
   name: 'Mautic form',
@@ -270,6 +325,7 @@ export default defineModule({
     heading: 'Send a message',
     introduction: 'Required fields are identified in the form.',
     successMessage: 'Thanks — your message has been received.',
+    sectionId: 'managed-form',
     mauticBaseUrl: 'https://marketing.creatorsignal.me',
     formAlias: 'creator_signal_contact',
     registryPath: '/media/creator-signal/forms-v1.js',
@@ -281,6 +337,7 @@ export default defineModule({
     heading: control.text('Heading'),
     introduction: control.textarea('Introduction', { rows: 3 }),
     successMessage: control.textarea('Success message', { rows: 2 }),
+    sectionId: control.text('Section anchor'),
     mauticBaseUrl: control.url('Mautic public URL'),
     formAlias: control.text('Governed form alias'),
     registryPath: control.text('Mautic form registry path'),
@@ -291,15 +348,15 @@ export default defineModule({
     const origin = String(props.mauticBaseUrl).match(/^https:\/\/[^/]+/i)?.[0] ?? ''
     return {
       html: html`
-        <section class="content-section">
+        <section class="content-section" id="${escapedProp(props.sectionId)}">
           <section class="cs-mautic" data-cs-mautic-form
             data-base-url="${safeUrl(props.mauticBaseUrl)}"
-            data-form-alias="${props.formAlias}"
-            data-registry-path="${props.registryPath}"
-            data-form-code="${props.formCode}"
-            data-campaign-code="${props.campaignCode}"
-            data-success-message="${props.successMessage}">
-            <div class="cs-mautic-copy"><p class="cs-eyebrow">${props.eyebrow}</p><h2>${props.heading}</h2><p>${props.introduction}</p></div>
+            data-form-alias="${escapedProp(props.formAlias)}"
+            data-registry-path="${escapedProp(props.registryPath)}"
+            data-form-code="${escapedProp(props.formCode)}"
+            data-campaign-code="${escapedProp(props.campaignCode)}"
+            data-success-message="${escapedProp(props.successMessage)}">
+            <div class="cs-mautic-copy"><p class="cs-eyebrow">${escapedProp(props.eyebrow)}</p><h2>${escapedProp(props.heading)}</h2><p>${escapedProp(props.introduction)}</p></div>
             <div class="cs-mautic-form-shell">
               <div data-form-mount></div>
               <p role="status" aria-live="polite" data-form-status></p>

@@ -18,7 +18,7 @@ bun run verify:creator-signal-parity \
 
 The verifier derives the route roster from the shared public-route contract,
 which the pack test matches against the compiled pages. A newly added route
-cannot silently miss the matrix. It can compare all 23 current routes at desktop,
+cannot silently miss the matrix. It can compare all 24 current routes at desktop,
 tablet and mobile widths. JavaScript is disabled for the deterministic pass so analytics,
 consent persistence and third-party form timing cannot make the visual result
 non-deterministic. During the intentional Design System migration, use the

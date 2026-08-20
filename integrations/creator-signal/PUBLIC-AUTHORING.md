@@ -21,10 +21,11 @@ Until the upstream design-system foundation is merged and distributable, the Ins
 ## Authorable public surface
 
 The contract explicitly allow-lists every site-specific Component Library
-entry. The governed surface includes the Hero, shared Header, shared Footer,
-Privacy Choices, Feature Grid, Call to Action, Rich Text Section, Testimonial,
-FAQ, Public Document and Managed Form. Freeform starter layouts are not part of
-the public contract.
+entry. The governed surface includes the Hero, Campaign Hero, Signal Strip,
+Signal Comparison, Process Steps, Pricing Plans, Founder Story, shared Header,
+shared Footer, Privacy Choices, Feature Grid, Call to Action, Rich Text Section,
+Testimonial, FAQ, Comparison Section, Recovery State, Public Document and
+Managed Form. Freeform starter layouts are not part of the public contract.
 
 A Component Library entry must be present in `permittedComponents` before the
 Creator Signal integration can register it. Variants are allow-listed per

@@ -18,14 +18,20 @@ import {
 } from '../../../integrations/creator-signal/component-library'
 import mauticForm, { creatorSignalSiteCss } from '../../../integrations/creator-signal/modules/mautic-form'
 import {
+  campaignHero,
   callToAction,
   comparisonSection,
   consentBanner,
   faq,
   featureGrid,
+  founderStory,
+  pricingPlans,
+  processSteps,
   publicDocument,
   recoveryState,
   richTextSection,
+  signalComparison,
+  signalStrip,
   siteFooter,
   siteHeader,
   testimonial,
@@ -150,7 +156,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.3.3')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.3.4')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -247,9 +253,9 @@ describe('Creator Signal site pack', () => {
       expect(root?.catalogueInstance?.pattern?.authorableNodeIds).toHaveLength(
         root?.children.length ?? 0,
       )
-      expect(entry.constraints.allowedChildEntryIds).toEqual(
+      expect(new Set(entry.constraints.allowedChildEntryIds)).toEqual(new Set(
         root?.children.map((nodeId) => fragment?.nodes[nodeId]?.catalogueInstance?.entryId),
-      )
+      ))
     }
   })
 
@@ -264,6 +270,46 @@ describe('Creator Signal site pack', () => {
         (nodeId) => page.nodes[nodeId]?.catalogueInstance?.entryId,
       )).toEqual(reference.componentEntryIds)
     }
+  })
+
+  it('builds the Home v2 flow from the governed campaign modules in design order', () => {
+    const home = creatorSignalPageAuthoringReference.find((page) => page.route === '/')
+
+    expect(home).toEqual(expect.objectContaining({
+      patternId: 'creator-signal.site.pattern.home-v2-page',
+      componentEntryIds: [
+        'creator-signal.site.campaign-hero',
+        'creator-signal.site.signal-strip',
+        'creator-signal.site.signal-comparison',
+        'creator-signal.site.feature-grid',
+        'creator-signal.site.process-steps',
+        'creator-signal.site.feature-grid',
+        'creator-signal.site.feature-grid',
+        'creator-signal.site.pricing-plans',
+        'creator-signal.site.founder-story',
+        'creator-signal.site.faq',
+        'creator-signal.site.call-to-action',
+      ],
+    }))
+  })
+
+  it('keeps identity, sign-up, onboarding and dashboard ownership outside Instatic', () => {
+    expect(creatorSignalPublicRouteSlugs).not.toContain('sign-up')
+    expect(creatorSignalPublicRouteSlugs).not.toContain('login')
+    expect(creatorSignalPublicRouteSlugs).not.toContain('onboarding')
+    expect(creatorSignalPublicRouteSlugs).not.toContain('sales-pulse')
+
+    const items = siteHeader.defaults.items as Array<{ label: string, url: string }>
+    expect(items).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        label: 'Log in',
+        url: 'https://salespulse.creatorsignal.me/api/auth/login?returnTo=/sales-pulse',
+      }),
+      expect.objectContaining({
+        label: 'Get started free',
+        url: 'https://salespulse.creatorsignal.me/sign-up',
+      }),
+    ]))
   })
 
   it('replaces the legacy pricing feature grid with the governed comparison pattern', () => {
@@ -309,6 +355,7 @@ describe('Creator Signal site pack', () => {
       ['contact', 'creator_signal_contact'],
       ['feedback', 'creator_signal_feedback'],
       ['wishlist', 'creator_signal_wishlist'],
+      ['early-access', 'creator_signal_wishlist'],
       ['ask-a-question', 'creator_signal_question'],
       ['feature-request', 'creator_signal_feature_request'],
       ['report-an-error', 'creator_signal_error_report'],
@@ -335,13 +382,50 @@ describe('Creator Signal site pack', () => {
     const output = mauticForm.render(mauticForm.defaults, [])
 
     expect(output.html).toContain('data-form-alias="creator_signal_contact"')
-    expect(output.html).toMatch(/^\s*<section class="content-section">/)
+    expect(output.html).toMatch(/^\s*<section class="content-section" id="managed-form">/)
     expect(output.html).toContain('data-registry-path="/media/creator-signal/forms-v1.js"')
     expect(output.html).not.toContain('data-form-id=')
     expect(output.html).not.toContain('data-form-api-name=')
     expect(output.js).toContain("registry.schema !== 'creator-signal.mautic-forms/v1'")
     expect(output.js).toContain("new Error('form_markup_missing')")
     expect(output.js).toContain("dispatch(root, 'failure', 'registry_invalid')")
+    expect(output.js).toContain("status.textContent = 'Sending...'")
+    expect(output.js).toContain('if (!form.checkValidity()) return')
+    expect(output.js).toContain("setAttribute('aria-busy', 'true')")
+    expect(output.js).toContain("control.dataset.csBusyDisabled = 'true'")
+    expect(output.css).toContain('.mauticform-errormsg[hidden] { display: none; }')
+  })
+
+  it('uses one noindex wishlist form for the complete early-access choice flow', () => {
+    const reference = creatorSignalPageAuthoringReference.find(
+      (page) => page.route === '/early-access',
+    )
+    const page = publicPages.find((candidate) => candidate.slug === 'early-access')!
+    const formNodes = Object.values(page.nodes).filter(
+      (node) => node.moduleId === 'creator-signal.site.mautic-form',
+    )
+
+    expect(reference).toEqual(expect.objectContaining({
+      patternId: 'creator-signal.site.pattern.early-access-page',
+      componentEntryIds: [
+        'creator-signal.site.campaign-hero',
+        'creator-signal.site.signal-strip',
+        'creator-signal.site.feature-grid',
+        'creator-signal.site.mautic-form',
+        'creator-signal.site.feature-grid',
+        'creator-signal.site.feature-grid',
+        'creator-signal.site.testimonial',
+      ],
+    }))
+    expect(formNodes).toHaveLength(1)
+    expect(formNodes[0]?.props).toMatchObject({
+      sectionId: 'early-access-form',
+      formAlias: 'creator_signal_wishlist',
+      formCode: 'creator_signal_wishlist',
+      campaignCode: 'early_access',
+    })
+    expect(formNodes[0]?.props.introduction).toContain('launch notification, early testing or both')
+    expect(page.seo?.robots).toEqual({ index: false, follow: true, archive: false })
   })
 
   it('publishes page-level SEO and semantic structured-data markup', () => {
@@ -349,7 +433,9 @@ describe('Creator Signal site pack', () => {
       expect(typeof page.seo?.description).toBe('string')
       expect(page.seo?.canonicalUrl).toStartWith('https://creatorsignal.me')
       expect(page.seo?.language).toBe('en-AU')
-      expect(page.seo?.robots).toEqual({ index: true, follow: true, archive: true })
+      expect(page.seo?.robots).toEqual(page.slug === 'early-access'
+        ? { index: false, follow: true, archive: false }
+        : { index: true, follow: true, archive: true })
       expect(typeof page.seo?.openGraph?.title).toBe('string')
       expect(typeof page.seo?.openGraph?.description).toBe('string')
       expect(page.seo?.twitter?.card).toBe('summary')
@@ -392,12 +478,17 @@ describe('Creator Signal site pack', () => {
     expect(output).toContain('<link rel="canonical" href="https://creatorsignal.me/">')
     expect(output).toContain('property="og:title"')
     expect(output).toContain('name="twitter:card" content="summary"')
-    expect(output).toContain('class="feature-grid"')
+    expect(output).toContain('class="feature-grid feature-grid-3"')
     expect(output).toContain('data-analytics-choice="granted"')
     expect(output.match(/creator-signal-site-design-contract/g)).toHaveLength(1)
     expect(output).toContain('data-cs-theme-control')
     expect(output).toContain('creator-signal-mark-light.svg')
-    expect(output).toContain('creator-signal-social.png')
+    expect(output).toContain('sales-pulse-social.png')
+    expect(output).toContain('Let&#x27;s see what&#x27;s working')
+    expect(output).not.toContain('&amp;#x27;')
+    expect(output).not.toContain('&amp;amp;')
+    expect(output).toContain('href="https://salespulse.creatorsignal.me/sign-up"')
+    expect(output).toContain('href="https://salespulse.creatorsignal.me/api/auth/login?returnTo=/sales-pulse"')
     expect(output).not.toContain('class="signal-visual"')
   })
 
@@ -433,7 +524,13 @@ describe('Creator Signal site pack', () => {
       siteHeader,
       siteFooter,
       consentBanner,
+      campaignHero,
+      signalStrip,
+      signalComparison,
       featureGrid,
+      processSteps,
+      pricingPlans,
+      founderStory,
       callToAction,
       richTextSection,
       testimonial,
@@ -515,7 +612,7 @@ describe('Creator Signal site pack', () => {
       padding: 'var(--cs-spacing-8)',
       borderRadius: 'var(--cs-radius-lg)',
     })
-    expect(featureGrid.render(featureGrid.defaults, []).html).toContain('class="feature-grid"')
+    expect(featureGrid.render(featureGrid.defaults, []).html).toContain('class="feature-grid feature-grid-3"')
   })
 
   it('ships a parameterised Hero Visual Component with media artwork support', () => {
@@ -541,7 +638,13 @@ describe('Creator Signal site pack', () => {
       'creator-signal.site.header',
       'creator-signal.site.footer',
       'creator-signal.site.consent-banner',
+      'creator-signal.site.campaign-hero',
+      'creator-signal.site.signal-strip',
+      'creator-signal.site.signal-comparison',
       'creator-signal.site.feature-grid',
+      'creator-signal.site.process-steps',
+      'creator-signal.site.pricing-plans',
+      'creator-signal.site.founder-story',
       'creator-signal.site.call-to-action',
       'creator-signal.site.rich-text-section',
       'creator-signal.site.testimonial',
@@ -552,6 +655,8 @@ describe('Creator Signal site pack', () => {
       'creator-signal.site.mautic-form',
     ])
     expect(creatorSignalPatternEntries.map((entry) => entry.id)).toEqual([
+      'creator-signal.site.pattern.home-v2-page',
+      'creator-signal.site.pattern.early-access-page',
       'creator-signal.site.pattern.content-page',
       'creator-signal.site.pattern.product-page',
       'creator-signal.site.pattern.pricing-page',

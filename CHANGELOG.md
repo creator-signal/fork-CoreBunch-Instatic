@@ -6,6 +6,12 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+### Fixed
+
+- Kept the packaged plugin module registry identical to its configured module
+  list, including the Creator Signal comparison and recovery components, and
+  fail plugin builds when direct module exports drift from that registry.
+
 ## 0.0.34 - 2026-08-20
 
 ### Complete Creator Signal authoring experience

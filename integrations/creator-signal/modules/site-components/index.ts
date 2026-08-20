@@ -14,6 +14,21 @@ export interface FeatureItem {
   body: string
 }
 
+export interface SignalStripItem {
+  text: string
+}
+
+export interface PricingPlan {
+  name: string
+  price: string
+  cadence: string
+  description: string
+  features: string
+  actionLabel: string
+  actionUrl: string
+  emphasis?: 'default' | 'featured'
+}
+
 export interface FaqItem {
   question: string
   answer: string
@@ -29,6 +44,10 @@ export interface ComparisonItem {
 export type RecoveryStateKind = 'empty' | 'error' | 'offline' | 'not-found'
 
 const text = (value: unknown): string => typeof value === 'string' ? value : ''
+// The publisher escapes scalar text controls before render(). Emit that
+// already-safe value without asking the SDK template tag to escape it again.
+// Repeater/object values are not recursively escaped and must still use text().
+const escapedProp = (value: unknown): ReturnType<typeof raw> => raw(text(value))
 const records = (value: unknown): Array<Record<string, unknown>> =>
   Array.isArray(value)
     ? value.filter((item): item is Record<string, unknown> =>
@@ -36,6 +55,10 @@ const records = (value: unknown): Array<Record<string, unknown>> =>
     : []
 const recoveryStateKind = (value: unknown): RecoveryStateKind =>
   value === 'error' || value === 'offline' || value === 'not-found' ? value : 'empty'
+const lines = (value: unknown): string[] => text(value)
+  .split(/\r?\n/)
+  .map((line) => line.trim())
+  .filter(Boolean)
 
 /**
  * Every Creator Signal leaf module carries the same public design contract.
@@ -70,11 +93,13 @@ export const siteHeader = defineModule({
     tagline: 'Clearer signals for independent creative businesses.',
     homeUrl: '/',
     items: [
-      { label: 'Products', url: '/products', emphasis: 'default' },
-      { label: 'Features', url: '/features', emphasis: 'default' },
-      { label: 'Pricing', url: '/pricing', emphasis: 'default' },
-      { label: 'Contact', url: '/contact', emphasis: 'default' },
-      { label: 'Sign in', url: 'https://salespulse.creatorsignal.me', emphasis: 'primary' },
+      { label: 'How it works', url: '/#how-it-works', emphasis: 'default' },
+      { label: 'Features', url: '/#features', emphasis: 'default' },
+      { label: 'Pricing', url: '/#pricing', emphasis: 'default' },
+      { label: 'About', url: '/#about', emphasis: 'default' },
+      { label: 'FAQ', url: '/#faq', emphasis: 'default' },
+      { label: 'Log in', url: 'https://salespulse.creatorsignal.me/api/auth/login?returnTo=/sales-pulse', emphasis: 'default' },
+      { label: 'Get started free', url: 'https://salespulse.creatorsignal.me/sign-up', emphasis: 'primary' },
     ] as NavigationItem[],
   },
   schema: {
@@ -85,12 +110,12 @@ export const siteHeader = defineModule({
   },
   render: ({ props }) => withCreatorSignalCss(html`<header class="site-header">
       <a class="skip-link" href="#main-content">Skip to main content</a>
-      <a class="site-brand" href="${safeUrl(props.homeUrl)}" aria-label="${props.brandName} home">
+      <a class="site-brand" href="${safeUrl(props.homeUrl)}" aria-label="${escapedProp(props.brandName)} home">
         <span class="brand-mark" aria-hidden="true">
           <img class="brand-mark-light" src="${safeUrl(creatorSignalBrandAssets.markLight)}" alt="" width="1024" height="688" decoding="async">
           <img class="brand-mark-reversed" src="${safeUrl(creatorSignalBrandAssets.markReversed)}" alt="" width="1024" height="688" decoding="async">
         </span>
-        <span><strong>${props.brandName}</strong><small>${props.tagline}</small></span>
+        <span><strong>${escapedProp(props.brandName)}</strong><small>${escapedProp(props.tagline)}</small></span>
       </a>
       <div class="site-header-tools">
         <label>
@@ -127,6 +152,7 @@ export const siteFooter = defineModule({
       { label: 'Contact', url: '/contact' },
       { label: 'Feedback', url: '/feedback' },
       { label: 'Join wishlist', url: '/wishlist' },
+      { label: 'Early access', url: '/early-access' },
       { label: 'Ask a question', url: '/ask-a-question' },
       { label: 'Feature request', url: '/feature-request' },
       { label: 'Report an error', url: '/report-an-error' },
@@ -144,9 +170,9 @@ export const siteFooter = defineModule({
   },
   render: ({ props }) => withCreatorSignalCss(html`<footer class="site-footer">
       <div class="footer-meta">
-        <div><strong>${props.brandName}</strong><p>${props.tagline}</p></div>
-        <small>${props.copyright}</small>
-        <button class="footer-privacy-choice" type="button" data-privacy-choices>${props.privacyLabel}</button>
+        <div><strong>${escapedProp(props.brandName)}</strong><p>${escapedProp(props.tagline)}</p></div>
+        <small>${escapedProp(props.copyright)}</small>
+        <button class="footer-privacy-choice" type="button" data-privacy-choices>${escapedProp(props.privacyLabel)}</button>
       </div>
       <nav aria-label="Footer navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
         ${navigationItems(props.items)}
@@ -173,10 +199,10 @@ export const consentBanner = defineModule({
     optionalLabel: control.text('Optional choice label'),
   },
   render: ({ props }) => withCreatorSignalCss(html`<aside class="consent" data-consent-banner aria-label="Privacy choices">
-      <div><strong>${props.heading}</strong><p>${props.body}</p></div>
+      <div><strong>${escapedProp(props.heading)}</strong><p>${escapedProp(props.body)}</p></div>
       <div class="consent-actions">
-        <button class="button button-secondary" type="button" data-analytics-choice="denied">${props.essentialLabel}</button>
-        <button class="button button-primary" type="button" data-analytics-choice="granted">${props.optionalLabel}</button>
+        <button class="button button-secondary" type="button" data-analytics-choice="denied">${escapedProp(props.essentialLabel)}</button>
+        <button class="button button-primary" type="button" data-analytics-choice="granted">${escapedProp(props.optionalLabel)}</button>
       </div>
     </aside>`),
 })
@@ -192,6 +218,7 @@ export const featureGrid = defineModule({
     heading: 'A focused feature set.',
     introduction: 'Explain what this group helps the visitor do.',
     sectionId: 'features',
+    tone: 'default',
     items: [
       { marker: '01', heading: 'First feature', body: 'Describe the outcome, not only the mechanism.' },
       { marker: '02', heading: 'Second feature', body: 'Keep the copy short enough to scan.' },
@@ -203,19 +230,288 @@ export const featureGrid = defineModule({
     heading: control.text('Heading'),
     introduction: control.textarea('Introduction', { rows: 3 }),
     sectionId: control.text('Section anchor'),
+    tone: control.select('Tone', [
+      { label: 'Default', value: 'default' },
+      { label: 'Signature', value: 'signature' },
+    ]),
     items: control.textarea('Feature cards'),
   },
   render: ({ props }) => {
-    const items = records(props.items).map((item) => raw(html`
+    const recordsValue = records(props.items)
+    const items = recordsValue.map((item) => raw(html`
       <article class="feature-card">
         <span class="feature-number">${text(item.marker)}</span>
         <h3>${text(item.heading)}</h3>
         <p>${text(item.body)}</p>
       </article>`))
-    return withCreatorSignalCss(html`<section class="content-section" aria-labelledby="${props.sectionId}">
-        <div class="section-intro"><p class="eyebrow">${props.eyebrow}</p><h2 id="${props.sectionId}">${props.heading}</h2><p>${props.introduction}</p></div>
-        <div class="feature-grid">${items}</div>
+    const count = Math.min(Math.max(recordsValue.length, 1), 3)
+    const tone = props.tone === 'signature' ? 'signature' : 'default'
+    return withCreatorSignalCss(html`<section class="content-section feature-section" data-feature-tone="${tone}" aria-labelledby="${escapedProp(props.sectionId)}">
+        <div class="section-intro"><p class="eyebrow">${escapedProp(props.eyebrow)}</p><h2 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h2><p>${escapedProp(props.introduction)}</p></div>
+        <div class="feature-grid feature-grid-${count}">${items}</div>
       </section>`)
+  },
+})
+
+export const campaignHero = defineModule({
+  id: 'creator-signal.site.campaign-hero',
+  name: 'Campaign hero',
+  description: 'A public-site introduction with one primary action, an optional secondary action and governed artwork.',
+  category: 'Creator Signal',
+  htmlTag: 'section',
+  defaults: {
+    eyebrow: 'Every sale sends a signal',
+    heading: 'Stop guessing. Design what sells.',
+    body: 'Turn your sales history into a clear picture of what is working.',
+    primaryActionLabel: 'Get started free',
+    primaryActionUrl: 'https://salespulse.creatorsignal.me/sign-up',
+    secondaryActionLabel: 'See how it works',
+    secondaryActionUrl: '#how-it-works',
+    footnote: 'Free forever plan. No spreadsheets, no stress.',
+    artwork: '',
+    artworkAlt: '',
+  },
+  schema: {
+    eyebrow: control.text('Eyebrow'),
+    heading: control.text('Heading'),
+    body: control.textarea('Introduction', { rows: 3 }),
+    primaryActionLabel: control.text('Primary action label'),
+    primaryActionUrl: control.url('Primary action URL'),
+    secondaryActionLabel: control.text('Secondary action label'),
+    secondaryActionUrl: control.url('Secondary action URL'),
+    footnote: control.text('Action footnote'),
+    artwork: control.image('Artwork'),
+    artworkAlt: control.text('Artwork alternative text'),
+  },
+  render: ({ props }) => {
+    const secondary = text(props.secondaryActionLabel) && text(props.secondaryActionUrl)
+      ? raw(html`<a class="button button-secondary" href="${safeUrl(props.secondaryActionUrl)}">${escapedProp(props.secondaryActionLabel)}</a>`)
+      : raw('')
+    const artwork = text(props.artwork)
+      ? raw(html`<img src="${safeUrl(props.artwork)}" alt="${escapedProp(props.artworkAlt)}" loading="eager" fetchpriority="high" decoding="async">`)
+      : raw(html`<img src="${safeUrl(creatorSignalBrandAssets.markLight)}" alt="" width="1024" height="688" loading="eager" fetchpriority="high" decoding="async">`)
+    return withCreatorSignalCss(html`<section class="campaign-hero">
+        <div class="campaign-hero-copy">
+          <p class="eyebrow">${escapedProp(props.eyebrow)}</p>
+          <h1>${escapedProp(props.heading)}</h1>
+          <p class="campaign-hero-body">${escapedProp(props.body)}</p>
+          <div class="actions">
+            <a class="button button-primary" href="${safeUrl(props.primaryActionUrl)}">${escapedProp(props.primaryActionLabel)}</a>
+            ${secondary}
+          </div>
+          <p class="campaign-hero-footnote">${escapedProp(props.footnote)}</p>
+        </div>
+        <div class="campaign-hero-art">${artwork}</div>
+      </section>`)
+  },
+})
+
+export const signalStrip = defineModule({
+  id: 'creator-signal.site.signal-strip',
+  name: 'Signal strip',
+  description: 'A static, wrapping band of short brand promises that remains readable without motion.',
+  category: 'Creator Signal',
+  htmlTag: 'aside',
+  defaults: {
+    label: 'Creator Signal promises',
+    items: [
+      { text: "You've got this" },
+      { text: 'Skip the maths' },
+      { text: 'No spreadsheets, no stress' },
+      { text: 'Grow with confidence' },
+      { text: 'Every sale sends a signal' },
+      { text: 'Zero data-nerd required' },
+    ] as SignalStripItem[],
+  },
+  schema: {
+    label: control.text('Accessible label'),
+    items: control.textarea('Signal messages'),
+  },
+  render: ({ props }) => {
+    const items = records(props.items).map((item) => raw(html`
+      <li><span aria-hidden="true">✦</span>${text(item.text)}</li>`))
+    return withCreatorSignalCss(html`<aside class="signal-strip" aria-label="${escapedProp(props.label)}">
+      <ul class="signal-strip-list">${items}</ul>
+    </aside>`)
+  },
+})
+
+export const signalComparison = defineModule({
+  id: 'creator-signal.site.signal-comparison',
+  name: 'Signal comparison',
+  description: 'A before-and-after explanation that contrasts limited marketplace reporting with a visual sales signal.',
+  category: 'Creator Signal',
+  htmlTag: 'section',
+  defaults: {
+    eyebrow: "Let's see what's working",
+    heading: 'From this, to this.',
+    introduction: 'Compare the limited view with the clearer Creator Signal experience.',
+    beforeLabel: 'From',
+    beforeBody: 'Thirty days, sales counts only and one bare-bones chart.',
+    afterLabel: 'To',
+    afterBody: "Your own design thumbnails, sorted by what's working.",
+    artwork: '',
+    artworkAlt: '',
+    sectionId: 'signal-comparison',
+  },
+  schema: {
+    eyebrow: control.text('Eyebrow'),
+    heading: control.text('Heading'),
+    introduction: control.textarea('Introduction', { rows: 2 }),
+    beforeLabel: control.text('Before label'),
+    beforeBody: control.textarea('Before description', { rows: 2 }),
+    afterLabel: control.text('After label'),
+    afterBody: control.textarea('After description', { rows: 2 }),
+    artwork: control.image('After artwork'),
+    artworkAlt: control.text('Artwork alternative text'),
+    sectionId: control.text('Section anchor'),
+  },
+  render: ({ props }) => {
+    const artwork = text(props.artwork)
+      ? raw(html`<img src="${safeUrl(props.artwork)}" alt="${escapedProp(props.artworkAlt)}" loading="lazy" decoding="async">`)
+      : raw(html`<img src="${safeUrl(creatorSignalBrandAssets.salesPulseSocial)}" alt="" loading="lazy" decoding="async">`)
+    return withCreatorSignalCss(html`<section class="content-section signal-comparison" aria-labelledby="${escapedProp(props.sectionId)}">
+      <div class="section-intro"><p class="eyebrow">${escapedProp(props.eyebrow)}</p><h2 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h2><p>${escapedProp(props.introduction)}</p></div>
+      <div class="signal-comparison-grid">
+        <article class="signal-comparison-card signal-comparison-before">
+          <p class="comparison-label">${escapedProp(props.beforeLabel)}</p>
+          <div class="comparison-bars" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+          <h3>Limited reporting</h3><p>${escapedProp(props.beforeBody)}</p>
+        </article>
+        <article class="signal-comparison-card signal-comparison-after">
+          <p class="comparison-label">${escapedProp(props.afterLabel)}</p>
+          <div class="signal-comparison-art">${artwork}</div>
+          <h3>A visual sales signal</h3><p>${escapedProp(props.afterBody)}</p>
+        </article>
+      </div>
+    </section>`)
+  },
+})
+
+export const processSteps = defineModule({
+  id: 'creator-signal.site.process-steps',
+  name: 'Process steps',
+  description: 'An ordered, outcome-focused explanation of a short public journey.',
+  category: 'Creator Signal',
+  htmlTag: 'section',
+  defaults: {
+    eyebrow: 'How it works',
+    heading: 'Connect, see, grow.',
+    introduction: 'Three clear steps from your existing shop to a more useful sales picture.',
+    sectionId: 'how-it-works',
+    items: [
+      { marker: '1', heading: 'Connect your shop', body: 'Link your supported marketplace in a few clear steps.' },
+      { marker: '2', heading: 'See your signal', body: 'See sales through your own design thumbnails.' },
+      { marker: '3', heading: 'Grow with confidence', body: 'Use the evidence to decide what deserves attention next.' },
+    ] as FeatureItem[],
+  },
+  schema: {
+    eyebrow: control.text('Eyebrow'),
+    heading: control.text('Heading'),
+    introduction: control.textarea('Introduction', { rows: 3 }),
+    sectionId: control.text('Section anchor'),
+    items: control.textarea('Steps'),
+  },
+  render: ({ props }) => {
+    const items = records(props.items).map((item) => raw(html`
+      <li class="process-step">
+        <span class="process-step-number">${text(item.marker)}</span>
+        <div><h3>${text(item.heading)}</h3><p>${text(item.body)}</p></div>
+      </li>`))
+    return withCreatorSignalCss(html`<section class="content-section process-section" aria-labelledby="${escapedProp(props.sectionId)}">
+      <div class="section-intro"><p class="eyebrow">${escapedProp(props.eyebrow)}</p><h2 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h2><p>${escapedProp(props.introduction)}</p></div>
+      <ol class="process-steps">${items}</ol>
+    </section>`)
+  },
+})
+
+export const pricingPlans = defineModule({
+  id: 'creator-signal.site.pricing-plans',
+  name: 'Pricing plans',
+  description: 'Three accessible plan cards with explicit prices, features and application-owned signup destinations.',
+  category: 'Creator Signal',
+  htmlTag: 'section',
+  defaults: {
+    eyebrow: 'Skip the maths',
+    heading: 'Find your fit.',
+    introduction: "Start free. Upgrade whenever you're ready to see more of your signal.",
+    footnote: 'Mobile, tablet and desktop are included on every plan.',
+    sectionId: 'pricing',
+    items: [
+      { name: 'Free', price: '$0', cadence: '', description: 'Start with the core workflow.', features: 'Revenue and sales overview\nSales growth over time\nTop selling designs', actionLabel: 'Start free', actionUrl: 'https://salespulse.creatorsignal.me/sign-up', emphasis: 'default' },
+      { name: 'Starter', price: '$5 AUD', cadence: 'per month', description: 'Build a durable sales record.', features: 'Everything in Free\nFilter by time and product type\nSales by category', actionLabel: 'Start Starter', actionUrl: 'https://salespulse.creatorsignal.me/sign-up', emphasis: 'featured' },
+      { name: 'Pro', price: '$10 AUD', cadence: 'per month', description: 'Use the complete analysis experience.', features: 'Everything in Starter\nCollection-level sales\nRepeat-customer insight', actionLabel: 'Start Pro', actionUrl: 'https://salespulse.creatorsignal.me/sign-up', emphasis: 'default' },
+    ] as PricingPlan[],
+  },
+  schema: {
+    eyebrow: control.text('Eyebrow'),
+    heading: control.text('Heading'),
+    introduction: control.textarea('Introduction', { rows: 2 }),
+    footnote: control.text('Plan footnote'),
+    sectionId: control.text('Section anchor'),
+    items: control.textarea('Plans'),
+  },
+  render: ({ props }) => {
+    const items = records(props.items).map((item) => {
+      const features = lines(item.features).map((feature) => raw(html`<li>${feature}</li>`))
+      const featured = item.emphasis === 'featured'
+      return raw(html`<article class="pricing-card${featured ? ' pricing-card-featured' : ''}">
+        ${featured ? raw('<p class="pricing-badge">Most popular</p>') : raw('')}
+        <h3>${text(item.name)}</h3>
+        <p class="pricing-price">${text(item.price)}${text(item.cadence) ? raw(html` <span>${text(item.cadence)}</span>`) : raw('')}</p>
+        <p>${text(item.description)}</p>
+        <ul>${features}</ul>
+        <a class="button ${featured ? 'button-primary' : 'button-secondary'}" href="${safeUrl(item.actionUrl)}">${text(item.actionLabel)}</a>
+      </article>`)
+    })
+    return withCreatorSignalCss(html`<section class="content-section pricing-plans" aria-labelledby="${escapedProp(props.sectionId)}">
+      <div class="section-intro"><p class="eyebrow">${escapedProp(props.eyebrow)}</p><h2 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h2><p>${escapedProp(props.introduction)}</p></div>
+      <div class="pricing-grid">${items}</div>
+      <p class="pricing-footnote">${escapedProp(props.footnote)}</p>
+    </section>`)
+  },
+})
+
+export const founderStory = defineModule({
+  id: 'creator-signal.site.founder-story',
+  name: 'Founder story',
+  description: 'A first-person founder story with an optional governed portrait.',
+  category: 'Creator Signal',
+  htmlTag: 'section',
+  defaults: {
+    eyebrow: 'By a designer, for designers',
+    heading: 'Meet the maker.',
+    body: '<p>Share why Creator Signal exists and how that experience shapes the product.</p>',
+    attribution: 'Lahni',
+    role: 'Founder, Creator Signal',
+    portrait: '',
+    portraitAlt: '',
+    sectionId: 'about',
+  },
+  schema: {
+    eyebrow: control.text('Eyebrow'),
+    heading: control.text('Heading'),
+    body: control.richtext('Story'),
+    attribution: control.text('Attribution'),
+    role: control.text('Role'),
+    portrait: control.image('Portrait'),
+    portraitAlt: control.text('Portrait alternative text'),
+    sectionId: control.text('Section anchor'),
+  },
+  render: ({ props }) => {
+    const portrait = text(props.portrait)
+      ? raw(html`<img src="${safeUrl(props.portrait)}" alt="${escapedProp(props.portraitAlt)}" loading="lazy" decoding="async">`)
+      : raw(html`<img src="${safeUrl(creatorSignalBrandAssets.markReversed)}" alt="" width="1024" height="688" loading="lazy" decoding="async">`)
+    return withCreatorSignalCss(html`<section class="founder-story" aria-labelledby="${escapedProp(props.sectionId)}">
+      <div class="founder-story-inner">
+        <div class="founder-portrait">${portrait}</div>
+        <div class="founder-copy">
+          <p class="eyebrow">${escapedProp(props.eyebrow)}</p><h2 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h2>
+          <div class="founder-body">${raw(text(props.body))}</div>
+          <p class="founder-attribution"><strong>${escapedProp(props.attribution)}</strong><span>${escapedProp(props.role)}</span></p>
+        </div>
+      </div>
+    </section>`)
   },
 })
 
@@ -241,9 +537,9 @@ export const callToAction = defineModule({
     actionUrl: control.url('Action URL'),
     sectionId: control.text('Section anchor'),
   },
-  render: ({ props }) => withCreatorSignalCss(html`<section class="cta-section" aria-labelledby="${props.sectionId}">
-      <div class="cta-copy"><p class="eyebrow">${props.eyebrow}</p><h2 id="${props.sectionId}">${props.heading}</h2><p>${props.body}</p></div>
-      <div class="actions"><a class="button button-secondary" href="${safeUrl(props.actionUrl)}">${props.actionLabel}</a></div>
+  render: ({ props }) => withCreatorSignalCss(html`<section class="cta-section" aria-labelledby="${escapedProp(props.sectionId)}">
+      <div class="cta-copy"><p class="eyebrow">${escapedProp(props.eyebrow)}</p><h2 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h2><p>${escapedProp(props.body)}</p></div>
+      <div class="actions"><a class="button button-secondary" href="${safeUrl(props.actionUrl)}">${escapedProp(props.actionLabel)}</a></div>
     </section>`),
 })
 
@@ -263,8 +559,8 @@ export const richTextSection = defineModule({
     body: control.richtext('Content'),
     sectionId: control.text('Section anchor'),
   },
-  render: ({ props }) => withCreatorSignalCss(html`<section class="content-section narrow-content" aria-labelledby="${props.sectionId}">
-      <h2 id="${props.sectionId}">${props.heading}</h2>
+  render: ({ props }) => withCreatorSignalCss(html`<section class="content-section narrow-content" aria-labelledby="${escapedProp(props.sectionId)}">
+      <h2 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h2>
       <div class="prose-content">${raw(text(props.body))}</div>
     </section>`),
 })
@@ -286,8 +582,8 @@ export const testimonial = defineModule({
     role: control.text('Role or business'),
   },
   render: ({ props }) => withCreatorSignalCss(html`<figure class="testimonial">
-      <blockquote><p>“${props.quote}”</p></blockquote>
-      <figcaption><strong>${props.attribution}</strong><span>${props.role}</span></figcaption>
+      <blockquote><p>“${escapedProp(props.quote)}”</p></blockquote>
+      <figcaption><strong>${escapedProp(props.attribution)}</strong><span>${escapedProp(props.role)}</span></figcaption>
     </figure>`),
 })
 
@@ -316,8 +612,8 @@ export const faq = defineModule({
         <summary itemprop="name">${text(item.question)}</summary>
         <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">${text(item.answer)}</p></div>
       </details>`))
-    return withCreatorSignalCss(html`<section class="content-section narrow-content" aria-labelledby="${props.sectionId}" itemscope itemtype="https://schema.org/FAQPage">
-        <h2 id="${props.sectionId}">${props.heading}</h2>
+    return withCreatorSignalCss(html`<section class="content-section narrow-content" aria-labelledby="${escapedProp(props.sectionId)}" itemscope itemtype="https://schema.org/FAQPage">
+        <h2 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h2>
         <div class="faq-list">${items}</div>
       </section>`)
   },
@@ -362,12 +658,12 @@ export const comparisonSection = defineModule({
         <td>${text(item.secondValue)}</td>
         <td>${text(item.thirdValue)}</td>
       </tr>`))
-    return withCreatorSignalCss(html`<section class="content-section comparison-section" aria-labelledby="${props.sectionId}">
-        <div class="section-intro"><p class="eyebrow">${props.eyebrow}</p><h2 id="${props.sectionId}">${props.heading}</h2><p>${props.introduction}</p></div>
-        <div class="comparison-table-scroll" tabindex="0" role="region" aria-label="${props.caption}">
+    return withCreatorSignalCss(html`<section class="content-section comparison-section" aria-labelledby="${escapedProp(props.sectionId)}">
+        <div class="section-intro"><p class="eyebrow">${escapedProp(props.eyebrow)}</p><h2 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h2><p>${escapedProp(props.introduction)}</p></div>
+        <div class="comparison-table-scroll" tabindex="0" role="region" aria-label="${escapedProp(props.caption)}">
           <table class="comparison-table">
-            <caption>${props.caption}</caption>
-            <thead><tr><th scope="col">Criteria</th><th scope="col">${props.firstLabel}</th><th scope="col">${props.secondLabel}</th><th scope="col">${props.thirdLabel}</th></tr></thead>
+            <caption>${escapedProp(props.caption)}</caption>
+            <thead><tr><th scope="col">Criteria</th><th scope="col">${escapedProp(props.firstLabel)}</th><th scope="col">${escapedProp(props.secondLabel)}</th><th scope="col">${escapedProp(props.thirdLabel)}</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>
@@ -411,11 +707,11 @@ export const recoveryState = defineModule({
       : state === 'offline'
         ? 'Connection unavailable'
         : 'No content yet'
-    return withCreatorSignalCss(html`<section class="recovery-state" data-recovery-state="${state}" aria-labelledby="${props.sectionId}">
+    return withCreatorSignalCss(html`<section class="recovery-state" data-recovery-state="${state}" aria-labelledby="${escapedProp(props.sectionId)}">
         <p class="eyebrow">${stateLabel}</p>
-        <h1 id="${props.sectionId}">${props.heading}</h1>
-        <p>${props.body}</p>
-        <div class="actions"><a class="button button-primary" href="${safeUrl(props.actionUrl)}">${props.actionLabel}</a></div>
+        <h1 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h1>
+        <p>${escapedProp(props.body)}</p>
+        <div class="actions"><a class="button button-primary" href="${safeUrl(props.actionUrl)}">${escapedProp(props.actionLabel)}</a></div>
       </section>`)
   },
 })
@@ -441,8 +737,8 @@ export const publicDocument = defineModule({
     dateModified: control.text('Date modified'),
   },
   render: ({ props }) => withCreatorSignalCss(html`<article class="public-document" itemscope itemtype="https://schema.org/Article">
-      <meta itemprop="dateModified" content="${props.dateModified}">
-      <header class="public-document-header"><p class="eyebrow">${props.eyebrow}</p><h1 itemprop="headline">${props.heading}</h1><p itemprop="description">${props.summary}</p></header>
+      <meta itemprop="dateModified" content="${escapedProp(props.dateModified)}">
+      <header class="public-document-header"><p class="eyebrow">${escapedProp(props.eyebrow)}</p><h1 itemprop="headline">${escapedProp(props.heading)}</h1><p itemprop="description">${escapedProp(props.summary)}</p></header>
       <div class="prose-content" itemprop="articleBody">${raw(text(props.body))}</div>
     </article>`),
 })
@@ -451,7 +747,13 @@ export const creatorSignalSiteModules = [
   siteHeader,
   siteFooter,
   consentBanner,
+  campaignHero,
+  signalStrip,
+  signalComparison,
   featureGrid,
+  processSteps,
+  pricingPlans,
+  founderStory,
   callToAction,
   richTextSection,
   testimonial,

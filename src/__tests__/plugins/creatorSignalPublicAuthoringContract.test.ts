@@ -119,11 +119,13 @@ describe('Creator Signal public authoring contract', () => {
     expect(creatorSignalPublicAuthoringPolicy.content).toMatchObject({
       pageTitleEntryIds: [
         'creator-signal.site.hero',
+        'creator-signal.site.campaign-hero',
         'creator-signal.site.recovery-state',
         'creator-signal.site.public-document',
       ],
       primaryActionEntryIds: [
         'creator-signal.site.hero',
+        'creator-signal.site.campaign-hero',
         'creator-signal.site.recovery-state',
       ],
     })

@@ -9,13 +9,20 @@ import { VisualComponentRefModule } from '@modules/base/visualComponentRef'
 import { heroComponent, heroParamIds } from './pack/hero-component'
 import mauticForm from './modules/mautic-form'
 import {
+  campaignHero,
   callToAction,
   comparisonSection,
   faq,
   featureGrid,
+  founderStory,
+  pricingPlans,
+  processSteps,
   publicDocument,
   recoveryState,
   richTextSection,
+  signalComparison,
+  signalStrip,
+  testimonial,
 } from './modules/site-components'
 import {
   creatorSignalPublicAuthoringContract,
@@ -206,6 +213,7 @@ export const creatorSignalConsentEntry = siteEntry({
 
 export const creatorSignalFeatureGridEntry = siteEntry({
   id: 'creator-signal.site.feature-grid',
+  version: '1.1.0',
   name: 'Feature Grid',
   description: 'A section introduction and repeatable list of opinionated feature cards.',
   tags: ['features', 'cards', 'list', 'marketing'],
@@ -215,6 +223,7 @@ export const creatorSignalFeatureGridEntry = siteEntry({
     { key: 'heading', label: 'Heading', description: 'Outcome-focused heading for the complete card group.', type: 'text', required: true },
     { key: 'introduction', label: 'Introduction', description: 'One concise explanation of what the group contains.', type: 'text', required: true },
     { key: 'sectionId', label: 'Section anchor', description: 'Unique page anchor used by the section heading.', type: 'text', required: true, advanced: true },
+    { key: 'tone', label: 'Tone', description: 'Use Signature only for a short brand-values section.', type: 'select', required: true },
     {
       key: 'items', label: 'Feature cards', description: 'Ordered cards; each card is data, not a nested component slot.', type: 'repeater', required: true,
       itemLabel: 'Feature', minItems: 1, maxItems: 12,
@@ -224,6 +233,139 @@ export const creatorSignalFeatureGridEntry = siteEntry({
         { key: 'body', label: 'Description', description: 'Supporting explanation for this card.', type: 'text', required: true },
       ],
     },
+  ],
+})
+
+export const creatorSignalCampaignHeroEntry = siteEntry({
+  id: 'creator-signal.site.campaign-hero',
+  version: '1.0.0',
+  name: 'Campaign Hero',
+  description: 'The governed public-site introduction with one primary action, an optional secondary action and approved artwork.',
+  tags: ['hero', 'campaign', 'landing page', 'call to action', 'media'],
+  moduleId: campaignHero.id,
+  constraints: { allowedDocumentKinds: ['page'], maxInstancesPerDocument: 1 },
+  usage: 'Use once at the start of an approved campaign or launch page; keep signup and login destinations application-owned.',
+  accessibilityGuidance: 'Keep one H1, name both actions by outcome, and provide alternative text when the artwork conveys information.',
+  fields: [
+    { key: 'eyebrow', label: 'Eyebrow', description: 'Short context label above the page promise.', type: 'text', required: true },
+    { key: 'heading', label: 'Heading', description: 'The single public page title.', type: 'text', required: true },
+    { key: 'body', label: 'Introduction', description: 'Plain-language supporting copy.', type: 'text', required: true },
+    { key: 'primaryActionLabel', label: 'Primary action label', description: 'Specific label for the one primary journey.', type: 'text', required: true },
+    { key: 'primaryActionUrl', label: 'Primary action URL', description: 'Approved internal or application-owned destination.', type: 'url', required: true },
+    { key: 'secondaryActionLabel', label: 'Secondary action label', description: 'Optional label for a supporting page-local or explanatory route.', type: 'text', required: false },
+    { key: 'secondaryActionUrl', label: 'Secondary action URL', description: 'Optional destination paired with the secondary action.', type: 'url', required: false },
+    { key: 'footnote', label: 'Action footnote', description: 'Short qualification below the actions.', type: 'text', required: true },
+    { key: 'artwork', label: 'Artwork', description: 'Approved media selected from the Instatic Media workspace.', type: 'image', required: false },
+    { key: 'artworkAlt', label: 'Artwork alternative text', description: 'Describe informative artwork; leave blank only when it is decorative.', type: 'text', required: false },
+  ],
+})
+
+export const creatorSignalSignalStripEntry = siteEntry({
+  id: 'creator-signal.site.signal-strip',
+  name: 'Signal Strip',
+  description: 'A static, wrapping band of short Creator Signal promises.',
+  tags: ['brand', 'promises', 'campaign', 'list'],
+  moduleId: signalStrip.id,
+  usage: 'Use once between the campaign hero and the supporting page story. The strip is intentionally static and must not become essential moving content.',
+  accessibilityGuidance: 'Keep each message short and preserve the list semantics; decorative separators remain hidden from assistive technology.',
+  fields: [
+    { key: 'label', label: 'Accessible label', description: 'Purpose of the complete message list.', type: 'text', required: true },
+    { key: 'items', label: 'Messages', description: 'Short, non-duplicative brand promises.', type: 'repeater', required: true, itemLabel: 'Message', minItems: 1, maxItems: 8, itemFields: [
+      { key: 'text', label: 'Text', description: 'Short promise that remains meaningful without animation.', type: 'text', required: true },
+    ] },
+  ],
+})
+
+export const creatorSignalSignalComparisonEntry = siteEntry({
+  id: 'creator-signal.site.signal-comparison',
+  name: 'Signal Comparison',
+  description: 'A before-and-after explanation of limited reporting and a visual sales signal.',
+  tags: ['comparison', 'before and after', 'sales', 'media'],
+  moduleId: signalComparison.id,
+  usage: 'Use for a two-sided narrative comparison; use Comparison Section when visitors need a row-and-column data table.',
+  accessibilityGuidance: 'State both sides in text and provide alternative text for informative artwork so the comparison never relies on imagery alone.',
+  fields: [
+    { key: 'eyebrow', label: 'Eyebrow', description: 'Short context label above the comparison.', type: 'text', required: true },
+    { key: 'heading', label: 'Heading', description: 'Outcome-focused heading for the complete comparison.', type: 'text', required: true },
+    { key: 'introduction', label: 'Introduction', description: 'Why the before-and-after distinction matters.', type: 'text', required: true },
+    { key: 'beforeLabel', label: 'Before label', description: 'Short name for the limited starting point.', type: 'text', required: true },
+    { key: 'beforeBody', label: 'Before description', description: 'Text description of the existing limitation.', type: 'text', required: true },
+    { key: 'afterLabel', label: 'After label', description: 'Short name for the improved view.', type: 'text', required: true },
+    { key: 'afterBody', label: 'After description', description: 'Text description of the improved experience.', type: 'text', required: true },
+    { key: 'artwork', label: 'After artwork', description: 'Optional approved product artwork.', type: 'image', required: false },
+    { key: 'artworkAlt', label: 'Artwork alternative text', description: 'Describe informative artwork; leave blank only when it repeats adjacent copy.', type: 'text', required: false },
+    { key: 'sectionId', label: 'Section anchor', description: 'Unique page anchor used by the comparison heading.', type: 'text', required: true, advanced: true },
+  ],
+})
+
+export const creatorSignalProcessStepsEntry = siteEntry({
+  id: 'creator-signal.site.process-steps',
+  name: 'Process Steps',
+  description: 'A short ordered journey with a marker, heading and outcome for every step.',
+  tags: ['process', 'steps', 'how it works', 'ordered list'],
+  moduleId: processSteps.id,
+  usage: 'Use for a short ordered journey. Keep implementation detail in the application and describe only the public handoff.',
+  accessibilityGuidance: 'Preserve ordered-list semantics and write markers that do not carry meaning without the step heading.',
+  fields: [
+    { key: 'eyebrow', label: 'Eyebrow', description: 'Short context label above the process.', type: 'text', required: true },
+    { key: 'heading', label: 'Heading', description: 'Heading for the complete ordered journey.', type: 'text', required: true },
+    { key: 'introduction', label: 'Introduction', description: 'One concise explanation of the journey.', type: 'text', required: true },
+    { key: 'sectionId', label: 'Section anchor', description: 'Unique page anchor used by the process heading.', type: 'text', required: true, advanced: true },
+    { key: 'items', label: 'Steps', description: 'Ordered public journey steps.', type: 'repeater', required: true, itemLabel: 'Step', minItems: 2, maxItems: 6, itemFields: [
+      { key: 'marker', label: 'Marker', description: 'Short sequence number.', type: 'text', required: true },
+      { key: 'heading', label: 'Heading', description: 'Outcome-focused step heading.', type: 'text', required: true },
+      { key: 'body', label: 'Description', description: 'What happens at this public step.', type: 'text', required: true },
+    ] },
+  ],
+})
+
+export const creatorSignalPricingPlansEntry = siteEntry({
+  id: 'creator-signal.site.pricing-plans',
+  name: 'Pricing Plans',
+  description: 'Three clear public plan cards with explicit prices, included features and signup handoffs.',
+  tags: ['pricing', 'plans', 'subscriptions', 'call to action'],
+  moduleId: pricingPlans.id,
+  usage: 'Use for the concise Home plan summary. Keep the detailed Pricing route as the semantic comparison authority.',
+  accessibilityGuidance: 'Write price cadence in text, include a descriptive feature list, and never communicate the featured plan through colour alone.',
+  fields: [
+    { key: 'eyebrow', label: 'Eyebrow', description: 'Short context label above the plans.', type: 'text', required: true },
+    { key: 'heading', label: 'Heading', description: 'Heading for the complete plan group.', type: 'text', required: true },
+    { key: 'introduction', label: 'Introduction', description: 'Short explanation of how to choose.', type: 'text', required: true },
+    { key: 'footnote', label: 'Footnote', description: 'A qualification shared by every plan.', type: 'text', required: true },
+    { key: 'sectionId', label: 'Section anchor', description: 'Unique page anchor used by the pricing heading.', type: 'text', required: true, advanced: true },
+    { key: 'items', label: 'Plans', description: 'Ordered public plans; separate feature lines with line breaks.', type: 'repeater', required: true, itemLabel: 'Plan', minItems: 1, maxItems: 3, itemFields: [
+      { key: 'name', label: 'Name', description: 'Public plan name.', type: 'text', required: true },
+      { key: 'price', label: 'Price', description: 'Visible price including currency where required.', type: 'text', required: true },
+      { key: 'cadence', label: 'Cadence', description: 'Billing cadence such as per month; leave blank for Free.', type: 'text', required: false },
+      { key: 'description', label: 'Description', description: 'Who the plan is for.', type: 'text', required: true },
+      { key: 'features', label: 'Features', description: 'One feature per line.', type: 'text', required: true },
+      { key: 'actionLabel', label: 'Action label', description: 'Specific signup action.', type: 'text', required: true },
+      { key: 'actionUrl', label: 'Action URL', description: 'Sales Pulse application-owned signup destination.', type: 'url', required: true },
+      { key: 'emphasis', label: 'Emphasis', description: 'Use Featured for at most one plan.', type: 'select', required: true, options: [
+        { label: 'Default', value: 'default' },
+        { label: 'Featured', value: 'featured' },
+      ] },
+    ] },
+  ],
+})
+
+export const creatorSignalFounderStoryEntry = siteEntry({
+  id: 'creator-signal.site.founder-story',
+  name: 'Founder Story',
+  description: 'A first-person founder narrative with attribution and optional approved portrait.',
+  tags: ['founder', 'story', 'about', 'media'],
+  moduleId: founderStory.id,
+  usage: 'Use once on the Home page for the approved founder narrative; use Testimonial for a short quotation.',
+  accessibilityGuidance: 'Keep a logical section heading and provide portrait alternative text when the image conveys identity.',
+  fields: [
+    { key: 'eyebrow', label: 'Eyebrow', description: 'Short context label above the story.', type: 'text', required: true },
+    { key: 'heading', label: 'Heading', description: 'Heading for the founder narrative.', type: 'text', required: true },
+    { key: 'body', label: 'Story', description: 'Approved first-person rich text.', type: 'rich-text', required: true },
+    { key: 'attribution', label: 'Attribution', description: 'Founder name.', type: 'text', required: true },
+    { key: 'role', label: 'Role', description: 'Founder role or business context.', type: 'text', required: true },
+    { key: 'portrait', label: 'Portrait', description: 'Optional approved portrait from Instatic Media.', type: 'image', required: false },
+    { key: 'portraitAlt', label: 'Portrait alternative text', description: 'Name or describe an informative portrait; leave blank only if decorative.', type: 'text', required: false },
+    { key: 'sectionId', label: 'Section anchor', description: 'Unique page anchor used by the founder heading.', type: 'text', required: true, advanced: true },
   ],
 })
 
@@ -353,6 +495,7 @@ export const creatorSignalPublicDocumentEntry = siteEntry({
 
 export const creatorSignalMauticFormEntry = siteEntry({
   id: 'creator-signal.site.mautic-form',
+  version: '1.1.0',
   name: 'Managed Form',
   description: 'A governed public form resolved from the generated Mautic registry.',
   tags: ['form', 'contact', 'mautic', 'integration'],
@@ -362,6 +505,7 @@ export const creatorSignalMauticFormEntry = siteEntry({
     { key: 'heading', label: 'Heading', description: 'Purpose of this complete managed form.', type: 'text', required: true },
     { key: 'introduction', label: 'Introduction', description: 'Instructions and privacy context shown before the fields.', type: 'text', required: true },
     { key: 'successMessage', label: 'Success message', description: 'Confirmation announced after a successful submission.', type: 'text', required: true },
+    { key: 'sectionId', label: 'Section anchor', description: 'Unique page anchor used by the form section.', type: 'text', required: true, advanced: true },
     { key: 'mauticBaseUrl', label: 'Mautic public URL', description: 'Approved public form-provider origin.', type: 'url', required: true, advanced: true },
     { key: 'formAlias', label: 'Governed form alias', description: 'Stable alias resolved through the generated registry; never use a numeric form ID.', type: 'text', required: true, advanced: true },
     { key: 'registryPath', label: 'Registry path', description: 'Published path for the generated form registry.', type: 'text', required: true, advanced: true },
@@ -375,7 +519,13 @@ export const creatorSignalComponentEntries: readonly ComponentLibraryEntry[] = [
   creatorSignalHeaderEntry,
   creatorSignalFooterEntry,
   creatorSignalConsentEntry,
+  creatorSignalCampaignHeroEntry,
+  creatorSignalSignalStripEntry,
+  creatorSignalSignalComparisonEntry,
   creatorSignalFeatureGridEntry,
+  creatorSignalProcessStepsEntry,
+  creatorSignalPricingPlansEntry,
+  creatorSignalFounderStoryEntry,
   creatorSignalCallToActionEntry,
   creatorSignalRichTextEntry,
   creatorSignalTestimonialEntry,
@@ -433,6 +583,42 @@ const patternBlocks = {
     featureGrid.id,
     { ...featureGrid.defaults },
   ),
+  campaignHero: () => componentNode(
+    'campaign-hero',
+    creatorSignalCampaignHeroEntry.id,
+    campaignHero.id,
+    { ...campaignHero.defaults },
+  ),
+  signalStrip: () => componentNode(
+    'signal-strip',
+    creatorSignalSignalStripEntry.id,
+    signalStrip.id,
+    { ...signalStrip.defaults },
+  ),
+  signalComparison: () => componentNode(
+    'signal-comparison',
+    creatorSignalSignalComparisonEntry.id,
+    signalComparison.id,
+    { ...signalComparison.defaults },
+  ),
+  process: () => componentNode(
+    'process',
+    creatorSignalProcessStepsEntry.id,
+    processSteps.id,
+    { ...processSteps.defaults },
+  ),
+  pricingPlans: () => componentNode(
+    'pricing-plans',
+    creatorSignalPricingPlansEntry.id,
+    pricingPlans.id,
+    { ...pricingPlans.defaults },
+  ),
+  founder: () => componentNode(
+    'founder',
+    creatorSignalFounderStoryEntry.id,
+    founderStory.id,
+    { ...founderStory.defaults },
+  ),
   content: () => componentNode(
     'content',
     creatorSignalRichTextEntry.id,
@@ -450,6 +636,12 @@ const patternBlocks = {
     creatorSignalFaqEntry.id,
     faq.id,
     { ...faq.defaults },
+  ),
+  testimonial: () => componentNode(
+    'testimonial',
+    creatorSignalTestimonialEntry.id,
+    testimonial.id,
+    { ...testimonial.defaults },
   ),
   action: () => componentNode(
     'action',
@@ -476,10 +668,17 @@ const patternBlockByEntryId: Readonly<Record<
   () => ComponentLibraryPatternNode
 >> = {
   [creatorSignalHeroEntry.id]: patternBlocks.hero,
+  [creatorSignalCampaignHeroEntry.id]: patternBlocks.campaignHero,
+  [creatorSignalSignalStripEntry.id]: patternBlocks.signalStrip,
+  [creatorSignalSignalComparisonEntry.id]: patternBlocks.signalComparison,
   [creatorSignalFeatureGridEntry.id]: patternBlocks.features,
+  [creatorSignalProcessStepsEntry.id]: patternBlocks.process,
+  [creatorSignalPricingPlansEntry.id]: patternBlocks.pricingPlans,
+  [creatorSignalFounderStoryEntry.id]: patternBlocks.founder,
   [creatorSignalRichTextEntry.id]: patternBlocks.content,
   [creatorSignalComparisonEntry.id]: patternBlocks.comparison,
   [creatorSignalFaqEntry.id]: patternBlocks.faq,
+  [creatorSignalTestimonialEntry.id]: patternBlocks.testimonial,
   [creatorSignalCallToActionEntry.id]: patternBlocks.action,
   [creatorSignalMauticFormEntry.id]: patternBlocks.form,
   [creatorSignalPublicDocumentEntry.id]: patternBlocks.document,
@@ -489,6 +688,7 @@ function pagePattern(
   id: string,
   childEntryIds: readonly string[],
 ): ComponentLibraryPatternDefinition {
+  const keyOccurrences = new Map<string, number>()
   const children = childEntryIds.map((entryId) => {
     const createBlock = patternBlockByEntryId[entryId]
     if (!createBlock) {
@@ -496,7 +696,12 @@ function pagePattern(
         `[creator-signal] Pattern "${id}" references unsupported component "${entryId}".`,
       )
     }
-    return createBlock()
+    const block = createBlock()
+    const occurrence = (keyOccurrences.get(block.key) ?? 0) + 1
+    keyOccurrences.set(block.key, occurrence)
+    return occurrence === 1
+      ? block
+      : { ...block, key: `${block.key}-${occurrence}` }
   })
   return {
     id,
@@ -659,6 +864,8 @@ function patternEntry(input: {
 }
 
 export const creatorSignalPatternEntries: readonly ComponentLibraryEntry[] = [
+  patternEntry({ id: 'creator-signal.site.pattern.home-v2-page', name: 'Home v2 Page', description: 'The complete governed Creator Signal Home composition from product promise through pricing, founder story, FAQ and signup.', tags: ['home', 'landing page', 'sales pulse', 'pricing', 'faq'], usage: 'Use only for the Creator Signal Home route. Edit its governed child components instead of rebuilding the sequence.', accessibility: 'Keep the Campaign Hero as the one H1 and primary journey, preserve ordered steps and keep every section anchor unique.', maxInstancesPerDocument: 1 }),
+  patternEntry({ id: 'creator-signal.site.pattern.early-access-page', name: 'Early Access Page', description: 'A launch-preview composition with one governed wishlist form and supporting product context.', tags: ['early access', 'wishlist', 'launch', 'form'], usage: 'Use for the noindex Early Access test route. Keep one Managed Form instance and do not embed account creation.', accessibility: 'Preserve the Campaign Hero as H1, one labelled form, explicit permission copy and readable provider states.', maxInstancesPerDocument: 1 }),
   patternEntry({ id: 'creator-signal.site.pattern.content-page', name: 'Content Page', description: 'Hero, long-form content and one next action.', tags: ['content page', 'editorial', 'cta'], usage: 'Use for an explanatory page that ends with one next step.', accessibility: 'Keep one H1 in the Hero and use semantic headings inside the rich-text section.', maxInstancesPerDocument: 1 }),
   patternEntry({ id: 'creator-signal.site.pattern.product-page', name: 'Product Page', description: 'Hero, governed feature grid and one product action.', tags: ['product', 'features', 'cta'], usage: 'Use for a product overview with outcome-focused features and one primary journey.', accessibility: 'Keep card content scannable and the single page action specific.', maxInstancesPerDocument: 1 }),
   patternEntry({ id: 'creator-signal.site.pattern.pricing-page', name: 'Pricing Page', description: 'Hero, semantic comparison and one next action.', tags: ['pricing', 'comparison'], usage: 'Use for plan or offer comparison; retain table captions and consistent row criteria.', accessibility: 'Keep row and column headings descriptive and avoid expressing availability through colour alone.', maxInstancesPerDocument: 1 }),

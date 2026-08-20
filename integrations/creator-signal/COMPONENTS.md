@@ -33,7 +33,7 @@ media storage.
 | Requirement | Instatic extension | Creator Signal example |
 | --- | --- | --- |
 | Reusable section with per-instance fields | Visual Component | `integrations/creator-signal/pack/hero-component.ts` |
-| Opinionated section with repeatable data | Governed module component | `integrations/creator-signal/modules/site-components.ts` |
+| Opinionated section with repeatable data | Governed module component | `integrations/creator-signal/modules/site-components/index.ts` |
 | Approved page/section composition | Component Library pattern | `integrations/creator-signal/component-library.ts` |
 | Copyable structure intentionally allowed to diverge | Saved layout | Not used by the Creator Signal pack |
 | Runtime JavaScript or an external integration | Module | `integrations/creator-signal/modules/mautic-form.ts` |
@@ -49,6 +49,14 @@ The public page and section patterns are registered beside those entries in
 and only their declared child component nodes are authorable. Route seeds use
 the same registry materializer, so the Insert experience and installed site
 cannot drift into separate structures.
+
+The Home v2 and Early Access compositions exercise the full module-component
+model. Campaign Hero owns the single page H1 and actions; Signal Strip owns a
+static list; Signal Comparison owns the before/after relationship; Process
+Steps owns an ordered list; Pricing Plans owns plan repeaters; Founder Story
+owns one sanitised rich-text story. Feature Grid supports a governed
+`default` or `signature` tone. These remain leaf components with no authored
+child slots, while `home-v2-page` and `early-access-page` govern their order.
 
 ## Hero component anatomy
 

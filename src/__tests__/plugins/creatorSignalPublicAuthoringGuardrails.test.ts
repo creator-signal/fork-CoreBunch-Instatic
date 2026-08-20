@@ -115,7 +115,7 @@ describe('Creator Signal public authoring guardrails', () => {
   it('rejects arbitrary colour, font, spacing and breakpoint styling even for a full writer', () => {
     const previous = governedSite()
     const next = structuredClone(previous)
-    const hero = Object.values(next.pages.find((page) => page.slug === 'index')!.nodes)
+    const hero = Object.values(next.pages.find((page) => page.slug === 'products')!.nodes)
       .find((node) => node.catalogueInstance?.entryId === 'creator-signal.site.hero')!
     hero.inlineStyles = {
       color: '#ff00ff',
@@ -134,7 +134,7 @@ describe('Creator Signal public authoring guardrails', () => {
     ]))
     expect(() => validatePageWriteDiff({
       previousPages: previous.pages,
-      changedPages: [next.pages.find((page) => page.slug === 'index')!],
+      changedPages: [next.pages.find((page) => page.slug === 'products')!],
       deletedPageIds: new Set(),
       capabilities: ALL_SITE_WRITE_CAPABILITIES,
       publicAuthoringPolicy: creatorSignalPublicAuthoringPolicy,
@@ -162,7 +162,7 @@ describe('Creator Signal public authoring guardrails', () => {
 
   it('applies the policy to collaborative page and shell updates', () => {
     const site = governedSite()
-    const page = site.pages.find((candidate) => candidate.slug === 'index')!
+    const page = site.pages.find((candidate) => candidate.slug === 'products')!
     const hero = Object.values(page.nodes).find(
       (node) => node.catalogueInstance?.entryId === 'creator-signal.site.hero',
     )!
@@ -204,7 +204,7 @@ describe('Creator Signal public authoring guardrails', () => {
 
   it('rejects unsupported variants, raw buttons and nodes outside the page pattern', () => {
     const site = governedSite()
-    const page = site.pages.find((candidate) => candidate.slug === 'index')!
+    const page = site.pages.find((candidate) => candidate.slug === 'products')!
     const hero = Object.values(page.nodes).find(
       (node) => node.catalogueInstance?.entryId === 'creator-signal.site.hero',
     )!
@@ -229,7 +229,7 @@ describe('Creator Signal public authoring guardrails', () => {
 
   it('rejects a damaged policy-owned pattern root and child sequence', () => {
     const site = governedSite()
-    const page = site.pages.find((candidate) => candidate.slug === 'index')!
+    const page = site.pages.find((candidate) => candidate.slug === 'products')!
     const pattern = Object.values(page.nodes).find(
       (node) => node.catalogueInstance?.entryId ===
         'creator-signal.site.pattern.product-page',
@@ -285,7 +285,7 @@ describe('Creator Signal public authoring guardrails', () => {
   it('allow-lists fixed image roles and treatments and rejects authored substitutes', () => {
     const site = governedSite()
     site.settings.publicAuthoring!.assets.fields[0]!.role = 'unapproved-background'
-    const hero = Object.values(site.pages.find((page) => page.slug === 'index')!.nodes)
+    const hero = Object.values(site.pages.find((page) => page.slug === 'products')!.nodes)
       .find((node) => node.catalogueInstance?.entryId === 'creator-signal.site.hero')!
     const overrides = hero.props.propOverrides as Record<string, unknown>
     overrides.artworkTreatment = 'stretch'
@@ -298,7 +298,7 @@ describe('Creator Signal public authoring guardrails', () => {
 
   it('rejects extra page-title and unsupported rich-text heading levels', () => {
     const site = governedSite()
-    const landingPage = site.pages.find((page) => page.slug === 'index')!
+    const landingPage = site.pages.find((page) => page.slug === 'products')!
     const hero = Object.values(landingPage.nodes).find(
       (node) => node.catalogueInstance?.entryId === 'creator-signal.site.hero',
     )!
@@ -347,7 +347,7 @@ describe('Creator Signal public authoring guardrails', () => {
   it('leaves ordinary Instatic sites freeform when no policy is installed', () => {
     const site = governedSite()
     delete site.settings.publicAuthoring
-    const page = site.pages.find((candidate) => candidate.slug === 'index')!
+    const page = site.pages.find((candidate) => candidate.slug === 'products')!
     const hero = Object.values(page.nodes).find(
       (node) => node.catalogueInstance?.entryId === 'creator-signal.site.hero',
     )!

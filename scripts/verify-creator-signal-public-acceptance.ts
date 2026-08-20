@@ -75,8 +75,10 @@ const outputDirectory = resolve(repositoryRoot, '.tmp/creator-signal-public-acce
 const actualDirectory = resolve(outputDirectory, 'actual')
 const pluginAssetPrefix = `/uploads/plugins/creator-signal.site/${creatorSignalPluginVersion}`
 const requestedPort = Number.parseInt(process.env.CREATOR_SIGNAL_PUBLIC_ACCEPTANCE_PORT ?? '0', 10)
+const requestedHost = process.env.CREATOR_SIGNAL_PUBLIC_ACCEPTANCE_HOST?.trim() || '127.0.0.1'
 const updateBaselines = Bun.argv.includes('--update-baselines')
 const baselineUpdateAllowed = process.env.CREATOR_SIGNAL_ALLOW_BASELINE_UPDATE === '1'
+const serveOnly = Bun.argv.includes('--serve-only')
 
 if (updateBaselines !== baselineUpdateAllowed) {
   throw new Error(
@@ -266,6 +268,7 @@ function contentType(path: string): string | undefined {
 }
 
 const server = Bun.serve({
+  hostname: requestedHost,
   port: Number.isSafeInteger(requestedPort) && requestedPort > 0 ? requestedPort : 0,
   async fetch(request) {
     const url = new URL(request.url)
@@ -343,7 +346,11 @@ const formRegistry = `window.CreatorSignalMauticForms=${JSON.stringify({
 const generatedForm = String.raw`(() => {
   const target = document.currentScript && document.currentScript.parentElement;
   if (!target) return;
-  target.innerHTML = '<form novalidate><div class="mauticform-row"><label for="acceptance-email">Email address</label><input id="acceptance-email" name="email" type="email" required aria-describedby="acceptance-email-error"><span id="acceptance-email-error" class="mauticform-errormsg" hidden>Enter a valid email address.</span></div><div class="mauticform-row"><label for="acceptance-message">Message</label><textarea id="acceptance-message" name="message" required></textarea></div><input name="mauticform[consent_timestamp]" type="hidden"><button type="submit">Send message</button></form>';
+  const formId = new URL(document.currentScript.src).searchParams.get('id');
+  const preference = formId === '3'
+    ? '<fieldset class="mauticform-row"><legend>Which updates would you like?</legend><label><input type="radio" name="contact_preference" value="launch" required> Launch notification</label><label><input type="radio" name="contact_preference" value="testing"> Early testing</label><label><input type="radio" name="contact_preference" value="both"> Both</label></fieldset>'
+    : '';
+  target.innerHTML = '<form novalidate><div class="mauticform-row"><label for="acceptance-email">Email address</label><input id="acceptance-email" name="email" type="email" required aria-describedby="acceptance-email-error"><span id="acceptance-email-error" class="mauticform-errormsg" hidden>Enter a valid email address.</span></div>' + preference + '<div class="mauticform-row"><label for="acceptance-message">Message</label><textarea id="acceptance-message" name="message" required></textarea></div><input name="mauticform[consent_timestamp]" type="hidden"><button type="submit">Send message</button></form>';
   const form = target.querySelector('form');
   const email = target.querySelector('#acceptance-email');
   const message = target.querySelector('#acceptance-message');
@@ -356,7 +363,7 @@ const generatedForm = String.raw`(() => {
     error.hidden = !invalid;
     if (invalid) { email.focus(); return; }
     const callback = Object.values(window.MauticFormCallback || {})[0];
-    callback && callback.onResponse({ success: new URL(location.href).searchParams.get('formResult') !== 'failure' });
+    if (callback) setTimeout(() => callback.onResponse({ success: new URL(location.href).searchParams.get('formResult') !== 'failure' }), 50);
   });
 })();`
 
@@ -421,6 +428,11 @@ async function addDeniedConsent(context: BrowserContext): Promise<void> {
   }])
 }
 
+if (serveOnly) {
+  console.log(`Creator Signal public acceptance preview: ${baseUrl}`)
+  await new Promise<never>(() => {})
+}
+
 const browserExecutablePath = process.env.CREATOR_SIGNAL_BROWSER_EXECUTABLE_PATH?.trim()
 const browser = await chromium.launch({
   headless: true,
@@ -464,6 +476,7 @@ try {
   await runCheck('representative routes pass automated WCAG 2.2 AA analysis', async () => {
     const routes = [
       '/',
+      '/early-access',
       '/products',
       '/products/sales-pulse',
       '/pricing',
@@ -519,7 +532,7 @@ try {
         const rect = node.getBoundingClientRect()
         return { label: node.textContent?.trim(), width: rect.width, height: rect.height }
       }))
-      assert.equal(navTargets.length, 5)
+      assert.equal(navTargets.length, 7)
       assert.equal(navTargets.every((target) => target.width > 0 && target.height >= 44), true)
       const summary = page.locator('.faq-list summary').first()
       await summary.focus()
@@ -594,9 +607,13 @@ try {
       const email = page.getByLabel('Email address')
       assert.equal(await email.getAttribute('aria-invalid'), 'true')
       assert.equal(await page.evaluate(() => document.activeElement?.id), 'acceptance-email')
+      assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('aria-busy'), null)
       await email.fill('creator@example.com')
       await page.getByLabel('Message').fill('Please send a useful signal.')
       await page.getByRole('button', { name: 'Send message' }).click()
+      assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('aria-busy'), 'true')
+      assert.equal(await page.getByRole('button', { name: 'Send message' }).isDisabled(), true)
+      await page.getByText('Sending...', { exact: true }).waitFor()
       await form.waitFor({ state: 'hidden' })
       await page.getByText('Thanks — your message has been received.', { exact: true }).waitFor()
 
@@ -607,6 +624,16 @@ try {
       await page.getByRole('button', { name: 'Send message' }).click()
       await page.getByText('The form could not be sent. Please try again.', { exact: true }).waitFor()
       assert.equal(await page.locator('[data-form-mount]').isVisible(), true)
+      assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('aria-busy'), null)
+      assert.equal(await page.getByRole('button', { name: 'Send message' }).isEnabled(), true)
+
+      await page.goto(`${baseUrl}/early-access`, { waitUntil: 'load' })
+      await page.locator('[data-form-mount] form').waitFor({ state: 'attached' })
+      assert.equal(await page.locator('[data-cs-mautic-form]').count(), 1)
+      assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('data-form-alias'), 'creator_signal_wishlist')
+      assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('data-campaign-code'), 'early_access')
+      assert.equal(await page.getByRole('radio').count(), 3)
+      await page.getByText('Which updates would you like?', { exact: true }).waitFor()
     } finally {
       await context.close()
     }
@@ -718,8 +745,8 @@ try {
     try {
       await page.goto(baseUrl, { waitUntil: 'load' })
       await waitForPage(page)
-      const before = await page.locator('.hero-art').evaluate((node) => node.getBoundingClientRect().height)
-      assert(before >= 300)
+      const before = await page.locator('.campaign-hero-art').evaluate((node) => node.getBoundingClientRect().height)
+      assert(before >= 250)
       await page.locator('h1').evaluate((node) => {
         node.textContent = `CreatorSignal${'UnbrokenSignal'.repeat(40)}`
       })
@@ -729,7 +756,7 @@ try {
       assert.equal(await page.evaluate(() =>
         document.documentElement.scrollWidth > document.documentElement.clientWidth,
       ), false)
-      assert.equal(await page.getByRole('link', { name: 'Explore Sales Pulse' }).isVisible(), true)
+      assert.equal(await page.getByRole('link', { name: 'Get started free' }).first().isVisible(), true)
     } finally {
       await context.close()
     }
@@ -752,6 +779,7 @@ try {
 
   const visualScenarios: readonly VisualScenario[] = [
     { name: 'home-desktop-system-light', route: '/', viewport: { width: 1440, height: 900 }, colorScheme: 'light', includeConsent: true },
+    { name: 'early-access-mobile-light', route: '/early-access', viewport: { width: 390, height: 844 }, colorScheme: 'light', theme: 'light' },
     { name: 'products-tablet-dark', route: '/products', viewport: { width: 900, height: 900 }, colorScheme: 'dark', theme: 'dark' },
     { name: 'sales-pulse-mobile-light', route: '/products/sales-pulse', viewport: { width: 390, height: 844 }, colorScheme: 'light', theme: 'light' },
     { name: 'pricing-desktop-dark', route: '/pricing', viewport: { width: 1440, height: 900 }, colorScheme: 'dark', theme: 'dark' },
@@ -771,11 +799,19 @@ try {
     .filter((file) => file.endsWith('.png'))
     .sort()
   if (existingBaselineFiles.length > 0) {
-    assert.deepEqual(
-      existingBaselineFiles,
-      expectedBaselineFiles,
-      'The committed baseline roster differs from the governed scenario roster.',
-    )
+    if (updateBaselines) {
+      assert.deepEqual(
+        existingBaselineFiles.filter((file) => !expectedBaselineFiles.includes(file)),
+        [],
+        'The committed baseline roster contains a scenario that is no longer governed.',
+      )
+    } else {
+      assert.deepEqual(
+        existingBaselineFiles,
+        expectedBaselineFiles,
+        'The committed baseline roster differs from the governed scenario roster.',
+      )
+    }
   }
 
   for (const scenario of visualScenarios) {

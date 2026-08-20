@@ -96,6 +96,8 @@ describe('Creator Signal 0.2.0 content migration', () => {
     expect(result.manifest?.site).toBeUndefined()
     expect(result.manifest?.media).toBeUndefined()
     expect(result.manifest?.rows).toHaveLength(25)
+    expect(result.manifest?.rows.some((row) =>
+      row.id === 'creator-signal.site/page/early-access')).toBe(false)
     expect(result.manifest?.tables[0].fields.some((field) => field.id === 'seo')).toBe(true)
 
     const templateRow = result.manifest?.rows.find((row) =>
@@ -115,7 +117,7 @@ describe('Creator Signal 0.2.0 content migration', () => {
     expect(body.nodes[body.rootNodeId].children).toHaveLength(1)
     const patternNode = body.nodes[body.nodes[body.rootNodeId].children[0]!]
     expect(patternNode.catalogueInstance?.entryId).toBe(
-      'creator-signal.site.pattern.product-page',
+      'creator-signal.site.pattern.home-v2-page',
     )
     for (const nodeId of patternNode.children) {
       expect(body.nodes[nodeId].catalogueInstance?.entryId).toStartWith('creator-signal.site.')

@@ -10,7 +10,7 @@ page roster, and publish the complete site automatically.
 
 ## Included experience
 
-- Twenty-three launch, form, legal, trust, support, and status pages plus a
+- Twenty-four launch, form, legal, trust, support, and status pages plus a
   shared `everywhere` template and governed `notFound` template.
 - The canonical Creator Signal Design System shared by the editor canvas and
   published pages, including self-hosted Fredoka, Mulish and Caveat fonts and
@@ -20,10 +20,11 @@ page roster, and publish the complete site automatically.
   starter marketing routes.
 - Creator Signal favicon, touch icon, maskable icon, and web app manifest
   injected into every published page from versioned plugin assets.
-- Governed Hero, Header, Footer, Privacy Choices, Feature Grid, Call to Action,
-  Rich Text Section, Testimonial, FAQ, Comparison, Recovery State, Public
-  Document, and Managed Form components.
-- Twelve stable page/section patterns plus explicit Hero, CTA and FAQ mappings;
+- Governed Hero, Campaign Hero, Signal Strip, Signal Comparison, Process Steps,
+  Pricing Plans, Founder Story, Header, Footer, Privacy Choices, Feature Grid,
+  Call to Action, Rich Text Section, Testimonial, FAQ, Comparison, Recovery
+  State, Public Document, and Managed Form components.
+- Fourteen stable page/section patterns plus explicit Hero, CTA and FAQ mappings;
   starter routes materialize the same registry definitions authors insert.
 - Six Mautic-backed public forms that resolve governed aliases through the
   Mautic-generated registry and emit typed success/failure events.
@@ -123,7 +124,7 @@ bun run integrations/creator-signal/migrations/0.2.0/prepare.ts preview \
   --input ./creator-signal-export.zip
 ```
 
-The preview is ready only when every one of the 23 known routes is either the
+The preview is ready only when every retained 0.1.11 route is either the
 exact retained 0.1.11 starter or already uses the 0.2.0 model, no unexpected
 page would inherit the new shared template, and both governed template IDs are
 available.
@@ -176,6 +177,9 @@ visual semantics.
 keyboard, responsive, degraded-state and committed visual-baseline gate that
 runs against pages produced by Instatic's real public publishing pipeline.
 
+`integrations/creator-signal/WEBSITE-V2.md` records the Home and Early Access
+flow, page ownership boundaries and one-form intent contract.
+
 Deploy Mautic first and verify
 `https://marketing.creatorsignal.me/media/creator-signal/forms-v1.js` exposes
 the `creator-signal.mautic-forms/v1` schema and all six governed aliases. Do not
@@ -195,6 +199,7 @@ its own role-protected application boundary.
 - `integrations/creator-signal/AUTHORING.md`
 - `integrations/creator-signal/PREVIEW-PARITY.md`
 - `integrations/creator-signal/ACCEPTANCE.md`
+- `integrations/creator-signal/WEBSITE-V2.md`
 - `integrations/creator-signal/PARITY.md`
 - `integrations/creator-signal/instatic-plugin.config.ts`
 - `integrations/creator-signal/modules/mautic-form.ts`

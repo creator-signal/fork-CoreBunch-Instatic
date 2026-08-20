@@ -8,6 +8,7 @@ export const creatorSignalPublicRouteSlugs = [
   'contact',
   'feedback',
   'wishlist',
+  'early-access',
   'ask-a-question',
   'feature-request',
   'report-an-error',

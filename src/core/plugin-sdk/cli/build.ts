@@ -409,7 +409,13 @@ export async function buildPlugin(
   //    next to the plugin source (not under dist/) so its relative imports
   //    of `./modules/<file>` resolve correctly.
   if (definition.modules.length > 0) {
-    const modulesFacade = generateModulesFacade(absoluteSource)
+    const moduleFiles = moduleSourceFiles(absoluteSource)
+    await assertConfiguredModulesArePackageable(
+      absoluteSource,
+      definition.modules,
+      moduleFiles,
+    )
+    const modulesFacade = generateModulesFacade(moduleFiles)
     const modulesFacadePath = join(absoluteSource, '__modules-facade.ts')
     await writeFile(modulesFacadePath, modulesFacade, 'utf-8')
     try {
@@ -546,7 +552,7 @@ function collectRuntimeExternals(modules: PluginDefinition['modules']): string[]
  * Convention: every `.ts` file directly under `<src>/modules/` whose default
  * export is a `PluginModuleDefinition` becomes a registered module.
  */
-function generateModulesFacade(sourceDir: string): string {
+function moduleSourceFiles(sourceDir: string): string[] {
   const modulesDir = join(sourceDir, 'modules')
   if (!existsSync(modulesDir)) {
     throw new Error(`Plugin declares modules but ${modulesDir} does not exist`)
@@ -556,6 +562,55 @@ function generateModulesFacade(sourceDir: string): string {
   if (moduleFiles.length === 0) {
     throw new Error(`No module files found under ${modulesDir}`)
   }
+  return moduleFiles
+}
+
+async function assertConfiguredModulesArePackageable(
+  sourceDir: string,
+  configuredModules: PluginDefinition['modules'],
+  moduleFiles: string[],
+): Promise<void> {
+  const packagedIds: string[] = []
+  for (const [index, file] of moduleFiles.entries()) {
+    const sourcePath = join(sourceDir, 'modules', file)
+    const imported = await import(
+      `${pathToFileURL(sourcePath).href}?plugin-build=${Date.now()}-${index}`
+    ) as { default?: unknown }
+    const candidate = imported.default
+    if (
+      !candidate ||
+      typeof candidate !== 'object' ||
+      !('id' in candidate) ||
+      typeof candidate.id !== 'string'
+    ) {
+      throw new Error(
+        `Module source "modules/${file}" must default-export one defineModule() result`,
+      )
+    }
+    packagedIds.push(candidate.id)
+  }
+
+  const configuredIds = configuredModules.map((module) => module.id)
+  const configuredSet = new Set(configuredIds)
+  const packagedSet = new Set(packagedIds)
+  const missing = configuredIds.filter((id) => !packagedSet.has(id))
+  const extra = packagedIds.filter((id) => !configuredSet.has(id))
+  if (missing.length > 0 || extra.length > 0) {
+    const findings = [
+      ...(missing.length > 0
+        ? [`configured modules missing a direct default-export source: ${missing.join(', ')}`]
+        : []),
+      ...(extra.length > 0
+        ? [`direct module sources absent from the plugin config: ${extra.join(', ')}`]
+        : []),
+    ]
+    throw new Error(
+      `Plugin module package does not match its configured registry: ${findings.join('; ')}`,
+    )
+  }
+}
+
+function generateModulesFacade(moduleFiles: string[]): string {
   const imports = moduleFiles
     .map((file, idx) => `import m${idx} from './modules/${file.replace(/\.(tsx?|m?js)$/, '')}'`)
     .join('\n')

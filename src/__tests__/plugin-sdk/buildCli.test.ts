@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'bun:test'
-import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { buildPlugin } from '../../core/plugin-sdk/cli/build'
+import { pathToFileURL } from 'node:url'
+import { buildPlugin, readPluginDefinition } from '../../core/plugin-sdk/cli/build'
 
 const PROJECT_ROOT = join(import.meta.dir, '../../..')
 
@@ -93,6 +94,31 @@ export default definePlugin({
       expect(entries.map((entry) => entry.id)).toEqual([
         'acme.catalogue.callout',
       ])
+    } finally {
+      await rm(pluginDir, { recursive: true, force: true })
+    }
+  })
+
+  it('packages every configured Creator Signal module into the runtime facade', async () => {
+    const parentDir = join(PROJECT_ROOT, '.tmp-build')
+    await mkdir(parentDir, { recursive: true })
+    const pluginDir = await mkdtemp(join(parentDir, 'creator-signal-plugin-'))
+
+    try {
+      await cp(
+        join(PROJECT_ROOT, 'integrations', 'creator-signal'),
+        pluginDir,
+        { recursive: true },
+      )
+      const definition = await readPluginDefinition(pluginDir)
+      await buildPlugin(pluginDir, { zip: false })
+
+      const modulePack = await import(
+        `${pathToFileURL(join(pluginDir, 'dist', 'modules', 'index.js')).href}?test=${Date.now()}`
+      ) as { default: Array<{ id: string }> }
+      expect(modulePack.default.map((module) => module.id).sort()).toEqual(
+        definition.modules.map((module) => module.id).sort(),
+      )
     } finally {
       await rm(pluginDir, { recursive: true, force: true })
     }

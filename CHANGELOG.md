@@ -6,6 +6,18 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.36 - 2026-08-21
+
+### Creator Signal Website v2 and retained-site migration
+
+- Added the governed Home v2 and Early Access flows, campaign components,
+  responsive states, SEO contracts and visual acceptance baselines.
+- Recognised exact retained 0.1.11 and 0.2.0-0.2.6 starter content as explicit
+  migration predecessors while continuing to block unknown authored changes.
+- Added newly governed pages only when their reserved IDs are absent, repaired
+  only exact historical shared templates, and advanced the technical plugin
+  reconciliation boundary to 0.3.5.
+
 ## 0.0.35 - 2026-08-21
 
 ### Fixed

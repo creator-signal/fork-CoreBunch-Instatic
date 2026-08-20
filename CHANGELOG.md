@@ -6,6 +6,26 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.34 - 2026-08-20
+
+### Complete Creator Signal authoring experience
+
+- Made the shared Header, Footer and Privacy Choices template-only singletons,
+  kept ordinary pages content-only, and applied the same placement rules to
+  editor insertion, drag-and-drop, server writes and Agent/MCP authoring.
+- Integrated the versioned Creator Signal design system, governed public
+  patterns and authoring guardrails as the single source for component fields,
+  assets, responsive behavior, themes and published semantics.
+- Added durable 23-route page/section authoring references plus desktop,
+  tablet and mobile visual, accessibility, SEO, consent, form, degraded-state
+  and unknown-route acceptance evidence.
+- Aligned component previews, full-page Preview and published rendering while
+  retaining editor-only sandbox protections and preserving authored pages
+  during technical plugin upgrades.
+- Added accessible navigation, skip links, persistent privacy choices,
+  long-content and 200% reflow handling, forced-colour/reduced-motion support,
+  and governed not-found, comparison and recovery experiences.
+
 ## 0.0.33 - 2026-08-14
 
 ### Creator Signal production parity

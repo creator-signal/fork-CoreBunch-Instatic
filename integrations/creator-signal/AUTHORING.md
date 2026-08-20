@@ -3,7 +3,7 @@
 This reference maps the public site to the shared template and governed components authors edit in Instatic.
 
 The source of truth is `integrations/creator-signal/pack/site.ts`. It defines
-the 23 route documents as page content only, one everywhere template that owns
+the 24 route documents as page content only, one everywhere template that owns
 shared header/footer/privacy choices, and one not-found template that owns the
 unknown-route recovery content.
 
@@ -52,7 +52,7 @@ Every row below is wrapped by the shared template. The sequence column lists onl
 
 | Route | Page | Opinionated page components in order |
 | --- | --- | --- |
-| `/` | Creator Signal | Hero → Feature Grid → Call to Action |
+| `/` | Creator Signal | Campaign Hero → Signal Strip → Signal Comparison → Feature Grid → Process Steps → Feature Grid → Feature Grid → Pricing Plans → Founder Story → FAQ → Call to Action |
 | `/products` | Products | Hero → Feature Grid → Call to Action |
 | `/products/sales-pulse` | Sales Pulse | Hero → Feature Grid → Call to Action |
 | `/features` | Features | Hero → Feature Grid |
@@ -60,6 +60,7 @@ Every row below is wrapped by the shared template. The sequence column lists onl
 | `/contact` | Contact | Hero → Managed Form |
 | `/feedback` | Feedback | Hero → Managed Form |
 | `/wishlist` | Join the wishlist | Hero → Managed Form |
+| `/early-access` | Creator Signal Early Access | Campaign Hero → Signal Strip → Feature Grid → Managed Form → Feature Grid → Feature Grid → Testimonial |
 | `/ask-a-question` | Ask a question | Hero → Managed Form |
 | `/feature-request` | Feature request | Hero → Managed Form |
 | `/report-an-error` | Report an error | Hero → Managed Form |
@@ -87,6 +88,8 @@ instead of duplicating it as a second implementation.
 
 | Author need | Stable mapping | Implementation |
 | --- | --- | --- |
+| Home v2 page | `creator-signal.site.pattern.home-v2-page` | Complete governed marketing flow with pricing, founder story and signup |
+| Early Access page | `creator-signal.site.pattern.early-access-page` | Noindex preview with one governed wishlist form |
 | Hero | `creator-signal.site.pattern.hero` | Existing Hero Visual Component |
 | Content page | `creator-signal.site.pattern.content-page` | Hero → Rich Text Section → Call to Action |
 | Product page | `creator-signal.site.pattern.product-page` | Hero → Feature Grid → Call to Action |
@@ -115,10 +118,16 @@ pack: they are for copyable structures that may diverge after insertion.
 | Component | Placement | Author controls | Repeatable data | Slots |
 | --- | --- | --- | --- | --- |
 | Creator Signal Hero | Page; maximum one | Eyebrow, heading, introduction, action label, action URL, artwork | None | None |
+| Campaign Hero | Page; maximum one | Eyebrow, heading, introduction, two actions, footnote and artwork | None | None |
+| Signal Strip | Page | Accessible label | Short static promise messages | None |
+| Signal Comparison | Page | Heading, before/after copy, artwork and section anchor | None | None |
+| Process Steps | Page | Heading, introduction and section anchor | Ordered step marker, heading and description | None |
+| Pricing Plans | Page | Heading, introduction, footnote and section anchor | Plan price, cadence, features, action and emphasis | None |
+| Founder Story | Page | Heading, formatted story, attribution, portrait and section anchor | None | None |
 | Site Header | Shared template; maximum one | Brand name, tagline, home URL | Navigation links with label, URL and treatment | None |
 | Site Footer | Shared template; maximum one | Brand name, tagline, copyright | Footer links with label and URL | None |
 | Privacy Choices | Shared template; maximum one | Heading, explanation and both choice labels | None | None |
-| Feature Grid | Page | Eyebrow, heading, introduction, section anchor | Feature marker, heading and description | None |
+| Feature Grid | Page | Eyebrow, heading, introduction, section anchor and default/signature tone | Feature marker, heading and description | None |
 | Call to Action | Page | Eyebrow, heading, explanation, action label, action URL, section anchor | None | None |
 | Rich Text Section | Page | Heading, one coherent formatted content field, section anchor | None | None |
 | Testimonial | Page | Quotation, attribution, role or business | None | None |
@@ -126,7 +135,7 @@ pack: they are for copyable structures that may diverge after insertion.
 | Comparison Section | Page | Heading, introduction, caption and three option labels | Criterion and three option values | None |
 | Recovery State | Page or not-found template; maximum one | Empty/error/offline/not-found kind, heading, explanation and recovery action | None | None |
 | Public Document | Page | Eyebrow, document heading, summary, one formatted document field, date modified | None | None |
-| Managed Form | Page | Eyebrow, heading, introduction and success message | Provider fields are resolved from the governed registry | None |
+| Managed Form | Page | Eyebrow, heading, introduction, success message and section anchor | Provider fields are resolved from the governed registry | None |
 
 The catalogue contract lives in `integrations/creator-signal/component-library.ts`. The semantic renderers live in `integrations/creator-signal/modules/site-components/index.ts` and `integrations/creator-signal/modules/mautic-form.ts`. They preserve headings, landmarks, accessible names and schema.org metadata while keeping markup structure out of routine authoring.
 

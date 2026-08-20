@@ -10,7 +10,7 @@ page roster, and publish the complete site automatically.
 
 ## Included experience
 
-- Twenty-three launch, form, legal, trust, support, and status pages plus a
+- Twenty-four launch, form, legal, trust, support, and status pages plus a
   shared `everywhere` template and governed `notFound` template.
 - The canonical Creator Signal Design System shared by the editor canvas and
   published pages, including self-hosted Fredoka, Mulish and Caveat fonts and
@@ -20,10 +20,11 @@ page roster, and publish the complete site automatically.
   starter marketing routes.
 - Creator Signal favicon, touch icon, maskable icon, and web app manifest
   injected into every published page from versioned plugin assets.
-- Governed Hero, Header, Footer, Privacy Choices, Feature Grid, Call to Action,
-  Rich Text Section, Testimonial, FAQ, Comparison, Recovery State, Public
-  Document, and Managed Form components.
-- Twelve stable page/section patterns plus explicit Hero, CTA and FAQ mappings;
+- Governed Hero, Campaign Hero, Signal Strip, Signal Comparison, Process Steps,
+  Pricing Plans, Founder Story, Header, Footer, Privacy Choices, Feature Grid,
+  Call to Action, Rich Text Section, Testimonial, FAQ, Comparison, Recovery
+  State, Public Document, and Managed Form components.
+- Fourteen stable page/section patterns plus explicit Hero, CTA and FAQ mappings;
   starter routes materialize the same registry definitions authors insert.
 - Six Mautic-backed public forms that resolve governed aliases through the
   Mautic-generated registry and emit typed success/failure events.
@@ -110,9 +111,9 @@ explicit, versioned CMS content migration with preview, backup and rollback.
 They must not be implemented by changing a deterministic starter page and
 relying on plugin upgrade reconciliation.
 
-### Upgrade existing 0.1.11 starter content
+### Upgrade existing retained starter content
 
-Installing plugin 0.3.4 runs the versioned technical-pack upgrade, installs the
+Installing plugin 0.3.5 runs the versioned technical-pack upgrade, installs the
 public-authoring policy and does not change existing pages. The authored-content
 migration remains version 0.2.0.
 Export the complete site from **Admin → Export**, then run the read-only
@@ -123,18 +124,20 @@ bun run integrations/creator-signal/migrations/0.2.0/prepare.ts preview \
   --input ./creator-signal-export.zip
 ```
 
-The preview is ready only when every one of the 23 known routes is either the
-exact retained 0.1.11 starter or already uses the 0.2.0 model, no unexpected
-page would inherit the new shared template, and both governed template IDs are
-available.
+The preview is ready only when every retained route is either the exact 0.1.11
+starter, the exact governed 0.2.0-0.2.6 pack, or already uses the current
+model; no unexpected page would inherit the new shared template; and both
+governed template IDs are available. A newly governed page is added only when
+its reserved ID is absent. An occupied ID with any other content blocks the
+whole migration.
 Any authored difference blocks the whole migration for manual mapping; it is
 never overwritten heuristically.
 
 The shared template uses the validator-compliant slug
-`creator-signal-site-template`. If an operator imported the unpublished 0.0.29
-migration archive, the classifier recognises and repairs only that release's
-exact `_templates/creator-signal-site` template. Any change to that template's
-content still blocks as authored content.
+`creator-signal-site-template`. The classifier recognises only the exact
+historical invalid-slug template, the exact repaired 0.2.0-0.2.6 template, or
+the current template. Any other change to that template's content still blocks
+as authored content.
 
 After reviewing a ready preview, prepare the immutable evidence set:
 
@@ -176,6 +179,9 @@ visual semantics.
 keyboard, responsive, degraded-state and committed visual-baseline gate that
 runs against pages produced by Instatic's real public publishing pipeline.
 
+`integrations/creator-signal/WEBSITE-V2.md` records the Home and Early Access
+flow, page ownership boundaries and one-form intent contract.
+
 Deploy Mautic first and verify
 `https://marketing.creatorsignal.me/media/creator-signal/forms-v1.js` exposes
 the `creator-signal.mautic-forms/v1` schema and all six governed aliases. Do not
@@ -195,6 +201,7 @@ its own role-protected application boundary.
 - `integrations/creator-signal/AUTHORING.md`
 - `integrations/creator-signal/PREVIEW-PARITY.md`
 - `integrations/creator-signal/ACCEPTANCE.md`
+- `integrations/creator-signal/WEBSITE-V2.md`
 - `integrations/creator-signal/PARITY.md`
 - `integrations/creator-signal/instatic-plugin.config.ts`
 - `integrations/creator-signal/modules/mautic-form.ts`

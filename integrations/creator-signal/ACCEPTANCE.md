@@ -17,13 +17,18 @@ The command writes actual screenshots and `report.json` under
 check fails. Passing this command proves source readiness only; it does not
 deploy, converge or accept a production environment.
 
+For a non-accepting local browser preview of the same published output, run
+the script with `--serve-only` and optionally set
+`CREATOR_SIGNAL_PUBLIC_ACCEPTANCE_PORT`. The preview intentionally does not
+replace the complete automated gate or a live provider-form check.
+
 ## Governed matrix
 
 The verifier covers:
 
-- every one of the 23 public routes at 1440px desktop, 900px tablet and 390px
+- every one of the 24 public routes at 1440px desktop, 900px tablet and 390px
   mobile widths, with one header, main, H1 and footer and no document overflow;
-- Home, Products, Sales Pulse, Pricing, Contact, Privacy, Security, the
+- Home v2, Early Access, Products, Sales Pulse, Pricing, Contact, Privacy, Security, the
   not-found template, FAQ and all recovery states with Axe's WCAG 2.0, 2.1 and
   2.2 A/AA rules;
 - skip navigation, visible 44px mobile navigation targets and native FAQ
@@ -31,13 +36,14 @@ The verifier covers:
 - system, light and dark themes, including explicit-choice persistence;
 - consent denial, reopening persistent privacy choices, granting consent and
   focus return while the runtime analytics configuration endpoint is down;
-- managed-form required-field focus/error association, success, provider
-  failure and provider-unavailable states without a live submission;
+- managed-form required-field focus/error association, submitting/busy,
+  success, provider failure and provider-unavailable states without a live
+  submission, with exactly one wishlist form on Early Access;
 - 200% reflow represented by a 640 CSS-pixel viewport for a 1280px reference,
   with comparison overflow contained in its labelled, focusable region;
 - reduced motion, forced colours, broken images, long unbroken content and the
   governed noindex 404 response; and
-- eleven committed visual scenarios spanning routes, chrome, themes,
+- twelve committed visual scenarios spanning routes, chrome, themes,
   viewports, legal reflow, FAQ and empty/error/offline/not-found states.
 
 ## Visual baseline governance

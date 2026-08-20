@@ -97,7 +97,7 @@ installation, set `INSTATIC_BOOTSTRAP_SITE_NAME`,
 `INSTATIC_BOOTSTRAP_PLUGIN_PACKAGE`, and optionally
 `INSTATIC_BOOTSTRAP_PLUGIN_SETTINGS_FILE`. Startup then creates the first
 owner, replaces the blank homepage, installs the trusted embedded package, and
-publishes all 23 routes through one shared site template. The bootstrap password is dormant when Zitadel mode
+publishes all 24 routes through one shared site template. The bootstrap password is dormant when Zitadel mode
 is enabled; first login links the verified Zitadel identity to that owner.
 Existing installations are never reset.
 

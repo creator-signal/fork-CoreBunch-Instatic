@@ -6,8 +6,13 @@ import { pageToCells } from '@core/data/pageFromRow'
 import { legacyCreatorSignalPageHashes0111 } from '../../../integrations/creator-signal/migrations/legacy-0.1.11-hashes'
 import { legacyCreatorSignalPages0111 } from '../../../integrations/creator-signal/migrations/legacy-0.1.11'
 import {
+  retainedCreatorSignalPageHashes0200To0206,
+  retainedCreatorSignalTemplates0200To0206,
+} from '../../../integrations/creator-signal/migrations/retained-0.2.x-hashes'
+import {
   canonicalSha256,
   prepareCreatorSignalContentMigration,
+  retainedCreatorSignalPageVersion,
 } from '../../../integrations/creator-signal/migrations/0.2.0/migration'
 
 const timestamp = '2026-08-14T00:00:00.000Z'
@@ -84,10 +89,11 @@ describe('Creator Signal 0.2.0 content migration', () => {
       alreadyCurrent: 0,
       authoredContent: 0,
       missing: 0,
+      newPages: 1,
       additionalPages: 0,
       template: 'add',
       notFoundTemplate: 'add',
-      rowsInMigration: 25,
+      rowsInMigration: 26,
     })
     expect(result.report.apply).toMatchObject({
       strategy: 'merge-overwrite',
@@ -95,9 +101,9 @@ describe('Creator Signal 0.2.0 content migration', () => {
     })
     expect(result.manifest?.site).toBeUndefined()
     expect(result.manifest?.media).toBeUndefined()
-    expect(result.manifest?.rows).toHaveLength(25)
+    expect(result.manifest?.rows).toHaveLength(26)
     expect(result.manifest?.rows.some((row) =>
-      row.id === 'creator-signal.site/page/early-access')).toBe(false)
+      row.id === 'creator-signal.site/page/early-access')).toBe(true)
     expect(result.manifest?.tables[0].fields.some((field) => field.id === 'seo')).toBe(true)
 
     const templateRow = result.manifest?.rows.find((row) =>
@@ -140,7 +146,8 @@ describe('Creator Signal 0.2.0 content migration', () => {
 
     expect(result.report.ready).toBe(true)
     expect(result.report.summary).toMatchObject({
-      alreadyCurrent: 23,
+      alreadyCurrent: 24,
+      newPages: 0,
       template: 'repair',
       notFoundTemplate: 'current',
       rowsInMigration: 1,
@@ -167,6 +174,27 @@ describe('Creator Signal 0.2.0 content migration', () => {
     expect(result.report.blockers).toEqual(expect.arrayContaining([
       expect.stringContaining('requires manual mapping'),
     ]))
+  })
+
+  it('recognises only the immutable 0.2.0-0.2.6 page and template hashes', () => {
+    expect(Object.keys(retainedCreatorSignalPageHashes0200To0206).sort()).toEqual(
+      Object.keys(legacyCreatorSignalPageHashes0111).sort(),
+    )
+    for (const [pageId, hash] of Object.entries(retainedCreatorSignalPageHashes0200To0206)) {
+      expect(retainedCreatorSignalPageVersion(pageId, hash)).toBe('0.2.0-0.2.6')
+      const unknownHash = `${hash.slice(0, -1)}${hash.endsWith('0') ? '1' : '0'}`
+      expect(retainedCreatorSignalPageVersion(pageId, unknownHash)).toBeNull()
+    }
+    expect(retainedCreatorSignalTemplates0200To0206).toEqual([
+      {
+        slug: '_templates/creator-signal-site',
+        hash: '541dbe0de9df281d1785c75ade65d7473e721ef36ef9e58fcadaee0447232ea2',
+      },
+      {
+        slug: 'creator-signal-site-template',
+        hash: 'e541f13c931e8e2f784428eb786f600bc0f123e98c79f7538416fe6a110aaf89',
+      },
+    ])
   })
 
   it('blocks when an additional page would unexpectedly inherit shared chrome', () => {

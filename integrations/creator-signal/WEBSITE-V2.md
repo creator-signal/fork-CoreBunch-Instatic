@@ -87,7 +87,7 @@ field semantics and its existing consent timestamp contract.
 ## Content lifecycle
 
 These pages are starter content for an empty local/test installation. Plugin
-0.3.4 reconciles technical catalogue, policy, style and runtime records, but it
+0.3.5 reconciles technical catalogue, policy, style and runtime records, but it
 does not overwrite an installation that already has authored pages. Moving
 Home v2 or Early Access into an existing site therefore requires an explicit
 content migration with preview, backup and rollback. Installing the plugin is

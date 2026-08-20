@@ -23,6 +23,7 @@ import type { PublishedRuntimePackageImportmap } from '@core/publisher'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import {
   assertComponentLibraryAccessibilityPublishable,
+  assertPublicAuthoringPolicyPublishable,
   componentLibraryRegistry,
 } from '@core/component-library'
 import { searchIndexService } from '@core/search'
@@ -98,6 +99,8 @@ async function publishDraftSiteLocked(
   // paths under that same lock, so reading outside the transaction is stable.
   const site = await getDraftSiteDocument(db)
   if (!site) throw new Error('draft site not found')
+
+  assertPublicAuthoringPolicyPublishable(site, componentLibraryRegistry)
 
   assertComponentLibraryAccessibilityPublishable(
     site,

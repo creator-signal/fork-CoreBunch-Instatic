@@ -33,7 +33,12 @@
  *     and no runtime drift.
  */
 
-import type { ConditionDef, StyleRule, Page } from '@core/page-tree'
+import type {
+  ConditionDef,
+  Page,
+  PublicAuthoringPolicy,
+  StyleRule,
+} from '@core/page-tree'
 import { classKindSelector } from '@core/page-tree'
 import type { VisualComponent } from '@core/visualComponents'
 import type { SavedLayout } from '@core/layouts'
@@ -46,6 +51,8 @@ export interface PluginPackContents {
   layouts: SavedLayout[]
   /** Site-level media/container/supports conditions used by class overrides. */
   conditions: ConditionDef[]
+  /** Optional site-owned policy installed and reconciled with the pack. */
+  publicAuthoring?: PublicAuthoringPolicy
 }
 
 interface DefinePackConfig {
@@ -72,6 +79,8 @@ interface DefinePackConfig {
    * `compilePackPage(s)` returns these alongside its class rules.
    */
   conditions?: ConditionDef[]
+  /** Enforceable public-output policy owned by this plugin. */
+  publicAuthoring?: PublicAuthoringPolicy
 }
 
 type ClassPackEntry =
@@ -143,5 +152,8 @@ export function definePack(config: DefinePackConfig): PluginPackContents {
     classes,
     layouts,
     conditions: config.conditions ?? [],
+    ...(config.publicAuthoring
+      ? { publicAuthoring: structuredClone(config.publicAuthoring) }
+      : {}),
   }
 }

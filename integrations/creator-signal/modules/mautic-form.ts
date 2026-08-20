@@ -1,5 +1,5 @@
 import { control, defineModule, html, safeUrl } from '@core/plugin-sdk'
-import { creatorSignalCss } from '../pack/design-system'
+import { creatorSignalRenderProfile } from '../pack/design-system'
 
 const runtime = String.raw`(() => {
   const selector = '[data-cs-mautic-form]';
@@ -131,143 +131,133 @@ const formCss = String.raw`
   display: grid;
   grid-template-columns: minmax(0, .8fr) minmax(320px, 1.2fr);
   align-items: start;
-  gap: 72px;
+  gap: var(--cs-spacing-16);
 }
 .cs-mautic-copy {
   max-width: 32rem;
-  padding-top: 12px;
+  padding-top: var(--cs-spacing-3);
 }
 .cs-mautic-copy h2 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 4rem;
-  font-weight: 600;
-  line-height: 1.04;
-  letter-spacing: -.035em;
+  font-family: var(--cs-type-heading2-family);
+  font-size: var(--cs-type-heading2-size);
+  font-weight: var(--cs-type-heading2-weight);
+  line-height: var(--cs-type-heading2-line-height);
+  letter-spacing: var(--cs-type-heading2-tracking);
 }
 .cs-mautic-copy > p:last-child {
-  color: var(--cs-muted);
-  font-size: 1.08rem;
-  line-height: 1.7;
-}
-.cs-eyebrow {
-  margin: 0 0 12px;
-  color: var(--cs-sage);
-  font-size: .76rem;
-  font-weight: 750;
-  letter-spacing: .13em;
-  text-transform: uppercase;
+  color: var(--cs-text-secondary);
+  font-size: var(--cs-type-body-large-size);
+  line-height: var(--cs-type-body-large-line-height);
 }
 .cs-mautic-form-shell {
   min-width: 0;
   min-height: 240px;
-  padding: 40px;
-  border: 1px solid var(--cs-line);
-  border-radius: 24px;
-  background: white;
-  box-shadow: var(--cs-shadow);
+  padding: var(--cs-spacing-10);
+  border: 1px solid var(--cs-component-card-border);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-component-card-background);
+  color: var(--cs-component-card-foreground);
+  box-shadow: var(--cs-shadow-md);
 }
 .cs-mautic [data-form-mount][hidden] { display: none; }
-.cs-mautic [data-form-mount] form { display: grid; gap: 18px; }
+.cs-mautic [data-form-mount] form { display: grid; gap: var(--cs-spacing-5); }
 .cs-mautic .mauticform-row { margin: 0; }
 .cs-mautic label, .cs-mautic .mauticform-label {
   display: block;
-  margin: 0 0 7px;
-  color: var(--cs-ink);
-  font-size: .92rem;
-  font-weight: 700;
-  line-height: 1.35;
+  margin: 0 0 var(--cs-spacing-2);
+  color: var(--cs-component-field-foreground);
+  font-size: var(--cs-type-label-size);
+  font-weight: var(--cs-type-label-weight);
+  line-height: var(--cs-type-label-line-height);
 }
 .cs-mautic input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
 .cs-mautic textarea,
 .cs-mautic select {
   display: block;
   width: 100%;
-  min-height: 48px;
-  padding: 11px 14px;
-  border: 1px solid var(--cs-line);
-  border-radius: 11px;
-  background: white;
-  color: var(--cs-ink);
-  font: inherit;
-  line-height: 1.4;
-  transition: border-color .16s ease, box-shadow .16s ease;
+  min-height: var(--cs-size-control-min-target);
+  padding: var(--cs-spacing-3) var(--cs-spacing-4);
+  border: 1px solid var(--cs-component-field-border);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-component-field-background);
+  color: var(--cs-component-field-foreground);
+  font-family: var(--cs-font-family-ui);
+  line-height: var(--cs-type-control-line-height);
+  transition: border-color var(--cs-motion-duration-fast) var(--cs-motion-easing-standard);
 }
 .cs-mautic textarea { min-height: 140px; resize: vertical; }
 .cs-mautic input[type="checkbox"], .cs-mautic input[type="radio"] {
   width: auto;
   min-height: 0;
-  margin-inline-end: 8px;
-  accent-color: var(--cs-sage);
+  margin-inline-end: var(--cs-spacing-2);
+  accent-color: var(--cs-action-primary-background);
 }
 .cs-mautic .mauticform-checkboxgrp-row,
 .cs-mautic .mauticform-radiogrp-row {
   display: flex;
   align-items: flex-start;
-  gap: 4px;
-  margin-top: 8px;
+  gap: var(--cs-spacing-1);
+  margin-top: var(--cs-spacing-2);
 }
 .cs-mautic .mauticform-errormsg {
   display: block;
-  margin-top: 6px;
-  color: #9b443c;
-  font-size: .84rem;
-  font-weight: 650;
+  margin-top: var(--cs-spacing-2);
+  color: var(--cs-status-error-foreground);
+  font-size: var(--cs-type-body-small-size);
+  font-weight: var(--cs-type-label-weight);
 }
 .cs-mautic .mauticform-helpmessage {
   display: block;
-  margin: 0 0 7px;
-  color: var(--cs-muted);
-  font-size: .84rem;
+  margin: 0 0 var(--cs-spacing-2);
+  color: var(--cs-text-muted);
+  font-size: var(--cs-type-body-small-size);
 }
 .cs-mautic button[type="submit"],
 .cs-mautic input[type="submit"],
 .cs-mautic .mauticform-button {
   display: inline-flex;
   width: auto;
-  min-height: 46px;
+  min-height: var(--cs-size-control-min-target);
   align-items: center;
   justify-content: center;
-  padding: 0 22px;
+  padding: 0 var(--cs-spacing-5);
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--cs-radius-pill);
   cursor: pointer;
-  background: var(--cs-sage);
-  color: white;
-  font: inherit;
-  font-weight: 700;
-  box-shadow: 0 10px 24px rgba(94, 111, 87, .18);
-  transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+  background: var(--cs-component-button-primary-background);
+  color: var(--cs-component-button-primary-foreground);
+  font-family: var(--cs-font-family-ui);
+  font-weight: var(--cs-type-control-weight);
+  box-shadow: var(--cs-shadow-sm);
+  transition: transform var(--cs-motion-duration-fast) var(--cs-motion-easing-standard);
 }
 .cs-mautic button[type="submit"]:hover,
 .cs-mautic input[type="submit"]:hover,
 .cs-mautic .mauticform-button:hover { transform: translateY(-1px); }
 .cs-mautic :is(input, textarea, select, button):focus-visible {
-  outline: 3px solid var(--cs-blue);
+  outline: 3px solid var(--cs-focus-ring);
   outline-offset: 2px;
-  border-color: var(--cs-sage);
-  box-shadow: 0 0 0 4px rgba(147, 169, 179, .18);
+  border-color: var(--cs-component-field-border-focus);
 }
 .cs-mautic [data-form-status] {
-  margin: 18px 0 0;
-  color: var(--cs-sage);
-  font-weight: 700;
+  margin: var(--cs-spacing-5) 0 0;
+  color: var(--cs-status-success-foreground);
+  font-weight: var(--cs-type-label-weight);
 }
-@media (max-width: 900px) {
-  .cs-mautic { grid-template-columns: 1fr; gap: 40px; }
-  .cs-mautic-copy h2 { font-size: 3.2rem; }
+@media (max-width: 64rem) {
+  .cs-mautic { grid-template-columns: 1fr; gap: var(--cs-spacing-10); }
 }
-@media (max-width: 560px) {
-  .cs-mautic-copy h2 { font-size: 2.6rem; }
+@media (max-width: 36rem) {
   .cs-mautic-form-shell {
-    padding: 22px 18px;
-    border-radius: 20px;
+    padding: var(--cs-spacing-5) var(--cs-spacing-4);
+    border-radius: var(--cs-radius-md);
   }
 }
 `
 
 /** One byte-identical public stylesheet shared by every site component. */
-export const creatorSignalSiteCss = `${creatorSignalCss}\n${formCss}`
+export const creatorSignalSiteCss = `${creatorSignalRenderProfile.stylesheet}\n${formCss}`
 
 export default defineModule({
   id: 'creator-signal.site.mautic-form',

@@ -10,15 +10,21 @@ page roster, and publish the complete site automatically.
 
 ## Included experience
 
-- Twenty-three launch, form, legal, trust, support, and status pages plus one
-  shared `everywhere` site template.
-- The warm Creator Signal editorial design system shared by the editor canvas
-  and published pages.
-- A parameterised Hero Visual Component with optional MinIO-backed artwork.
+- Twenty-three launch, form, legal, trust, support, and status pages plus a
+  shared `everywhere` template and governed `notFound` template.
+- The canonical Creator Signal Design System shared by the editor canvas and
+  published pages, including self-hosted Fredoka, Mulish and Caveat fonts and
+  system, light and dark theme preferences.
+- A parameterised Hero Visual Component with optional MinIO-backed artwork,
+  governed brand fallback art and real generated design assets on the primary
+  starter marketing routes.
 - Creator Signal favicon, touch icon, maskable icon, and web app manifest
   injected into every published page from versioned plugin assets.
 - Governed Hero, Header, Footer, Privacy Choices, Feature Grid, Call to Action,
-  Rich Text Section, Testimonial, FAQ, Public Document, and Managed Form components.
+  Rich Text Section, Testimonial, FAQ, Comparison, Recovery State, Public
+  Document, and Managed Form components.
+- Twelve stable page/section patterns plus explicit Hero, CTA and FAQ mappings;
+  starter routes materialize the same registry definitions authors insert.
 - Six Mautic-backed public forms that resolve governed aliases through the
   Mautic-generated registry and emit typed success/failure events.
 - The host-level MinIO adapter for originals, variants, avatars, and fonts.
@@ -32,6 +38,36 @@ page roster, and publish the complete site automatically.
   published output use the same bounded, responsive page layout without
   duplicate ambient rules.
 
+## Design System source of truth
+
+`creator-signal/sales-pulse/packages/design-system` and its governed brand-asset
+pipeline are authoritative. This repository does not maintain an independent
+palette, font stack, theme algorithm or logo source. The exact upstream Git
+revision and SHA-256 of every consumed artifact are recorded in
+`design-system/lock.json`; CI rejects edited, missing or stale vendored files
+and rejects a stale generated canvas adapter.
+
+Verify the committed snapshot:
+
+```sh
+bun run creator-signal:design-system:check
+```
+
+To advance it, first generate the artifacts in a clean Sales Pulse checkout at
+the intended `develop` revision, then run:
+
+```sh
+bun run creator-signal:design-system:sync -- \
+  --source-root ../sales-pulse \
+  --revision <full-sales-pulse-git-sha>
+```
+
+Review the revision, lock diff, generated adapter and packaged assets together.
+Never edit files under `assets/design-system`, `design-system/foundation-css.ts`
+or the current `icon.svg` by hand. The frozen
+`migrations/legacy-0.1.11-design-system.ts` is historical classifier evidence,
+not a runtime styling source.
+
 The integrations are disabled by default. Configure and enable them in the plugin settings only after the corresponding collectors and consent policy are ready.
 
 Configure the host with the `MINIO_*` environment/file variables documented in
@@ -42,6 +78,7 @@ site uses a separate identity and bucket.
 ## Build and install
 
 ```sh
+bun run creator-signal:design-system:check
 bun run instatic-plugin lint integrations/creator-signal
 bun run instatic-plugin build integrations/creator-signal
 ```
@@ -62,8 +99,8 @@ publishes authored pages.
 
 The plugin continues to govern technical records that must follow its runtime
 contract: Component Library definitions, Visual Components, saved layouts,
-namespaced styles, Mautic validation, CSP inputs, analytics event schemas and
-integration behaviour. Pack installation applies its database changes in one
+namespaced styles, the locked Design System adapter, Mautic validation, CSP
+inputs, analytics event schemas and integration behaviour. Pack installation applies its database changes in one
 transaction. A failure leaves both authored content and technical records at
 their prior state, and an empty managed installation retries the same-version
 starter import on its next bootstrap.
@@ -75,8 +112,9 @@ relying on plugin upgrade reconciliation.
 
 ### Upgrade existing 0.1.11 starter content
 
-Installing plugin 0.2.1 runs the versioned technical-pack upgrade and does not
-change existing pages. The authored-content migration remains version 0.2.0.
+Installing plugin 0.3.3 runs the versioned technical-pack upgrade, installs the
+public-authoring policy and does not change existing pages. The authored-content
+migration remains version 0.2.0.
 Export the complete site from **Admin → Export**, then run the read-only
 classifier:
 
@@ -87,7 +125,8 @@ bun run integrations/creator-signal/migrations/0.2.0/prepare.ts preview \
 
 The preview is ready only when every one of the 23 known routes is either the
 exact retained 0.1.11 starter or already uses the 0.2.0 model, no unexpected
-page would inherit the new shared template, and the template ID is available.
+page would inherit the new shared template, and both governed template IDs are
+available.
 Any authored difference blocks the whole migration for manual mapping; it is
 never overwritten heuristically.
 
@@ -119,6 +158,23 @@ own opinionated semantic HTML. Navigation links, feature cards and FAQ items are
 repeaters; complete prose and public documents use one sanitised rich-text
 value rather than a stack of paragraph nodes. The visual editor, Agent tools
 and MCP use the same Component Library entries and field validation.
+Registered `creator-signal.site.pattern.*` roots compose those leaves into
+approved page and section structures; saved layouts remain reserved for
+structures that authors are intentionally allowed to copy and diverge.
+
+`integrations/creator-signal/AUTHORING.md` is the complete route, section,
+component and shared-template reference. Its parity command generates a
+browsable production-versus-candidate report with full-page and per-section
+images at desktop, tablet and mobile widths.
+
+`integrations/creator-signal/PREVIEW-PARITY.md` defines the shared render
+profile used by the editable canvas, full-page Preview and public publisher,
+including the narrow editor-safety differences that do not change content or
+visual semantics.
+
+`integrations/creator-signal/ACCEPTANCE.md` defines the source-owned WCAG,
+keyboard, responsive, degraded-state and committed visual-baseline gate that
+runs against pages produced by Instatic's real public publishing pipeline.
 
 Deploy Mautic first and verify
 `https://marketing.creatorsignal.me/media/creator-signal/forms-v1.js` exposes
@@ -136,6 +192,10 @@ its own role-protected application boundary.
 
 - `docs/deployment/creator-signal-stack.md`
 - `integrations/creator-signal/COMPONENTS.md`
+- `integrations/creator-signal/AUTHORING.md`
+- `integrations/creator-signal/PREVIEW-PARITY.md`
+- `integrations/creator-signal/ACCEPTANCE.md`
+- `integrations/creator-signal/PARITY.md`
 - `integrations/creator-signal/instatic-plugin.config.ts`
 - `integrations/creator-signal/modules/mautic-form.ts`
 - `integrations/creator-signal/frontend/analytics.ts`

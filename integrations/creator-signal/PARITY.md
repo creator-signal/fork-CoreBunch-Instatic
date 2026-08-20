@@ -1,9 +1,11 @@
-# Creator Signal production parity
+# Creator Signal public-site acceptance baseline
 
-The current public site is the visual and behavioral baseline for every route
-in the Creator Signal pack. The candidate must preserve that presentation while
-the underlying page is authored from governed `creator-signal.site` leaf
-components and a shared structural template.
+The current public site remains the behavioural and content baseline for every
+route in the Creator Signal pack. Issue `creator-signal/sales-pulse#995`
+intentionally replaces its legacy visual language with the master Creator
+Signal Design System, so pixel equality with the old production styling is not
+an approval criterion for that migration. Route behaviour, content, landmarks,
+integrations and metadata must still remain intact.
 
 Run the deterministic comparison against a local candidate:
 
@@ -16,10 +18,12 @@ bun run verify:creator-signal-parity \
 
 The verifier derives the route roster from the shared public-route contract,
 which the pack test matches against the compiled pages. A newly added route
-cannot silently miss the matrix. It checks all 23 current routes at desktop,
-tablet and mobile widths. JavaScript is disabled for this pass so analytics,
+cannot silently miss the matrix. It can compare all 23 current routes at desktop,
+tablet and mobile widths. JavaScript is disabled for the deterministic pass so analytics,
 consent persistence and third-party form timing cannot make the visual result
-non-deterministic. The report covers:
+non-deterministic. During the intentional Design System migration, use the
+pixel output as review evidence and diagnose behavioural/layout regressions;
+do not treat expected old-versus-new brand pixels as a failure. The report covers:
 
 - full-page pixel comparison with a narrow anti-aliasing tolerance (0.2% of
   pixels and 0.1 mean channel delta);
@@ -29,16 +33,26 @@ non-deterministic. The report covers:
 - canonical, robots, Open Graph, Twitter and language metadata; and
 - preserved schema.org navigation markup.
 
-Failures write the baseline and candidate PNGs plus `report.json` under
-`.tmp/creator-signal-parity`. Metadata is intentionally a candidate quality
-gate rather than a production-equality check: the component-authored candidate
-retains complete SEO metadata even where the older public baseline omits it.
+Every run writes baseline and candidate full-page PNGs, per-section PNGs,
+`report.json`, and a browsable `index.html` under
+`.tmp/creator-signal-parity`. The HTML report shows the shared template,
+route-to-component map, authoring fields, desktop/tablet/mobile page pairs and
+section pairs even when they pass. Metadata is intentionally a candidate
+quality gate rather than a production-equality check: the component-authored
+candidate retains complete SEO metadata even where the older public baseline omits
+it.
 
 The same command also runs JavaScript-enabled comparisons for the essential-only
 consent choice and all six generated Mautic forms without submitting them.
 When the production baseline's generated script does not attach in headless
 Chromium, the gate records that diagnostic, matches the governed alias, and
 still requires the candidate to render labelled fields and a submit control.
-Repository tests separately verify navigation contracts, keyboard/accessibility
-rules and Agent/MCP component authoring. Passing this verifier does not
-authorize a production deployment.
+Repository tests separately verify the pinned Design System snapshot, theme
+runtime, navigation contracts and Agent/MCP component authoring. The completed
+source-owned multi-viewport, WCAG, keyboard, degraded-state and visual gate is
+documented in `integrations/creator-signal/ACCEPTANCE.md` and runs through
+`bun run verify:creator-signal-public-acceptance`. Passing either verifier or
+repository tests does not authorize a production deployment.
+
+The durable authoring and route reference is
+`integrations/creator-signal/AUTHORING.md`.

@@ -25,6 +25,7 @@ import type {
   ConditionDef,
   StyleRule,
   Page,
+  PublicAuthoringPolicy,
   SiteDocument,
 } from '@core/page-tree'
 import { assertValidNodeTree, conditionId, parseConditions } from '@core/page-tree'
@@ -35,6 +36,7 @@ import { parseValue, safeParseValue } from '@core/utils/typeboxHelpers'
 import { compiledCheck } from '@core/utils/typeboxCompiler'
 import { Type } from '@sinclair/typebox'
 import { PageSchema } from '@core/page-tree'
+import { PublicAuthoringPolicySchema } from '@core/page-tree'
 import { parseStyleRule } from '@core/page-tree'
 import { assertPathWithin } from '../util/pathWithin'
 
@@ -44,6 +46,7 @@ interface PluginPackContents {
   classes: StyleRule[]
   layouts: SavedLayout[]
   conditions?: ConditionDef[]
+  publicAuthoring?: PublicAuthoringPolicy
 }
 
 interface PluginPackInstallResult {
@@ -77,6 +80,7 @@ const PluginPackFileSchema = Type.Object({
   classes: Type.Optional(Type.Array(Type.Unknown())),
   layouts: Type.Optional(Type.Array(Type.Unknown())),
   conditions: Type.Optional(Type.Array(Type.Unknown())),
+  publicAuthoring: Type.Optional(PublicAuthoringPolicySchema),
 })
 
 export async function loadPluginPackFile(
@@ -102,6 +106,12 @@ export function parsePluginPack(pluginId: string, raw: unknown): PluginPackConte
   }
 
   const visualComponents: VisualComponent[] = []
+  const publicAuthoring = parsed.value.publicAuthoring
+  if (publicAuthoring && publicAuthoring.ownerPluginId !== pluginId) {
+    throw new PluginPackError(
+      `Plugin "${pluginId}" pack cannot install public-authoring policy owned by "${publicAuthoring.ownerPluginId}".`,
+    )
+  }
   for (const rawVc of parsed.value.visualComponents ?? []) {
     const vc = parseVisualComponent(rawVc)
     if (!vc) {
@@ -188,7 +198,14 @@ export function parsePluginPack(pluginId: string, raw: unknown): PluginPackConte
     }
   }
 
-  return { visualComponents, pages, classes, layouts, conditions }
+  return {
+    visualComponents,
+    pages,
+    classes,
+    layouts,
+    conditions,
+    ...(publicAuthoring ? { publicAuthoring } : {}),
+  }
 }
 
 const CSS_CLASS_NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_-]*$/
@@ -274,6 +291,12 @@ export function applyPluginPackToSite(
     site: {
       ...site,
       pages: installStarterPages ? [...pack.pages] : site.pages,
+      settings: pack.publicAuthoring
+        ? {
+            ...site.settings,
+            publicAuthoring: structuredClone(pack.publicAuthoring),
+          }
+        : site.settings,
       styleRules: nextClasses,
       conditions: [...nextConditions.values()],
       updatedAt: Date.now(),

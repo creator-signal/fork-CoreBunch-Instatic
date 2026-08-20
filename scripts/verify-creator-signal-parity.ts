@@ -1,8 +1,16 @@
 import { mkdir } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import { chromium, type BrowserContext, type Page } from 'playwright'
+import { chromium, type BrowserContext, type Locator, type Page } from 'playwright'
 import sharp from 'sharp'
 import { creatorSignalPublicRouteSlugs } from '../integrations/creator-signal/pack/routes'
+import { creatorSignalComponentLibraryEntries } from '../integrations/creator-signal/component-library'
+import { installPackCompileEnvironment } from '../src/core/plugin-sdk/cli/packCompileEnvironment'
+
+installPackCompileEnvironment()
+const {
+  creatorSignalPageAuthoringReference,
+  creatorSignalSharedTemplateEntryIds,
+} = await import('../integrations/creator-signal/pack/site')
 
 interface Viewport {
   name: 'desktop' | 'tablet' | 'mobile'
@@ -24,7 +32,15 @@ interface PageContract {
   landmarks: Record<string, number>
   classes: string[]
   schemaTypes: string[]
+  sections: PageSectionContract[]
   bodyHeight: number
+}
+
+interface PageSectionContract {
+  tag: string
+  className: string
+  heading: string
+  componentEntryId: string
 }
 
 interface VisualComparison {
@@ -33,6 +49,30 @@ interface VisualComparison {
   differentPixels: number
   differentPixelRatio: number
   meanChannelDelta: number
+}
+
+interface SectionComparisonResult {
+  index: number
+  pass: boolean
+  componentEntryId: string
+  heading: string
+  visual?: VisualComparison
+  screenshots?: { baseline: string; candidate: string }
+  failure?: string
+}
+
+interface ParityResult {
+  route: string
+  viewport: Viewport['name']
+  pass: boolean
+  visualPass: boolean
+  visual: VisualComparison
+  semanticFailures: string[]
+  candidateSeoFailures: string[]
+  screenshots: { baseline: string; candidate: string }
+  sections: SectionComparisonResult[]
+  baseline: PageContract
+  candidate: PageContract
 }
 
 const viewports: readonly Viewport[] = [
@@ -56,6 +96,10 @@ function routePath(slug: string): string {
 
 function fileStem(route: string): string {
   return route === '/' ? 'index' : route.slice(1).replace(/[^a-z0-9]+/gi, '-')
+}
+
+function identifierStem(value: string): string {
+  return value.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') || 'unknown'
 }
 
 async function collectContract(page: Page): Promise<PageContract> {
@@ -93,6 +137,32 @@ async function collectContract(page: Page): Promise<PageContract> {
           .map((node) => node.getAttribute('itemtype'))
           .filter((value): value is string => Boolean(value)),
       )].sort(),
+      sections: [
+        ...document.querySelectorAll(
+          'header.site-header, main > section, main > article, main > figure, ' +
+          'footer.site-footer, aside[data-consent-banner]',
+        ),
+      ].map((node) => {
+        const className = String(node.className)
+        let componentEntryId = 'unknown'
+        if (node.matches('header.site-header')) componentEntryId = 'creator-signal.site.header'
+        else if (node.matches('footer.site-footer')) componentEntryId = 'creator-signal.site.footer'
+        else if (node.matches('[data-consent-banner]')) componentEntryId = 'creator-signal.site.consent-banner'
+        else if (node.matches('.hero-section')) componentEntryId = 'creator-signal.site.hero'
+        else if (node.matches('.cta-section')) componentEntryId = 'creator-signal.site.call-to-action'
+        else if (node.matches('.testimonial')) componentEntryId = 'creator-signal.site.testimonial'
+        else if (node.matches('.public-document')) componentEntryId = 'creator-signal.site.public-document'
+        else if (node.matches('.cs-mautic')) componentEntryId = 'creator-signal.site.mautic-form'
+        else if (node.querySelector('.feature-grid')) componentEntryId = 'creator-signal.site.feature-grid'
+        else if (node.querySelector('.faq-list')) componentEntryId = 'creator-signal.site.faq'
+        else if (node.querySelector('.prose-content')) componentEntryId = 'creator-signal.site.rich-text-section'
+        return {
+          tag: node.tagName.toLowerCase(),
+          className,
+          heading: normalize(node.querySelector('h1,h2,h3')?.textContent),
+          componentEntryId,
+        }
+      }),
       bodyHeight: Math.round(document.body.getBoundingClientRect().height * 100) / 100,
     }
   })
@@ -156,6 +226,32 @@ async function comparePngs(baseline: Buffer, candidate: Buffer): Promise<VisualC
   }
 }
 
+async function screenshotSection(
+  page: Page,
+  locator: Locator,
+  componentEntryId: string,
+): Promise<Buffer> {
+  if (componentEntryId === 'creator-signal.site.consent-banner') {
+    return locator.screenshot({ animations: 'disabled' })
+  }
+
+  const consent = page.locator('aside[data-consent-banner]')
+  const previousVisibility = await consent.evaluateAll((nodes) => nodes.map((node) => {
+    const element = node as HTMLElement
+    const previous = element.style.visibility
+    element.style.visibility = 'hidden'
+    return previous
+  }))
+  try {
+    return await locator.screenshot({ animations: 'disabled' })
+  } finally {
+    await consent.evaluateAll((nodes, previous) => nodes.forEach((node, index) => {
+      const element = node as HTMLElement
+      element.style.visibility = previous[index] ?? ''
+    }), previousVisibility)
+  }
+}
+
 function seoFailures(contract: PageContract): string[] {
   const failures: string[] = []
   if (!contract.title) failures.push('missing title')
@@ -171,16 +267,169 @@ function seoFailures(contract: PageContract): string[] {
   return failures
 }
 
+function escapeReportHtml(value: unknown): string {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+}
+
+function percent(value: number): string {
+  return `${(value * 100).toFixed(4)}%`
+}
+
+function renderHtmlReport(input: {
+  generatedAt: string
+  baselineBase: string
+  candidateBase: string
+  results: readonly ParityResult[]
+  interactionResults: readonly Record<string, unknown>[]
+}): string {
+  const componentNameById = new Map(
+    creatorSignalComponentLibraryEntries.map((entry) => [entry.id, entry.name]),
+  )
+  const passed = input.results.filter((result) => result.pass).length
+  const interactionsPassed = input.interactionResults.filter(
+    (result) => result.pass === true,
+  ).length
+  const routeRows = creatorSignalPageAuthoringReference.map((page) => `
+    <tr>
+      <td><a href="#${identifierStem(page.route)}">${escapeReportHtml(page.route)}</a></td>
+      <td>${escapeReportHtml(page.title)}</td>
+      <td><code>${escapeReportHtml(componentNameById.get(page.patternId) ?? page.patternId)}</code></td>
+      <td>${page.componentEntryIds.map((id) =>
+        `<code>${escapeReportHtml(componentNameById.get(id) ?? id)}</code>`).join(' → ')}</td>
+    </tr>`).join('')
+  const componentRows = creatorSignalComponentLibraryEntries.map((entry) => {
+    const repeaters = entry.fields.filter((field) => field.type === 'repeater')
+    const placement = entry.constraints.allowedDocumentKinds?.map((kind) =>
+      kind === 'template' ? 'shared template' : 'page').join(', ') ?? 'page or template'
+    return `
+      <tr>
+        <td><code>${escapeReportHtml(entry.id)}</code><br><strong>${escapeReportHtml(entry.name)}</strong></td>
+        <td>${escapeReportHtml(entry.composition ?? 'leaf')}</td>
+        <td>${escapeReportHtml(placement)}</td>
+        <td>${entry.fields.map((field) => escapeReportHtml(field.label)).join(', ') || 'None'}</td>
+        <td>${repeaters.map((field) => escapeReportHtml(field.label)).join(', ') || 'None'}</td>
+        <td>${entry.slots.length}</td>
+      </tr>`
+  }).join('')
+  const pageComparisons = creatorSignalPageAuthoringReference.map((page, pageIndex) => {
+    const comparisons = input.results.filter((result) => result.route === page.route)
+    const viewportHtml = comparisons.map((comparison) => {
+      const sections = comparison.sections.map((section) => `
+        <article class="section-card">
+          <header>
+            <span class="status ${section.pass ? 'pass' : 'fail'}">${section.pass ? 'PASS' : 'FAIL'}</span>
+            <strong>${escapeReportHtml(componentNameById.get(section.componentEntryId) ?? section.componentEntryId)}</strong>
+            <span>${escapeReportHtml(section.heading)}</span>
+          </header>
+          ${section.screenshots ? `
+            <div class="image-pair compact">
+              <figure><figcaption>Production</figcaption><img loading="lazy" src="${escapeReportHtml(section.screenshots.baseline)}" alt="Production ${escapeReportHtml(section.componentEntryId)} section"></figure>
+              <figure><figcaption>Candidate</figcaption><img loading="lazy" src="${escapeReportHtml(section.screenshots.candidate)}" alt="Candidate ${escapeReportHtml(section.componentEntryId)} section"></figure>
+            </div>` : `<p>${escapeReportHtml(section.failure ?? 'Section screenshot unavailable.')}</p>`}
+        </article>`).join('')
+      const failures = [...comparison.semanticFailures, ...comparison.candidateSeoFailures]
+      return `
+        <section class="viewport-card">
+          <header class="comparison-heading">
+            <h3>${escapeReportHtml(comparison.viewport)}</h3>
+            <span class="status ${comparison.pass ? 'pass' : 'fail'}">${comparison.pass ? 'PASS' : 'FAIL'}</span>
+            <span>${percent(comparison.visual.differentPixelRatio)} different pixels · ${comparison.visual.meanChannelDelta.toFixed(4)} mean channel delta</span>
+          </header>
+          ${failures.length > 0 ? `<ul class="failures">${failures.map((failure) => `<li>${escapeReportHtml(failure)}</li>`).join('')}</ul>` : ''}
+          <div class="image-pair">
+            <figure><figcaption>Production</figcaption><img loading="lazy" src="${escapeReportHtml(comparison.screenshots.baseline)}" alt="Production ${escapeReportHtml(page.title)} at ${escapeReportHtml(comparison.viewport)}"></figure>
+            <figure><figcaption>Candidate</figcaption><img loading="lazy" src="${escapeReportHtml(comparison.screenshots.candidate)}" alt="Candidate ${escapeReportHtml(page.title)} at ${escapeReportHtml(comparison.viewport)}"></figure>
+          </div>
+          <details><summary>Component sections (${comparison.sections.length})</summary><div class="section-grid">${sections}</div></details>
+        </section>`
+    }).join('')
+    return `
+      <details class="page-card" id="${identifierStem(page.route)}" ${pageIndex === 0 ? 'open' : ''}>
+        <summary><strong>${escapeReportHtml(page.route)}</strong> · ${escapeReportHtml(page.title)} · ${comparisons.filter((result) => result.pass).length}/${comparisons.length} viewports</summary>
+        <p>${escapeReportHtml(page.description)}</p>
+        <p class="sequence"><strong>Governed pattern:</strong> ${escapeReportHtml(componentNameById.get(page.patternId) ?? page.patternId)}</p>
+        <p class="sequence"><strong>Page content:</strong> ${page.componentEntryIds.map((id) => escapeReportHtml(componentNameById.get(id) ?? id)).join(' → ')}</p>
+        ${viewportHtml || '<p>No visual comparisons were requested.</p>'}
+      </details>`
+  }).join('')
+  const sharedSequence = creatorSignalSharedTemplateEntryIds.map((id) =>
+    escapeReportHtml(componentNameById.get(id) ?? id)).join(' → ')
+
+  return `<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Creator Signal authoring and production parity</title>
+  <style>
+    :root { color-scheme: light dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    body { max-width: 1600px; margin: 0 auto; padding: 32px; background: #111315; color: #f4f5f7; line-height: 1.5; }
+    a { color: #82b5ff; } code { color: #b8d5ff; } table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px; border: 1px solid #34383d; text-align: left; vertical-align: top; }
+    th { background: #202328; } .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+    .metric, .page-card, .viewport-card, .section-card { border: 1px solid #34383d; border-radius: 12px; background: #191c20; }
+    .metric { padding: 16px; } .metric strong { display: block; font-size: 1.65rem; }
+    .page-card { margin: 18px 0; padding: 16px; scroll-margin-top: 16px; } .page-card > summary { cursor: pointer; font-size: 1.05rem; }
+    .viewport-card { margin-top: 16px; padding: 14px; } .comparison-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; }
+    .comparison-heading h3 { margin: 0; text-transform: capitalize; } .status { border-radius: 999px; padding: 2px 8px; font-size: .75rem; font-weight: 800; }
+    .status.pass { background: #164e2b; color: #9ff0ba; } .status.fail { background: #5b2024; color: #ffc0c3; }
+    .image-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0; align-items: start; }
+    figure { margin: 0; } figcaption { margin-bottom: 6px; color: #b8bec7; font-size: .8rem; font-weight: 700; text-transform: uppercase; }
+    img { display: block; width: 100%; height: auto; border: 1px solid #34383d; border-radius: 8px; background: white; }
+    .section-grid { display: grid; gap: 12px; margin-top: 12px; } .section-card { padding: 12px; } .section-card > header { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .compact img { max-height: 520px; object-fit: contain; object-position: top; } .failures { color: #ffc0c3; } .sequence { color: #c9ced6; }
+    section > h2 { margin-top: 42px; } .table-wrap { overflow-x: auto; }
+    @media (max-width: 760px) { body { padding: 16px; } .image-pair { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <p>Generated ${escapeReportHtml(input.generatedAt)}</p>
+    <h1>Creator Signal authoring and production parity</h1>
+    <p>Production <a href="${escapeReportHtml(input.baselineBase)}">${escapeReportHtml(input.baselineBase)}</a> compared with candidate <a href="${escapeReportHtml(input.candidateBase)}">${escapeReportHtml(input.candidateBase)}</a>. Images are captured at desktop, tablet and mobile widths.</p>
+  </header>
+  <div class="summary">
+    <div class="metric"><strong>${passed}/${input.results.length}</strong>page/viewport comparisons</div>
+    <div class="metric"><strong>${interactionsPassed}/${input.interactionResults.length}</strong>interaction comparisons</div>
+    <div class="metric"><strong>${creatorSignalPageAuthoringReference.length}</strong>public routes</div>
+    <div class="metric"><strong>${creatorSignalComponentLibraryEntries.length}</strong>authorable catalogue entries</div>
+  </div>
+  <section>
+    <h2>Shared template</h2>
+    <p><strong>Creator Signal site template</strong> wraps every ordinary page. Its sequence is ${sharedSequence}, with one content outlet between the header and footer. Page authors add only the route content listed below.</p>
+  </section>
+  <section>
+    <h2>Route and section reference</h2>
+    <div class="table-wrap"><table><thead><tr><th>Route</th><th>Page</th><th>Governed pattern</th><th>Opinionated page components</th></tr></thead><tbody>${routeRows}</tbody></table></div>
+  </section>
+  <section>
+    <h2>Authoring catalogue</h2>
+    <div class="table-wrap"><table><thead><tr><th>Component</th><th>Shape</th><th>Placement</th><th>Fields</th><th>Repeaters</th><th>Slots</th></tr></thead><tbody>${componentRows}</tbody></table></div>
+  </section>
+  <section>
+    <h2>Side-by-side pages and sections</h2>
+    ${pageComparisons}
+  </section>
+</body>
+</html>`
+}
+
 const baselineBase = baseUrl(argument('--baseline-base', 'https://creatorsignal.me'))
 const candidateBase = baseUrl(argument('--candidate-base', 'http://localhost:4330'))
 const outputDir = resolve(argument('--output-dir', '.tmp/creator-signal-parity'))
 const maxDifferentPixelRatio = Number(argument('--max-different-pixel-ratio', '0.002'))
 const maxMeanChannelDelta = Number(argument('--max-mean-channel-delta', '0.1'))
+const maxSectionDifferentPixels = Number(argument('--max-section-different-pixels', '1024'))
 const interactionsOnly = Bun.argv.includes('--interactions-only')
 await mkdir(outputDir, { recursive: true })
 
 const browser = await chromium.launch({ headless: true })
-const results: Array<Record<string, unknown>> = []
+const results: ParityResult[] = []
 const interactionResults: Array<Record<string, unknown>> = []
 let failed = false
 
@@ -199,13 +448,92 @@ try {
           openRoute(candidateContext, candidateBase, route),
         ])
         try {
+          const screenshotDir = resolve(outputDir, 'screenshots', viewport.name)
+          const sectionDir = resolve(outputDir, 'sections', viewport.name, fileStem(route))
+          await Promise.all([
+            mkdir(screenshotDir, { recursive: true }),
+            mkdir(sectionDir, { recursive: true }),
+          ])
+          const fullPageScreenshots = {
+            baseline: `screenshots/${viewport.name}/${fileStem(route)}-baseline.png`,
+            candidate: `screenshots/${viewport.name}/${fileStem(route)}-candidate.png`,
+          }
+          await Promise.all([
+            Bun.write(resolve(outputDir, fullPageScreenshots.baseline), baseline.screenshot),
+            Bun.write(resolve(outputDir, fullPageScreenshots.candidate), candidate.screenshot),
+          ])
+
           const visual = await comparePngs(baseline.screenshot, candidate.screenshot)
           const semanticFailures: string[] = []
           if (baseline.contract.visibleText !== candidate.contract.visibleText) semanticFailures.push('visible text differs')
           if (JSON.stringify(baseline.contract.headings) !== JSON.stringify(candidate.contract.headings)) semanticFailures.push('heading hierarchy differs')
           if (JSON.stringify(baseline.contract.landmarks) !== JSON.stringify(candidate.contract.landmarks)) semanticFailures.push('landmarks differ')
           if (JSON.stringify(baseline.contract.classes) !== JSON.stringify(candidate.contract.classes)) semanticFailures.push('class contract differs')
+          if (JSON.stringify(baseline.contract.sections) !== JSON.stringify(candidate.contract.sections)) semanticFailures.push('component section contract differs')
           if (Math.abs(baseline.contract.bodyHeight - candidate.contract.bodyHeight) > 1) semanticFailures.push('page height differs')
+          const sectionResults: SectionComparisonResult[] = []
+          const sectionSelector =
+            'header.site-header, main > section, main > article, main > figure, ' +
+            'footer.site-footer, aside[data-consent-banner]'
+          const baselineSections = baseline.page.locator(sectionSelector)
+          const candidateSections = candidate.page.locator(sectionSelector)
+          const [baselineSectionCount, candidateSectionCount] = await Promise.all([
+            baselineSections.count(),
+            candidateSections.count(),
+          ])
+          const sectionCount = Math.max(baselineSectionCount, candidateSectionCount)
+          for (let index = 0; index < sectionCount; index++) {
+            const sectionContract = candidate.contract.sections[index] ?? baseline.contract.sections[index]
+            if (index >= baselineSectionCount || index >= candidateSectionCount) {
+              sectionResults.push({
+                index,
+                pass: false,
+                componentEntryId: sectionContract?.componentEntryId ?? 'unknown',
+                heading: sectionContract?.heading ?? '',
+                failure: 'section missing from one side',
+              })
+              continue
+            }
+            const [baselineSection, candidateSection] = await Promise.all([
+              screenshotSection(
+                baseline.page,
+                baselineSections.nth(index),
+                sectionContract?.componentEntryId ?? 'unknown',
+              ),
+              screenshotSection(
+                candidate.page,
+                candidateSections.nth(index),
+                sectionContract?.componentEntryId ?? 'unknown',
+              ),
+            ])
+            const sectionStem = `${String(index + 1).padStart(2, '0')}-${identifierStem(sectionContract?.componentEntryId ?? 'unknown')}`
+            const screenshots = {
+              baseline: `sections/${viewport.name}/${fileStem(route)}/${sectionStem}-baseline.png`,
+              candidate: `sections/${viewport.name}/${fileStem(route)}/${sectionStem}-candidate.png`,
+            }
+            await Promise.all([
+              Bun.write(resolve(outputDir, screenshots.baseline), baselineSection),
+              Bun.write(resolve(outputDir, screenshots.candidate), candidateSection),
+            ])
+            const sectionVisual = await comparePngs(baselineSection, candidateSection)
+            const sectionPass =
+              ((sectionVisual.differentPixelRatio <= maxDifferentPixelRatio &&
+                sectionVisual.meanChannelDelta <= maxMeanChannelDelta) ||
+                sectionVisual.differentPixels <= maxSectionDifferentPixels) &&
+              baseline.contract.sections[index]?.componentEntryId ===
+                candidate.contract.sections[index]?.componentEntryId
+            sectionResults.push({
+              index,
+              pass: sectionPass,
+              componentEntryId: sectionContract?.componentEntryId ?? 'unknown',
+              heading: sectionContract?.heading ?? '',
+              visual: sectionVisual,
+              screenshots,
+            })
+          }
+          if (sectionResults.some((section) => section.pass === false)) {
+            semanticFailures.push('one or more component sections differ')
+          }
           const candidateSeoFailures = seoFailures(candidate.contract)
           const visualPass =
             visual.differentPixelRatio <= maxDifferentPixelRatio &&
@@ -213,11 +541,6 @@ try {
           const pass = visualPass && semanticFailures.length === 0 && candidateSeoFailures.length === 0
           if (!pass) {
             failed = true
-            const stem = `${viewport.name}-${fileStem(route)}`
-            await Promise.all([
-              Bun.write(resolve(outputDir, `${stem}-baseline.png`), baseline.screenshot),
-              Bun.write(resolve(outputDir, `${stem}-candidate.png`), candidate.screenshot),
-            ])
           }
           results.push({
             route,
@@ -227,6 +550,8 @@ try {
             visual,
             semanticFailures,
             candidateSeoFailures,
+            screenshots: fullPageScreenshots,
+            sections: sectionResults,
             baseline: baseline.contract,
             candidate: candidate.contract,
           })
@@ -361,6 +686,7 @@ const report = {
   candidateBase,
   maxDifferentPixelRatio,
   maxMeanChannelDelta,
+  maxSectionDifferentPixels,
   routes: creatorSignalPublicRouteSlugs.length,
   viewports: viewports.length,
   comparisons: results.length,
@@ -373,8 +699,33 @@ const report = {
     failed: interactionResults.filter((result) => !result.pass).length,
     results: interactionResults,
   },
+  authoring: {
+    sharedTemplateEntryIds: creatorSignalSharedTemplateEntryIds,
+    pages: creatorSignalPageAuthoringReference,
+    components: creatorSignalComponentLibraryEntries.map((entry) => ({
+      id: entry.id,
+      name: entry.name,
+      description: entry.description,
+      composition: entry.composition,
+      fields: entry.fields,
+      slots: entry.slots,
+      constraints: entry.constraints,
+      usage: entry.documentation.usage,
+      accessibility: entry.documentation.accessibility,
+    })),
+  },
 }
-await Bun.write(resolve(outputDir, 'report.json'), `${JSON.stringify(report, null, 2)}\n`)
-console.log(`\n${report.passed}/${report.comparisons} comparisons passed; report: ${resolve(outputDir, 'report.json')}`)
+await Promise.all([
+  Bun.write(resolve(outputDir, 'report.json'), `${JSON.stringify(report, null, 2)}\n`),
+  Bun.write(resolve(outputDir, 'index.html'), renderHtmlReport({
+    generatedAt: report.generatedAt,
+    baselineBase,
+    candidateBase,
+    results,
+    interactionResults,
+  })),
+])
+console.log(`\n${report.passed}/${report.comparisons} comparisons passed; visual report: ${resolve(outputDir, 'index.html')}`)
+console.log(`Machine-readable report: ${resolve(outputDir, 'report.json')}`)
 console.log(`${report.interactions.passed}/${report.interactions.comparisons} interaction comparisons passed`)
 if (failed) process.exitCode = 1

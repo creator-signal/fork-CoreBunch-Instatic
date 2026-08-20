@@ -4,10 +4,16 @@ import {
   escapeHtml,
   type PagePackEntry,
 } from '@core/plugin-sdk'
+import { componentLibraryPatternRegistry } from '@core/component-library'
 import type { PageSeo } from '@core/page-tree'
 import { creatorSignalComponentLibraryEntries } from '../component-library'
+import { creatorSignalBrandAssets } from '../design-system/contract'
 import { consentBanner, siteFooter, siteHeader } from '../modules/site-components'
-import { creatorSignalCss } from './design-system'
+import {
+  creatorSignalPatternForRole,
+  creatorSignalPublicAuthoringPolicy,
+} from '../public-authoring-contract'
+import { creatorSignalRenderProfile } from './design-system'
 import { heroComponent, heroParamIds } from './hero-component'
 
 interface ModuleBlock {
@@ -30,7 +36,26 @@ interface StarterPage {
   slug: string
   title: string
   description: string
+  patternId: string
   blocks: PageBlock[]
+}
+
+type OwnedPagePatternRole =
+  | 'content-page'
+  | 'product-page'
+  | 'pricing'
+  | 'features'
+  | 'contact'
+  | 'legal-trust'
+  | 'article-content'
+  | 'not-found-state'
+
+function pagePatternId(role: OwnedPagePatternRole): string {
+  const mapping = creatorSignalPatternForRole(role)
+  if (mapping.ownership !== 'pattern') {
+    throw new Error(`[creator-signal] Page pattern role "${role}" is not pattern-owned.`)
+  }
+  return mapping.patternId
 }
 
 const legalRelease = {
@@ -63,6 +88,7 @@ const hero = (
   body: string,
   actionUrl: string,
   actionLabel: string,
+  artwork = '',
 ): HeroBlock => ({
   kind: 'hero',
   entryId: 'creator-signal.site.hero',
@@ -72,7 +98,7 @@ const hero = (
     [heroParamIds.body]: body,
     [heroParamIds.actionLabel]: actionLabel,
     [heroParamIds.actionUrl]: actionUrl,
-    [heroParamIds.artwork]: '',
+    [heroParamIds.artwork]: artwork,
   },
 })
 
@@ -91,6 +117,31 @@ const features = (
     marker,
     heading: itemHeading,
     body,
+  })),
+})
+
+const comparison = (
+  eyebrow: string,
+  heading: string,
+  introduction: string,
+  caption: string,
+  labels: readonly [string, string, string],
+  items: Array<[string, string, string, string]>,
+  sectionId = 'comparison',
+): ModuleBlock => moduleBlock('comparison-section', {
+  eyebrow,
+  heading,
+  introduction,
+  sectionId,
+  caption,
+  firstLabel: labels[0],
+  secondLabel: labels[1],
+  thirdLabel: labels[2],
+  items: items.map(([label, firstValue, secondValue, thirdValue]) => ({
+    label,
+    firstValue,
+    secondValue,
+    thirdValue,
   })),
 })
 
@@ -142,6 +193,7 @@ const publicDocument = (
   slug,
   title,
   description,
+  patternId: pagePatternId('legal-trust'),
   blocks: [moduleBlock('public-document', {
     eyebrow: 'Creator Signal',
     heading: title,
@@ -151,14 +203,20 @@ const publicDocument = (
   })],
 })
 
-const starterPages: StarterPage[] = [
+/**
+ * Exact 0.1.11 starter specification used only by the retained migration
+ * reconstruction. Apply current catalogue changes to the cloned starterPages
+ * below so the historical classifier cannot drift with the active pack.
+ */
+export const legacyCreatorSignalStarterPages0111: StarterPage[] = [
   {
     id: 'home',
     slug: 'index',
     title: 'Creator Signal',
     description: 'Calm, useful tools that help independent creators understand what is working and act with confidence.',
+    patternId: pagePatternId('product-page'),
     blocks: [
-      hero('Creator Signal', 'Turn creative business data into a clearer next move.', 'Creator Signal builds calm, useful tools that help independent creators understand what is working and act with confidence.', '/products/sales-pulse', 'Explore Sales Pulse'),
+      hero('Creator Signal', 'Turn creative business data into a clearer next move.', 'Creator Signal builds calm, useful tools that help independent creators understand what is working and act with confidence.', '/products/sales-pulse', 'Explore Sales Pulse', creatorSignalBrandAssets.creatorSignalSocial),
       features('Built for working creators', 'Less spreadsheet archaeology. More useful signals.', 'Bring scattered marketplace activity into focused experiences without giving up control of your work or data.', [
         ['01', 'See the whole picture', 'Bring sales history and current activity into one considered view.'],
         ['02', 'Keep your data yours', 'Use private, exportable records with straightforward controls.'],
@@ -172,8 +230,9 @@ const starterPages: StarterPage[] = [
     slug: 'products',
     title: 'Products',
     description: 'Focused products for clearer creative-business decisions.',
+    patternId: pagePatternId('product-page'),
     blocks: [
-      hero('Creator Signal products', 'Products for clearer creative-business decisions.', 'Creator Signal products turn complex business information into focused, practical experiences. Start with Sales Pulse, with more products to follow.', '/products/sales-pulse', 'Explore Sales Pulse'),
+      hero('Creator Signal products', 'Products for clearer creative-business decisions.', 'Creator Signal products turn complex business information into focused, practical experiences. Start with Sales Pulse, with more products to follow.', '/products/sales-pulse', 'Explore Sales Pulse', creatorSignalBrandAssets.creatorSignalSocial),
       features('Products', 'Available now.', 'Our product catalogue will grow as we build more focused tools for independent creators.', [
         ['SP', 'Sales Pulse', 'Understand what is selling, what is changing and where to focus next.'],
       ]),
@@ -185,8 +244,9 @@ const starterPages: StarterPage[] = [
     slug: 'products/sales-pulse',
     title: 'Sales Pulse',
     description: 'Turn marketplace history into a calm view of what is selling, what is changing and where to look next.',
+    patternId: pagePatternId('product-page'),
     blocks: [
-      hero('Sales Pulse', 'See the signal in your sales.', 'Sales Pulse turns marketplace history into a calm, useful view of what is selling, what is changing and where to look next.', '/pricing', 'View pricing'),
+      hero('Sales Pulse', 'See the signal in your sales.', 'Sales Pulse turns marketplace history into a calm, useful view of what is selling, what is changing and where to look next.', '/pricing', 'View pricing', creatorSignalBrandAssets.salesPulseSocial),
       features('What it does', 'A dashboard made for creative work.', 'Understand performance without rebuilding the same spreadsheet every week.', [
         ['01', 'Connected history', 'Import supported marketplace sales and keep a durable record.'],
         ['02', 'Useful comparisons', 'See products, periods and patterns in a consistent view.'],
@@ -200,8 +260,9 @@ const starterPages: StarterPage[] = [
     slug: 'features',
     title: 'Features',
     description: 'Reliable imports, readable analysis and clear controls for independent creators.',
+    patternId: pagePatternId('features'),
     blocks: [
-      hero('Features', 'Practical tools, deliberately focused.', 'Creator Signal prioritises reliable imports, readable analysis and clear controls over noisy dashboards.', '/pricing', 'See pricing'),
+      hero('Features', 'Practical tools, deliberately focused.', 'Creator Signal prioritises reliable imports, readable analysis and clear controls over noisy dashboards.', '/pricing', 'See pricing', creatorSignalBrandAssets.salesPulseSocial),
       features('Capabilities', 'Built around the work you already do.', 'Each capability is designed to reduce repeated administration and make the next decision easier.', [
         ['01', 'Sales imports', 'Bring supported marketplace history into a consistent ledger.'],
         ['02', 'Performance views', 'Compare products and time periods without manual cleanup.'],
@@ -217,8 +278,9 @@ const starterPages: StarterPage[] = [
     slug: 'pricing',
     title: 'Pricing',
     description: 'Straightforward AUD monthly Sales Pulse plans with access boundaries shown before checkout.',
+    patternId: pagePatternId('pricing'),
     blocks: [
-      hero('Pricing', 'Choose the Sales Pulse plan that fits your work.', 'Straightforward AUD monthly plans with the access boundary shown before checkout.', 'https://salespulse.creatorsignal.me', 'Open Sales Pulse'),
+      hero('Pricing', 'Choose the Sales Pulse plan that fits your work.', 'Straightforward AUD monthly plans with the access boundary shown before checkout.', 'https://salespulse.creatorsignal.me', 'Open Sales Pulse', creatorSignalBrandAssets.salesPulseSocial),
       features('Sales Pulse plans', 'Free, Starter and Pro.', 'Product access is funded by subscriptions, not advertising profiles.', [
         ['01', 'Free — $0', 'Start with the core workflow and understand whether Sales Pulse fits.'],
         ['02', 'Starter — $5 AUD monthly', 'Build a durable sales record and unlock the supported starter capabilities.'],
@@ -239,11 +301,12 @@ const formPages = [
 ] as const
 
 for (const page of formPages) {
-  starterPages.push({
+  legacyCreatorSignalStarterPages0111.push({
     id: page.id,
     slug: page.slug,
     title: page.title,
     description: page.description,
+    patternId: pagePatternId('contact'),
     blocks: [
       hero(...page.hero),
       managedForm({
@@ -259,12 +322,13 @@ for (const page of formPages) {
   })
 }
 
-starterPages.push(
+legacyCreatorSignalStarterPages0111.push(
   {
     id: 'privacy',
     slug: 'legal/privacy',
     title: 'Privacy',
     description: 'How Creator Signal uses information to operate its services and the choices available to you.',
+    patternId: pagePatternId('article-content'),
     blocks: [
       hero('Legal', 'Privacy should be understandable.', 'This notice explains the information Creator Signal uses to operate its services and the choices available to you.', '/contact', 'Contact us'),
       richText('Information we use', [
@@ -280,6 +344,7 @@ starterPages.push(
     slug: 'legal/terms',
     title: 'Terms',
     description: 'Acceptable use, subscriptions, connected data and service responsibilities for Creator Signal.',
+    patternId: pagePatternId('article-content'),
     blocks: [
       hero('Legal', 'Clear expectations for using Creator Signal.', 'These terms describe acceptable use, subscriptions, connected data and service responsibilities.', '/contact', 'Contact us'),
       richText('Service terms', [
@@ -342,6 +407,67 @@ starterPages.push(
   ]),
 )
 
+const starterPages: StarterPage[] = legacyCreatorSignalStarterPages0111.map((page) => ({
+  ...page,
+  blocks: [...page.blocks],
+}))
+
+for (const slug of ['legal/privacy', 'legal/terms']) {
+  const page = starterPages.find((candidate) => candidate.slug === slug)
+  const legacyContent = page?.blocks.find(
+    (block): block is ModuleBlock =>
+      block.kind === 'module' && block.moduleId === 'creator-signal.site.rich-text-section',
+  )
+  if (!page || !legacyContent) {
+    throw new Error(`[creator-signal] Missing legacy legal content for "${slug}".`)
+  }
+  page.patternId = pagePatternId('legal-trust')
+  page.blocks = [moduleBlock('public-document', {
+    eyebrow: 'Creator Signal',
+    heading: page.title,
+    summary: page.description,
+    body: legacyContent.props.body,
+    dateModified: legalRelease.version,
+  })]
+}
+
+const pricingPage = starterPages.find((page) => page.slug === 'pricing')
+if (!pricingPage) throw new Error('[creator-signal] Missing pricing starter page.')
+pricingPage.blocks = [
+  pricingPage.blocks[0]!,
+  comparison(
+    'Sales Pulse plans',
+    'Compare Free, Starter and Pro.',
+    'Product access is funded by subscriptions, not advertising profiles.',
+    'Sales Pulse monthly plan comparison in Australian dollars',
+    ['Free', 'Starter', 'Pro'],
+    [
+      ['Monthly price', '$0', '$5 AUD', '$10 AUD'],
+      ['Best for', 'Trying the core workflow', 'Building a durable sales record', 'Using the full analysis experience'],
+      ['Product access', 'Core workflow', 'Supported Starter capabilities', 'Full analysis and broader comparisons'],
+    ],
+    'plans',
+  ),
+  pricingPage.blocks[2]!,
+]
+
+const notFoundPage: StarterPage = {
+  id: 'not-found',
+  slug: 'creator-signal-not-found',
+  title: 'Page not found',
+  description: 'The requested Creator Signal page could not be found.',
+  patternId: pagePatternId('not-found-state'),
+  blocks: [moduleBlock('recovery-state', {
+    state: 'not-found',
+    heading: 'We cannot find that page',
+    body: 'The address may have changed or the page may no longer exist.',
+    actionLabel: 'Return home',
+    actionUrl: '/',
+    sectionId: 'not-found-state',
+  })],
+}
+const governedPages = [...starterPages, notFoundPage]
+
 function pageSeo(page: StarterPage): PageSeo {
   const pageTitle = page.slug === 'index' ? page.title : `${page.title} | Creator Signal`
   const path = page.slug === 'index' ? '' : `/${page.slug}`
@@ -358,11 +484,11 @@ function pageSeo(page: StarterPage): PageSeo {
 }
 
 const placeholder = (index: number): string => `<div data-creator-signal-block="${index}"></div>`
-const entries: PagePackEntry[] = starterPages.map((page) => ({
+const entries: PagePackEntry[] = governedPages.map((page) => ({
   id: page.id,
   slug: page.slug,
   title: page.title,
-  html: page.blocks.map((_, index) => placeholder(index)).join(''),
+  html: placeholder(0),
 }))
 
 const sharedBlocks: PageBlock[] = [
@@ -371,14 +497,48 @@ const sharedBlocks: PageBlock[] = [
   moduleBlock('consent-banner', { ...consentBanner.defaults }),
 ]
 
+export interface CreatorSignalPageAuthoringReference {
+  route: string
+  title: string
+  description: string
+  patternId: string
+  componentEntryIds: string[]
+}
+
+/** Durable route-to-component contract consumed by tests and parity reports. */
+export const creatorSignalPageAuthoringReference: readonly CreatorSignalPageAuthoringReference[] =
+  starterPages.map((page) => ({
+    route: page.slug === 'index' ? '/' : `/${page.slug}`,
+    title: page.title,
+    description: page.description,
+    patternId: page.patternId,
+    componentEntryIds: page.blocks.map((block) => block.entryId),
+  }))
+
+export const creatorSignalNotFoundAuthoringReference: CreatorSignalPageAuthoringReference = {
+  route: '/404',
+  title: notFoundPage.title,
+  description: notFoundPage.description,
+  patternId: notFoundPage.patternId,
+  componentEntryIds: notFoundPage.blocks.map((block) => block.entryId),
+}
+
+export const creatorSignalSharedTemplateEntryIds = sharedBlocks.map(
+  (block) => block.entryId,
+)
+
 entries.push({
   id: 'site-template',
   slug: 'creator-signal-site-template',
   title: 'Creator Signal site template',
-  html: `${placeholder(0)}<main id="main-content"><instatic-outlet></instatic-outlet></main>${placeholder(1)}${placeholder(2)}`,
+  html: `${placeholder(0)}<main id="main-content" tabindex="-1"><instatic-outlet></instatic-outlet></main>${placeholder(1)}${placeholder(2)}`,
 })
 
-const compiled = compilePackPages('creator-signal.site', entries, creatorSignalCss)
+const compiled = compilePackPages(
+  'creator-signal.site',
+  entries,
+  creatorSignalRenderProfile.stylesheet,
+)
 const entryVersion = new Map(
   creatorSignalComponentLibraryEntries.map((entry) => [entry.id, entry.version]),
 )
@@ -417,10 +577,83 @@ function applyBlocks(pageSlug: string, blocks: PageBlock[]): void {
   }
 }
 
-for (const page of starterPages) {
-  applyBlocks(page.slug, page.blocks)
+function applyPagePattern(page: StarterPage): void {
+  const compiledPage = compiled.pages.find((candidate) => candidate.slug === page.slug)
+  if (!compiledPage) throw new Error(`[creator-signal] Missing compiled page "${page.slug}".`)
+
+  const placeholderNode = Object.values(compiledPage.nodes).find((node) => {
+    const attributes = node.props.htmlAttributes
+    return Boolean(
+      attributes &&
+      typeof attributes === 'object' &&
+      !Array.isArray(attributes) &&
+      (attributes as Record<string, unknown>)['data-creator-signal-block'] === '0',
+    )
+  })
+  if (!placeholderNode) {
+    throw new Error(`[creator-signal] Page "${page.slug}" has no governed pattern placeholder.`)
+  }
+
+  const version = entryVersion.get(page.patternId)
+  if (!version) throw new Error(`[creator-signal] Missing pattern entry "${page.patternId}".`)
+  const fragment = componentLibraryPatternRegistry.materialize(page.patternId, {
+    entryId: page.patternId,
+    entryVersion: version,
+    variantId: 'default',
+  })
+  const rootId = fragment?.rootIds[0]
+  const root = rootId ? fragment?.nodes[rootId] : undefined
+  if (!fragment || !rootId || !root) {
+    throw new Error(`[creator-signal] Pattern "${page.patternId}" could not materialize.`)
+  }
+  const authorableNodeIds = root.catalogueInstance?.pattern?.authorableNodeIds ?? []
+  if (authorableNodeIds.length !== page.blocks.length) {
+    throw new Error(
+      `[creator-signal] Pattern "${page.patternId}" exposes ${authorableNodeIds.length}/${page.blocks.length} route blocks.`,
+    )
+  }
+
+  for (const [index, block] of page.blocks.entries()) {
+    const nodeId = authorableNodeIds[index]!
+    const node = fragment.nodes[nodeId]
+    if (!node || node.catalogueInstance?.entryId !== block.entryId) {
+      throw new Error(
+        `[creator-signal] Pattern "${page.patternId}" block ${index} does not map to "${block.entryId}".`,
+      )
+    }
+    const expectedModuleId = block.kind === 'hero' ? 'base.visual-component-ref' : block.moduleId
+    if (node.moduleId !== expectedModuleId) {
+      throw new Error(
+        `[creator-signal] Pattern "${page.patternId}" block ${index} uses "${node.moduleId}", expected "${expectedModuleId}".`,
+      )
+    }
+    node.props = block.kind === 'hero'
+      ? { componentId: heroComponent.id, propOverrides: block.props }
+      : { ...block.props }
+    node.children = []
+    node.classIds = []
+  }
+
+  for (const [nodeId, node] of Object.entries(fragment.nodes)) {
+    if (nodeId === rootId) continue
+    compiledPage.nodes[nodeId] = node
+  }
+  compiledPage.nodes[placeholderNode.id] = {
+    ...root,
+    id: placeholderNode.id,
+  }
+}
+
+for (const page of governedPages) {
+  applyPagePattern(page)
   const compiledPage = compiled.pages.find((candidate) => candidate.slug === page.slug)!
-  compiledPage.seo = pageSeo(page)
+  compiledPage.seo = page === notFoundPage
+    ? {
+        ...pageSeo(page),
+        canonicalUrl: 'https://creatorsignal.me/404',
+        robots: { index: false, follow: true, archive: false },
+      }
+    : pageSeo(page)
 }
 
 applyBlocks('creator-signal-site-template', sharedBlocks)
@@ -430,9 +663,16 @@ siteTemplate.template = {
   target: { kind: 'everywhere' },
   priority: 0,
 }
+const notFoundTemplate = compiled.pages.find((page) => page.slug === notFoundPage.slug)!
+notFoundTemplate.template = {
+  enabled: true,
+  target: { kind: 'notFound' },
+  priority: 0,
+}
 
 const pack = definePack({
   pluginId: 'creator-signal.site',
+  publicAuthoring: creatorSignalPublicAuthoringPolicy,
   visualComponents: [heroComponent],
   pages: compiled.pages,
   conditions: compiled.conditions,

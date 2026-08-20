@@ -86,7 +86,8 @@ describe('Creator Signal 0.2.0 content migration', () => {
       missing: 0,
       additionalPages: 0,
       template: 'add',
-      rowsInMigration: 24,
+      notFoundTemplate: 'add',
+      rowsInMigration: 25,
     })
     expect(result.report.apply).toMatchObject({
       strategy: 'merge-overwrite',
@@ -94,7 +95,7 @@ describe('Creator Signal 0.2.0 content migration', () => {
     })
     expect(result.manifest?.site).toBeUndefined()
     expect(result.manifest?.media).toBeUndefined()
-    expect(result.manifest?.rows).toHaveLength(24)
+    expect(result.manifest?.rows).toHaveLength(25)
     expect(result.manifest?.tables[0].fields.some((field) => field.id === 'seo')).toBe(true)
 
     const templateRow = result.manifest?.rows.find((row) =>
@@ -103,10 +104,20 @@ describe('Creator Signal 0.2.0 content migration', () => {
     expect(templateRow?.cells.templateEnabled).toBe(true)
     expect(templateRow?.slug).toBe('creator-signal-site-template')
 
+    const notFoundTemplateRow = result.manifest?.rows.find((row) =>
+      row.id === 'creator-signal.site/page/not-found')
+    expect(notFoundTemplateRow?.status).toBe('draft')
+    expect(notFoundTemplateRow?.cells.templateTarget).toEqual({ kind: 'notFound' })
+
     const home = result.manifest?.rows.find((row) =>
       row.id === 'creator-signal.site/page/home')
     const body = home?.cells.body as { nodes: Record<string, { children: string[]; catalogueInstance?: { entryId: string } }>; rootNodeId: string }
-    for (const nodeId of body.nodes[body.rootNodeId].children) {
+    expect(body.nodes[body.rootNodeId].children).toHaveLength(1)
+    const patternNode = body.nodes[body.nodes[body.rootNodeId].children[0]!]
+    expect(patternNode.catalogueInstance?.entryId).toBe(
+      'creator-signal.site.pattern.product-page',
+    )
+    for (const nodeId of patternNode.children) {
       expect(body.nodes[nodeId].catalogueInstance?.entryId).toStartWith('creator-signal.site.')
       expect(body.nodes[nodeId].children).toEqual([])
     }
@@ -129,6 +140,7 @@ describe('Creator Signal 0.2.0 content migration', () => {
     expect(result.report.summary).toMatchObject({
       alreadyCurrent: 23,
       template: 'repair',
+      notFoundTemplate: 'current',
       rowsInMigration: 1,
     })
     expect(result.manifest?.rows).toHaveLength(1)

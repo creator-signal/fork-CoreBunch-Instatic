@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import { SiteExplorerPanel } from '@site/panels/SiteExplorerPanel'
 import { useEditorStore } from '@site/store/store'
 import { makeNode, makePage, makeSite } from '../fixtures'
+import { resolvePageWrapperTemplates } from '@core/templates'
 
 const originalFetch = globalThis.fetch
 
@@ -65,6 +66,64 @@ function loadTemplateSite() {
 beforeEach(resetStore)
 
 describe('SiteExplorerPanel templates', () => {
+  it('tells authors that new pages inherit the shared frame and creates content only', () => {
+    const home = makePage({
+      id: 'page-home',
+      title: 'Home',
+      slug: 'index',
+      rootNodeId: 'root-home',
+      nodes: {
+        'root-home': makeNode({ id: 'root-home', moduleId: 'base.body' }),
+      },
+    })
+    const template = makePage({
+      id: 'page-site-template',
+      title: 'Creator Signal site template',
+      slug: 'creator-signal-site-template',
+      rootNodeId: 'root-template',
+      nodes: {
+        'root-template': makeNode({
+          id: 'root-template',
+          moduleId: 'base.body',
+          children: ['header', 'outlet', 'footer'],
+        }),
+        header: makeNode({ id: 'header', moduleId: 'base.container' }),
+        outlet: makeNode({ id: 'outlet', moduleId: 'base.outlet' }),
+        footer: makeNode({ id: 'footer', moduleId: 'base.container' }),
+      },
+      template: {
+        enabled: true,
+        target: { kind: 'everywhere' },
+        priority: 0,
+      },
+    })
+    useEditorStore.setState({
+      site: makeSite({ pages: [home, template] }),
+      activePageId: home.id,
+      activeDocument: { kind: 'page', pageId: home.id },
+    } as Parameters<typeof useEditorStore.setState>[0])
+
+    render(<SiteExplorerPanel sectionGroup="site" />)
+    fireEvent.click(screen.getByRole('button', { name: 'New page' }))
+
+    const dialog = screen.getByRole('dialog', { name: 'New page' })
+    const notice = within(dialog).getByRole('status')
+    expect(notice.textContent).toContain('Creator Signal site template')
+    expect(notice.textContent).toContain("Add only this page's content")
+
+    fireEvent.change(within(dialog).getByLabelText('Name'), {
+      target: { value: 'Authorable page' },
+    })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Create' }))
+
+    const site = useEditorStore.getState().site!
+    const created = site.pages.find((page) => page.title === 'Authorable page')!
+    expect(created.template).toBeUndefined()
+    expect(created.nodes[created.rootNodeId]?.children).toEqual([])
+    expect(resolvePageWrapperTemplates(site, created).map((page) => page.id))
+      .toEqual([template.id])
+  })
+
   it('shows pages and templates in separate sections', () => {
     loadTemplateSite()
     render(<SiteExplorerPanel sectionGroup="site" />)

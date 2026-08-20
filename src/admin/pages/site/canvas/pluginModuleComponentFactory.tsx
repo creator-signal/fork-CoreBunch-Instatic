@@ -10,11 +10,12 @@
  * opt into `canHaveChildren` still see the host-rendered nested modules.
  *
  * Module CSS — the `.css` string a plugin returns from `render()` — is
- * injected into the document head as a single `<style data-plugin-module="..."
- * data-css-hash="...">` element per module type + CSS content. The publisher
- * does the equivalent via `buildSiteCssBundle` for the published page, so
- * keeping the canvas in sync means the editor preview matches what visitors
- * will see — no more "styled on the frontend, unstyled in canvas" surprises.
+ * injected into the nearest canvas iframe document as a single
+ * `<style data-plugin-module="..." data-css-hash="...">` element per module
+ * type + CSS content. The publisher does the equivalent via
+ * `buildSiteCssBundle` for the published page. Targeting the canvas document
+ * (not the surrounding admin document) is essential: every breakpoint and
+ * live frame is an isolated document with its own cascade.
  *
  * This file deliberately exports only the factory function (a regular
  * function, not a React component) so React Fast Refresh stays happy. Each
@@ -28,13 +29,20 @@ import type {
   PluginModuleDefinition,
 } from '@core/plugin-sdk'
 import type { PluginModuleComponentFactory } from '@core/plugins/moduleAdapter'
+import { useContext, useEffect } from 'react'
+import { CanvasDocumentContext } from './CanvasContexts'
 
 /**
  * Track which (moduleId, css-content-hash) pairs we've already injected,
  * so re-rendering an instance doesn't keep appending `<style>` elements.
  * Keyed by the data-css-hash attribute the `<style>` element carries.
  */
-const injectedCssHashes = new Set<string>()
+interface InjectedModuleCss {
+  element: HTMLStyleElement
+  references: number
+}
+
+const injectedModuleCss = new WeakMap<Document, Map<string, InjectedModuleCss>>()
 
 /**
  * Tiny non-crypto hash — DJB2. Used purely to key the injected `<style>`
@@ -51,34 +59,49 @@ function hashCss(s: string): string {
   return (h >>> 0).toString(36)
 }
 
-function injectModuleCss(moduleId: string, css: string): void {
-  if (typeof document === 'undefined') return
+function acquireModuleCss(targetDocument: Document, moduleId: string, css: string): () => void {
   const trimmed = css.trim()
-  if (!trimmed) return
+  if (!trimmed) return () => {}
   const hash = hashCss(trimmed)
   const key = `${moduleId}:${hash}`
-  if (injectedCssHashes.has(key)) return
-  // Defensive — another instance may have injected the same hash before
-  // this one ran (e.g. during concurrent first renders of two instances
-  // of the same module).
-  if (document.querySelector(
-    `style[data-plugin-module="${CSS.escape(moduleId)}"][data-css-hash="${CSS.escape(hash)}"]`,
-  )) {
-    injectedCssHashes.add(key)
-    return
+  let entries = injectedModuleCss.get(targetDocument)
+  if (!entries) {
+    entries = new Map()
+    injectedModuleCss.set(targetDocument, entries)
   }
-  const style = document.createElement('style')
-  style.setAttribute('data-plugin-module', moduleId)
-  style.setAttribute('data-css-hash', hash)
-  style.textContent = trimmed
-  document.head.appendChild(style)
-  injectedCssHashes.add(key)
+
+  let entry = entries.get(key)
+  if (!entry) {
+    const element = targetDocument.createElement('style')
+    element.setAttribute('data-plugin-module', moduleId)
+    element.setAttribute('data-css-hash', hash)
+    // Canvas author CSS is layered so the unlayered editor-chrome rules can
+    // remain authoritative. Keep module CSS in that same layer: this preserves
+    // the published author cascade while still preventing plugin styles from
+    // leaking into or defeating editor chrome.
+    element.textContent = `@layer user-authored {\n${trimmed}\n}`
+    const userStyles = targetDocument.getElementById('mc-user-styles')
+    targetDocument.head.insertBefore(element, userStyles)
+    entry = { element, references: 0 }
+    entries.set(key, entry)
+  }
+  entry.references += 1
+
+  return () => {
+    const current = entries?.get(key)
+    if (!current) return
+    current.references -= 1
+    if (current.references > 0) return
+    current.element.remove()
+    entries?.delete(key)
+  }
 }
 
 export const editorPluginModuleComponentFactory: PluginModuleComponentFactory = (definition: PluginModuleDefinition) => {
   const renderForEditor = definition.preview ?? definition.render
   const canHaveChildren = Boolean(definition.canHaveChildren)
   return function PluginCanvasModule(props: ModuleComponentProps) {
+    const canvasDocument = useContext(CanvasDocumentContext)
     const childList: string[] = []
     // Defensive wrap — a throwing plugin preview()/render() is caught by the
     // per-node ErrorBoundary above us, but that boundary swaps the entire
@@ -96,7 +119,12 @@ export const editorPluginModuleComponentFactory: PluginModuleComponentFactory = 
       console.error(`[plugin-module:${definition.id}] preview/render() threw:`, err)
       html = `<!-- instatic: plugin module "${definition.id}" render failed -->`
     }
-    if (css) injectModuleCss(definition.id, css)
+    useEffect(() => {
+      if (!css) return
+      const targetDocument = canvasDocument ?? (typeof document === 'undefined' ? null : document)
+      if (!targetDocument) return
+      return acquireModuleCss(targetDocument, definition.id, css)
+    }, [canvasDocument, css])
     if (canHaveChildren) {
       // dangerouslySetInnerHTML and children are mutually exclusive in React.
       // Plugins with `canHaveChildren: true` need both: rendered HTML + a

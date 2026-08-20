@@ -10,6 +10,56 @@ import '@modules/base/index'
 const publicId = creatorSignalCatalogueEntryId
 
 describe('Component Library placement policy', () => {
+  it('keeps shared chrome in template documents', () => {
+    const text = componentLibraryRegistry.getOrThrow(publicId('base.plain-text'))
+    const sharedChrome: ComponentLibraryEntry = {
+      ...text,
+      id: 'test.shared-header',
+      name: 'Shared header',
+      constraints: { allowedDocumentKinds: ['template'] },
+    }
+
+    expect(resolveComponentLibraryPlacement(sharedChrome, {
+      documentKind: 'page',
+      parentIsPageRoot: true,
+      existingChildCount: 0,
+    })).toMatchObject({
+      allowed: false,
+      code: 'document-rejects-entry',
+    })
+    expect(resolveComponentLibraryPlacement(sharedChrome, {
+      documentKind: 'template',
+      parentIsPageRoot: true,
+      existingChildCount: 0,
+    })).toEqual({ allowed: true })
+  })
+
+  it('enforces per-document component cardinality', () => {
+    const hero: ComponentLibraryEntry = {
+      ...componentLibraryRegistry.getOrThrow(publicId('base.hero')),
+      constraints: {
+        allowedDocumentKinds: ['page'],
+        maxInstancesPerDocument: 1,
+      },
+    }
+
+    expect(resolveComponentLibraryPlacement(hero, {
+      documentKind: 'page',
+      parentIsPageRoot: true,
+      existingChildCount: 1,
+      existingDocumentEntryCount: 1,
+    })).toMatchObject({
+      allowed: false,
+      code: 'document-entry-limit',
+    })
+    expect(resolveComponentLibraryPlacement(hero, {
+      documentKind: 'page',
+      parentIsPageRoot: true,
+      existingChildCount: 1,
+      existingDocumentEntryCount: 0,
+    })).toEqual({ allowed: true })
+  })
+
   it('enforces child-required parents and parent child allow-lists', () => {
     const email = componentLibraryRegistry.getOrThrow(publicId('base.email-input'))
     const form = componentLibraryRegistry.getOrThrow(publicId('base.form-container'))

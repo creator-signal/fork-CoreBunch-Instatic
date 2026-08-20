@@ -1,4 +1,5 @@
 import { control, defineModule, html, raw, safeUrl } from '@core/plugin-sdk'
+import { creatorSignalBrandAssets } from '../../design-system/contract'
 import { creatorSignalSiteCss } from '../mautic-form'
 
 export interface NavigationItem {
@@ -18,12 +19,23 @@ export interface FaqItem {
   answer: string
 }
 
+export interface ComparisonItem {
+  label: string
+  firstValue: string
+  secondValue: string
+  thirdValue: string
+}
+
+export type RecoveryStateKind = 'empty' | 'error' | 'offline' | 'not-found'
+
 const text = (value: unknown): string => typeof value === 'string' ? value : ''
 const records = (value: unknown): Array<Record<string, unknown>> =>
   Array.isArray(value)
     ? value.filter((item): item is Record<string, unknown> =>
         Boolean(item) && typeof item === 'object' && !Array.isArray(item))
     : []
+const recoveryStateKind = (value: unknown): RecoveryStateKind =>
+  value === 'error' || value === 'offline' || value === 'not-found' ? value : 'empty'
 
 /**
  * Every Creator Signal leaf module carries the same public design contract.
@@ -72,13 +84,27 @@ export const siteHeader = defineModule({
     items: control.textarea('Navigation items'),
   },
   render: ({ props }) => withCreatorSignalCss(html`<header class="site-header">
+      <a class="skip-link" href="#main-content">Skip to main content</a>
       <a class="site-brand" href="${safeUrl(props.homeUrl)}" aria-label="${props.brandName} home">
-        <span class="brand-signal" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="brand-mark" aria-hidden="true">
+          <img class="brand-mark-light" src="${safeUrl(creatorSignalBrandAssets.markLight)}" alt="" width="1024" height="688" decoding="async">
+          <img class="brand-mark-reversed" src="${safeUrl(creatorSignalBrandAssets.markReversed)}" alt="" width="1024" height="688" decoding="async">
+        </span>
         <span><strong>${props.brandName}</strong><small>${props.tagline}</small></span>
       </a>
-      <nav aria-label="Main navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
-        ${navigationItems(props.items, true)}
-      </nav>
+      <div class="site-header-tools">
+        <label>
+          <span class="sr-only">Appearance</span>
+          <select class="theme-control" data-cs-theme-control aria-label="Appearance">
+            <option value="system" selected>System theme</option>
+            <option value="light">Light theme</option>
+            <option value="dark">Dark theme</option>
+          </select>
+        </label>
+        <nav aria-label="Main navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
+          ${navigationItems(props.items, true)}
+        </nav>
+      </div>
     </header>`),
 })
 
@@ -92,6 +118,7 @@ export const siteFooter = defineModule({
     brandName: 'Creator Signal',
     tagline: 'Clearer signals for independent creative businesses.',
     copyright: '© 2026 Creator Signal',
+    privacyLabel: 'Privacy choices',
     items: [
       { label: 'Products', url: '/products' },
       { label: 'Sales Pulse', url: '/products/sales-pulse' },
@@ -112,12 +139,14 @@ export const siteFooter = defineModule({
     brandName: control.text('Brand name'),
     tagline: control.text('Tagline'),
     copyright: control.text('Copyright'),
+    privacyLabel: control.text('Privacy choices label'),
     items: control.textarea('Footer links'),
   },
   render: ({ props }) => withCreatorSignalCss(html`<footer class="site-footer">
       <div class="footer-meta">
         <div><strong>${props.brandName}</strong><p>${props.tagline}</p></div>
         <small>${props.copyright}</small>
+        <button class="footer-privacy-choice" type="button" data-privacy-choices>${props.privacyLabel}</button>
       </div>
       <nav aria-label="Footer navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
         ${navigationItems(props.items)}
@@ -214,7 +243,7 @@ export const callToAction = defineModule({
   },
   render: ({ props }) => withCreatorSignalCss(html`<section class="cta-section" aria-labelledby="${props.sectionId}">
       <div class="cta-copy"><p class="eyebrow">${props.eyebrow}</p><h2 id="${props.sectionId}">${props.heading}</h2><p>${props.body}</p></div>
-      <div class="actions"><a class="button button-primary" href="${safeUrl(props.actionUrl)}">${props.actionLabel}</a></div>
+      <div class="actions"><a class="button button-secondary" href="${safeUrl(props.actionUrl)}">${props.actionLabel}</a></div>
     </section>`),
 })
 
@@ -294,6 +323,103 @@ export const faq = defineModule({
   },
 })
 
+export const comparisonSection = defineModule({
+  id: 'creator-signal.site.comparison-section',
+  name: 'Comparison section',
+  description: 'A captioned, row-and-column comparison for plans, products or capabilities.',
+  category: 'Creator Signal',
+  htmlTag: 'section',
+  defaults: {
+    eyebrow: 'Comparison',
+    heading: 'Compare the options.',
+    introduction: 'Use the same criteria for every option so the differences are clear.',
+    sectionId: 'comparison',
+    caption: 'Creator Signal option comparison',
+    firstLabel: 'First option',
+    secondLabel: 'Second option',
+    thirdLabel: 'Third option',
+    items: [
+      { label: 'Primary use', firstValue: 'Describe the first option.', secondValue: 'Describe the second option.', thirdValue: 'Describe the third option.' },
+      { label: 'Availability', firstValue: 'Available', secondValue: 'Available', thirdValue: 'Available' },
+    ] as ComparisonItem[],
+  },
+  schema: {
+    eyebrow: control.text('Eyebrow'),
+    heading: control.text('Heading'),
+    introduction: control.textarea('Introduction', { rows: 3 }),
+    sectionId: control.text('Section anchor'),
+    caption: control.text('Table caption'),
+    firstLabel: control.text('First option'),
+    secondLabel: control.text('Second option'),
+    thirdLabel: control.text('Third option'),
+    items: control.textarea('Comparison rows'),
+  },
+  render: ({ props }) => {
+    const rows = records(props.items).map((item) => raw(html`
+      <tr>
+        <th scope="row">${text(item.label)}</th>
+        <td>${text(item.firstValue)}</td>
+        <td>${text(item.secondValue)}</td>
+        <td>${text(item.thirdValue)}</td>
+      </tr>`))
+    return withCreatorSignalCss(html`<section class="content-section comparison-section" aria-labelledby="${props.sectionId}">
+        <div class="section-intro"><p class="eyebrow">${props.eyebrow}</p><h2 id="${props.sectionId}">${props.heading}</h2><p>${props.introduction}</p></div>
+        <div class="comparison-table-scroll" tabindex="0" role="region" aria-label="${props.caption}">
+          <table class="comparison-table">
+            <caption>${props.caption}</caption>
+            <thead><tr><th scope="col">Criteria</th><th scope="col">${props.firstLabel}</th><th scope="col">${props.secondLabel}</th><th scope="col">${props.thirdLabel}</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </section>`)
+  },
+})
+
+export const recoveryState = defineModule({
+  id: 'creator-signal.site.recovery-state',
+  name: 'Recovery state',
+  description: 'A meaningful empty, error or offline state with one recovery action.',
+  category: 'Creator Signal',
+  htmlTag: 'section',
+  defaults: {
+    state: 'empty' as RecoveryStateKind,
+    heading: 'Nothing here yet',
+    body: 'There is no content to show here yet.',
+    actionLabel: 'Return home',
+    actionUrl: '/',
+    sectionId: 'recovery-state',
+  },
+  schema: {
+    state: control.select('State', [
+      { label: 'Empty', value: 'empty' },
+      { label: 'Error', value: 'error' },
+      { label: 'Offline', value: 'offline' },
+      { label: 'Not found', value: 'not-found' },
+    ]),
+    heading: control.text('Heading'),
+    body: control.textarea('Explanation', { rows: 3 }),
+    actionLabel: control.text('Recovery action label'),
+    actionUrl: control.url('Recovery action URL'),
+    sectionId: control.text('Section anchor'),
+  },
+  render: ({ props }) => {
+    const state = recoveryStateKind(props.state)
+    const stateLabel = state === 'not-found'
+      ? 'Page not found'
+      : state === 'error'
+      ? 'Something went wrong'
+      : state === 'offline'
+        ? 'Connection unavailable'
+        : 'No content yet'
+    return withCreatorSignalCss(html`<section class="recovery-state" data-recovery-state="${state}" aria-labelledby="${props.sectionId}">
+        <p class="eyebrow">${stateLabel}</p>
+        <h1 id="${props.sectionId}">${props.heading}</h1>
+        <p>${props.body}</p>
+        <div class="actions"><a class="button button-primary" href="${safeUrl(props.actionUrl)}">${props.actionLabel}</a></div>
+      </section>`)
+  },
+})
+
 export const publicDocument = defineModule({
   id: 'creator-signal.site.public-document',
   name: 'Public document',
@@ -330,5 +456,7 @@ export const creatorSignalSiteModules = [
   richTextSection,
   testimonial,
   faq,
+  comparisonSection,
+  recoveryState,
   publicDocument,
 ] as const

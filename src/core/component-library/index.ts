@@ -6,6 +6,7 @@ export {
   ComponentLibraryAccessibilityRuleSchema,
   ComponentLibraryConstraintsSchema,
   ComponentLibraryCompositionSchema,
+  ComponentLibraryDocumentKindSchema,
   ComponentLibraryDependencyHealthSchema,
   ComponentLibraryDependencyIssueSchema,
   ComponentLibraryDependencyStateSchema,
@@ -31,6 +32,7 @@ export type {
   ComponentLibraryAvailability,
   ComponentLibraryConstraints,
   ComponentLibraryComposition,
+  ComponentLibraryDocumentKind,
   ComponentLibraryDependencyHealth,
   ComponentLibraryDependencyIssue,
   ComponentLibraryDependencyState,
@@ -142,6 +144,22 @@ export {
   ComponentLibraryPatternRegistry,
   componentLibraryPatternRegistry,
 } from './patterns'
+
+export {
+  isManagedGovernedPatternNode,
+  isValidGovernedPatternBoundary,
+} from './patternGovernance'
+
+export {
+  PublicAuthoringPolicyError,
+  analysePublicAuthoringPage,
+  analysePublicAuthoringPolicy,
+  assertPublicAuthoringPage,
+  assertPublicAuthoringPolicyPublishable,
+  isProtectedPublicAuthoringVisualComponent,
+} from './publicAuthoring'
+
+export type { PublicAuthoringDiagnostic } from './publicAuthoringTypes'
 
 export type {
   ComponentLibraryPatternDefinition,

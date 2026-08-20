@@ -21,6 +21,8 @@ The registry is metadata over Instatic's existing modules, Visual Components, pa
 - Entry-specific accessibility contracts distinguish automated diagnostics,
   behavior tests and manual review; site policy alone selects publication
   blockers.
+- `SiteSettings.publicAuthoring` optionally turns an integration catalogue
+  into a fail-closed public surface. Sites without it remain freeform.
 - The bundled Creator Signal catalogue is explicit in `src/modules/base/componentLibrary.ts`; it is not inferred from every registered HTML module.
 - Components view opens a searchable, filterable catalogue and stamps library identity on the inserted backing node in the same undo transaction.
 - Add to canvas lists governed non-form entries under Components, groups
@@ -138,7 +140,14 @@ Every mapped entry declares the `creator-signal.site` design-system source with
 the author-facing provider name `Creator Signal`. The Components provider filter
 and `site_list_component_library` MCP response read that same registry metadata.
 
-An omitted parent, child or slot allow-list means unrestricted. A present empty allow-list means none are permitted. This preserves the difference between an unconstrained container and a deliberately closed boundary.
+An omitted document, parent, child or slot allow-list means unrestricted. A
+present empty allow-list means none are permitted. `allowedDocumentKinds`
+limits an entry to ordinary pages or templates, while
+`maxInstancesPerDocument` prevents duplicate singleton chrome such as a shared
+header. `src/core/component-library/placement.ts` applies these rules to the
+picker, drag-and-drop, Agent/MCP insertion and server write validation. This
+preserves the difference between an unconstrained container and a deliberately
+closed boundary.
 
 ### Implementation taxonomy
 
@@ -387,6 +396,38 @@ editable only through authorised HTML mode. Pattern and Visual Component
 conversion require their later structure/slot mapping workflows and are not
 silently approximated by this primitive path.
 
+## Public-authoring policy
+
+`src/core/page-tree/publicAuthoringPolicy.ts` defines the declarative policy
+shape stored at `SiteSettings.publicAuthoring`. A plugin pack may install its
+own policy through `definePack({ publicAuthoring })`; `server/plugins/pack.ts`
+checks owner identity and reconciles the policy with the technical pack.
+Normal shell writes cannot add, remove or weaken the policy.
+
+`src/core/component-library/publicAuthoring.ts` is the shared analyser. It
+validates current entry definitions and variants, exact pattern composition,
+typed fields, component-owned appearance, protected template chrome, fixed
+asset roles/treatments and semantic page-title/primary-action limits. Its
+diagnostics always include a stable code, document path and remediation.
+
+The same analyser is called from:
+
+- `server/writePolicy/pageDiff.ts` for transactional page saves;
+- `server/collab/updateGuard.ts` for Yjs page updates, including full writers
+  when a policy is active;
+- `server/publish/publishSite.ts` before any publish-side database or artefact
+  write.
+
+The shell guard in `server/writePolicy/siteDiff.ts` also prevents site-local
+framework, font, breakpoint, style, file, dependency and runtime changes while
+component-owned appearance is active. Pack-owned Visual Components listed by
+the policy are immutable through both HTTP and collaborative authoring.
+
+This is an opt-in site contract. An absent policy returns no diagnostics and
+does not change ordinary Instatic authoring. Direct storage mutation is outside
+the supported authoring API; the publisher still re-runs the complete policy
+and refuses invalid trees or missing protected records.
+
 ## Versioning and migration
 
 Every persisted catalogue instance carries a semantic `entryVersion`. It may also carry `pinnedVersion` while an administrator deliberately retains an older definition, and `variantId` when an approved variant was applied.
@@ -460,6 +501,8 @@ opens either boundary before focusing an invalid descendant.
 - Do not skip semantic versions or invent an implicit migration across an unregistered gap.
 - Do not include provider credentials or secret configuration in requirements or availability.
 - Do not import internal files from outside the module; use `@core/component-library`.
+- Do not special-case an integration in the editor, write handler or publisher;
+  persist a declarative `SiteSettings.publicAuthoring` policy instead.
 
 ## Related
 
@@ -472,4 +515,5 @@ opens either boundary before focusing an invalid descendant.
 - `docs/reference/component-html-seo-contract.md` — semantic HTML, structured data, SEO, native hooks and design-token contract for every built-in entry.
 - `docs/reference/typebox-patterns.md` — boundary validation.
 - Source-of-truth files: `src/core/component-library/`
-- Focused tests: `src/__tests__/component-library/componentLibraryRegistry.test.ts`
+- Focused tests: `src/__tests__/component-library/componentLibraryRegistry.test.ts`,
+  `src/__tests__/plugins/creatorSignalPublicAuthoringGuardrails.test.ts`

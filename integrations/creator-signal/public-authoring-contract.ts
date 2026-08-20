@@ -1,13 +1,47 @@
+import type { PublicAuthoringPolicy } from '@core/page-tree'
+
 export const creatorSignalDesignSystemDependency = {
   packageName: '@creator-signal/design-system',
   repository: 'creator-signal/sales-pulse',
   packagePath: 'packages/design-system',
+  lockPath: 'integrations/creator-signal/design-system/lock.json',
+  syncCommand: 'bun run creator-signal:design-system:sync -- --source-root <sales-pulse-checkout>',
   adapters: {
     css: '@creator-signal/design-system/tokens.css',
     json: '@creator-signal/design-system/adapters.json',
     metadata: '@creator-signal/design-system/metadata.json',
   },
 } as const
+
+export const creatorSignalPublicPatternRootModuleId = 'base.container'
+
+export function creatorSignalPublicPatternRootProps(
+  patternId: string,
+): Record<string, unknown> {
+  return {
+    tag: 'div',
+    customTag: '',
+    htmlAttributes: { 'data-creator-signal-pattern': patternId },
+  }
+}
+
+export const creatorSignalPublicPatternCatalogue = [
+  { layoutId: 'creator-signal.site.pattern.hero', role: 'hero', ownership: 'component', entryId: 'creator-signal.site.hero' },
+  { layoutId: 'creator-signal.site.pattern.content-page', role: 'content-page', ownership: 'pattern', patternId: 'creator-signal.site.pattern.content-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.rich-text-section', 'creator-signal.site.call-to-action'] },
+  { layoutId: 'creator-signal.site.pattern.product-page', role: 'product-page', ownership: 'pattern', patternId: 'creator-signal.site.pattern.product-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.feature-grid', 'creator-signal.site.call-to-action'] },
+  { layoutId: 'creator-signal.site.pattern.pricing-page', role: 'pricing', ownership: 'pattern', patternId: 'creator-signal.site.pattern.pricing-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.comparison-section', 'creator-signal.site.call-to-action'] },
+  { layoutId: 'creator-signal.site.pattern.features-page', role: 'features', ownership: 'pattern', patternId: 'creator-signal.site.pattern.features-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.feature-grid'] },
+  { layoutId: 'creator-signal.site.pattern.call-to-action', role: 'call-to-action', ownership: 'component', entryId: 'creator-signal.site.call-to-action' },
+  { layoutId: 'creator-signal.site.pattern.faq', role: 'faq', ownership: 'component', entryId: 'creator-signal.site.faq' },
+  { layoutId: 'creator-signal.site.pattern.contact-page', role: 'contact', ownership: 'pattern', patternId: 'creator-signal.site.pattern.contact-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.mautic-form'] },
+  { layoutId: 'creator-signal.site.pattern.legal-trust-page', role: 'legal-trust', ownership: 'pattern', patternId: 'creator-signal.site.pattern.legal-trust-page', childEntryIds: ['creator-signal.site.public-document'] },
+  { layoutId: 'creator-signal.site.pattern.article-content-page', role: 'article-content', ownership: 'pattern', patternId: 'creator-signal.site.pattern.article-content-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.rich-text-section'] },
+  { layoutId: 'creator-signal.site.pattern.comparison-section', role: 'comparison-section', ownership: 'pattern', patternId: 'creator-signal.site.pattern.comparison-section', childEntryIds: ['creator-signal.site.comparison-section'] },
+  { layoutId: 'creator-signal.site.pattern.empty-state', role: 'empty-state', ownership: 'pattern', patternId: 'creator-signal.site.pattern.empty-state', childEntryIds: ['creator-signal.site.recovery-state'] },
+  { layoutId: 'creator-signal.site.pattern.error-state', role: 'error-state', ownership: 'pattern', patternId: 'creator-signal.site.pattern.error-state', childEntryIds: ['creator-signal.site.recovery-state'] },
+  { layoutId: 'creator-signal.site.pattern.offline-state', role: 'offline-state', ownership: 'pattern', patternId: 'creator-signal.site.pattern.offline-state', childEntryIds: ['creator-signal.site.recovery-state'] },
+  { layoutId: 'creator-signal.site.pattern.not-found-state', role: 'not-found-state', ownership: 'pattern', patternId: 'creator-signal.site.pattern.not-found-state', childEntryIds: ['creator-signal.site.recovery-state'] },
+] as const
 
 export const creatorSignalPublicAuthoringContract = {
   id: 'creator-signal.public-authoring',
@@ -20,22 +54,25 @@ export const creatorSignalPublicAuthoringContract = {
       assetRoles: ['hero-artwork'],
       constraints: {
         maxInstancesPerPage: 1,
+        allowedDocumentKinds: ['page'],
         headingRole: 'page-title',
         actionRole: 'primary',
       },
     },
-    { entryId: 'creator-signal.site.header', variants: ['default'], assetRoles: [], constraints: {} },
-    { entryId: 'creator-signal.site.footer', variants: ['default'], assetRoles: [], constraints: {} },
-    { entryId: 'creator-signal.site.consent-banner', variants: ['default'], assetRoles: [], constraints: {} },
-    { entryId: 'creator-signal.site.feature-grid', variants: ['default'], assetRoles: [], constraints: {} },
-    { entryId: 'creator-signal.site.call-to-action', variants: ['default'], assetRoles: [], constraints: {} },
-    { entryId: 'creator-signal.site.rich-text-section', variants: ['default'], assetRoles: [], constraints: {} },
-    { entryId: 'creator-signal.site.testimonial', variants: ['default'], assetRoles: [], constraints: {} },
-    { entryId: 'creator-signal.site.faq', variants: ['default'], assetRoles: [], constraints: {} },
-    { entryId: 'creator-signal.site.public-document', variants: ['default'], assetRoles: [], constraints: {} },
-    { entryId: 'creator-signal.site.mautic-form', variants: ['default'], assetRoles: [], constraints: {} },
+    { entryId: 'creator-signal.site.header', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 } },
+    { entryId: 'creator-signal.site.footer', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 } },
+    { entryId: 'creator-signal.site.consent-banner', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 } },
+    { entryId: 'creator-signal.site.feature-grid', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'] } },
+    { entryId: 'creator-signal.site.call-to-action', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'], actionRole: 'secondary' } },
+    { entryId: 'creator-signal.site.rich-text-section', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'] } },
+    { entryId: 'creator-signal.site.testimonial', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'] } },
+    { entryId: 'creator-signal.site.faq', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'] } },
+    { entryId: 'creator-signal.site.comparison-section', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'] } },
+    { entryId: 'creator-signal.site.recovery-state', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'], maxInstancesPerDocument: 1, headingRole: 'page-title', actionRole: 'primary' } },
+    { entryId: 'creator-signal.site.public-document', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'], headingRole: 'page-title' } },
+    { entryId: 'creator-signal.site.mautic-form', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'] } },
   ],
-  permittedPatterns: [],
+  permittedPatterns: creatorSignalPublicPatternCatalogue,
   semanticStyling: {
     colours: 'design-token-only',
     typography: 'design-token-only',
@@ -59,19 +96,92 @@ export const creatorSignalPublicAuthoringContract = {
     source: 'instatic-media',
     roles: ['hero-artwork', 'content-image', 'product-artwork', 'decorative-artwork'],
     treatments: ['default', 'contain', 'cover'],
+    fields: [{
+      entryId: 'creator-signal.site.hero',
+      fieldKey: 'creator-signal.site.hero.artwork',
+      role: 'hero-artwork',
+      treatment: 'contain',
+    }],
     essentialTextInImages: false,
   },
   content: {
     headingHierarchy: 'semantic',
     pageTitleCount: 1,
     headingLevels: ['h1', 'h2', 'h3'],
-    primaryActionCount: 1,
+    primaryActionMaxCount: 1,
     requiredAlternativeTextForInformativeImages: true,
   },
 } as const
 
 export type CreatorSignalPublicAuthoringContract =
   typeof creatorSignalPublicAuthoringContract
+
+/**
+ * Site-owned policy installed with the technical pack. Every list is derived
+ * from the public contract above so the integration has one machine-readable
+ * authoring source of truth.
+ */
+export const creatorSignalPublicAuthoringPolicy: PublicAuthoringPolicy = {
+  id: creatorSignalPublicAuthoringContract.id,
+  version: creatorSignalPublicAuthoringContract.version,
+  ownerPluginId: 'creator-signal.site',
+  allowedComponentEntryIds:
+    creatorSignalPublicAuthoringContract.permittedComponents.map((entry) => entry.entryId),
+  allowedPatternEntryIds:
+    creatorSignalPublicAuthoringContract.permittedPatterns
+      .filter((entry) => entry.ownership === 'pattern')
+      .map((entry) => entry.patternId),
+  patterns: creatorSignalPublicAuthoringContract.permittedPatterns
+    .filter((entry) => entry.ownership === 'pattern')
+    .map((entry) => ({
+      entryId: entry.patternId,
+      rootModuleId: creatorSignalPublicPatternRootModuleId,
+      rootProps: creatorSignalPublicPatternRootProps(entry.patternId),
+      childEntryIds: [...entry.childEntryIds],
+    })),
+  allowedVariants: Object.fromEntries([
+    ...creatorSignalPublicAuthoringContract.permittedComponents.map((entry) => [
+      entry.entryId,
+      [...entry.variants],
+    ]),
+    ...creatorSignalPublicAuthoringContract.permittedPatterns
+      .filter((entry) => entry.ownership === 'pattern')
+      .map((entry) => [entry.patternId, ['default']]),
+  ]),
+  allowedStructuralModuleIds: ['base.body', 'base.container', 'base.outlet'],
+  protectedVisualComponentIds: ['creator-signal.site/component/hero'],
+  templates: [{
+    pageId: 'creator-signal.site/page/site-template',
+    requiredEntryIds: [
+      'creator-signal.site.header',
+      'creator-signal.site.footer',
+      'creator-signal.site.consent-banner',
+    ],
+  }],
+  appearance: { mode: 'component-owned' },
+  assets: {
+    roles: [...creatorSignalPublicAuthoringContract.assets.roles],
+    treatments: [...creatorSignalPublicAuthoringContract.assets.treatments],
+    fields: creatorSignalPublicAuthoringContract.assets.fields.map((field) => ({ ...field })),
+  },
+  content: {
+    pageTitleEntryIds: creatorSignalPublicAuthoringContract.permittedComponents
+      .filter((entry) =>
+        'headingRole' in entry.constraints &&
+        entry.constraints.headingRole === 'page-title',
+      )
+      .map((entry) => entry.entryId),
+    primaryActionEntryIds: creatorSignalPublicAuthoringContract.permittedComponents
+      .filter((entry) =>
+        'actionRole' in entry.constraints &&
+        entry.constraints.actionRole === 'primary',
+      )
+      .map((entry) => entry.entryId),
+    headingLevels: [...creatorSignalPublicAuthoringContract.content.headingLevels],
+    pageTitleCount: creatorSignalPublicAuthoringContract.content.pageTitleCount,
+    primaryActionMaxCount: creatorSignalPublicAuthoringContract.content.primaryActionMaxCount,
+  },
+}
 
 export function isCreatorSignalComponentPermitted(entryId: string): boolean {
   return creatorSignalPublicAuthoringContract.permittedComponents.some(
@@ -94,4 +204,10 @@ export function isCreatorSignalPatternPermitted(layoutId: string): boolean {
   return creatorSignalPublicAuthoringContract.permittedPatterns.some(
     (pattern) => pattern.layoutId === layoutId,
   )
+}
+
+export function creatorSignalPatternForRole(
+  role: typeof creatorSignalPublicPatternCatalogue[number]['role'],
+) {
+  return creatorSignalPublicPatternCatalogue.find((pattern) => pattern.role === role)!
 }

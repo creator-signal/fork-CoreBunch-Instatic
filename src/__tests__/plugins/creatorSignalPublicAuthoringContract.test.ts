@@ -1,14 +1,22 @@
 import { describe, expect, it } from 'bun:test'
 import '@modules/base'
-import { creatorSignalComponentLibraryEntries } from '../../../integrations/creator-signal/component-library'
+import {
+  creatorSignalComponentEntries,
+  creatorSignalComponentLibraryEntries,
+  creatorSignalPatternEntries,
+} from '../../../integrations/creator-signal/component-library'
+import { creatorSignalCompositionCss } from '../../../integrations/creator-signal/pack/design-system'
 import {
   creatorSignalDesignSystemDependency,
+  creatorSignalPublicPatternCatalogue,
   creatorSignalPublicAuthoringContract,
+  creatorSignalPublicAuthoringPolicy,
   isCreatorSignalComponentPermitted,
   isCreatorSignalPatternPermitted,
   isCreatorSignalVariantPermitted,
 } from '../../../integrations/creator-signal/public-authoring-contract'
 import { pack } from '../../../integrations/creator-signal/pack/site'
+import { verifyCreatorSignalDesignSystem } from '../../../scripts/sync-creator-signal-design-system'
 
 describe('Creator Signal public authoring contract', () => {
   it('depends on generated master design-system adapters instead of copied token values', () => {
@@ -16,6 +24,8 @@ describe('Creator Signal public authoring contract', () => {
       packageName: '@creator-signal/design-system',
       repository: 'creator-signal/sales-pulse',
       packagePath: 'packages/design-system',
+      lockPath: 'integrations/creator-signal/design-system/lock.json',
+      syncCommand: 'bun run creator-signal:design-system:sync -- --source-root <sales-pulse-checkout>',
       adapters: {
         css: '@creator-signal/design-system/tokens.css',
         json: '@creator-signal/design-system/adapters.json',
@@ -28,13 +38,30 @@ describe('Creator Signal public authoring contract', () => {
     expect(serialized).not.toMatch(/\brgb(?:a)?\(/i)
   })
 
+  it('verifies the pinned upstream snapshot and keeps authored CSS token-only', async () => {
+    expect(await verifyCreatorSignalDesignSystem()).toEqual({
+      files: 23,
+      revision: 'dac774a794bf41c3e5bc4318c97858b364b3a68c',
+    })
+
+    expect(creatorSignalCompositionCss).toContain('var(--cs-surface-canvas)')
+    expect(creatorSignalCompositionCss).toContain('var(--cs-font-family-heading)')
+    expect(creatorSignalCompositionCss).not.toMatch(/#[0-9a-f]{3,8}\b/i)
+    expect(creatorSignalCompositionCss).not.toMatch(/\brgb(?:a)?\(/i)
+    expect(creatorSignalCompositionCss).not.toMatch(/Georgia|Times New Roman|Avenir Next/i)
+  })
+
   it('allow-lists every Creator Signal catalogue entry and only governed variants', () => {
-    for (const entry of creatorSignalComponentLibraryEntries) {
+    for (const entry of creatorSignalComponentEntries) {
       expect(isCreatorSignalComponentPermitted(entry.id)).toBe(true)
       expect(entry.variants.length).toBeGreaterThan(0)
       for (const variant of entry.variants) {
         expect(isCreatorSignalVariantPermitted(entry.id, variant.id)).toBe(true)
       }
+    }
+    for (const entry of creatorSignalPatternEntries) {
+      expect(isCreatorSignalPatternPermitted(entry.id)).toBe(true)
+      expect(entry.implementation).toEqual({ type: 'pattern', patternId: entry.id })
     }
 
     expect(isCreatorSignalComponentPermitted('creator-signal.site.unapproved')).toBe(false)
@@ -42,12 +69,23 @@ describe('Creator Signal public authoring contract', () => {
   })
 
   it('does not expose freeform starter layouts outside the governed catalogue', () => {
-    const permittedLayoutIds = creatorSignalPublicAuthoringContract.permittedPatterns
+    const patternOwnedIds = creatorSignalPublicPatternCatalogue
+      .filter((pattern) => pattern.ownership === 'pattern')
       .map((pattern) => pattern.layoutId)
+    const componentMappings = creatorSignalPublicPatternCatalogue
+      .filter((pattern) => pattern.ownership === 'component')
 
-    expect(pack.layouts.map((layout) => layout.id)).toEqual(permittedLayoutIds)
-    for (const layoutId of permittedLayoutIds) {
+    expect(pack.layouts).toEqual([])
+    expect(creatorSignalPatternEntries.map((entry) => entry.id)).toEqual(patternOwnedIds)
+    for (const layoutId of creatorSignalPublicAuthoringContract.permittedPatterns.map(
+      (pattern) => pattern.layoutId,
+    )) {
       expect(isCreatorSignalPatternPermitted(layoutId)).toBe(true)
+    }
+    for (const mapping of componentMappings) {
+      expect(creatorSignalComponentLibraryEntries.some(
+        (entry) => entry.id === mapping.entryId,
+      )).toBe(true)
     }
     expect(isCreatorSignalPatternPermitted('freeform-brand-experiment')).toBe(false)
   })
@@ -76,7 +114,19 @@ describe('Creator Signal public authoring contract', () => {
     expect(creatorSignalPublicAuthoringContract.content).toMatchObject({
       headingHierarchy: 'semantic',
       pageTitleCount: 1,
-      primaryActionCount: 1,
+      primaryActionMaxCount: 1,
     })
+    expect(creatorSignalPublicAuthoringPolicy.content).toMatchObject({
+      pageTitleEntryIds: [
+        'creator-signal.site.hero',
+        'creator-signal.site.recovery-state',
+        'creator-signal.site.public-document',
+      ],
+      primaryActionEntryIds: [
+        'creator-signal.site.hero',
+        'creator-signal.site.recovery-state',
+      ],
+    })
+    expect(pack.publicAuthoring).toEqual(creatorSignalPublicAuthoringPolicy)
   })
 })

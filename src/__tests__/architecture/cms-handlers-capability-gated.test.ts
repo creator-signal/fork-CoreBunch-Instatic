@@ -60,7 +60,6 @@ const ALLOWLIST: ReadonlyMap<string, string> = new Map([
   ['session.ts', 'Session lookup helper; called from auth.ts which gates.'],
   ['siteDiff.ts', 'Diff validator called from site.ts after that file gates.'],
   ['pageDiff.ts', 'Diff validator called from pages.ts after that file gates.'],
-  ['pageDiffPatterns.ts', 'Governed-pattern diff helper called by pageDiff.ts; no handlers.'],
   // Media upload helpers — `acceptUploadedMedia`, `readUploadedFile`,
   // file-magic sniffing. Always called by an already-gated parent
   // handler (`/me/avatar`, `/media`).

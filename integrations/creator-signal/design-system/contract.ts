@@ -1,4 +1,4 @@
-export const creatorSignalPluginVersion = '0.3.3'
+export const creatorSignalPluginVersion = '0.3.4'
 
 export const creatorSignalDesignSystemAssetBaseUrl =
   `/uploads/plugins/creator-signal.site/${creatorSignalPluginVersion}/assets/design-system`

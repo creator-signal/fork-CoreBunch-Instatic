@@ -6,6 +6,8 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.35 - 2026-08-21
+
 ### Fixed
 
 - Kept the packaged plugin module registry identical to its configured module

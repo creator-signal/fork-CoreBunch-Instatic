@@ -75,7 +75,7 @@ requested update and is not treated as general marketing consent.
 
 ## Content lifecycle
 
-Pack pages are starter content for an empty installation. Plugin 0.3.9
+Pack pages are starter content for an empty installation. Plugin 0.4.0
 reconciles technical catalogue, policy, style and runtime records but does not
 overwrite authored pages. The explicit content migration recognises exact
 retained 0.1.11, 0.2.0-0.2.6 and 0.3.5 content, produces a reviewable

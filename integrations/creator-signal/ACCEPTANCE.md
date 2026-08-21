@@ -28,14 +28,15 @@ The verifier covers:
 
 - every one of the 24 public routes at 1440px desktop, 900px tablet and 390px
   mobile widths, with one header, main, H1 and footer and no document overflow;
-- Home v2, Early Access, Products, Sales Pulse, Pricing, Contact, Privacy, Security, the
+- Home, Early Access, Products, Sales Pulse, Pricing, Contact, Privacy, Security, the
   not-found template, FAQ and all recovery states with Axe's WCAG 2.0, 2.1 and
   2.2 A/AA rules;
 - skip navigation, visible 44px mobile navigation targets and native FAQ
   keyboard disclosure;
-- system, light and dark themes, including explicit-choice persistence;
-- consent denial, reopening persistent privacy choices, granting consent and
-  focus return while the runtime analytics configuration endpoint is down;
+- system, light and dark theme-runtime states, including persisted API choices,
+  while the production-look public presentation remains visually stable;
+- consent denial and granting consent while the runtime analytics
+  configuration endpoint is down;
 - managed-form required-field focus/error association, submitting/busy,
   success, provider failure and provider-unavailable states without a live
   submission, with exactly one wishlist form on Early Access;

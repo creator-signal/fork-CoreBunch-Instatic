@@ -10,6 +10,12 @@ import {
   retainedCreatorSignalTemplates0200To0206,
 } from '../../../integrations/creator-signal/migrations/retained-0.2.x-hashes'
 import {
+  retainedCreatorSignalNotFoundTemplates035,
+  retainedCreatorSignalPageHashes035,
+  retainedCreatorSignalTemplates035,
+} from '../../../integrations/creator-signal/migrations/retained-0.3.5-hashes'
+import {
+  canonicalPageCellsSha256,
   canonicalSha256,
   prepareCreatorSignalContentMigration,
   retainedCreatorSignalPageVersion,
@@ -176,7 +182,7 @@ describe('Creator Signal 0.2.0 content migration', () => {
     ]))
   })
 
-  it('recognises only the immutable 0.2.0-0.2.6 page and template hashes', () => {
+  it('recognises only the pinned retained page and template hashes', () => {
     expect(Object.keys(retainedCreatorSignalPageHashes0200To0206).sort()).toEqual(
       Object.keys(legacyCreatorSignalPageHashes0111).sort(),
     )
@@ -195,6 +201,63 @@ describe('Creator Signal 0.2.0 content migration', () => {
         hash: 'e541f13c931e8e2f784428eb786f600bc0f123e98c79f7538416fe6a110aaf89',
       },
     ])
+    expect(Object.keys(retainedCreatorSignalPageHashes035)).toHaveLength(24)
+    for (const [pageId, hash] of Object.entries(retainedCreatorSignalPageHashes035)) {
+      expect(retainedCreatorSignalPageVersion(pageId, hash)).toBe('0.3.5')
+      const unknownHash = `${hash.slice(0, -1)}${hash.endsWith('0') ? '1' : '0'}`
+      expect(retainedCreatorSignalPageVersion(pageId, unknownHash)).toBeNull()
+    }
+    expect(retainedCreatorSignalTemplates035).toEqual([{
+      slug: 'creator-signal-site-template',
+      hash: '59c126a2d7791cd8ebc192d17bff3be66fc10ea6892b1d4f73dc2c31ad53207f',
+    }])
+    expect(retainedCreatorSignalNotFoundTemplates035).toEqual([{
+      slug: 'creator-signal-not-found',
+      hash: 'a33bf95e80ba899965b419913adc057ec7f0e929a1f262b2a35acd71f7fe54fb',
+    }])
+  })
+
+  it('classifies identical page content independently of generated node IDs', () => {
+    const cells = {
+      title: 'Stable page',
+      slug: 'stable-page',
+      body: {
+        rootNodeId: 'random-root-a',
+        nodes: {
+          'random-root-a': {
+            id: 'random-root-a', moduleId: 'base.body', props: {}, breakpointOverrides: {},
+            children: ['random-child-a'], parentId: null, classIds: [],
+          },
+          'random-child-a': {
+            id: 'random-child-a', moduleId: 'base.text', props: { text: 'Same content' },
+            breakpointOverrides: {}, children: [], parentId: 'random-root-a', classIds: [],
+            catalogueInstance: {
+              entryId: 'creator-signal.site.rich-text-section', entryVersion: '1.0.0',
+              variantId: 'default',
+            },
+          },
+        },
+      },
+    }
+    const reidentified = {
+      ...cells,
+      body: {
+        rootNodeId: 'other-root',
+        nodes: {
+          'other-root': { ...cells.body.nodes['random-root-a'], id: 'other-root', children: ['other-child'] },
+          'other-child': {
+            ...cells.body.nodes['random-child-a'],
+            id: 'other-child',
+            parentId: 'other-root',
+            props: { ...cells.body.nodes['random-child-a'].props },
+          },
+        },
+      },
+    }
+
+    expect(canonicalPageCellsSha256(cells)).toBe(canonicalPageCellsSha256(reidentified))
+    reidentified.body.nodes['other-child']!.props.text = 'Authored change'
+    expect(canonicalPageCellsSha256(cells)).not.toBe(canonicalPageCellsSha256(reidentified))
   })
 
   it('blocks when an additional page would unexpectedly inherit shared chrome', () => {

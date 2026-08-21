@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto'
 import type { DataRow, DataTable } from '@core/data/schemas'
 import type { SiteBundleArchiveManifest } from '@core/data/bundleArchive'
 import { pageToCells } from '@core/data/pageFromRow'
@@ -7,7 +6,18 @@ import {
   retainedCreatorSignalPageHashes0200To0206,
   retainedCreatorSignalTemplates0200To0206,
 } from '../retained-0.2.x-hashes'
+import {
+  retainedCreatorSignalNotFoundTemplates035,
+  retainedCreatorSignalPageHashes035,
+  retainedCreatorSignalTemplates035,
+} from '../retained-0.3.5-hashes'
 import { pack } from '../../pack/site'
+import {
+  canonicalPageCellsSha256,
+  canonicalSha256,
+} from '../content-hash'
+
+export { canonicalPageCellsSha256, canonicalSha256 } from '../content-hash'
 
 export const CREATOR_SIGNAL_CONTENT_MIGRATION = 'creator-signal.site/content/0.2.0'
 
@@ -47,7 +57,7 @@ export interface CreatorSignalMigrationReport {
     newPages: number
     additionalPages: number
     template: 'add' | 'current' | 'repair' | 'conflict'
-    notFoundTemplate: 'add' | 'current' | 'conflict'
+    notFoundTemplate: 'add' | 'current' | 'repair' | 'conflict'
     rowsInMigration: number
   }
   apply: {
@@ -64,18 +74,6 @@ export interface CreatorSignalMigrationReport {
 export interface PreparedCreatorSignalMigration {
   report: CreatorSignalMigrationReport
   manifest: SiteBundleArchiveManifest | null
-}
-
-function canonical(value: unknown): string {
-  if (value === null || typeof value !== 'object') return JSON.stringify(value)
-  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`
-  const record = value as Record<string, unknown>
-  return `{${Object.keys(record).sort().map((key) =>
-    `${JSON.stringify(key)}:${canonical(record[key])}`).join(',')}}`
-}
-
-export function canonicalSha256(value: unknown): string {
-  return createHash('sha256').update(canonical(value)).digest('hex')
 }
 
 function pageTableWithSeo(table: DataTable): DataTable {
@@ -116,6 +114,7 @@ function newPageRow(page: (typeof pack.pages)[number], now: string): DataRow {
 const retainedPageHashSets = [
   { version: '0.1.11', hashes: legacyCreatorSignalPageHashes0111 },
   { version: '0.2.0-0.2.6', hashes: retainedCreatorSignalPageHashes0200To0206 },
+  { version: '0.3.5', hashes: retainedCreatorSignalPageHashes035 },
 ] as const
 
 export function retainedCreatorSignalPageVersion(
@@ -148,7 +147,7 @@ export function prepareCreatorSignalContentMigration(
   // template so an attempted 0.0.29 migration can be repaired without treating
   // authored template content as disposable.
   const invalid029TemplateSlug = '_templates/creator-signal-site'
-  const invalidCurrentTemplateHash = canonicalSha256(pageToCells({
+  const invalidCurrentTemplateHash = canonicalPageCellsSha256(pageToCells({
     ...template,
     slug: invalid029TemplateSlug,
   }))
@@ -162,8 +161,11 @@ export function prepareCreatorSignalContentMigration(
   for (const target of currentPages) {
     const row = rowById.get(target.id)
     const legacyHash = legacyCreatorSignalPageHashes0111[target.id]
-    const isNewPage = !retainedPageHashSets.some((candidate) => candidate.hashes[target.id])
-    const targetHash = canonicalSha256(pageToCells(target))
+    // A page absent from the original retained starter is additive. Later
+    // retained versions may contain it, but that must not turn an older,
+    // otherwise exact starter export into a destructive "missing" blocker.
+    const isNewPage = !legacyCreatorSignalPageHashes0111[target.id]
+    const targetHash = canonicalPageCellsSha256(pageToCells(target))
     if (!row) {
       if (isNewPage) {
         previews.push({ id: target.id, slug: target.slug, state: 'page-add', targetHash })
@@ -175,9 +177,13 @@ export function prepareCreatorSignalContentMigration(
       continue
     }
 
-    const currentHash = canonicalSha256(row.cells)
+    const currentHash = canonicalPageCellsSha256(row.cells)
+    const currentRawHash = canonicalSha256(row.cells)
     const retainedVersion = retainedCreatorSignalPageVersion(target.id, currentHash)
-    if (retainedVersion) {
+      ?? retainedCreatorSignalPageVersion(target.id, currentRawHash)
+    if (currentHash === targetHash) {
+      previews.push({ id: target.id, slug: target.slug, state: 'already-current', currentHash, legacyHash, targetHash })
+    } else if (retainedVersion) {
       previews.push({
         id: target.id,
         slug: target.slug,
@@ -195,8 +201,6 @@ export function prepareCreatorSignalContentMigration(
         updatedByUserId: null,
         updatedBy: null,
       })
-    } else if (currentHash === targetHash) {
-      previews.push({ id: target.id, slug: target.slug, state: 'already-current', currentHash, legacyHash, targetHash })
     } else {
       previews.push({ id: target.id, slug: target.slug, state: 'authored-content', currentHash, legacyHash, targetHash })
       blockers.push(`Page "${target.slug}" differs from every recognised retained starter and the current target; it requires manual mapping.`)
@@ -209,7 +213,7 @@ export function prepareCreatorSignalContentMigration(
       id: row.id,
       slug: row.slug,
       state: 'additional-page',
-      currentHash: canonicalSha256(row.cells),
+      currentHash: canonicalPageCellsSha256(row.cells),
     })
     blockers.push(`Additional page "${row.slug}" would inherit the new everywhere template; review it manually.`)
   }
@@ -222,18 +226,21 @@ export function prepareCreatorSignalContentMigration(
       id: template.id,
       slug: template.slug,
       state: 'template-add',
-      targetHash: canonicalSha256(pageToCells(template)),
+      targetHash: canonicalPageCellsSha256(pageToCells(template)),
     })
     migrationRows.push(newPageRow(template, now))
   } else {
-    const currentHash = canonicalSha256(templateRow.cells)
-    const targetHash = canonicalSha256(pageToCells(template))
+    const currentHash = canonicalPageCellsSha256(templateRow.cells)
+    const currentRawHash = canonicalSha256(templateRow.cells)
+    const targetHash = canonicalPageCellsSha256(pageToCells(template))
     if (currentHash === targetHash) {
       templateState = 'current'
       previews.push({ id: template.id, slug: template.slug, state: 'template-current', currentHash, targetHash })
     } else if (
       (currentHash === invalidCurrentTemplateHash && templateRow.slug === invalid029TemplateSlug)
       || retainedCreatorSignalTemplates0200To0206.some((candidate) =>
+        (candidate.hash === currentHash || candidate.hash === currentRawHash) && candidate.slug === templateRow.slug)
+      || retainedCreatorSignalTemplates035.some((candidate) =>
         candidate.hash === currentHash && candidate.slug === templateRow.slug)
     ) {
       templateState = 'repair'
@@ -261,12 +268,12 @@ export function prepareCreatorSignalContentMigration(
       id: notFoundTemplate.id,
       slug: notFoundTemplate.slug,
       state: 'template-add',
-      targetHash: canonicalSha256(pageToCells(notFoundTemplate)),
+      targetHash: canonicalPageCellsSha256(pageToCells(notFoundTemplate)),
     })
     migrationRows.push(newPageRow(notFoundTemplate, now))
   } else {
-    const currentHash = canonicalSha256(notFoundTemplateRow.cells)
-    const targetHash = canonicalSha256(pageToCells(notFoundTemplate))
+    const currentHash = canonicalPageCellsSha256(notFoundTemplateRow.cells)
+    const targetHash = canonicalPageCellsSha256(pageToCells(notFoundTemplate))
     if (currentHash === targetHash) {
       notFoundTemplateState = 'current'
       previews.push({
@@ -275,6 +282,24 @@ export function prepareCreatorSignalContentMigration(
         state: 'template-current',
         currentHash,
         targetHash,
+      })
+    } else if (retainedCreatorSignalNotFoundTemplates035.some((candidate) =>
+      candidate.hash === currentHash && candidate.slug === notFoundTemplateRow.slug)) {
+      notFoundTemplateState = 'repair'
+      previews.push({
+        id: notFoundTemplate.id,
+        slug: notFoundTemplate.slug,
+        state: 'template-repair',
+        currentHash,
+        targetHash,
+      })
+      migrationRows.push({
+        ...notFoundTemplateRow,
+        cells: pageToCells(notFoundTemplate),
+        slug: notFoundTemplate.slug,
+        updatedAt: now,
+        updatedByUserId: null,
+        updatedBy: null,
       })
     } else {
       notFoundTemplateState = 'conflict'

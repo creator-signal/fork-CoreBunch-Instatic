@@ -81,9 +81,19 @@ jobs:
   creator-signal-plugin:
     name: Creator Signal Site Pack
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.60.0-noble@sha256:9bd26ad900bb5e0f4dee75839e957a89ae89c2b7ab1e76050e559790e946b948
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install Bun bootstrap dependency
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends unzip zip
+          rm -rf /var/lib/apt/lists/*
 
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
@@ -101,9 +111,6 @@ jobs:
 
       - name: Build site pack
         run: bun run instatic-plugin build integrations/creator-signal
-
-      - name: Install browser for Design System acceptance
-        run: bunx playwright install --with-deps chromium
 
       - name: Verify Design System in a browser
         run: bun run verify:creator-signal-design-system:browser

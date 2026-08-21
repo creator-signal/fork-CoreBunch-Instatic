@@ -50,13 +50,13 @@ and only their declared child component nodes are authorable. Route seeds use
 the same registry materializer, so the Insert experience and installed site
 cannot drift into separate structures.
 
-The Home v2 and Early Access compositions exercise the full module-component
-model. Campaign Hero owns the single page H1 and actions; Signal Strip owns a
-static list; Signal Comparison owns the before/after relationship; Process
-Steps owns an ordered list; Pricing Plans owns plan repeaters; Founder Story
-owns one sanitised rich-text story. Feature Grid supports a governed
-`default` or `signature` tone. These remain leaf components with no authored
-child slots, while `home-v2-page` and `early-access-page` govern their order.
+The Home and Early Access compositions exercise the full module-component
+model. Home uses Hero, Feature Grid and Call to Action to preserve the concise
+production flow. Early Access uses Campaign Hero, Signal Strip, typed Feature
+Grids, one Managed Form and a Testimonial. The other catalogue components
+remain available for approved page patterns. They are leaf components with no
+authored child slots; the stable `home-v2-page` and `early-access-page` pattern
+roots govern their declared order.
 
 ## Hero component anatomy
 
@@ -72,7 +72,9 @@ base.body
     │   └── div.actions
     │       └── base.button
     └── div.hero-art
-        └── base.image
+        ├── base.image (optional authored artwork)
+        └── div.signal-visual (production fallback)
+            └── four decorative spans
 ```
 
 The component exposes `Eyebrow`, `Heading`, `Introduction`, `Action label`,

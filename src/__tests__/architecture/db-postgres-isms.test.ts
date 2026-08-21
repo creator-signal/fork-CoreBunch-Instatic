@@ -144,6 +144,10 @@ const FORBIDDEN_PATTERNS: ForbiddenPattern[] = [
     name: 'jsonb DDL type — use text for SQLite compat',
     regex: /\bjsonb\b/,
   },
+  {
+    name: 'boolean system column compared to an integer — use a dialect-neutral boolean predicate',
+    regex: /\bsystem\s*=\s*[01]\b/i,
+  },
 ]
 
 // ---------------------------------------------------------------------------

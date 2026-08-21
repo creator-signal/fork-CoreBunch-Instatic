@@ -80,6 +80,22 @@ describe('Creator Signal site pack', () => {
     })
   })
 
+  it('uses reproducible bundled node IDs for every starter and template page', () => {
+    for (const page of pack.pages) {
+      const prefix = page.id.replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '')
+      expect(page.rootNodeId).toBe(`${prefix}--node-000`)
+      for (const [nodeId, node] of Object.entries(page.nodes)) {
+        expect(nodeId).toMatch(new RegExp(`^${prefix}--node-\\d{3}$`))
+        expect(node.id).toBe(nodeId)
+        expect(node.children.every((childId) => Boolean(page.nodes[childId]))).toBe(true)
+        if (node.parentId) expect(page.nodes[node.parentId]).toBeDefined()
+        for (const authorableNodeId of node.catalogueInstance?.pattern?.authorableNodeIds ?? []) {
+          expect(page.nodes[authorableNodeId]).toBeDefined()
+        }
+      }
+    }
+  })
+
   it('passes the authoring persistence boundary as a complete governed site', () => {
     expect(() => validateSite(makeSite({
       pages: pack.pages,
@@ -138,16 +154,17 @@ describe('Creator Signal site pack', () => {
     for (const query of Object.values(creatorSignalRenderProfile.responsiveQueries)) {
       expect(creatorSignalRenderProfile.stylesheet).toContain(`@media ${query}`)
     }
-    for (const preference of creatorSignalRenderProfile.theme.preferences) {
-      expect(siteHeader.render(siteHeader.defaults, []).html).toContain(`value="${preference}"`)
-    }
+    expect(creatorSignalRenderProfile.theme.preferences).toEqual(['system', 'light', 'dark'])
+    expect(siteHeader.render(siteHeader.defaults, []).html).not.toContain(
+      creatorSignalRenderProfile.theme.controlSelector.slice(1, -1),
+    )
     expect(creatorSignalRenderProfile.stylesheet).toContain(
       `[${creatorSignalRenderProfile.theme.themeAttribute}="dark"]`,
     )
     expect(creatorSignalRenderProfile.stylesheet).toContain('.hero-art img')
     expect(creatorSignalRenderProfile.stylesheet).toContain('object-fit: cover')
     expect(creatorSignalRenderProfile.stylesheet).toContain('.button-secondary')
-    expect(creatorSignalRenderProfile.stylesheet).toContain('[data-recovery-state="error"]')
+    expect(creatorSignalRenderProfile.stylesheet).toContain('.recovery-state')
   })
 
   it('advances the technical-pack version for the template authoring contract', () => {
@@ -156,7 +173,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.3.5')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.3.9')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -272,22 +289,14 @@ describe('Creator Signal site pack', () => {
     }
   })
 
-  it('builds the Home v2 flow from the governed campaign modules in design order', () => {
+  it('builds the production-look Home flow from three governed leaf components', () => {
     const home = creatorSignalPageAuthoringReference.find((page) => page.route === '/')
 
     expect(home).toEqual(expect.objectContaining({
       patternId: 'creator-signal.site.pattern.home-v2-page',
       componentEntryIds: [
-        'creator-signal.site.campaign-hero',
-        'creator-signal.site.signal-strip',
-        'creator-signal.site.signal-comparison',
+        'creator-signal.site.hero',
         'creator-signal.site.feature-grid',
-        'creator-signal.site.process-steps',
-        'creator-signal.site.feature-grid',
-        'creator-signal.site.feature-grid',
-        'creator-signal.site.pricing-plans',
-        'creator-signal.site.founder-story',
-        'creator-signal.site.faq',
         'creator-signal.site.call-to-action',
       ],
     }))
@@ -302,31 +311,30 @@ describe('Creator Signal site pack', () => {
     const items = siteHeader.defaults.items as Array<{ label: string, url: string }>
     expect(items).toEqual(expect.arrayContaining([
       expect.objectContaining({
-        label: 'Log in',
-        url: 'https://salespulse.creatorsignal.me/api/auth/login?returnTo=/sales-pulse',
-      }),
-      expect.objectContaining({
-        label: 'Get started free',
-        url: 'https://salespulse.creatorsignal.me/sign-up',
+        label: 'Sign in',
+        url: 'https://salespulse.creatorsignal.me',
       }),
     ]))
   })
 
-  it('replaces the legacy pricing feature grid with the governed comparison pattern', () => {
+  it('keeps pricing visually aligned through the governed feature-card pattern', () => {
     const pricing = creatorSignalPageAuthoringReference.find((page) => page.route === '/pricing')
     expect(pricing?.patternId).toBe('creator-signal.site.pattern.pricing-page')
     expect(pricing?.componentEntryIds).toEqual([
       'creator-signal.site.hero',
-      'creator-signal.site.comparison-section',
+      'creator-signal.site.feature-grid',
       'creator-signal.site.call-to-action',
     ])
   })
 
-  it('promotes privacy and terms from legacy prose layouts to the legal/trust pattern', () => {
+  it('keeps privacy and terms as a hero plus one coherent rich-text component', () => {
     for (const route of ['/legal/privacy', '/legal/terms']) {
       const reference = creatorSignalPageAuthoringReference.find((page) => page.route === route)
-      expect(reference?.patternId).toBe('creator-signal.site.pattern.legal-trust-page')
-      expect(reference?.componentEntryIds).toEqual(['creator-signal.site.public-document'])
+      expect(reference?.patternId).toBe('creator-signal.site.pattern.article-content-page')
+      expect(reference?.componentEntryIds).toEqual([
+        'creator-signal.site.hero',
+        'creator-signal.site.rich-text-section',
+      ])
     }
   })
 
@@ -481,15 +489,14 @@ describe('Creator Signal site pack', () => {
     expect(output).toContain('class="feature-grid feature-grid-3"')
     expect(output).toContain('data-analytics-choice="granted"')
     expect(output.match(/creator-signal-site-design-contract/g)).toHaveLength(1)
-    expect(output).toContain('data-cs-theme-control')
-    expect(output).toContain('creator-signal-mark-light.svg')
-    expect(output).toContain('sales-pulse-social.png')
-    expect(output).toContain('Let&#x27;s see what&#x27;s working')
+    expect(output.match(/\.hero-section\s*\{/g)).toHaveLength(2)
+    expect(output).not.toContain('data-cs-theme-control')
+    expect(output).toContain('class="brand-signal"')
+    expect(output).not.toContain('sales-pulse-social.png')
     expect(output).not.toContain('&amp;#x27;')
     expect(output).not.toContain('&amp;amp;')
-    expect(output).toContain('href="https://salespulse.creatorsignal.me/sign-up"')
-    expect(output).toContain('href="https://salespulse.creatorsignal.me/api/auth/login?returnTo=/sales-pulse"')
-    expect(output).not.toContain('class="signal-visual"')
+    expect(output).toContain('href="https://salespulse.creatorsignal.me"')
+    expect(output).toContain('class="signal-visual"')
   })
 
   it('publishes the governed not-found template through the shared site chrome', () => {
@@ -587,31 +594,15 @@ describe('Creator Signal site pack', () => {
   it('publishes the shared editorial design system once', () => {
     expect(pack.layouts).toEqual([])
     expect(new Set(pack.classes.map((rule) => rule.id)).size).toBe(pack.classes.length)
-    expect(pack.conditions.map((condition) => condition.id)).toEqual([
-      'media:(prefers-reduced-motion: reduce)',
-      'media:(forced-colors: active)',
-      'media:print',
-      'media:(max-width: 64rem)',
-      'media:(max-width: 48rem)',
-      'media:(max-width: 36rem)',
-    ])
-
-    const classStyles = (name: string) => pack.classes.find((rule) =>
-      rule.kind === 'class' && rule.name === name)?.styles
-    expect(classStyles('site-header')).toMatchObject({
-      width: 'min(calc(100% - (var(--cs-spacing-5) * 2)), var(--cs-size-content-max))',
-      marginLeft: 'auto',
-      marginRight: 'auto',
-    })
-    expect(classStyles('feature-grid')).toMatchObject({
-      display: 'grid',
-      gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-    })
-    expect(classStyles('feature-card')).toMatchObject({
-      minHeight: '16rem',
-      padding: 'var(--cs-spacing-8)',
-      borderRadius: 'var(--cs-radius-lg)',
-    })
+    expect(pack.conditions).toEqual([])
+    expect(pack.classes.every((rule) =>
+      rule.kind === 'class' &&
+      Object.keys(rule.styles).length === 0 &&
+      Object.keys(rule.contextStyles).length === 0,
+    )).toBe(true)
+    expect(pack.classes.find((rule) => rule.name === 'hero-section')?.id).toBe(
+      'creator-signal.site/site/hero-section',
+    )
     expect(featureGrid.render(featureGrid.defaults, []).html).toContain('class="feature-grid feature-grid-3"')
   })
 

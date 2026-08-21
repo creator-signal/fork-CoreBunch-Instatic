@@ -91,7 +91,7 @@ function siteEntry(input: {
 
 export const creatorSignalHeroEntry: ComponentLibraryEntry = {
   id: 'creator-signal.site.hero',
-  version: '1.1.0',
+  version: '1.2.0',
   name: 'Creator Signal Hero',
   description: 'The governed Creator Signal page introduction with one primary action and optional artwork.',
   category: 'Creator Signal',
@@ -143,6 +143,7 @@ export const creatorSignalHeroEntry: ComponentLibraryEntry = {
 
 export const creatorSignalHeaderEntry = siteEntry({
   id: 'creator-signal.site.header',
+  version: '1.1.0',
   name: 'Site Header',
   description: 'Pack-owned brand identity and primary navigation inherited from the site template.',
   tags: ['header', 'navigation', 'brand', 'shared'],
@@ -171,6 +172,7 @@ export const creatorSignalHeaderEntry = siteEntry({
 
 export const creatorSignalFooterEntry = siteEntry({
   id: 'creator-signal.site.footer',
+  version: '1.1.0',
   name: 'Site Footer',
   description: 'Shared footer identity, legal routes and service links.',
   tags: ['footer', 'navigation', 'legal', 'shared'],
@@ -182,7 +184,6 @@ export const creatorSignalFooterEntry = siteEntry({
     { key: 'brandName', label: 'Brand name', description: 'Visible site name in the shared footer.', type: 'text', required: true },
     { key: 'tagline', label: 'Tagline', description: 'Short supporting brand line.', type: 'text', required: true },
     { key: 'copyright', label: 'Copyright', description: 'Current copyright notice displayed on every page.', type: 'text', required: true },
-    { key: 'privacyLabel', label: 'Privacy choices label', description: 'Persistent control that reopens the shared consent choices.', type: 'text', required: true },
     {
       key: 'items', label: 'Footer links', description: 'Ordered product, help, legal and service destinations shared by every page.', type: 'repeater', required: true,
       itemLabel: 'Link', minItems: 1, maxItems: 24,
@@ -808,6 +809,7 @@ function patternEntry(input: {
   tags: string[]
   usage: string
   accessibility: string
+  version?: string
   maxInstancesPerDocument?: number
   allowedDocumentKinds?: Array<'page' | 'template'>
 }): ComponentLibraryEntry {
@@ -820,7 +822,7 @@ function patternEntry(input: {
     .filter((id): id is string => Boolean(id))
   return {
     id: input.id,
-    version: '1.0.0',
+    version: input.version ?? '1.0.0',
     name: input.name,
     description: input.description,
     category: 'Creator Signal patterns',
@@ -864,11 +866,11 @@ function patternEntry(input: {
 }
 
 export const creatorSignalPatternEntries: readonly ComponentLibraryEntry[] = [
-  patternEntry({ id: 'creator-signal.site.pattern.home-v2-page', name: 'Home v2 Page', description: 'The complete governed Creator Signal Home composition from product promise through pricing, founder story, FAQ and signup.', tags: ['home', 'landing page', 'sales pulse', 'pricing', 'faq'], usage: 'Use only for the Creator Signal Home route. Edit its governed child components instead of rebuilding the sequence.', accessibility: 'Keep the Campaign Hero as the one H1 and primary journey, preserve ordered steps and keep every section anchor unique.', maxInstancesPerDocument: 1 }),
+  patternEntry({ id: 'creator-signal.site.pattern.home-v2-page', version: '1.1.0', name: 'Home Page', description: 'The production-look Creator Signal home composition with a hero, focused feature grid and one next step.', tags: ['home', 'landing page', 'sales pulse'], usage: 'Use only for the Creator Signal Home route. Edit its governed child components instead of rebuilding the sequence.', accessibility: 'Keep the Hero as the one H1, retain the feature-grid heading order and keep the final action descriptive.', maxInstancesPerDocument: 1 }),
   patternEntry({ id: 'creator-signal.site.pattern.early-access-page', name: 'Early Access Page', description: 'A launch-preview composition with one governed wishlist form and supporting product context.', tags: ['early access', 'wishlist', 'launch', 'form'], usage: 'Use for the noindex Early Access test route. Keep one Managed Form instance and do not embed account creation.', accessibility: 'Preserve the Campaign Hero as H1, one labelled form, explicit permission copy and readable provider states.', maxInstancesPerDocument: 1 }),
   patternEntry({ id: 'creator-signal.site.pattern.content-page', name: 'Content Page', description: 'Hero, long-form content and one next action.', tags: ['content page', 'editorial', 'cta'], usage: 'Use for an explanatory page that ends with one next step.', accessibility: 'Keep one H1 in the Hero and use semantic headings inside the rich-text section.', maxInstancesPerDocument: 1 }),
   patternEntry({ id: 'creator-signal.site.pattern.product-page', name: 'Product Page', description: 'Hero, governed feature grid and one product action.', tags: ['product', 'features', 'cta'], usage: 'Use for a product overview with outcome-focused features and one primary journey.', accessibility: 'Keep card content scannable and the single page action specific.', maxInstancesPerDocument: 1 }),
-  patternEntry({ id: 'creator-signal.site.pattern.pricing-page', name: 'Pricing Page', description: 'Hero, semantic comparison and one next action.', tags: ['pricing', 'comparison'], usage: 'Use for plan or offer comparison; retain table captions and consistent row criteria.', accessibility: 'Keep row and column headings descriptive and avoid expressing availability through colour alone.', maxInstancesPerDocument: 1 }),
+  patternEntry({ id: 'creator-signal.site.pattern.pricing-page', version: '1.1.0', name: 'Pricing Page', description: 'Hero, a concise plan-card repeater and one next action.', tags: ['pricing', 'plans', 'cards'], usage: 'Use for the public plan overview and keep each plan as structured repeater data.', accessibility: 'Keep plan names, prices and access boundaries understandable without relying on colour.', maxInstancesPerDocument: 1 }),
   patternEntry({ id: 'creator-signal.site.pattern.features-page', name: 'Features Page', description: 'Hero and governed feature collection.', tags: ['features', 'capabilities', 'landing page'], usage: 'Use for a focused capability overview.', accessibility: 'Keep the Hero as H1 and feature headings as short H3 outcomes.', maxInstancesPerDocument: 1 }),
   patternEntry({ id: 'creator-signal.site.pattern.contact-page', name: 'Contact Page', description: 'Hero and capability-backed managed Mautic form.', tags: ['contact', 'form', 'mautic'], usage: 'Use for contact and intake routes; choose a governed form alias rather than custom HTML.', accessibility: 'Preserve the managed form labels, status announcements and privacy context.', maxInstancesPerDocument: 1 }),
   patternEntry({ id: 'creator-signal.site.pattern.legal-trust-page', name: 'Legal or Trust Page', description: 'One versioned semantic public document.', tags: ['legal', 'trust', 'document'], usage: 'Use for approved legal, trust, support and status documents that need version metadata.', accessibility: 'Use coherent rich text, meaningful headings and readable link labels.', maxInstancesPerDocument: 1 }),

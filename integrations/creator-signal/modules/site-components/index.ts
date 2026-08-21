@@ -93,13 +93,11 @@ export const siteHeader = defineModule({
     tagline: 'Clearer signals for independent creative businesses.',
     homeUrl: '/',
     items: [
-      { label: 'How it works', url: '/#how-it-works', emphasis: 'default' },
-      { label: 'Features', url: '/#features', emphasis: 'default' },
-      { label: 'Pricing', url: '/#pricing', emphasis: 'default' },
-      { label: 'About', url: '/#about', emphasis: 'default' },
-      { label: 'FAQ', url: '/#faq', emphasis: 'default' },
-      { label: 'Log in', url: 'https://salespulse.creatorsignal.me/api/auth/login?returnTo=/sales-pulse', emphasis: 'default' },
-      { label: 'Get started free', url: 'https://salespulse.creatorsignal.me/sign-up', emphasis: 'primary' },
+      { label: 'Products', url: '/products', emphasis: 'default' },
+      { label: 'Features', url: '/features', emphasis: 'default' },
+      { label: 'Pricing', url: '/pricing', emphasis: 'default' },
+      { label: 'Contact', url: '/contact', emphasis: 'default' },
+      { label: 'Sign in', url: 'https://salespulse.creatorsignal.me', emphasis: 'primary' },
     ] as NavigationItem[],
   },
   schema: {
@@ -109,27 +107,14 @@ export const siteHeader = defineModule({
     items: control.textarea('Navigation items'),
   },
   render: ({ props }) => withCreatorSignalCss(html`<header class="site-header">
-      <a class="skip-link" href="#main-content">Skip to main content</a>
+      <a class="skip-link" href="#main-content" data-parity-ignore>Skip to main content</a>
       <a class="site-brand" href="${safeUrl(props.homeUrl)}" aria-label="${escapedProp(props.brandName)} home">
-        <span class="brand-mark" aria-hidden="true">
-          <img class="brand-mark-light" src="${safeUrl(creatorSignalBrandAssets.markLight)}" alt="" width="1024" height="688" decoding="async">
-          <img class="brand-mark-reversed" src="${safeUrl(creatorSignalBrandAssets.markReversed)}" alt="" width="1024" height="688" decoding="async">
-        </span>
+        <span class="brand-signal" aria-hidden="true"><i></i><i></i><i></i></span>
         <span><strong>${escapedProp(props.brandName)}</strong><small>${escapedProp(props.tagline)}</small></span>
       </a>
-      <div class="site-header-tools">
-        <label>
-          <span class="sr-only">Appearance</span>
-          <select class="theme-control" data-cs-theme-control aria-label="Appearance">
-            <option value="system" selected>System theme</option>
-            <option value="light">Light theme</option>
-            <option value="dark">Dark theme</option>
-          </select>
-        </label>
-        <nav aria-label="Main navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
-          ${navigationItems(props.items, true)}
-        </nav>
-      </div>
+      <nav aria-label="Main navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
+        ${navigationItems(props.items, true)}
+      </nav>
     </header>`),
 })
 
@@ -143,7 +128,6 @@ export const siteFooter = defineModule({
     brandName: 'Creator Signal',
     tagline: 'Clearer signals for independent creative businesses.',
     copyright: '© 2026 Creator Signal',
-    privacyLabel: 'Privacy choices',
     items: [
       { label: 'Products', url: '/products' },
       { label: 'Sales Pulse', url: '/products/sales-pulse' },
@@ -152,7 +136,6 @@ export const siteFooter = defineModule({
       { label: 'Contact', url: '/contact' },
       { label: 'Feedback', url: '/feedback' },
       { label: 'Join wishlist', url: '/wishlist' },
-      { label: 'Early access', url: '/early-access' },
       { label: 'Ask a question', url: '/ask-a-question' },
       { label: 'Feature request', url: '/feature-request' },
       { label: 'Report an error', url: '/report-an-error' },
@@ -165,14 +148,12 @@ export const siteFooter = defineModule({
     brandName: control.text('Brand name'),
     tagline: control.text('Tagline'),
     copyright: control.text('Copyright'),
-    privacyLabel: control.text('Privacy choices label'),
     items: control.textarea('Footer links'),
   },
   render: ({ props }) => withCreatorSignalCss(html`<footer class="site-footer">
       <div class="footer-meta">
         <div><strong>${escapedProp(props.brandName)}</strong><p>${escapedProp(props.tagline)}</p></div>
         <small>${escapedProp(props.copyright)}</small>
-        <button class="footer-privacy-choice" type="button" data-privacy-choices>${escapedProp(props.privacyLabel)}</button>
       </div>
       <nav aria-label="Footer navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
         ${navigationItems(props.items)}

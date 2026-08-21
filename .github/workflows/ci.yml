@@ -92,7 +92,7 @@ jobs:
       - name: Install Bun bootstrap dependency
         run: |
           apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends unzip
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends unzip zip
           rm -rf /var/lib/apt/lists/*
 
       - name: Set up Bun

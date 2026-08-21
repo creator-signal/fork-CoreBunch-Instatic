@@ -12,7 +12,10 @@
 
 import { nanoid } from 'nanoid'
 import { registry } from '@core/module-engine'
-import { analyseComponentLibraryPrimitiveConversion, componentLibraryRegistry } from '@core/component-library'
+import {
+  analyseComponentLibraryPrimitiveConversion,
+  componentLibraryRegistry,
+} from '@core/component-library'
 import {
   cloneScopedClassesForNodeMap,
   createNode,
@@ -40,6 +43,7 @@ import { depthInTree, resolveActiveTreeTarget } from './helpers'
 import { pruneCanvasSelectionDraft } from '../selectionSlice'
 import { createStyleRuleOrderAllocator, indexStyleRulesByName, linkImportedClassNames, mergeImportedStyleRules } from './importLinking'
 import { backingComponentLibraryImplementation, initialComponentLibraryVariantValues, safeComponentLibraryOverrides } from './componentLibraryNodeOptions'
+import { consolidateCoherentRichText } from './coherentRichTextAction'
 import type { SiteSlice, SiteSliceHelpers } from './types'
 
 type NodeActions = Pick<
@@ -50,6 +54,7 @@ type NodeActions = Pick<
   | 'updateComponentLibraryField'
   | 'applyComponentLibraryOption'
   | 'convertFreeformPrimitiveToComponent'
+  | 'consolidateCoherentRichText'
   | 'deleteNode'
   | 'deleteNodes'
   | 'updateNodeProps'
@@ -116,12 +121,8 @@ function duplicateNodeWithScopedClasses(
   return duplicateNode(tree, nodeId, { nodeIdMap, classIdRemap })
 }
 
-function recordPatchChanges(
-  current: Record<string, unknown>,
-  patch: Record<string, unknown>,
-): boolean {
-  return Object.entries(patch).some(([key, value]) => !Object.is(current[key], value))
-}
+const recordPatchChanges = (current: Record<string, unknown>, patch: Record<string, unknown>): boolean =>
+  Object.entries(patch).some(([key, value]) => !Object.is(current[key], value))
 
 /**
  * Surface a blocked one-outlet-per-document mutation to the user. The store is
@@ -156,9 +157,7 @@ function coalesceKeyForPatch(
   return { coalesceKey: `${scope}:${nodeId}:${keys[0]}` }
 }
 
-function componentLibraryDefinitionForInstance(entryId: string, version: string) {
-  return componentLibraryRegistry.getVersion(entryId, version)
-}
+const componentLibraryDefinitionForInstance = (entryId: string, version: string) => componentLibraryRegistry.getVersion(entryId, version)
 
 export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
   const { get, set, mutateActiveTree, mutateActiveTreeAndSite } = helpers
@@ -414,6 +413,9 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
         node.catalogueInstance = analysis.candidate.metadata
         return true
       }),
+
+    consolidateCoherentRichText: (nodeId) =>
+      mutateActiveTree((tree) => consolidateCoherentRichText(tree, nodeId)),
 
     deleteNode: (nodeId) => {
       const deleted = mutateActiveTree((tree) => {

@@ -6,6 +6,24 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.38 - 2026-08-21
+
+### Complete Creator Signal authoring acceptance
+
+- Consolidated eligible adjacent prose into one governed Rich Text component
+  through the shared editor and MCP operation, preserving semantic source
+  content and author-controlled revisions.
+- Proved discover, insert, configure, preview, publish, revise and removal
+  tasks for all 33 Creator Signal catalogue entries through the editor and MCP
+  bridge, while keeping shared chrome single-owned and leaf entries slot-free.
+- Added explicit semantic, keyboard, focus, dismissal, announcement, form,
+  media, motion, contrast, touch and no-JavaScript accessibility contracts for
+  every catalogue entry, including field-level deterministic diagnostics and
+  policy-only publication blockers.
+- Advanced the bundled Creator Signal technical pack to 0.4.0 so retained
+  installations receive the accepted catalogue upgrade without replacing or
+  publishing authored pages.
+
 ## 0.0.37 - 2026-08-21
 
 ### Production-look Creator Signal authoring parity

@@ -155,6 +155,14 @@ export const ListComponentLibraryInputSchema = Type.Object({
 }, { additionalProperties: false })
 export type ListComponentLibraryInput = Static<typeof ListComponentLibraryInputSchema>
 
+export const CheckComponentLibraryAccessibilityInputSchema = Type.Object(
+  {},
+  { additionalProperties: false },
+)
+export type CheckComponentLibraryAccessibilityInput = Static<
+  typeof CheckComponentLibraryAccessibilityInputSchema
+>
+
 export const InsertComponentLibraryEntryInputSchema = Type.Object({
   entryId: Type.String({ minLength: 1 }),
   parentId: Type.String({ minLength: 1 }),
@@ -165,6 +173,11 @@ export const InsertComponentLibraryEntryInputSchema = Type.Object({
 export type InsertComponentLibraryEntryInput = Static<
   typeof InsertComponentLibraryEntryInputSchema
 >
+
+export const ConsolidateRichTextInputSchema = Type.Object({
+  nodeId: Type.String({ minLength: 1, description: 'The first ungoverned H2 in the adjacent prose run to consolidate.' }),
+}, { additionalProperties: false })
+export type ConsolidateRichTextInput = Static<typeof ConsolidateRichTextInputSchema>
 
 export const UpdateComponentLibraryFieldInputSchema = Type.Object({
   nodeId: Type.String({ minLength: 1 }),

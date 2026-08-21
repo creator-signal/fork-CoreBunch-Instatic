@@ -218,8 +218,9 @@ function requirementSpecification(entry: ComponentLibraryEntry): string[] {
 
 function accessibilitySpecification(entry: ComponentLibraryEntry): string[] {
   const checks = entry.accessibility?.checks ?? []
-  if (checks.length === 0) return []
-  return [
+  const notApplicable = entry.accessibility?.notApplicable ?? []
+  if (checks.length === 0 && notApplicable.length === 0) return []
+  const lines = [
     '#### Accessibility checks',
     '',
     '| Rule | Enforcement | Severity | Contract | Remediation |',
@@ -228,8 +229,21 @@ function accessibilitySpecification(entry: ComponentLibraryEntry): string[] {
       `| \`${cell(check.rule)}\` | ${cell(check.enforcement)} | ` +
       `${cell(check.severity)} | ${cell(check.summary)} | ` +
       `${cell(check.remediation)} |`),
-    '',
   ]
+  if (notApplicable.length > 0) {
+    lines.push(
+      '',
+      '#### Explicitly not applicable',
+      '',
+      '| Rule | Rationale |',
+      '|---|---|',
+      ...notApplicable.map((item) =>
+        `| \`${cell(item.rule)}\` | ${cell(item.rationale)} |`,
+      ),
+    )
+  }
+  lines.push('')
+  return lines
 }
 
 function implementation(value: ComponentLibraryImplementation): string {

@@ -173,7 +173,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.3.9')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.4.0')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -205,8 +205,8 @@ describe('Creator Signal site pack', () => {
       )
       expect(entry?.constraints.allowedDocumentKinds).toEqual(['template'])
       expect(entry?.constraints.maxInstancesPerDocument).toBe(1)
-      expect(entry?.documentation.usage).toContain('Read-only')
-      expect(entry?.documentation.usage).toContain('technical pack')
+      expect(entry?.documentation.usage).toContain('Edit once')
+      expect(entry?.documentation.usage).toContain('shared template')
       expect(entry?.fields.every((field) => Boolean(field.description))).toBe(true)
     }
 

@@ -158,5 +158,8 @@ export function createSqliteClient(filename: string): DbClient {
     return result
   }
 
-  return Object.assign(fn, { dialect: 'sqlite' as const })
+  return Object.assign(fn, {
+    dialect: 'sqlite' as const,
+    close: () => db.close(),
+  })
 }

@@ -102,6 +102,10 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ghcr.io/creator-signal/instatic-media-edge:sha-${{ github.sha }}
+          build-args: |
+            INSTATIC_VERSION=${{ steps.version.outputs.version }}
+            INSTATIC_REVISION=${{ github.sha }}
+            INSTATIC_CREATED=${{ steps.version.outputs.created }}
 
       - name: Scan both candidate digests
         shell: bash

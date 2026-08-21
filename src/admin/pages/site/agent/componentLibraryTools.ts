@@ -3,11 +3,14 @@ import {
   aiToolOk,
   type AiToolOutput,
   type ApplyComponentLibraryOptionInput,
+  type ConsolidateRichTextInput,
   type InsertComponentLibraryEntryInput,
   type ListComponentLibraryInput,
   type UpdateComponentLibraryFieldInput,
 } from '@core/ai'
 import {
+  analyseSiteComponentLibraryAccessibility,
+  analyseCoherentRichTextConversion,
   componentLibraryRegistry,
   filterComponentLibraryEntries,
   resolveComponentLibraryAvailability,
@@ -44,6 +47,25 @@ export function runListComponentLibrary(
   return aiToolOk({
     total: entries.length,
     entries: entries.slice(0, limit).map(describeEntry),
+  })
+}
+
+export function runCheckComponentLibraryAccessibility(
+  store: EditorStore,
+): AiToolOutput {
+  if (!store.site) return aiToolError('No active site.')
+  const policy = {
+    blockingRuleIds: store.site.settings.accessibility?.blockingRuleIds ?? [],
+  }
+  const diagnostics = analyseSiteComponentLibraryAccessibility(
+    store.site,
+    componentLibraryRegistry,
+    policy,
+  )
+  return aiToolOk({
+    diagnostics,
+    blockingDiagnostics: diagnostics.filter((diagnostic) => diagnostic.blocking),
+    policy,
   })
 }
 
@@ -169,6 +191,27 @@ export function runUpdateComponentLibraryField(
     entryId: node.catalogueInstance!.entryId,
     entryVersion: node.catalogueInstance!.entryVersion,
     fieldKey: input.fieldKey,
+  })
+}
+
+export function runConsolidateRichText(
+  input: ConsolidateRichTextInput,
+  store: EditorStore,
+): AiToolOutput {
+  const page = activeRenderPage(store)
+  const entry = componentLibraryRegistry.get('creator-signal.site.rich-text-section')
+  if (!page || !entry) return aiToolError('The governed Rich Text Section is not installed in the active document.')
+  const analysis = analyseCoherentRichTextConversion(page, input.nodeId, entry)
+  if (!analysis.eligible) return aiToolError(analysis.reason)
+  if (!store.consolidateCoherentRichText(input.nodeId)) {
+    return aiToolError('The prose changed before it could be consolidated. Review the preview and try again.')
+  }
+  return aiToolOk({
+    nodeId: input.nodeId,
+    entryId: entry.id,
+    entryVersion: entry.version,
+    replacedNodeIds: analysis.candidate.sourceNodeIds,
+    preview: analysis.candidate.props,
   })
 }
 

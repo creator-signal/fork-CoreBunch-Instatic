@@ -3,7 +3,9 @@ export {
   ComponentLibraryAccessibilityCategorySchema,
   ComponentLibraryAccessibilityCheckSchema,
   ComponentLibraryAccessibilityContractSchema,
+  ComponentLibraryAccessibilityNotApplicableSchema,
   ComponentLibraryAccessibilityRuleSchema,
+  COMPONENT_LIBRARY_ACCESSIBILITY_RULES,
   ComponentLibraryConstraintsSchema,
   ComponentLibraryCompositionSchema,
   ComponentLibraryDocumentKindSchema,
@@ -28,6 +30,7 @@ export type {
   ComponentLibraryAccessibilityCategory,
   ComponentLibraryAccessibilityCheck,
   ComponentLibraryAccessibilityContract,
+  ComponentLibraryAccessibilityNotApplicable,
   ComponentLibraryAccessibilityRule,
   ComponentLibraryAvailability,
   ComponentLibraryConstraints,
@@ -100,6 +103,16 @@ export {
   analyseComponentLibraryPrimitiveConversion,
   findComponentLibraryConversionCandidates,
 } from './conversion'
+
+export {
+  analyseCoherentRichTextConversion,
+  applyCoherentRichTextConversion,
+} from './coherentRichTextConversion'
+
+export type {
+  CoherentRichTextConversionAnalysis,
+  CoherentRichTextConversionCandidate,
+} from './coherentRichTextConversion'
 
 export type {
   ComponentLibraryConversionAnalysis,

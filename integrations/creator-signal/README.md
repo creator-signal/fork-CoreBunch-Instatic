@@ -114,7 +114,7 @@ relying on plugin upgrade reconciliation.
 
 ### Upgrade existing retained starter content
 
-Installing plugin 0.3.9 runs the versioned technical-pack upgrade, installs the
+Installing plugin 0.4.0 runs the versioned technical-pack upgrade, installs the
 public-authoring policy and does not change existing pages. The authored-content
 migration remains version 0.2.0.
 Export the complete site from **Admin → Export**, then run the read-only
@@ -186,6 +186,18 @@ visual semantics.
 keyboard, responsive, degraded-state and committed visual-baseline gate that
 runs against pages produced by Instatic's real public publishing pipeline.
 
+`integrations/creator-signal/CONTENT-WORKFLOWS.md` defines the executable
+create, edit, revision, preview, publish, unpublish, media, pattern, legal,
+product-page, theme, catalogue-task and guardrail acceptance matrix. Run it
+with `bun run verify:creator-signal-content-workflows`; run
+`bun run verify:creator-signal-authoring-tasks` to write the 33-entry editor
+and MCP task matrix from the registered catalogue.
+
+`integrations/creator-signal/ACCESSIBILITY.md` records the entry-specific
+accessibility contracts and the equivalent editor/MCP diagnostic tool. Run
+`bun run verify:creator-signal-accessibility` for the source contract and tool
+surface checks.
+
 `integrations/creator-signal/WEBSITE-V2.md` records the production-look Home
 and Early Access flow, page ownership boundaries and one-form intent contract.
 
@@ -208,6 +220,7 @@ its own role-protected application boundary.
 - `integrations/creator-signal/AUTHORING.md`
 - `integrations/creator-signal/PREVIEW-PARITY.md`
 - `integrations/creator-signal/ACCEPTANCE.md`
+- `integrations/creator-signal/CONTENT-WORKFLOWS.md`
 - `integrations/creator-signal/WEBSITE-V2.md`
 - `integrations/creator-signal/PARITY.md`
 - `integrations/creator-signal/instatic-plugin.config.ts`

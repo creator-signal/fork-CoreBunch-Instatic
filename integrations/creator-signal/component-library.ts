@@ -32,6 +32,7 @@ import {
   isCreatorSignalComponentPermitted,
   isCreatorSignalPatternPermitted,
 } from './public-authoring-contract'
+import { creatorSignalAccessibilityContract } from './accessibility-contract'
 
 const pluginRequirement = {
   capabilities: [],
@@ -57,7 +58,6 @@ function siteEntry(input: {
   constraints?: ComponentLibraryEntry['constraints']
   usage?: string
   accessibilityGuidance?: string
-  accessibility?: ComponentLibraryEntry['accessibility']
 }): ComponentLibraryEntry {
   return {
     id: input.id,
@@ -85,7 +85,7 @@ function siteEntry(input: {
       usage: input.usage ?? `Edit the typed content fields; the component owns its semantic HTML and uses ${creatorSignalPublicAuthoringContract.designSystem.packageName}.`,
       accessibility: input.accessibilityGuidance ?? 'Keep labels descriptive and preserve the component heading hierarchy.',
     },
-    ...(input.accessibility ? { accessibility: input.accessibility } : {}),
+    accessibility: creatorSignalAccessibilityContract(input.id),
   }
 }
 
@@ -128,17 +128,7 @@ export const creatorSignalHeroEntry: ComponentLibraryEntry = {
     usage: `Use once near the start of a landing page. Styling is governed by ${creatorSignalPublicAuthoringContract.designSystem.packageName}.`,
     accessibility: 'Use the Hero as the page-level H1 and keep later heading levels logical.',
   },
-  accessibility: {
-    checks: [{
-      rule: 'a11y.heading-order',
-      category: 'heading',
-      enforcement: 'manual',
-      severity: 'warning',
-      fields: [heroParamIds.heading],
-      summary: 'The Hero heading must fit the page heading hierarchy.',
-      remediation: 'Use the Hero as the page-level H1 and keep later heading levels logical.',
-    }],
-  },
+  accessibility: creatorSignalAccessibilityContract('creator-signal.site.hero'),
 }
 
 export const creatorSignalHeaderEntry = siteEntry({
@@ -149,7 +139,7 @@ export const creatorSignalHeaderEntry = siteEntry({
   tags: ['header', 'navigation', 'brand', 'shared'],
   moduleId: 'creator-signal.site.header',
   constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 },
-  usage: 'Read-only public chrome reconciled by the Creator Signal technical pack and inherited by ordinary pages.',
+  usage: 'Edit once in the shared template; every ordinary page inherits the updated brand identity and navigation.',
   accessibilityGuidance: 'Use short navigation labels, one primary action, and a Home URL that returns to the site root.',
   fields: [
     { key: 'brandName', label: 'Brand name', description: 'Visible site name and home-link accessible name.', type: 'text', required: true },
@@ -178,7 +168,7 @@ export const creatorSignalFooterEntry = siteEntry({
   tags: ['footer', 'navigation', 'legal', 'shared'],
   moduleId: 'creator-signal.site.footer',
   constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 },
-  usage: 'Read-only public chrome reconciled by the Creator Signal technical pack and inherited by ordinary pages.',
+  usage: 'Edit once in the shared template; every ordinary page inherits the updated footer links and legal routes.',
   accessibilityGuidance: 'Keep link labels unique enough to make sense when read out of context.',
   fields: [
     { key: 'brandName', label: 'Brand name', description: 'Visible site name in the shared footer.', type: 'text', required: true },
@@ -202,7 +192,7 @@ export const creatorSignalConsentEntry = siteEntry({
   tags: ['privacy', 'consent', 'analytics', 'shared'],
   moduleId: 'creator-signal.site.consent-banner',
   constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 },
-  usage: 'Read-only privacy chrome reconciled by the Creator Signal technical pack and inherited by ordinary pages.',
+  usage: 'Edit once in the shared template; every ordinary page inherits the same privacy choices.',
   accessibilityGuidance: 'Describe the optional purpose plainly and keep both choices equally understandable.',
   fields: [
     { key: 'heading', label: 'Heading', description: 'Short name for the privacy choice.', type: 'text', required: true },
@@ -396,6 +386,7 @@ export const creatorSignalRichTextEntry = siteEntry({
     { key: 'heading', label: 'Heading', description: 'Heading for this complete prose section.', type: 'text', required: true },
     { key: 'body', label: 'Content', description: 'Author the coherent formatted text here instead of stacking paragraph components.', type: 'rich-text', required: true },
     { key: 'sectionId', label: 'Section anchor', description: 'Unique page anchor used by the section heading.', type: 'text', required: true, advanced: true },
+    { key: 'headingLanguage', label: 'Heading language', description: 'Optional language declaration preserved on the section heading.', type: 'text', required: false, advanced: true },
   ],
 })
 
@@ -852,16 +843,7 @@ function patternEntry(input: {
       usage: input.usage,
       accessibility: input.accessibility,
     },
-    accessibility: {
-      checks: [{
-        rule: 'a11y.heading-order',
-        category: 'heading',
-        enforcement: 'manual',
-        severity: 'warning',
-        summary: 'Keep the pattern heading hierarchy meaningful in its destination page.',
-        remediation: 'Use one page-level heading and preserve logical section heading levels.',
-      }],
-    },
+    accessibility: creatorSignalAccessibilityContract(input.id),
   }
 }
 

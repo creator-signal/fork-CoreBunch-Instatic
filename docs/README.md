@@ -145,6 +145,7 @@ Three categories, three voices:
 | [features/visual-components.md](features/visual-components.md)   | VCs, slots, params, instantiation, recursion guard                   |
 | [features/component-library.md](features/component-library.md)   | Governed catalogue metadata, registry, search and dependency health |
 | [features/plain-text-component.md](features/plain-text-component.md) | Plain Text governed properties, sample pages and isolated acceptance |
+| [features/rich-text-consolidation.md](features/rich-text-consolidation.md) | Lossless adjacent-prose conversion into the governed Rich Text Section |
 | [features/content-storage.md](features/content-storage.md)       | `data_tables` + `data_rows` — the universal content store           |
 | [features/content-workspace.md](features/content-workspace.md)   | Content workspace UI: collections, entries, body editor, settings panel |
 | [features/data-workspace.md](features/data-workspace.md)         | Data workspace UI: DataInspector, field management, DataGrid        |

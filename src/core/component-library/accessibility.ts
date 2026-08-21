@@ -24,6 +24,7 @@ export interface ComponentLibraryAccessibilityDiagnostic {
   category: ComponentLibraryAccessibilityCategory
   severity: 'warning' | 'error'
   blocking: boolean
+  field?: string
   message: string
   remediation: string
 }
@@ -84,6 +85,7 @@ export function analyseComponentLibraryAccessibility(
               check,
               blockingRules,
               `${check.summary} Missing or empty field: ${field}.`,
+              field,
             ))
           }
           break
@@ -102,6 +104,7 @@ export function analyseComponentLibraryAccessibility(
               check,
               blockingRules,
               `${check.summary} The ${field} value is empty.`,
+              field,
             ))
           } else if (occurrences.length > 1) {
             diagnostics.push(diagnostic(
@@ -113,6 +116,7 @@ export function analyseComponentLibraryAccessibility(
               `${check.summary} "${value}" is also used by ${occurrences
                 .filter((candidate) => candidate !== node.id)
                 .join(', ')}.`,
+              field,
             ))
           }
           break
@@ -127,6 +131,7 @@ export function analyseComponentLibraryAccessibility(
               check,
               blockingRules,
               check.summary,
+              check.fields?.[0],
             ))
           }
           break
@@ -150,9 +155,29 @@ export function analyseComponentLibraryAccessibility(
               check,
               blockingRules,
               `${check.summary} Heading level jumps from h${previousHeadingLevel} to h${level}.`,
+              check.fields?.[0] ?? 'tag',
             ))
           }
           if (level !== null) previousHeadingLevel = level
+          break
+        }
+
+        case 'a11y.image-alternative': {
+          const [imageField, alternativeField] = check.fields ?? []
+          if (!imageField || !alternativeField) break
+          const image = governedFieldValue(node, entry, imageField, visualComponents)
+          const alternative = governedFieldValue(node, entry, alternativeField, visualComponents)
+          if (image === undefined || image === null || image === '') break
+          if (nonEmptyString(alternative)) break
+          diagnostics.push(diagnostic(
+            page,
+            node,
+            entry,
+            check,
+            blockingRules,
+            `${check.summary} Missing or empty field: ${alternativeField}.`,
+            alternativeField,
+          ))
           break
         }
       }
@@ -221,6 +246,7 @@ function diagnostic(
   check: ComponentLibraryAccessibilityCheck,
   blockingRules: ReadonlySet<string>,
   message: string,
+  field?: string,
 ): ComponentLibraryAccessibilityDiagnostic {
   return {
     pageId: page.id,
@@ -230,6 +256,7 @@ function diagnostic(
     category: check.category,
     severity: check.severity,
     blocking: blockingRules.has(check.rule),
+    ...(field ? { field } : {}),
     message,
     remediation: check.remediation,
   }

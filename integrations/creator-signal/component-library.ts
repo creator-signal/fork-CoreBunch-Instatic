@@ -32,6 +32,7 @@ import {
   isCreatorSignalComponentPermitted,
   isCreatorSignalPatternPermitted,
 } from './public-authoring-contract'
+import { creatorSignalAccessibilityContract } from './accessibility-contract'
 
 const pluginRequirement = {
   capabilities: [],
@@ -57,7 +58,6 @@ function siteEntry(input: {
   constraints?: ComponentLibraryEntry['constraints']
   usage?: string
   accessibilityGuidance?: string
-  accessibility?: ComponentLibraryEntry['accessibility']
 }): ComponentLibraryEntry {
   return {
     id: input.id,
@@ -85,7 +85,7 @@ function siteEntry(input: {
       usage: input.usage ?? `Edit the typed content fields; the component owns its semantic HTML and uses ${creatorSignalPublicAuthoringContract.designSystem.packageName}.`,
       accessibility: input.accessibilityGuidance ?? 'Keep labels descriptive and preserve the component heading hierarchy.',
     },
-    ...(input.accessibility ? { accessibility: input.accessibility } : {}),
+    accessibility: creatorSignalAccessibilityContract(input.id),
   }
 }
 
@@ -128,17 +128,7 @@ export const creatorSignalHeroEntry: ComponentLibraryEntry = {
     usage: `Use once near the start of a landing page. Styling is governed by ${creatorSignalPublicAuthoringContract.designSystem.packageName}.`,
     accessibility: 'Use the Hero as the page-level H1 and keep later heading levels logical.',
   },
-  accessibility: {
-    checks: [{
-      rule: 'a11y.heading-order',
-      category: 'heading',
-      enforcement: 'manual',
-      severity: 'warning',
-      fields: [heroParamIds.heading],
-      summary: 'The Hero heading must fit the page heading hierarchy.',
-      remediation: 'Use the Hero as the page-level H1 and keep later heading levels logical.',
-    }],
-  },
+  accessibility: creatorSignalAccessibilityContract('creator-signal.site.hero'),
 }
 
 export const creatorSignalHeaderEntry = siteEntry({
@@ -853,16 +843,7 @@ function patternEntry(input: {
       usage: input.usage,
       accessibility: input.accessibility,
     },
-    accessibility: {
-      checks: [{
-        rule: 'a11y.heading-order',
-        category: 'heading',
-        enforcement: 'manual',
-        severity: 'warning',
-        summary: 'Keep the pattern heading hierarchy meaningful in its destination page.',
-        remediation: 'Use one page-level heading and preserve logical section heading levels.',
-      }],
-    },
+    accessibility: creatorSignalAccessibilityContract(input.id),
   }
 }
 

@@ -312,21 +312,27 @@ export const ComponentLibraryDocumentationSchema = Type.Object(
   { additionalProperties: false },
 )
 
-export const ComponentLibraryAccessibilityRuleSchema = Type.Union([
-  Type.Literal('a11y.accessible-name'),
-  Type.Literal('a11y.heading-order'),
-  Type.Literal('a11y.form-control-label'),
-  Type.Literal('a11y.unique-field-id'),
-  Type.Literal('a11y.keyboard-contract'),
-  Type.Literal('a11y.focus-contract'),
-  Type.Literal('a11y.announcement-contract'),
-  Type.Literal('a11y.no-javascript-fallback'),
-  Type.Literal('a11y.provider-fallback'),
-  Type.Literal('a11y.image-alternative'),
-  Type.Literal('a11y.motion-control'),
-  Type.Literal('a11y.contrast'),
-  Type.Literal('a11y.touch-target'),
-])
+export const COMPONENT_LIBRARY_ACCESSIBILITY_RULES = [
+  'a11y.semantic-structure',
+  'a11y.accessible-name',
+  'a11y.heading-order',
+  'a11y.form-control-label',
+  'a11y.unique-field-id',
+  'a11y.keyboard-contract',
+  'a11y.focus-contract',
+  'a11y.dismissal-contract',
+  'a11y.announcement-contract',
+  'a11y.no-javascript-fallback',
+  'a11y.provider-fallback',
+  'a11y.image-alternative',
+  'a11y.motion-control',
+  'a11y.contrast',
+  'a11y.touch-target',
+] as const
+
+export const ComponentLibraryAccessibilityRuleSchema = Type.Union(
+  COMPONENT_LIBRARY_ACCESSIBILITY_RULES.map((rule) => Type.Literal(rule)),
+)
 
 export type ComponentLibraryAccessibilityRule = Static<
   typeof ComponentLibraryAccessibilityRuleSchema
@@ -336,6 +342,7 @@ export const ComponentLibraryAccessibilityCategorySchema = Type.Union([
   Type.Literal('semantic'),
   Type.Literal('keyboard'),
   Type.Literal('focus'),
+  Type.Literal('dismissal'),
   Type.Literal('naming'),
   Type.Literal('heading'),
   Type.Literal('form'),
@@ -344,6 +351,7 @@ export const ComponentLibraryAccessibilityCategorySchema = Type.Union([
   Type.Literal('contrast'),
   Type.Literal('touch'),
   Type.Literal('provider'),
+  Type.Literal('no-javascript'),
 ])
 
 export type ComponentLibraryAccessibilityCategory = Static<
@@ -376,9 +384,24 @@ export type ComponentLibraryAccessibilityCheck = Static<
   typeof ComponentLibraryAccessibilityCheckSchema
 >
 
+export const ComponentLibraryAccessibilityNotApplicableSchema = Type.Object(
+  {
+    rule: ComponentLibraryAccessibilityRuleSchema,
+    rationale: Type.String({ minLength: 1 }),
+  },
+  { additionalProperties: false },
+)
+
+export type ComponentLibraryAccessibilityNotApplicable = Static<
+  typeof ComponentLibraryAccessibilityNotApplicableSchema
+>
+
 export const ComponentLibraryAccessibilityContractSchema = Type.Object(
   {
     checks: Type.Array(ComponentLibraryAccessibilityCheckSchema),
+    notApplicable: Type.Optional(
+      Type.Array(ComponentLibraryAccessibilityNotApplicableSchema),
+    ),
   },
   { additionalProperties: false },
 )

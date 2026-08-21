@@ -193,6 +193,11 @@ with `bun run verify:creator-signal-content-workflows`; run
 `bun run verify:creator-signal-authoring-tasks` to write the 33-entry editor
 and MCP task matrix from the registered catalogue.
 
+`integrations/creator-signal/ACCESSIBILITY.md` records the entry-specific
+accessibility contracts and the equivalent editor/MCP diagnostic tool. Run
+`bun run verify:creator-signal-accessibility` for the source contract and tool
+surface checks.
+
 `integrations/creator-signal/WEBSITE-V2.md` records the production-look Home
 and Early Access flow, page ownership boundaries and one-form intent contract.
 

@@ -9,6 +9,7 @@ import {
   type UpdateComponentLibraryFieldInput,
 } from '@core/ai'
 import {
+  analyseSiteComponentLibraryAccessibility,
   analyseCoherentRichTextConversion,
   componentLibraryRegistry,
   filterComponentLibraryEntries,
@@ -46,6 +47,25 @@ export function runListComponentLibrary(
   return aiToolOk({
     total: entries.length,
     entries: entries.slice(0, limit).map(describeEntry),
+  })
+}
+
+export function runCheckComponentLibraryAccessibility(
+  store: EditorStore,
+): AiToolOutput {
+  if (!store.site) return aiToolError('No active site.')
+  const policy = {
+    blockingRuleIds: store.site.settings.accessibility?.blockingRuleIds ?? [],
+  }
+  const diagnostics = analyseSiteComponentLibraryAccessibility(
+    store.site,
+    componentLibraryRegistry,
+    policy,
+  )
+  return aiToolOk({
+    diagnostics,
+    blockingDiagnostics: diagnostics.filter((diagnostic) => diagnostic.blocking),
+    policy,
   })
 }
 

@@ -269,7 +269,7 @@ const formCss = String.raw`
 .cs-mautic .mauticform-helpmessage {
   display: block;
   margin: 0 0 7px;
-  color: var(--cs-text-muted);
+  color: var(--cs-muted);
   font-size: .84rem;
 }
 .cs-mautic button[type="submit"],

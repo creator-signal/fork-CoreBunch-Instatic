@@ -299,6 +299,12 @@ p { line-height: 1.7; }
 .cta-section .eyebrow { color: var(--cs-site-cta-eyebrow); }
 .cta-section .cta-copy > p { color: var(--cs-site-cta-copy); }
 .cta-section .button-primary { background: white; color: var(--cs-ink); }
+.cta-section .button-secondary {
+  border-color: transparent;
+  background: white;
+  color: var(--cs-ink);
+  box-shadow: var(--cs-site-shadow-action);
+}
 
 .testimonial {
   width: calc(100% - 40px);

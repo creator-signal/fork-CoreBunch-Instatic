@@ -18,9 +18,10 @@ assets.
 - Full-page Preview uses Instatic's authenticated public renderer, including
   template composition, resolved media, plugin frontend assets, and the same
   Content Security Policy envelope as publication.
-- The system, light, and dark choices use the vendored theme bootstrap and
-  control assets declared by the render profile. Preview permits those scripts
-  in an opaque sandbox so the visible theme result follows public HTML.
+- The system, light, and dark runtime states use the vendored theme bootstrap
+  declared by the render profile. The public header intentionally exposes no
+  appearance selector; the production-look adapter keeps the visible site
+  stable across those compatibility states.
 - Desktop, tablet, and mobile canvas frames are real iframe viewports. The
   shared CSS media queries therefore select the same responsive rules as a
   published page at the same width.

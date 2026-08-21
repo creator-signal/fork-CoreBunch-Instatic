@@ -7,6 +7,10 @@ import {
   retainedCreatorSignalPageHashes0200To0206,
   retainedCreatorSignalTemplates0200To0206,
 } from '../retained-0.2.x-hashes'
+import {
+  retainedCreatorSignalPageHashes035,
+  retainedCreatorSignalTemplates035,
+} from '../retained-0.3.5-hashes'
 import { pack } from '../../pack/site'
 
 export const CREATOR_SIGNAL_CONTENT_MIGRATION = 'creator-signal.site/content/0.2.0'
@@ -116,6 +120,7 @@ function newPageRow(page: (typeof pack.pages)[number], now: string): DataRow {
 const retainedPageHashSets = [
   { version: '0.1.11', hashes: legacyCreatorSignalPageHashes0111 },
   { version: '0.2.0-0.2.6', hashes: retainedCreatorSignalPageHashes0200To0206 },
+  { version: '0.3.5', hashes: retainedCreatorSignalPageHashes035 },
 ] as const
 
 export function retainedCreatorSignalPageVersion(
@@ -162,7 +167,10 @@ export function prepareCreatorSignalContentMigration(
   for (const target of currentPages) {
     const row = rowById.get(target.id)
     const legacyHash = legacyCreatorSignalPageHashes0111[target.id]
-    const isNewPage = !retainedPageHashSets.some((candidate) => candidate.hashes[target.id])
+    // A page absent from the original retained starter is additive. Later
+    // retained versions may contain it, but that must not turn an older,
+    // otherwise exact starter export into a destructive "missing" blocker.
+    const isNewPage = !legacyCreatorSignalPageHashes0111[target.id]
     const targetHash = canonicalSha256(pageToCells(target))
     if (!row) {
       if (isNewPage) {
@@ -234,6 +242,8 @@ export function prepareCreatorSignalContentMigration(
     } else if (
       (currentHash === invalidCurrentTemplateHash && templateRow.slug === invalid029TemplateSlug)
       || retainedCreatorSignalTemplates0200To0206.some((candidate) =>
+        candidate.hash === currentHash && candidate.slug === templateRow.slug)
+      || retainedCreatorSignalTemplates035.some((candidate) =>
         candidate.hash === currentHash && candidate.slug === templateRow.slug)
     ) {
       templateState = 'repair'

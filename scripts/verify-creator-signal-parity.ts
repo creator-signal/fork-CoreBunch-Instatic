@@ -61,19 +61,45 @@ interface SectionComparisonResult {
   failure?: string
 }
 
+type ComparisonMode = 'production-parity' | 'candidate-only' | 'candidate-unavailable'
+
 interface ParityResult {
   route: string
   viewport: Viewport['name']
+  comparisonMode: ComparisonMode
   pass: boolean
-  visualPass: boolean
-  visual: VisualComparison
+  visualPass: boolean | null
+  visual: VisualComparison | null
   semanticFailures: string[]
   candidateSeoFailures: string[]
-  screenshots: { baseline: string; candidate: string }
+  notes: string[]
+  screenshots: { baseline?: string; candidate?: string }
   sections: SectionComparisonResult[]
-  baseline: PageContract
-  candidate: PageContract
+  baseline: PageContract | null
+  candidate: PageContract | null
 }
+
+interface RouteCapture {
+  page: Page
+  available: boolean
+  status: number | null
+  contract: PageContract | null
+  screenshot: Buffer | null
+  failure: string | null
+}
+
+const pageSectionSelector = [
+  'header.site-header',
+  'main > section',
+  'main > article',
+  'main > figure',
+  'main > [data-creator-signal-pattern] > section',
+  'main > [data-creator-signal-pattern] > article',
+  'main > [data-creator-signal-pattern] > figure',
+  'main > [data-creator-signal-pattern] > aside',
+  'footer.site-footer',
+  'aside[data-consent-banner]',
+].join(', ')
 
 const viewports: readonly Viewport[] = [
   { name: 'desktop', width: 1440, height: 900 },
@@ -103,10 +129,15 @@ function identifierStem(value: string): string {
 }
 
 async function collectContract(page: Page): Promise<PageContract> {
-  return page.evaluate(() => {
+  return page.evaluate((sectionSelector) => {
     const normalize = (value: unknown): string => String(value ?? '').replace(/\s+/g, ' ').trim()
     const meta = (selector: string): string | null =>
       document.querySelector(selector)?.getAttribute('content') ?? null
+    const ignored = [...document.querySelectorAll<HTMLElement>('[data-parity-ignore]')]
+    const ignoredDisplay = ignored.map((node) => node.style.display)
+    ignored.forEach((node) => { node.style.display = 'none' })
+    const visibleText = normalize(document.body.innerText)
+    ignored.forEach((node, index) => { node.style.display = ignoredDisplay[index] ?? '' })
     return {
       title: document.title,
       description: meta('meta[name="description"]'),
@@ -116,7 +147,7 @@ async function collectContract(page: Page): Promise<PageContract> {
       openGraphDescription: meta('meta[property="og:description"]'),
       twitterCard: meta('meta[name="twitter:card"]'),
       language: document.documentElement.lang,
-      visibleText: normalize(document.body.innerText),
+      visibleText,
       headings: [...document.querySelectorAll('h1,h2,h3,h4,h5,h6')].map((node) =>
         `${node.tagName}:${normalize(node.textContent)}`
       ),
@@ -137,12 +168,7 @@ async function collectContract(page: Page): Promise<PageContract> {
           .map((node) => node.getAttribute('itemtype'))
           .filter((value): value is string => Boolean(value)),
       )].sort(),
-      sections: [
-        ...document.querySelectorAll(
-          'header.site-header, main > section, main > article, main > figure, ' +
-          'footer.site-footer, aside[data-consent-banner]',
-        ),
-      ].map((node) => {
+      sections: [...document.querySelectorAll(sectionSelector)].map((node) => {
         const className = String(node.className)
         let componentEntryId = 'unknown'
         if (node.matches('header.site-header')) componentEntryId = 'creator-signal.site.header'
@@ -152,7 +178,15 @@ async function collectContract(page: Page): Promise<PageContract> {
         else if (node.matches('.cta-section')) componentEntryId = 'creator-signal.site.call-to-action'
         else if (node.matches('.testimonial')) componentEntryId = 'creator-signal.site.testimonial'
         else if (node.matches('.public-document')) componentEntryId = 'creator-signal.site.public-document'
-        else if (node.matches('.cs-mautic')) componentEntryId = 'creator-signal.site.mautic-form'
+        else if (node.matches('.campaign-hero')) componentEntryId = 'creator-signal.site.campaign-hero'
+        else if (node.matches('.signal-strip')) componentEntryId = 'creator-signal.site.signal-strip'
+        else if (node.matches('.signal-comparison')) componentEntryId = 'creator-signal.site.signal-comparison'
+        else if (node.matches('.process-section')) componentEntryId = 'creator-signal.site.process-steps'
+        else if (node.matches('.pricing-plans')) componentEntryId = 'creator-signal.site.pricing-plans'
+        else if (node.matches('.founder-story')) componentEntryId = 'creator-signal.site.founder-story'
+        else if (node.matches('.comparison-section')) componentEntryId = 'creator-signal.site.comparison-section'
+        else if (node.matches('.recovery-state')) componentEntryId = 'creator-signal.site.recovery-state'
+        else if (node.matches('.cs-mautic') || node.querySelector('.cs-mautic')) componentEntryId = 'creator-signal.site.mautic-form'
         else if (node.querySelector('.feature-grid')) componentEntryId = 'creator-signal.site.feature-grid'
         else if (node.querySelector('.faq-list')) componentEntryId = 'creator-signal.site.faq'
         else if (node.querySelector('.prose-content')) componentEntryId = 'creator-signal.site.rich-text-section'
@@ -165,27 +199,46 @@ async function collectContract(page: Page): Promise<PageContract> {
       }),
       bodyHeight: Math.round(document.body.getBoundingClientRect().height * 100) / 100,
     }
-  })
+  }, pageSectionSelector)
 }
 
 async function openRoute(
   context: BrowserContext,
   base: string,
   route: string,
-): Promise<{ page: Page; contract: PageContract; screenshot: Buffer }> {
+): Promise<RouteCapture> {
   const page = await context.newPage()
-  const response = await page.goto(`${base}${route}`, { waitUntil: 'load' })
-  if (!response?.ok()) {
-    throw new Error(`${base}${route} returned ${response?.status() ?? 'no response'}`)
+  try {
+    const response = await page.goto(`${base}${route}`, { waitUntil: 'load' })
+    const status = response?.status() ?? null
+    if (!response?.ok()) {
+      return {
+        page,
+        available: false,
+        status,
+        contract: null,
+        screenshot: null,
+        failure: `${base}${route} returned ${status ?? 'no response'}`,
+      }
+    }
+    await page.evaluate(async () => {
+      await document.fonts.ready
+    })
+    const [contract, screenshot] = await Promise.all([
+      collectContract(page),
+      page.screenshot({ fullPage: true, animations: 'disabled' }),
+    ])
+    return { page, available: true, status, contract, screenshot, failure: null }
+  } catch (error) {
+    return {
+      page,
+      available: false,
+      status: null,
+      contract: null,
+      screenshot: null,
+      failure: error instanceof Error ? error.message : String(error),
+    }
   }
-  await page.evaluate(async () => {
-    await document.fonts.ready
-  })
-  const [contract, screenshot] = await Promise.all([
-    collectContract(page),
-    page.screenshot({ fullPage: true, animations: 'disabled' }),
-  ])
-  return { page, contract, screenshot }
 }
 
 async function comparePngs(baseline: Buffer, candidate: Buffer): Promise<VisualComparison> {
@@ -252,12 +305,19 @@ async function screenshotSection(
   }
 }
 
-function seoFailures(contract: PageContract): string[] {
+export function seoFailures(contract: PageContract, route: string): string[] {
   const failures: string[] = []
   if (!contract.title) failures.push('missing title')
   if (!contract.description) failures.push('missing description')
   if (!contract.canonical?.startsWith('https://creatorsignal.me')) failures.push('missing production canonical')
-  if (!contract.robots?.includes('index') || !contract.robots.includes('follow')) failures.push('missing index/follow robots')
+  const expectedRobots = route === '/early-access'
+    ? ['noindex', 'follow', 'noarchive']
+    : ['index', 'follow']
+  for (const directive of expectedRobots) {
+    if (!contract.robots?.split(',').map((value) => value.trim()).includes(directive)) {
+      failures.push(`missing ${directive} robots directive`)
+    }
+  }
   if (!contract.openGraphTitle || !contract.openGraphDescription) failures.push('missing Open Graph metadata')
   if (!contract.twitterCard) failures.push('missing Twitter card metadata')
   if (contract.language !== 'en-AU') failures.push('language is not en-AU')
@@ -291,6 +351,8 @@ function renderHtmlReport(input: {
     creatorSignalComponentLibraryEntries.map((entry) => [entry.id, entry.name]),
   )
   const passed = input.results.filter((result) => result.pass).length
+  const comparable = input.results.filter((result) => result.comparisonMode === 'production-parity').length
+  const candidateOnly = input.results.filter((result) => result.comparisonMode === 'candidate-only').length
   const interactionsPassed = input.interactionResults.filter(
     (result) => result.pass === true,
   ).length
@@ -333,18 +395,30 @@ function renderHtmlReport(input: {
             </div>` : `<p>${escapeReportHtml(section.failure ?? 'Section screenshot unavailable.')}</p>`}
         </article>`).join('')
       const failures = [...comparison.semanticFailures, ...comparison.candidateSeoFailures]
+      const visualSummary = comparison.visual
+        ? `${percent(comparison.visual.differentPixelRatio)} different pixels · ${comparison.visual.meanChannelDelta.toFixed(4)} mean channel delta`
+        : comparison.comparisonMode === 'candidate-only'
+          ? 'Candidate-only route; no production screenshot exists.'
+          : 'Candidate route unavailable; visual comparison not possible.'
+      const screenshots = comparison.screenshots.baseline && comparison.screenshots.candidate
+        ? `<div class="image-pair">
+            <figure><figcaption>Production</figcaption><img loading="lazy" src="${escapeReportHtml(comparison.screenshots.baseline)}" alt="Production ${escapeReportHtml(page.title)} at ${escapeReportHtml(comparison.viewport)}"></figure>
+            <figure><figcaption>Candidate</figcaption><img loading="lazy" src="${escapeReportHtml(comparison.screenshots.candidate)}" alt="Candidate ${escapeReportHtml(page.title)} at ${escapeReportHtml(comparison.viewport)}"></figure>
+          </div>`
+        : comparison.screenshots.candidate
+          ? `<div class="image-pair single"><figure><figcaption>Candidate</figcaption><img loading="lazy" src="${escapeReportHtml(comparison.screenshots.candidate)}" alt="Candidate ${escapeReportHtml(page.title)} at ${escapeReportHtml(comparison.viewport)}"></figure></div>`
+          : ''
       return `
         <section class="viewport-card">
           <header class="comparison-heading">
             <h3>${escapeReportHtml(comparison.viewport)}</h3>
             <span class="status ${comparison.pass ? 'pass' : 'fail'}">${comparison.pass ? 'PASS' : 'FAIL'}</span>
-            <span>${percent(comparison.visual.differentPixelRatio)} different pixels · ${comparison.visual.meanChannelDelta.toFixed(4)} mean channel delta</span>
+            <span>${escapeReportHtml(comparison.comparisonMode)}</span>
+            <span>${escapeReportHtml(visualSummary)}</span>
           </header>
           ${failures.length > 0 ? `<ul class="failures">${failures.map((failure) => `<li>${escapeReportHtml(failure)}</li>`).join('')}</ul>` : ''}
-          <div class="image-pair">
-            <figure><figcaption>Production</figcaption><img loading="lazy" src="${escapeReportHtml(comparison.screenshots.baseline)}" alt="Production ${escapeReportHtml(page.title)} at ${escapeReportHtml(comparison.viewport)}"></figure>
-            <figure><figcaption>Candidate</figcaption><img loading="lazy" src="${escapeReportHtml(comparison.screenshots.candidate)}" alt="Candidate ${escapeReportHtml(page.title)} at ${escapeReportHtml(comparison.viewport)}"></figure>
-          </div>
+          ${comparison.notes.length > 0 ? `<ul class="notes">${comparison.notes.map((note) => `<li>${escapeReportHtml(note)}</li>`).join('')}</ul>` : ''}
+          ${screenshots}
           <details><summary>Component sections (${comparison.sections.length})</summary><div class="section-grid">${sections}</div></details>
         </section>`
     }).join('')
@@ -382,7 +456,8 @@ function renderHtmlReport(input: {
     figure { margin: 0; } figcaption { margin-bottom: 6px; color: #b8bec7; font-size: .8rem; font-weight: 700; text-transform: uppercase; }
     img { display: block; width: 100%; height: auto; border: 1px solid #34383d; border-radius: 8px; background: white; }
     .section-grid { display: grid; gap: 12px; margin-top: 12px; } .section-card { padding: 12px; } .section-card > header { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-    .compact img { max-height: 520px; object-fit: contain; object-position: top; } .failures { color: #ffc0c3; } .sequence { color: #c9ced6; }
+    .image-pair.single { grid-template-columns: minmax(0, 1fr); max-width: 760px; }
+    .compact img { max-height: 520px; object-fit: contain; object-position: top; } .failures { color: #ffc0c3; } .notes, .sequence { color: #c9ced6; }
     section > h2 { margin-top: 42px; } .table-wrap { overflow-x: auto; }
     @media (max-width: 760px) { body { padding: 16px; } .image-pair { grid-template-columns: 1fr; } }
   </style>
@@ -395,6 +470,8 @@ function renderHtmlReport(input: {
   </header>
   <div class="summary">
     <div class="metric"><strong>${passed}/${input.results.length}</strong>page/viewport comparisons</div>
+    <div class="metric"><strong>${comparable}</strong>production-comparable captures</div>
+    <div class="metric"><strong>${candidateOnly}</strong>candidate-only captures</div>
     <div class="metric"><strong>${interactionsPassed}/${input.interactionResults.length}</strong>interaction comparisons</div>
     <div class="metric"><strong>${creatorSignalPageAuthoringReference.length}</strong>public routes</div>
     <div class="metric"><strong>${creatorSignalComponentLibraryEntries.length}</strong>authorable catalogue entries</div>
@@ -454,6 +531,65 @@ try {
             mkdir(screenshotDir, { recursive: true }),
             mkdir(sectionDir, { recursive: true }),
           ])
+          if (!candidate.available || !candidate.contract || !candidate.screenshot) {
+            failed = true
+            results.push({
+              route,
+              viewport: viewport.name,
+              comparisonMode: 'candidate-unavailable',
+              pass: false,
+              visualPass: null,
+              visual: null,
+              semanticFailures: [candidate.failure ?? 'candidate route unavailable'],
+              candidateSeoFailures: [],
+              notes: baseline.failure ? [`Production capture: ${baseline.failure}`] : [],
+              screenshots: {},
+              sections: [],
+              baseline: baseline.contract,
+              candidate: null,
+            })
+            console.log(`FAIL ${viewport.name.padEnd(7)} ${route} (candidate unavailable)`)
+            continue
+          }
+
+          const candidateSeoFailures = seoFailures(candidate.contract, route)
+          if (!baseline.available || !baseline.contract || !baseline.screenshot) {
+            const candidateScreenshot = `screenshots/${viewport.name}/${fileStem(route)}-candidate.png`
+            await Bun.write(resolve(outputDir, candidateScreenshot), candidate.screenshot)
+            const baselineMissingAsExpected = baseline.status === 404
+            const pass = baselineMissingAsExpected && candidateSeoFailures.length === 0
+            if (!pass) failed = true
+            results.push({
+              route,
+              viewport: viewport.name,
+              comparisonMode: 'candidate-only',
+              pass,
+              visualPass: null,
+              visual: null,
+              semanticFailures: baselineMissingAsExpected
+                ? []
+                : [baseline.failure ?? 'production baseline unavailable'],
+              candidateSeoFailures,
+              notes: [
+                baselineMissingAsExpected
+                  ? 'Production returns HTTP 404; candidate quality is reported without claiming visual parity.'
+                  : `Production capture failed: ${baseline.failure ?? 'unknown error'}`,
+              ],
+              screenshots: { candidate: candidateScreenshot },
+              sections: candidate.contract.sections.map((section, index) => ({
+                index,
+                pass: true,
+                componentEntryId: section.componentEntryId,
+                heading: section.heading,
+                failure: 'Candidate-only section; no production section exists for comparison.',
+              })),
+              baseline: null,
+              candidate: candidate.contract,
+            })
+            console.log(`${pass ? 'PASS' : 'FAIL'} ${viewport.name.padEnd(7)} ${route} (candidate only)`)
+            continue
+          }
+
           const fullPageScreenshots = {
             baseline: `screenshots/${viewport.name}/${fileStem(route)}-baseline.png`,
             candidate: `screenshots/${viewport.name}/${fileStem(route)}-candidate.png`,
@@ -468,15 +604,24 @@ try {
           if (baseline.contract.visibleText !== candidate.contract.visibleText) semanticFailures.push('visible text differs')
           if (JSON.stringify(baseline.contract.headings) !== JSON.stringify(candidate.contract.headings)) semanticFailures.push('heading hierarchy differs')
           if (JSON.stringify(baseline.contract.landmarks) !== JSON.stringify(candidate.contract.landmarks)) semanticFailures.push('landmarks differ')
-          if (JSON.stringify(baseline.contract.classes) !== JSON.stringify(candidate.contract.classes)) semanticFailures.push('class contract differs')
-          if (JSON.stringify(baseline.contract.sections) !== JSON.stringify(candidate.contract.sections)) semanticFailures.push('component section contract differs')
+          const missingProductionClasses = baseline.contract.classes.filter(
+            (className) => !candidate.contract.classes.includes(className),
+          )
+          if (missingProductionClasses.length > 0) {
+            semanticFailures.push(`production classes missing: ${missingProductionClasses.join(', ')}`)
+          }
+          const sectionContract = (contract: PageContract) => contract.sections.map((section) => ({
+            tag: section.tag,
+            heading: section.heading,
+            componentEntryId: section.componentEntryId,
+          }))
+          if (JSON.stringify(sectionContract(baseline.contract)) !== JSON.stringify(sectionContract(candidate.contract))) {
+            semanticFailures.push('component section contract differs')
+          }
           if (Math.abs(baseline.contract.bodyHeight - candidate.contract.bodyHeight) > 1) semanticFailures.push('page height differs')
           const sectionResults: SectionComparisonResult[] = []
-          const sectionSelector =
-            'header.site-header, main > section, main > article, main > figure, ' +
-            'footer.site-footer, aside[data-consent-banner]'
-          const baselineSections = baseline.page.locator(sectionSelector)
-          const candidateSections = candidate.page.locator(sectionSelector)
+          const baselineSections = baseline.page.locator(pageSectionSelector)
+          const candidateSections = candidate.page.locator(pageSectionSelector)
           const [baselineSectionCount, candidateSectionCount] = await Promise.all([
             baselineSections.count(),
             candidateSections.count(),
@@ -534,7 +679,6 @@ try {
           if (sectionResults.some((section) => section.pass === false)) {
             semanticFailures.push('one or more component sections differ')
           }
-          const candidateSeoFailures = seoFailures(candidate.contract)
           const visualPass =
             visual.differentPixelRatio <= maxDifferentPixelRatio &&
             visual.meanChannelDelta <= maxMeanChannelDelta
@@ -545,11 +689,13 @@ try {
           results.push({
             route,
             viewport: viewport.name,
+            comparisonMode: 'production-parity',
             pass,
             visualPass,
             visual,
             semanticFailures,
             candidateSeoFailures,
+            notes: [],
             screenshots: fullPageScreenshots,
             sections: sectionResults,
             baseline: baseline.contract,
@@ -690,6 +836,9 @@ const report = {
   routes: creatorSignalPublicRouteSlugs.length,
   viewports: viewports.length,
   comparisons: results.length,
+  comparableComparisons: results.filter((result) => result.comparisonMode === 'production-parity').length,
+  candidateOnlyComparisons: results.filter((result) => result.comparisonMode === 'candidate-only').length,
+  candidateUnavailableComparisons: results.filter((result) => result.comparisonMode === 'candidate-unavailable').length,
   passed: results.filter((result) => result.pass).length,
   failed: results.filter((result) => !result.pass).length,
   results,

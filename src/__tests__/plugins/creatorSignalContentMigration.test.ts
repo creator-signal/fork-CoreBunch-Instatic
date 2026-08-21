@@ -10,6 +10,10 @@ import {
   retainedCreatorSignalTemplates0200To0206,
 } from '../../../integrations/creator-signal/migrations/retained-0.2.x-hashes'
 import {
+  retainedCreatorSignalPageHashes035,
+  retainedCreatorSignalTemplates035,
+} from '../../../integrations/creator-signal/migrations/retained-0.3.5-hashes'
+import {
   canonicalSha256,
   prepareCreatorSignalContentMigration,
   retainedCreatorSignalPageVersion,
@@ -176,7 +180,7 @@ describe('Creator Signal 0.2.0 content migration', () => {
     ]))
   })
 
-  it('recognises only the immutable 0.2.0-0.2.6 page and template hashes', () => {
+  it('recognises only the pinned retained page and template hashes', () => {
     expect(Object.keys(retainedCreatorSignalPageHashes0200To0206).sort()).toEqual(
       Object.keys(legacyCreatorSignalPageHashes0111).sort(),
     )
@@ -195,6 +199,16 @@ describe('Creator Signal 0.2.0 content migration', () => {
         hash: 'e541f13c931e8e2f784428eb786f600bc0f123e98c79f7538416fe6a110aaf89',
       },
     ])
+    expect(Object.keys(retainedCreatorSignalPageHashes035)).toHaveLength(24)
+    for (const [pageId, hash] of Object.entries(retainedCreatorSignalPageHashes035)) {
+      expect(retainedCreatorSignalPageVersion(pageId, hash)).toBe('0.3.5')
+      const unknownHash = `${hash.slice(0, -1)}${hash.endsWith('0') ? '1' : '0'}`
+      expect(retainedCreatorSignalPageVersion(pageId, unknownHash)).toBeNull()
+    }
+    expect(retainedCreatorSignalTemplates035).toEqual([{
+      slug: 'creator-signal-site-template',
+      hash: '03f1f3166741dfe705c215de4c1d7b92120dd47e1d6f9dcfb63f84e602fac804',
+    }])
   })
 
   it('blocks when an additional page would unexpectedly inherit shared chrome', () => {

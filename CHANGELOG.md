@@ -6,6 +6,22 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.37 - 2026-08-21
+
+### Production-look Creator Signal authoring parity
+
+- Rebuilt all 24 public routes from opinionated `creator-signal.site`
+  components while keeping shared header, footer and privacy choices reusable
+  through the site template.
+- Kept every leaf component slot-free and field-driven, including repeatable
+  navigation, footer, feature, FAQ, comparison and pricing data.
+- Restored public card, generated-form and CTA styling, retained responsive
+  component rules, and removed the mobile privacy page's horizontal overflow.
+- Advanced the technical pack to 0.3.9 without replacing authored pages and
+  made retained-content migration classification deterministic.
+- Added a governed 72-capture page and section comparison report, 8 interaction
+  checks, SEO/schema verification and deterministic browser baselines in CI.
+
 ## 0.0.36 - 2026-08-21
 
 ### Creator Signal Website v2 and retained-site migration

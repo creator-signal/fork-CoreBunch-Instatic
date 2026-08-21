@@ -12,7 +12,12 @@
 
 import { nanoid } from 'nanoid'
 import { registry } from '@core/module-engine'
-import { analyseComponentLibraryPrimitiveConversion, componentLibraryRegistry } from '@core/component-library'
+import {
+  analyseCoherentRichTextConversion,
+  analyseComponentLibraryPrimitiveConversion,
+  applyCoherentRichTextConversion,
+  componentLibraryRegistry,
+} from '@core/component-library'
 import {
   cloneScopedClassesForNodeMap,
   createNode,
@@ -50,6 +55,7 @@ type NodeActions = Pick<
   | 'updateComponentLibraryField'
   | 'applyComponentLibraryOption'
   | 'convertFreeformPrimitiveToComponent'
+  | 'consolidateCoherentRichText'
   | 'deleteNode'
   | 'deleteNodes'
   | 'updateNodeProps'
@@ -413,6 +419,21 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
         if (!analysis.eligible) return false
         node.catalogueInstance = analysis.candidate.metadata
         return true
+      }),
+
+    consolidateCoherentRichText: (nodeId) =>
+      mutateActiveTree((tree) => {
+        const entry = componentLibraryRegistry.get('creator-signal.site.rich-text-section')
+        const analysis = analyseCoherentRichTextConversion(tree, nodeId, entry)
+        if (!analysis.eligible) return false
+        const definition = registry.get('creator-signal.site.rich-text-section')
+        if (!definition) return false
+        const replacement = createNode(definition.id, {
+          ...definition.defaults,
+          ...analysis.candidate.props,
+        })
+        replacement.catalogueInstance = analysis.candidate.metadata
+        return applyCoherentRichTextConversion(tree, analysis.candidate, replacement)
       }),
 
     deleteNode: (nodeId) => {

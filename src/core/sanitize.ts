@@ -131,7 +131,7 @@ const RICHTEXT_CONFIG: Config = {
     'span', 'div',
   ],
   // Restrict attributes to safe subset; data-* is blocked by default
-  ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'id'],
+  ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'id', 'lang'],
   // Force all links to open in a new tab with noopener
   ADD_ATTR: ['target'],
   // Never allow data: / javascript: in href

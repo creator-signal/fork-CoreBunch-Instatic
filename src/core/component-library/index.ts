@@ -101,6 +101,16 @@ export {
   findComponentLibraryConversionCandidates,
 } from './conversion'
 
+export {
+  analyseCoherentRichTextConversion,
+  applyCoherentRichTextConversion,
+} from './coherentRichTextConversion'
+
+export type {
+  CoherentRichTextConversionAnalysis,
+  CoherentRichTextConversionCandidate,
+} from './coherentRichTextConversion'
+
 export type {
   ComponentLibraryConversionAnalysis,
   ComponentLibraryConversionCandidate,

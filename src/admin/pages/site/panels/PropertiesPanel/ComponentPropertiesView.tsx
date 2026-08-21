@@ -1,6 +1,7 @@
 import type { AnyModuleDefinition, PropertyControl } from '@core/module-engine'
 import {
   analyseComponentLibraryAccessibility,
+  analyseCoherentRichTextConversion,
   componentLibraryRegistry,
   findComponentLibraryConversionCandidates,
   resolveComponentLibraryInstanceStatus,
@@ -53,6 +54,9 @@ export function ComponentPropertiesView({
   const convertPrimitive = useEditorStore(
     (state) => state.convertFreeformPrimitiveToComponent,
   )
+  const consolidateRichText = useEditorStore(
+    (state) => state.consolidateCoherentRichText,
+  )
   const metadata = node.catalogueInstance
   const accessibilityDiagnostics = activePage
     ? analyseComponentLibraryAccessibility(
@@ -63,12 +67,20 @@ export function ComponentPropertiesView({
       ).filter((diagnostic) => diagnostic.nodeId === node.id)
     : []
   const [conversionOpen, setConversionOpen] = useState(false)
+  const [richTextConversionOpen, setRichTextConversionOpen] = useState(false)
   const conversionCandidates = metadata
     ? []
     : findComponentLibraryConversionCandidates(
         node,
         componentLibraryRegistry.list(),
-        (moduleId) => moduleId === definition.id ? definition.defaults : undefined,
+      (moduleId) => moduleId === definition.id ? definition.defaults : undefined,
+      )
+  const richTextConversion = metadata || !activePage
+    ? undefined
+    : analyseCoherentRichTextConversion(
+        activePage,
+        node.id,
+        componentLibraryRegistry.get('creator-signal.site.rich-text-section'),
       )
 
   if (!metadata || !entry) {
@@ -81,16 +93,23 @@ export function ComponentPropertiesView({
             description={metadata
               ? `The retained definition for ${metadata.entryId}@${metadata.entryVersion} is not installed. This content remains intact and read-only in Components view.`
               : 'This block has no governed Component Library mapping. Switch to HTML view to inspect its implementation or convert it through an approved workflow.'}
-            action={permissions.canEditStructure ? (
+            action={permissions.canEditStructure || (permissions.canEditComponents && richTextConversion?.eligible) ? (
               <div className={styles.lockedActions}>
                 {conversionCandidates.length > 0 ? (
                   <Button variant="primary" onClick={() => setConversionOpen(true)}>
                     Preview conversion
                   </Button>
                 ) : null}
-                <Button variant="secondary" onClick={() => setLayersViewMode('html')}>
-                  Open HTML view
-                </Button>
+                {permissions.canEditComponents && richTextConversion?.eligible ? (
+                  <Button variant="primary" onClick={() => setRichTextConversionOpen(true)}>
+                    Preview Rich Text conversion
+                  </Button>
+                ) : null}
+                {permissions.canEditStructure ? (
+                  <Button variant="secondary" onClick={() => setLayersViewMode('html')}>
+                    Open HTML view
+                  </Button>
+                ) : null}
               </div>
             ) : undefined}
           />
@@ -120,6 +139,29 @@ export function ComponentPropertiesView({
               kind: 'success',
               title: `Converted to ${candidate.entry.name}`,
               body: 'Props, children and styles were preserved. Undo restores the freeform state.',
+              location: 'component-library',
+            })
+          }}
+        />
+        <RichTextConversionDialog
+          open={richTextConversionOpen}
+          analysis={richTextConversion}
+          onClose={() => setRichTextConversionOpen(false)}
+          onConvert={() => {
+            if (!consolidateRichText(node.id)) {
+              pushToast({
+                kind: 'error',
+                title: 'Conversion no longer eligible',
+                body: 'The prose or its governed definition changed. Review it and try again.',
+                location: 'component-library',
+              })
+              return
+            }
+            setRichTextConversionOpen(false)
+            pushToast({
+              kind: 'success',
+              title: 'Converted to Rich Text Section',
+              body: 'The adjacent prose was replaced in one revision. Undo restores every original block.',
               location: 'component-library',
             })
           }}
@@ -323,6 +365,59 @@ export function ComponentPropertiesView({
         </Button>
       ) : null}
     </div>
+  )
+}
+
+function RichTextConversionDialog({
+  open,
+  analysis,
+  onClose,
+  onConvert,
+}: {
+  open: boolean
+  analysis: ReturnType<typeof analyseCoherentRichTextConversion> | undefined
+  onClose: () => void
+  onConvert: () => void
+}) {
+  const candidate = analysis?.eligible ? analysis.candidate : undefined
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title="Consolidate coherent prose"
+      eyebrow="Rich Text preview"
+      size="md"
+      footer={(
+        <>
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button variant="primary" disabled={!candidate} onClick={onConvert}>
+            Convert to Rich Text Section
+          </Button>
+        </>
+      )}
+    >
+      {candidate ? (
+        <div className={styles.conversionPreview}>
+          <div className={styles.notice}>
+            This operation replaces {candidate.sourceNodeIds.length} adjacent source blocks with one governed Rich Text Section. It uses authored node values, not rendered HTML, and Undo restores the exact source run.
+          </div>
+          <section className={styles.section}>
+            <h4>Resulting fields</h4>
+            <ul className={styles.conversionFields}>
+              <li><span>Heading</span><span>{candidate.props.heading}</span></li>
+              <li><span>Section anchor</span><span>{candidate.props.sectionId}</span></li>
+              <li><span>Content</span><span>{previewValue(candidate.props.body)}</span></li>
+            </ul>
+          </section>
+        </div>
+      ) : (
+        <EmptyState
+          plain
+          title="No lossless Rich Text conversion is available"
+          description={analysis?.eligible === false ? analysis.reason : 'Review the selected source block and try again.'}
+        />
+      )}
+    </Dialog>
   )
 }
 

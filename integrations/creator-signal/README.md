@@ -179,6 +179,11 @@ visual semantics.
 keyboard, responsive, degraded-state and committed visual-baseline gate that
 runs against pages produced by Instatic's real public publishing pipeline.
 
+`integrations/creator-signal/CONTENT-WORKFLOWS.md` defines the executable
+create, edit, revision, preview, publish, unpublish, media, pattern, legal,
+product-page, theme and guardrail acceptance matrix. Run it with
+`bun run verify:creator-signal-content-workflows`.
+
 `integrations/creator-signal/WEBSITE-V2.md` records the Home and Early Access
 flow, page ownership boundaries and one-form intent contract.
 
@@ -201,6 +206,7 @@ its own role-protected application boundary.
 - `integrations/creator-signal/AUTHORING.md`
 - `integrations/creator-signal/PREVIEW-PARITY.md`
 - `integrations/creator-signal/ACCEPTANCE.md`
+- `integrations/creator-signal/CONTENT-WORKFLOWS.md`
 - `integrations/creator-signal/WEBSITE-V2.md`
 - `integrations/creator-signal/PARITY.md`
 - `integrations/creator-signal/instatic-plugin.config.ts`

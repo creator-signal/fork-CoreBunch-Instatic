@@ -27,6 +27,7 @@ import {
 import { heroParamIds } from '../../../integrations/creator-signal/pack/hero-component'
 import { creatorSignalRenderProfile } from '../../../integrations/creator-signal/pack/design-system'
 import { pack } from '../../../integrations/creator-signal/pack/site'
+import { canonicalPageCellsSha256 } from '../../../integrations/creator-signal/migrations/content-hash'
 import { creatorSignalPublicAuthoringPolicy } from '../../../integrations/creator-signal/public-authoring-contract'
 import { createUser } from '../../../server/repositories/users'
 import {
@@ -124,6 +125,35 @@ afterAll(() => {
 })
 
 describe('Creator Signal content authoring workflows', () => {
+  it('upgrades retained authored pages without creating, replacing or publishing page content', () => {
+    const retained = installCreatorSignalSite()
+    const product = pageBySlug(retained, 'products')
+    const hero = Object.values(product.nodes).find(
+      (node) => node.catalogueInstance?.entryId === 'creator-signal.site.hero',
+    )
+    if (!hero) throw new Error('Creator Signal product Hero was not installed')
+    const overrides = hero.props.propOverrides
+    if (!overrides || typeof overrides !== 'object' || Array.isArray(overrides)) {
+      throw new Error('Creator Signal product Hero has no authorable overrides')
+    }
+    const authorOverrides = overrides as Record<string, unknown>
+    authorOverrides[heroParamIds.heading] =
+      'A retained author heading must survive the technical upgrade.'
+    const beforeHash = canonicalPageCellsSha256(pageToCells(product))
+
+    const upgraded = applyPluginPackToSite(
+      'creator-signal.site',
+      retained,
+      parsePluginPack('creator-signal.site', pack),
+    )
+    const upgradedProduct = pageBySlug(upgraded.site, 'products')
+
+    expect(upgraded.pageImport.installedIds).toEqual([])
+    expect(upgraded.pageImport.skippedIds).toEqual(pack.pages.map((page) => page.id))
+    expect(upgraded.replaced.pages).toEqual([])
+    expect(canonicalPageCellsSha256(pageToCells(upgradedProduct))).toBe(beforeHash)
+  })
+
   it('keeps every requested workflow in one executable source-owned contract', () => {
     expect(creatorSignalContentWorkflowAcceptance).toMatchObject({
       issue: 48,

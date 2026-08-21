@@ -127,6 +127,7 @@ describe('Creator Signal content authoring workflows', () => {
   it('keeps every requested workflow in one executable source-owned contract', () => {
     expect(creatorSignalContentWorkflowAcceptance).toMatchObject({
       issue: 48,
+      relatedIssues: [145],
       boundary: 'source-only',
       command: 'bun run verify:creator-signal-content-workflows',
     })
@@ -138,6 +139,7 @@ describe('Creator Signal content authoring workflows', () => {
       'legal-pages',
       'product-pages',
       'themes',
+      'catalogue-tasks',
       'guardrails',
     ])
     for (const workflow of creatorSignalContentWorkflowAcceptance.workflows) {
@@ -160,6 +162,30 @@ describe('Creator Signal content authoring workflows', () => {
         variantId: 'default',
       })
       expect(root?.catalogueInstance?.pattern?.authorableNodeIds).toEqual(root?.children)
+    }
+  })
+
+  it('edits shared chrome once while page content stays independent', () => {
+    const site = installCreatorSignalSite()
+    const template = pageBySlug(site, 'creator-signal-site-template')
+    const header = Object.values(template.nodes).find(
+      (node) => node.catalogueInstance?.entryId === 'creator-signal.site.header',
+    )
+    if (!header) throw new Error('Creator Signal shared header was not installed')
+    header.props.brandName = 'Creator Signal authors'
+
+    const products = pageBySlug(site, 'products')
+    const privacy = pageBySlug(site, 'legal/privacy')
+    for (const page of [products, privacy]) {
+      expect(Object.values(page.nodes).some(
+        (node) => node.catalogueInstance?.entryId === 'creator-signal.site.header',
+      )).toBe(false)
+      const html = publishPage(
+        composeTemplateChain([template], { kind: 'page', page }),
+        site,
+        creatorSignalPageModules(),
+      ).html
+      expect(html).toContain('Creator Signal authors')
     }
   })
 

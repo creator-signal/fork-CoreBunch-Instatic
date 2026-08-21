@@ -205,8 +205,8 @@ describe('Creator Signal site pack', () => {
       )
       expect(entry?.constraints.allowedDocumentKinds).toEqual(['template'])
       expect(entry?.constraints.maxInstancesPerDocument).toBe(1)
-      expect(entry?.documentation.usage).toContain('Read-only')
-      expect(entry?.documentation.usage).toContain('technical pack')
+      expect(entry?.documentation.usage).toContain('Edit once')
+      expect(entry?.documentation.usage).toContain('shared template')
       expect(entry?.fields.every((field) => Boolean(field.description))).toBe(true)
     }
 

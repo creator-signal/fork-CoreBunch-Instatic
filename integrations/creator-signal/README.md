@@ -188,8 +188,10 @@ runs against pages produced by Instatic's real public publishing pipeline.
 
 `integrations/creator-signal/CONTENT-WORKFLOWS.md` defines the executable
 create, edit, revision, preview, publish, unpublish, media, pattern, legal,
-product-page, theme and guardrail acceptance matrix. Run it with
-`bun run verify:creator-signal-content-workflows`.
+product-page, theme, catalogue-task and guardrail acceptance matrix. Run it
+with `bun run verify:creator-signal-content-workflows`; run
+`bun run verify:creator-signal-authoring-tasks` to write the 33-entry editor
+and MCP task matrix from the registered catalogue.
 
 `integrations/creator-signal/WEBSITE-V2.md` records the production-look Home
 and Early Access flow, page ownership boundaries and one-form intent contract.

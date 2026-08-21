@@ -20,6 +20,7 @@ unknown-route recovery content.
 - Page-content components are page-only; the Hero is limited to one instance per page.
 - Every starter route materializes one stable `creator-signal.site.pattern.*` catalogue entry; its authorable children are governed components.
 - Creator Signal components are opinionated leaves. Pattern roots are governed containers; neither model exposes arbitrary child slots.
+- `bun run verify:creator-signal-authoring-tasks` writes the current 33-entry task matrix to `.tmp/creator-signal-authoring-tasks/` and fails when the catalogue drifts from a supported authoring task.
 - `bun run verify:creator-signal-parity` writes the browsable side-by-side report to `.tmp/creator-signal-parity/index.html`.
 - `bun run verify:creator-signal-public-acceptance` verifies the locally
   published pack against the committed responsive, accessibility and visual
@@ -45,6 +46,37 @@ Recovery State with the `not-found` kind. It is not an ordinary route seed and
 is excluded from the public route roster and sitemap inputs.
 
 In Components view, template rows are read-only while an ordinary page is active. The owning-template action in `src/admin/pages/site/panels/LayersPanel/ComponentLayersTree.tsx` opens the shared template for editing. One edit therefore propagates to every wrapped route without copying header or footer nodes into those pages.
+
+## Task-based authoring
+
+`integrations/creator-signal/authoring-tasks.ts` is the application-owned task
+matrix. It derives one row per registered Creator Signal entry and records the
+same supported task on both surfaces: Components catalogue discovery,
+placement-aware insertion, typed configuration, responsive preview,
+publication, revision, and removal. Run:
+
+```sh
+bun run verify:creator-signal-authoring-tasks
+```
+
+The command writes a machine-readable `matrix.json` and a readable `matrix.md`
+to `.tmp/creator-signal-authoring-tasks/`. Do not maintain a second checklist:
+the matrix follows `integrations/creator-signal/component-library.ts` and fails
+if an entry is missing, exposes a raw implementation field, leaves field help
+blank, gives a leaf a slot, or lacks editor/MCP task support.
+
+For ordinary page work, create the page from the shared template, select a
+page component from Components, complete its labelled fields or repeaters,
+check mobile/tablet/desktop preview, and publish. To revise, edit the retained
+component instance and publish again; remove the component from the Components
+tree when it no longer belongs. For shared chrome, open the template owner and
+edit Header, Footer, Navigation link repeaters, or Privacy Choices once.
+
+MCP follows the same model: call `site_list_component_library`, insert the
+returned entry with `site_insert_component`, change declared values with
+`site_update_component_field`, inspect with `site_open_document` and
+`site_render_snapshot`, then publish through the existing explicit publish
+tool. It cannot supply arbitrary props, styles, or implementation markup.
 
 ## Public route and section map
 

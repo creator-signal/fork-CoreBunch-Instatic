@@ -6,6 +6,7 @@ export type CreatorSignalContentWorkflowId =
   | 'legal-pages'
   | 'product-pages'
   | 'themes'
+  | 'catalogue-tasks'
   | 'guardrails'
 
 export interface CreatorSignalContentWorkflow {
@@ -24,6 +25,7 @@ export interface CreatorSignalContentWorkflow {
  */
 export const creatorSignalContentWorkflowAcceptance = Object.freeze({
   issue: 48,
+  relatedIssues: [145],
   boundary: 'source-only' as const,
   command: 'bun run verify:creator-signal-content-workflows',
   workflows: [
@@ -110,6 +112,19 @@ export const creatorSignalContentWorkflowAcceptance = Object.freeze({
       automatedEvidence: [
         'src/__tests__/plugins/creatorSignalContentWorkflows.test.ts',
         'src/__tests__/plugins/creatorSignalSitePack.test.ts',
+      ],
+    },
+    {
+      id: 'catalogue-tasks',
+      label: 'Author every governed catalogue task',
+      acceptance: [
+        'Keep one generated task row for every Creator Signal component and pattern.',
+        'Exercise discovery, insertion, typed configuration, preview, publish, revision, and removal through the editor and MCP contracts.',
+        'Reject raw implementation fields and leaf content slots from the public authoring surface.',
+      ],
+      automatedEvidence: [
+        'src/__tests__/plugins/creatorSignalCatalogueAuthoringTasks.test.ts',
+        'scripts/verify-creator-signal-authoring-tasks.ts',
       ],
     },
     {

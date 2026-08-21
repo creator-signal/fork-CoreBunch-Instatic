@@ -13,8 +13,9 @@ page roster, and publish the complete site automatically.
 - Twenty-four launch, form, legal, trust, support, and status pages plus a
   shared `everywhere` template and governed `notFound` template.
 - The canonical Creator Signal Design System shared by the editor canvas and
-  published pages, including self-hosted Fredoka, Mulish and Caveat fonts and
-  system, light and dark theme preferences.
+  published pages, with a semantic production-look adapter and packaged font
+  and theme assets available to governed components without exposing a public
+  appearance selector.
 - A parameterised Hero Visual Component with optional MinIO-backed artwork,
   governed brand fallback art and real generated design assets on the primary
   starter marketing routes.
@@ -113,7 +114,7 @@ relying on plugin upgrade reconciliation.
 
 ### Upgrade existing retained starter content
 
-Installing plugin 0.3.5 runs the versioned technical-pack upgrade, installs the
+Installing plugin 0.3.9 runs the versioned technical-pack upgrade, installs the
 public-authoring policy and does not change existing pages. The authored-content
 migration remains version 0.2.0.
 Export the complete site from **Admin → Export**, then run the read-only
@@ -125,13 +126,17 @@ bun run integrations/creator-signal/migrations/0.2.0/prepare.ts preview \
 ```
 
 The preview is ready only when every retained route is either the exact 0.1.11
-starter, the exact governed 0.2.0-0.2.6 pack, or already uses the current
+starter, the exact governed 0.2.0-0.2.6 or 0.3.5 pack, or already uses the current
 model; no unexpected page would inherit the new shared template; and both
 governed template IDs are available. A newly governed page is added only when
 its reserved ID is absent. An occupied ID with any other content blocks the
 whole migration.
 Any authored difference blocks the whole migration for manual mapping; it is
 never overwritten heuristically.
+Page classification hashes the semantic tree independently of generated node
+IDs, so exporting or compiling the same retained content in another process
+does not create a false authored-content result. Text, properties, metadata,
+structure and ordering remain part of the hash and still block on change.
 
 The shared template uses the validator-compliant slug
 `creator-signal-site-template`. The classifier recognises only the exact
@@ -152,6 +157,8 @@ content-only migration archive. Review the archive through the normal import
 preview, apply it with `merge-overwrite`, preview the draft site, and publish
 deliberately. The archive does not publish. Exact rollback uses the untouched
 backup through the guarded `replace` import after its preview and step-up gate.
+The guarded restore path uses a dialect-neutral system-table predicate and is
+covered for both the PostgreSQL production schema and SQLite acceptance schema.
 
 ## Component authoring model
 
@@ -184,8 +191,8 @@ create, edit, revision, preview, publish, unpublish, media, pattern, legal,
 product-page, theme and guardrail acceptance matrix. Run it with
 `bun run verify:creator-signal-content-workflows`.
 
-`integrations/creator-signal/WEBSITE-V2.md` records the Home and Early Access
-flow, page ownership boundaries and one-form intent contract.
+`integrations/creator-signal/WEBSITE-V2.md` records the production-look Home
+and Early Access flow, page ownership boundaries and one-form intent contract.
 
 Deploy Mautic first and verify
 `https://marketing.creatorsignal.me/media/creator-signal/forms-v1.js` exposes

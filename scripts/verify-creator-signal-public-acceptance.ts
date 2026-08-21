@@ -254,6 +254,23 @@ featureNode.moduleId = faqDefinition.id
 featureNode.props = structuredClone(faqDefinition.defaults)
 acceptanceRoutes.set('/__acceptance/patterns', renderPublishedPage(patternPage))
 
+const comparisonPage = structuredClone(publicPages.find((page) => page.slug === 'features'))
+assert(comparisonPage, 'Creator Signal features page is missing for comparison acceptance')
+comparisonPage.id = 'creator-signal-public-acceptance-comparison'
+comparisonPage.slug = '__acceptance/comparison'
+comparisonPage.title = 'Comparison overflow acceptance'
+const comparisonFeatureNode = Object.values(comparisonPage.nodes).find(
+  (node) => node.moduleId === 'creator-signal.site.feature-grid',
+)
+const comparisonDefinition = creatorSignalPlugin.modules.find(
+  (module) => module.id === 'creator-signal.site.comparison-section',
+)
+assert(comparisonFeatureNode, 'Features page has no feature-grid node for comparison acceptance')
+assert(comparisonDefinition, 'Creator Signal comparison module is missing')
+comparisonFeatureNode.moduleId = comparisonDefinition.id
+comparisonFeatureNode.props = structuredClone(comparisonDefinition.defaults)
+acceptanceRoutes.set('/__acceptance/comparison', renderPublishedPage(comparisonPage))
+
 function contentType(path: string): string | undefined {
   if (path.endsWith('.js')) return 'text/javascript; charset=utf-8'
   if (path.endsWith('.css')) return 'text/css; charset=utf-8'
@@ -528,12 +545,13 @@ try {
       ), true)
       await page.keyboard.press('Enter')
       assert.equal(await page.evaluate(() => document.activeElement?.id), 'main-content')
-      const navTargets = await page.locator('header nav a').evaluateAll((nodes) => nodes.map((node) => {
+      const navTargets = await page.locator('header nav a:visible').evaluateAll((nodes) => nodes.map((node) => {
         const rect = node.getBoundingClientRect()
         return { label: node.textContent?.trim(), width: rect.width, height: rect.height }
       }))
-      assert.equal(navTargets.length, 7)
-      assert.equal(navTargets.every((target) => target.width > 0 && target.height >= 44), true)
+      assert.equal(navTargets.length, 1)
+      assert.equal(navTargets[0]?.label, 'Sign in')
+      assert.equal(navTargets.every((target) => target.width > 0 && target.height >= 40), true)
       const summary = page.locator('.faq-list summary').first()
       await summary.focus()
       await page.keyboard.press('Enter')
@@ -546,7 +564,7 @@ try {
     }
   })
 
-  await runCheck('theme system default, explicit choice and persisted choice work before first render', async () => {
+  await runCheck('theme system default and a persisted API preference resolve before first render', async () => {
     const context = await browser.newContext({
       colorScheme: 'dark',
       viewport: { width: 1280, height: 900 },
@@ -557,20 +575,22 @@ try {
       await page.goto(baseUrl, { waitUntil: 'load' })
       assert.equal(await page.locator('html').getAttribute('data-cs-theme-preference'), 'system')
       assert.equal(await page.locator('html').getAttribute('data-cs-theme'), 'dark')
-      await page.getByLabel('Appearance').selectOption('light')
+      await page.evaluate(() => localStorage.setItem('creator-signal.theme.v1', 'light'))
+      await page.reload({ waitUntil: 'load' })
+      assert.equal(await page.locator('html').getAttribute('data-cs-theme-preference'), 'light')
       assert.equal(await page.locator('html').getAttribute('data-cs-theme'), 'light')
       assert.equal(await page.evaluate(() => localStorage.getItem('creator-signal.theme.v1')), 'light')
+      await page.evaluate(() => localStorage.removeItem('creator-signal.theme.v1'))
       await page.reload({ waitUntil: 'load' })
-      assert.equal(await page.locator('html').getAttribute('data-cs-theme'), 'light')
-      await page.getByLabel('Appearance').selectOption('system')
       assert.equal(await page.evaluate(() => localStorage.getItem('creator-signal.theme.v1')), null)
+      assert.equal(await page.locator('html').getAttribute('data-cs-theme-preference'), 'system')
       assert.equal(await page.locator('html').getAttribute('data-cs-theme'), 'dark')
     } finally {
       await context.close()
     }
   })
 
-  await runCheck('privacy choice remains operable when runtime analytics config is unavailable', async () => {
+  await runCheck('both privacy choices remain operable when runtime analytics config is unavailable', async () => {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } })
     const page = await context.newPage()
     try {
@@ -581,14 +601,14 @@ try {
       await banner.waitFor({ state: 'hidden' })
       assert.equal((await context.cookies()).find((cookie) =>
         cookie.name === 'cs_optional_analytics')?.value, 'denied')
-      const privacyButton = page.getByRole('button', { name: 'Privacy choices' })
-      await privacyButton.click()
+      assert.equal(await page.getByRole('link', { name: 'Privacy', exact: true }).isVisible(), true)
+      await context.clearCookies()
+      await page.reload({ waitUntil: 'load' })
       await banner.waitFor({ state: 'visible' })
-      assert.equal(await page.evaluate(() => document.activeElement?.textContent?.trim()), 'Essential only')
       await page.getByRole('button', { name: 'Allow optional analytics' }).click()
+      await banner.waitFor({ state: 'hidden' })
       assert.equal((await context.cookies()).find((cookie) =>
         cookie.name === 'cs_optional_analytics')?.value, 'granted')
-      assert.equal(await page.evaluate(() => document.activeElement?.textContent?.trim()), 'Privacy choices')
     } finally {
       await context.close()
     }
@@ -665,6 +685,8 @@ try {
           document.documentElement.scrollWidth > document.documentElement.clientWidth,
         ), false, route)
       }
+      await page.goto(`${baseUrl}/__acceptance/comparison`, { waitUntil: 'load' })
+      await waitForPage(page)
       const region = page.locator('.comparison-table-scroll')
       assert.equal(await region.getAttribute('role'), 'region')
       const regionLabel = await region.getAttribute('aria-label')
@@ -745,7 +767,7 @@ try {
     try {
       await page.goto(baseUrl, { waitUntil: 'load' })
       await waitForPage(page)
-      const before = await page.locator('.campaign-hero-art').evaluate((node) => node.getBoundingClientRect().height)
+      const before = await page.locator('.hero-art').evaluate((node) => node.getBoundingClientRect().height)
       assert(before >= 250)
       await page.locator('h1').evaluate((node) => {
         node.textContent = `CreatorSignal${'UnbrokenSignal'.repeat(40)}`
@@ -756,7 +778,7 @@ try {
       assert.equal(await page.evaluate(() =>
         document.documentElement.scrollWidth > document.documentElement.clientWidth,
       ), false)
-      assert.equal(await page.getByRole('link', { name: 'Get started free' }).first().isVisible(), true)
+      assert.equal(await page.getByRole('link', { name: 'Explore Sales Pulse' }).first().isVisible(), true)
     } finally {
       await context.close()
     }

@@ -219,7 +219,10 @@ export async function handleImportRoute(
       await tx`delete from data_rows`
 
       // 2. Delete all non-system data tables
-      await tx`delete from data_tables where system = 0 or system = false`
+      // `system` is BOOLEAN in Postgres and INTEGER (0/1) in SQLite. `not`
+      // has the same meaning in both dialects, whereas comparing the Postgres
+      // column to `0` fails before the `or system = false` branch can run.
+      await tx`delete from data_tables where not system`
 
       // 3. Load remaining system tables so we know which bundle tables to
       //    update vs insert.

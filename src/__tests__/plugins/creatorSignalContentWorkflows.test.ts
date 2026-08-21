@@ -185,6 +185,7 @@ describe('Creator Signal content authoring workflows', () => {
         pages: [
           pageBySlug(installed, 'creator-signal-site-template'),
           pageBySlug(installed, 'products'),
+          pageBySlug(installed, 'early-access'),
           pageBySlug(installed, 'legal/privacy'),
         ],
       }
@@ -209,8 +210,14 @@ describe('Creator Signal content authoring workflows', () => {
       const overrides = hero.props.propOverrides as Record<string, unknown>
       overrides[heroParamIds.heading] = 'Products shaped by clearer creator signals.'
 
-      expect(overrides[heroParamIds.artwork]).toBe(creatorSignalBrandAssets.creatorSignalSocial)
-      expect(String(overrides[heroParamIds.artworkAlt])).toBeTruthy()
+      expect(overrides[heroParamIds.artwork]).toBe('')
+      const earlyAccess = pageBySlug(draft, 'early-access')
+      const campaignHero = Object.values(earlyAccess.nodes).find(
+        (node) => node.catalogueInstance?.entryId === 'creator-signal.site.campaign-hero',
+      )
+      if (!campaignHero) throw new Error('Creator Signal campaign Hero was not installed')
+      expect(campaignHero.props.artwork).toBe(creatorSignalBrandAssets.salesPulseSocial)
+      expect(String(campaignHero.props.artworkAlt)).toBeTruthy()
       expect(() => validatePageWriteDiff({
         previousPages: draft.pages,
         changedPages: [editedProduct],
@@ -231,10 +238,9 @@ describe('Creator Signal content authoring workflows', () => {
         creatorSignalPageModules(),
       ).html
       expect(preview).toContain('Products shaped by clearer creator signals.')
-      expect(preview).toContain('data-cs-theme-control')
-      for (const preference of creatorSignalRenderProfile.theme.preferences) {
-        expect(preview).toContain(`value="${preference}"`)
-      }
+      expect(creatorSignalRenderProfile.theme.preferences).toEqual(['system', 'light', 'dark'])
+      expect(preview).toContain('[data-cs-theme="light"]')
+      expect(preview).toContain('[data-cs-theme="dark"]')
 
       const stillPublic = await getPublishedPageBySlug(testDb.db, 'products')
       const firstPublicProduct = pageBySlug(stillPublic!.site, 'products')
@@ -251,7 +257,14 @@ describe('Creator Signal content authoring workflows', () => {
         url: new URL('https://creatorsignal.me/products'),
       })
       expect(renderedProduct.html).toContain('Products shaped by clearer creator signals.')
-      expect(renderedProduct.html).toContain(creatorSignalBrandAssets.creatorSignalSocial)
+
+      const earlyAccessSnapshot = await getPublishedPageBySlug(testDb.db, 'early-access')
+      const renderedEarlyAccess = await renderPublishedSnapshot(earlyAccessSnapshot!, {
+        db: testDb.db,
+        url: new URL('https://creatorsignal.me/early-access'),
+      })
+      expect(renderedEarlyAccess.html).toContain(creatorSignalBrandAssets.salesPulseSocial)
+      expect(renderedEarlyAccess.html).toContain('A preview of the Sales Pulse visual sales dashboard.')
 
       const legalSnapshot = await getPublishedPageBySlug(testDb.db, 'legal/privacy')
       const renderedLegal = await renderPublishedSnapshot(legalSnapshot!, {

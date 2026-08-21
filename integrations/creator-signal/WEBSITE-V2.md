@@ -1,66 +1,57 @@
-# Creator Signal website v2 flow
+# Creator Signal public website flow
 
-This contract translates the review material in the Sales Pulse repository
-into testable Instatic pages. The visual references are:
+This contract keeps the public site visually and behaviourally aligned with
+the current production website while making every page section authorable as a
+governed Creator Signal component. The filename and the stable
+`creator-signal.site.pattern.home-v2-page` identifier remain for migration
+compatibility; they do not describe a separate visual redesign.
 
-- `ref/design/website/index.html` — Home direction;
-- `ref/design/website/presale.html` — pre-launch/Early Access direction; and
-- `ref/design/website/creator_signal_site_flow.png` — cross-surface journey.
-
-The references inform hierarchy, voice and section intent. Published markup,
-tokens, assets, themes, responsive behaviour and authoring constraints remain
-owned by the governed Creator Signal Design System and Instatic component
-catalogue.
+Published markup, semantic tokens, responsive behaviour, assets and authoring
+constraints are owned by the Creator Signal component catalogue. The parity
+verifier compares the generated pages with the production baseline at desktop,
+tablet and mobile sizes before a release can pass.
 
 ## Page ownership
 
 ```text
 Instatic public site
-├── /                              Home v2 marketing and product explanation
+├── /                              Production-look Home
 ├── /early-access                  Noindex launch/testing interest capture
 ├── /products/*, /features         Supporting marketing pages
 └── /legal/*, /trust/*, /support   Public documents and help
              │
-             ├── Get started free ───────► Sales Pulse /sign-up
-             └── Log in ─────────────────► Sales Pulse OIDC login endpoint
-                                                │
-                                                ▼
-                                      ZITADEL identity boundary
-                                                │
-                                                ▼
-                                  Sales Pulse onboarding and dashboard
+             ├── Product action ─────────► Sales Pulse sign-up or product route
+             └── Sign in ─────────────────► Sales Pulse identity boundary
 ```
 
 Instatic does not reproduce account creation, login, identity recovery,
 onboarding, connection setup or the Sales Pulse dashboard. Those remain
 application-owned journeys. Marketing actions use the canonical application
-URLs; they do not point at placeholder Instatic routes.
+URLs; they do not point at placeholder routes.
 
 ## Home flow
 
-The `creator-signal.site.pattern.home-v2-page` pattern keeps the reviewed story
-in one governed sequence:
+The stable `creator-signal.site.pattern.home-v2-page` pattern now materialises
+the concise production composition:
 
-1. Campaign Hero states the product promise and offers one primary signup.
-2. Signal Strip reinforces short brand promises without animation.
-3. Signal Comparison shows the limited current view and the intended visual
-   signal without relying on colour alone.
-4. Current Options names the three existing workarounds.
-5. Process Steps explains Connect, See and Grow as an ordered list.
-6. Feature and signature-value grids explain outcomes and trust principles.
-7. Pricing Plans provide Free, Starter and Pro comparisons; all signup actions
-   enter the application-owned signup journey.
-8. Founder Story, FAQ and the final secondary CTA close the decision flow.
+1. Hero owns the only H1, introduction, primary action and optional artwork.
+2. Feature Grid owns the section introduction and typed feature-card repeater.
+3. Call to Action owns the final next step.
 
-The Header preserves one direct login action and one primary signup action.
-Every Home section anchor is unique and the Campaign Hero owns the only H1.
+The shared template supplies the authorable Header, Footer and Privacy Choices
+once around the page outlet. The Header owns a typed list of navigation links;
+it does not expose child slots. The CSS-built signal is the default Hero artwork
+so an author may replace it through the optional image field without editing
+markup.
 
 ## Early Access and form flow
 
-`/early-access` is an explicit test page with `noindex, follow, noarchive`.
-It is not an account-registration page. It contains exactly one Managed Form
-using the governed `creator_signal_wishlist` alias and the `early_access`
-campaign code.
+`/early-access` is an additional preview page with
+`noindex, follow, noarchive`. Production currently has no comparable route, so
+the side-by-side report labels it candidate-only and still enforces its own
+semantic, responsive, SEO and interaction checks. It contains exactly one
+Managed Form using the governed `creator_signal_wishlist` alias and the
+`early_access` campaign code.
 
 ```text
 Early Access page
@@ -77,21 +68,26 @@ one creator_signal_wishlist form
           └── unavailable explanatory state + typed safe failure event
 ```
 
-The provider form must expose an explicit preference field for launch
-notification, early testing, or both. That field is owned by the Sales Pulse
-Mautic source and generated registry, not copied into Instatic markup. The
-permission copy is specific to the requested update and must not be treated as
-general marketing consent. The form retains visible provider labels, required
-field semantics and its existing consent timestamp contract.
+The provider form exposes an explicit preference field for launch notification,
+early testing or both. That field is resolved from the generated provider
+registry and is not copied into page markup. Permission copy is specific to the
+requested update and is not treated as general marketing consent.
 
 ## Content lifecycle
 
-These pages are starter content for an empty local/test installation. Plugin
-0.3.5 reconciles technical catalogue, policy, style and runtime records, but it
-does not overwrite an installation that already has authored pages. Moving
-Home v2 or Early Access into an existing site therefore requires an explicit
-content migration with preview, backup and rollback. Installing the plugin is
-not a production publication or deployment.
+Pack pages are starter content for an empty installation. Plugin 0.3.9
+reconciles technical catalogue, policy, style and runtime records but does not
+overwrite authored pages. The explicit content migration recognises exact
+retained 0.1.11, 0.2.0-0.2.6 and 0.3.5 content, produces a reviewable
+`merge-overwrite` archive, and blocks the complete migration if any page or
+template contains an unrecognised authored difference.
+Its semantic hashes ignore generated node identities while retaining authored
+content, metadata, structure and ordering, making repeated preparation
+deterministic without weakening the overwrite guard.
+
+The migration archive does not publish. Operators review the report and import
+preview, apply it deliberately, inspect the draft site, and then publish. The
+untouched export is retained as rollback evidence.
 
 ## Local acceptance
 
@@ -100,13 +96,15 @@ Run:
 ```sh
 bun run creator-signal:design-system:check
 bun test src/__tests__/plugins/creatorSignalSitePack.test.ts
+bun test src/__tests__/plugins/creatorSignalContentMigration.test.ts
 bun run instatic-plugin lint integrations/creator-signal
 bun run instatic-plugin build integrations/creator-signal
 bun run verify:creator-signal-public-acceptance
+bun run verify:creator-signal-parity -- \
+  --baseline-base https://creatorsignal.me \
+  --candidate-base http://localhost:4330
 ```
 
-Source acceptance must verify both routes at desktop, tablet and mobile widths,
-light/dark/system themes, keyboard order, one H1, no horizontal document
-overflow, exact application-owned links, one Early Access form and every
-managed-form state. Live form delivery and production publication remain
-separate post-deployment acceptance gates.
+The side-by-side report must cover every public route and section at all three
+viewports. Live provider delivery and production publication remain separate
+post-deployment acceptance gates.

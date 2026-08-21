@@ -105,7 +105,7 @@ export const creatorSignalContentWorkflowAcceptance = Object.freeze({
       label: 'Render system, light, and dark preferences',
       acceptance: [
         'Expose system, light, and dark choices from the locked render profile.',
-        'Use the same theme control and token stylesheet in preview and public output.',
+        'Use the same first-render theme runtime and token stylesheet in preview and public output.',
       ],
       automatedEvidence: [
         'src/__tests__/plugins/creatorSignalContentWorkflows.test.ts',

@@ -52,11 +52,11 @@ Every row below is wrapped by the shared template. The sequence column lists onl
 
 | Route | Page | Opinionated page components in order |
 | --- | --- | --- |
-| `/` | Creator Signal | Campaign Hero → Signal Strip → Signal Comparison → Feature Grid → Process Steps → Feature Grid → Feature Grid → Pricing Plans → Founder Story → FAQ → Call to Action |
+| `/` | Creator Signal | Hero → Feature Grid → Call to Action |
 | `/products` | Products | Hero → Feature Grid → Call to Action |
 | `/products/sales-pulse` | Sales Pulse | Hero → Feature Grid → Call to Action |
 | `/features` | Features | Hero → Feature Grid |
-| `/pricing` | Pricing | Hero → Comparison Section → Call to Action |
+| `/pricing` | Pricing | Hero → Feature Grid → Call to Action |
 | `/contact` | Contact | Hero → Managed Form |
 | `/feedback` | Feedback | Hero → Managed Form |
 | `/wishlist` | Join the wishlist | Hero → Managed Form |
@@ -64,8 +64,8 @@ Every row below is wrapped by the shared template. The sequence column lists onl
 | `/ask-a-question` | Ask a question | Hero → Managed Form |
 | `/feature-request` | Feature request | Hero → Managed Form |
 | `/report-an-error` | Report an error | Hero → Managed Form |
-| `/legal/privacy` | Privacy | Public Document |
-| `/legal/terms` | Terms | Public Document |
+| `/legal/privacy` | Privacy | Hero → Rich Text Section |
+| `/legal/terms` | Terms | Hero → Rich Text Section |
 | `/legal/billing` | Subscriptions, Cancellation and Refunds | Public Document |
 | `/legal/acceptable-use` | Acceptable Use Policy | Public Document |
 | `/legal/browser-extension` | Browser Extension Privacy and Permissions | Public Document |
@@ -88,12 +88,12 @@ instead of duplicating it as a second implementation.
 
 | Author need | Stable mapping | Implementation |
 | --- | --- | --- |
-| Home v2 page | `creator-signal.site.pattern.home-v2-page` | Complete governed marketing flow with pricing, founder story and signup |
+| Home page | `creator-signal.site.pattern.home-v2-page` | Production-look Hero → Feature Grid → Call to Action flow; the stable ID is retained for migration compatibility |
 | Early Access page | `creator-signal.site.pattern.early-access-page` | Noindex preview with one governed wishlist form |
 | Hero | `creator-signal.site.pattern.hero` | Existing Hero Visual Component |
 | Content page | `creator-signal.site.pattern.content-page` | Hero → Rich Text Section → Call to Action |
 | Product page | `creator-signal.site.pattern.product-page` | Hero → Feature Grid → Call to Action |
-| Pricing page | `creator-signal.site.pattern.pricing-page` | Hero → Comparison Section → Call to Action |
+| Pricing page | `creator-signal.site.pattern.pricing-page` | Hero → Feature Grid → Call to Action |
 | Features page | `creator-signal.site.pattern.features-page` | Hero → Feature Grid |
 | CTA | `creator-signal.site.pattern.call-to-action` | Existing Call to Action component |
 | FAQ | `creator-signal.site.pattern.faq` | Existing native-disclosure FAQ component |

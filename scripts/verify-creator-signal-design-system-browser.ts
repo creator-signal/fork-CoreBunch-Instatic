@@ -44,6 +44,14 @@ const documentFixture = (main: string, title: string) => `<!doctype html>
 </head>
 <body>
   ${header}
+  <label data-parity-ignore style="position:fixed;right:12px;bottom:12px;z-index:20">
+    <span>Appearance</span>
+    <select data-cs-theme-control aria-label="Appearance">
+      <option value="system" selected>System theme</option>
+      <option value="light">Light theme</option>
+      <option value="dark">Dark theme</option>
+    </select>
+  </label>
   ${main}
   ${footer}
   <script type="module" src="${pluginAssetPrefix}/frontend/theme-control.js"></script>
@@ -133,9 +141,9 @@ if (Bun.argv.includes('--serve')) {
       heading: getComputedStyle(document.querySelector('h1')!).fontFamily,
       eyebrow: getComputedStyle(document.querySelector('.eyebrow')!).fontFamily,
     }))
-    assert.match(fonts.body, /Mulish Variable/)
-    assert.match(fonts.heading, /Fredoka Variable/)
-    assert.match(fonts.eyebrow, /Caveat Variable/)
+    assert.match(fonts.body, /Avenir Next/)
+    assert.match(fonts.heading, /Georgia/)
+    assert.match(fonts.eyebrow, /Avenir Next/)
 
     const comparisonTable = page.getByRole('table', { name: 'Creator Signal option comparison' })
     await assert.doesNotReject(comparisonTable.waitFor())

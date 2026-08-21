@@ -9,10 +9,11 @@ assets.
 
 ## What is guaranteed
 
-- Pack page compilation consumes `creatorSignalRenderProfile.stylesheet` only
-  to resolve stable class IDs. The installed technical pack retains empty
-  class-name references, while governed modules emit the stylesheet once; this
-  prevents a second desktop cascade from overriding responsive rules.
+- Pack page compilation consumes `creatorSignalRenderProfile.stylesheet` to
+  resolve stable class IDs. The technical pack keeps empty authorable class
+  references, while governed modules provide the stylesheet through the
+  publisher's deduplicated framework bundle. This keeps one ordered responsive
+  cascade in isolated previews and published output.
 - Every governed module renders the same HTML and shared stylesheet in the
   editable canvas and publisher. A module without an explicit `preview()` uses
   its public `render()` implementation.

@@ -568,10 +568,10 @@ const compiled = compilePackPages(
 )
 // The compiler needs the shared CSS to resolve authored class names to stable
 // class IDs, especially inside the Hero Visual Component. Governed modules
-// already emit the byte-identical render-profile stylesheet for isolated
-// previews and publication, so retain only empty class-name references in the
-// technical pack. Re-emitting compiled declarations after module CSS would
-// place desktop declarations after responsive media rules and break mobile.
+// emit the render-profile stylesheet through the publisher's deduplicated
+// framework bundle, so the technical pack retains empty class references.
+// Re-emitting desktop declarations in a later style bundle would override the
+// module stylesheet's responsive cascade.
 const compiledClassReferences = compiled.classes
   .filter((rule) => rule.kind === 'class')
   .map((rule) => ({

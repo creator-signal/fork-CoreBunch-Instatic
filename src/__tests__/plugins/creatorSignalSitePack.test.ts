@@ -173,7 +173,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.3.7')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.3.8')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -595,7 +595,6 @@ describe('Creator Signal site pack', () => {
     expect(pack.layouts).toEqual([])
     expect(new Set(pack.classes.map((rule) => rule.id)).size).toBe(pack.classes.length)
     expect(pack.conditions).toEqual([])
-
     expect(pack.classes.every((rule) =>
       rule.kind === 'class' &&
       Object.keys(rule.styles).length === 0 &&

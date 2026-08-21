@@ -550,7 +550,7 @@ p { line-height: 1.7; }
 }
 .feature-section[data-feature-tone="signature"] .section-intro > p,
 .testimonial figcaption { color: var(--cs-ink); }
-.feature-grid-1 { grid-template-columns: minmax(0, 1fr); }
+.feature-grid-1 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .feature-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .feature-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
@@ -655,6 +655,7 @@ p { line-height: 1.7; }
 @media (max-width: 900px) {
   .campaign-hero { min-height: auto; grid-template-columns: minmax(0, 1fr); padding-top: 55px; }
   .campaign-hero-art { min-height: 380px; }
+  .feature-grid-1,
   .feature-grid-2,
   .feature-grid-3,
   .signal-comparison-grid,

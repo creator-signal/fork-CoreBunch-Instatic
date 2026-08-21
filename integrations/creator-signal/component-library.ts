@@ -396,6 +396,7 @@ export const creatorSignalRichTextEntry = siteEntry({
     { key: 'heading', label: 'Heading', description: 'Heading for this complete prose section.', type: 'text', required: true },
     { key: 'body', label: 'Content', description: 'Author the coherent formatted text here instead of stacking paragraph components.', type: 'rich-text', required: true },
     { key: 'sectionId', label: 'Section anchor', description: 'Unique page anchor used by the section heading.', type: 'text', required: true, advanced: true },
+    { key: 'headingLanguage', label: 'Heading language', description: 'Optional language declaration preserved on the section heading.', type: 'text', required: false, advanced: true },
   ],
 })
 

@@ -16,12 +16,60 @@ import { executeAgentTool } from '@site/agent'
 import type { AiToolOutput } from '@core/ai'
 import { classNamesForClassIds, creatorSignalCatalogueEntryId } from '@core/page-tree'
 import { componentLibraryRegistry } from '@core/component-library'
+import { registry } from '@core/module-engine'
 import { BUILT_IN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibrary'
+import { creatorSignalRichTextEntry } from '../../../integrations/creator-signal/component-library'
+import { richTextSection } from '../../../integrations/creator-signal/modules/site-components'
 import '@modules/base'
 
 const publicId = creatorSignalCatalogueEntryId
 
 describe('executeAgentTool — governed Component Library', () => {
+  it('consolidates the same anchored prose model used by the Component Library preview', async () => {
+    componentLibraryRegistry.register(creatorSignalRichTextEntry)
+    registry.registerOrReplace(richTextSection)
+    try {
+      const { rootId } = freshStore()
+      const headingId = useEditorStore.getState().insertNode('base.text', {
+        text: 'Working agreements',
+        tag: 'h2',
+        htmlAttributes: { id: 'agreements', lang: 'en-AU' },
+      }, rootId)
+      const paragraphId = useEditorStore.getState().insertNode('base.text', {
+        text: 'We communicate clearly.',
+        tag: 'p',
+        htmlAttributes: {},
+      }, rootId)
+
+      const result = expectToolData<{
+        entryId: string
+        replacedNodeIds: string[]
+        preview: { heading: string; sectionId: string; headingLanguage: string; body: string }
+      }>(await executeAgentTool('site_consolidate_rich_text', { nodeId: headingId }))
+      expect(result.entryId).toBe('creator-signal.site.rich-text-section')
+      expect(result.replacedNodeIds).toEqual([headingId, paragraphId])
+      expect(result.preview).toEqual({
+        heading: 'Working agreements',
+        sectionId: 'agreements',
+        headingLanguage: 'en-AU',
+        body: '<p>We communicate clearly.</p>',
+      })
+      const page = activePage()
+      expect(page.nodes[headingId]).toBeUndefined()
+      expect(page.nodes[paragraphId]).toBeUndefined()
+      const replacementId = page.nodes[page.rootNodeId]!.children[0]!
+      expect(page.nodes[replacementId]?.catalogueInstance).toEqual({
+        entryId: 'creator-signal.site.rich-text-section',
+        entryVersion: '1.0.0',
+      })
+      useEditorStore.getState().undo()
+      expect(activePage().nodes[headingId]?.props.text).toBe('Working agreements')
+      expect(activePage().nodes[paragraphId]?.props.text).toBe('We communicate clearly.')
+    } finally {
+      componentLibraryRegistry.unregister(creatorSignalRichTextEntry.id)
+    }
+  })
+
   it('shares template placement and singleton limits with Agent/MCP authoring', async () => {
     const entryId = 'test.shared-chrome'
     componentLibraryRegistry.register({

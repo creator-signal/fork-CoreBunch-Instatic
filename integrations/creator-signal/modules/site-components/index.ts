@@ -534,14 +534,16 @@ export const richTextSection = defineModule({
     heading: 'Section heading',
     body: '<p>Write the complete text block here.</p>',
     sectionId: 'content',
+    headingLanguage: '',
   },
   schema: {
     heading: control.text('Heading'),
     body: control.richtext('Content'),
     sectionId: control.text('Section anchor'),
+    headingLanguage: control.text('Heading language'),
   },
   render: ({ props }) => withCreatorSignalCss(html`<section class="content-section narrow-content" aria-labelledby="${escapedProp(props.sectionId)}">
-      <h2 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h2>
+      <h2 id="${escapedProp(props.sectionId)}"${props.headingLanguage ? raw(` lang="${escapedProp(props.headingLanguage)}"`) : ''}>${escapedProp(props.heading)}</h2>
       <div class="prose-content">${raw(text(props.body))}</div>
     </section>`),
 })

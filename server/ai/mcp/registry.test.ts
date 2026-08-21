@@ -34,6 +34,7 @@ describe('mcp registry', () => {
     expect(names).toContain('site_set_color_tokens')
     expect(names).toContain('site_list_component_library')
     expect(names).toContain('site_insert_component')
+    expect(names).toContain('site_consolidate_rich_text')
     expect(names).toContain('site_update_component_field')
     expect(names).toContain('site_apply_component_option')
     expect(tools.some((t) => t.execution === 'browser')).toBe(true)
@@ -74,6 +75,7 @@ describe('mcp registry', () => {
     expect(tools.some((t) => t.name === 'site_insert_html')).toBe(false)
     expect(tools.some((t) => t.name === 'site_list_component_library')).toBe(true)
     expect(tools.some((t) => t.name === 'site_insert_component')).toBe(false)
+    expect(tools.some((t) => t.name === 'site_consolidate_rich_text')).toBe(false)
   })
 
   it('requires the component capability for governed component writes', () => {
@@ -81,6 +83,7 @@ describe('mcp registry', () => {
     const names = mcpToolsForCapabilities(withoutComponentEdit).map((tool) => tool.name)
     expect(names).toContain('site_list_component_library')
     expect(names).not.toContain('site_insert_component')
+    expect(names).not.toContain('site_consolidate_rich_text')
     expect(names).not.toContain('site_update_component_field')
     expect(names).not.toContain('site_apply_component_option')
 
@@ -91,6 +94,7 @@ describe('mcp registry', () => {
       'site.components.edit',
     ]).map((tool) => tool.name)
     expect(componentOnly).toContain('site_insert_component')
+    expect(componentOnly).toContain('site_consolidate_rich_text')
     expect(componentOnly).not.toContain('site_insert_html')
   })
 

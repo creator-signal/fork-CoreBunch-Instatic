@@ -33,6 +33,7 @@ import {
   DuplicateNodeInputSchema,
   ListComponentLibraryInputSchema,
   InsertComponentLibraryEntryInputSchema,
+  ConsolidateRichTextInputSchema,
   UpdateComponentLibraryFieldInputSchema,
   ApplyComponentLibraryOptionInputSchema,
   ApplyCssInputSchema,
@@ -146,6 +147,16 @@ const insertComponentLibraryEntryTool: AiTool = {
   description:
     'Insert a governed Component Library entry under an existing parent node. The editor resolves the registered backing implementation, placement rules, preset/variant values, dependencies, versioned catalogue identity, slots, and plugin ownership. Use an entry id and option ids returned by site_list_component_library. Do not substitute site_insert_html when the requested component exists in the catalogue. Returns the inserted node id and retained catalogue version.',
   inputSchema: InsertComponentLibraryEntryInputSchema,
+}
+
+const consolidateRichTextTool: AiTool = {
+  name: 'site_consolidate_rich_text',
+  scope: 'site',
+  execution: 'browser',
+  requiredCapabilities: SITE_COMPONENT_CAPS,
+  description:
+    'Preview and atomically replace an eligible adjacent freeform prose run with one governed Creator Signal Rich Text Section. Pass the first ungoverned H2 node. The editor accepts only a direct sibling run with an anchored H2 and unstyled Text/Rich Text source; navigation, cards, actions, media, forms, bindings, structural containers, and lossy markup remain unchanged. The result is a draft and one undo step.',
+  inputSchema: ConsolidateRichTextInputSchema,
 }
 
 const updateComponentLibraryFieldTool: AiTool = {
@@ -472,6 +483,7 @@ export const siteWriteTools: AiTool[] = [
   duplicateNodeTool,
   listComponentLibraryTool,
   insertComponentLibraryEntryTool,
+  consolidateRichTextTool,
   updateComponentLibraryFieldTool,
   applyComponentLibraryOptionTool,
   applyCssTool,

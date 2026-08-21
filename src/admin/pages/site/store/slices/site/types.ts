@@ -248,6 +248,12 @@ export interface SiteSlice {
     entryId: string,
     presetId?: string,
   ) => boolean
+  /**
+   * Replace one eligible adjacent prose run with the installed governed Rich
+   * Text Section. The analysis and replacement happen in one undoable tree
+   * mutation so the operation is revisioned and exactly reversible.
+   */
+  consolidateCoherentRichText: (nodeId: string) => boolean
   deleteNode: (nodeId: string) => void
   /** Multi-delete: removes every id and its descendants in one undo step. */
   deleteNodes: (nodeIds: string[]) => void

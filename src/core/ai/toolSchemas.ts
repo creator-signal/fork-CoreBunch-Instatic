@@ -166,6 +166,11 @@ export type InsertComponentLibraryEntryInput = Static<
   typeof InsertComponentLibraryEntryInputSchema
 >
 
+export const ConsolidateRichTextInputSchema = Type.Object({
+  nodeId: Type.String({ minLength: 1, description: 'The first ungoverned H2 in the adjacent prose run to consolidate.' }),
+}, { additionalProperties: false })
+export type ConsolidateRichTextInput = Static<typeof ConsolidateRichTextInputSchema>
+
 export const UpdateComponentLibraryFieldInputSchema = Type.Object({
   nodeId: Type.String({ minLength: 1 }),
   fieldKey: Type.String({ minLength: 1 }),

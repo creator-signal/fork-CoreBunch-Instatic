@@ -14,9 +14,16 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
 
 FROM ${ALPINE_IMAGE}
 
+ARG INSTATIC_VERSION=dev
+ARG INSTATIC_REVISION=unknown
+ARG INSTATIC_CREATED=unknown
+
 LABEL org.opencontainers.image.title="Creator Signal Instatic media edge"
 LABEL org.opencontainers.image.description="Read-only media route from Creator Signal Instatic to its MinIO bucket."
 LABEL org.opencontainers.image.source="https://github.com/creator-signal/fork-CoreBunch-Instatic"
+LABEL org.opencontainers.image.version="${INSTATIC_VERSION}"
+LABEL org.opencontainers.image.revision="${INSTATIC_REVISION}"
+LABEL org.opencontainers.image.created="${INSTATIC_CREATED}"
 
 RUN apk upgrade --no-cache \
     && apk add --no-cache ca-certificates \

@@ -254,6 +254,23 @@ featureNode.moduleId = faqDefinition.id
 featureNode.props = structuredClone(faqDefinition.defaults)
 acceptanceRoutes.set('/__acceptance/patterns', renderPublishedPage(patternPage))
 
+const comparisonPage = structuredClone(publicPages.find((page) => page.slug === 'features'))
+assert(comparisonPage, 'Creator Signal features page is missing for comparison acceptance')
+comparisonPage.id = 'creator-signal-public-acceptance-comparison'
+comparisonPage.slug = '__acceptance/comparison'
+comparisonPage.title = 'Comparison overflow acceptance'
+const comparisonFeatureNode = Object.values(comparisonPage.nodes).find(
+  (node) => node.moduleId === 'creator-signal.site.feature-grid',
+)
+const comparisonDefinition = creatorSignalPlugin.modules.find(
+  (module) => module.id === 'creator-signal.site.comparison-section',
+)
+assert(comparisonFeatureNode, 'Features page has no feature-grid node for comparison acceptance')
+assert(comparisonDefinition, 'Creator Signal comparison module is missing')
+comparisonFeatureNode.moduleId = comparisonDefinition.id
+comparisonFeatureNode.props = structuredClone(comparisonDefinition.defaults)
+acceptanceRoutes.set('/__acceptance/comparison', renderPublishedPage(comparisonPage))
+
 function contentType(path: string): string | undefined {
   if (path.endsWith('.js')) return 'text/javascript; charset=utf-8'
   if (path.endsWith('.css')) return 'text/css; charset=utf-8'
@@ -668,6 +685,8 @@ try {
           document.documentElement.scrollWidth > document.documentElement.clientWidth,
         ), false, route)
       }
+      await page.goto(`${baseUrl}/__acceptance/comparison`, { waitUntil: 'load' })
+      await waitForPage(page)
       const region = page.locator('.comparison-table-scroll')
       assert.equal(await region.getAttribute('role'), 'region')
       const regionLabel = await region.getAttribute('aria-label')

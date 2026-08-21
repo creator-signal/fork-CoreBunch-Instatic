@@ -173,7 +173,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.3.6')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.3.7')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -489,6 +489,7 @@ describe('Creator Signal site pack', () => {
     expect(output).toContain('class="feature-grid feature-grid-3"')
     expect(output).toContain('data-analytics-choice="granted"')
     expect(output.match(/creator-signal-site-design-contract/g)).toHaveLength(1)
+    expect(output.match(/\.hero-section\s*\{/g)).toHaveLength(2)
     expect(output).not.toContain('data-cs-theme-control')
     expect(output).toContain('class="brand-signal"')
     expect(output).not.toContain('sales-pulse-social.png')
@@ -593,38 +594,16 @@ describe('Creator Signal site pack', () => {
   it('publishes the shared editorial design system once', () => {
     expect(pack.layouts).toEqual([])
     expect(new Set(pack.classes.map((rule) => rule.id)).size).toBe(pack.classes.length)
-    expect(pack.conditions.map((condition) => condition.id)).toEqual([
-      'media:(prefers-reduced-motion: reduce)',
-      'media:(forced-colors: active)',
-      'media:print',
-      'media:(max-width: 900px)',
-      'media:(max-width: 720px)',
-      'media:(max-width: 560px)',
-    ])
+    expect(pack.conditions).toEqual([])
 
-    const classStyles = (name: string) => pack.classes.find((rule) =>
-      rule.kind === 'class' && rule.name === name)?.styles
-    expect(classStyles('site-header')).toMatchObject({
-      width: 'calc(100% - 40px)',
-      maxWidth: '1240px',
-      marginLeft: 'auto',
-      marginRight: 'auto',
-    })
-    expect(classStyles('feature-grid')).toMatchObject({
-      display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
-    })
-    expect(classStyles('feature-card')).toMatchObject({
-      minHeight: '260px',
-      paddingTop: '32px',
-      paddingRight: '32px',
-      paddingBottom: '32px',
-      paddingLeft: '32px',
-      borderTopLeftRadius: '24px',
-      borderTopRightRadius: '24px',
-      borderBottomRightRadius: '24px',
-      borderBottomLeftRadius: '24px',
-    })
+    expect(pack.classes.every((rule) =>
+      rule.kind === 'class' &&
+      Object.keys(rule.styles).length === 0 &&
+      Object.keys(rule.contextStyles).length === 0,
+    )).toBe(true)
+    expect(pack.classes.find((rule) => rule.name === 'hero-section')?.id).toBe(
+      'creator-signal.site/site/hero-section',
+    )
     expect(featureGrid.render(featureGrid.defaults, []).html).toContain('class="feature-grid feature-grid-3"')
   })
 

@@ -566,6 +566,19 @@ const compiled = compilePackPages(
   entries,
   creatorSignalRenderProfile.stylesheet,
 )
+// The compiler needs the shared CSS to resolve authored class names to stable
+// class IDs, especially inside the Hero Visual Component. Governed modules
+// already emit the byte-identical render-profile stylesheet for isolated
+// previews and publication, so retain only empty class-name references in the
+// technical pack. Re-emitting compiled declarations after module CSS would
+// place desktop declarations after responsive media rules and break mobile.
+const compiledClassReferences = compiled.classes
+  .filter((rule) => rule.kind === 'class')
+  .map((rule) => ({
+    ...rule,
+    styles: {},
+    contextStyles: {},
+  }))
 const entryVersion = new Map(
   creatorSignalComponentLibraryEntries.map((entry) => [entry.id, entry.version]),
 )
@@ -773,8 +786,8 @@ const pack = definePack({
   publicAuthoring: creatorSignalPublicAuthoringPolicy,
   visualComponents: [heroComponent],
   pages: compiled.pages,
-  conditions: compiled.conditions,
+  conditions: [],
 })
-pack.classes.push(...compiled.classes)
+pack.classes.push(...compiledClassReferences)
 
 export { pack, starterPages }

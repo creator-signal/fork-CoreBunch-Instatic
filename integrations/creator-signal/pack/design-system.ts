@@ -37,6 +37,7 @@ body {
   font-family: var(--cs-font-family-body);
 }
 a { color: inherit; }
+main { min-width: 0; overflow-wrap: anywhere; }
 h1, h2, h3 {
   margin: 0;
   font-family: var(--cs-font-family-heading);
@@ -165,7 +166,7 @@ p { line-height: 1.7; }
   gap: 110px;
   padding: 70px 0 110px;
 }
-.hero-copy { max-width: 760px; }
+.hero-copy { max-width: 760px; min-width: 0; }
 .hero-body {
   max-width: 650px;
   margin: 28px 0;
@@ -409,7 +410,7 @@ p { line-height: 1.7; }
   .site-header nav a:not(.button) { display: none; }
   .hero-section {
     min-height: auto;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     padding-top: 55px;
   }
   .hero-art { min-height: 380px; }
@@ -469,6 +470,7 @@ p { line-height: 1.7; }
     scroll-behavior: auto !important;
     transition: none !important;
   }
+  .button:hover { transform: none; }
 }
 
 /* Active component extensions retain the production public-site visual contract. */
@@ -499,7 +501,7 @@ p { line-height: 1.7; }
   gap: 110px;
   padding: 70px 0 110px;
 }
-.campaign-hero-copy { max-width: 760px; }
+.campaign-hero-copy { max-width: 760px; min-width: 0; }
 .campaign-hero-body {
   max-width: 650px;
   margin: 28px 0;
@@ -546,6 +548,8 @@ p { line-height: 1.7; }
   padding-inline: max(20px, calc((100% - 1160px) / 2));
   background: var(--cs-clay-pale);
 }
+.feature-section[data-feature-tone="signature"] .section-intro > p,
+.testimonial figcaption { color: var(--cs-ink); }
 .feature-grid-1 { grid-template-columns: minmax(0, 1fr); }
 .feature-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .feature-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -649,8 +653,10 @@ p { line-height: 1.7; }
 .recovery-state .actions { margin-top: 28px; }
 
 @media (max-width: 900px) {
-  .campaign-hero { min-height: auto; grid-template-columns: 1fr; padding-top: 55px; }
+  .campaign-hero { min-height: auto; grid-template-columns: minmax(0, 1fr); padding-top: 55px; }
   .campaign-hero-art { min-height: 380px; }
+  .feature-grid-2,
+  .feature-grid-3,
   .signal-comparison-grid,
   .pricing-grid,
   .founder-story-inner,

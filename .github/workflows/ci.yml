@@ -89,6 +89,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Bun bootstrap dependency
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends unzip
+          rm -rf /var/lib/apt/lists/*
+
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
         with:

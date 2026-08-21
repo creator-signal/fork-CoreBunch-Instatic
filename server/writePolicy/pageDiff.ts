@@ -20,6 +20,7 @@
 import type { CoreCapability } from '../auth/capabilities'
 import { deepEqual } from '@core/utils/deepEqual'
 import { ForbiddenSiteChangeError } from './siteDiff'
+import { assertTemplateChromeFieldsOnly } from './templateChrome'
 import {
   assertPublicAuthoringPage,
   componentLibraryPatternRegistry,
@@ -95,14 +96,16 @@ export function validatePageWriteDiff({
     const previousById = new Map(previousPages.map((page) => [page.id, page]))
     for (const page of changedPages) {
       assertPublicAuthoringPage(page, publicAuthoringPolicy, componentLibraryRegistry)
-      if (
-        publicAuthoringPolicy.templates.some((template) => template.pageId === page.id) &&
-        !deepEqual(previousById.get(page.id), page)
-      ) {
-        throw new ForbiddenSiteChangeError(
-          'structure',
-          `pages.${page.id}`,
-          'the template-controlled public chrome is reconciled by the owning plugin pack',
+      const template = publicAuthoringPolicy.templates.find(
+        (candidate) => candidate.pageId === page.id,
+      )
+      const previous = previousById.get(page.id)
+      if (template && previous) {
+        assertTemplateChromeFieldsOnly(
+          previous,
+          page,
+          template.requiredEntryIds,
+          isApprovedGovernedPropChange,
         )
       }
     }

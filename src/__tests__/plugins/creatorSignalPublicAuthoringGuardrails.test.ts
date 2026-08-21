@@ -249,7 +249,7 @@ describe('Creator Signal public authoring guardrails', () => {
     )
   })
 
-  it('keeps header, footer and consent chrome on the protected shared template', () => {
+  it('allows declared shared-chrome fields but keeps the template structure protected', () => {
     const previous = governedSite()
     const site = structuredClone(previous)
     const template = site.pages.find(
@@ -265,7 +265,16 @@ describe('Creator Signal public authoring guardrails', () => {
       deletedPageIds: new Set(),
       capabilities: ALL_SITE_WRITE_CAPABILITIES,
       publicAuthoringPolicy: creatorSignalPublicAuthoringPolicy,
-    })).toThrow(/template-controlled public chrome is reconciled by the owning plugin pack/)
+    })).not.toThrow()
+
+    template.nodes[template.rootNodeId]!.label = 'Renamed template root'
+    expect(() => validatePageWriteDiff({
+      previousPages: previous.pages,
+      changedPages: [template],
+      deletedPageIds: new Set(),
+      capabilities: ALL_SITE_WRITE_CAPABILITIES,
+      publicAuthoringPolicy: creatorSignalPublicAuthoringPolicy,
+    })).toThrow(/only declared shared-chrome component fields are editable/)
 
     delete template.nodes[header.id]
     for (const node of Object.values(template.nodes)) {

@@ -149,7 +149,7 @@ export const creatorSignalHeaderEntry = siteEntry({
   tags: ['header', 'navigation', 'brand', 'shared'],
   moduleId: 'creator-signal.site.header',
   constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 },
-  usage: 'Read-only public chrome reconciled by the Creator Signal technical pack and inherited by ordinary pages.',
+  usage: 'Edit once in the shared template; every ordinary page inherits the updated brand identity and navigation.',
   accessibilityGuidance: 'Use short navigation labels, one primary action, and a Home URL that returns to the site root.',
   fields: [
     { key: 'brandName', label: 'Brand name', description: 'Visible site name and home-link accessible name.', type: 'text', required: true },
@@ -178,7 +178,7 @@ export const creatorSignalFooterEntry = siteEntry({
   tags: ['footer', 'navigation', 'legal', 'shared'],
   moduleId: 'creator-signal.site.footer',
   constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 },
-  usage: 'Read-only public chrome reconciled by the Creator Signal technical pack and inherited by ordinary pages.',
+  usage: 'Edit once in the shared template; every ordinary page inherits the updated footer links and legal routes.',
   accessibilityGuidance: 'Keep link labels unique enough to make sense when read out of context.',
   fields: [
     { key: 'brandName', label: 'Brand name', description: 'Visible site name in the shared footer.', type: 'text', required: true },
@@ -202,7 +202,7 @@ export const creatorSignalConsentEntry = siteEntry({
   tags: ['privacy', 'consent', 'analytics', 'shared'],
   moduleId: 'creator-signal.site.consent-banner',
   constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 },
-  usage: 'Read-only privacy chrome reconciled by the Creator Signal technical pack and inherited by ordinary pages.',
+  usage: 'Edit once in the shared template; every ordinary page inherits the same privacy choices.',
   accessibilityGuidance: 'Describe the optional purpose plainly and keep both choices equally understandable.',
   fields: [
     { key: 'heading', label: 'Heading', description: 'Short name for the privacy choice.', type: 'text', required: true },

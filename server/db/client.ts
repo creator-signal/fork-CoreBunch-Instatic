@@ -31,5 +31,7 @@ export interface DbClient {
   ): Promise<DbResult<Row>>
   unsafe<Row = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<DbResult<Row>>
   transaction<T>(fn: (tx: DbClient) => Promise<T>): Promise<T>
+  /** Release adapter resources when the owner has a bounded client lifetime. */
+  close?: () => void | Promise<void>
   readonly dialect: Dialect
 }

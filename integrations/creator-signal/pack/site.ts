@@ -5,7 +5,7 @@ import {
   type PagePackEntry,
 } from '@core/plugin-sdk'
 import { componentLibraryPatternRegistry } from '@core/component-library'
-import type { PageSeo } from '@core/page-tree'
+import type { Page, PageSeo } from '@core/page-tree'
 import { creatorSignalComponentLibraryEntries } from '../component-library'
 import { creatorSignalBrandAssets } from '../design-system/contract'
 import { consentBanner, siteFooter, siteHeader } from '../modules/site-components'
@@ -696,6 +696,77 @@ notFoundTemplate.template = {
   target: { kind: 'notFound' },
   priority: 0,
 }
+
+/**
+ * Pack compilation and ordinary catalogue insertion use generated node IDs.
+ * Starter and migration pages instead need reproducible IDs so two builds of
+ * the same source produce the same page-cell hashes. Authored page IDs are
+ * never rewritten by this helper because it runs only on the bundled pack.
+ */
+function stabilisePackPageNodeIds(page: Page): void {
+  const orderedIds: string[] = []
+  const parentById = new Map<string, string | null>()
+  const visited = new Set<string>()
+
+  const visit = (nodeId: string, parentId: string | null): void => {
+    if (visited.has(nodeId)) return
+    const node = page.nodes[nodeId]
+    if (!node) throw new Error(`[creator-signal] Page "${page.slug}" references missing node "${nodeId}".`)
+    visited.add(nodeId)
+    orderedIds.push(nodeId)
+    parentById.set(nodeId, parentId)
+    for (const childId of node.children) visit(childId, nodeId)
+  }
+
+  visit(page.rootNodeId, null)
+  for (const nodeId of Object.keys(page.nodes).sort()) visit(nodeId, null)
+
+  const prefix = page.id.replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '')
+  const nextIdByCurrentId = new Map(orderedIds.map((nodeId, index) => [
+    nodeId,
+    `${prefix}--node-${String(index).padStart(3, '0')}`,
+  ]))
+  const remap = (nodeId: string): string => {
+    const nextId = nextIdByCurrentId.get(nodeId)
+    if (!nextId) throw new Error(`[creator-signal] Page "${page.slug}" could not stabilise node "${nodeId}".`)
+    return nextId
+  }
+
+  const nextNodes: Page['nodes'] = {}
+  for (const currentId of orderedIds) {
+    const node = page.nodes[currentId]!
+    const pattern = node.catalogueInstance?.pattern
+    const nextId = remap(currentId)
+    nextNodes[nextId] = {
+      ...node,
+      id: nextId,
+      children: node.children.map(remap),
+      parentId: parentById.get(currentId) === null
+        ? null
+        : remap(parentById.get(currentId)!),
+      ...(node.catalogueInstance
+        ? {
+            catalogueInstance: {
+              ...node.catalogueInstance,
+              ...(pattern
+                ? {
+                    pattern: {
+                      ...pattern,
+                      authorableNodeIds: pattern.authorableNodeIds.map(remap),
+                    },
+                  }
+                : {}),
+            },
+          }
+        : {}),
+    }
+  }
+
+  page.nodes = nextNodes
+  page.rootNodeId = remap(page.rootNodeId)
+}
+
+for (const page of compiled.pages) stabilisePackPageNodeIds(page)
 
 const pack = definePack({
   pluginId: 'creator-signal.site',

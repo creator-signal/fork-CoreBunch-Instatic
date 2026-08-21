@@ -81,6 +81,9 @@ overwrite authored pages. The explicit content migration recognises exact
 retained 0.1.11, 0.2.0-0.2.6 and 0.3.5 content, produces a reviewable
 `merge-overwrite` archive, and blocks the complete migration if any page or
 template contains an unrecognised authored difference.
+Its semantic hashes ignore generated node identities while retaining authored
+content, metadata, structure and ordering, making repeated preparation
+deterministic without weakening the overwrite guard.
 
 The migration archive does not publish. Operators review the report and import
 preview, apply it deliberately, inspect the draft site, and then publish. The

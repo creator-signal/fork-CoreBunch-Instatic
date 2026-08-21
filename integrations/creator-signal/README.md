@@ -133,6 +133,10 @@ its reserved ID is absent. An occupied ID with any other content blocks the
 whole migration.
 Any authored difference blocks the whole migration for manual mapping; it is
 never overwritten heuristically.
+Page classification hashes the semantic tree independently of generated node
+IDs, so exporting or compiling the same retained content in another process
+does not create a false authored-content result. Text, properties, metadata,
+structure and ordering remain part of the hash and still block on change.
 
 The shared template uses the validator-compliant slug
 `creator-signal-site-template`. The classifier recognises only the exact
@@ -153,6 +157,8 @@ content-only migration archive. Review the archive through the normal import
 preview, apply it with `merge-overwrite`, preview the draft site, and publish
 deliberately. The archive does not publish. Exact rollback uses the untouched
 backup through the guarded `replace` import after its preview and step-up gate.
+The guarded restore path uses a dialect-neutral system-table predicate and is
+covered for both the PostgreSQL production schema and SQLite acceptance schema.
 
 ## Component authoring model
 

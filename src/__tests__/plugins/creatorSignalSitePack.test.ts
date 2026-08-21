@@ -80,6 +80,22 @@ describe('Creator Signal site pack', () => {
     })
   })
 
+  it('uses reproducible bundled node IDs for every starter and template page', () => {
+    for (const page of pack.pages) {
+      const prefix = page.id.replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '')
+      expect(page.rootNodeId).toBe(`${prefix}--node-000`)
+      for (const [nodeId, node] of Object.entries(page.nodes)) {
+        expect(nodeId).toMatch(new RegExp(`^${prefix}--node-\\d{3}$`))
+        expect(node.id).toBe(nodeId)
+        expect(node.children.every((childId) => Boolean(page.nodes[childId]))).toBe(true)
+        if (node.parentId) expect(page.nodes[node.parentId]).toBeDefined()
+        for (const authorableNodeId of node.catalogueInstance?.pattern?.authorableNodeIds ?? []) {
+          expect(page.nodes[authorableNodeId]).toBeDefined()
+        }
+      }
+    }
+  })
+
   it('passes the authoring persistence boundary as a complete governed site', () => {
     expect(() => validateSite(makeSite({
       pages: pack.pages,

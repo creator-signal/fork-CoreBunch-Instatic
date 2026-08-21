@@ -155,6 +155,14 @@ export const ListComponentLibraryInputSchema = Type.Object({
 }, { additionalProperties: false })
 export type ListComponentLibraryInput = Static<typeof ListComponentLibraryInputSchema>
 
+export const CheckComponentLibraryAccessibilityInputSchema = Type.Object(
+  {},
+  { additionalProperties: false },
+)
+export type CheckComponentLibraryAccessibilityInput = Static<
+  typeof CheckComponentLibraryAccessibilityInputSchema
+>
+
 export const InsertComponentLibraryEntryInputSchema = Type.Object({
   entryId: Type.String({ minLength: 1 }),
   parentId: Type.String({ minLength: 1 }),

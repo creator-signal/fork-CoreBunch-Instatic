@@ -36,6 +36,21 @@ function assertEntryInvariants(entry: ComponentLibraryEntry): void {
     'accessibility.checks',
     entry.accessibility?.checks.map((check) => check.rule) ?? [],
   )
+  assertUniqueIds(
+    'accessibility.notApplicable',
+    entry.accessibility?.notApplicable?.map((check) => check.rule) ?? [],
+  )
+  const declaredAccessibilityRules = new Set(
+    entry.accessibility?.checks.map((check) => check.rule) ?? [],
+  )
+  for (const notApplicable of entry.accessibility?.notApplicable ?? []) {
+    if (declaredAccessibilityRules.has(notApplicable.rule)) {
+      throw new ComponentLibraryDefinitionError(
+        `accessibility.notApplicable.${notApplicable.rule}`,
+        `Accessibility rule "${notApplicable.rule}" cannot be both applicable and not applicable.`,
+      )
+    }
+  }
 
   if (entry.composition === 'leaf' && entry.slots.length > 0) {
     throw new ComponentLibraryDefinitionError(

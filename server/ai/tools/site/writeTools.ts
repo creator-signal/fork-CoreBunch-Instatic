@@ -32,6 +32,7 @@ import {
   RenameNodeInputSchema,
   DuplicateNodeInputSchema,
   ListComponentLibraryInputSchema,
+  CheckComponentLibraryAccessibilityInputSchema,
   InsertComponentLibraryEntryInputSchema,
   ConsolidateRichTextInputSchema,
   UpdateComponentLibraryFieldInputSchema,
@@ -137,6 +138,16 @@ const listComponentLibraryTool: AiTool = {
   description:
     'Search the governed Component Library loaded by the editor, including plugin-owned entries. Returns current entry ids and versions, source ownership, implementation type, declared authoring fields, preset/variant ids, slots, placement constraints, requirements, documentation, and accessibility contracts. Option values remain internal; apply them by id with site_apply_component_option. Use this before inserting a catalogue component.',
   inputSchema: ListComponentLibraryInputSchema,
+}
+
+const checkComponentLibraryAccessibilityTool: AiTool = {
+  name: 'site_check_accessibility',
+  scope: 'site',
+  execution: 'browser',
+  requiredCapabilities: ['site.read'],
+  description:
+    'Return entry-specific accessibility diagnostics for the live site draft. Each result names the page, component instance, authored field when applicable, rule, severity, configured publication-blocking decision, and remediation. Behavior and manual contracts remain declared separately; this tool reports only deterministic draft checks.',
+  inputSchema: CheckComponentLibraryAccessibilityInputSchema,
 }
 
 const insertComponentLibraryEntryTool: AiTool = {
@@ -482,6 +493,7 @@ export const siteWriteTools: AiTool[] = [
   renameNodeTool,
   duplicateNodeTool,
   listComponentLibraryTool,
+  checkComponentLibraryAccessibilityTool,
   insertComponentLibraryEntryTool,
   consolidateRichTextTool,
   updateComponentLibraryFieldTool,

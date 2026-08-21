@@ -13,9 +13,7 @@
 import { nanoid } from 'nanoid'
 import { registry } from '@core/module-engine'
 import {
-  analyseCoherentRichTextConversion,
   analyseComponentLibraryPrimitiveConversion,
-  applyCoherentRichTextConversion,
   componentLibraryRegistry,
 } from '@core/component-library'
 import {
@@ -45,6 +43,7 @@ import { depthInTree, resolveActiveTreeTarget } from './helpers'
 import { pruneCanvasSelectionDraft } from '../selectionSlice'
 import { createStyleRuleOrderAllocator, indexStyleRulesByName, linkImportedClassNames, mergeImportedStyleRules } from './importLinking'
 import { backingComponentLibraryImplementation, initialComponentLibraryVariantValues, safeComponentLibraryOverrides } from './componentLibraryNodeOptions'
+import { consolidateCoherentRichText } from './coherentRichTextAction'
 import type { SiteSlice, SiteSliceHelpers } from './types'
 
 type NodeActions = Pick<
@@ -122,12 +121,8 @@ function duplicateNodeWithScopedClasses(
   return duplicateNode(tree, nodeId, { nodeIdMap, classIdRemap })
 }
 
-function recordPatchChanges(
-  current: Record<string, unknown>,
-  patch: Record<string, unknown>,
-): boolean {
-  return Object.entries(patch).some(([key, value]) => !Object.is(current[key], value))
-}
+const recordPatchChanges = (current: Record<string, unknown>, patch: Record<string, unknown>): boolean =>
+  Object.entries(patch).some(([key, value]) => !Object.is(current[key], value))
 
 /**
  * Surface a blocked one-outlet-per-document mutation to the user. The store is
@@ -162,9 +157,7 @@ function coalesceKeyForPatch(
   return { coalesceKey: `${scope}:${nodeId}:${keys[0]}` }
 }
 
-function componentLibraryDefinitionForInstance(entryId: string, version: string) {
-  return componentLibraryRegistry.getVersion(entryId, version)
-}
+const componentLibraryDefinitionForInstance = (entryId: string, version: string) => componentLibraryRegistry.getVersion(entryId, version)
 
 export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
   const { get, set, mutateActiveTree, mutateActiveTreeAndSite } = helpers
@@ -422,19 +415,7 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
       }),
 
     consolidateCoherentRichText: (nodeId) =>
-      mutateActiveTree((tree) => {
-        const entry = componentLibraryRegistry.get('creator-signal.site.rich-text-section')
-        const analysis = analyseCoherentRichTextConversion(tree, nodeId, entry)
-        if (!analysis.eligible) return false
-        const definition = registry.get('creator-signal.site.rich-text-section')
-        if (!definition) return false
-        const replacement = createNode(definition.id, {
-          ...definition.defaults,
-          ...analysis.candidate.props,
-        })
-        replacement.catalogueInstance = analysis.candidate.metadata
-        return applyCoherentRichTextConversion(tree, analysis.candidate, replacement)
-      }),
+      mutateActiveTree((tree) => consolidateCoherentRichText(tree, nodeId)),
 
     deleteNode: (nodeId) => {
       const deleted = mutateActiveTree((tree) => {

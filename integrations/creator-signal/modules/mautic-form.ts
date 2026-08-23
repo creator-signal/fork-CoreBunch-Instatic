@@ -119,24 +119,26 @@ const runtime = String.raw`(() => {
     }
     const formId = String(entry.id);
     const apiName = String(entry.apiName);
-    window.MauticFormCallback = window.MauticFormCallback || {};
-    window.MauticFormCallback[apiName] = {
-      onResponse(response) {
-        const success = response && (response.success === true || response.success === 1 || response.success === '1');
-        setBusy(root, target, false);
-        if (success) {
-          target.hidden = true;
-          if (status) status.textContent = root.dataset.successMessage || 'Thanks — your message has been received.';
-          dispatch(root, 'success');
-        } else {
-          if (status) status.textContent = 'The form could not be sent. Please try again.';
-          dispatch(root, 'failure', 'mautic_response_failed');
-        }
-        return true;
-      },
+    const handleResponse = (response) => {
+      const success = response && (response.success === true || response.success === 1 || response.success === '1');
+      setBusy(root, target, false);
+      if (success) {
+        target.hidden = true;
+        if (status) status.textContent = root.dataset.successMessage || 'Thanks — your message has been received.';
+        dispatch(root, 'success');
+      } else {
+        if (status) status.textContent = 'The form could not be sent. Please try again.';
+        dispatch(root, 'failure', 'mautic_response_failed');
+      }
+      return true;
     };
+    window.MauticFormCallback = window.MauticFormCallback || {};
+    window.MauticFormCallback[apiName] = { onResponse: handleResponse };
     try {
-      await loadScript(base + '/media/js/mautic-form.js', 'mautic-runtime:' + base);
+      // Mautic's generated script includes a legacy SDK bootstrap. The
+      // governed adapter owns submission below, so mark the SDK as loaded and
+      // let that generated bootstrap become a no-op rather than registering a
+      // second submit handler.
       window.MauticSDKLoaded = true;
       await loadScript(
         base + '/form/generate.js?id=' + encodeURIComponent(formId),
@@ -149,11 +151,25 @@ const runtime = String.raw`(() => {
       if (form && form.dataset.csSubmitBound !== 'true') {
         form.dataset.csSubmitBound = 'true';
         form.addEventListener('change', () => syncConsentTimestamps(target, entry.consentTimestampFields));
-        form.addEventListener('submit', () => {
+        form.addEventListener('submit', async (event) => {
           syncConsentTimestamps(target, entry.consentTimestampFields);
           if (!form.checkValidity()) return;
+          event.preventDefault();
           setBusy(root, target, true);
           if (status) status.textContent = 'Sending...';
+          try {
+            const submission = await fetch(
+              base + '/form/submit?formId=' + encodeURIComponent(formId) + '&ajax=1',
+              {
+                method: 'POST',
+                body: new URLSearchParams(new FormData(form)),
+              },
+            );
+            if (!submission.ok) throw new Error('mautic_submission_failed');
+            handleResponse(await submission.json());
+          } catch {
+            handleResponse({ success: false });
+          }
         });
       }
       syncConsentTimestamps(target, entry.consentTimestampFields);

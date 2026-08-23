@@ -373,18 +373,6 @@ const generatedForm = String.raw`(() => {
   target.innerHTML = '<form novalidate><div class="mauticform-row"><label for="acceptance-email">Email address</label><input id="acceptance-email" name="email" type="email" required aria-describedby="acceptance-email-error"><span id="acceptance-email-error" class="mauticform-errormsg" hidden>Enter a valid email address.</span></div>' + preference + '<div class="mauticform-row"><label for="acceptance-message">Message</label><textarea id="acceptance-message" name="message" required></textarea></div><input name="mauticform[consent_timestamp]" type="hidden"><button type="submit">Send message</button></form>';
   const form = target.querySelector('form');
   const email = target.querySelector('#acceptance-email');
-  const message = target.querySelector('#acceptance-message');
-  const error = target.querySelector('#acceptance-email-error');
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const invalid = !email.validity.valid || !message.validity.valid;
-    if (invalid) email.setAttribute('aria-invalid', 'true');
-    else email.removeAttribute('aria-invalid');
-    error.hidden = !invalid;
-    if (invalid) { email.focus(); return; }
-    const callback = Object.values(window.MauticFormCallback || {})[0];
-    if (callback) setTimeout(() => callback.onResponse({ success: new URL(location.href).searchParams.get('formResult') !== 'failure' }), 50);
-  });
 })();`
 
 async function routeMarketing(page: Page, registryAvailable = true): Promise<void> {
@@ -406,6 +394,14 @@ async function routeMarketing(page: Page, registryAvailable = true): Promise<voi
         status: 200,
         contentType: 'text/javascript; charset=utf-8',
         body: generatedForm,
+      })
+    }
+    if (url.pathname.endsWith('/form/submit')) {
+      const referer = route.request().headers().referer ?? ''
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json; charset=utf-8',
+        body: JSON.stringify({ success: !referer.includes('formResult=failure') }),
       })
     }
     return route.abort('blockedbyclient')

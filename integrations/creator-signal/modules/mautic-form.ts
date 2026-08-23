@@ -152,6 +152,7 @@ const runtime = String.raw`(() => {
         form.dataset.csSubmitBound = 'true';
         form.addEventListener('change', () => syncConsentTimestamps(target, entry.consentTimestampFields));
         form.addEventListener('submit', async (event) => {
+          event.preventDefault();
           syncConsentTimestamps(target, entry.consentTimestampFields);
           const controls = [...form.querySelectorAll('input, select, textarea')];
           controls.forEach((control) => control.removeAttribute('aria-invalid'));
@@ -161,7 +162,6 @@ const runtime = String.raw`(() => {
             invalid[0]?.focus();
             return;
           }
-          event.preventDefault();
           setBusy(root, target, true);
           if (status) status.textContent = 'Sending...';
           try {

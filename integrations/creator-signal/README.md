@@ -27,7 +27,7 @@ page roster, and publish the complete site automatically.
   State, Public Document, and Managed Form components.
 - Fourteen stable page/section patterns plus explicit Hero, CTA and FAQ mappings;
   starter routes materialize the same registry definitions authors insert.
-- Six Mautic-backed public forms that resolve governed aliases through the
+- Eight Mautic-backed public forms that resolve governed aliases through the
   Mautic-generated registry and emit typed success/failure events.
 - The host-level MinIO adapter for originals, variants, avatars, and fonts.
 - Plausible pageviews, consent-gated OpenPanel events, GlitchTip browser monitoring, consent UI, and hashed Mautic attribution.
@@ -203,7 +203,7 @@ and Early Access flow, page ownership boundaries and one-form intent contract.
 
 Deploy Mautic first and verify
 `https://marketing.creatorsignal.me/media/creator-signal/forms-v1.js` exposes
-the `creator-signal.mautic-forms/v1` schema and all six governed aliases. Do not
+the `creator-signal.mautic-forms/v1` schema and all eight governed aliases. Do not
 copy numeric form IDs or generated API names into Instatic: the module resolves
 those deployment-specific values from the registry on every page load.
 

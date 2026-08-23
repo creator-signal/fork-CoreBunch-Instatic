@@ -21,6 +21,11 @@ import {
   retainedCreatorSignalPageHashes050,
   retainedCreatorSignalTemplates050,
 } from '../retained-0.5.0-hashes'
+import {
+  retainedCreatorSignalNotFoundTemplates060,
+  retainedCreatorSignalPageHashes060,
+  retainedCreatorSignalTemplates060,
+} from '../retained-0.6.0-hashes'
 import { pack } from '../../pack/site'
 import {
   canonicalPageCellsSha256,
@@ -127,6 +132,7 @@ const retainedPageHashSets = [
   { version: '0.3.5', hashes: retainedCreatorSignalPageHashes035 },
   { version: '0.4.0', hashes: retainedCreatorSignalPageHashes040 },
   { version: '0.5.0', hashes: retainedCreatorSignalPageHashes050 },
+  { version: '0.6.0', hashes: retainedCreatorSignalPageHashes060 },
 ] as const
 
 export function retainedCreatorSignalPageVersion(
@@ -258,6 +264,8 @@ export function prepareCreatorSignalContentMigration(
         candidate.hash === currentHash && candidate.slug === templateRow.slug)
       || retainedCreatorSignalTemplates050.some((candidate) =>
         candidate.hash === currentHash && candidate.slug === templateRow.slug)
+      || retainedCreatorSignalTemplates060.some((candidate) =>
+        candidate.hash === currentHash && candidate.slug === templateRow.slug)
     ) {
       templateState = 'repair'
       previews.push({ id: template.id, slug: template.slug, state: 'template-repair', currentHash, targetHash })
@@ -305,6 +313,8 @@ export function prepareCreatorSignalContentMigration(
       || retainedCreatorSignalNotFoundTemplates040.some((candidate) =>
         candidate.hash === currentHash && candidate.slug === notFoundTemplateRow.slug)
       || retainedCreatorSignalNotFoundTemplates050.some((candidate) =>
+        candidate.hash === currentHash && candidate.slug === notFoundTemplateRow.slug)
+      || retainedCreatorSignalNotFoundTemplates060.some((candidate) =>
         candidate.hash === currentHash && candidate.slug === notFoundTemplateRow.slug)
     ) {
       notFoundTemplateState = 'repair'

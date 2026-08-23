@@ -196,28 +196,8 @@ const runtime = String.raw`(() => {
 
 const formCss = String.raw`
 .cs-mautic {
-  display: grid;
-  grid-template-columns: minmax(0, .8fr) minmax(320px, 1.2fr);
-  align-items: start;
-  gap: 72px;
-}
-.cs-mautic-copy {
-  max-width: 32rem;
-  padding-top: 12px;
-}
-.cs-mautic-copy h2 {
-  margin: 0;
-  color: var(--cs-text-primary);
-  font-family: var(--cs-type-heading2-family);
-  font-size: var(--cs-type-heading2-size);
-  font-weight: var(--cs-type-heading2-weight);
-  line-height: var(--cs-type-heading2-line-height);
-  letter-spacing: var(--cs-type-heading2-tracking);
-}
-.cs-mautic-copy > p:last-child {
-  color: var(--cs-text-secondary);
-  font-size: var(--cs-type-body-large-size);
-  line-height: var(--cs-type-body-large-line-height);
+  min-width: 0;
+  width: 100%;
 }
 .cs-mautic-form-shell {
   min-width: 0;
@@ -338,9 +318,6 @@ const formCss = String.raw`
   color: var(--cs-status-success-foreground);
   font-weight: 700;
 }
-@media (max-width: 900px) {
-  .cs-mautic { grid-template-columns: 1fr; gap: 40px; }
-}
 @media (max-width: 560px) {
   .cs-mautic-form-shell {
     padding: 22px 18px;
@@ -359,13 +336,10 @@ const escapedProp = (value: unknown) => raw(typeof value === 'string' ? value : 
 export default defineModule({
   id: 'creator-signal.site.mautic-form',
   name: 'Mautic form',
-  description: 'Embeds a governed Creator Signal Mautic form and emits typed result events.',
+  description: 'Delivers a standalone governed Creator Signal Mautic form and emits typed result events.',
   category: 'Creator Signal',
   htmlTag: 'section',
   defaults: {
-    eyebrow: 'Contact',
-    heading: 'Send a message',
-    introduction: 'Required fields are identified in the form.',
     successMessage: 'Thanks — your message has been received.',
     sectionId: 'managed-form',
     mauticBaseUrl: 'https://marketing.creatorsignal.me',
@@ -375,9 +349,6 @@ export default defineModule({
     campaignCode: 'contact',
   },
   schema: {
-    eyebrow: control.text('Eyebrow'),
-    heading: control.text('Heading'),
-    introduction: control.textarea('Introduction', { rows: 3 }),
     successMessage: control.textarea('Success message', { rows: 2 }),
     sectionId: control.text('Section anchor'),
     mauticBaseUrl: control.url('Mautic public URL'),
@@ -390,20 +361,17 @@ export default defineModule({
     const origin = String(props.mauticBaseUrl).match(/^https:\/\/[^/]+/i)?.[0] ?? ''
     return {
       html: html`
-        <section class="content-section" id="${escapedProp(props.sectionId)}">
-          <section class="cs-mautic" data-cs-mautic-form
-            data-base-url="${safeUrl(props.mauticBaseUrl)}"
-            data-form-alias="${escapedProp(props.formAlias)}"
-            data-registry-path="${escapedProp(props.registryPath)}"
-            data-form-code="${escapedProp(props.formCode)}"
-            data-campaign-code="${escapedProp(props.campaignCode)}"
-            data-success-message="${escapedProp(props.successMessage)}">
-            <div class="cs-mautic-copy"><p class="cs-eyebrow">${escapedProp(props.eyebrow)}</p><h2>${escapedProp(props.heading)}</h2><p>${escapedProp(props.introduction)}</p></div>
-            <div class="cs-mautic-form-shell">
-              <div data-form-mount></div>
-              <p role="status" aria-live="polite" data-form-status></p>
-            </div>
-          </section>
+        <section class="cs-mautic" id="${escapedProp(props.sectionId)}" data-cs-mautic-form
+          data-base-url="${safeUrl(props.mauticBaseUrl)}"
+          data-form-alias="${escapedProp(props.formAlias)}"
+          data-registry-path="${escapedProp(props.registryPath)}"
+          data-form-code="${escapedProp(props.formCode)}"
+          data-campaign-code="${escapedProp(props.campaignCode)}"
+          data-success-message="${escapedProp(props.successMessage)}">
+          <div class="cs-mautic-form-shell">
+            <div data-form-mount></div>
+            <p role="status" aria-live="polite" data-form-status></p>
+          </div>
         </section>`,
       css: creatorSignalSiteCss,
       js: runtime,

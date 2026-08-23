@@ -209,6 +209,34 @@ const twoColumn = (left: LeafBlock[], right: LeafBlock[]): TwoColumnBlock => ({
   slots: { left, right },
 })
 
+type ManagedFormDefinition = readonly [
+  eyebrow: string,
+  heading: string,
+  introduction: string,
+  successMessage: string,
+  formAlias: string,
+  campaignCode: string,
+]
+
+const managedFormColumns = (
+  form: ManagedFormDefinition,
+  formSectionId: string,
+): TwoColumnBlock => twoColumn(
+  [sectionIntroduction({
+    eyebrow: form[0],
+    heading: form[1],
+    introduction: form[2],
+    sectionId: `${form[5]}-introduction`,
+  })],
+  [managedForm({
+    successMessage: form[3],
+    sectionId: formSectionId,
+    formAlias: form[4],
+    formCode: form[4],
+    campaignCode: form[5],
+  })],
+)
+
 const publicDocument = (
   id: string,
   slug: string,
@@ -460,6 +488,15 @@ const starterPages: StarterPage[] = legacyCreatorSignalStarterPages0111.map((pag
   })),
 }))
 
+for (const formPage of formPages) {
+  if (formPage.id === 'feedback') continue
+  const page = starterPages.find((candidate) => candidate.slug === formPage.slug)
+  if (!page) throw new Error(`[creator-signal] Missing ${formPage.title} starter page.`)
+  const formSectionId = formSectionIdByPageId.get(formPage.id)
+  if (!formSectionId) throw new Error(`[creator-signal] Missing ${formPage.title} form section ID.`)
+  page.blocks = [page.blocks[0]!, managedFormColumns(formPage.form, formSectionId)]
+}
+
 const feedbackPage = starterPages.find((page) => page.slug === 'feedback')
 if (!feedbackPage) throw new Error('[creator-signal] Missing Feedback starter page.')
 feedbackPage.patternId = pagePatternId('feedback')
@@ -501,16 +538,7 @@ const intakeStarterPages: StarterPage[] = intakeFormPages.map((page) => (
     patternId: pagePatternId('contact'),
     blocks: [
       hero(...page.hero),
-      managedForm({
-        eyebrow: page.form[0],
-        heading: page.form[1],
-        introduction: page.form[2],
-        successMessage: page.form[3],
-        sectionId: formSectionIdByPageId.get(page.id),
-        formAlias: page.form[4],
-        formCode: page.form[4],
-        campaignCode: page.form[5],
-      }),
+      managedFormColumns(page.form, formSectionIdByPageId.get(page.id)!),
     ],
   }
 ))
@@ -636,16 +664,14 @@ const earlyAccessPage: StarterPage = {
       ['01', 'Be the first to know', 'Choose launch notification if you want one useful update when Creator Signal is ready.'],
       ['02', 'Help us test it first', 'Choose early testing if you are happy to try the product and share honest feedback before launch.'],
     ], 'early-access-options'),
-    managedForm({
-      eyebrow: 'Join the list',
-      heading: 'Choose your early-access update',
-      introduction: 'Required fields are identified in the form. Choose launch notification, early testing or both. This permission is specific to this request and is not general marketing consent.',
-      successMessage: 'You are on the Creator Signal early-access list — thank you.',
-      sectionId: 'early-access-form',
-      formAlias: 'creator_signal_wishlist',
-      formCode: 'creator_signal_wishlist',
-      campaignCode: 'early_access',
-    }),
+    managedFormColumns([
+      'Join the list',
+      'Choose your early-access update',
+      'Required fields are identified in the form. Choose launch notification, early testing or both. This permission is specific to this request and is not general marketing consent.',
+      'You are on the Creator Signal early-access list — thank you.',
+      'creator_signal_wishlist',
+      'early_access',
+    ], 'early-access-form'),
     features('In case you are wondering', 'What is Creator Signal?', 'A clearer view of your own Spoonflower sales, built around the way designers work.', [
       ['01', "See what's selling", 'See real sales through your own design thumbnails without rebuilding a spreadsheet.'],
       ['02', 'Filter it your way', 'Explore the time periods, product types and categories that matter to your work.'],
@@ -722,7 +748,73 @@ export interface CreatorSignalPageAuthoringReference {
   description: string
   patternId: string
   componentEntryIds: string[]
+  componentTree: CreatorSignalPageBodyComponentReference[]
+  migration: 'none' | 'preview-0.6.0-to-0.7.0'
 }
+
+export type CreatorSignalPageBodyBoundary = 'atomic-component' | 'layout-container' | 'provider-component'
+
+export interface CreatorSignalPageBodyComponentReference {
+  entryId: string
+  boundary: CreatorSignalPageBodyBoundary
+  slots?: Readonly<Record<string, CreatorSignalPageBodyComponentReference[]>>
+}
+
+/**
+ * Explicit ownership audit for every catalogue entry used in a public page
+ * body. Atomic entries keep one coherent responsibility and expose their copy
+ * or repeaters as governed fields. Layout entries own only real slots. Provider
+ * entries own only delivery configuration and runtime state.
+ */
+export const creatorSignalPageBodyComponentBoundaries: Readonly<Record<string, CreatorSignalPageBodyBoundary>> = {
+  'creator-signal.site.hero': 'atomic-component',
+  'creator-signal.site.campaign-hero': 'atomic-component',
+  'creator-signal.site.signal-strip': 'atomic-component',
+  'creator-signal.site.signal-comparison': 'atomic-component',
+  'creator-signal.site.feature-grid': 'atomic-component',
+  'creator-signal.site.process-steps': 'atomic-component',
+  'creator-signal.site.pricing-plans': 'atomic-component',
+  'creator-signal.site.founder-story': 'atomic-component',
+  'creator-signal.site.call-to-action': 'atomic-component',
+  'creator-signal.site.rich-text-section': 'atomic-component',
+  'creator-signal.site.testimonial': 'atomic-component',
+  'creator-signal.site.faq': 'atomic-component',
+  'creator-signal.site.comparison-section': 'atomic-component',
+  'creator-signal.site.recovery-state': 'atomic-component',
+  'creator-signal.site.public-document': 'atomic-component',
+  'creator-signal.site.section-intro': 'atomic-component',
+  'creator-signal.site.two-column-layout': 'layout-container',
+  'creator-signal.site.mautic-form': 'provider-component',
+  'creator-signal.site.crm-iframe-form': 'provider-component',
+}
+
+function pageBodyComponentReference(block: PageBlock): CreatorSignalPageBodyComponentReference {
+  const boundary = creatorSignalPageBodyComponentBoundaries[block.entryId]
+  if (!boundary) {
+    throw new Error(`[creator-signal] Page-body component "${block.entryId}" has no authoring boundary audit.`)
+  }
+  return block.kind === 'two-column'
+    ? {
+        entryId: block.entryId,
+        boundary,
+        slots: Object.fromEntries(Object.entries(block.slots).map(([slotName, slotBlocks]) => [
+          slotName,
+          slotBlocks.map(pageBodyComponentReference),
+        ])),
+      }
+    : { entryId: block.entryId, boundary }
+}
+
+const routeWideFormMigrationPageIds = new Set([
+  'contact',
+  'wishlist',
+  'waitlist',
+  'beta',
+  'ask-a-question',
+  'feature-request',
+  'report-an-error',
+  'early-access',
+])
 
 /** Durable route-to-component contract consumed by tests and parity reports. */
 export const creatorSignalPageAuthoringReference: readonly CreatorSignalPageAuthoringReference[] =
@@ -732,6 +824,10 @@ export const creatorSignalPageAuthoringReference: readonly CreatorSignalPageAuth
     description: page.description,
     patternId: page.patternId,
     componentEntryIds: page.blocks.map((block) => block.entryId),
+    componentTree: page.blocks.map(pageBodyComponentReference),
+    migration: routeWideFormMigrationPageIds.has(page.id)
+      ? 'preview-0.6.0-to-0.7.0'
+      : 'none',
   }))
 
 export const creatorSignalNotFoundAuthoringReference: CreatorSignalPageAuthoringReference = {
@@ -740,6 +836,8 @@ export const creatorSignalNotFoundAuthoringReference: CreatorSignalPageAuthoring
   description: notFoundPage.description,
   patternId: notFoundPage.patternId,
   componentEntryIds: notFoundPage.blocks.map((block) => block.entryId),
+  componentTree: notFoundPage.blocks.map(pageBodyComponentReference),
+  migration: 'none',
 }
 
 export const creatorSignalSharedTemplateEntryIds = sharedBlocks.map(

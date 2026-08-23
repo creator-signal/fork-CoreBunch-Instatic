@@ -630,7 +630,7 @@ try {
       assert.equal(await page.evaluate(() => document.activeElement?.id), 'acceptance-email')
       assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('aria-busy'), null)
       await email.fill('creator@example.com')
-      await page.getByLabel('Message').fill('Please send a useful signal.')
+      await page.getByRole('textbox', { name: 'Message', exact: true }).fill('Please send a useful signal.')
       await page.getByRole('button', { name: 'Send message' }).click({ noWaitAfter: true })
       await form.waitFor({ state: 'hidden' })
       await page.getByText('Thanks — your message has been received.', { exact: true }).waitFor()
@@ -638,7 +638,7 @@ try {
       await page.goto(`${baseUrl}/contact?formResult=failure`, { waitUntil: 'load' })
       await page.locator('[data-form-mount] form').waitFor({ state: 'attached' })
       await page.getByLabel('Email address').fill('creator@example.com')
-      await page.getByLabel('Message').fill('Please retry this signal.')
+      await page.getByRole('textbox', { name: 'Message', exact: true }).fill('Please retry this signal.')
       await page.getByRole('button', { name: 'Send message' }).click({ noWaitAfter: true })
       await page.getByText('The form could not be sent. Please try again.', { exact: true }).waitFor()
       assert.equal(await page.locator('[data-form-mount]').isVisible(), true)
@@ -652,6 +652,50 @@ try {
       assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('data-campaign-code'), 'early_access')
       assert.equal(await page.getByRole('radio').count(), 3)
       await page.getByText('Which updates would you like?', { exact: true }).waitFor()
+    } finally {
+      await context.close()
+    }
+  })
+
+  await runCheck('every managed form route publishes copy-first responsive authoring columns', async () => {
+    const routes = new Map([
+      ['/contact', 'creator_signal_contact'],
+      ['/wishlist', 'creator_signal_wishlist'],
+      ['/early-access', 'creator_signal_wishlist'],
+      ['/waitlist', 'creator_signal_waitlist'],
+      ['/beta', 'creator_signal_beta_application'],
+      ['/ask-a-question', 'creator_signal_question'],
+      ['/feature-request', 'creator_signal_feature_request'],
+      ['/report-an-error', 'creator_signal_error_report'],
+    ])
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
+    await addDeniedConsent(context)
+    const page = await context.newPage()
+    await routeMarketing(page)
+    try {
+      for (const [route, alias] of routes) {
+        await page.goto(`${baseUrl}${route}`, { waitUntil: 'load' })
+        await page.locator('[data-form-mount] form').waitFor({ state: 'attached' })
+        assert.equal(await page.locator('.two-column-layout').count(), 1, route)
+        assert.equal(await page.locator('.two-column-layout .section-intro').count(), 1, route)
+        assert.equal(await page.locator('.two-column-layout [data-cs-mautic-form]').count(), 1, route)
+        assert.equal(
+          await page.locator('[data-cs-mautic-form]').getAttribute('data-form-alias'),
+          alias,
+          route,
+        )
+        const order = await page.evaluate(() => {
+          const intro = document.querySelector('.two-column-layout .section-intro')
+          const provider = document.querySelector('.two-column-layout [data-cs-mautic-form]')
+          if (!intro || !provider) return null
+          return {
+            source: Boolean(intro.compareDocumentPosition(provider) & Node.DOCUMENT_POSITION_FOLLOWING),
+            responsive: intro.getBoundingClientRect().bottom <= provider.getBoundingClientRect().top,
+          }
+        })
+        assert.deepEqual(order, { source: true, responsive: true }, route)
+      }
+      return { routes: routes.size, viewport: { width: 390, height: 844 } }
     } finally {
       await context.close()
     }

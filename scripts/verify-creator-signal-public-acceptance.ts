@@ -554,7 +554,7 @@ try {
         return { label: node.textContent?.trim(), width: rect.width, height: rect.height }
       }))
       assert.equal(navTargets.length, 1)
-      assert.equal(navTargets[0]?.label, 'Sign in')
+      assert.equal(navTargets[0]?.label, 'Get started free')
       assert.equal(navTargets.every((target) => target.width > 0 && target.height >= 40), true)
       const summary = page.locator('.faq-list summary').first()
       await summary.focus()
@@ -771,7 +771,7 @@ try {
     try {
       await page.goto(baseUrl, { waitUntil: 'load' })
       await waitForPage(page)
-      const before = await page.locator('.hero-art').evaluate((node) => node.getBoundingClientRect().height)
+      const before = await page.locator('.campaign-art').evaluate((node) => node.getBoundingClientRect().height)
       assert(before >= 250)
       await page.locator('h1').evaluate((node) => {
         node.textContent = `CreatorSignal${'UnbrokenSignal'.repeat(40)}`

@@ -452,11 +452,14 @@ if (serveOnly) {
 }
 
 const browserExecutablePath = process.env.CREATOR_SIGNAL_BROWSER_EXECUTABLE_PATH?.trim()
-const browser = await chromium.launch({
-  headless: true,
-  timeout: 30_000,
-  ...(browserExecutablePath ? { executablePath: browserExecutablePath } : {}),
-})
+const browserCdpUrl = process.env.CREATOR_SIGNAL_BROWSER_CDP_URL?.trim()
+const browser = browserCdpUrl
+  ? await chromium.connectOverCDP(browserCdpUrl)
+  : await chromium.launch({
+      headless: true,
+      timeout: 30_000,
+      ...(browserExecutablePath ? { executablePath: browserExecutablePath } : {}),
+    })
 
 try {
   for (const viewport of [

@@ -173,7 +173,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.4.0')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.5.0')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -289,14 +289,22 @@ describe('Creator Signal site pack', () => {
     }
   })
 
-  it('builds the production-look Home flow from three governed leaf components', () => {
+  it('builds the reference Home flow from governed authorable sections', () => {
     const home = creatorSignalPageAuthoringReference.find((page) => page.route === '/')
 
     expect(home).toEqual(expect.objectContaining({
       patternId: 'creator-signal.site.pattern.home-v2-page',
       componentEntryIds: [
-        'creator-signal.site.hero',
+        'creator-signal.site.campaign-hero',
+        'creator-signal.site.signal-strip',
+        'creator-signal.site.signal-comparison',
         'creator-signal.site.feature-grid',
+        'creator-signal.site.process-steps',
+        'creator-signal.site.feature-grid',
+        'creator-signal.site.feature-grid',
+        'creator-signal.site.pricing-plans',
+        'creator-signal.site.founder-story',
+        'creator-signal.site.faq',
         'creator-signal.site.call-to-action',
       ],
     }))
@@ -314,7 +322,19 @@ describe('Creator Signal site pack', () => {
         label: 'Sign in',
         url: 'https://salespulse.creatorsignal.me',
       }),
+      expect.objectContaining({
+        label: 'Get started free',
+        url: 'https://salespulse.creatorsignal.me/sign-up',
+      }),
     ]))
+  })
+
+  it('uses only generated semantic design-system variables in active public composition', () => {
+    expect(creatorSignalRenderProfile.stylesheet).toContain('var(--cs-brand-pink)')
+    expect(creatorSignalRenderProfile.stylesheet).toContain('var(--cs-product-creator-signal-signature)')
+    expect(creatorSignalRenderProfile.stylesheet).toContain('var(--cs-type-heading1-family)')
+    expect(creatorSignalRenderProfile.stylesheet).not.toMatch(/--cs-(sage|clay|ink|paper|card|line|muted|blue)\b/)
+    expect(creatorSignalRenderProfile.stylesheet).not.toContain('Georgia')
   })
 
   it('keeps pricing visually aligned through the governed feature-card pattern', () => {
@@ -489,14 +509,14 @@ describe('Creator Signal site pack', () => {
     expect(output).toContain('class="feature-grid feature-grid-3"')
     expect(output).toContain('data-analytics-choice="granted"')
     expect(output.match(/creator-signal-site-design-contract/g)).toHaveLength(1)
-    expect(output.match(/\.hero-section\s*\{/g)).toHaveLength(2)
+    expect(output.match(/\.hero-section, \.campaign-hero\s*\{/g)).toHaveLength(2)
     expect(output).not.toContain('data-cs-theme-control')
-    expect(output).toContain('class="brand-signal"')
-    expect(output).not.toContain('sales-pulse-social.png')
+    expect(output).toContain('class="site-brand-mark"')
+    expect(output).toContain('sales-pulse-social.png')
     expect(output).not.toContain('&amp;#x27;')
     expect(output).not.toContain('&amp;amp;')
     expect(output).toContain('href="https://salespulse.creatorsignal.me"')
-    expect(output).toContain('class="signal-visual"')
+    expect(output).toContain('class="signal-comparison-grid"')
   })
 
   it('publishes the governed not-found template through the shared site chrome', () => {

@@ -133,7 +133,7 @@ export const creatorSignalHeroEntry: ComponentLibraryEntry = {
 
 export const creatorSignalHeaderEntry = siteEntry({
   id: 'creator-signal.site.header',
-  version: '1.1.0',
+  version: '1.2.0',
   name: 'Site Header',
   description: 'Pack-owned brand identity and primary navigation inherited from the site template.',
   tags: ['header', 'navigation', 'brand', 'shared'],
@@ -848,7 +848,7 @@ function patternEntry(input: {
 }
 
 export const creatorSignalPatternEntries: readonly ComponentLibraryEntry[] = [
-  patternEntry({ id: 'creator-signal.site.pattern.home-v2-page', version: '1.1.0', name: 'Home Page', description: 'The production-look Creator Signal home composition with a hero, focused feature grid and one next step.', tags: ['home', 'landing page', 'sales pulse'], usage: 'Use only for the Creator Signal Home route. Edit its governed child components instead of rebuilding the sequence.', accessibility: 'Keep the Hero as the one H1, retain the feature-grid heading order and keep the final action descriptive.', maxInstancesPerDocument: 1 }),
+  patternEntry({ id: 'creator-signal.site.pattern.home-v2-page', version: '2.0.0', name: 'Home Page', description: 'The governed Creator Signal reference flow from the campaign promise through proof, product detail, pricing, founder context and one final next step.', tags: ['home', 'landing page', 'sales pulse'], usage: 'Use only for the Creator Signal Home route. Edit its governed child components instead of rebuilding or reordering the reference flow.', accessibility: 'Keep the Campaign Hero as the one H1, preserve the ordered section hierarchy and keep every signup action pointed at the Sales Pulse application.', maxInstancesPerDocument: 1 }),
   patternEntry({ id: 'creator-signal.site.pattern.early-access-page', name: 'Early Access Page', description: 'A launch-preview composition with one governed wishlist form and supporting product context.', tags: ['early access', 'wishlist', 'launch', 'form'], usage: 'Use for the noindex Early Access test route. Keep one Managed Form instance and do not embed account creation.', accessibility: 'Preserve the Campaign Hero as H1, one labelled form, explicit permission copy and readable provider states.', maxInstancesPerDocument: 1 }),
   patternEntry({ id: 'creator-signal.site.pattern.content-page', name: 'Content Page', description: 'Hero, long-form content and one next action.', tags: ['content page', 'editorial', 'cta'], usage: 'Use for an explanatory page that ends with one next step.', accessibility: 'Keep one H1 in the Hero and use semantic headings inside the rich-text section.', maxInstancesPerDocument: 1 }),
   patternEntry({ id: 'creator-signal.site.pattern.product-page', name: 'Product Page', description: 'Hero, governed feature grid and one product action.', tags: ['product', 'features', 'cta'], usage: 'Use for a product overview with outcome-focused features and one primary journey.', accessibility: 'Keep card content scannable and the single page action specific.', maxInstancesPerDocument: 1 }),

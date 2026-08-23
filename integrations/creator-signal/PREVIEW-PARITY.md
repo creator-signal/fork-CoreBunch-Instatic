@@ -24,8 +24,8 @@ assets.
   Content Security Policy envelope as publication.
 - The system, light, and dark runtime states use the vendored theme bootstrap
   declared by the render profile. The public header intentionally exposes no
-  appearance selector; the production-look adapter keeps the visible site
-  stable across those compatibility states.
+  appearance selector; the generated semantic roles keep the reference design
+  coherent across those states.
 - Desktop, tablet, and mobile canvas frames are real iframe viewports. The
   shared CSS media queries therefore select the same responsive rules as a
   published page at the same width.

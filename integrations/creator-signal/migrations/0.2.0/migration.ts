@@ -11,6 +11,11 @@ import {
   retainedCreatorSignalPageHashes035,
   retainedCreatorSignalTemplates035,
 } from '../retained-0.3.5-hashes'
+import {
+  retainedCreatorSignalNotFoundTemplates040,
+  retainedCreatorSignalPageHashes040,
+  retainedCreatorSignalTemplates040,
+} from '../retained-0.4.0-hashes'
 import { pack } from '../../pack/site'
 import {
   canonicalPageCellsSha256,
@@ -115,6 +120,7 @@ const retainedPageHashSets = [
   { version: '0.1.11', hashes: legacyCreatorSignalPageHashes0111 },
   { version: '0.2.0-0.2.6', hashes: retainedCreatorSignalPageHashes0200To0206 },
   { version: '0.3.5', hashes: retainedCreatorSignalPageHashes035 },
+  { version: '0.4.0', hashes: retainedCreatorSignalPageHashes040 },
 ] as const
 
 export function retainedCreatorSignalPageVersion(
@@ -242,6 +248,8 @@ export function prepareCreatorSignalContentMigration(
         (candidate.hash === currentHash || candidate.hash === currentRawHash) && candidate.slug === templateRow.slug)
       || retainedCreatorSignalTemplates035.some((candidate) =>
         candidate.hash === currentHash && candidate.slug === templateRow.slug)
+      || retainedCreatorSignalTemplates040.some((candidate) =>
+        candidate.hash === currentHash && candidate.slug === templateRow.slug)
     ) {
       templateState = 'repair'
       previews.push({ id: template.id, slug: template.slug, state: 'template-repair', currentHash, targetHash })
@@ -283,8 +291,12 @@ export function prepareCreatorSignalContentMigration(
         currentHash,
         targetHash,
       })
-    } else if (retainedCreatorSignalNotFoundTemplates035.some((candidate) =>
-      candidate.hash === currentHash && candidate.slug === notFoundTemplateRow.slug)) {
+    } else if (
+      retainedCreatorSignalNotFoundTemplates035.some((candidate) =>
+        candidate.hash === currentHash && candidate.slug === notFoundTemplateRow.slug)
+      || retainedCreatorSignalNotFoundTemplates040.some((candidate) =>
+        candidate.hash === currentHash && candidate.slug === notFoundTemplateRow.slug)
+    ) {
       notFoundTemplateState = 'repair'
       previews.push({
         id: notFoundTemplate.id,

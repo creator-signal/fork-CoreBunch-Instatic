@@ -167,34 +167,27 @@ const formCss = String.raw`
 }
 .cs-mautic-copy h2 {
   margin: 0;
-  font-family: var(--cs-site-font-heading);
-  font-size: 4rem;
-  font-weight: 600;
-  line-height: 1.04;
-  letter-spacing: -.035em;
+  color: var(--cs-text-primary);
+  font-family: var(--cs-type-heading2-family);
+  font-size: var(--cs-type-heading2-size);
+  font-weight: var(--cs-type-heading2-weight);
+  line-height: var(--cs-type-heading2-line-height);
+  letter-spacing: var(--cs-type-heading2-tracking);
 }
 .cs-mautic-copy > p:last-child {
-  color: var(--cs-muted);
-  font-size: 1.08rem;
-  line-height: 1.7;
-}
-.cs-eyebrow {
-  margin: 0 0 12px;
-  color: var(--cs-sage);
-  font-size: .76rem;
-  font-weight: 750;
-  letter-spacing: .13em;
-  text-transform: uppercase;
+  color: var(--cs-text-secondary);
+  font-size: var(--cs-type-body-large-size);
+  line-height: var(--cs-type-body-large-line-height);
 }
 .cs-mautic-form-shell {
   min-width: 0;
   min-height: 240px;
   padding: 40px;
-  border: 1px solid var(--cs-line);
-  border-radius: 24px;
-  background: var(--cs-card);
-  color: var(--cs-ink);
-  box-shadow: var(--cs-shadow);
+  border: 1px solid var(--cs-component-card-border);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-component-card-background);
+  color: var(--cs-component-card-foreground);
+  box-shadow: var(--cs-shadow-sm);
 }
 .cs-mautic [data-form-mount][hidden] { display: none; }
 .cs-mautic-form-shell[aria-busy="true"] :is(button[type="submit"], input[type="submit"], .mauticform-button) {
@@ -211,14 +204,14 @@ const formCss = String.raw`
 .cs-mautic label, .cs-mautic .mauticform-label {
   display: block;
   margin: 0 0 7px;
-  color: var(--cs-ink);
+  color: var(--cs-text-primary);
   font-size: .92rem;
   font-weight: 700;
   line-height: 1.35;
 }
 .cs-mautic fieldset.mauticform-row legend {
   margin: 0 0 7px;
-  color: var(--cs-ink);
+  color: var(--cs-text-primary);
   font-size: .92rem;
   font-weight: 700;
   line-height: 1.35;
@@ -236,10 +229,10 @@ const formCss = String.raw`
   width: 100%;
   min-height: 48px;
   padding: 11px 14px;
-  border: 1px solid var(--cs-line);
-  border-radius: 11px;
-  background: var(--cs-card);
-  color: var(--cs-ink);
+  border: 1px solid var(--cs-component-field-border);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-component-field-background);
+  color: var(--cs-component-field-foreground);
   font: inherit;
   line-height: 1.4;
   transition: border-color .16s ease, box-shadow .16s ease;
@@ -249,7 +242,7 @@ const formCss = String.raw`
   width: auto;
   min-height: 0;
   margin-inline-end: 8px;
-  accent-color: var(--cs-sage);
+  accent-color: var(--cs-action-primary-background);
 }
 .cs-mautic .mauticform-checkboxgrp-row,
 .cs-mautic .mauticform-radiogrp-row {
@@ -261,7 +254,7 @@ const formCss = String.raw`
 .cs-mautic .mauticform-errormsg {
   display: block;
   margin-top: 6px;
-  color: #9b443c;
+  color: var(--cs-status-error-foreground);
   font-size: .84rem;
   font-weight: 650;
 }
@@ -269,7 +262,7 @@ const formCss = String.raw`
 .cs-mautic .mauticform-helpmessage {
   display: block;
   margin: 0 0 7px;
-  color: var(--cs-muted);
+  color: var(--cs-text-muted);
   font-size: .84rem;
 }
 .cs-mautic button[type="submit"],
@@ -284,36 +277,34 @@ const formCss = String.raw`
   border: 1px solid transparent;
   border-radius: 999px;
   cursor: pointer;
-  background: var(--cs-sage);
-  color: var(--cs-card);
+  background: var(--cs-product-creator-signal-signature);
+  color: var(--cs-brand-maroon);
   font: inherit;
   font-weight: 700;
-  box-shadow: var(--cs-site-shadow-action);
+  box-shadow: var(--cs-shadow-sm);
   transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
 }
 .cs-mautic button[type="submit"]:hover,
 .cs-mautic input[type="submit"]:hover,
 .cs-mautic .mauticform-button:hover { transform: translateY(-1px); }
 .cs-mautic :is(input, textarea, select, button):focus-visible {
-  outline: 3px solid var(--cs-blue);
+  outline: 3px solid var(--cs-focus-ring);
   outline-offset: 2px;
-  border-color: var(--cs-sage);
-  box-shadow: 0 0 0 4px rgba(147, 169, 179, .18);
+  border-color: var(--cs-component-field-border-focus);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--cs-focus-ring) 18%, transparent);
 }
 .cs-mautic [data-form-status] {
   margin: 18px 0 0;
-  color: var(--cs-sage);
+  color: var(--cs-status-success-foreground);
   font-weight: 700;
 }
 @media (max-width: 900px) {
   .cs-mautic { grid-template-columns: 1fr; gap: 40px; }
-  .cs-mautic-copy h2 { font-size: 3.2rem; }
 }
 @media (max-width: 560px) {
-  .cs-mautic-copy h2 { font-size: 2.6rem; }
   .cs-mautic-form-shell {
     padding: 22px 18px;
-    border-radius: 20px;
+    border-radius: var(--cs-radius-lg);
   }
 }
 `

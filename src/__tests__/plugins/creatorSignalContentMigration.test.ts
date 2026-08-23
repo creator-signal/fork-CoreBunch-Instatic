@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'bun:test'
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate'
 import '@modules/base'
-import type { SiteBundleArchiveManifest } from '@core/data/bundleArchive'
+import {
+  BUNDLE_ARCHIVE_MANIFEST_PATH,
+  type SiteBundleArchiveManifest,
+} from '@core/data/bundleArchive'
 import type { DataRow, DataTable } from '@core/data/schemas'
 import { pageToCells } from '@core/data/pageFromRow'
 import { legacyCreatorSignalPageHashes0111 } from '../../../integrations/creator-signal/migrations/legacy-0.1.11-hashes'
@@ -94,6 +101,48 @@ function legacyManifest(): SiteBundleArchiveManifest {
 }
 
 describe('Creator Signal 0.2.0 content migration', () => {
+  it('writes equivalent JSON and ZIP manifests with the untouched backup evidence', async () => {
+    const temporary = await mkdtemp(join(tmpdir(), 'instatic-creator-signal-migration-'))
+    const inputPath = join(temporary, 'retained-site.zip')
+    const outputDirectory = join(temporary, 'prepared')
+    const inputArchive = zipSync({
+      [BUNDLE_ARCHIVE_MANIFEST_PATH]: strToU8(JSON.stringify(legacyManifest())),
+    }, { level: 0 })
+    await writeFile(inputPath, inputArchive)
+
+    try {
+      const child = Bun.spawn([
+        process.execPath,
+        'run',
+        'integrations/creator-signal/migrations/0.2.0/prepare.ts',
+        'prepare',
+        '--input',
+        inputPath,
+        '--output-dir',
+        outputDirectory,
+      ], { stdout: 'pipe', stderr: 'pipe' })
+      expect(await child.exited).toBe(0)
+
+      const migrationJson = JSON.parse(await readFile(
+        join(outputDirectory, 'creator-signal-content-0.2.0-migration.json'),
+        'utf8',
+      ))
+      const migrationArchive = unzipSync(new Uint8Array(await readFile(
+        join(outputDirectory, 'creator-signal-content-0.2.0-migration.zip'),
+      )))
+      expect(JSON.parse(strFromU8(migrationArchive[BUNDLE_ARCHIVE_MANIFEST_PATH]!)))
+        .toEqual(migrationJson)
+      expect(new Uint8Array(await readFile(
+        join(outputDirectory, 'creator-signal-content-0.2.0-backup.zip'),
+      ))).toEqual(inputArchive)
+      expect(migrationJson.rows).toHaveLength(28)
+      expect(migrationJson.site).toBeUndefined()
+      expect(migrationJson.media).toBeUndefined()
+    } finally {
+      await rm(temporary, { recursive: true, force: true })
+    }
+  })
+
   it('pins the retained 0.1.11 fixture to hashes captured from the source commit', () => {
     expect(Object.fromEntries(legacyCreatorSignalPages0111.map((page) => [
       page.id,

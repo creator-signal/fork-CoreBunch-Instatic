@@ -65,8 +65,13 @@ if (args.command === 'preview') {
   const backupPath = join(outputDir, 'creator-signal-content-0.2.0-backup.zip')
   const reportPath = join(outputDir, 'creator-signal-content-0.2.0-report.json')
   const migrationPath = join(outputDir, 'creator-signal-content-0.2.0-migration.zip')
-  await refuseExisting(backupPath)
-  await refuseExisting(reportPath)
+  const manifestPath = join(outputDir, 'creator-signal-content-0.2.0-migration.json')
+  await Promise.all([
+    backupPath,
+    reportPath,
+    migrationPath,
+    manifestPath,
+  ].map(refuseExisting))
   await Bun.write(backupPath, inputBytes)
   await Bun.write(reportPath, `${JSON.stringify(evidence, null, 2)}\n`)
 
@@ -74,16 +79,17 @@ if (args.command === 'preview') {
     console.error(`Migration is blocked. Backup and report written to ${outputDir}; no migration archive was created.`)
     process.exitCode = 2
   } else {
-    await refuseExisting(migrationPath)
     const outputArchive = zipSync({
       [BUNDLE_ARCHIVE_MANIFEST_PATH]: strToU8(JSON.stringify(prepared.manifest)),
     }, { level: 0 })
+    await Bun.write(manifestPath, `${JSON.stringify(prepared.manifest, null, 2)}\n`)
     await Bun.write(migrationPath, outputArchive)
     console.log(JSON.stringify({
       ready: true,
       backupPath,
       reportPath,
       migrationPath,
+      manifestPath,
       rows: prepared.manifest.rows.length,
       importStrategy: prepared.report.apply.strategy,
       publishesAutomatically: false,

@@ -16,6 +16,7 @@ import {
   creatorSignalPatternEntries,
   creatorSignalRecoveryStateEntry,
 } from '../../../integrations/creator-signal/component-library'
+import crmIframeForm from '../../../integrations/creator-signal/modules/crm-iframe-form'
 import mauticForm, { creatorSignalSiteCss } from '../../../integrations/creator-signal/modules/mautic-form'
 import {
   campaignHero,
@@ -575,6 +576,18 @@ describe('Creator Signal site pack', () => {
     }
   })
 
+  it('registers an independently previewable embedded CRM form', () => {
+    const published = crmIframeForm.render(crmIframeForm.defaults, [])
+    const previewed = (crmIframeForm.preview ?? crmIframeForm.render)(
+      crmIframeForm.defaults,
+      [],
+    )
+
+    expect(published.html).toContain('data-cs-crm-iframe-form')
+    expect(published.css).toContain('creator-signal-site-design-contract')
+    expect(previewed).toEqual(published)
+  })
+
   it('renders semantic comparison and recovery patterns without colour-only meaning', () => {
     const comparison = comparisonSection.render(comparisonSection.defaults, []).html
     expect(comparison).toContain('<caption>Creator Signal option comparison</caption>')
@@ -664,6 +677,7 @@ describe('Creator Signal site pack', () => {
       'creator-signal.site.recovery-state',
       'creator-signal.site.public-document',
       'creator-signal.site.mautic-form',
+      'creator-signal.site.crm-iframe-form',
     ])
     expect(creatorSignalPatternEntries.map((entry) => entry.id)).toEqual([
       'creator-signal.site.pattern.home-v2-page',

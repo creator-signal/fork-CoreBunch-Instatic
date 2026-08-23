@@ -47,7 +47,7 @@ export const creatorSignalPublicPatternCatalogue = [
 
 export const creatorSignalPublicAuthoringContract = {
   id: 'creator-signal.public-authoring',
-  version: '1.1.0',
+  version: '1.2.0',
   designSystem: creatorSignalDesignSystemDependency,
   permittedComponents: [
     {
@@ -83,6 +83,7 @@ export const creatorSignalPublicAuthoringContract = {
     { entryId: 'creator-signal.site.recovery-state', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
     { entryId: 'creator-signal.site.public-document', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
     { entryId: 'creator-signal.site.mautic-form', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.crm-iframe-form', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
   ],
   permittedPatterns: creatorSignalPublicPatternCatalogue,
   semanticStyling: {

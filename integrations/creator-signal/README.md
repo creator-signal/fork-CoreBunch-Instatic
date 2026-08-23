@@ -190,7 +190,7 @@ runs against pages produced by Instatic's real public publishing pipeline.
 create, edit, revision, preview, publish, unpublish, media, pattern, legal,
 product-page, theme, catalogue-task and guardrail acceptance matrix. Run it
 with `bun run verify:creator-signal-content-workflows`; run
-`bun run verify:creator-signal-authoring-tasks` to write the 33-entry editor
+`bun run verify:creator-signal-authoring-tasks` to write the 34-entry editor
 and MCP task matrix from the registered catalogue.
 
 `integrations/creator-signal/ACCESSIBILITY.md` records the entry-specific

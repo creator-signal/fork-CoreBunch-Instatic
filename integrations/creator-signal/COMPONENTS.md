@@ -268,7 +268,7 @@ Extend `src/__tests__/plugins/creatorSignalSitePack.test.ts` to verify:
 - referenced class IDs exist in `pack.classes`;
 - image parameters bind to a `base.image` property;
 - required modules and governed entries remain registered;
-- every leaf entry declares no slots and every starter instance has no children.
+- every leaf entry declares no slots; intentional containers declare named slots and tests prove their starter children resolve to governed entries.
 
 Run the integration gates:
 

@@ -227,16 +227,17 @@ describe('Creator Signal public authoring guardrails', () => {
     ]))
   })
 
-  it('allows authors to reshape a seeded pattern and remove its Managed Form', () => {
+  it('allows authors to reshape Feedback and remove its standalone iframe from the right slot', () => {
     const site = governedSite()
     const page = site.pages.find((candidate) => candidate.slug === 'feedback')!
     const pattern = Object.values(page.nodes).find(
       (node) => node.catalogueInstance?.entryId ===
-        'creator-signal.site.pattern.contact-page',
+        'creator-signal.site.pattern.feedback-page',
     )!
     const form = Object.values(page.nodes).find(
-      (node) => node.catalogueInstance?.entryId === 'creator-signal.site.mautic-form',
+      (node) => node.catalogueInstance?.entryId === 'creator-signal.site.crm-iframe-form',
     )!
+    const rightSlot = page.nodes[form.parentId!]!
     const hero = Object.values(page.nodes).find(
       (node) => node.catalogueInstance?.entryId === 'creator-signal.site.hero',
     )!
@@ -245,7 +246,7 @@ describe('Creator Signal public authoring guardrails', () => {
     addedHero.parentId = pattern.id
     delete page.nodes[form.id]
     page.nodes[addedHero.id] = addedHero
-    pattern.children = pattern.children.filter((nodeId) => nodeId !== form.id)
+    rightSlot.children = rightSlot.children.filter((nodeId) => nodeId !== form.id)
     pattern.children.push(addedHero.id)
     reindexNodeParents(page.nodes)
 

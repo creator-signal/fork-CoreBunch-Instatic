@@ -60,6 +60,10 @@ describe('Creator Signal Embedded CRM Form', () => {
     expect(output.html).toContain('target="_blank"')
     expect(output.html).toContain('rel="noopener noreferrer"')
     expect(output.html).toContain('role="status"')
+    expect(output.html).not.toContain('<h2')
+    expect(output.html).not.toContain('cs-crm-iframe-form-copy')
+    expect(crmIframeForm.defaults).not.toHaveProperty('heading')
+    expect(crmIframeForm.defaults).not.toHaveProperty('introduction')
     expect(output.js).toContain(CRM_IFRAME_FORM_MESSAGE_TYPE)
     expect(output.js).toContain("event.origin !== origin || event.source !== frame.contentWindow")
     expect(output.cspSources).toEqual([{

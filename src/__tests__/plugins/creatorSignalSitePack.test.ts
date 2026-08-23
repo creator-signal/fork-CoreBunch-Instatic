@@ -32,6 +32,7 @@ import {
   publicDocument,
   recoveryState,
   richTextSection,
+  sectionIntro,
   signalComparison,
   signalStrip,
   siteFooter,
@@ -183,7 +184,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.5.1')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.6.0')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -231,10 +232,15 @@ describe('Creator Signal site pack', () => {
     )?.constraints.allowedDocumentKinds).toEqual(['page', 'template'])
   })
 
-  it('uses governed leaf components with typed repeaters instead of authored child slots', () => {
+  it('uses governed leaf components except for the explicit editable two-column container', () => {
     for (const entry of creatorSignalComponentEntries) {
-      expect(entry.composition).toBe('leaf')
-      expect(entry.slots).toEqual([])
+      if (entry.id === 'creator-signal.site.two-column-layout') {
+        expect(entry.composition).toBe('container')
+        expect(entry.slots.map((slot) => slot.id)).toEqual(['left', 'right'])
+      } else {
+        expect(entry.composition).toBe('leaf')
+        expect(entry.slots).toEqual([])
+      }
     }
 
     for (const page of publicPages) {
@@ -246,7 +252,9 @@ describe('Creator Signal site pack', () => {
       for (const nodeId of pattern.children) {
         const component = page.nodes[nodeId]
         expect(component.catalogueInstance?.entryId).toStartWith('creator-signal.site.')
-        expect(component.children).toEqual([])
+        if (component.catalogueInstance?.entryId !== 'creator-signal.site.two-column-layout') {
+          expect(component.children).toEqual([])
+        }
       }
     }
 
@@ -261,6 +269,34 @@ describe('Creator Signal site pack', () => {
         heading: 'Sales imports',
       }),
     ]))
+  })
+
+  it('composes Feedback from independently editable columns, copy and iframe components', () => {
+    const feedback = publicPages.find((page) => page.slug === 'feedback')!
+    const nodes = Object.values(feedback.nodes)
+    const layout = nodes.find((node) =>
+      node.catalogueInstance?.entryId === 'creator-signal.site.two-column-layout')!
+    const leftSlot = layout.children.map((nodeId) => feedback.nodes[nodeId]).find(
+      (node) => node.moduleId === 'base.slot-instance' && node.props.slotName === 'left',
+    )!
+    const rightSlot = layout.children.map((nodeId) => feedback.nodes[nodeId]).find(
+      (node) => node.moduleId === 'base.slot-instance' && node.props.slotName === 'right',
+    )!
+
+    expect(feedback.nodes[feedback.nodes[feedback.rootNodeId].children[0]!]
+      .catalogueInstance?.entryId).toBe('creator-signal.site.pattern.feedback-page')
+    expect(layout.moduleId).toBe('base.visual-component-ref')
+    expect(layout.props.componentId).toBe('creator-signal.site/component/two-column-layout')
+    expect(feedback.nodes[leftSlot.children[0]!]).toMatchObject({
+      moduleId: 'creator-signal.site.section-intro',
+      catalogueInstance: { entryId: 'creator-signal.site.section-intro' },
+      props: { heading: 'Share your feedback' },
+    })
+    expect(feedback.nodes[rightSlot.children[0]!]).toMatchObject({
+      moduleId: 'creator-signal.site.crm-iframe-form',
+      catalogueInstance: { entryId: 'creator-signal.site.crm-iframe-form' },
+      props: { formUrl: 'https://marketing.creatorsignal.me/form/creator-signal-feedback' },
+    })
   })
 
   it('materializes every governed public pattern through the editor registry', () => {
@@ -391,7 +427,6 @@ describe('Creator Signal site pack', () => {
   it('turns every public intake page into a governed alias-resolved Mautic component', () => {
     const forms = [
       ['contact', 'creator_signal_contact'],
-      ['feedback', 'creator_signal_feedback'],
       ['wishlist', 'creator_signal_wishlist'],
       ['early-access', 'creator_signal_wishlist'],
       ['waitlist', 'creator_signal_waitlist'],
@@ -535,6 +570,36 @@ describe('Creator Signal site pack', () => {
     expect(output).toContain('class="signal-comparison-grid"')
   })
 
+  it('publishes Feedback as left-column copy followed by a standalone right-column iframe', () => {
+    const modules = Object.fromEntries(registry.list().map((module) => [module.id, module]))
+    for (const definition of creatorSignalPlugin.modules) {
+      modules[definition.id] = pluginModuleToHostModule(
+        'creator-signal.site',
+        definition,
+        () => () => null,
+        creatorSignalPlugin.manifest.permissions,
+        creatorSignalPlugin.manifest.networkAllowedHosts,
+      )
+    }
+    const feedback = publicPages.find((page) => page.slug === 'feedback')!
+    const composed = composeTemplateChain([templatePage!], { kind: 'page', page: feedback })
+    const site = makeSite({
+      pages: pack.pages,
+      visualComponents: pack.visualComponents,
+      styleRules: Object.fromEntries(pack.classes.map((rule) => [rule.id, rule])),
+    })
+    const output = publishPage(composed, site, makeRegistry(modules)).html
+
+    expect(output).toContain('class="two-column-layout"')
+    expect(output).toContain('<h2 id="feedback-introduction">Share your feedback</h2>')
+    expect(output).toContain('src="https://marketing.creatorsignal.me/form/creator-signal-feedback"')
+    expect(output.indexOf('Share your feedback')).toBeLessThan(
+      output.indexOf('data-cs-crm-iframe-form'),
+    )
+    expect(output.match(/Share your feedback/g)).toHaveLength(1)
+    expect(output).not.toContain('data-form-alias="creator_signal_feedback"')
+  })
+
   it('publishes the governed not-found template through the shared site chrome', () => {
     const modules = Object.fromEntries(registry.list().map((module) => [module.id, module]))
     for (const definition of creatorSignalPlugin.modules) {
@@ -576,6 +641,7 @@ describe('Creator Signal site pack', () => {
       founderStory,
       callToAction,
       richTextSection,
+      sectionIntro,
       testimonial,
       faq,
       comparisonSection,
@@ -692,6 +758,8 @@ describe('Creator Signal site pack', () => {
       'creator-signal.site.recovery-state',
       'creator-signal.site.public-document',
       'creator-signal.site.mautic-form',
+      'creator-signal.site.section-intro',
+      'creator-signal.site.two-column-layout',
       'creator-signal.site.crm-iframe-form',
     ])
     expect(creatorSignalPatternEntries.map((entry) => entry.id)).toEqual([
@@ -702,6 +770,7 @@ describe('Creator Signal site pack', () => {
       'creator-signal.site.pattern.pricing-page',
       'creator-signal.site.pattern.features-page',
       'creator-signal.site.pattern.contact-page',
+      'creator-signal.site.pattern.feedback-page',
       'creator-signal.site.pattern.legal-trust-page',
       'creator-signal.site.pattern.article-content-page',
       'creator-signal.site.pattern.comparison-section',

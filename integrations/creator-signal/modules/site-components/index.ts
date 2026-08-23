@@ -550,6 +550,31 @@ export const richTextSection = defineModule({
     </section>`),
 })
 
+export const sectionIntro = defineModule({
+  id: 'creator-signal.site.section-intro',
+  name: 'Section intro',
+  description: 'A compact eyebrow, heading and introduction for use inside authored layouts.',
+  category: 'Creator Signal',
+  htmlTag: 'section',
+  defaults: {
+    eyebrow: 'Section',
+    heading: 'Introduce this section',
+    introduction: 'Add the context visitors need before they continue.',
+    sectionId: 'section-intro',
+  },
+  schema: {
+    eyebrow: control.text('Eyebrow'),
+    heading: control.text('Heading'),
+    introduction: control.textarea('Introduction', { rows: 3 }),
+    sectionId: control.text('Section anchor'),
+  },
+  render: ({ props }) => withCreatorSignalCss(html`<section class="section-intro column-section-intro" aria-labelledby="${escapedProp(props.sectionId)}">
+      <p class="eyebrow">${escapedProp(props.eyebrow)}</p>
+      <h2 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h2>
+      <p>${escapedProp(props.introduction)}</p>
+    </section>`),
+})
+
 export const testimonial = defineModule({
   id: 'creator-signal.site.testimonial',
   name: 'Testimonial',
@@ -740,6 +765,7 @@ export const creatorSignalSiteModules = [
   pricingPlans,
   founderStory,
   callToAction,
+  sectionIntro,
   richTextSection,
   testimonial,
   faq,

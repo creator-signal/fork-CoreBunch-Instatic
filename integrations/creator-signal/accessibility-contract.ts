@@ -209,8 +209,16 @@ export const creatorSignalAccessibilityContracts: Readonly<Record<string, Compon
     manual('a11y.no-javascript-fallback', 'no-javascript', 'The unavailable form state must provide a non-destructive alternative.', 'Verify the published fallback explains the unavailable provider without hiding contact context.'),
     contrast(), touch(),
   ]),
+  'creator-signal.site.section-intro': contract([
+    automatedName(['heading'], 'The section introduction needs a heading.'),
+    heading(), contrast(),
+  ]),
+  'creator-signal.site.two-column-layout': contract([
+    manual('a11y.semantic-structure', 'semantic', 'The two columns must keep a meaningful source order and reflow without horizontal scrolling.', 'Keep supporting copy in the left slot and the related interactive content in the right slot unless another order is deliberately more meaningful; verify the result at 320 CSS pixels and 400% zoom.'),
+    contrast(),
+  ]),
   'creator-signal.site.crm-iframe-form': contract([
-    automatedName(['heading', 'iframeTitle', 'fallbackLabel'], 'The embedded CRM form needs a heading, accessible iframe title and fallback link.'), heading(),
+    automatedName(['iframeTitle', 'fallbackLabel'], 'The embedded CRM form needs an accessible iframe title and fallback link.'),
     behavior('a11y.keyboard-contract', 'keyboard', 'The hosted CRM controls and fallback link must be keyboard operable.', 'Verify tab order and submission in the published embedded form, then verify the fallback link opens the same form.', ['formUrl', 'fallbackLabel']),
     behavior('a11y.focus-contract', 'focus', 'Focus must enter the iframe and return to the page predictably.', 'Verify keyboard focus crosses the iframe boundary without trapping visitors.', ['formUrl']),
     behavior('a11y.announcement-contract', 'focus', 'Loading, unavailable and resize states must be announced.', 'Verify the live status remains understandable while the CRM form loads, resizes or cannot be framed.', ['loadingMessage', 'unavailableMessage']),
@@ -225,6 +233,7 @@ export const creatorSignalAccessibilityContracts: Readonly<Record<string, Compon
   'creator-signal.site.pattern.pricing-page': contract([heading(null)]),
   'creator-signal.site.pattern.features-page': contract([heading(null)]),
   'creator-signal.site.pattern.contact-page': contract([heading(null)]),
+  'creator-signal.site.pattern.feedback-page': contract([heading(null)]),
   'creator-signal.site.pattern.legal-trust-page': contract([heading(null)]),
   'creator-signal.site.pattern.article-content-page': contract([heading(null)]),
   'creator-signal.site.pattern.comparison-section': contract([heading(null)]),

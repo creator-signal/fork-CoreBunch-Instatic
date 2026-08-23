@@ -6,6 +6,8 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.40 - 2026-08-24
+
 ### Creator Signal retained-content operations
 
 - Shipped the governed Creator Signal retained-content classifier inside the

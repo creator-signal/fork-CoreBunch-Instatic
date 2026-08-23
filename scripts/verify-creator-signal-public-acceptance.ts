@@ -397,11 +397,10 @@ async function routeMarketing(page: Page, registryAvailable = true): Promise<voi
       })
     }
     if (url.pathname.endsWith('/form/submit')) {
-      const referer = route.request().headers().referer ?? ''
       return route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',
-        body: JSON.stringify({ success: !referer.includes('formResult=failure') }),
+        body: JSON.stringify({ success: !page.url().includes('formResult=failure') }),
       })
     }
     return route.abort('blockedbyclient')

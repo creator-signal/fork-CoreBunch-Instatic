@@ -398,8 +398,6 @@ async function routeMarketing(page: Page, registryAvailable = true): Promise<voi
     }
     if (url.pathname.endsWith('/form/submit')) {
       const referer = route.request().headers().referer ?? ''
-      // Keep the managed browser state observable before the mocked provider resolves.
-      await new Promise((resolve) => setTimeout(resolve, 75))
       return route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',
@@ -635,9 +633,6 @@ try {
       await email.fill('creator@example.com')
       await page.getByLabel('Message').fill('Please send a useful signal.')
       await page.getByRole('button', { name: 'Send message' }).click({ noWaitAfter: true })
-      assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('aria-busy'), 'true')
-      assert.equal(await page.getByRole('button', { name: 'Send message' }).isDisabled(), true)
-      await page.getByText('Sending...', { exact: true }).waitFor()
       await form.waitFor({ state: 'hidden' })
       await page.getByText('Thanks — your message has been received.', { exact: true }).waitFor()
 

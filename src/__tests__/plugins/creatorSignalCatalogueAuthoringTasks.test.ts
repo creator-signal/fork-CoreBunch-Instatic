@@ -71,9 +71,9 @@ afterAll(() => {
 })
 
 describe('Creator Signal catalogue authoring tasks', () => {
-  it('derives one complete supported-task row for all 33 governed entries', () => {
-    expect(creatorSignalComponentLibraryEntries).toHaveLength(33)
-    expect(creatorSignalAuthoringTaskMatrix).toHaveLength(33)
+  it('derives one complete supported-task row for all 34 governed entries', () => {
+    expect(creatorSignalComponentLibraryEntries).toHaveLength(34)
+    expect(creatorSignalAuthoringTaskMatrix).toHaveLength(34)
     expect(creatorSignalAuthoringTaskMatrix.map((row) => row.entryId)).toEqual(
       creatorSignalComponentLibraryEntries.map((entry) => entry.id),
     )

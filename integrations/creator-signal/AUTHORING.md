@@ -20,7 +20,7 @@ unknown-route recovery content.
 - Components may be added, reordered or removed freely.
 - Every starter route materializes one stable `creator-signal.site.pattern.*` catalogue entry; it is an editable starting composition, not a fixed route contract.
 - Creator Signal components are opinionated leaves. Pattern roots are governed containers; neither model exposes arbitrary child slots.
-- `bun run verify:creator-signal-authoring-tasks` writes the current 33-entry task matrix to `.tmp/creator-signal-authoring-tasks/` and fails when the catalogue drifts from a supported authoring task.
+- `bun run verify:creator-signal-authoring-tasks` writes the current 34-entry task matrix to `.tmp/creator-signal-authoring-tasks/` and fails when the catalogue drifts from a supported authoring task.
 - `bun run verify:creator-signal-parity` writes the browsable side-by-side report to `.tmp/creator-signal-parity/index.html`.
 - `bun run verify:creator-signal-public-acceptance` verifies the locally
   published pack against the committed responsive, accessibility and visual
@@ -170,8 +170,40 @@ pack: they are for copyable structures that may diverge after insertion.
 | Recovery State | Page or template | Empty/error/offline/not-found kind, heading, explanation and recovery action | None | None |
 | Public Document | Page or template | Eyebrow, document heading, summary, one formatted document field, date modified | None | None |
 | Managed Form | Page or template | Eyebrow, heading, introduction, success message and section anchor | Provider fields are resolved from the governed registry | None |
+| Embedded CRM Form | Page or template | CRM form URL, iframe title, fallback copy and bounded resize heights | Same-origin observation or CRM `postMessage` resize events | None |
 
-The catalogue contract lives in `integrations/creator-signal/component-library.ts`. The semantic renderers live in `integrations/creator-signal/modules/site-components/index.ts` and `integrations/creator-signal/modules/mautic-form.ts`. They preserve headings, landmarks, accessible names and schema.org metadata while keeping markup structure out of routine authoring.
+The catalogue contract lives in `integrations/creator-signal/component-library.ts`. The semantic renderers live in `integrations/creator-signal/modules/site-components/index.ts`, `integrations/creator-signal/modules/mautic-form.ts` and `integrations/creator-signal/modules/crm-iframe-form.ts`. They preserve headings, landmarks, accessible names and schema.org metadata while keeping markup structure out of routine authoring.
+
+## Embedded CRM Form resizing
+
+Use **Embedded CRM Form** when Mautic exposes a complete HTTPS form page. The
+author chooses its Mautic URL, accessible iframe title, fallback link text and
+bounded initial/minimum/maximum height. The visible fallback link always opens
+the same form in a new tab.
+
+If the Mautic form and public page have the same origin, Instatic observes the
+iframe document and updates its height automatically. For the usual
+cross-origin `marketing.creatorsignal.me` form, the Mautic form page must send
+resize updates to its exact public-site origin; a browser cannot read a
+cross-origin iframe's document height.
+
+Add this helper to the hosted Mautic form page, replacing the two placeholders
+with the page's public origin and the component's **Section anchor**:
+
+```js
+const publishHeight = () => window.parent.postMessage({
+  type: 'creator-signal.crm-form.resize.v1',
+  instanceId: '<SECTION_ANCHOR>',
+  height: document.documentElement.scrollHeight,
+}, '<PUBLIC_SITE_ORIGIN>')
+
+new ResizeObserver(publishHeight).observe(document.documentElement)
+window.addEventListener('load', publishHeight)
+```
+
+The Mautic page must permit framing by the public-site origin. If it sends
+`X-Frame-Options: DENY` or a restrictive `frame-ancestors` policy, the browser
+will block the iframe; retain the fallback link in that case.
 
 ## Placement enforcement
 

@@ -39,9 +39,9 @@ The shared `Creator Signal site template` owns the reusable site chrome:
 3. `creator-signal.site.footer`
 4. `creator-signal.site.consent-banner`
 
-Header and footer links are repeatable data fields. Authors using the template add only page content. All 19 content/chrome components are opinionated leaf components with typed fields or repeaters and zero authored child slots. The 14 page patterns are fixed container compositions used to create coherent pages; they do not expose arbitrary component slots.
+Header and footer links are repeatable data fields. Authors using the template add only page content. All 20 content/chrome components are opinionated leaf components with typed fields or repeaters and zero authored child slots. The 14 page patterns are editable starter compositions used to create coherent pages; they do not expose arbitrary component slots.
 
-The catalogue contains 33 Creator Signal entries in total: 19 opinionated components and 14 governed page patterns. All use the `creator-signal.site` namespace.
+The catalogue contains 34 Creator Signal entries in total: 20 opinionated components and 14 governed page patterns. All use the `creator-signal.site` namespace.
 
 ## Page and section reference
 

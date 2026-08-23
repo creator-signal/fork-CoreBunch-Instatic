@@ -6,6 +6,16 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.40 - 2026-08-24
+
+### Creator Signal retained-content operations
+
+- Shipped the governed Creator Signal retained-content classifier inside the
+  runtime image so operators can prepare an untouched backup, hash report,
+  content-only migration archive and equivalent import-preview JSON without a
+  separate source checkout; classification remains fail-closed and never
+  imports or publishes content automatically.
+
 ## 0.0.39 - 2026-08-24
 
 ### Governed Creator Signal reference site and forms

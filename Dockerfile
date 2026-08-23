@@ -60,6 +60,7 @@ COPY --chown=bun:bun package.json bun.lock ./
 COPY --chown=bun:bun tsconfig*.json ./
 COPY --chown=bun:bun server ./server
 COPY --chown=bun:bun src ./src
+COPY --from=build --chown=bun:bun /app/integrations/creator-signal /app/operator-tools/creator-signal
 COPY --from=build --chown=bun:bun /app/integrations/creator-signal.plugin.zip /app/starter-plugins/creator-signal.plugin.zip
 COPY --from=build --chown=bun:bun /app/integrations/component-showcase.plugin.zip /app/starter-plugins/component-showcase.plugin.zip
 

@@ -113,21 +113,11 @@ describe('Creator Signal public authoring contract', () => {
     expect(creatorSignalPublicAuthoringContract.assets.essentialTextInImages).toBe(false)
     expect(creatorSignalPublicAuthoringContract.content).toMatchObject({
       headingHierarchy: 'semantic',
-      pageTitleCount: 1,
-      primaryActionMaxCount: 1,
+      requiredAlternativeTextForInformativeImages: true,
     })
     expect(creatorSignalPublicAuthoringPolicy.content).toMatchObject({
-      pageTitleEntryIds: [
-        'creator-signal.site.hero',
-        'creator-signal.site.campaign-hero',
-        'creator-signal.site.recovery-state',
-        'creator-signal.site.public-document',
-      ],
-      primaryActionEntryIds: [
-        'creator-signal.site.hero',
-        'creator-signal.site.campaign-hero',
-        'creator-signal.site.recovery-state',
-      ],
+      pageTitleEntryIds: [],
+      primaryActionEntryIds: [],
     })
     expect(pack.publicAuthoring).toEqual(creatorSignalPublicAuthoringPolicy)
   })

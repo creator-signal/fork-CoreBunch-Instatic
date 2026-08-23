@@ -36,7 +36,6 @@ export const PublicAuthoringTemplatePolicySchema = Type.Object(
   {
     pageId: Type.String({ minLength: 1 }),
     requiredEntryIds: Type.Array(NamespacedIdSchema, {
-      minItems: 1,
       uniqueItems: true,
     }),
   },
@@ -115,11 +114,9 @@ export const PublicAuthoringPolicySchema = Type.Object(
     content: Type.Object(
       {
         pageTitleEntryIds: Type.Array(NamespacedIdSchema, {
-          minItems: 1,
           uniqueItems: true,
         }),
         primaryActionEntryIds: Type.Array(NamespacedIdSchema, {
-          minItems: 1,
           uniqueItems: true,
         }),
         headingLevels: Type.Array(
@@ -133,8 +130,10 @@ export const PublicAuthoringPolicySchema = Type.Object(
           ]),
           { minItems: 1, uniqueItems: true },
         ),
-        pageTitleCount: Type.Integer({ minimum: 1, maximum: 1 }),
-        primaryActionMaxCount: Type.Integer({ minimum: 1 }),
+        /** Omit to let the author compose page titles freely. */
+        pageTitleCount: Type.Optional(Type.Integer({ minimum: 1, maximum: 1 })),
+        /** Omit to let the author compose calls to action freely. */
+        primaryActionMaxCount: Type.Optional(Type.Integer({ minimum: 1 })),
       },
       { additionalProperties: false },
     ),

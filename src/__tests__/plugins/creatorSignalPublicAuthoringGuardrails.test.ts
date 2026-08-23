@@ -202,7 +202,7 @@ describe('Creator Signal public authoring guardrails', () => {
     })
   })
 
-  it('rejects unsupported variants, raw buttons and nodes outside the page pattern', () => {
+  it('rejects unsupported variants and raw buttons', () => {
     const site = governedSite()
     const page = site.pages.find((candidate) => candidate.slug === 'products')!
     const hero = Object.values(page.nodes).find(
@@ -227,29 +227,39 @@ describe('Creator Signal public authoring guardrails', () => {
     ]))
   })
 
-  it('rejects a damaged policy-owned pattern root and child sequence', () => {
+  it('allows authors to reshape a seeded pattern and remove its Managed Form', () => {
     const site = governedSite()
-    const page = site.pages.find((candidate) => candidate.slug === 'products')!
+    const page = site.pages.find((candidate) => candidate.slug === 'feedback')!
     const pattern = Object.values(page.nodes).find(
       (node) => node.catalogueInstance?.entryId ===
-        'creator-signal.site.pattern.product-page',
+        'creator-signal.site.pattern.contact-page',
     )!
-    pattern.children.reverse()
-    pattern.catalogueInstance!.pattern!.authorableNodeIds.reverse()
+    const form = Object.values(page.nodes).find(
+      (node) => node.catalogueInstance?.entryId === 'creator-signal.site.mautic-form',
+    )!
+    const hero = Object.values(page.nodes).find(
+      (node) => node.catalogueInstance?.entryId === 'creator-signal.site.hero',
+    )!
+    const addedHero = structuredClone(hero)
+    addedHero.id = 'author-added-hero'
+    addedHero.parentId = pattern.id
+    delete page.nodes[form.id]
+    page.nodes[addedHero.id] = addedHero
+    pattern.children = pattern.children.filter((nodeId) => nodeId !== form.id)
+    pattern.children.push(addedHero.id)
     reindexNodeParents(page.nodes)
 
-    expect(analysePublicAuthoringPolicy(site, localRegistry)).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          code: 'composition.pattern-invalid',
-          path: expect.stringContaining(`nodes.${pattern.id}`),
-          remediation: expect.stringContaining('fresh Component Library instance'),
-        }),
-      ]),
-    )
+    expect(analysePublicAuthoringPolicy(site, localRegistry)).toEqual([])
+    expect(() => validatePageWriteDiff({
+      previousPages: governedSite().pages,
+      changedPages: [page],
+      deletedPageIds: new Set(),
+      capabilities: ALL_SITE_WRITE_CAPABILITIES,
+      publicAuthoringPolicy: creatorSignalPublicAuthoringPolicy,
+    })).not.toThrow()
   })
 
-  it('allows declared shared-chrome fields but keeps the template structure protected', () => {
+  it('allows shared-template components to be edited and removed', () => {
     const previous = governedSite()
     const site = structuredClone(previous)
     const template = site.pages.find(
@@ -267,28 +277,19 @@ describe('Creator Signal public authoring guardrails', () => {
       publicAuthoringPolicy: creatorSignalPublicAuthoringPolicy,
     })).not.toThrow()
 
-    template.nodes[template.rootNodeId]!.label = 'Renamed template root'
+    delete template.nodes[header.id]
+    for (const node of Object.values(template.nodes)) {
+      node.children = node.children.filter((childId) => childId !== header.id)
+    }
+
+    expect(analysePublicAuthoringPolicy(site, localRegistry)).toEqual([])
     expect(() => validatePageWriteDiff({
       previousPages: previous.pages,
       changedPages: [template],
       deletedPageIds: new Set(),
       capabilities: ALL_SITE_WRITE_CAPABILITIES,
       publicAuthoringPolicy: creatorSignalPublicAuthoringPolicy,
-    })).toThrow(/only declared shared-chrome component fields are editable/)
-
-    delete template.nodes[header.id]
-    for (const node of Object.values(template.nodes)) {
-      node.children = node.children.filter((childId) => childId !== header.id)
-    }
-
-    const diagnostics = analysePublicAuthoringPolicy(site, localRegistry)
-    expect(diagnostics).toEqual(expect.arrayContaining([
-      expect.objectContaining({
-        code: 'template.chrome-count',
-        message: expect.stringContaining('creator-signal.site.header'),
-        remediation: expect.stringContaining('Restore the shared template'),
-      }),
-    ]))
+    })).not.toThrow()
   })
 
   it('allow-lists fixed image roles and treatments and rejects authored substitutes', () => {
@@ -305,7 +306,7 @@ describe('Creator Signal public authoring guardrails', () => {
     ]))
   })
 
-  it('rejects extra page-title and unsupported rich-text heading levels', () => {
+  it('allows authors to add page components while retaining rich-text heading rules', () => {
     const site = governedSite()
     const landingPage = site.pages.find((page) => page.slug === 'products')!
     const hero = Object.values(landingPage.nodes).find(
@@ -328,7 +329,7 @@ describe('Creator Signal public authoring guardrails', () => {
     expect(diagnostics.filter(
       (item) => item.code === 'content.heading-level-not-allowed',
     )).toHaveLength(2)
-    expect(diagnostics.map((item) => item.code)).toEqual(expect.arrayContaining([
+    expect(diagnostics.map((item) => item.code)).not.toEqual(expect.arrayContaining([
       'content.page-title-count',
       'content.primary-action-count',
     ]))

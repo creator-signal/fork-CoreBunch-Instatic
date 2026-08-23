@@ -153,7 +153,14 @@ const runtime = String.raw`(() => {
         form.addEventListener('change', () => syncConsentTimestamps(target, entry.consentTimestampFields));
         form.addEventListener('submit', async (event) => {
           syncConsentTimestamps(target, entry.consentTimestampFields);
-          if (!form.checkValidity()) return;
+          const controls = [...form.querySelectorAll('input, select, textarea')];
+          controls.forEach((control) => control.removeAttribute('aria-invalid'));
+          if (!form.checkValidity()) {
+            const invalid = controls.filter((control) => !control.checkValidity());
+            invalid.forEach((control) => control.setAttribute('aria-invalid', 'true'));
+            invalid[0]?.focus();
+            return;
+          }
           event.preventDefault();
           setBusy(root, target, true);
           if (status) status.textContent = 'Sending...';

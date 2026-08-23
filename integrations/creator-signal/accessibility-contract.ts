@@ -200,7 +200,7 @@ export const creatorSignalAccessibilityContracts: Readonly<Record<string, Compon
   ]),
   'creator-signal.site.public-document': contract([automatedName(['heading', 'summary'], 'The public document needs a heading and summary.'), heading(), contrast()]),
   'creator-signal.site.mautic-form': contract([
-    automatedName(['heading', 'successMessage'], 'The managed form needs a heading and success message.'), heading(),
+    automatedName(['successMessage'], 'The managed form needs a success message; its surrounding Section Intro owns the heading.'),
     behavior('a11y.form-control-label', 'form', 'Every generated provider control must have an associated visible label.', 'Verify the generated form labels after the provider markup loads.'),
     behavior('a11y.keyboard-contract', 'keyboard', 'Generated provider controls must be keyboard operable.', 'Verify tab order, validation and submission in the published form.'),
     behavior('a11y.focus-contract', 'focus', 'Validation and submission must move focus predictably.', 'Verify invalid fields and result feedback receive the documented focus treatment.'),

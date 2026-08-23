@@ -56,11 +56,12 @@ mobile widths.
 
 ## Forms and early-access flow
 
-Public intake routes other than Feedback contain one Managed Form component
-whose alias resolves through the generated Mautic registry. Authors control the
-section heading, introduction and confirmation copy; provider field identifiers
-and generated markup are not duplicated in page content. Feedback uses the
-standalone iframe composition documented below.
+Every public intake route separates page copy from provider behaviour. A Two
+Column Layout owns real Left and Right slots, Section Intro owns the section
+heading and introduction in the Left slot, and a standalone Managed Form in the
+Right slot resolves its alias through the generated Mautic registry. Managed
+Form owns only provider configuration, delivery and result state. Feedback uses
+the same composition boundary with Embedded CRM Form as its provider.
 
 `/early-access` remains `noindex, follow, noarchive` and contains exactly one
 `creator_signal_wishlist` form with the `early_access` campaign code:
@@ -89,10 +90,10 @@ components so its text and iframe can be selected, replaced or removed independe
 
 ## Content lifecycle
 
-Pack pages are starter content for an empty installation. Plugin 0.6.0
+Pack pages are starter content for an empty installation. Plugin 0.7.0
 reconciles technical catalogue, policy, style and runtime records but does not
 overwrite authored pages. The explicit content migration recognises exact
-retained 0.1.11, 0.2.0-0.2.6, 0.3.5, 0.4.0 and 0.5.0 starter content, produces a
+retained 0.1.11, 0.2.0-0.2.6, 0.3.5, 0.4.0, 0.5.0 and 0.6.0 starter content, produces a
 reviewable `merge-overwrite` archive, and blocks the complete migration if any
 page or template contains an unrecognised authored difference.
 
@@ -108,6 +109,7 @@ Run:
 
 ```sh
 bun run creator-signal:design-system:check
+bun test src/__tests__/plugins/creatorSignalPageBodyAuthoring.test.ts
 bun test src/__tests__/plugins/creatorSignalSitePack.test.ts
 bun test src/__tests__/plugins/creatorSignalContentMigration.test.ts
 bun run instatic-plugin lint integrations/creator-signal

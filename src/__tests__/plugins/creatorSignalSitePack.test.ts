@@ -88,6 +88,11 @@ describe('Creator Signal site pack', () => {
       description: 'The requested Creator Signal page could not be found.',
       patternId: 'creator-signal.site.pattern.not-found-state',
       componentEntryIds: ['creator-signal.site.recovery-state'],
+      componentTree: [{
+        entryId: 'creator-signal.site.recovery-state',
+        boundary: 'atomic-component',
+      }],
+      migration: 'none',
     })
   })
 
@@ -184,7 +189,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.6.0')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.7.0')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -448,6 +453,9 @@ describe('Creator Signal site pack', () => {
         registryPath: '/media/creator-signal/forms-v1.js',
         formCode: alias,
       })
+      expect(formNode?.props).not.toHaveProperty('eyebrow')
+      expect(formNode?.props).not.toHaveProperty('heading')
+      expect(formNode?.props).not.toHaveProperty('introduction')
       expect(formNode?.props).not.toHaveProperty('formId')
       expect(formNode?.props).not.toHaveProperty('formApiName')
     }
@@ -457,7 +465,8 @@ describe('Creator Signal site pack', () => {
     const output = mauticForm.render(mauticForm.defaults, [])
 
     expect(output.html).toContain('data-form-alias="creator_signal_contact"')
-    expect(output.html).toMatch(/^\s*<section class="content-section" id="managed-form">/)
+    expect(output.html).toMatch(/^\s*<section class="cs-mautic" id="managed-form" data-cs-mautic-form/)
+    expect(output.html).not.toContain('cs-mautic-copy')
     expect(output.html).toContain('data-registry-path="/media/creator-signal/forms-v1.js"')
     expect(output.html).not.toContain('data-form-id=')
     expect(output.html).not.toContain('data-form-api-name=')
@@ -490,7 +499,7 @@ describe('Creator Signal site pack', () => {
         'creator-signal.site.campaign-hero',
         'creator-signal.site.signal-strip',
         'creator-signal.site.feature-grid',
-        'creator-signal.site.mautic-form',
+        'creator-signal.site.two-column-layout',
         'creator-signal.site.feature-grid',
         'creator-signal.site.feature-grid',
         'creator-signal.site.testimonial',
@@ -503,7 +512,11 @@ describe('Creator Signal site pack', () => {
       formCode: 'creator_signal_wishlist',
       campaignCode: 'early_access',
     })
-    expect(formNodes[0]?.props.introduction).toContain('launch notification, early testing or both')
+    expect(formNodes[0]?.props).not.toHaveProperty('introduction')
+    const introductionNode = Object.values(page.nodes).find(
+      (node) => node.moduleId === 'creator-signal.site.section-intro',
+    )
+    expect(introductionNode?.props.introduction).toContain('launch notification, early testing or both')
     expect(page.seo?.robots).toEqual({ index: false, follow: true, archive: false })
   })
 

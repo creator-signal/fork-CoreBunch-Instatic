@@ -115,7 +115,7 @@ relying on plugin upgrade reconciliation.
 
 ### Upgrade existing retained starter content
 
-Installing plugin 0.6.0 runs the versioned technical-pack upgrade, installs the
+Installing plugin 0.7.0 runs the versioned technical-pack upgrade, installs the
 public-authoring policy and does not change existing pages. The authored-content
 migration remains version 0.2.0.
 Export the complete site from **Admin → Export**, then run the read-only
@@ -127,7 +127,7 @@ bun run integrations/creator-signal/migrations/0.2.0/prepare.ts preview \
 ```
 
 The preview is ready only when every retained route is either the exact 0.1.11
-starter, the exact governed 0.2.0-0.2.6, 0.3.5, 0.4.0 or 0.5.0 pack, or already uses
+starter, the exact governed 0.2.0-0.2.6, 0.3.5, 0.4.0, 0.5.0 or 0.6.0 pack, or already uses
 the current model; no unexpected page would inherit the new shared template; and both
 governed template IDs are available. A newly governed page is added only when
 its reserved ID is absent. An occupied ID with any other content blocks the

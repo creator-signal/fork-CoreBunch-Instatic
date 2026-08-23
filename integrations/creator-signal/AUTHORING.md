@@ -91,15 +91,15 @@ Every row below is wrapped by the shared template. The sequence column lists onl
 | `/products/sales-pulse` | Sales Pulse | Hero → Feature Grid → Call to Action |
 | `/features` | Features | Hero → Feature Grid |
 | `/pricing` | Pricing | Hero → Feature Grid → Call to Action |
-| `/contact` | Contact | Hero → Managed Form |
+| `/contact` | Contact | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
 | `/feedback` | Feedback | Hero → Two Column Layout (Left: Section Intro; Right: Embedded CRM Form) |
-| `/wishlist` | Join the wishlist | Hero → Managed Form |
-| `/early-access` | Creator Signal Early Access | Campaign Hero → Signal Strip → Feature Grid → Managed Form → Feature Grid → Feature Grid → Testimonial |
-| `/waitlist` | Join the waitlist | Hero → Managed Form |
-| `/beta` | Try it early | Hero → Managed Form |
-| `/ask-a-question` | Ask a question | Hero → Managed Form |
-| `/feature-request` | Feature request | Hero → Managed Form |
-| `/report-an-error` | Report an error | Hero → Managed Form |
+| `/wishlist` | Join the wishlist | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
+| `/early-access` | Creator Signal Early Access | Campaign Hero → Signal Strip → Feature Grid → Two Column Layout (Left: Section Intro; Right: Managed Form) → Feature Grid → Feature Grid → Testimonial |
+| `/waitlist` | Join the waitlist | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
+| `/beta` | Try it early | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
+| `/ask-a-question` | Ask a question | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
+| `/feature-request` | Feature request | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
+| `/report-an-error` | Report an error | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
 | `/legal/privacy` | Privacy | Hero → Rich Text Section |
 | `/legal/terms` | Terms | Hero → Rich Text Section |
 | `/legal/billing` | Subscriptions, Cancellation and Refunds | Public Document |
@@ -113,7 +113,7 @@ Every row below is wrapped by the shared template. The sequence column lists onl
 | `/help/account-data` | Account Export and Deletion | Public Document |
 | `/status` | Service Status | Public Document |
 
-`creatorSignalPageAuthoringReference` in `integrations/creator-signal/pack/site.ts` exposes this mapping to tests and the visual report. `integrations/creator-signal/pack/routes.ts` owns the independent route roster so a route cannot silently disappear from verification.
+`creatorSignalPageAuthoringReference` in `integrations/creator-signal/pack/site.ts` exposes this mapping, its nested slot tree, component-boundary classification and migration disposition to tests and the visual report. `integrations/creator-signal/pack/routes.ts` owns the independent route roster so a route cannot silently disappear from verification. The reviewed route-by-route inventory is recorded in `PAGE-BODY-AUTHORING.md`.
 
 ## Pattern catalogue
 
@@ -125,7 +125,7 @@ instead of duplicating it as a second implementation.
 | Author need | Stable mapping | Implementation |
 | --- | --- | --- |
 | Home page | `creator-signal.site.pattern.home-v2-page` | Reference-design eleven-section marketing flow; the stable ID is retained for migration compatibility |
-| Early Access page | `creator-signal.site.pattern.early-access-page` | Noindex preview with one governed wishlist form |
+| Early Access page | `creator-signal.site.pattern.early-access-page` | Noindex preview with separate Section Intro and governed wishlist provider inside Two Column Layout |
 | Hero | `creator-signal.site.pattern.hero` | Existing Hero Visual Component |
 | Content page | `creator-signal.site.pattern.content-page` | Hero → Rich Text Section → Call to Action |
 | Product page | `creator-signal.site.pattern.product-page` | Hero → Feature Grid → Call to Action |
@@ -133,7 +133,7 @@ instead of duplicating it as a second implementation.
 | Features page | `creator-signal.site.pattern.features-page` | Hero → Feature Grid |
 | CTA | `creator-signal.site.pattern.call-to-action` | Existing Call to Action component |
 | FAQ | `creator-signal.site.pattern.faq` | Existing native-disclosure FAQ component |
-| Contact/intake page | `creator-signal.site.pattern.contact-page` | Hero → capability-backed Managed Form |
+| Contact/intake page | `creator-signal.site.pattern.contact-page` | Hero → Two Column Layout with independent Section Intro and capability-backed Managed Form |
 | Feedback page | `creator-signal.site.pattern.feedback-page` | Hero → Two Column Layout with an independent Section Intro in the Left slot and Embedded CRM Form in the Right slot |
 | Legal/trust document | `creator-signal.site.pattern.legal-trust-page` | Versioned Public Document |
 | Article/content page | `creator-signal.site.pattern.article-content-page` | Hero → Rich Text Section |
@@ -172,7 +172,7 @@ pack: they are for copyable structures that may diverge after insertion.
 | Comparison Section | Page or template | Heading, introduction, caption and three option labels | Criterion and three option values | None |
 | Recovery State | Page or template | Empty/error/offline/not-found kind, heading, explanation and recovery action | None | None |
 | Public Document | Page or template | Eyebrow, document heading, summary, one formatted document field, date modified | None | None |
-| Managed Form | Page or template | Eyebrow, heading, introduction, success message and section anchor | Provider fields are resolved from the governed registry | None |
+| Managed Form | Page or template, including layout slots | Success message, section anchor and governed provider/analytics configuration | Form markup and fields are resolved from the governed registry | None |
 | Section Intro | Page or template, including layout slots | Eyebrow, heading, introduction and section anchor | None | None |
 | Two Column Layout | Page or template | Component order and content within each column | None | Left and Right |
 | Embedded CRM Form | Page or template, including layout slots | CRM form URL, iframe title, fallback copy and bounded resize heights | Same-origin observation or CRM `postMessage` resize events | None |
@@ -205,7 +205,7 @@ Feedback Page
 Every named node above has its own Component Library entry and remains
 selectable. A `Missing library entry` label means the editor is running stale
 plugin catalogue records, not that the content has been intentionally hidden.
-Reconcile/install plugin 0.6.0 and use the previewed content migration for an
+Reconcile/install plugin 0.7.0 and use the previewed content migration for an
 untouched retained Feedback page; the migration never publishes automatically.
 
 If the Mautic form and public page have the same origin, Instatic observes the

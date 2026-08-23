@@ -28,14 +28,14 @@ export function creatorSignalPublicPatternRootProps(
 export const creatorSignalPublicPatternCatalogue = [
   { layoutId: 'creator-signal.site.pattern.hero', role: 'hero', ownership: 'component', entryId: 'creator-signal.site.hero' },
   { layoutId: 'creator-signal.site.pattern.home-v2-page', role: 'home-v2', ownership: 'pattern', patternId: 'creator-signal.site.pattern.home-v2-page', childEntryIds: ['creator-signal.site.campaign-hero', 'creator-signal.site.signal-strip', 'creator-signal.site.signal-comparison', 'creator-signal.site.feature-grid', 'creator-signal.site.process-steps', 'creator-signal.site.feature-grid', 'creator-signal.site.feature-grid', 'creator-signal.site.pricing-plans', 'creator-signal.site.founder-story', 'creator-signal.site.faq', 'creator-signal.site.call-to-action'] },
-  { layoutId: 'creator-signal.site.pattern.early-access-page', role: 'early-access', ownership: 'pattern', patternId: 'creator-signal.site.pattern.early-access-page', childEntryIds: ['creator-signal.site.campaign-hero', 'creator-signal.site.signal-strip', 'creator-signal.site.feature-grid', 'creator-signal.site.mautic-form', 'creator-signal.site.feature-grid', 'creator-signal.site.feature-grid', 'creator-signal.site.testimonial'] },
+  { layoutId: 'creator-signal.site.pattern.early-access-page', role: 'early-access', ownership: 'pattern', patternId: 'creator-signal.site.pattern.early-access-page', childEntryIds: ['creator-signal.site.campaign-hero', 'creator-signal.site.signal-strip', 'creator-signal.site.feature-grid', 'creator-signal.site.two-column-layout', 'creator-signal.site.feature-grid', 'creator-signal.site.feature-grid', 'creator-signal.site.testimonial'] },
   { layoutId: 'creator-signal.site.pattern.content-page', role: 'content-page', ownership: 'pattern', patternId: 'creator-signal.site.pattern.content-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.rich-text-section', 'creator-signal.site.call-to-action'] },
   { layoutId: 'creator-signal.site.pattern.product-page', role: 'product-page', ownership: 'pattern', patternId: 'creator-signal.site.pattern.product-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.feature-grid', 'creator-signal.site.call-to-action'] },
   { layoutId: 'creator-signal.site.pattern.pricing-page', role: 'pricing', ownership: 'pattern', patternId: 'creator-signal.site.pattern.pricing-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.feature-grid', 'creator-signal.site.call-to-action'] },
   { layoutId: 'creator-signal.site.pattern.features-page', role: 'features', ownership: 'pattern', patternId: 'creator-signal.site.pattern.features-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.feature-grid'] },
   { layoutId: 'creator-signal.site.pattern.call-to-action', role: 'call-to-action', ownership: 'component', entryId: 'creator-signal.site.call-to-action' },
   { layoutId: 'creator-signal.site.pattern.faq', role: 'faq', ownership: 'component', entryId: 'creator-signal.site.faq' },
-  { layoutId: 'creator-signal.site.pattern.contact-page', role: 'contact', ownership: 'pattern', patternId: 'creator-signal.site.pattern.contact-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.mautic-form'] },
+  { layoutId: 'creator-signal.site.pattern.contact-page', role: 'contact', ownership: 'pattern', patternId: 'creator-signal.site.pattern.contact-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.two-column-layout'] },
   { layoutId: 'creator-signal.site.pattern.feedback-page', role: 'feedback', ownership: 'pattern', patternId: 'creator-signal.site.pattern.feedback-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.two-column-layout'] },
   { layoutId: 'creator-signal.site.pattern.legal-trust-page', role: 'legal-trust', ownership: 'pattern', patternId: 'creator-signal.site.pattern.legal-trust-page', childEntryIds: ['creator-signal.site.public-document'] },
   { layoutId: 'creator-signal.site.pattern.article-content-page', role: 'article-content', ownership: 'pattern', patternId: 'creator-signal.site.pattern.article-content-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.rich-text-section'] },
@@ -48,7 +48,7 @@ export const creatorSignalPublicPatternCatalogue = [
 
 export const creatorSignalPublicAuthoringContract = {
   id: 'creator-signal.public-authoring',
-  version: '1.3.0',
+  version: '1.4.0',
   designSystem: creatorSignalDesignSystemDependency,
   permittedComponents: [
     {

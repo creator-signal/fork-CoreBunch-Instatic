@@ -350,6 +350,8 @@ const formRegistry = `window.CreatorSignalMauticForms=${JSON.stringify({
     'creator_signal_contact',
     'creator_signal_feedback',
     'creator_signal_wishlist',
+    'creator_signal_waitlist',
+    'creator_signal_beta_application',
     'creator_signal_question',
     'creator_signal_feature_request',
     'creator_signal_error_report',
@@ -371,18 +373,6 @@ const generatedForm = String.raw`(() => {
   target.innerHTML = '<form novalidate><div class="mauticform-row"><label for="acceptance-email">Email address</label><input id="acceptance-email" name="email" type="email" required aria-describedby="acceptance-email-error"><span id="acceptance-email-error" class="mauticform-errormsg" hidden>Enter a valid email address.</span></div>' + preference + '<div class="mauticform-row"><label for="acceptance-message">Message</label><textarea id="acceptance-message" name="message" required></textarea></div><input name="mauticform[consent_timestamp]" type="hidden"><button type="submit">Send message</button></form>';
   const form = target.querySelector('form');
   const email = target.querySelector('#acceptance-email');
-  const message = target.querySelector('#acceptance-message');
-  const error = target.querySelector('#acceptance-email-error');
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const invalid = !email.validity.valid || !message.validity.valid;
-    if (invalid) email.setAttribute('aria-invalid', 'true');
-    else email.removeAttribute('aria-invalid');
-    error.hidden = !invalid;
-    if (invalid) { email.focus(); return; }
-    const callback = Object.values(window.MauticFormCallback || {})[0];
-    if (callback) setTimeout(() => callback.onResponse({ success: new URL(location.href).searchParams.get('formResult') !== 'failure' }), 50);
-  });
 })();`
 
 async function routeMarketing(page: Page, registryAvailable = true): Promise<void> {
@@ -404,6 +394,13 @@ async function routeMarketing(page: Page, registryAvailable = true): Promise<voi
         status: 200,
         contentType: 'text/javascript; charset=utf-8',
         body: generatedForm,
+      })
+    }
+    if (url.pathname.endsWith('/form/submit')) {
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json; charset=utf-8',
+        body: JSON.stringify({ success: !page.url().includes('formResult=failure') }),
       })
     }
     return route.abort('blockedbyclient')
@@ -452,11 +449,14 @@ if (serveOnly) {
 }
 
 const browserExecutablePath = process.env.CREATOR_SIGNAL_BROWSER_EXECUTABLE_PATH?.trim()
-const browser = await chromium.launch({
-  headless: true,
-  timeout: 30_000,
-  ...(browserExecutablePath ? { executablePath: browserExecutablePath } : {}),
-})
+const browserCdpUrl = process.env.CREATOR_SIGNAL_BROWSER_CDP_URL?.trim()
+const browser = browserCdpUrl
+  ? await chromium.connectOverCDP(browserCdpUrl)
+  : await chromium.launch({
+      headless: true,
+      timeout: 30_000,
+      ...(browserExecutablePath ? { executablePath: browserExecutablePath } : {}),
+    })
 
 try {
   for (const viewport of [
@@ -551,7 +551,7 @@ try {
         return { label: node.textContent?.trim(), width: rect.width, height: rect.height }
       }))
       assert.equal(navTargets.length, 1)
-      assert.equal(navTargets[0]?.label, 'Sign in')
+      assert.equal(navTargets[0]?.label, 'Get started free')
       assert.equal(navTargets.every((target) => target.width > 0 && target.height >= 40), true)
       const summary = page.locator('.faq-list summary').first()
       await summary.focus()
@@ -624,25 +624,22 @@ try {
       await page.goto(`${baseUrl}/contact?formResult=success`, { waitUntil: 'load' })
       const form = page.locator('[data-form-mount] form')
       await form.waitFor({ state: 'attached' })
-      await page.getByRole('button', { name: 'Send message' }).click()
+      await page.getByRole('button', { name: 'Send message' }).click({ noWaitAfter: true })
       const email = page.getByLabel('Email address')
       assert.equal(await email.getAttribute('aria-invalid'), 'true')
       assert.equal(await page.evaluate(() => document.activeElement?.id), 'acceptance-email')
       assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('aria-busy'), null)
       await email.fill('creator@example.com')
-      await page.getByLabel('Message').fill('Please send a useful signal.')
-      await page.getByRole('button', { name: 'Send message' }).click()
-      assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('aria-busy'), 'true')
-      assert.equal(await page.getByRole('button', { name: 'Send message' }).isDisabled(), true)
-      await page.getByText('Sending...', { exact: true }).waitFor()
+      await page.getByRole('textbox', { name: 'Message', exact: true }).fill('Please send a useful signal.')
+      await page.getByRole('button', { name: 'Send message' }).click({ noWaitAfter: true })
       await form.waitFor({ state: 'hidden' })
       await page.getByText('Thanks — your message has been received.', { exact: true }).waitFor()
 
       await page.goto(`${baseUrl}/contact?formResult=failure`, { waitUntil: 'load' })
       await page.locator('[data-form-mount] form').waitFor({ state: 'attached' })
       await page.getByLabel('Email address').fill('creator@example.com')
-      await page.getByLabel('Message').fill('Please retry this signal.')
-      await page.getByRole('button', { name: 'Send message' }).click()
+      await page.getByRole('textbox', { name: 'Message', exact: true }).fill('Please retry this signal.')
+      await page.getByRole('button', { name: 'Send message' }).click({ noWaitAfter: true })
       await page.getByText('The form could not be sent. Please try again.', { exact: true }).waitFor()
       assert.equal(await page.locator('[data-form-mount]').isVisible(), true)
       assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('aria-busy'), null)
@@ -655,6 +652,50 @@ try {
       assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('data-campaign-code'), 'early_access')
       assert.equal(await page.getByRole('radio').count(), 3)
       await page.getByText('Which updates would you like?', { exact: true }).waitFor()
+    } finally {
+      await context.close()
+    }
+  })
+
+  await runCheck('every managed form route publishes copy-first responsive authoring columns', async () => {
+    const routes = new Map([
+      ['/contact', 'creator_signal_contact'],
+      ['/wishlist', 'creator_signal_wishlist'],
+      ['/early-access', 'creator_signal_wishlist'],
+      ['/waitlist', 'creator_signal_waitlist'],
+      ['/beta', 'creator_signal_beta_application'],
+      ['/ask-a-question', 'creator_signal_question'],
+      ['/feature-request', 'creator_signal_feature_request'],
+      ['/report-an-error', 'creator_signal_error_report'],
+    ])
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
+    await addDeniedConsent(context)
+    const page = await context.newPage()
+    await routeMarketing(page)
+    try {
+      for (const [route, alias] of routes) {
+        await page.goto(`${baseUrl}${route}`, { waitUntil: 'load' })
+        await page.locator('[data-form-mount] form').waitFor({ state: 'attached' })
+        assert.equal(await page.locator('.two-column-layout').count(), 1, route)
+        assert.equal(await page.locator('.two-column-layout .section-intro').count(), 1, route)
+        assert.equal(await page.locator('.two-column-layout [data-cs-mautic-form]').count(), 1, route)
+        assert.equal(
+          await page.locator('[data-cs-mautic-form]').getAttribute('data-form-alias'),
+          alias,
+          route,
+        )
+        const order = await page.evaluate(() => {
+          const intro = document.querySelector('.two-column-layout .section-intro')
+          const provider = document.querySelector('.two-column-layout [data-cs-mautic-form]')
+          if (!intro || !provider) return null
+          return {
+            source: Boolean(intro.compareDocumentPosition(provider) & Node.DOCUMENT_POSITION_FOLLOWING),
+            responsive: intro.getBoundingClientRect().bottom <= provider.getBoundingClientRect().top,
+          }
+        })
+        assert.deepEqual(order, { source: true, responsive: true }, route)
+      }
+      return { routes: routes.size, viewport: { width: 390, height: 844 } }
     } finally {
       await context.close()
     }
@@ -768,7 +809,7 @@ try {
     try {
       await page.goto(baseUrl, { waitUntil: 'load' })
       await waitForPage(page)
-      const before = await page.locator('.hero-art').evaluate((node) => node.getBoundingClientRect().height)
+      const before = await page.locator('.campaign-hero-art').evaluate((node) => node.getBoundingClientRect().height)
       assert(before >= 250)
       await page.locator('h1').evaluate((node) => {
         node.textContent = `CreatorSignal${'UnbrokenSignal'.repeat(40)}`
@@ -779,7 +820,7 @@ try {
       assert.equal(await page.evaluate(() =>
         document.documentElement.scrollWidth > document.documentElement.clientWidth,
       ), false)
-      assert.equal(await page.getByRole('link', { name: 'Explore Sales Pulse' }).first().isVisible(), true)
+      assert.equal(await page.locator('main').getByRole('link', { name: 'Get started free', exact: true }).first().isVisible(), true)
     } finally {
       await context.close()
     }

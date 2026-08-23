@@ -140,10 +140,13 @@ if (Bun.argv.includes('--serve')) {
       body: getComputedStyle(document.body).fontFamily,
       heading: getComputedStyle(document.querySelector('h1')!).fontFamily,
       eyebrow: getComputedStyle(document.querySelector('.eyebrow')!).fontFamily,
+      decorative: getComputedStyle(document.documentElement)
+        .getPropertyValue('--cs-type-decorative-family'),
     }))
-    assert.match(fonts.body, /Avenir Next/)
-    assert.match(fonts.heading, /Georgia/)
-    assert.match(fonts.eyebrow, /Avenir Next/)
+    assert.match(fonts.body, /Mulish Variable/)
+    assert.match(fonts.heading, /Fredoka Variable/)
+    assert.match(fonts.eyebrow, /Mulish Variable/)
+    assert.match(fonts.decorative, /Caveat Variable/)
 
     const comparisonTable = page.getByRole('table', { name: 'Creator Signal option comparison' })
     await assert.doesNotReject(comparisonTable.waitFor())

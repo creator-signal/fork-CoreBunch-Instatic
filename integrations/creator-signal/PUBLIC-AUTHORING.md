@@ -25,16 +25,19 @@ entry. The governed surface includes the Hero, Campaign Hero, Signal Strip,
 Signal Comparison, Process Steps, Pricing Plans, Founder Story, shared Header,
 shared Footer, Privacy Choices, Feature Grid, Call to Action, Rich Text Section,
 Testimonial, FAQ, Comparison Section, Recovery State, Public Document and
-Managed Form. Freeform starter layouts are not part of the public contract.
+Managed Form, plus Section Intro, Two Column Layout and Embedded CRM Form.
+Freeform starter layouts are not part of the public contract.
 
 A Component Library entry must be present in `permittedComponents` before the
 Creator Signal integration can register it. Variants are allow-listed per
 component. All current entries expose one governed `default` variant.
 
-Only containers may expose slots. Site-specific leaf components declare
-`composition: 'leaf'`, keep `slots: []`, and use typed repeater fields for
-ordered links, feature cards and questions. Coherent prose is one rich-text
-field. These rules are shared by human authoring, Agent tools and MCP.
+Only containers may expose slots. **Two Column Layout** is the explicit
+site-specific container and exposes independent `left` and `right` slots;
+authors may add, remove, reorder and replace allowed components within them.
+All site-specific leaf components declare `composition: 'leaf'`, keep
+`slots: []`, and use typed fields or repeaters. These rules are shared by human
+authoring, Agent tools and MCP.
 
 ## Semantic styling
 
@@ -84,8 +87,8 @@ the owning technical pack.
 ## Bypass boundary
 
 Normal HTTP and collaborative authoring cannot remove or weaken the policy,
-change pack-owned styles/runtime dependencies, or edit the protected Hero
-Visual Component. Plugin pack reconciliation is the sole supported policy and
+change pack-owned styles/runtime dependencies, or edit the protected Hero and
+Two Column Layout Visual Component definitions. Plugin pack reconciliation is the sole supported policy and
 technical-record update path.
 
 Direct database/storage mutation is not a supported authoring path. Publication

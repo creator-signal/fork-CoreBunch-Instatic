@@ -3,7 +3,7 @@
 This reference maps the public site to the shared template and governed components authors edit in Instatic.
 
 The source of truth is `integrations/creator-signal/pack/site.ts`. It defines
-the 24 route documents as page content only, one everywhere template that owns
+the 26 route documents as page content only, one everywhere template that owns
 shared header/footer/privacy choices, and one not-found template that owns the
 unknown-route recovery content.
 
@@ -15,12 +15,12 @@ unknown-route recovery content.
 - The template owns Site Header, Site Footer and Privacy Choices around one content outlet.
 - Unknown routes compose that shared chrome with the governed `notFound`
   template and publish `noindex, follow, noarchive` metadata.
-- Authors creating an ordinary page add only page-content components.
-- Shared chrome is template-only and limited to one instance of each component per template.
-- Page-content components are page-only; the Hero is limited to one instance per page.
-- Every starter route materializes one stable `creator-signal.site.pattern.*` catalogue entry; its authorable children are governed components.
-- Creator Signal components are opinionated leaves. Pattern roots are governed containers; neither model exposes arbitrary child slots.
-- `bun run verify:creator-signal-authoring-tasks` writes the current 33-entry task matrix to `.tmp/creator-signal-authoring-tasks/` and fails when the catalogue drifts from a supported authoring task.
+- Every catalogue component is available on ordinary pages and templates.
+- Components placed in the shared template are inherited by its pages; components placed in a page affect that page only.
+- Components may be added, reordered or removed freely.
+- Every starter route materializes one stable `creator-signal.site.pattern.*` catalogue entry; it is an editable starting composition, not a fixed route contract.
+- Creator Signal components are opinionated leaves except for **Two Column Layout**, a real container with independently editable Left and Right slots. Pattern roots remain editable starting compositions.
+- `bun run verify:creator-signal-authoring-tasks` writes the current 37-entry task matrix to `.tmp/creator-signal-authoring-tasks/` and fails when the catalogue drifts from a supported authoring task.
 - `bun run verify:creator-signal-parity` writes the browsable side-by-side report to `.tmp/creator-signal-parity/index.html`.
 - `bun run verify:creator-signal-public-acceptance` verifies the locally
   published pack against the committed responsive, accessibility and visual
@@ -65,12 +65,14 @@ the matrix follows `integrations/creator-signal/component-library.ts` and fails
 if an entry is missing, exposes a raw implementation field, leaves field help
 blank, gives a leaf a slot, or lacks editor/MCP task support.
 
-For ordinary page work, create the page from the shared template, select a
-page component from Components, complete its labelled fields or repeaters,
-check mobile/tablet/desktop preview, and publish. To revise, edit the retained
-component instance and publish again; remove the component from the Components
-tree when it no longer belongs. For shared chrome, open the template owner and
-edit Header, Footer, Navigation link repeaters, or Privacy Choices once.
+For ordinary page work, create the page from the shared template, select any
+catalogue component from Components, complete its labelled fields or repeaters,
+check mobile/tablet/desktop preview, and publish. Starter patterns are optional
+shortcuts: their components can be added, reordered or removed after insertion.
+To revise, edit the retained component instance and publish again; remove the
+component from the Components tree when it no longer belongs. For shared
+chrome, open the template owner and add, reorder, edit or remove Header, Footer,
+Navigation link repeaters, or Privacy Choices once.
 
 MCP follows the same model: call `site_list_component_library`, insert the
 returned entry with `site_insert_component`, change declared values with
@@ -84,18 +86,20 @@ Every row below is wrapped by the shared template. The sequence column lists onl
 
 | Route | Page | Opinionated page components in order |
 | --- | --- | --- |
-| `/` | Creator Signal | Hero → Feature Grid → Call to Action |
+| `/` | Creator Signal | Campaign Hero → Signal Strip → Signal Comparison → Feature Grid → Process Steps → Feature Grid → Feature Grid → Pricing Plans → Founder Story → FAQ → Call to Action |
 | `/products` | Products | Hero → Feature Grid → Call to Action |
 | `/products/sales-pulse` | Sales Pulse | Hero → Feature Grid → Call to Action |
 | `/features` | Features | Hero → Feature Grid |
 | `/pricing` | Pricing | Hero → Feature Grid → Call to Action |
-| `/contact` | Contact | Hero → Managed Form |
-| `/feedback` | Feedback | Hero → Managed Form |
-| `/wishlist` | Join the wishlist | Hero → Managed Form |
-| `/early-access` | Creator Signal Early Access | Campaign Hero → Signal Strip → Feature Grid → Managed Form → Feature Grid → Feature Grid → Testimonial |
-| `/ask-a-question` | Ask a question | Hero → Managed Form |
-| `/feature-request` | Feature request | Hero → Managed Form |
-| `/report-an-error` | Report an error | Hero → Managed Form |
+| `/contact` | Contact | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
+| `/feedback` | Feedback | Hero → Two Column Layout (Left: Section Intro; Right: Embedded CRM Form) |
+| `/wishlist` | Join the wishlist | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
+| `/early-access` | Creator Signal Early Access | Campaign Hero → Signal Strip → Feature Grid → Two Column Layout (Left: Section Intro; Right: Managed Form) → Feature Grid → Feature Grid → Testimonial |
+| `/waitlist` | Join the waitlist | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
+| `/beta` | Try it early | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
+| `/ask-a-question` | Ask a question | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
+| `/feature-request` | Feature request | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
+| `/report-an-error` | Report an error | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
 | `/legal/privacy` | Privacy | Hero → Rich Text Section |
 | `/legal/terms` | Terms | Hero → Rich Text Section |
 | `/legal/billing` | Subscriptions, Cancellation and Refunds | Public Document |
@@ -109,7 +113,7 @@ Every row below is wrapped by the shared template. The sequence column lists onl
 | `/help/account-data` | Account Export and Deletion | Public Document |
 | `/status` | Service Status | Public Document |
 
-`creatorSignalPageAuthoringReference` in `integrations/creator-signal/pack/site.ts` exposes this mapping to tests and the visual report. `integrations/creator-signal/pack/routes.ts` owns the independent route roster so a route cannot silently disappear from verification.
+`creatorSignalPageAuthoringReference` in `integrations/creator-signal/pack/site.ts` exposes this mapping, its nested slot tree, component-boundary classification and migration disposition to tests and the visual report. `integrations/creator-signal/pack/routes.ts` owns the independent route roster so a route cannot silently disappear from verification. The reviewed route-by-route inventory is recorded in `PAGE-BODY-AUTHORING.md`.
 
 ## Pattern catalogue
 
@@ -120,8 +124,8 @@ instead of duplicating it as a second implementation.
 
 | Author need | Stable mapping | Implementation |
 | --- | --- | --- |
-| Home page | `creator-signal.site.pattern.home-v2-page` | Production-look Hero → Feature Grid → Call to Action flow; the stable ID is retained for migration compatibility |
-| Early Access page | `creator-signal.site.pattern.early-access-page` | Noindex preview with one governed wishlist form |
+| Home page | `creator-signal.site.pattern.home-v2-page` | Reference-design eleven-section marketing flow; the stable ID is retained for migration compatibility |
+| Early Access page | `creator-signal.site.pattern.early-access-page` | Noindex preview with separate Section Intro and governed wishlist provider inside Two Column Layout |
 | Hero | `creator-signal.site.pattern.hero` | Existing Hero Visual Component |
 | Content page | `creator-signal.site.pattern.content-page` | Hero → Rich Text Section → Call to Action |
 | Product page | `creator-signal.site.pattern.product-page` | Hero → Feature Grid → Call to Action |
@@ -129,7 +133,8 @@ instead of duplicating it as a second implementation.
 | Features page | `creator-signal.site.pattern.features-page` | Hero → Feature Grid |
 | CTA | `creator-signal.site.pattern.call-to-action` | Existing Call to Action component |
 | FAQ | `creator-signal.site.pattern.faq` | Existing native-disclosure FAQ component |
-| Contact/intake page | `creator-signal.site.pattern.contact-page` | Hero → capability-backed Managed Form |
+| Contact/intake page | `creator-signal.site.pattern.contact-page` | Hero → Two Column Layout with independent Section Intro and capability-backed Managed Form |
+| Feedback page | `creator-signal.site.pattern.feedback-page` | Hero → Two Column Layout with an independent Section Intro in the Left slot and Embedded CRM Form in the Right slot |
 | Legal/trust document | `creator-signal.site.pattern.legal-trust-page` | Versioned Public Document |
 | Article/content page | `creator-signal.site.pattern.article-content-page` | Hero → Rich Text Section |
 | Comparison section | `creator-signal.site.pattern.comparison-section` | Captioned row-and-column Comparison Section |
@@ -149,27 +154,83 @@ pack: they are for copyable structures that may diverge after insertion.
 
 | Component | Placement | Author controls | Repeatable data | Slots |
 | --- | --- | --- | --- | --- |
-| Creator Signal Hero | Page; maximum one | Eyebrow, heading, introduction, action label, action URL, artwork | None | None |
-| Campaign Hero | Page; maximum one | Eyebrow, heading, introduction, two actions, footnote and artwork | None | None |
-| Signal Strip | Page | Accessible label | Short static promise messages | None |
-| Signal Comparison | Page | Heading, before/after copy, artwork and section anchor | None | None |
-| Process Steps | Page | Heading, introduction and section anchor | Ordered step marker, heading and description | None |
-| Pricing Plans | Page | Heading, introduction, footnote and section anchor | Plan price, cadence, features, action and emphasis | None |
-| Founder Story | Page | Heading, formatted story, attribution, portrait and section anchor | None | None |
-| Site Header | Shared template; maximum one | Brand name, tagline, home URL | Navigation links with label, URL and treatment | None |
-| Site Footer | Shared template; maximum one | Brand name, tagline, copyright | Footer links with label and URL | None |
-| Privacy Choices | Shared template; maximum one | Heading, explanation and both choice labels | None | None |
-| Feature Grid | Page | Eyebrow, heading, introduction, section anchor and default/signature tone | Feature marker, heading and description | None |
-| Call to Action | Page | Eyebrow, heading, explanation, action label, action URL, section anchor | None | None |
-| Rich Text Section | Page | Heading, one coherent formatted content field, section anchor | None | None |
-| Testimonial | Page | Quotation, attribution, role or business | None | None |
-| FAQ | Page | Heading and section anchor | Question and answer | None |
-| Comparison Section | Page | Heading, introduction, caption and three option labels | Criterion and three option values | None |
-| Recovery State | Page or not-found template; maximum one | Empty/error/offline/not-found kind, heading, explanation and recovery action | None | None |
-| Public Document | Page | Eyebrow, document heading, summary, one formatted document field, date modified | None | None |
-| Managed Form | Page | Eyebrow, heading, introduction, success message and section anchor | Provider fields are resolved from the governed registry | None |
+| Creator Signal Hero | Page or template | Eyebrow, heading, introduction, action label, action URL, artwork | None | None |
+| Campaign Hero | Page or template | Eyebrow, heading, introduction, two actions, footnote and artwork | None | None |
+| Signal Strip | Page or template | Accessible label | Short static promise messages | None |
+| Signal Comparison | Page or template | Heading, before/after copy, artwork and section anchor | None | None |
+| Process Steps | Page or template | Heading, introduction and section anchor | Ordered step marker, heading and description | None |
+| Pricing Plans | Page or template | Heading, introduction, footnote and section anchor | Plan price, cadence, features, action and emphasis | None |
+| Founder Story | Page or template | Heading, formatted story, attribution, portrait and section anchor | None | None |
+| Site Header | Page or template | Brand name, tagline, home URL | Navigation links with label, URL and treatment | None |
+| Site Footer | Page or template | Brand name, tagline, copyright | Footer links with label and URL | None |
+| Privacy Choices | Page or template | Heading, explanation and both choice labels | None | None |
+| Feature Grid | Page or template | Eyebrow, heading, introduction, section anchor and default/signature tone | Feature marker, heading and description | None |
+| Call to Action | Page or template | Eyebrow, heading, explanation, action label, action URL, section anchor | None | None |
+| Rich Text Section | Page or template | Heading, one coherent formatted content field, section anchor | None | None |
+| Testimonial | Page or template | Quotation, attribution, role or business | None | None |
+| FAQ | Page or template | Heading and section anchor | Question and answer | None |
+| Comparison Section | Page or template | Heading, introduction, caption and three option labels | Criterion and three option values | None |
+| Recovery State | Page or template | Empty/error/offline/not-found kind, heading, explanation and recovery action | None | None |
+| Public Document | Page or template | Eyebrow, document heading, summary, one formatted document field, date modified | None | None |
+| Managed Form | Page or template, including layout slots | Success message, section anchor and governed provider/analytics configuration | Form markup and fields are resolved from the governed registry | None |
+| Section Intro | Page or template, including layout slots | Eyebrow, heading, introduction and section anchor | None | None |
+| Two Column Layout | Page or template | Component order and content within each column | None | Left and Right |
+| Embedded CRM Form | Page or template, including layout slots | CRM form URL, iframe title, fallback copy and bounded resize heights | Same-origin observation or CRM `postMessage` resize events | None |
 
-The catalogue contract lives in `integrations/creator-signal/component-library.ts`. The semantic renderers live in `integrations/creator-signal/modules/site-components/index.ts` and `integrations/creator-signal/modules/mautic-form.ts`. They preserve headings, landmarks, accessible names and schema.org metadata while keeping markup structure out of routine authoring.
+The catalogue contract lives in `integrations/creator-signal/component-library.ts`. The semantic renderers live in `integrations/creator-signal/modules/site-components/index.ts`, `integrations/creator-signal/modules/mautic-form.ts` and `integrations/creator-signal/modules/crm-iframe-form.ts`. They preserve headings, landmarks, accessible names and schema.org metadata while keeping markup structure out of routine authoring.
+
+## Embedded CRM Form resizing
+
+Use **Embedded CRM Form** when Mautic exposes a complete HTTPS form page. The
+author chooses its Mautic URL, accessible iframe title, fallback link text and
+bounded initial/minimum/maximum height. The visible fallback link always opens
+the same form in a new tab. The component owns only the embed: place it in the
+Right slot of **Two Column Layout** for the Feedback treatment, and place an
+independent **Section Intro** or another suitable component in the Left slot.
+The built-in Teaser is not used by the starter because its contract requires a
+navigation destination; static form-introduction copy does not.
+
+The seeded Feedback tree is:
+
+```text
+Feedback Page
+├── Creator Signal Hero
+└── Two Column Layout
+    ├── Left
+    │   └── Section Intro
+    └── Right
+        └── Embedded CRM Form
+```
+
+Every named node above has its own Component Library entry and remains
+selectable. A `Missing library entry` label means the editor is running stale
+plugin catalogue records, not that the content has been intentionally hidden.
+Reconcile/install plugin 0.7.0 and use the previewed content migration for an
+untouched retained Feedback page; the migration never publishes automatically.
+
+If the Mautic form and public page have the same origin, Instatic observes the
+iframe document and updates its height automatically. For the usual
+cross-origin `marketing.creatorsignal.me` form, the Mautic form page must send
+resize updates to its exact public-site origin; a browser cannot read a
+cross-origin iframe's document height.
+
+Add this helper to the hosted Mautic form page, replacing the two placeholders
+with the page's public origin and the component's **Section anchor**:
+
+```js
+const publishHeight = () => window.parent.postMessage({
+  type: 'creator-signal.crm-form.resize.v1',
+  instanceId: '<SECTION_ANCHOR>',
+  height: document.documentElement.scrollHeight,
+}, '<PUBLIC_SITE_ORIGIN>')
+
+new ResizeObserver(publishHeight).observe(document.documentElement)
+window.addEventListener('load', publishHeight)
+```
+
+The Mautic page must permit framing by the public-site origin. If it sends
+`X-Frame-Options: DENY` or a restrictive `frame-ancestors` policy, the browser
+will block the iframe; retain the fallback link in that case.
 
 ## Placement enforcement
 
@@ -182,7 +243,8 @@ The same resolver protects all authoring paths:
 - `src/admin/pages/site/panels/LayersPanel/componentLayersDnd.ts` enforces drag-and-drop moves.
 - `server/writePolicy/pageDiff.ts` validates component-only writes at the server boundary.
 
-This keeps a shared header or footer from becoming duplicated page content and stops a page Hero from being inserted into the shared site template.
+This validates a component's own declared data and safety contracts without
+locking it to a route, fixed child sequence, document kind or cardinality.
 
 ## Side-by-side visual report
 
@@ -225,7 +287,6 @@ The visual report is evidence, not deployment authority. Production release and 
 | Pattern | Use instead |
 | --- | --- |
 | Header, footer or privacy controls copied into each page | Edit the shared site template once |
-| A page-content component inserted into the shared template | Add it to the ordinary page content outlet |
 | Multiple components for one prose block | One Rich Text Section or Public Document rich-text field |
 | Navigation or cards represented as child slots | Typed repeater items on the owning leaf component |
 | Numeric managed-form IDs in page content | Stable form aliases resolved from the generated registry |

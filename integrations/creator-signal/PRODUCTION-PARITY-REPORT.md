@@ -1,8 +1,10 @@
-# Creator Signal production-look and authoring parity
+# Creator Signal historical production-look and authoring parity
 
 Generated: 2026-08-21
 
-This report is the durable reference for the Creator Signal public-site migration. It compares the current public site with the authorable Instatic candidate across every governed route and records the component and template contract used to reproduce each page.
+> Historical evidence: this report records the accepted 2026-08-21 production-look candidate. Plugin 0.5.0 intentionally supersedes that visual baseline with the governed reference design documented in `WEBSITE-V2.md` and `ACCEPTANCE.md`.
+
+This report compares the then-current public site with the authorable Instatic candidate across every governed route and records the component and template contract that was accepted at that time. It must not be read as the current source-design contract.
 
 ## Accepted candidate
 
@@ -39,9 +41,9 @@ The shared `Creator Signal site template` owns the reusable site chrome:
 3. `creator-signal.site.footer`
 4. `creator-signal.site.consent-banner`
 
-Header and footer links are repeatable data fields. Authors using the template add only page content. All 19 content/chrome components are opinionated leaf components with typed fields or repeaters and zero authored child slots. The 14 page patterns are fixed container compositions used to create coherent pages; they do not expose arbitrary component slots.
+Header and footer links are repeatable data fields. Authors using the template add only page content. All 20 content/chrome components are opinionated leaf components with typed fields or repeaters and zero authored child slots. The 14 page patterns are editable starter compositions used to create coherent pages; they do not expose arbitrary component slots.
 
-The catalogue contains 33 Creator Signal entries in total: 19 opinionated components and 14 governed page patterns. All use the `creator-signal.site` namespace.
+The catalogue contains 34 Creator Signal entries in total: 20 opinionated components and 14 governed page patterns. All use the `creator-signal.site` namespace.
 
 ## Page and section reference
 

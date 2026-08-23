@@ -93,11 +93,13 @@ export const siteHeader = defineModule({
     tagline: 'Clearer signals for independent creative businesses.',
     homeUrl: '/',
     items: [
-      { label: 'Products', url: '/products', emphasis: 'default' },
-      { label: 'Features', url: '/features', emphasis: 'default' },
-      { label: 'Pricing', url: '/pricing', emphasis: 'default' },
-      { label: 'Contact', url: '/contact', emphasis: 'default' },
-      { label: 'Sign in', url: 'https://salespulse.creatorsignal.me', emphasis: 'primary' },
+      { label: 'How it works', url: '/#how-it-works', emphasis: 'default' },
+      { label: 'Features', url: '/#features', emphasis: 'default' },
+      { label: 'Pricing', url: '/#pricing', emphasis: 'default' },
+      { label: 'About', url: '/#about', emphasis: 'default' },
+      { label: 'FAQ', url: '/#faq', emphasis: 'default' },
+      { label: 'Sign in', url: 'https://salespulse.creatorsignal.me', emphasis: 'default' },
+      { label: 'Get started free', url: 'https://salespulse.creatorsignal.me/sign-up', emphasis: 'primary' },
     ] as NavigationItem[],
   },
   schema: {
@@ -109,7 +111,7 @@ export const siteHeader = defineModule({
   render: ({ props }) => withCreatorSignalCss(html`<header class="site-header">
       <a class="skip-link" href="#main-content" data-parity-ignore>Skip to main content</a>
       <a class="site-brand" href="${safeUrl(props.homeUrl)}" aria-label="${escapedProp(props.brandName)} home">
-        <span class="brand-signal" aria-hidden="true"><i></i><i></i><i></i></span>
+        <img class="site-brand-mark" src="${safeUrl(creatorSignalBrandAssets.markLight)}" alt="" width="1024" height="688">
         <span><strong>${escapedProp(props.brandName)}</strong><small>${escapedProp(props.tagline)}</small></span>
       </a>
       <nav aria-label="Main navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
@@ -548,6 +550,31 @@ export const richTextSection = defineModule({
     </section>`),
 })
 
+export const sectionIntro = defineModule({
+  id: 'creator-signal.site.section-intro',
+  name: 'Section intro',
+  description: 'A compact eyebrow, heading and introduction for use inside authored layouts.',
+  category: 'Creator Signal',
+  htmlTag: 'section',
+  defaults: {
+    eyebrow: 'Section',
+    heading: 'Introduce this section',
+    introduction: 'Add the context visitors need before they continue.',
+    sectionId: 'section-intro',
+  },
+  schema: {
+    eyebrow: control.text('Eyebrow'),
+    heading: control.text('Heading'),
+    introduction: control.textarea('Introduction', { rows: 3 }),
+    sectionId: control.text('Section anchor'),
+  },
+  render: ({ props }) => withCreatorSignalCss(html`<section class="section-intro column-section-intro" aria-labelledby="${escapedProp(props.sectionId)}">
+      <p class="eyebrow">${escapedProp(props.eyebrow)}</p>
+      <h2 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h2>
+      <p>${escapedProp(props.introduction)}</p>
+    </section>`),
+})
+
 export const testimonial = defineModule({
   id: 'creator-signal.site.testimonial',
   name: 'Testimonial',
@@ -738,6 +765,7 @@ export const creatorSignalSiteModules = [
   pricingPlans,
   founderStory,
   callToAction,
+  sectionIntro,
   richTextSection,
   testimonial,
   faq,

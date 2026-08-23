@@ -26,15 +26,15 @@ replace the complete automated gate or a live provider-form check.
 
 The verifier covers:
 
-- every one of the 24 public routes at 1440px desktop, 900px tablet and 390px
+- every one of the 26 public routes at 1440px desktop, 900px tablet and 390px
   mobile widths, with one header, main, H1 and footer and no document overflow;
-- Home, Early Access, Products, Sales Pulse, Pricing, Contact, Privacy, Security, the
+- Home, Early Access, Waitlist, Beta, Products, Sales Pulse, Pricing, Contact, Privacy, Security, the
   not-found template, FAQ and all recovery states with Axe's WCAG 2.0, 2.1 and
   2.2 A/AA rules;
 - skip navigation, visible 44px mobile navigation targets and native FAQ
   keyboard disclosure;
 - system, light and dark theme-runtime states, including persisted API choices,
-  while the production-look public presentation remains visually stable;
+  while the reference-design composition remains readable and theme-safe;
 - consent denial and granting consent while the runtime analytics
   configuration endpoint is down;
 - managed-form required-field focus/error association, submitting/busy,
@@ -63,6 +63,12 @@ browser family used for repository acceptance. Review every PNG under
 script rejects missing or extra PNGs and fails when dimensions change or the
 pixel/channel tolerance is exceeded. Never refresh baselines merely to make an
 unexplained change pass.
+
+If a local Bun/Chromium combination cannot establish Playwright's pipe
+transport, start an equivalent pinned Chromium instance with remote debugging
+and set `CREATOR_SIGNAL_BROWSER_CDP_URL` to its endpoint. The verifier then
+connects to that browser while keeping the same routes, assertions, screenshots
+and comparison rules. CI uses the normal pinned launch path.
 
 ## Limits and follow-up
 

@@ -71,9 +71,9 @@ afterAll(() => {
 })
 
 describe('Creator Signal catalogue authoring tasks', () => {
-  it('derives one complete supported-task row for all 33 governed entries', () => {
-    expect(creatorSignalComponentLibraryEntries).toHaveLength(33)
-    expect(creatorSignalAuthoringTaskMatrix).toHaveLength(33)
+  it('derives one complete supported-task row for all 37 governed entries', () => {
+    expect(creatorSignalComponentLibraryEntries).toHaveLength(37)
+    expect(creatorSignalAuthoringTaskMatrix).toHaveLength(37)
     expect(creatorSignalAuthoringTaskMatrix.map((row) => row.entryId)).toEqual(
       creatorSignalComponentLibraryEntries.map((entry) => entry.id),
     )
@@ -151,17 +151,24 @@ describe('Creator Signal catalogue authoring tasks', () => {
         expect(revised.nodeId, entry.id).toBe(inserted.nodeId)
         expect(revised.fieldKey, entry.id).toBe(field.key)
       } else {
-        const pattern = creatorSignalPatternEntries.find((candidate) => candidate.id === entry.id)
-        expect(pattern, entry.id).toBeDefined()
-        if (entry.implementation.type !== 'pattern') throw new Error(`${entry.id} has no pattern implementation`)
-        const fragment = componentLibraryPatternRegistry.materialize(entry.implementation.patternId, {
-          entryId: entry.id,
-          entryVersion: entry.version,
-        })
-        expect(fragment?.rootIds).toHaveLength(1)
-        const root = fragment?.nodes[fragment.rootIds[0]!]
-        expect(root?.catalogueInstance?.pattern?.authorableNodeIds.length, entry.id)
-          .toBeGreaterThan(0)
+        if (entry.implementation.type === 'visual-component') {
+          const insertedNode = activeDocument.nodes[inserted.nodeId]!
+          expect(insertedNode.props.componentId, entry.id).toBe(entry.implementation.componentId)
+          expect(insertedNode.children.map((nodeId) => activeDocument.nodes[nodeId]?.props.slotName))
+            .toEqual(['left', 'right'])
+        } else {
+          const pattern = creatorSignalPatternEntries.find((candidate) => candidate.id === entry.id)
+          expect(pattern, entry.id).toBeDefined()
+          if (entry.implementation.type !== 'pattern') throw new Error(`${entry.id} has no pattern implementation`)
+          const fragment = componentLibraryPatternRegistry.materialize(entry.implementation.patternId, {
+            entryId: entry.id,
+            entryVersion: entry.version,
+          })
+          expect(fragment?.rootIds).toHaveLength(1)
+          const root = fragment?.nodes[fragment.rootIds[0]!]
+          expect(root?.catalogueInstance?.pattern?.authorableNodeIds.length, entry.id)
+            .toBeGreaterThan(0)
+        }
       }
 
       expectToolOk(await executeAgentTool('site_delete_node', { nodeId: inserted.nodeId }))

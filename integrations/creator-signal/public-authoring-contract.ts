@@ -27,15 +27,16 @@ export function creatorSignalPublicPatternRootProps(
 
 export const creatorSignalPublicPatternCatalogue = [
   { layoutId: 'creator-signal.site.pattern.hero', role: 'hero', ownership: 'component', entryId: 'creator-signal.site.hero' },
-  { layoutId: 'creator-signal.site.pattern.home-v2-page', role: 'home-v2', ownership: 'pattern', patternId: 'creator-signal.site.pattern.home-v2-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.feature-grid', 'creator-signal.site.call-to-action'] },
-  { layoutId: 'creator-signal.site.pattern.early-access-page', role: 'early-access', ownership: 'pattern', patternId: 'creator-signal.site.pattern.early-access-page', childEntryIds: ['creator-signal.site.campaign-hero', 'creator-signal.site.signal-strip', 'creator-signal.site.feature-grid', 'creator-signal.site.mautic-form', 'creator-signal.site.feature-grid', 'creator-signal.site.feature-grid', 'creator-signal.site.testimonial'] },
+  { layoutId: 'creator-signal.site.pattern.home-v2-page', role: 'home-v2', ownership: 'pattern', patternId: 'creator-signal.site.pattern.home-v2-page', childEntryIds: ['creator-signal.site.campaign-hero', 'creator-signal.site.signal-strip', 'creator-signal.site.signal-comparison', 'creator-signal.site.feature-grid', 'creator-signal.site.process-steps', 'creator-signal.site.feature-grid', 'creator-signal.site.feature-grid', 'creator-signal.site.pricing-plans', 'creator-signal.site.founder-story', 'creator-signal.site.faq', 'creator-signal.site.call-to-action'] },
+  { layoutId: 'creator-signal.site.pattern.early-access-page', role: 'early-access', ownership: 'pattern', patternId: 'creator-signal.site.pattern.early-access-page', childEntryIds: ['creator-signal.site.campaign-hero', 'creator-signal.site.signal-strip', 'creator-signal.site.feature-grid', 'creator-signal.site.two-column-layout', 'creator-signal.site.feature-grid', 'creator-signal.site.feature-grid', 'creator-signal.site.testimonial'] },
   { layoutId: 'creator-signal.site.pattern.content-page', role: 'content-page', ownership: 'pattern', patternId: 'creator-signal.site.pattern.content-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.rich-text-section', 'creator-signal.site.call-to-action'] },
   { layoutId: 'creator-signal.site.pattern.product-page', role: 'product-page', ownership: 'pattern', patternId: 'creator-signal.site.pattern.product-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.feature-grid', 'creator-signal.site.call-to-action'] },
   { layoutId: 'creator-signal.site.pattern.pricing-page', role: 'pricing', ownership: 'pattern', patternId: 'creator-signal.site.pattern.pricing-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.feature-grid', 'creator-signal.site.call-to-action'] },
   { layoutId: 'creator-signal.site.pattern.features-page', role: 'features', ownership: 'pattern', patternId: 'creator-signal.site.pattern.features-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.feature-grid'] },
   { layoutId: 'creator-signal.site.pattern.call-to-action', role: 'call-to-action', ownership: 'component', entryId: 'creator-signal.site.call-to-action' },
   { layoutId: 'creator-signal.site.pattern.faq', role: 'faq', ownership: 'component', entryId: 'creator-signal.site.faq' },
-  { layoutId: 'creator-signal.site.pattern.contact-page', role: 'contact', ownership: 'pattern', patternId: 'creator-signal.site.pattern.contact-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.mautic-form'] },
+  { layoutId: 'creator-signal.site.pattern.contact-page', role: 'contact', ownership: 'pattern', patternId: 'creator-signal.site.pattern.contact-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.two-column-layout'] },
+  { layoutId: 'creator-signal.site.pattern.feedback-page', role: 'feedback', ownership: 'pattern', patternId: 'creator-signal.site.pattern.feedback-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.two-column-layout'] },
   { layoutId: 'creator-signal.site.pattern.legal-trust-page', role: 'legal-trust', ownership: 'pattern', patternId: 'creator-signal.site.pattern.legal-trust-page', childEntryIds: ['creator-signal.site.public-document'] },
   { layoutId: 'creator-signal.site.pattern.article-content-page', role: 'article-content', ownership: 'pattern', patternId: 'creator-signal.site.pattern.article-content-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.rich-text-section'] },
   { layoutId: 'creator-signal.site.pattern.comparison-section', role: 'comparison-section', ownership: 'pattern', patternId: 'creator-signal.site.pattern.comparison-section', childEntryIds: ['creator-signal.site.comparison-section'] },
@@ -47,7 +48,7 @@ export const creatorSignalPublicPatternCatalogue = [
 
 export const creatorSignalPublicAuthoringContract = {
   id: 'creator-signal.public-authoring',
-  version: '1.0.0',
+  version: '1.4.0',
   designSystem: creatorSignalDesignSystemDependency,
   permittedComponents: [
     {
@@ -55,10 +56,7 @@ export const creatorSignalPublicAuthoringContract = {
       variants: ['default'],
       assetRoles: ['hero-artwork'],
       constraints: {
-        maxInstancesPerPage: 1,
-        allowedDocumentKinds: ['page'],
-        headingRole: 'page-title',
-        actionRole: 'primary',
+        allowedDocumentKinds: ['page', 'template'],
       },
     },
     {
@@ -66,29 +64,29 @@ export const creatorSignalPublicAuthoringContract = {
       variants: ['default'],
       assetRoles: ['hero-artwork'],
       constraints: {
-        maxInstancesPerPage: 1,
-        allowedDocumentKinds: ['page'],
-        headingRole: 'page-title',
-        actionRole: 'primary',
+        allowedDocumentKinds: ['page', 'template'],
       },
     },
-    { entryId: 'creator-signal.site.header', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 } },
-    { entryId: 'creator-signal.site.footer', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 } },
-    { entryId: 'creator-signal.site.consent-banner', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['template'], maxInstancesPerDocument: 1 } },
-    { entryId: 'creator-signal.site.feature-grid', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'] } },
-    { entryId: 'creator-signal.site.signal-strip', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'], maxInstancesPerDocument: 1 } },
-    { entryId: 'creator-signal.site.signal-comparison', variants: ['default'], assetRoles: ['product-artwork'], constraints: { allowedDocumentKinds: ['page'], maxInstancesPerDocument: 1 } },
-    { entryId: 'creator-signal.site.process-steps', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'], maxInstancesPerDocument: 1 } },
-    { entryId: 'creator-signal.site.pricing-plans', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'], maxInstancesPerDocument: 1 } },
-    { entryId: 'creator-signal.site.founder-story', variants: ['default'], assetRoles: ['content-image'], constraints: { allowedDocumentKinds: ['page'], maxInstancesPerDocument: 1 } },
-    { entryId: 'creator-signal.site.call-to-action', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'], actionRole: 'secondary' } },
-    { entryId: 'creator-signal.site.rich-text-section', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'] } },
-    { entryId: 'creator-signal.site.testimonial', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'] } },
-    { entryId: 'creator-signal.site.faq', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'] } },
-    { entryId: 'creator-signal.site.comparison-section', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'] } },
-    { entryId: 'creator-signal.site.recovery-state', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'], maxInstancesPerDocument: 1, headingRole: 'page-title', actionRole: 'primary' } },
-    { entryId: 'creator-signal.site.public-document', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'], headingRole: 'page-title' } },
-    { entryId: 'creator-signal.site.mautic-form', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page'] } },
+    { entryId: 'creator-signal.site.header', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.footer', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.consent-banner', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.feature-grid', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.signal-strip', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.signal-comparison', variants: ['default'], assetRoles: ['product-artwork'], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.process-steps', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.pricing-plans', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.founder-story', variants: ['default'], assetRoles: ['content-image'], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.call-to-action', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.rich-text-section', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.testimonial', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.faq', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.comparison-section', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.recovery-state', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.public-document', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.mautic-form', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.section-intro', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.two-column-layout', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.crm-iframe-form', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
   ],
   permittedPatterns: creatorSignalPublicPatternCatalogue,
   semanticStyling: {
@@ -139,9 +137,7 @@ export const creatorSignalPublicAuthoringContract = {
   },
   content: {
     headingHierarchy: 'semantic',
-    pageTitleCount: 1,
     headingLevels: ['h1', 'h2', 'h3'],
-    primaryActionMaxCount: 1,
     requiredAlternativeTextForInformativeImages: true,
   },
 } as const
@@ -181,15 +177,14 @@ export const creatorSignalPublicAuthoringPolicy: PublicAuthoringPolicy = {
       .filter((entry) => entry.ownership === 'pattern')
       .map((entry) => [entry.patternId, ['default']]),
   ]),
-  allowedStructuralModuleIds: ['base.body', 'base.container', 'base.outlet'],
-  protectedVisualComponentIds: ['creator-signal.site/component/hero'],
+  allowedStructuralModuleIds: ['base.body', 'base.container', 'base.outlet', 'base.slot-instance'],
+  protectedVisualComponentIds: [
+    'creator-signal.site/component/hero',
+    'creator-signal.site/component/two-column-layout',
+  ],
   templates: [{
     pageId: 'creator-signal.site/page/site-template',
-    requiredEntryIds: [
-      'creator-signal.site.header',
-      'creator-signal.site.footer',
-      'creator-signal.site.consent-banner',
-    ],
+    requiredEntryIds: [],
   }],
   appearance: { mode: 'component-owned' },
   assets: {
@@ -211,8 +206,6 @@ export const creatorSignalPublicAuthoringPolicy: PublicAuthoringPolicy = {
       )
       .map((entry) => entry.entryId),
     headingLevels: [...creatorSignalPublicAuthoringContract.content.headingLevels],
-    pageTitleCount: creatorSignalPublicAuthoringContract.content.pageTitleCount,
-    primaryActionMaxCount: creatorSignalPublicAuthoringContract.content.primaryActionMaxCount,
   },
 }
 

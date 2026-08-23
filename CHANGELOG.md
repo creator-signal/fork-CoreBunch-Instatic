@@ -6,6 +6,29 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.39 - 2026-08-24
+
+### Governed Creator Signal reference site and forms
+
+- Rebuilt the complete Creator Signal public route set from the governed
+  reference design while keeping starter patterns optional and every page body
+  freely authorable after insertion.
+- Added purpose-specific Waitlist and Beta routes, governed Mautic aliases and
+  production-shaped managed-form submission under the published content
+  security policy, including validation, latency, failure and unavailable
+  states.
+- Added a standalone CRM iframe provider component with bounded resizing,
+  fallback behaviour and source-owned acceptance for the Feedback route.
+- Split all managed-form pages into separately selectable Section Intro,
+  Two Column Layout and provider components, with responsive copy-first reading
+  order across Contact, Wishlist, Early Access and every public intake route.
+- Audited every public route and nested slot boundary, verified all current
+  catalogue entries through discovery, insertion, configuration, revision and
+  removal, and added route-wide browser and accessibility regression gates.
+- Advanced the bundled Creator Signal technical pack to 0.7.0 and recognised
+  exact untouched 0.4.0, 0.5.0 and 0.6.0 starter content through an explicit,
+  preview-only migration that never overwrites or publishes authored pages.
+
 ## 0.0.38 - 2026-08-21
 
 ### Complete Creator Signal authoring acceptance

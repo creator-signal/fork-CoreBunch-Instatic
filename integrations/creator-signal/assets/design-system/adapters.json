@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "sourceVersion": "0.1.0",
   "generatedFrom": "tokens/source.json",
+  "tokenSourceSha256": "59eaa4663f092cb67ae8fed8ed508192c121411c136ab3097fd519d8e359bc7e",
   "light": {
     "email": {
       "surface.canvas": "#FFF9F3",
@@ -22,6 +23,13 @@
       "brand.maroon": "#420F20",
       "brand.orange": "#EA6A28",
       "brand.salesPulseGreen": "#74BE86"
+    },
+    "identityProvider": {
+      "surface.canvas": "#FFF9F3",
+      "text.primary": "#420F20",
+      "action.primary.background": "#420F20",
+      "action.primary.foreground": "#FFF9F3",
+      "status.error.foreground": "#7B1837"
     },
     "charts": {
       "chart.series.1": "#420F20",
@@ -53,6 +61,13 @@
       "brand.maroon": "#420F20",
       "brand.orange": "#EA6A28",
       "brand.salesPulseGreen": "#74BE86"
+    },
+    "identityProvider": {
+      "surface.canvas": "#1D0B12",
+      "text.primary": "#FFF9F3",
+      "action.primary.background": "#E895BE",
+      "action.primary.foreground": "#420F20",
+      "status.error.foreground": "#FFD5E0"
     },
     "charts": {
       "chart.series.1": "#FFF9F3",

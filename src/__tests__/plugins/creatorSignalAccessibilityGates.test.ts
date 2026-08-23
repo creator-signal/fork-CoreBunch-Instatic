@@ -43,8 +43,8 @@ function creatorSignalSite(blockingRuleIds: string[] = []) {
 }
 
 describe('Creator Signal entry-specific accessibility gates', () => {
-  it('declares every accessibility rule as applicable or explicitly not applicable for all 33 entries', () => {
-    expect(creatorSignalComponentLibraryEntries).toHaveLength(33)
+  it('declares every accessibility rule as applicable or explicitly not applicable for all 34 entries', () => {
+    expect(creatorSignalComponentLibraryEntries).toHaveLength(34)
     expect(Object.keys(creatorSignalAccessibilityContracts).sort()).toEqual(
       creatorSignalComponentLibraryEntries.map((entry) => entry.id).sort(),
     )

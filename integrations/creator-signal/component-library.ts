@@ -503,6 +503,31 @@ export const creatorSignalMauticFormEntry = siteEntry({
   ],
 })
 
+export const creatorSignalCrmIframeFormEntry = siteEntry({
+  id: 'creator-signal.site.crm-iframe-form',
+  version: '1.0.0',
+  name: 'Embedded CRM Form',
+  description: 'An authorable Mautic iframe form with a validated seamless-resize protocol.',
+  tags: ['form', 'crm', 'mautic', 'iframe', 'embed'],
+  moduleId: 'creator-signal.site.crm-iframe-form',
+  fields: [
+    { key: 'eyebrow', label: 'Eyebrow', description: 'Short context label above the form heading.', type: 'text', required: true },
+    { key: 'heading', label: 'Heading', description: 'Purpose of this embedded CRM form.', type: 'text', required: true },
+    { key: 'introduction', label: 'Introduction', description: 'Instructions and privacy context shown before the embedded form.', type: 'text', required: true },
+    { key: 'sectionId', label: 'Section anchor', description: 'Unique identifier used to match resize messages from this CRM form.', type: 'text', required: true, advanced: true },
+    { key: 'formUrl', label: 'CRM form URL', description: 'HTTPS Mautic form page hosted at the approved public CRM origin.', type: 'url', required: true },
+    { key: 'iframeTitle', label: 'Accessible iframe title', description: 'Concise name announced before visitors enter the embedded form.', type: 'text', required: true },
+    { key: 'fallbackLabel', label: 'Fallback link label', description: 'Visible link that opens the CRM form outside the iframe.', type: 'text', required: true },
+    { key: 'loadingMessage', label: 'Loading message', description: 'Status announced while the iframe form loads.', type: 'text', required: true },
+    { key: 'unavailableMessage', label: 'Unavailable message', description: 'Status announced when the provider cannot be framed.', type: 'text', required: true },
+    { key: 'initialHeight', label: 'Initial height', description: 'Starting iframe height before same-origin or CRM resize updates arrive.', type: 'number', required: true, advanced: true },
+    { key: 'minimumHeight', label: 'Minimum height', description: 'Smallest accepted iframe height.', type: 'number', required: true, advanced: true },
+    { key: 'maximumHeight', label: 'Maximum height', description: 'Largest accepted iframe height.', type: 'number', required: true, advanced: true },
+  ],
+  usage: 'Paste an approved Mautic form page URL. Same-origin forms resize automatically; cross-origin forms must send the documented resize message.',
+  accessibilityGuidance: 'Provide a concise iframe title and fallback link. Verify keyboard flow in the hosted form before publishing.',
+})
+
 export const creatorSignalComponentEntries: readonly ComponentLibraryEntry[] = [
   creatorSignalHeroEntry,
   creatorSignalHeaderEntry,
@@ -523,6 +548,7 @@ export const creatorSignalComponentEntries: readonly ComponentLibraryEntry[] = [
   creatorSignalRecoveryStateEntry,
   creatorSignalPublicDocumentEntry,
   creatorSignalMauticFormEntry,
+  creatorSignalCrmIframeFormEntry,
 ]
 
 const componentEntryById = new Map(

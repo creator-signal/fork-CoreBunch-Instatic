@@ -1,6 +1,7 @@
 import { definePlugin, permissions } from '@core/plugin-sdk'
 import { creatorSignalComponentLibraryEntries } from './component-library'
 import { creatorSignalPluginVersion } from './design-system/contract'
+import crmIframeForm from './modules/crm-iframe-form'
 import mauticForm from './modules/mautic-form'
 import { creatorSignalSiteModules } from './modules/site-components'
 import { creatorSignalRenderProfile } from './pack/design-system'
@@ -32,7 +33,7 @@ export default definePlugin({
     'replay-api.creatorsignal.me',
     'errors-api.creatorsignal.me',
   ],
-  modules: [mauticForm, ...creatorSignalSiteModules],
+  modules: [mauticForm, crmIframeForm, ...creatorSignalSiteModules],
   componentLibrary: creatorSignalComponentLibraryEntries,
   pack,
   settings: [

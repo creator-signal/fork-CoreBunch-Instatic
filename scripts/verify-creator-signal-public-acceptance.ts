@@ -350,6 +350,8 @@ const formRegistry = `window.CreatorSignalMauticForms=${JSON.stringify({
     'creator_signal_contact',
     'creator_signal_feedback',
     'creator_signal_wishlist',
+    'creator_signal_waitlist',
+    'creator_signal_beta_application',
     'creator_signal_question',
     'creator_signal_feature_request',
     'creator_signal_error_report',

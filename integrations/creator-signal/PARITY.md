@@ -18,7 +18,7 @@ bun run verify:creator-signal-parity \
 
 The verifier derives the route roster from the shared public-route contract,
 which the pack test matches against the compiled pages. A newly added route
-cannot silently miss the matrix. It captures all 24 current routes at desktop,
+cannot silently miss the matrix. It captures all 26 current routes at desktop,
 tablet and mobile widths. The 23 routes exposed by production receive direct
 side-by-side comparisons. `/early-access` is candidate-only while production
 returns HTTP 404, so the report captures its candidate output and metadata
@@ -48,7 +48,7 @@ it. `/early-access` specifically requires `noindex`, `follow` and `noarchive`;
 ordinary public routes require `index` and `follow`.
 
 The same command also runs JavaScript-enabled comparisons for the essential-only
-consent choice and all six generated Mautic forms without submitting them.
+consent choice and all eight generated Mautic forms without submitting them.
 When the production baseline's generated script does not attach in headless
 Chromium, the gate records that diagnostic, matches the governed alias, and
 still requires the candidate to render labelled fields and a submit control.

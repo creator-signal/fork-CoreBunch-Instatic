@@ -385,6 +385,8 @@ describe('Creator Signal site pack', () => {
       ['feedback', 'creator_signal_feedback'],
       ['wishlist', 'creator_signal_wishlist'],
       ['early-access', 'creator_signal_wishlist'],
+      ['waitlist', 'creator_signal_waitlist'],
+      ['beta', 'creator_signal_beta_application'],
       ['ask-a-question', 'creator_signal_question'],
       ['feature-request', 'creator_signal_feature_request'],
       ['report-an-error', 'creator_signal_error_report'],
@@ -418,6 +420,9 @@ describe('Creator Signal site pack', () => {
     expect(output.js).toContain("registry.schema !== 'creator-signal.mautic-forms/v1'")
     expect(output.js).toContain("new Error('form_markup_missing')")
     expect(output.js).toContain("dispatch(root, 'failure', 'registry_invalid')")
+    expect(output.js).toContain('consentTimestampFields')
+    expect(output.js).toContain('syncConsentTimestamps')
+    expect(output.js).toContain('choiceField: null')
     expect(output.js).toContain("status.textContent = 'Sending...'")
     expect(output.js).toContain('if (!form.checkValidity()) return')
     expect(output.js).toContain("setAttribute('aria-busy', 'true')")

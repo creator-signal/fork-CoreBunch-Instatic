@@ -23,9 +23,27 @@ const runtime = String.raw`(() => {
     const entry = registry.forms[alias];
     if (!entry || !Number.isInteger(entry.id) || entry.id < 1 ||
       !/^[a-zA-Z0-9_-]+$/.test(String(entry.apiName || '')) || entry.code !== alias) return null;
-    if (entry.consentTimestampField !== undefined &&
-      !/^[a-zA-Z0-9_-]+$/.test(String(entry.consentTimestampField))) return null;
-    return entry;
+    const legacyTimestampField = entry.consentTimestampField;
+    if (legacyTimestampField !== undefined && !/^[a-zA-Z0-9_-]+$/.test(String(legacyTimestampField))) return null;
+    const declaredTimestampFields = entry.consentTimestampFields === undefined
+      ? (legacyTimestampField ? [{ choiceField: null, timestampField: legacyTimestampField }] : [])
+      : entry.consentTimestampFields;
+    if (!Array.isArray(declaredTimestampFields) || !declaredTimestampFields.every((field) =>
+      field && /^[a-zA-Z0-9_-]+$/.test(String(field.timestampField)) &&
+      (field.choiceField === null || /^[a-zA-Z0-9_-]+$/.test(String(field.choiceField))))) return null;
+    return { ...entry, consentTimestampFields: declaredTimestampFields };
+  };
+  const syncConsentTimestamps = (target, fields) => {
+    const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
+    fields.forEach(({ choiceField, timestampField }) => {
+      const timestampInput = target.querySelector('input[name="mauticform[' + timestampField + ']"]');
+      if (!timestampInput) return;
+      const choices = choiceField
+        ? [...target.querySelectorAll('input[name^="mauticform[' + choiceField + ']"]')]
+        : [];
+      const permitted = choiceField ? choices.some((choice) => choice.checked) : true;
+      timestampInput.value = permitted ? (timestampInput.value || timestamp) : '';
+    });
   };
   const waitForForm = (target) => {
     if (target.querySelector('form')) return Promise.resolve();
@@ -130,16 +148,15 @@ const runtime = String.raw`(() => {
       const form = target.querySelector('form');
       if (form && form.dataset.csSubmitBound !== 'true') {
         form.dataset.csSubmitBound = 'true';
+        form.addEventListener('change', () => syncConsentTimestamps(target, entry.consentTimestampFields));
         form.addEventListener('submit', () => {
+          syncConsentTimestamps(target, entry.consentTimestampFields);
           if (!form.checkValidity()) return;
           setBusy(root, target, true);
           if (status) status.textContent = 'Sending...';
         });
       }
-      if (entry.consentTimestampField) {
-        const timestamp = target.querySelector('input[name="mauticform[' + entry.consentTimestampField + ']"]');
-        if (timestamp && !timestamp.value) timestamp.value = new Date().toISOString().replace('T', ' ').slice(0, 19);
-      }
+      syncConsentTimestamps(target, entry.consentTimestampFields);
       if (status) status.textContent = '';
     } catch (error) {
       setBusy(root, target, false);

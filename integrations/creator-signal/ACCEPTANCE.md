@@ -26,9 +26,9 @@ replace the complete automated gate or a live provider-form check.
 
 The verifier covers:
 
-- every one of the 24 public routes at 1440px desktop, 900px tablet and 390px
+- every one of the 26 public routes at 1440px desktop, 900px tablet and 390px
   mobile widths, with one header, main, H1 and footer and no document overflow;
-- Home, Early Access, Products, Sales Pulse, Pricing, Contact, Privacy, Security, the
+- Home, Early Access, Waitlist, Beta, Products, Sales Pulse, Pricing, Contact, Privacy, Security, the
   not-found template, FAQ and all recovery states with Axe's WCAG 2.0, 2.1 and
   2.2 A/AA rules;
 - skip navigation, visible 44px mobile navigation targets and native FAQ

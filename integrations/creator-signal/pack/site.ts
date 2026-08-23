@@ -294,6 +294,14 @@ const formPages = [
   { id: 'report-an-error', slug: 'report-an-error', title: 'Report an error', description: 'Report a reproducible Creator Signal product error without sharing sensitive data.', hero: ['Error report', 'Tell us what went wrong.', 'Share steps we can use to reproduce the problem. Do not include passwords, access keys, payment details or customer data.', 'https://status.creatorsignal.me', 'Check service status'], form: ['Error report', 'Report an error', 'Required fields are identified in the form. Do not include passwords, access keys, payment details or customer data.', 'Thanks — your error report has been recorded.', 'creator_signal_error_report', 'error_report'] },
 ] as const
 
+// These pages are additive to the current pack. Keep them out of the retained
+// 0.1.11 starter specification so upgrade classification never mistakes an
+// authored historical page for source-owned intake content.
+const intakeFormPages = [
+  { id: 'waitlist', slug: 'waitlist', title: 'Join the waitlist', description: 'Get a purpose-specific launch update and help Creator Signal understand what would be most useful for your Spoonflower shop.', hero: ['Waitlist', 'Be the first to know when Creator Signal is ready.', 'Join the waitlist for launch availability updates. Optional answers help us understand who we are building for. This is not a general marketing subscription.', '/legal/privacy', 'Read our privacy notice'], form: ['Waitlist', 'Join the waitlist', 'Required fields are identified in the form. Your permission covers Creator Signal launch availability and this waitlist request, not general marketing.', 'You are on the waitlist — thanks for your interest.', 'creator_signal_waitlist', 'waitlist'] },
+  { id: 'beta', slug: 'beta', title: 'Try it early', description: 'Apply to test Creator Signal early and share what would make it more useful for Spoonflower designers.', hero: ['Early testing', 'Help us test Creator Signal before anyone else.', 'Apply to test the product early and tell us what you think. Optional answers help us balance the beta cohort. This is not a general marketing subscription.', '/legal/privacy', 'Read our privacy notice'], form: ['Early testing', 'Apply to test it early', 'Required fields are identified in the form. Your permission covers this beta application and early testing, not general marketing.', 'Thanks — your early-access application has been received.', 'creator_signal_beta_application', 'beta_application'] },
+] as const
+
 for (const page of formPages) {
   legacyCreatorSignalStarterPages0111.push({
     id: page.id,
@@ -401,8 +409,10 @@ legacyCreatorSignalStarterPages0111.push(
   ]),
 )
 
+const currentFormPages = [...formPages, ...intakeFormPages]
+
 const formSectionIdByPageId = new Map(
-  formPages.map((page) => [page.id, `${page.form[5]}-form`] as const),
+  currentFormPages.map((page) => [page.id, `${page.form[5]}-form`] as const),
 )
 
 const starterPages: StarterPage[] = legacyCreatorSignalStarterPages0111.map((page) => ({
@@ -416,6 +426,29 @@ const starterPages: StarterPage[] = legacyCreatorSignalStarterPages0111.map((pag
         : { ...block.props },
   })),
 }))
+
+const intakeStarterPages: StarterPage[] = intakeFormPages.map((page) => (
+  {
+    id: page.id,
+    slug: page.slug,
+    title: page.title,
+    description: page.description,
+    patternId: pagePatternId('contact'),
+    blocks: [
+      hero(...page.hero),
+      managedForm({
+        eyebrow: page.form[0],
+        heading: page.form[1],
+        introduction: page.form[2],
+        successMessage: page.form[3],
+        sectionId: formSectionIdByPageId.get(page.id),
+        formAlias: page.form[4],
+        formCode: page.form[4],
+        campaignCode: page.form[5],
+      }),
+    ],
+  }
+))
 
 const homeV2Page = starterPages.find((page) => page.slug === 'index')
 if (!homeV2Page) throw new Error('[creator-signal] Missing Home starter page.')
@@ -568,6 +601,7 @@ const earlyAccessPage: StarterPage = {
 const wishlistIndex = starterPages.findIndex((page) => page.slug === 'wishlist')
 if (wishlistIndex < 0) throw new Error('[creator-signal] Missing Wishlist starter page.')
 starterPages.splice(wishlistIndex + 1, 0, earlyAccessPage)
+starterPages.splice(wishlistIndex + 2, 0, ...intakeStarterPages)
 
 const notFoundPage: StarterPage = {
   id: 'not-found',

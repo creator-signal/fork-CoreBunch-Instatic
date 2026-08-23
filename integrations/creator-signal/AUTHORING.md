@@ -3,7 +3,7 @@
 This reference maps the public site to the shared template and governed components authors edit in Instatic.
 
 The source of truth is `integrations/creator-signal/pack/site.ts`. It defines
-the 24 route documents as page content only, one everywhere template that owns
+the 26 route documents as page content only, one everywhere template that owns
 shared header/footer/privacy choices, and one not-found template that owns the
 unknown-route recovery content.
 
@@ -95,6 +95,8 @@ Every row below is wrapped by the shared template. The sequence column lists onl
 | `/feedback` | Feedback | Hero → Managed Form |
 | `/wishlist` | Join the wishlist | Hero → Managed Form |
 | `/early-access` | Creator Signal Early Access | Campaign Hero → Signal Strip → Feature Grid → Managed Form → Feature Grid → Feature Grid → Testimonial |
+| `/waitlist` | Join the waitlist | Hero → Managed Form |
+| `/beta` | Try it early | Hero → Managed Form |
 | `/ask-a-question` | Ask a question | Hero → Managed Form |
 | `/feature-request` | Feature request | Hero → Managed Form |
 | `/report-an-error` | Report an error | Hero → Managed Form |

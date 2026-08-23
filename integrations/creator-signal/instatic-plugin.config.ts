@@ -93,6 +93,14 @@ export default definePlugin({
         placement: 'body-end',
         strategy: 'module',
       },
+      // Mautic's supported generated-form embed injects its own initializer
+      // after the provider script has loaded. This explicit declaration keeps
+      // the published CSP aligned with that provider contract.
+      {
+        kind: 'script-inline',
+        content: 'window.CreatorSignalMauticEmbed = Object.freeze({ version: "v1" });',
+        placement: 'body-end',
+      },
       { kind: 'script', src: 'frontend/analytics.js', placement: 'body-end', strategy: 'defer' },
     ],
   },

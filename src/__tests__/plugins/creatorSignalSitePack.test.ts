@@ -18,6 +18,7 @@ import {
 } from '../../../integrations/creator-signal/component-library'
 import crmIframeForm from '../../../integrations/creator-signal/modules/crm-iframe-form'
 import mauticForm, { creatorSignalSiteCss } from '../../../integrations/creator-signal/modules/mautic-form'
+import creatorSignalPlugin from '../../../integrations/creator-signal/instatic-plugin.config'
 import {
   campaignHero,
   callToAction,
@@ -51,6 +52,14 @@ const templatePage = pack.pages.find((page) => page.template?.target.kind === 'e
 const notFoundTemplate = pack.pages.find((page) => page.template?.target.kind === 'notFound')
 
 describe('Creator Signal site pack', () => {
+  it('declares the Mautic generated-embed CSP requirement', () => {
+    const assets = creatorSignalPlugin.manifest.frontend?.assets ?? []
+    expect(assets).toContainEqual(expect.objectContaining({
+      kind: 'script-inline',
+      content: expect.stringContaining('CreatorSignalMauticEmbed'),
+    }))
+  })
+
   it('contains the complete public launch route set plus shared and not-found templates', () => {
     expect(publicPages.map((page) => page.slug)).toEqual(creatorSignalPublicRouteSlugs)
     expect(templatePage).toMatchObject({
@@ -459,7 +468,8 @@ describe('Creator Signal site pack', () => {
     expect(output.js).toContain('syncConsentTimestamps')
     expect(output.js).toContain('choiceField: null')
     expect(output.js).toContain("status.textContent = 'Sending...'")
-    expect(output.js).toContain('if (!form.checkValidity()) return')
+    expect(output.js).toContain('const invalid = controls.filter((control) => !control.checkValidity())')
+    expect(output.js).toContain("control.setAttribute('aria-invalid', 'true')")
     expect(output.js).toContain("setAttribute('aria-busy', 'true')")
     expect(output.js).toContain("control.dataset.csBusyDisabled = 'true'")
     expect(output.css).toContain('.mauticform-errormsg[hidden] { display: none; }')

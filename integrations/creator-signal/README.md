@@ -154,9 +154,13 @@ bun run integrations/creator-signal/migrations/0.2.0/prepare.ts prepare \
 ```
 
 This writes an untouched full backup, a JSON audit report with hashes, and a
-content-only migration archive. Review the archive through the normal import
-preview, apply it with `merge-overwrite`, preview the draft site, and publish
-deliberately. The archive does not publish. Exact rollback uses the untouched
+content-only migration archive plus an equivalent validated JSON manifest for
+the read-only import-preview API. The immutable image ships this command at
+`/app/operator-tools/creator-signal/migrations/0.2.0/prepare.ts`, so operators
+run the exact classifier from the accepted image without a source checkout.
+Review the JSON manifest through the normal import preview, apply the archive
+with `merge-overwrite`, preview the draft site, and publish deliberately. The
+archive does not publish. Exact rollback uses the untouched
 backup through the guarded `replace` import after its preview and step-up gate.
 The guarded restore path uses a dialect-neutral system-table predicate and is
 covered for both the PostgreSQL production schema and SQLite acceptance schema.

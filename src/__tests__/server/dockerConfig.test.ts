@@ -44,6 +44,14 @@ describe('self-host docker config', () => {
     expect(dockerfile).toContain('COPY --chown=bun:bun tsconfig*.json ./')
   })
 
+  it('ships the governed Creator Signal content migration dependency closure', () => {
+    const dockerfile = readFileSync('Dockerfile', 'utf8')
+
+    expect(dockerfile).toContain(
+      'COPY --from=build --chown=bun:bun /app/integrations/creator-signal /app/operator-tools/creator-signal',
+    )
+  })
+
   it('builds and bundles the isolated Plain Text showcase starter', () => {
     const dockerfile = readFileSync('Dockerfile', 'utf8')
 

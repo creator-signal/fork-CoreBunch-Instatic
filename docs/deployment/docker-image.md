@@ -160,6 +160,34 @@ Managed HTTPS platforms often terminate TLS before forwarding HTTP to the contai
 
 `INSTATIC_SECRET_KEY` is the stable AES master key for reversible server secrets, including Anthropic, OpenAI, and OpenRouter credentials and TOTP MFA seeds. If it is missing in production, adding a credential or enabling TOTP MFA fails. If it is rotated or lost, existing stored credentials must be re-entered and TOTP MFA must be re-enrolled.
 
+## Creator Signal content migration tool
+
+The image carries the Creator Signal retained-content classifier at
+`/app/operator-tools/creator-signal/migrations/0.2.0/prepare.ts`. Copy a full
+Instatic export into the container, preview it, then prepare the immutable
+evidence set:
+
+```sh
+docker cp ./creator-signal-export.zip instatic:/tmp/creator-signal-export.zip
+docker exec instatic bun run \
+  /app/operator-tools/creator-signal/migrations/0.2.0/prepare.ts preview \
+  --input /tmp/creator-signal-export.zip
+docker exec instatic bun run \
+  /app/operator-tools/creator-signal/migrations/0.2.0/prepare.ts prepare \
+  --input /tmp/creator-signal-export.zip \
+  --output-dir /tmp/creator-signal-content-migration
+docker cp instatic:/tmp/creator-signal-content-migration \
+  ./creator-signal-content-migration
+```
+
+`prepare` writes the untouched backup, hash report, content-only ZIP, and its
+equivalent validated JSON manifest. Submit the JSON to
+`POST /admin/api/cms/import/preview`, review that dry-run, then submit the ZIP
+to `POST /admin/api/cms/import/archive?strategy=merge-overwrite`. Publishing is
+a separate guarded action at `POST /admin/api/cms/publish`; neither classifier
+command mutates or publishes content. Roll back only by previewing the untouched
+backup and importing it with the guarded `replace` strategy.
+
 ## Health Check
 
 ```sh

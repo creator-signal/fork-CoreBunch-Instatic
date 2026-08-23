@@ -20,7 +20,6 @@
 import type { CoreCapability } from '../auth/capabilities'
 import { deepEqual } from '@core/utils/deepEqual'
 import { ForbiddenSiteChangeError } from './siteDiff'
-import { assertTemplateChromeFieldsOnly } from './templateChrome'
 import {
   assertPublicAuthoringPage,
   componentLibraryPatternRegistry,
@@ -93,21 +92,8 @@ export function validatePageWriteDiff({
   publicAuthoringPolicy,
 }: PageDiffInput): void {
   if (publicAuthoringPolicy) {
-    const previousById = new Map(previousPages.map((page) => [page.id, page]))
     for (const page of changedPages) {
       assertPublicAuthoringPage(page, publicAuthoringPolicy, componentLibraryRegistry)
-      const template = publicAuthoringPolicy.templates.find(
-        (candidate) => candidate.pageId === page.id,
-      )
-      const previous = previousById.get(page.id)
-      if (template && previous) {
-        assertTemplateChromeFieldsOnly(
-          previous,
-          page,
-          template.requiredEntryIds,
-          isApprovedGovernedPropChange,
-        )
-      }
     }
     for (const template of publicAuthoringPolicy.templates) {
       if (deletedPageIds.has(template.pageId)) {

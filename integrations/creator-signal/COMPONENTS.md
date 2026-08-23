@@ -56,8 +56,8 @@ Grids, Process Steps, Pricing Plans, Founder Story, FAQ and Call to Action to
 implement the approved reference flow. Early Access uses Campaign Hero, Signal
 Strip, typed Feature Grids, one Managed Form and a Testimonial. The catalogue
 components are leaf components with no authored child slots; the stable
-`home-v2-page` and `early-access-page` pattern roots govern their declared
-order.
+`home-v2-page` and `early-access-page` pattern roots provide their initial
+order, which authors may then adjust.
 
 ## Hero component anatomy
 

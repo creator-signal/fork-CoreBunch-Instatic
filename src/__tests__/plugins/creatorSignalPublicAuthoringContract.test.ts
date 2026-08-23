@@ -19,6 +19,10 @@ import { pack } from '../../../integrations/creator-signal/pack/site'
 import { verifyCreatorSignalDesignSystem } from '../../../scripts/sync-creator-signal-design-system'
 
 describe('Creator Signal public authoring contract', () => {
+  it('versions the freely authorable reference-design contract', () => {
+    expect(creatorSignalPublicAuthoringContract.version).toBe('1.1.0')
+  })
+
   it('depends on generated master design-system adapters instead of copied token values', () => {
     expect(creatorSignalDesignSystemDependency).toEqual({
       packageName: '@creator-signal/design-system',
@@ -113,21 +117,11 @@ describe('Creator Signal public authoring contract', () => {
     expect(creatorSignalPublicAuthoringContract.assets.essentialTextInImages).toBe(false)
     expect(creatorSignalPublicAuthoringContract.content).toMatchObject({
       headingHierarchy: 'semantic',
-      pageTitleCount: 1,
-      primaryActionMaxCount: 1,
+      requiredAlternativeTextForInformativeImages: true,
     })
     expect(creatorSignalPublicAuthoringPolicy.content).toMatchObject({
-      pageTitleEntryIds: [
-        'creator-signal.site.hero',
-        'creator-signal.site.campaign-hero',
-        'creator-signal.site.recovery-state',
-        'creator-signal.site.public-document',
-      ],
-      primaryActionEntryIds: [
-        'creator-signal.site.hero',
-        'creator-signal.site.campaign-hero',
-        'creator-signal.site.recovery-state',
-      ],
+      pageTitleEntryIds: [],
+      primaryActionEntryIds: [],
     })
     expect(pack.publicAuthoring).toEqual(creatorSignalPublicAuthoringPolicy)
   })

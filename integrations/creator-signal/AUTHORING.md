@@ -15,10 +15,10 @@ unknown-route recovery content.
 - The template owns Site Header, Site Footer and Privacy Choices around one content outlet.
 - Unknown routes compose that shared chrome with the governed `notFound`
   template and publish `noindex, follow, noarchive` metadata.
-- Authors creating an ordinary page add only page-content components.
-- Shared chrome is template-only and limited to one instance of each component per template.
-- Page-content components are page-only; the Hero is limited to one instance per page.
-- Every starter route materializes one stable `creator-signal.site.pattern.*` catalogue entry; its authorable children are governed components.
+- Every catalogue component is available on ordinary pages and templates.
+- Components placed in the shared template are inherited by its pages; components placed in a page affect that page only.
+- Components may be added, reordered or removed freely.
+- Every starter route materializes one stable `creator-signal.site.pattern.*` catalogue entry; it is an editable starting composition, not a fixed route contract.
 - Creator Signal components are opinionated leaves. Pattern roots are governed containers; neither model exposes arbitrary child slots.
 - `bun run verify:creator-signal-authoring-tasks` writes the current 33-entry task matrix to `.tmp/creator-signal-authoring-tasks/` and fails when the catalogue drifts from a supported authoring task.
 - `bun run verify:creator-signal-parity` writes the browsable side-by-side report to `.tmp/creator-signal-parity/index.html`.
@@ -65,12 +65,14 @@ the matrix follows `integrations/creator-signal/component-library.ts` and fails
 if an entry is missing, exposes a raw implementation field, leaves field help
 blank, gives a leaf a slot, or lacks editor/MCP task support.
 
-For ordinary page work, create the page from the shared template, select a
-page component from Components, complete its labelled fields or repeaters,
-check mobile/tablet/desktop preview, and publish. To revise, edit the retained
-component instance and publish again; remove the component from the Components
-tree when it no longer belongs. For shared chrome, open the template owner and
-edit Header, Footer, Navigation link repeaters, or Privacy Choices once.
+For ordinary page work, create the page from the shared template, select any
+catalogue component from Components, complete its labelled fields or repeaters,
+check mobile/tablet/desktop preview, and publish. Starter patterns are optional
+shortcuts: their components can be added, reordered or removed after insertion.
+To revise, edit the retained component instance and publish again; remove the
+component from the Components tree when it no longer belongs. For shared
+chrome, open the template owner and add, reorder, edit or remove Header, Footer,
+Navigation link repeaters, or Privacy Choices once.
 
 MCP follows the same model: call `site_list_component_library`, insert the
 returned entry with `site_insert_component`, change declared values with
@@ -149,25 +151,25 @@ pack: they are for copyable structures that may diverge after insertion.
 
 | Component | Placement | Author controls | Repeatable data | Slots |
 | --- | --- | --- | --- | --- |
-| Creator Signal Hero | Page; maximum one | Eyebrow, heading, introduction, action label, action URL, artwork | None | None |
-| Campaign Hero | Page; maximum one | Eyebrow, heading, introduction, two actions, footnote and artwork | None | None |
-| Signal Strip | Page | Accessible label | Short static promise messages | None |
-| Signal Comparison | Page | Heading, before/after copy, artwork and section anchor | None | None |
-| Process Steps | Page | Heading, introduction and section anchor | Ordered step marker, heading and description | None |
-| Pricing Plans | Page | Heading, introduction, footnote and section anchor | Plan price, cadence, features, action and emphasis | None |
-| Founder Story | Page | Heading, formatted story, attribution, portrait and section anchor | None | None |
-| Site Header | Shared template; maximum one | Brand name, tagline, home URL | Navigation links with label, URL and treatment | None |
-| Site Footer | Shared template; maximum one | Brand name, tagline, copyright | Footer links with label and URL | None |
-| Privacy Choices | Shared template; maximum one | Heading, explanation and both choice labels | None | None |
-| Feature Grid | Page | Eyebrow, heading, introduction, section anchor and default/signature tone | Feature marker, heading and description | None |
-| Call to Action | Page | Eyebrow, heading, explanation, action label, action URL, section anchor | None | None |
-| Rich Text Section | Page | Heading, one coherent formatted content field, section anchor | None | None |
-| Testimonial | Page | Quotation, attribution, role or business | None | None |
-| FAQ | Page | Heading and section anchor | Question and answer | None |
-| Comparison Section | Page | Heading, introduction, caption and three option labels | Criterion and three option values | None |
-| Recovery State | Page or not-found template; maximum one | Empty/error/offline/not-found kind, heading, explanation and recovery action | None | None |
-| Public Document | Page | Eyebrow, document heading, summary, one formatted document field, date modified | None | None |
-| Managed Form | Page | Eyebrow, heading, introduction, success message and section anchor | Provider fields are resolved from the governed registry | None |
+| Creator Signal Hero | Page or template | Eyebrow, heading, introduction, action label, action URL, artwork | None | None |
+| Campaign Hero | Page or template | Eyebrow, heading, introduction, two actions, footnote and artwork | None | None |
+| Signal Strip | Page or template | Accessible label | Short static promise messages | None |
+| Signal Comparison | Page or template | Heading, before/after copy, artwork and section anchor | None | None |
+| Process Steps | Page or template | Heading, introduction and section anchor | Ordered step marker, heading and description | None |
+| Pricing Plans | Page or template | Heading, introduction, footnote and section anchor | Plan price, cadence, features, action and emphasis | None |
+| Founder Story | Page or template | Heading, formatted story, attribution, portrait and section anchor | None | None |
+| Site Header | Page or template | Brand name, tagline, home URL | Navigation links with label, URL and treatment | None |
+| Site Footer | Page or template | Brand name, tagline, copyright | Footer links with label and URL | None |
+| Privacy Choices | Page or template | Heading, explanation and both choice labels | None | None |
+| Feature Grid | Page or template | Eyebrow, heading, introduction, section anchor and default/signature tone | Feature marker, heading and description | None |
+| Call to Action | Page or template | Eyebrow, heading, explanation, action label, action URL, section anchor | None | None |
+| Rich Text Section | Page or template | Heading, one coherent formatted content field, section anchor | None | None |
+| Testimonial | Page or template | Quotation, attribution, role or business | None | None |
+| FAQ | Page or template | Heading and section anchor | Question and answer | None |
+| Comparison Section | Page or template | Heading, introduction, caption and three option labels | Criterion and three option values | None |
+| Recovery State | Page or template | Empty/error/offline/not-found kind, heading, explanation and recovery action | None | None |
+| Public Document | Page or template | Eyebrow, document heading, summary, one formatted document field, date modified | None | None |
+| Managed Form | Page or template | Eyebrow, heading, introduction, success message and section anchor | Provider fields are resolved from the governed registry | None |
 
 The catalogue contract lives in `integrations/creator-signal/component-library.ts`. The semantic renderers live in `integrations/creator-signal/modules/site-components/index.ts` and `integrations/creator-signal/modules/mautic-form.ts`. They preserve headings, landmarks, accessible names and schema.org metadata while keeping markup structure out of routine authoring.
 
@@ -182,7 +184,8 @@ The same resolver protects all authoring paths:
 - `src/admin/pages/site/panels/LayersPanel/componentLayersDnd.ts` enforces drag-and-drop moves.
 - `server/writePolicy/pageDiff.ts` validates component-only writes at the server boundary.
 
-This keeps a shared header or footer from becoming duplicated page content and stops a page Hero from being inserted into the shared site template.
+This validates a component's own declared data and safety contracts without
+locking it to a route, fixed child sequence, document kind or cardinality.
 
 ## Side-by-side visual report
 
@@ -225,7 +228,6 @@ The visual report is evidence, not deployment authority. Production release and 
 | Pattern | Use instead |
 | --- | --- |
 | Header, footer or privacy controls copied into each page | Edit the shared site template once |
-| A page-content component inserted into the shared template | Add it to the ordinary page content outlet |
 | Multiple components for one prose block | One Rich Text Section or Public Document rich-text field |
 | Navigation or cards represented as child slots | Typed repeater items on the owning leaf component |
 | Numeric managed-form IDs in page content | Stable form aliases resolved from the generated registry |

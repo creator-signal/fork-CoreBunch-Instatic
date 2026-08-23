@@ -398,6 +398,8 @@ async function routeMarketing(page: Page, registryAvailable = true): Promise<voi
     }
     if (url.pathname.endsWith('/form/submit')) {
       const referer = route.request().headers().referer ?? ''
+      // Keep the managed browser state observable before the mocked provider resolves.
+      await new Promise((resolve) => setTimeout(resolve, 75))
       return route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',

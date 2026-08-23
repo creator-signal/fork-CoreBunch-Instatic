@@ -782,7 +782,7 @@ try {
       assert.equal(await page.evaluate(() =>
         document.documentElement.scrollWidth > document.documentElement.clientWidth,
       ), false)
-      assert.equal(await page.getByRole('link', { name: 'Explore Sales Pulse' }).first().isVisible(), true)
+      assert.equal(await page.locator('main').getByRole('link', { name: 'Get started free', exact: true }).first().isVisible(), true)
     } finally {
       await context.close()
     }

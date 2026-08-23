@@ -454,11 +454,14 @@ if (serveOnly) {
 }
 
 const browserExecutablePath = process.env.CREATOR_SIGNAL_BROWSER_EXECUTABLE_PATH?.trim()
-const browser = await chromium.launch({
-  headless: true,
-  timeout: 30_000,
-  ...(browserExecutablePath ? { executablePath: browserExecutablePath } : {}),
-})
+const browserCdpUrl = process.env.CREATOR_SIGNAL_BROWSER_CDP_URL?.trim()
+const browser = browserCdpUrl
+  ? await chromium.connectOverCDP(browserCdpUrl)
+  : await chromium.launch({
+      headless: true,
+      timeout: 30_000,
+      ...(browserExecutablePath ? { executablePath: browserExecutablePath } : {}),
+    })
 
 try {
   for (const viewport of [
@@ -553,7 +556,7 @@ try {
         return { label: node.textContent?.trim(), width: rect.width, height: rect.height }
       }))
       assert.equal(navTargets.length, 1)
-      assert.equal(navTargets[0]?.label, 'Sign in')
+      assert.equal(navTargets[0]?.label, 'Get started free')
       assert.equal(navTargets.every((target) => target.width > 0 && target.height >= 40), true)
       const summary = page.locator('.faq-list summary').first()
       await summary.focus()
@@ -770,7 +773,7 @@ try {
     try {
       await page.goto(baseUrl, { waitUntil: 'load' })
       await waitForPage(page)
-      const before = await page.locator('.hero-art').evaluate((node) => node.getBoundingClientRect().height)
+      const before = await page.locator('.campaign-hero-art').evaluate((node) => node.getBoundingClientRect().height)
       assert(before >= 250)
       await page.locator('h1').evaluate((node) => {
         node.textContent = `CreatorSignal${'UnbrokenSignal'.repeat(40)}`
@@ -781,7 +784,7 @@ try {
       assert.equal(await page.evaluate(() =>
         document.documentElement.scrollWidth > document.documentElement.clientWidth,
       ), false)
-      assert.equal(await page.getByRole('link', { name: 'Explore Sales Pulse' }).first().isVisible(), true)
+      assert.equal(await page.locator('main').getByRole('link', { name: 'Get started free', exact: true }).first().isVisible(), true)
     } finally {
       await context.close()
     }

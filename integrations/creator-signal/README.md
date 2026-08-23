@@ -13,8 +13,8 @@ page roster, and publish the complete site automatically.
 - Twenty-four launch, form, legal, trust, support, and status pages plus a
   shared `everywhere` template and governed `notFound` template.
 - The canonical Creator Signal Design System shared by the editor canvas and
-  published pages, with a semantic production-look adapter and packaged font
-  and theme assets available to governed components without exposing a public
+  published pages, with generated semantic roles and packaged font, theme and
+  brand assets available to governed components without exposing a public
   appearance selector.
 - A parameterised Hero Visual Component with optional MinIO-backed artwork,
   governed brand fallback art and real generated design assets on the primary
@@ -114,7 +114,7 @@ relying on plugin upgrade reconciliation.
 
 ### Upgrade existing retained starter content
 
-Installing plugin 0.4.0 runs the versioned technical-pack upgrade, installs the
+Installing plugin 0.5.0 runs the versioned technical-pack upgrade, installs the
 public-authoring policy and does not change existing pages. The authored-content
 migration remains version 0.2.0.
 Export the complete site from **Admin → Export**, then run the read-only
@@ -126,8 +126,8 @@ bun run integrations/creator-signal/migrations/0.2.0/prepare.ts preview \
 ```
 
 The preview is ready only when every retained route is either the exact 0.1.11
-starter, the exact governed 0.2.0-0.2.6 or 0.3.5 pack, or already uses the current
-model; no unexpected page would inherit the new shared template; and both
+starter, the exact governed 0.2.0-0.2.6, 0.3.5 or 0.4.0 pack, or already uses
+the current model; no unexpected page would inherit the new shared template; and both
 governed template IDs are available. A newly governed page is added only when
 its reserved ID is absent. An occupied ID with any other content blocks the
 whole migration.
@@ -198,8 +198,9 @@ accessibility contracts and the equivalent editor/MCP diagnostic tool. Run
 `bun run verify:creator-signal-accessibility` for the source contract and tool
 surface checks.
 
-`integrations/creator-signal/WEBSITE-V2.md` records the production-look Home
-and Early Access flow, page ownership boundaries and one-form intent contract.
+`integrations/creator-signal/WEBSITE-V2.md` records the governed reference-design
+Home and Early Access flow, page ownership boundaries and one-form intent
+contract.
 
 Deploy Mautic first and verify
 `https://marketing.creatorsignal.me/media/creator-signal/forms-v1.js` exposes

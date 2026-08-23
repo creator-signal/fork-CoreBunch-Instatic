@@ -19,6 +19,10 @@ import { pack } from '../../../integrations/creator-signal/pack/site'
 import { verifyCreatorSignalDesignSystem } from '../../../scripts/sync-creator-signal-design-system'
 
 describe('Creator Signal public authoring contract', () => {
+  it('versions the freely authorable reference-design contract', () => {
+    expect(creatorSignalPublicAuthoringContract.version).toBe('1.2.0')
+  })
+
   it('depends on generated master design-system adapters instead of copied token values', () => {
     expect(creatorSignalDesignSystemDependency).toEqual({
       packageName: '@creator-signal/design-system',
@@ -41,11 +45,11 @@ describe('Creator Signal public authoring contract', () => {
   it('verifies the pinned upstream snapshot and keeps authored CSS token-only', async () => {
     expect(await verifyCreatorSignalDesignSystem()).toEqual({
       files: 23,
-      revision: 'dac774a794bf41c3e5bc4318c97858b364b3a68c',
+      revision: '1afc33bd5a8037bb2ec79fb512423268b9b771bb',
     })
 
     expect(creatorSignalCompositionCss).toContain('var(--cs-surface-canvas)')
-    expect(creatorSignalCompositionCss).toContain('var(--cs-font-family-heading)')
+    expect(creatorSignalCompositionCss).toContain('var(--cs-type-heading1-family)')
     expect(creatorSignalCompositionCss).not.toMatch(/#[0-9a-f]{3,8}\b/i)
     expect(creatorSignalCompositionCss).not.toMatch(/\brgb(?:a)?\(/i)
     expect(creatorSignalCompositionCss).not.toMatch(/Georgia|Times New Roman|Avenir Next/i)

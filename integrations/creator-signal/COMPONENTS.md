@@ -51,12 +51,13 @@ the same registry materializer, so the Insert experience and installed site
 cannot drift into separate structures.
 
 The Home and Early Access compositions exercise the full module-component
-model. Home uses Hero, Feature Grid and Call to Action to preserve the concise
-production flow. Early Access uses Campaign Hero, Signal Strip, typed Feature
-Grids, one Managed Form and a Testimonial. The other catalogue components
-remain available for approved page patterns. They are leaf components with no
-authored child slots; the stable `home-v2-page` and `early-access-page` pattern
-roots govern their declared order.
+model. Home uses Campaign Hero, Signal Strip, Signal Comparison, three Feature
+Grids, Process Steps, Pricing Plans, Founder Story, FAQ and Call to Action to
+implement the approved reference flow. Early Access uses Campaign Hero, Signal
+Strip, typed Feature Grids, one Managed Form and a Testimonial. The catalogue
+components are leaf components with no authored child slots; the stable
+`home-v2-page` and `early-access-page` pattern roots provide their initial
+order, which authors may then adjust.
 
 ## Hero component anatomy
 

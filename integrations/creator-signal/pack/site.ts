@@ -453,6 +453,99 @@ const intakeStarterPages: StarterPage[] = intakeFormPages.map((page) => (
 const homeV2Page = starterPages.find((page) => page.slug === 'index')
 if (!homeV2Page) throw new Error('[creator-signal] Missing Home starter page.')
 homeV2Page.patternId = pagePatternId('home-v2')
+homeV2Page.title = 'Creator Signal — Stop guessing, design what sells'
+homeV2Page.description = "Creator Signal turns Spoonflower sales into a clear, visual picture of what's actually selling, using your own design thumbnails instead of spreadsheets."
+homeV2Page.blocks = [
+  campaignHero({
+    eyebrow: 'Every sale sends a signal',
+    heading: 'Stop guessing. Design what sells.',
+    body: "Creator Signal turns your Spoonflower sales data into a clear, visual picture of what's actually selling, using your own design thumbnails, not spreadsheets.",
+    primaryActionLabel: 'Get started free',
+    primaryActionUrl: 'https://salespulse.creatorsignal.me/sign-up',
+    secondaryActionLabel: 'See how it works',
+    secondaryActionUrl: '#how-it-works',
+    footnote: 'Free forever plan. No spreadsheets, no stress.',
+    artwork: creatorSignalBrandAssets.salesPulseSocial,
+    artworkAlt: 'A preview of the Sales Pulse visual sales dashboard.',
+  }),
+  signalStrip(),
+  moduleBlock('signal-comparison', {
+    eyebrow: "Let's see what's working",
+    heading: 'From this, to this.',
+    introduction: 'Compare the limited marketplace view with the clearer Creator Signal experience.',
+    beforeLabel: 'From',
+    beforeBody: 'Thirty days, sales counts only and one bare-bones chart.',
+    afterLabel: 'To',
+    afterBody: "Your own design thumbnails, sorted by what's working.",
+    artwork: creatorSignalBrandAssets.salesPulseSocial,
+    artworkAlt: 'Sales Pulse showing sales through visual design thumbnails.',
+    sectionId: 'signal-comparison',
+  }),
+  features("Let's take a look", "Right now, you've got three options.", 'None of these approaches was really built for independent designers.', [
+    ['01', 'Design blind', 'Upload, cross your fingers and hope something sells. It is the spaghetti-at-the-wall approach, and it is exhausting.'],
+    ['02', "Squint at Spoonflower's own stats", 'A useful starting point, but only thirty days, sales counts and one bare-bones chart — no trends, categories or repeat customers.'],
+    ['03', 'Wrangle it yourself', 'Copy and paste into a spreadsheet or a generic AI tool, then try to make sense of it alone.'],
+  ], 'market-gap', 'signature'),
+  moduleBlock('process-steps', {
+    eyebrow: "Here's the good news",
+    heading: 'How it works: connect, see, grow.',
+    introduction: 'Real-time, visual insight into your own sales data — no spreadsheets or scary graphs — so you can design with confidence instead of guesswork.',
+    sectionId: 'how-it-works',
+    items: [
+      { marker: '1', heading: 'Connect your shop', body: 'Link your Spoonflower store in a few easy steps. Your data stays yours, always.' },
+      { marker: '2', heading: 'See your signal', body: "Your sales come to life as your own design thumbnails, sorted by what's working." },
+      { marker: '3', heading: 'Grow with confidence', body: 'Make more of what is selling and design with a plan instead of a guess.' },
+    ],
+  }),
+  features('See it for yourself', 'What Creator Signal actually shows you.', 'Start with the essentials and reveal more of your signal when you are ready.', [
+    ['Free', "See what's selling", 'Revenue and sales overview, growth over time and your top-selling designs.'],
+    ['Starter', 'Slice it your way', 'Filter by time and product type, then see sales broken down by category.'],
+    ['Pro', 'Know your shop inside out', 'Explore collection-level sales, repeat customers, trends and what to design next.'],
+  ], 'features'),
+  features('Why designers trust us', 'The values behind the signal.', 'Useful, respectful and honest by design.', [
+    ['01', 'Your data stays yours', 'We never sell or share your operational data. It stays protected and used for your own signal.'],
+    ['02', 'We build what you need', 'Features follow what designers ask for and where the evidence shows real value.'],
+    ['03', 'We keep it real', 'Honest numbers, clear limits, no hype and no pressure.'],
+    ['04', 'By a designer, for designers', 'Every decision is tested against whether it would actually help an independent designer.'],
+    ['05', "We're human too", 'Built by a designer and her techy best friend, with support from actual people.'],
+    ['06', 'Wherever you design', 'Mobile, tablet and desktop are included on every plan.'],
+  ], 'values', 'signature'),
+  moduleBlock('pricing-plans', {
+    eyebrow: 'Skip the maths',
+    heading: 'Pricing: find your fit.',
+    introduction: "Start free. Upgrade whenever you're ready to see more of your signal.",
+    footnote: 'Mobile, tablet and desktop are included on every plan. Plus support from an actual human.',
+    sectionId: 'pricing',
+    items: [
+      { name: 'Free', price: '$0', cadence: '', description: 'Start with the core workflow.', features: 'Revenue and sales overview\nSales growth over time\nYour top 3 selling designs', actionLabel: 'Start free', actionUrl: 'https://salespulse.creatorsignal.me/sign-up', emphasis: 'default' },
+      { name: 'Starter', price: '$5 AUD', cadence: 'per month', description: 'Build a durable sales record.', features: 'Everything in Free\nFilter by time and product type\nYour top 6 selling designs\nSales broken down by category', actionLabel: 'Start Starter', actionUrl: 'https://salespulse.creatorsignal.me/sign-up', emphasis: 'featured' },
+      { name: 'Pro', price: '$10 AUD', cadence: 'per month', description: 'Use the complete analysis experience.', features: "Everything in Starter\nCollection-level sales\nRepeat-customer insight\nWhat's trending and what to design next", actionLabel: 'Start Pro', actionUrl: 'https://salespulse.creatorsignal.me/sign-up', emphasis: 'default' },
+    ],
+  }),
+  moduleBlock('founder-story', {
+    eyebrow: 'By a designer, for designers',
+    heading: 'About the founder: meet the maker.',
+    body: "<p>I'm a Spoonflower designer myself. I got tired of guessing what to design next with almost nothing to go on — just thirty days of history and a bare-bones chart, with no dollar figures or real story behind the numbers.</p><p>So I built the tool I wished existed: something that turns your own sales history into a clear signal you can actually see through your own thumbnails. I built it for myself, and for every designer who has wasted hours exporting to spreadsheets and still felt stuck guessing.</p>",
+    attribution: 'Lahni',
+    role: 'Founder, Creator Signal',
+    portrait: '',
+    portraitAlt: '',
+    sectionId: 'about',
+  }),
+  moduleBlock('faq', {
+    heading: 'FAQ: good to know.',
+    sectionId: 'faq',
+    items: [
+      { question: 'Is my Spoonflower data safe with you?', answer: 'Yes. We never sell or share your data. It is used only to show you your own sales clearly.' },
+      { question: 'Do I need to be good with spreadsheets or numbers?', answer: 'Not even a little. Creator Signal shows your sales as your own design thumbnails — no spreadsheets or scary graphs.' },
+      { question: 'Will this replace my Spoonflower dashboard?', answer: 'It works alongside it. Spoonflower still runs your shop; Creator Signal gives you the fuller picture.' },
+      { question: 'Can I cancel anytime?', answer: 'Anytime. There is no lock-in and no awkward email needed.' },
+      { question: "I'm just getting started and do not have many sales yet. Is this still for me?", answer: 'Yes. The Free plan is built for exactly that. Start there and upgrade whenever you are ready.' },
+      { question: 'Does this work on my phone?', answer: 'Yes. Mobile, tablet and desktop are all included.' },
+    ],
+  }),
+  callToAction('You have got this', 'Grow your Spoonflower shop with confidence.', 'Real signal, zero data-nerd required.', 'https://salespulse.creatorsignal.me/sign-up', 'Get started free', 'get-started'),
+]
 
 const earlyAccessPage: StarterPage = {
   id: 'early-access',

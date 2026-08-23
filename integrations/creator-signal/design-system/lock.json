@@ -2,7 +2,7 @@
   "schema": "creator-signal-design-system-lock/v1",
   "source": {
     "repository": "https://github.com/creator-signal/sales-pulse.git",
-    "revision": "dac774a794bf41c3e5bc4318c97858b364b3a68c",
+    "revision": "1afc33bd5a8037bb2ec79fb512423268b9b771bb",
     "package": "@creator-signal/design-system",
     "packageVersion": "0.1.0",
     "scopes": [
@@ -40,7 +40,7 @@
     {
       "source": "packages/design-system/generated/adapters.json",
       "target": "assets/design-system/adapters.json",
-      "sha256": "6d5513471e9d3bbeda32e250565d108f37b31007df6c921b3f04261a638200d8"
+      "sha256": "7c25aeb3dc0be963a7b1c6d177e195eff98d44840304733d2df6dec9ff02e296"
     },
     {
       "source": "packages/design-system/generated/token-metadata.json",

@@ -1,11 +1,11 @@
-# Creator Signal public-site acceptance baseline
+# Creator Signal deployed-site comparison
 
-The current public site is the visual, behavioural and content baseline for
-every production route in the Creator Signal pack. The implementation uses the
-governed Creator Signal Design System and authorable `creator-signal.site`
-components, but the resulting typography, colour, spacing, responsive layout,
-content, landmarks, integrations and metadata must preserve the production
-look and experience.
+This verifier is a deployment comparison between the current public site and a
+candidate. It is not the source baseline for the new reference design. Source
+acceptance is governed by `ACCEPTANCE.md` and its committed responsive visual
+baselines. Until the reference design is deployed, material visual differences
+from the current public site are expected and must be reviewed as the intended
+release change rather than described as source parity.
 
 Run the deterministic comparison against a local candidate:
 
@@ -25,8 +25,8 @@ returns HTTP 404, so the report captures its candidate output and metadata
 without claiming visual parity. Any other baseline failure remains a failed
 comparison. JavaScript is disabled for the deterministic pass so analytics,
 consent persistence and third-party form timing cannot make the visual result
-non-deterministic. Material pixel, component-section or semantic differences
-are release blockers. The report covers:
+non-deterministic. Unexplained pixel, component-section or semantic differences
+remain release blockers. The report covers:
 
 - full-page pixel comparison with a narrow anti-aliasing tolerance (0.2% of
   pixels and 0.1 mean channel delta);

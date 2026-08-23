@@ -130,7 +130,7 @@ export const creatorSignalHeroEntry: ComponentLibraryEntry = {
 
 export const creatorSignalHeaderEntry = siteEntry({
   id: 'creator-signal.site.header',
-  version: '1.1.0',
+  version: '1.2.0',
   name: 'Site Header',
   description: 'Pack-owned brand identity and primary navigation inherited from the site template.',
   tags: ['header', 'navigation', 'brand', 'shared'],
@@ -863,7 +863,7 @@ function patternEntry(input: {
 }
 
 export const creatorSignalPatternEntries: readonly ComponentLibraryEntry[] = [
-  patternEntry({ id: 'creator-signal.site.pattern.home-v2-page', version: '1.1.0', name: 'Home Page', description: 'The production-look Creator Signal home composition with a hero, focused feature grid and one next step.', tags: ['home', 'landing page', 'sales pulse'], usage: 'Use as a starting composition for the Creator Signal Home route, then freely edit its child components.', accessibility: 'Keep heading order and action labels clear as the composition changes.' }),
+  patternEntry({ id: 'creator-signal.site.pattern.home-v2-page', version: '2.0.0', name: 'Home Page', description: 'The governed Creator Signal reference flow from the campaign promise through proof, product detail, pricing, founder context and one final next step.', tags: ['home', 'landing page', 'sales pulse'], usage: 'Use as the reference-design starting composition for the Creator Signal Home route, then freely edit its child components.', accessibility: 'Keep heading order and action labels clear as the composition changes, and keep signup actions pointed at the Sales Pulse application.' }),
   patternEntry({ id: 'creator-signal.site.pattern.early-access-page', name: 'Early Access Page', description: 'A launch-preview composition with one governed wishlist form and supporting product context.', tags: ['early access', 'wishlist', 'launch', 'form'], usage: 'Use as a starting composition for an Early Access route; add, remove or configure components as needed.', accessibility: 'Preserve labelled forms, explicit permission copy and readable provider states.' }),
   patternEntry({ id: 'creator-signal.site.pattern.content-page', name: 'Content Page', description: 'Hero, long-form content and one next action.', tags: ['content page', 'editorial', 'cta'], usage: 'Use as a starting composition for an explanatory page, then adjust its sections freely.', accessibility: 'Keep headings logical inside the rich-text section.' }),
   patternEntry({ id: 'creator-signal.site.pattern.product-page', name: 'Product Page', description: 'Hero, governed feature grid and one product action.', tags: ['product', 'features', 'cta'], usage: 'Use as a starting composition for a product overview, then adjust its components freely.', accessibility: 'Keep card content scannable and action labels specific.' }),

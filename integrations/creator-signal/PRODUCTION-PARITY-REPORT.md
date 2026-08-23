@@ -1,8 +1,10 @@
-# Creator Signal production-look and authoring parity
+# Creator Signal historical production-look and authoring parity
 
 Generated: 2026-08-21
 
-This report is the durable reference for the Creator Signal public-site migration. It compares the current public site with the authorable Instatic candidate across every governed route and records the component and template contract used to reproduce each page.
+> Historical evidence: this report records the accepted 2026-08-21 production-look candidate. Plugin 0.5.0 intentionally supersedes that visual baseline with the governed reference design documented in `WEBSITE-V2.md` and `ACCEPTANCE.md`.
+
+This report compares the then-current public site with the authorable Instatic candidate across every governed route and records the component and template contract that was accepted at that time. It must not be read as the current source-design contract.
 
 ## Accepted candidate
 

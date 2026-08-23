@@ -86,7 +86,7 @@ Every row below is wrapped by the shared template. The sequence column lists onl
 
 | Route | Page | Opinionated page components in order |
 | --- | --- | --- |
-| `/` | Creator Signal | Hero → Feature Grid → Call to Action |
+| `/` | Creator Signal | Campaign Hero → Signal Strip → Signal Comparison → Feature Grid → Process Steps → Feature Grid → Feature Grid → Pricing Plans → Founder Story → FAQ → Call to Action |
 | `/products` | Products | Hero → Feature Grid → Call to Action |
 | `/products/sales-pulse` | Sales Pulse | Hero → Feature Grid → Call to Action |
 | `/features` | Features | Hero → Feature Grid |
@@ -124,7 +124,7 @@ instead of duplicating it as a second implementation.
 
 | Author need | Stable mapping | Implementation |
 | --- | --- | --- |
-| Home page | `creator-signal.site.pattern.home-v2-page` | Production-look Hero → Feature Grid → Call to Action flow; the stable ID is retained for migration compatibility |
+| Home page | `creator-signal.site.pattern.home-v2-page` | Reference-design eleven-section marketing flow; the stable ID is retained for migration compatibility |
 | Early Access page | `creator-signal.site.pattern.early-access-page` | Noindex preview with one governed wishlist form |
 | Hero | `creator-signal.site.pattern.hero` | Existing Hero Visual Component |
 | Content page | `creator-signal.site.pattern.content-page` | Hero → Rich Text Section → Call to Action |

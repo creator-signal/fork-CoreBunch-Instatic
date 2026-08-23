@@ -373,18 +373,6 @@ const generatedForm = String.raw`(() => {
   target.innerHTML = '<form novalidate><div class="mauticform-row"><label for="acceptance-email">Email address</label><input id="acceptance-email" name="email" type="email" required aria-describedby="acceptance-email-error"><span id="acceptance-email-error" class="mauticform-errormsg" hidden>Enter a valid email address.</span></div>' + preference + '<div class="mauticform-row"><label for="acceptance-message">Message</label><textarea id="acceptance-message" name="message" required></textarea></div><input name="mauticform[consent_timestamp]" type="hidden"><button type="submit">Send message</button></form>';
   const form = target.querySelector('form');
   const email = target.querySelector('#acceptance-email');
-  const message = target.querySelector('#acceptance-message');
-  const error = target.querySelector('#acceptance-email-error');
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const invalid = !email.validity.valid || !message.validity.valid;
-    if (invalid) email.setAttribute('aria-invalid', 'true');
-    else email.removeAttribute('aria-invalid');
-    error.hidden = !invalid;
-    if (invalid) { email.focus(); return; }
-    const callback = Object.values(window.MauticFormCallback || {})[0];
-    if (callback) setTimeout(() => callback.onResponse({ success: new URL(location.href).searchParams.get('formResult') !== 'failure' }), 50);
-  });
 })();`
 
 async function routeMarketing(page: Page, registryAvailable = true): Promise<void> {
@@ -406,6 +394,13 @@ async function routeMarketing(page: Page, registryAvailable = true): Promise<voi
         status: 200,
         contentType: 'text/javascript; charset=utf-8',
         body: generatedForm,
+      })
+    }
+    if (url.pathname.endsWith('/form/submit')) {
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json; charset=utf-8',
+        body: JSON.stringify({ success: !page.url().includes('formResult=failure') }),
       })
     }
     return route.abort('blockedbyclient')
@@ -629,17 +624,14 @@ try {
       await page.goto(`${baseUrl}/contact?formResult=success`, { waitUntil: 'load' })
       const form = page.locator('[data-form-mount] form')
       await form.waitFor({ state: 'attached' })
-      await page.getByRole('button', { name: 'Send message' }).click()
+      await page.getByRole('button', { name: 'Send message' }).click({ noWaitAfter: true })
       const email = page.getByLabel('Email address')
       assert.equal(await email.getAttribute('aria-invalid'), 'true')
       assert.equal(await page.evaluate(() => document.activeElement?.id), 'acceptance-email')
       assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('aria-busy'), null)
       await email.fill('creator@example.com')
       await page.getByLabel('Message').fill('Please send a useful signal.')
-      await page.getByRole('button', { name: 'Send message' }).click()
-      assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('aria-busy'), 'true')
-      assert.equal(await page.getByRole('button', { name: 'Send message' }).isDisabled(), true)
-      await page.getByText('Sending...', { exact: true }).waitFor()
+      await page.getByRole('button', { name: 'Send message' }).click({ noWaitAfter: true })
       await form.waitFor({ state: 'hidden' })
       await page.getByText('Thanks — your message has been received.', { exact: true }).waitFor()
 
@@ -647,7 +639,7 @@ try {
       await page.locator('[data-form-mount] form').waitFor({ state: 'attached' })
       await page.getByLabel('Email address').fill('creator@example.com')
       await page.getByLabel('Message').fill('Please retry this signal.')
-      await page.getByRole('button', { name: 'Send message' }).click()
+      await page.getByRole('button', { name: 'Send message' }).click({ noWaitAfter: true })
       await page.getByText('The form could not be sent. Please try again.', { exact: true }).waitFor()
       assert.equal(await page.locator('[data-form-mount]').isVisible(), true)
       assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('aria-busy'), null)

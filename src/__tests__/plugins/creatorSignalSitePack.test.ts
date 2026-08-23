@@ -203,24 +203,22 @@ describe('Creator Signal site pack', () => {
       const entry = creatorSignalComponentLibraryEntries.find(
         (candidate) => candidate.id === entryId,
       )
-      expect(entry?.constraints.allowedDocumentKinds).toEqual(['template'])
-      expect(entry?.constraints.maxInstancesPerDocument).toBe(1)
+      expect(entry?.constraints.allowedDocumentKinds).toEqual(['page', 'template'])
+      expect(entry?.constraints.maxInstancesPerDocument).toBeUndefined()
       expect(entry?.documentation.usage).toContain('Edit once')
       expect(entry?.documentation.usage).toContain('shared template')
       expect(entry?.fields.every((field) => Boolean(field.description))).toBe(true)
     }
 
-    for (const entry of creatorSignalComponentLibraryEntries.filter(
-      (candidate) => !candidate.constraints.allowedDocumentKinds?.includes('template'),
-    )) {
-      expect(entry.constraints.allowedDocumentKinds).toEqual(['page'])
+    for (const entry of creatorSignalComponentLibraryEntries) {
+      expect(entry.constraints.allowedDocumentKinds).toEqual(['page', 'template'])
     }
 
     expect(creatorSignalRecoveryStateEntry.constraints.allowedDocumentKinds)
       .toEqual(['page', 'template'])
     expect(creatorSignalPatternEntries.find(
       (entry) => entry.id === 'creator-signal.site.pattern.not-found-state',
-    )?.constraints.allowedDocumentKinds).toEqual(['template'])
+    )?.constraints.allowedDocumentKinds).toEqual(['page', 'template'])
   })
 
   it('uses governed leaf components with typed repeaters instead of authored child slots', () => {
@@ -270,9 +268,7 @@ describe('Creator Signal site pack', () => {
       expect(root?.catalogueInstance?.pattern?.authorableNodeIds).toHaveLength(
         root?.children.length ?? 0,
       )
-      expect(new Set(entry.constraints.allowedChildEntryIds)).toEqual(new Set(
-        root?.children.map((nodeId) => fragment?.nodes[nodeId]?.catalogueInstance?.entryId),
-      ))
+      expect(entry.constraints.allowedChildEntryIds).toBeUndefined()
     }
   })
 

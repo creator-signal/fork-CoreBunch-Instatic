@@ -4,7 +4,6 @@ import type {
   PublicAuthoringPolicy,
   SiteDocument,
 } from '@core/page-tree'
-import { deepEqual } from '@core/utils/deepEqual'
 import type { ComponentLibraryRegistry } from './registry'
 import type {
   ComponentLibraryEntry,
@@ -120,17 +119,6 @@ export function analysePublicAuthoringPage(
   const allowedEntries = new Set([...allowedComponents, ...allowedPatterns])
   const allowedStructuralModules = new Set(policy.allowedStructuralModuleIds)
   const protectedTemplate = policy.templates.find((candidate) => candidate.pageId === page.id)
-  const patternRoots = Object.values(page.nodes).filter((node) =>
-    Boolean(node.catalogueInstance && allowedPatterns.has(node.catalogueInstance.entryId)),
-  )
-  const managedPatternNodeIds = new Set<string>()
-  for (const root of patternRoots) {
-    managedPatternNodeIds.add(root.id)
-    for (const nodeId of root.catalogueInstance?.pattern?.authorableNodeIds ?? []) {
-      managedPatternNodeIds.add(nodeId)
-    }
-  }
-
   if (protectedTemplate) {
     if (!page.template) {
       diagnostics.push(diagnostic(
@@ -153,13 +141,6 @@ export function analysePublicAuthoringPage(
         ))
       }
     }
-  } else if (patternRoots.length !== 1) {
-    diagnostics.push(diagnostic(
-      'composition.pattern-count',
-      `${pagePath}.nodes`,
-      `The governed document contains ${patternRoots.length} approved pattern roots; exactly one is required.`,
-      'Replace the document body with one approved public-authoring pattern.',
-    ))
   }
 
   const entryForNode = (node: PageNode): ComponentLibraryEntry | undefined =>
@@ -168,8 +149,6 @@ export function analysePublicAuthoringPage(
   for (const node of Object.values(page.nodes)) {
     const nodePath = `${pagePath}.nodes.${node.id}`
     const metadata = node.catalogueInstance
-    const managedPatternNode = managedPatternNodeIds.has(node.id)
-
     if (hasAuthoredAppearance(node)) {
       diagnostics.push(diagnostic(
         'appearance.component-owned',
@@ -180,24 +159,12 @@ export function analysePublicAuthoringPage(
     }
 
     if (!metadata) {
-      if (!managedPatternNode && !allowedStructuralModules.has(node.moduleId)) {
+      if (!allowedStructuralModules.has(node.moduleId)) {
         diagnostics.push(diagnostic(
           'composition.structural-module-not-allowed',
           `${nodePath}.moduleId`,
           `Ungoverned module "${node.moduleId}" is not approved public scaffolding.`,
           'Use an allow-listed Component Library entry or pattern.',
-        ))
-      } else if (
-        !protectedTemplate &&
-        patternRoots.length === 1 &&
-        node.id !== page.rootNodeId &&
-        !managedPatternNode
-      ) {
-        diagnostics.push(diagnostic(
-          'composition.outside-pattern',
-          nodePath,
-          'A public page node sits outside its single governed pattern boundary.',
-          'Move the content into an approved pattern field or replace the page pattern.',
         ))
       }
       continue
@@ -253,16 +220,7 @@ export function analysePublicAuthoringPage(
       ))
     }
     if (implementation.type === 'pattern') {
-      diagnostics.push(...validatePolicyPatternBoundary(page, node, policy))
       continue
-    }
-    if (!managedPatternNode && !protectedTemplate) {
-      diagnostics.push(diagnostic(
-        'composition.component-outside-pattern',
-        nodePath,
-        `Component "${entry.id}" is outside the document pattern.`,
-        'Insert the component through an approved pattern slot.',
-      ))
     }
     diagnostics.push(...validateComponentNode(page, node, entry, policy))
   }
@@ -270,7 +228,11 @@ export function analysePublicAuthoringPage(
   const titleCount = Object.values(page.nodes).filter((node) =>
     policy.content.pageTitleEntryIds.includes(node.catalogueInstance?.entryId ?? ''),
   ).length
-  if (!protectedTemplate && titleCount !== policy.content.pageTitleCount) {
+  if (
+    !protectedTemplate &&
+    policy.content.pageTitleCount !== undefined &&
+    titleCount !== policy.content.pageTitleCount
+  ) {
     diagnostics.push(diagnostic(
       'content.page-title-count',
       `${pagePath}.nodes`,
@@ -281,7 +243,11 @@ export function analysePublicAuthoringPage(
   const primaryActionCount = Object.values(page.nodes).filter((node) =>
     policy.content.primaryActionEntryIds.includes(node.catalogueInstance?.entryId ?? ''),
   ).length
-  if (!protectedTemplate && primaryActionCount > policy.content.primaryActionMaxCount) {
+  if (
+    !protectedTemplate &&
+    policy.content.primaryActionMaxCount !== undefined &&
+    primaryActionCount > policy.content.primaryActionMaxCount
+  ) {
     diagnostics.push(diagnostic(
       'content.primary-action-count',
       `${pagePath}.nodes`,
@@ -413,42 +379,6 @@ function validateRichTextMarkup(
     ))
   }
   return diagnostics
-}
-
-function validatePolicyPatternBoundary(
-  page: Page,
-  root: PageNode,
-  policy: PublicAuthoringPolicy,
-): PublicAuthoringDiagnostic[] {
-  const path = `pages.${page.id}.nodes.${root.id}`
-  const entryId = root.catalogueInstance?.entryId ?? ''
-  const pattern = policy.patterns.find((candidate) => candidate.entryId === entryId)
-  if (!pattern) {
-    return [diagnostic(
-      'composition.pattern-invalid',
-      path,
-      `Pattern "${entryId}" has no exact policy composition.`,
-      'Replace the pattern from the current owning plugin pack.',
-    )]
-  }
-  const authorableNodeIds = root.catalogueInstance?.pattern?.authorableNodeIds ?? []
-  const childEntryIds = authorableNodeIds.map(
-    (nodeId) => page.nodes[nodeId]?.catalogueInstance?.entryId ?? '<missing>',
-  )
-  if (
-    root.moduleId !== pattern.rootModuleId ||
-    !deepEqual(root.props, pattern.rootProps) ||
-    !deepEqual(root.children, authorableNodeIds) ||
-    !deepEqual(childEntryIds, pattern.childEntryIds)
-  ) {
-    return [diagnostic(
-      'composition.pattern-invalid',
-      path,
-      `Pattern "${entryId}" no longer matches its policy-owned root and child sequence.`,
-      'Replace the damaged pattern with a fresh Component Library instance.',
-    )]
-  }
-  return []
 }
 
 function validateFieldValue(

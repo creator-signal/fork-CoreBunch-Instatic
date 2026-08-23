@@ -95,11 +95,11 @@ describe('Creator Signal 0.2.0 content migration', () => {
       alreadyCurrent: 0,
       authoredContent: 0,
       missing: 0,
-      newPages: 1,
+      newPages: 3,
       additionalPages: 0,
       template: 'add',
       notFoundTemplate: 'add',
-      rowsInMigration: 26,
+      rowsInMigration: 28,
     })
     expect(result.report.apply).toMatchObject({
       strategy: 'merge-overwrite',
@@ -107,9 +107,13 @@ describe('Creator Signal 0.2.0 content migration', () => {
     })
     expect(result.manifest?.site).toBeUndefined()
     expect(result.manifest?.media).toBeUndefined()
-    expect(result.manifest?.rows).toHaveLength(26)
+    expect(result.manifest?.rows).toHaveLength(28)
     expect(result.manifest?.rows.some((row) =>
       row.id === 'creator-signal.site/page/early-access')).toBe(true)
+    expect(result.manifest?.rows.some((row) =>
+      row.id === 'creator-signal.site/page/waitlist')).toBe(true)
+    expect(result.manifest?.rows.some((row) =>
+      row.id === 'creator-signal.site/page/beta')).toBe(true)
     expect(result.manifest?.tables[0].fields.some((field) => field.id === 'seo')).toBe(true)
 
     const templateRow = result.manifest?.rows.find((row) =>
@@ -152,7 +156,7 @@ describe('Creator Signal 0.2.0 content migration', () => {
 
     expect(result.report.ready).toBe(true)
     expect(result.report.summary).toMatchObject({
-      alreadyCurrent: 24,
+      alreadyCurrent: 26,
       newPages: 0,
       template: 'repair',
       notFoundTemplate: 'current',

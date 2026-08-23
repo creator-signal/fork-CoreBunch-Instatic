@@ -771,7 +771,7 @@ try {
     try {
       await page.goto(baseUrl, { waitUntil: 'load' })
       await waitForPage(page)
-      const before = await page.locator('.campaign-art').evaluate((node) => node.getBoundingClientRect().height)
+      const before = await page.locator('.campaign-hero-art').evaluate((node) => node.getBoundingClientRect().height)
       assert(before >= 250)
       await page.locator('h1').evaluate((node) => {
         node.textContent = `CreatorSignal${'UnbrokenSignal'.repeat(40)}`

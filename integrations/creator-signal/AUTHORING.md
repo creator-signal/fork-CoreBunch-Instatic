@@ -19,8 +19,8 @@ unknown-route recovery content.
 - Components placed in the shared template are inherited by its pages; components placed in a page affect that page only.
 - Components may be added, reordered or removed freely.
 - Every starter route materializes one stable `creator-signal.site.pattern.*` catalogue entry; it is an editable starting composition, not a fixed route contract.
-- Creator Signal components are opinionated leaves. Pattern roots are governed containers; neither model exposes arbitrary child slots.
-- `bun run verify:creator-signal-authoring-tasks` writes the current 34-entry task matrix to `.tmp/creator-signal-authoring-tasks/` and fails when the catalogue drifts from a supported authoring task.
+- Creator Signal components are opinionated leaves except for **Two Column Layout**, a real container with independently editable Left and Right slots. Pattern roots remain editable starting compositions.
+- `bun run verify:creator-signal-authoring-tasks` writes the current 37-entry task matrix to `.tmp/creator-signal-authoring-tasks/` and fails when the catalogue drifts from a supported authoring task.
 - `bun run verify:creator-signal-parity` writes the browsable side-by-side report to `.tmp/creator-signal-parity/index.html`.
 - `bun run verify:creator-signal-public-acceptance` verifies the locally
   published pack against the committed responsive, accessibility and visual
@@ -92,7 +92,7 @@ Every row below is wrapped by the shared template. The sequence column lists onl
 | `/features` | Features | Hero → Feature Grid |
 | `/pricing` | Pricing | Hero → Feature Grid → Call to Action |
 | `/contact` | Contact | Hero → Managed Form |
-| `/feedback` | Feedback | Hero → Managed Form |
+| `/feedback` | Feedback | Hero → Two Column Layout (Left: Section Intro; Right: Embedded CRM Form) |
 | `/wishlist` | Join the wishlist | Hero → Managed Form |
 | `/early-access` | Creator Signal Early Access | Campaign Hero → Signal Strip → Feature Grid → Managed Form → Feature Grid → Feature Grid → Testimonial |
 | `/waitlist` | Join the waitlist | Hero → Managed Form |
@@ -134,6 +134,7 @@ instead of duplicating it as a second implementation.
 | CTA | `creator-signal.site.pattern.call-to-action` | Existing Call to Action component |
 | FAQ | `creator-signal.site.pattern.faq` | Existing native-disclosure FAQ component |
 | Contact/intake page | `creator-signal.site.pattern.contact-page` | Hero → capability-backed Managed Form |
+| Feedback page | `creator-signal.site.pattern.feedback-page` | Hero → Two Column Layout with an independent Section Intro in the Left slot and Embedded CRM Form in the Right slot |
 | Legal/trust document | `creator-signal.site.pattern.legal-trust-page` | Versioned Public Document |
 | Article/content page | `creator-signal.site.pattern.article-content-page` | Hero → Rich Text Section |
 | Comparison section | `creator-signal.site.pattern.comparison-section` | Captioned row-and-column Comparison Section |
@@ -172,7 +173,9 @@ pack: they are for copyable structures that may diverge after insertion.
 | Recovery State | Page or template | Empty/error/offline/not-found kind, heading, explanation and recovery action | None | None |
 | Public Document | Page or template | Eyebrow, document heading, summary, one formatted document field, date modified | None | None |
 | Managed Form | Page or template | Eyebrow, heading, introduction, success message and section anchor | Provider fields are resolved from the governed registry | None |
-| Embedded CRM Form | Page or template | CRM form URL, iframe title, fallback copy and bounded resize heights | Same-origin observation or CRM `postMessage` resize events | None |
+| Section Intro | Page or template, including layout slots | Eyebrow, heading, introduction and section anchor | None | None |
+| Two Column Layout | Page or template | Component order and content within each column | None | Left and Right |
+| Embedded CRM Form | Page or template, including layout slots | CRM form URL, iframe title, fallback copy and bounded resize heights | Same-origin observation or CRM `postMessage` resize events | None |
 
 The catalogue contract lives in `integrations/creator-signal/component-library.ts`. The semantic renderers live in `integrations/creator-signal/modules/site-components/index.ts`, `integrations/creator-signal/modules/mautic-form.ts` and `integrations/creator-signal/modules/crm-iframe-form.ts`. They preserve headings, landmarks, accessible names and schema.org metadata while keeping markup structure out of routine authoring.
 
@@ -181,7 +184,29 @@ The catalogue contract lives in `integrations/creator-signal/component-library.t
 Use **Embedded CRM Form** when Mautic exposes a complete HTTPS form page. The
 author chooses its Mautic URL, accessible iframe title, fallback link text and
 bounded initial/minimum/maximum height. The visible fallback link always opens
-the same form in a new tab.
+the same form in a new tab. The component owns only the embed: place it in the
+Right slot of **Two Column Layout** for the Feedback treatment, and place an
+independent **Section Intro** or another suitable component in the Left slot.
+The built-in Teaser is not used by the starter because its contract requires a
+navigation destination; static form-introduction copy does not.
+
+The seeded Feedback tree is:
+
+```text
+Feedback Page
+├── Creator Signal Hero
+└── Two Column Layout
+    ├── Left
+    │   └── Section Intro
+    └── Right
+        └── Embedded CRM Form
+```
+
+Every named node above has its own Component Library entry and remains
+selectable. A `Missing library entry` label means the editor is running stale
+plugin catalogue records, not that the content has been intentionally hidden.
+Reconcile/install plugin 0.6.0 and use the previewed content migration for an
+untouched retained Feedback page; the migration never publishes automatically.
 
 If the Mautic form and public page have the same origin, Instatic observes the
 iframe document and updates its height automatically. For the usual

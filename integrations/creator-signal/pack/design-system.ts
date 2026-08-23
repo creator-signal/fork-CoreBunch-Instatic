@@ -262,6 +262,25 @@ p { line-height: var(--cs-type-body-large-line-height); }
   margin: 0 auto;
   padding: var(--cs-spacing-16) 0;
 }
+.two-column-layout {
+  display: grid;
+  width: calc(100% - (2 * var(--cs-spacing-8)));
+  max-width: var(--cs-size-content-max);
+  margin: 0 auto;
+  grid-template-columns: minmax(0, .8fr) minmax(20rem, 1.2fr);
+  align-items: start;
+  gap: var(--cs-spacing-12);
+  padding: var(--cs-spacing-16) 0;
+}
+.two-column-layout-column { min-width: 0; }
+.section-intro.column-section-intro { max-width: 32rem; margin-bottom: 0; padding-top: var(--cs-spacing-3); }
+.column-section-intro h2 { margin: 0; }
+.column-section-intro > p:last-child {
+  margin: var(--cs-spacing-3) 0 0;
+  color: var(--cs-text-secondary);
+  font-size: var(--cs-type-body-large-size);
+  line-height: var(--cs-type-body-large-line-height);
+}
 .section-intro { max-width: 40rem; margin: 0 0 var(--cs-spacing-10); }
 .section-intro > p:not(.eyebrow) { margin: var(--cs-spacing-3) 0 0; color: var(--cs-text-secondary); font-size: var(--cs-type-body-large-size); }
 .feature-section[data-feature-tone="signature"] {
@@ -475,6 +494,8 @@ p { line-height: var(--cs-type-body-large-line-height); }
   .site-header nav a:not(.button) { display: none; }
   .hero-section, .campaign-hero { grid-template-columns: minmax(0, 1fr); }
   .hero-art, .campaign-hero-art { min-height: 20rem; }
+  .two-column-layout { grid-template-columns: 1fr; gap: var(--cs-spacing-8); }
+  .section-intro.column-section-intro { max-width: none; padding-top: 0; }
   .feature-grid, .feature-grid-1, .feature-grid-2, .feature-grid-3, .signal-comparison-grid, .pricing-grid, .founder-story-inner, .process-steps { grid-template-columns: 1fr; }
   .pricing-card ul { min-height: 0; }
   .cta-section { align-items: flex-start; flex-direction: column; }
@@ -488,7 +509,7 @@ p { line-height: var(--cs-type-body-large-line-height); }
   .site-brand small { display: none; }
   .site-header { padding-inline: var(--cs-spacing-4); }
   .site-header nav .button { padding-inline: var(--cs-spacing-4); font-size: var(--cs-type-body-small-size); }
-  .hero-section, .campaign-hero, .content-section, .signal-comparison, .process-section, .pricing-plans, .comparison-section, .recovery-state, .public-document { width: calc(100% - (2 * var(--cs-spacing-5))); }
+  .hero-section, .campaign-hero, .content-section, .two-column-layout, .signal-comparison, .process-section, .pricing-plans, .comparison-section, .recovery-state, .public-document { width: calc(100% - (2 * var(--cs-spacing-5))); }
   .hero-art, .campaign-hero-art, .founder-portrait { min-height: 17rem; }
   .feature-section[data-feature-tone="signature"] { width: 100%; padding-inline: var(--cs-spacing-5); }
   .signal-comparison-card, .pricing-card { padding: var(--cs-spacing-6); }

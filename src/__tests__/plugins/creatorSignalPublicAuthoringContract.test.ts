@@ -20,7 +20,7 @@ import { verifyCreatorSignalDesignSystem } from '../../../scripts/sync-creator-s
 
 describe('Creator Signal public authoring contract', () => {
   it('versions the freely authorable reference-design contract', () => {
-    expect(creatorSignalPublicAuthoringContract.version).toBe('1.2.0')
+    expect(creatorSignalPublicAuthoringContract.version).toBe('1.3.0')
   })
 
   it('depends on generated master design-system adapters instead of copied token values', () => {

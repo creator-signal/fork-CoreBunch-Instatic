@@ -36,6 +36,7 @@ export const creatorSignalPublicPatternCatalogue = [
   { layoutId: 'creator-signal.site.pattern.call-to-action', role: 'call-to-action', ownership: 'component', entryId: 'creator-signal.site.call-to-action' },
   { layoutId: 'creator-signal.site.pattern.faq', role: 'faq', ownership: 'component', entryId: 'creator-signal.site.faq' },
   { layoutId: 'creator-signal.site.pattern.contact-page', role: 'contact', ownership: 'pattern', patternId: 'creator-signal.site.pattern.contact-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.mautic-form'] },
+  { layoutId: 'creator-signal.site.pattern.feedback-page', role: 'feedback', ownership: 'pattern', patternId: 'creator-signal.site.pattern.feedback-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.two-column-layout'] },
   { layoutId: 'creator-signal.site.pattern.legal-trust-page', role: 'legal-trust', ownership: 'pattern', patternId: 'creator-signal.site.pattern.legal-trust-page', childEntryIds: ['creator-signal.site.public-document'] },
   { layoutId: 'creator-signal.site.pattern.article-content-page', role: 'article-content', ownership: 'pattern', patternId: 'creator-signal.site.pattern.article-content-page', childEntryIds: ['creator-signal.site.hero', 'creator-signal.site.rich-text-section'] },
   { layoutId: 'creator-signal.site.pattern.comparison-section', role: 'comparison-section', ownership: 'pattern', patternId: 'creator-signal.site.pattern.comparison-section', childEntryIds: ['creator-signal.site.comparison-section'] },
@@ -47,7 +48,7 @@ export const creatorSignalPublicPatternCatalogue = [
 
 export const creatorSignalPublicAuthoringContract = {
   id: 'creator-signal.public-authoring',
-  version: '1.2.0',
+  version: '1.3.0',
   designSystem: creatorSignalDesignSystemDependency,
   permittedComponents: [
     {
@@ -83,6 +84,8 @@ export const creatorSignalPublicAuthoringContract = {
     { entryId: 'creator-signal.site.recovery-state', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
     { entryId: 'creator-signal.site.public-document', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
     { entryId: 'creator-signal.site.mautic-form', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.section-intro', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.two-column-layout', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
     { entryId: 'creator-signal.site.crm-iframe-form', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
   ],
   permittedPatterns: creatorSignalPublicPatternCatalogue,
@@ -174,8 +177,11 @@ export const creatorSignalPublicAuthoringPolicy: PublicAuthoringPolicy = {
       .filter((entry) => entry.ownership === 'pattern')
       .map((entry) => [entry.patternId, ['default']]),
   ]),
-  allowedStructuralModuleIds: ['base.body', 'base.container', 'base.outlet'],
-  protectedVisualComponentIds: ['creator-signal.site/component/hero'],
+  allowedStructuralModuleIds: ['base.body', 'base.container', 'base.outlet', 'base.slot-instance'],
+  protectedVisualComponentIds: [
+    'creator-signal.site/component/hero',
+    'creator-signal.site/component/two-column-layout',
+  ],
   templates: [{
     pageId: 'creator-signal.site/page/site-template',
     requiredEntryIds: [],

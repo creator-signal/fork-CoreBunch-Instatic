@@ -20,6 +20,11 @@ import {
   retainedCreatorSignalTemplates040,
 } from '../../../integrations/creator-signal/migrations/retained-0.4.0-hashes'
 import {
+  retainedCreatorSignalNotFoundTemplates050,
+  retainedCreatorSignalPageHashes050,
+  retainedCreatorSignalTemplates050,
+} from '../../../integrations/creator-signal/migrations/retained-0.5.0-hashes'
+import {
   canonicalPageCellsSha256,
   canonicalSha256,
   prepareCreatorSignalContentMigration,
@@ -239,6 +244,23 @@ describe('Creator Signal 0.2.0 content migration', () => {
       hash: '718c048ac69f6742898cd1c1d8f0adc19ad08de4b03db120c0e9f97e6097be8b',
     }])
     expect(retainedCreatorSignalNotFoundTemplates040).toEqual([{
+      slug: 'creator-signal-not-found',
+      hash: 'a33bf95e80ba899965b419913adc057ec7f0e929a1f262b2a35acd71f7fe54fb',
+    }])
+    expect(Object.keys(retainedCreatorSignalPageHashes050)).toHaveLength(26)
+    expect(retainedCreatorSignalPageVersion(
+      'creator-signal.site/page/home',
+      retainedCreatorSignalPageHashes050['creator-signal.site/page/home']!,
+    )).toBe('0.5.0')
+    expect(retainedCreatorSignalPageVersion(
+      'creator-signal.site/page/waitlist',
+      retainedCreatorSignalPageHashes050['creator-signal.site/page/waitlist']!,
+    )).toBe('0.5.0')
+    expect(retainedCreatorSignalTemplates050).toEqual([{
+      slug: 'creator-signal-site-template',
+      hash: 'f5c3624648b6a2abee2318519ba98ada1edf8d6dab3bdc721a6e7a0ce50f1767',
+    }])
+    expect(retainedCreatorSignalNotFoundTemplates050).toEqual([{
       slug: 'creator-signal-not-found',
       hash: 'a33bf95e80ba899965b419913adc057ec7f0e929a1f262b2a35acd71f7fe54fb',
     }])

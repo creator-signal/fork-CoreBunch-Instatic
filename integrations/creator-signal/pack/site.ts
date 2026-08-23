@@ -8,13 +8,15 @@ import { componentLibraryPatternRegistry } from '@core/component-library'
 import type { Page, PageSeo } from '@core/page-tree'
 import { creatorSignalComponentLibraryEntries } from '../component-library'
 import { creatorSignalBrandAssets } from '../design-system/contract'
-import { consentBanner, siteFooter, siteHeader } from '../modules/site-components'
+import crmIframeForm from '../modules/crm-iframe-form'
+import { consentBanner, sectionIntro, siteFooter, siteHeader } from '../modules/site-components'
 import {
   creatorSignalPatternForRole,
   creatorSignalPublicAuthoringPolicy,
 } from '../public-authoring-contract'
 import { creatorSignalRenderProfile } from './design-system'
 import { heroComponent, heroParamIds } from './hero-component'
+import { twoColumnComponent, twoColumnSlotIds } from './two-column-component'
 
 interface ModuleBlock {
   kind: 'module'
@@ -29,7 +31,16 @@ interface HeroBlock {
   props: Record<string, unknown>
 }
 
-type PageBlock = ModuleBlock | HeroBlock
+type LeafBlock = ModuleBlock | HeroBlock
+
+interface TwoColumnBlock {
+  kind: 'two-column'
+  entryId: 'creator-signal.site.two-column-layout'
+  componentId: typeof twoColumnComponent.id
+  slots: Record<(typeof twoColumnSlotIds)[keyof typeof twoColumnSlotIds], LeafBlock[]>
+}
+
+type PageBlock = LeafBlock | TwoColumnBlock
 
 interface StarterPage {
   id: string
@@ -48,6 +59,7 @@ type OwnedPagePatternRole =
   | 'pricing'
   | 'features'
   | 'contact'
+  | 'feedback'
   | 'legal-trust'
   | 'article-content'
   | 'not-found-state'
@@ -174,6 +186,27 @@ const managedForm = (props: Record<string, unknown>): ModuleBlock => ({
     registryPath: '/media/creator-signal/forms-v1.js',
     ...props,
   },
+})
+
+const sectionIntroduction = (props: Record<string, unknown>): ModuleBlock => ({
+  kind: 'module',
+  entryId: 'creator-signal.site.section-intro',
+  moduleId: sectionIntro.id,
+  props,
+})
+
+const embeddedCrmForm = (props: Record<string, unknown>): ModuleBlock => ({
+  kind: 'module',
+  entryId: 'creator-signal.site.crm-iframe-form',
+  moduleId: crmIframeForm.id,
+  props: { ...crmIframeForm.defaults, ...props },
+})
+
+const twoColumn = (left: LeafBlock[], right: LeafBlock[]): TwoColumnBlock => ({
+  kind: 'two-column',
+  entryId: 'creator-signal.site.two-column-layout',
+  componentId: twoColumnComponent.id,
+  slots: { left, right },
 })
 
 const publicDocument = (
@@ -426,6 +459,38 @@ const starterPages: StarterPage[] = legacyCreatorSignalStarterPages0111.map((pag
         : { ...block.props },
   })),
 }))
+
+const feedbackPage = starterPages.find((page) => page.slug === 'feedback')
+if (!feedbackPage) throw new Error('[creator-signal] Missing Feedback starter page.')
+feedbackPage.patternId = pagePatternId('feedback')
+feedbackPage.blocks = [
+  hero(
+    'Feedback',
+    'Help us make Creator Signal more useful.',
+    'Tell us what worked, what felt unclear and what would improve your experience. You can choose whether we may follow up about your feedback.',
+    '/legal/privacy',
+    'Read our privacy notice',
+  ),
+  twoColumn(
+    [sectionIntroduction({
+      eyebrow: 'Feedback',
+      heading: 'Share your feedback',
+      introduction: 'Required fields are identified in the form. Choose the follow-up option only if we may contact you about this feedback.',
+      sectionId: 'feedback-introduction',
+    })],
+    [embeddedCrmForm({
+      sectionId: 'feedback-form',
+      formUrl: 'https://marketing.creatorsignal.me/form/creator-signal-feedback',
+      iframeTitle: 'Creator Signal feedback form',
+      fallbackLabel: 'Open the feedback form in a new tab',
+      loadingMessage: 'Loading the feedback form…',
+      unavailableMessage: 'The feedback form cannot be displayed here right now.',
+      initialHeight: 640,
+      minimumHeight: 320,
+      maximumHeight: 2400,
+    })],
+  ),
+]
 
 const intakeStarterPages: StarterPage[] = intakeFormPages.map((page) => (
   {
@@ -723,6 +788,9 @@ function applyBlocks(pageSlug: string, blocks: PageBlock[]): void {
     const index = Number(rawIndex)
     const block = blocks[index]
     if (!block) throw new Error(`[creator-signal] Page "${pageSlug}" has an unknown block ${index}.`)
+    if (block.kind === 'two-column') {
+      throw new Error(`[creator-signal] Page "${pageSlug}" cannot compile a two-column layout from a flat placeholder.`)
+    }
 
     const version = entryVersion.get(block.entryId)
     if (!version) throw new Error(`[creator-signal] Missing Component Library entry "${block.entryId}".`)
@@ -741,6 +809,75 @@ function applyBlocks(pageSlug: string, blocks: PageBlock[]): void {
   }
   if (matched.size !== blocks.length) {
     throw new Error(`[creator-signal] Page "${pageSlug}" compiled ${matched.size}/${blocks.length} governed blocks.`)
+  }
+}
+
+function applyLeafBlock(
+  patternId: string,
+  node: Page['nodes'][string],
+  block: LeafBlock,
+  label: string,
+): void {
+  if (node.catalogueInstance?.entryId !== block.entryId) {
+    throw new Error(
+      `[creator-signal] Pattern "${patternId}" ${label} does not map to "${block.entryId}".`,
+    )
+  }
+  const expectedModuleId = block.kind === 'hero' ? 'base.visual-component-ref' : block.moduleId
+  if (node.moduleId !== expectedModuleId) {
+    throw new Error(
+      `[creator-signal] Pattern "${patternId}" ${label} uses "${node.moduleId}", expected "${expectedModuleId}".`,
+    )
+  }
+  node.props = block.kind === 'hero'
+    ? { componentId: heroComponent.id, propOverrides: block.props }
+    : { ...block.props }
+  node.children = []
+  node.classIds = []
+}
+
+function applyTwoColumnBlock(
+  patternId: string,
+  nodes: Page['nodes'],
+  node: Page['nodes'][string],
+  block: TwoColumnBlock,
+  label: string,
+): void {
+  if (
+    node.catalogueInstance?.entryId !== block.entryId ||
+    node.moduleId !== 'base.visual-component-ref'
+  ) {
+    throw new Error(
+      `[creator-signal] Pattern "${patternId}" ${label} is not the governed Two Column Layout.`,
+    )
+  }
+  node.props = { componentId: block.componentId, propOverrides: {} }
+  node.classIds = []
+
+  for (const slotName of [twoColumnSlotIds.left, twoColumnSlotIds.right] as const) {
+    const slotNode = node.children
+      .map((childId) => nodes[childId])
+      .find((child) => child?.moduleId === 'base.slot-instance' && child.props.slotName === slotName)
+    if (!slotNode) {
+      throw new Error(
+        `[creator-signal] Pattern "${patternId}" ${label} has no "${slotName}" slot.`,
+      )
+    }
+    const slotBlocks = block.slots[slotName]
+    if (slotNode.children.length !== slotBlocks.length) {
+      throw new Error(
+        `[creator-signal] Pattern "${patternId}" ${label} exposes ${slotNode.children.length}/${slotBlocks.length} "${slotName}" slot components.`,
+      )
+    }
+    for (const [slotIndex, slotBlock] of slotBlocks.entries()) {
+      const slotChild = nodes[slotNode.children[slotIndex]!]
+      if (!slotChild) {
+        throw new Error(
+          `[creator-signal] Pattern "${patternId}" ${label} has a missing "${slotName}" slot child.`,
+        )
+      }
+      applyLeafBlock(patternId, slotChild, slotBlock, `${label} ${slotName} component ${slotIndex}`)
+    }
   }
 }
 
@@ -783,22 +920,16 @@ function applyPagePattern(page: StarterPage): void {
   for (const [index, block] of page.blocks.entries()) {
     const nodeId = authorableNodeIds[index]!
     const node = fragment.nodes[nodeId]
-    if (!node || node.catalogueInstance?.entryId !== block.entryId) {
+    if (!node) {
       throw new Error(
-        `[creator-signal] Pattern "${page.patternId}" block ${index} does not map to "${block.entryId}".`,
+        `[creator-signal] Pattern "${page.patternId}" block ${index} is missing.`,
       )
     }
-    const expectedModuleId = block.kind === 'hero' ? 'base.visual-component-ref' : block.moduleId
-    if (node.moduleId !== expectedModuleId) {
-      throw new Error(
-        `[creator-signal] Pattern "${page.patternId}" block ${index} uses "${node.moduleId}", expected "${expectedModuleId}".`,
-      )
+    if (block.kind === 'two-column') {
+      applyTwoColumnBlock(page.patternId, fragment.nodes, node, block, `block ${index}`)
+    } else {
+      applyLeafBlock(page.patternId, node, block, `block ${index}`)
     }
-    node.props = block.kind === 'hero'
-      ? { componentId: heroComponent.id, propOverrides: block.props }
-      : { ...block.props }
-    node.children = []
-    node.classIds = []
   }
 
   for (const [nodeId, node] of Object.entries(fragment.nodes)) {
@@ -911,7 +1042,7 @@ for (const page of compiled.pages) stabilisePackPageNodeIds(page)
 const pack = definePack({
   pluginId: 'creator-signal.site',
   publicAuthoring: creatorSignalPublicAuthoringPolicy,
-  visualComponents: [heroComponent],
+  visualComponents: [heroComponent, twoColumnComponent],
   pages: compiled.pages,
   conditions: [],
 })

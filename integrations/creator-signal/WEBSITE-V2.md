@@ -56,10 +56,11 @@ mobile widths.
 
 ## Forms and early-access flow
 
-Public intake routes contain one Managed Form component whose alias resolves
-through the generated Mautic registry. Authors control the section heading,
-introduction and confirmation copy; provider field identifiers and generated
-markup are not duplicated in page content.
+Public intake routes other than Feedback contain one Managed Form component
+whose alias resolves through the generated Mautic registry. Authors control the
+section heading, introduction and confirmation copy; provider field identifiers
+and generated markup are not duplicated in page content. Feedback uses the
+standalone iframe composition documented below.
 
 `/early-access` remains `noindex, follow, noarchive` and contains exactly one
 `creator_signal_wishlist` form with the `early_access` campaign code:
@@ -81,16 +82,17 @@ one creator_signal_wishlist form
 
 The preference field is provider-owned and resolved from the governed registry.
 Permission copy is specific to the requested update and is not treated as
-general marketing consent. Contact, feedback, question, feature-request and
-error-report routes follow the same component and theme contract with their own
-governed aliases.
+general marketing consent. Contact, question, feature-request and error-report
+routes use Managed Form with their own governed aliases. Feedback instead uses
+an editable Two Column Layout with separate Section Intro and Embedded CRM Form
+components so its text and iframe can be selected, replaced or removed independently.
 
 ## Content lifecycle
 
-Pack pages are starter content for an empty installation. Plugin 0.5.0
+Pack pages are starter content for an empty installation. Plugin 0.6.0
 reconciles technical catalogue, policy, style and runtime records but does not
 overwrite authored pages. The explicit content migration recognises exact
-retained 0.1.11, 0.2.0-0.2.6, 0.3.5 and 0.4.0 starter content, produces a
+retained 0.1.11, 0.2.0-0.2.6, 0.3.5, 0.4.0 and 0.5.0 starter content, produces a
 reviewable `merge-overwrite` archive, and blocks the complete migration if any
 page or template contains an unrecognised authored difference.
 

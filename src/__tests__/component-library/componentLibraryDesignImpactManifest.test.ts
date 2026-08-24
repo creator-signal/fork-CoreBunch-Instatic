@@ -22,6 +22,10 @@ import {
   creatorSignalPluginIdentity,
 } from '../../../integrations/creator-signal/plugin-contract'
 import {
+  CREATOR_SIGNAL_SPECIMEN_BUNDLE_REFERENCE,
+  validateCreatorSignalComponentSpecimenBundle,
+} from '../../../scripts/lib/creator-signal-component-specimens'
+import {
   buildDesignImpactManifest,
   DESIGN_IMPACT_MANIFEST_SCHEMA_VERSION,
   validateDesignImpactManifest,
@@ -35,6 +39,10 @@ const manifestPath = resolve(
 const designSystemLockPath = resolve(
   import.meta.dir,
   '../../../integrations/creator-signal/design-system/lock.json',
+)
+const specimenBundlePath = resolve(
+  import.meta.dir,
+  '../../../integrations/creator-signal/specimens/manifest.json',
 )
 
 const DesignSystemLockSchema = Type.Object(
@@ -54,6 +62,14 @@ const lockResult = safeParseJson(
   DesignSystemLockSchema,
 )
 if (!lockResult.ok) throw lockResult.error
+const specimenBundleResult = safeParseJson(
+  readFileSync(specimenBundlePath, 'utf8'),
+  Type.Unknown(),
+)
+if (!specimenBundleResult.ok) throw specimenBundleResult.error
+const specimenBundle = validateCreatorSignalComponentSpecimenBundle(
+  specimenBundleResult.value,
+)
 
 function manifestInput(): DesignImpactManifestInput {
   return {
@@ -88,6 +104,13 @@ function manifestInput(): DesignImpactManifestInput {
       ),
       templateRoles: new Set(['header', 'footer', 'skip-link']),
     },
+    specimenArtifacts: specimenBundle.entries.map((entry) => ({
+      schemaVersion: specimenBundle.schemaVersion,
+      bundleReference: CREATOR_SIGNAL_SPECIMEN_BUNDLE_REFERENCE,
+      entryId: entry.id,
+      htmlReference: entry.htmlReference,
+      contentHash: entry.htmlHash,
+    })),
   }
 }
 
@@ -112,6 +135,9 @@ describe('Component Library design-impact manifest', () => {
     expect(first.entries.every((entry) =>
       entry.contentHash.startsWith('sha256:') &&
       entry.specimen.contractReference.includes(entry.id)
+    )).toBe(true)
+    expect(first.entries.filter((entry) => entry.registryOrigin === 'plugin').every(
+      (entry) => entry.specimen.executable?.entryId === entry.id,
     )).toBe(true)
     expect(first.entries.find((entry) =>
       entry.definition.requirements.providerAdapters.length > 0
@@ -173,6 +199,13 @@ describe('Component Library design-impact manifest', () => {
     specimenDrift.entries[0]!.specimen.contractReference = 'not-the-entry'
     expect(() => validateDesignImpactManifest(specimenDrift)).toThrow(
       'invalid specimen contract reference',
+    )
+
+    const executableSpecimenDrift = structuredClone(manifest)
+    executableSpecimenDrift.entries.find((entry) => entry.specimen.executable)!
+      .specimen.executable!.entryId = 'creator-signal.site.not-this-entry'
+    expect(() => validateDesignImpactManifest(executableSpecimenDrift)).toThrow(
+      'executable specimen for another entry',
     )
 
     const hashDrift = structuredClone(manifest)

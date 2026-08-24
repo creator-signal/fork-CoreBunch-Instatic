@@ -195,8 +195,18 @@ runs against pages produced by Instatic's real public publishing pipeline.
 create, edit, revision, preview, publish, unpublish, media, pattern, legal,
 product-page, theme, catalogue-task and guardrail acceptance matrix. Run it
 with `bun run verify:creator-signal-content-workflows`; run
-`bun run verify:creator-signal-authoring-tasks` to write the 34-entry editor
+`bun run verify:creator-signal-authoring-tasks` to write the 37-entry editor
 and MCP task matrix from the registered catalogue.
+
+`integrations/creator-signal/specimens/manifest.json` is the generated,
+registry-driven design-impact bundle for all 37 current entries: 22 components
+and 15 patterns. Each row references one publisher-produced HTML document and
+retains field contracts, accessibility intent, fixture provenance, ordered
+pattern-child lineage, replaceable design-system assets and provider state.
+Regenerate it with `bun run component-library:creator-signal-specimens`, reject
+drift with `bun run component-library:creator-signal-specimens:check`, and run
+`bun run verify:creator-signal-component-specimens:browser` after the plugin
+build for the responsive, theme, accessibility and degraded-state matrix.
 
 `integrations/creator-signal/ACCESSIBILITY.md` records the entry-specific
 accessibility contracts and the equivalent editor/MCP diagnostic tool. Run

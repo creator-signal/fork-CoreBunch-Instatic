@@ -58,6 +58,16 @@ const DesignImpactSpecimenSchema = Type.Object(
   {
     contractReference: Type.String({ minLength: 1 }),
     rendered: Type.Union([ComponentLibraryPreviewSchema, Type.Null()]),
+    executable: Type.Optional(Type.Object(
+      {
+        schemaVersion: Type.String({ minLength: 1 }),
+        bundleReference: Type.String({ minLength: 1 }),
+        entryId: Type.String({ minLength: 1 }),
+        htmlReference: Type.String({ minLength: 1 }),
+        contentHash: Sha256Schema,
+      },
+      { additionalProperties: false },
+    )),
   },
   { additionalProperties: false },
 )
@@ -178,11 +188,31 @@ export interface DesignImpactManifestInput {
   plugins: readonly DesignImpactPluginInput[]
   designSystemLocks: readonly Static<typeof DesignSystemLockSchema>[]
   resolutions: DesignImpactResolutionInput
+  specimenArtifacts?: readonly DesignImpactSpecimenArtifactInput[]
+}
+
+export interface DesignImpactSpecimenArtifactInput {
+  schemaVersion: string
+  bundleReference: string
+  entryId: string
+  htmlReference: string
+  contentHash: `sha256:${string}`
 }
 
 export function buildDesignImpactManifest(
   input: DesignImpactManifestInput,
 ): DesignImpactManifest {
+  const specimenArtifacts = new Map<string, DesignImpactSpecimenArtifactInput>()
+  for (const artifact of input.specimenArtifacts ?? []) {
+    if (specimenArtifacts.has(artifact.entryId)) {
+      throw new Error(
+        `[design-impact] Duplicate executable specimen for "${artifact.entryId}".`,
+      )
+    }
+    assertRepositoryRelativeReference(artifact.bundleReference, artifact.entryId)
+    assertRepositoryRelativeReference(artifact.htmlReference, artifact.entryId)
+    specimenArtifacts.set(artifact.entryId, artifact)
+  }
   const entryInputs = [
     ...input.builtInEntries.map((definition) => ({
       registryOrigin: 'built-in' as const,
@@ -232,6 +262,9 @@ export function buildDesignImpactManifest(
       specimen: {
         contractReference: specimenContractReference(definition),
         rendered: definition.preview ?? null,
+        ...(specimenArtifacts.has(definition.id)
+          ? { executable: specimenArtifacts.get(definition.id)! }
+          : {}),
       },
     }
     assertRenderedSpecimenReference(definition)
@@ -240,6 +273,14 @@ export function buildDesignImpactManifest(
       contentHash: hashValue(entryWithoutHash),
     }
   })
+
+  for (const entryId of specimenArtifacts.keys()) {
+    if (!seenIds.has(entryId)) {
+      throw new Error(
+        `[design-impact] Executable specimen references unknown entry "${entryId}".`,
+      )
+    }
+  }
 
   const pluginVersions = [...input.plugins]
     .sort((left, right) => left.id.localeCompare(right.id))
@@ -339,6 +380,21 @@ export function validateDesignImpactManifest(
     if (entry.specimen.contractReference !== specimenContractReference(entry.definition)) {
       throw new Error(
         `[design-impact] Entry "${entry.id}" has an invalid specimen contract reference.`,
+      )
+    }
+    if (entry.specimen.executable) {
+      if (entry.specimen.executable.entryId !== entry.id) {
+        throw new Error(
+          `[design-impact] Entry "${entry.id}" has an executable specimen for another entry.`,
+        )
+      }
+      assertRepositoryRelativeReference(
+        entry.specimen.executable.bundleReference,
+        entry.id,
+      )
+      assertRepositoryRelativeReference(
+        entry.specimen.executable.htmlReference,
+        entry.id,
       )
     }
     assertRenderedSpecimenReference(entry.definition)
@@ -564,6 +620,17 @@ function assertRenderedSpecimenReference(entry: ComponentLibraryEntry): void {
   if (preview.type === 'image' && !preview.alt?.trim()) {
     throw new Error(
       `[design-impact] Entry "${entry.id}" image specimen requires alternative text.`,
+    )
+  }
+}
+
+function assertRepositoryRelativeReference(reference: string, entryId: string): void {
+  const isRepositoryRelative =
+    /^[A-Za-z0-9][A-Za-z0-9._/-]*$/.test(reference) &&
+    !reference.split('/').includes('..')
+  if (!isRepositoryRelative) {
+    throw new Error(
+      `[design-impact] Entry "${entryId}" has invalid executable specimen reference "${reference}".`,
     )
   }
 }

@@ -191,7 +191,10 @@ the complete built-in registry plus the selected Creator Signal plugin pack;
 documentation is not scraped and rendered markup is not copied. Each record
 retains the executable definition, real owner and implementation taxonomy,
 dependency limitations, accessibility gates, a stable specimen contract
-reference and any registry-owned rendered preview reference.
+reference and any registry-owned rendered preview reference. Creator Signal
+records also link to the executable specimen bundle at
+`integrations/creator-signal/specimens/manifest.json` and the exact published
+HTML artifact owned by that bundle.
 
 The manifest records the Instatic version, an executable-registry content
 revision, selected plugin versions, the Component Library entry schema version
@@ -238,6 +241,21 @@ Its machine-readable evidence is
 `.tmp/component-library-form-specimens/acceptance.json`. The handlers implement
 the public browser contract without external calls; server persistence,
 scanner and provider acceptance remain separate evidence classes.
+
+### Creator Signal executable specimens
+
+The Creator Signal executable specimens are generated separately with
+`bun run component-library:creator-signal-specimens`. The generator derives its
+inventory from `creatorSignalComponentLibraryEntries`, reuses exact starter
+route subtrees where available, materializes remaining patterns through
+`componentLibraryPatternRegistry`, and publishes every result through
+`publishPage`. Run
+`bun run component-library:creator-signal-specimens:check` to reject a missing,
+obsolete, duplicate or byte-drifted artifact. Run
+`bun run verify:creator-signal-component-specimens:browser` after building the
+plugin to exercise the complete local browser matrix. Provider entries stay in
+an explicit non-delivering state during that verifier; a rendered specimen does
+not claim an external provider response.
 
 ## Registration
 

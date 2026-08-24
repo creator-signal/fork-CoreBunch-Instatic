@@ -18,8 +18,8 @@ unknown-route recovery content.
 - Every catalogue component is available on ordinary pages and templates.
 - Components placed in the shared template are inherited by its pages; components placed in a page affect that page only.
 - Components may be added, reordered or removed freely.
-- Every starter route materializes one stable `creator-signal.site.pattern.*` catalogue entry; it is an editable starting composition, not a fixed route contract.
-- Creator Signal components are opinionated leaves except for **Two Column Layout**, a real container with independently editable Left and Right slots. Pattern roots remain editable starting compositions.
+- Starter patterns are insertion recipes only. They expand directly into ordinary page components and never persist a `creator-signal.site.pattern.*` owner around a page body.
+- Creator Signal components are opinionated leaves except for **Two Column Layout**, a real container with independently editable Left and Right slots. Populated slots render without editor scaffolding so the canvas matches the published layout.
 - `bun run verify:creator-signal-authoring-tasks` writes the current 37-entry task matrix to `.tmp/creator-signal-authoring-tasks/` and fails when the catalogue drifts from a supported authoring task.
 - `bun run verify:creator-signal-parity` writes the browsable side-by-side report to `.tmp/creator-signal-parity/index.html`.
 - `bun run verify:creator-signal-public-acceptance` verifies the locally
@@ -68,7 +68,8 @@ blank, gives a leaf a slot, or lacks editor/MCP task support.
 For ordinary page work, create the page from the shared template, select any
 catalogue component from Components, complete its labelled fields or repeaters,
 check mobile/tablet/desktop preview, and publish. Starter patterns are optional
-shortcuts: their components can be added, reordered or removed after insertion.
+insertion recipes: insertion places their real child components directly on the
+page, where each one can be selected, configured, dragged or removed.
 To revise, edit the retained component instance and publish again; remove the
 component from the Components tree when it no longer belongs. For shared
 chrome, open the template owner and add, reorder, edit or remove Header, Footer,
@@ -124,7 +125,7 @@ instead of duplicating it as a second implementation.
 
 | Author need | Stable mapping | Implementation |
 | --- | --- | --- |
-| Home page | `creator-signal.site.pattern.home-v2-page` | Reference-design eleven-section marketing flow; the stable ID is retained for migration compatibility |
+| Home page | `creator-signal.site.pattern.home-v2-page` | Recipe for the reference-design eleven-section marketing flow; the ID is not persisted as a page node |
 | Early Access page | `creator-signal.site.pattern.early-access-page` | Noindex preview with separate Section Intro and governed wishlist provider inside Two Column Layout |
 | Hero | `creator-signal.site.pattern.hero` | Existing Hero Visual Component |
 | Content page | `creator-signal.site.pattern.content-page` | Hero → Rich Text Section → Call to Action |
@@ -135,7 +136,7 @@ instead of duplicating it as a second implementation.
 | FAQ | `creator-signal.site.pattern.faq` | Existing native-disclosure FAQ component |
 | Contact/intake page | `creator-signal.site.pattern.contact-page` | Hero → Two Column Layout with independent Section Intro and capability-backed Managed Form |
 | Feedback page | `creator-signal.site.pattern.feedback-page` | Hero → Two Column Layout with an independent Section Intro in the Left slot and Embedded CRM Form in the Right slot |
-| Legal/trust document | `creator-signal.site.pattern.legal-trust-page` | Versioned Public Document |
+| Legal/trust document | `creator-signal.site.pattern.legal-trust-page` | Recipe that inserts one directly selectable versioned Public Document |
 | Article/content page | `creator-signal.site.pattern.article-content-page` | Hero → Rich Text Section |
 | Comparison section | `creator-signal.site.pattern.comparison-section` | Captioned row-and-column Comparison Section |
 | Empty state | `creator-signal.site.pattern.empty-state` | Textual Recovery State with action |
@@ -205,8 +206,10 @@ Feedback Page
 Every named node above has its own Component Library entry and remains
 selectable. A `Missing library entry` label means the editor is running stale
 plugin catalogue records, not that the content has been intentionally hidden.
-Reconcile/install plugin 0.7.0 and use the previewed content migration for an
-untouched retained Feedback page; the migration never publishes automatically.
+Reconcile/install plugin 0.8.0 and use the previewed content migration for
+retained 0.7.0 pages. It removes only the exact technical recipe wrapper,
+preserves the authored child component IDs, fields and order, and never
+publishes automatically.
 
 If the Mautic form and public page have the same origin, Instatic observes the
 iframe document and updates its height automatically. For the usual
@@ -291,7 +294,7 @@ The visual report is evidence, not deployment authority. Production release and 
 | Navigation or cards represented as child slots | Typed repeater items on the owning leaf component |
 | Numeric managed-form IDs in page content | Stable form aliases resolved from the generated registry |
 | Hand-edited HTML or CSS for routine content changes | Governed fields and Creator Signal design tokens |
-| A route seed assembled independently from string templates | A registered pattern plus its governed child components |
+| A route seed assembled independently from string templates | A registered insertion recipe that expands into governed page components |
 | Declaring parity from one desktop screenshot | The complete desktop, tablet, mobile, section, interaction and metadata report |
 
 ## Related

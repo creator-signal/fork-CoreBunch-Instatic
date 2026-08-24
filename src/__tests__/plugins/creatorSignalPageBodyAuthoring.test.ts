@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 import '@modules/base'
 import type { Page } from '@core/page-tree'
+import { buildComponentTreeProjection } from '@site/panels/LayersPanel'
 import {
   creatorSignalComponentLibraryEntries,
 } from '../../../integrations/creator-signal/component-library'
@@ -39,13 +40,10 @@ function pageForRoute(route: string): Page {
   return page
 }
 
-function patternNode(page: Page): Page['nodes'][string] {
+function pageComponentRootIds(page: Page): string[] {
   const body = page.nodes[page.rootNodeId]
-  const pattern = body?.children.length === 1 ? page.nodes[body.children[0]!] : undefined
-  if (!pattern?.catalogueInstance?.pattern) {
-    throw new Error(`Page ${page.slug} has no governed pattern root`)
-  }
-  return pattern
+  if (!body || body.moduleId !== 'base.body') throw new Error(`Page ${page.slug} has no body root`)
+  return body.children
 }
 
 function componentReference(
@@ -82,18 +80,36 @@ describe('Creator Signal route-wide page-body authoring boundary', () => {
 
     for (const reference of creatorSignalPageAuthoringReference) {
       const page = pageForRoute(reference.route)
-      const pattern = patternNode(page)
-      const actualTree = pattern.children.map((nodeId) => componentReference(page, nodeId))
+      const actualTree = pageComponentRootIds(page).map((nodeId) => componentReference(page, nodeId))
       expect(actualTree, reference.route).toEqual(reference.componentTree)
       expect(actualTree.map((node) => node.entryId), reference.route)
         .toEqual(reference.componentEntryIds)
     }
   })
 
+  it('projects every route as direct selectable components without page-pattern rows', () => {
+    for (const reference of creatorSignalPageAuthoringReference) {
+      const page = pageForRoute(reference.route)
+      const projection = buildComponentTreeProjection({
+        page,
+        moduleNames: {},
+        visualComponents: pack.visualComponents,
+        catalogueEntries: creatorSignalComponentLibraryEntries,
+      })
+      const pageRow = projection.roots[0]
+      expect(pageRow?.kind, reference.route).toBe('page')
+      expect(pageRow?.children.map((row) => row.entryId), reference.route)
+        .toEqual(reference.componentEntryIds)
+      expect(pageRow?.children.some((row) => row.kind === 'pattern'), reference.route)
+        .toBe(false)
+      expect(pageRow?.children.every((row) => row.readOnly === false), reference.route)
+        .toBe(true)
+    }
+  })
+
   it('resolves every pack-owned catalogue node to its current entry and permits only real slot structure', () => {
     for (const page of [...publicPages, pack.pages.find((candidate) =>
       candidate.template?.target.kind === 'notFound')!]) {
-      const pattern = patternNode(page)
       const visit = (nodeId: string, parentBoundary?: string): void => {
         const node = page.nodes[nodeId]
         expect(node, `${page.slug}:${nodeId}`).toBeDefined()
@@ -127,19 +143,16 @@ describe('Creator Signal route-wide page-body authoring boundary', () => {
         for (const childId of node.children) visit(childId, boundary)
       }
 
-      const rootEntry = entryById.get(pattern.catalogueInstance!.entryId)
-      expect(rootEntry, `${page.slug}:pattern`).toBeDefined()
-      expect(pattern.catalogueInstance!.entryVersion).toBe(rootEntry!.version)
-      expect(pattern.catalogueInstance!.pattern!.authorableNodeIds).toEqual(pattern.children)
-      for (const childId of pattern.children) visit(childId)
+      expect(Object.values(page.nodes).some((node) => node.catalogueInstance?.pattern))
+        .toBe(false)
+      for (const childId of pageComponentRootIds(page)) visit(childId)
     }
   })
 
   it('keeps all managed form routes as copy-first responsive columns with provider-only forms', () => {
     for (const route of managedFormRoutes) {
       const page = pageForRoute(route)
-      const pattern = patternNode(page)
-      const layout = pattern.children.map((nodeId) => page.nodes[nodeId]).find(
+      const layout = pageComponentRootIds(page).map((nodeId) => page.nodes[nodeId]).find(
         (node) => node?.catalogueInstance?.entryId === 'creator-signal.site.two-column-layout',
       )!
       const [left, right] = layout.children.map((nodeId) => page.nodes[nodeId])

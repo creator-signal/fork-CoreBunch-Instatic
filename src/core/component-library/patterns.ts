@@ -18,6 +18,12 @@ export interface ComponentLibraryPatternDefinition {
   rootKey: string
   nodes: readonly ComponentLibraryPatternNode[]
   authorableNodeKeys: readonly string[]
+  /**
+   * Boundary patterns retain their root as one governed catalogue instance.
+   * Recipe patterns expand to the root's children so each inserted component
+   * remains an ordinary, independently authorable page-tree root.
+   */
+  materialization?: 'boundary' | 'children'
 }
 
 export class ComponentLibraryPatternRegistry {
@@ -82,6 +88,13 @@ export class ComponentLibraryPatternRegistry {
         classIds: [],
         ...(catalogueInstance ? { catalogueInstance } : {}),
       }
+    }
+
+    if (definition.materialization === 'children') {
+      const root = nodes[rootId]
+      if (!root) return null
+      delete nodes[rootId]
+      return { nodes, rootIds: [...root.children] }
     }
 
     return { nodes, rootIds: [rootId] }
@@ -149,6 +162,7 @@ function freezePatternDefinition(
 ): ComponentLibraryPatternDefinition {
   return Object.freeze({
     ...definition,
+    materialization: definition.materialization ?? 'boundary',
     nodes: Object.freeze(
       definition.nodes.map((node) =>
         Object.freeze({

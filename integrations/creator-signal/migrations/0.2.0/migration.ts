@@ -1,6 +1,6 @@
 import type { DataRow, DataTable } from '@core/data/schemas'
 import type { SiteBundleArchiveManifest } from '@core/data/bundleArchive'
-import { pageToCells } from '@core/data/pageFromRow'
+import { pageFromRow, pageToCells } from '@core/data/pageFromRow'
 import { legacyCreatorSignalPageHashes0111 } from '../legacy-0.1.11-hashes'
 import {
   retainedCreatorSignalPageHashes0200To0206,
@@ -26,7 +26,12 @@ import {
   retainedCreatorSignalPageHashes060,
   retainedCreatorSignalTemplates060,
 } from '../retained-0.6.0-hashes'
-import { pack } from '../../pack/site'
+import { creatorSignalPatternEntries } from '../../component-library'
+import {
+  creatorSignalNotFoundAuthoringReference,
+  creatorSignalPageAuthoringReference,
+  pack,
+} from '../../pack/site'
 import {
   canonicalPageCellsSha256,
   canonicalSha256,
@@ -135,6 +140,10 @@ const retainedPageHashSets = [
   { version: '0.6.0', hashes: retainedCreatorSignalPageHashes060 },
 ] as const
 
+const currentPatternVersionById = new Map(
+  creatorSignalPatternEntries.map((entry) => [entry.id, entry.version]),
+)
+
 export function retainedCreatorSignalPageVersion(
   pageId: string,
   hash: string,
@@ -199,6 +208,13 @@ export function prepareCreatorSignalContentMigration(
     const currentRawHash = canonicalSha256(row.cells)
     const retainedVersion = retainedCreatorSignalPageVersion(target.id, currentHash)
       ?? retainedCreatorSignalPageVersion(target.id, currentRawHash)
+    const route = target.slug === 'index' ? '/' : `/${target.slug}`
+    const expectedPatternId = creatorSignalPageAuthoringReference.find(
+      (reference) => reference.route === route,
+    )?.patternId
+    const expandedCells = !retainedVersion && expectedPatternId
+      ? expandCurrentPageRecipe(row, expectedPatternId)
+      : null
     if (currentHash === targetHash) {
       previews.push({ id: target.id, slug: target.slug, state: 'already-current', currentHash, legacyHash, targetHash })
     } else if (retainedVersion) {
@@ -215,6 +231,23 @@ export function prepareCreatorSignalContentMigration(
         ...row,
         cells: pageToCells(target),
         slug: target.slug,
+        updatedAt: now,
+        updatedByUserId: null,
+        updatedBy: null,
+      })
+    } else if (expandedCells) {
+      previews.push({
+        id: target.id,
+        slug: target.slug,
+        state: 'legacy-eligible',
+        currentHash,
+        legacyHash,
+        retainedVersion: '0.7.0-pattern-wrapper',
+        targetHash,
+      })
+      migrationRows.push({
+        ...row,
+        cells: expandedCells,
         updatedAt: now,
         updatedByUserId: null,
         updatedBy: null,
@@ -298,6 +331,10 @@ export function prepareCreatorSignalContentMigration(
   } else {
     const currentHash = canonicalPageCellsSha256(notFoundTemplateRow.cells)
     const targetHash = canonicalPageCellsSha256(pageToCells(notFoundTemplate))
+    const expandedCells = expandCurrentPageRecipe(
+      notFoundTemplateRow,
+      creatorSignalNotFoundAuthoringReference.patternId,
+    )
     if (currentHash === targetHash) {
       notFoundTemplateState = 'current'
       previews.push({
@@ -329,6 +366,22 @@ export function prepareCreatorSignalContentMigration(
         ...notFoundTemplateRow,
         cells: pageToCells(notFoundTemplate),
         slug: notFoundTemplate.slug,
+        updatedAt: now,
+        updatedByUserId: null,
+        updatedBy: null,
+      })
+    } else if (expandedCells) {
+      notFoundTemplateState = 'repair'
+      previews.push({
+        id: notFoundTemplate.id,
+        slug: notFoundTemplate.slug,
+        state: 'template-repair',
+        currentHash,
+        targetHash,
+      })
+      migrationRows.push({
+        ...notFoundTemplateRow,
+        cells: expandedCells,
         updatedAt: now,
         updatedByUserId: null,
         updatedBy: null,
@@ -386,6 +439,72 @@ export function prepareCreatorSignalContentMigration(
       rows: migrationRows,
     },
   }
+}
+
+/**
+ * Plugin 0.7.0 persisted page recipes as one synthetic catalogue container.
+ * The wrapper had no author-owned presentation; its children are the actual
+ * authored components. Promote those exact child nodes into the page body so
+ * fields, IDs, order, nested slots and publication history remain untouched.
+ */
+function expandCurrentPageRecipe(
+  row: DataRow,
+  expectedPatternId: string,
+): DataRow['cells'] | null {
+  const expectedVersion = currentPatternVersionById.get(expectedPatternId)
+  if (!expectedVersion) return null
+
+  const page = pageFromRow(row)
+  const body = page.nodes[page.rootNodeId]
+  if (!body || body.moduleId !== 'base.body' || body.children.length !== 1) return null
+  const wrapper = page.nodes[body.children[0]!]
+  if (
+    !wrapper ||
+    wrapper.moduleId !== 'base.container' ||
+    wrapper.catalogueInstance?.entryId !== expectedPatternId ||
+    wrapper.catalogueInstance.entryVersion !== expectedVersion ||
+    !wrapper.catalogueInstance.pattern ||
+    !isTechnicalPageRecipeWrapper(wrapper, expectedPatternId)
+  ) {
+    return null
+  }
+  if (wrapper.children.some((nodeId) => !page.nodes[nodeId])) return null
+
+  body.children = [...wrapper.children]
+  for (const nodeId of body.children) page.nodes[nodeId]!.parentId = body.id
+  delete page.nodes[wrapper.id]
+
+  return {
+    ...row.cells,
+    body: {
+      nodes: page.nodes,
+      rootNodeId: page.rootNodeId,
+    },
+  }
+}
+
+function isTechnicalPageRecipeWrapper(
+  wrapper: ReturnType<typeof pageFromRow>['nodes'][string],
+  patternId: string,
+): boolean {
+  const attributes = wrapper.props.htmlAttributes
+  return (
+    wrapper.props.tag === 'div' &&
+    wrapper.props.customTag === '' &&
+    attributes !== null &&
+    typeof attributes === 'object' &&
+    !Array.isArray(attributes) &&
+    Object.keys(attributes).length === 1 &&
+    (attributes as Record<string, unknown>)['data-creator-signal-pattern'] === patternId &&
+    wrapper.classIds.length === 0 &&
+    Object.keys(wrapper.breakpointOverrides).length === 0 &&
+    (!wrapper.inlineStyles || Object.keys(wrapper.inlineStyles).length === 0) &&
+    wrapper.propBindings === undefined &&
+    wrapper.dynamicBindings === undefined &&
+    wrapper.label === undefined &&
+    wrapper.locked === undefined &&
+    wrapper.hidden === undefined
+  )
 }
 
 function blockedReport(blocker: string): CreatorSignalMigrationReport {

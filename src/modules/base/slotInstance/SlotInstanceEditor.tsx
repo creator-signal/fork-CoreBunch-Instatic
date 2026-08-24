@@ -21,13 +21,20 @@ export const SlotInstanceEditor: React.FC<ModuleComponentProps<SlotInstanceStore
   nodeWrapperProps,
 }) => {
   const slotName = resolveSlotName(props)
+  const hasContent = React.Children.count(children) > 0
 
   return (
-    <div {...nodeWrapperProps} className={styles.container} data-instatic-slot-instance="">
-      <div className={styles.header} data-instatic-slot-instance-header="">
-        <TargetSolidIcon size={11} color="currentColor" aria-hidden="true" />
-        <span className={styles.label} data-instatic-slot-label="">Slot: {slotName}</span>
-      </div>
+    <div
+      {...nodeWrapperProps}
+      className={`${styles.container}${hasContent ? ` ${styles.populated}` : ''}`}
+      data-instatic-slot-instance=""
+    >
+      {!hasContent && (
+        <div className={styles.header} data-instatic-slot-instance-header="">
+          <TargetSolidIcon size={11} color="currentColor" aria-hidden="true" />
+          <span className={styles.label} data-instatic-slot-label="">Empty {slotName} slot</span>
+        </div>
+      )}
       <div className={styles.content} data-instatic-slot-instance-content="">{children}</div>
     </div>
   )

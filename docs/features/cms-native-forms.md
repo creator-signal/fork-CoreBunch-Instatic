@@ -110,6 +110,37 @@ The submit handler reloads the latest published site snapshot, derives the form 
 
 Validation lives in `src/core/forms/validation.ts`. It rejects unknown fields, enforces required fields, coerces table field types, applies email/url/number/select checks, applies control min/max/pattern constraints, and caps payload size.
 
+## Component Library specimens
+
+The governed Forms category has a static rendered specimen for every executable
+built-in catalogue entry. `scripts/lib/component-library-form-specimens.ts`
+enumerates the entries from `componentLibraryRegistry`, uses the real primitive
+defaults and presets, materializes registered patterns, and sends the resulting
+page trees through `src/core/publisher/index.ts`. The generated bundle lives at
+`docs/features/component-library-form-specimens/` and is indexed by full entry
+ID in its `manifest.json`.
+
+The bundle separates three checks:
+
+- `bun run component-library:form-specimens` renders the 41-entry, 74-scenario
+  static projection.
+- `bun run component-library:form-specimens:check` proves that the checked-in
+  documents, entry set, content hashes and bundle checksum match the executable
+  registry.
+- `bun run component-library:form-specimens:browser` serves every document with
+  the real `base.form` module runtime and checks semantic relationships,
+  keyboard disclosures, invalid focus, success, draft cleanup, attachment
+  retry/cleanup, serious accessibility findings and mobile overflow. It writes
+  `.tmp/component-library-form-specimens/acceptance.json`.
+
+Capability-backed specimens declare their limitation and use synthetic local
+challenge, submission, draft, storage and scanner responses. They never call a
+provider and do not claim external sandbox, DEV, STAGE or PROD acceptance.
+`src/__tests__/server/formDrafts.test.ts`,
+`src/__tests__/server/attachments.test.ts` and
+`src/__tests__/server/publicForms.test.ts` exercise the corresponding server
+boundaries independently.
+
 ## Security
 
 The endpoint is public by necessity, so it is layered:
@@ -138,6 +169,7 @@ No public form endpoint can be made unusable by a dedicated HTTP client that fet
 - [Recoverable Form Drafts](form-drafts.md) — session/persistent recovery, conflicts, expiry and privacy
 - [Modules](modules.md) — module definitions and the module picker
 - [Publisher](publisher.md) — HTML pipeline and runtime injection
+- [Component Library](component-library.md) — registry ownership and deterministic design-impact projections
 - [TypeBox patterns](../reference/typebox-patterns.md) — request/response validation
 - Source of truth — module definitions: `src/modules/base/forms/index.ts`
 - Source of truth — form settings panel: `src/admin/pages/site/panels/PropertiesPanel/FormSettingsPanel.tsx`
@@ -145,3 +177,5 @@ No public form endpoint can be made unusable by a dedicated HTTP client that fet
 - Source of truth — naming utilities: `src/admin/pages/site/panels/PropertiesPanel/formSettingsNaming.ts`
 - Source of truth — target table restriction: `src/core/forms/targets.ts`
 - Source of truth — submission handler: `server/forms/handler.ts`
+- Source of truth — rendered specimen bundle: `scripts/lib/component-library-form-specimens.ts`
+- Gate test — `src/__tests__/component-library/componentLibraryFormSpecimens.test.ts`

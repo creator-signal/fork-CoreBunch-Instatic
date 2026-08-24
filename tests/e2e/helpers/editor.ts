@@ -1,5 +1,6 @@
 import { expect, type FrameLocator, type Page } from '@playwright/test'
 import { OWNER } from './constants'
+import { expectReadyWithLazyChunkRecovery } from './readiness'
 
 /**
  * Site editor / visual builder helpers. Each one is a small wrapper around the
@@ -14,7 +15,7 @@ import { OWNER } from './constants'
 
 /** The editor is ready once the canvas surface and its insert notch are shown. */
 export async function expectEditorReady(page: Page): Promise<void> {
-  await expect(page.getByTestId('canvas-root')).toBeVisible({ timeout: 20_000 })
+  await expectReadyWithLazyChunkRecovery(page, page.getByTestId('canvas-root'))
   await expect(page.getByTestId('canvas-notch')).toBeVisible()
 }
 

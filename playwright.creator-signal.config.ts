@@ -53,7 +53,9 @@ export default defineConfig({
   ],
   webServer: {
     command: 'bun run e2e:dev',
-    url: ADMIN_BASE_URL,
+    // Probe the editor shell itself. The site root is public content and may
+    // legitimately be absent or rebuilding while the authoring UI is ready.
+    url: `${ADMIN_BASE_URL}/admin`,
     reuseExistingServer: false,
     timeout: 180_000,
     gracefulShutdown: { signal: 'SIGTERM', timeout: 500 },

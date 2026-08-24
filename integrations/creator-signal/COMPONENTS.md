@@ -275,9 +275,11 @@ Run the integration gates:
 
 ```sh
 bun run creator-signal:design-system:check
+bun run component-library:creator-signal-specimens:check
 bun test src/__tests__/plugins/creatorSignalSitePack.test.ts
 bun run instatic-plugin lint integrations/creator-signal
 bun run instatic-plugin build integrations/creator-signal
+bun run verify:creator-signal-component-specimens:browser
 bun run build
 bun test
 bun run lint

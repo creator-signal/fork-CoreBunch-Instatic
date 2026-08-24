@@ -251,9 +251,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.call-to-action@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.call-to-action",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-call-to-action.html",
+          "contentHash": "sha256:e0c9caf0d648fc2872813288e8b09b6eba5d6a6a1a383fb16cacc5913eb6a507"
+        }
       },
-      "contentHash": "sha256:0992bac6c2e2b22f551f7a1acc903ade18fb2292f7895a3a6cdb5f618c00009d"
+      "contentHash": "sha256:c51aa6e9dfec42575aa5be89da59988c293bb6c48c0769bf870109e3304b996a"
     },
     {
       "id": "creator-signal.site.campaign-hero",
@@ -499,9 +506,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.campaign-hero@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.campaign-hero",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-campaign-hero.html",
+          "contentHash": "sha256:4b1c964deece2d62b1be9a70e6169904b3ee7ee420f184a3f394f140a678aa79"
+        }
       },
-      "contentHash": "sha256:5eee2deb8fb4bdc4c67b8d60741d08ae595329d41c2cdd720ea236442e59c4be"
+      "contentHash": "sha256:7583004a9ea5985b9a262da418d4004db4717f98e942bfc92898f097b025321f"
     },
     {
       "id": "creator-signal.site.catalogue.accordion",
@@ -11553,9 +11567,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.comparison-section@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.comparison-section",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-comparison-section.html",
+          "contentHash": "sha256:66a387dd7072a72490431f75e163ec0cbb5a3b4bd9409c9b8088a9055913a5ec"
+        }
       },
-      "contentHash": "sha256:4934864a580d08e1906d9fd89af42d706e6efe739f38b170b147301b1dbf9ee3"
+      "contentHash": "sha256:67cca4460f533ce4210715b63baa1afd4d7cb2fd7d9a10ffc68a548b4e6df2bd"
     },
     {
       "id": "creator-signal.site.consent-banner",
@@ -11764,9 +11785,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.consent-banner@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.consent-banner",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-consent-banner.html",
+          "contentHash": "sha256:03940555a09b86c4341c59f85315ba5f4643b111c557b88c064d6e678236d141"
+        }
       },
-      "contentHash": "sha256:d5f24cfe1a25a069e2fb8abf8445bae7615d8fc818079da27ab3016fdfde052d"
+      "contentHash": "sha256:d373c29e59da6d27bd24a53e4d42aeb0f818bcb822c51300be633730c251055c"
     },
     {
       "id": "creator-signal.site.crm-iframe-form",
@@ -12030,9 +12058,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.crm-iframe-form@2.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.crm-iframe-form",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-crm-iframe-form.html",
+          "contentHash": "sha256:26e68e18cccc221b796219be99489c0b1857a5b478378bddf33bc41cf833561e"
+        }
       },
-      "contentHash": "sha256:28034796b8b4e4e0d2aeea5b4a51c2ed05cea42244bc2a3b9ca0b9ecc489ceb2"
+      "contentHash": "sha256:dea81671c10a11f468448f4db4580c48625525342ab45fb2edcd065e49c4fb05"
     },
     {
       "id": "creator-signal.site.faq",
@@ -12263,9 +12298,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.faq@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.faq",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-faq.html",
+          "contentHash": "sha256:daf4757403ffc0a58def0d02c0c3701485696b468666ac7e39cf62b8873ed9ff"
+        }
       },
-      "contentHash": "sha256:1108dcaadffa8ea21c394278b323798c943df9ecac0dd5ba10ee44dcbc920642"
+      "contentHash": "sha256:5bf4c73a821c5adcad5ffa3d5c0edad743bc520005e09189bd46e9ab318075f0"
     },
     {
       "id": "creator-signal.site.feature-grid",
@@ -12496,9 +12538,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.feature-grid@1.1.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.feature-grid",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-feature-grid.html",
+          "contentHash": "sha256:9d4c6c138a4273a15f7cd1dbcdb51d4e4cddb4a40e83239f4cc52269498f2254"
+        }
       },
-      "contentHash": "sha256:de1809142cbff44d4ba362cf8fa020b04c45ec33b88d1878a6c531e98eadcef9"
+      "contentHash": "sha256:8c30a4af72ea1b3b581df513cada366e6b425bacd3b8d0b7b5f0ca67978d1e3b"
     },
     {
       "id": "creator-signal.site.footer",
@@ -12711,9 +12760,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.footer@1.1.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.footer",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-footer.html",
+          "contentHash": "sha256:87c5cf2d296dd9914c3baa11ac5de2f1b8c0433933c818a2b90bc96b7d68f555"
+        }
       },
-      "contentHash": "sha256:651842d92fa675964d9c6c437fa38d7f1473edf2d1b7958f61b1cf3990097c80"
+      "contentHash": "sha256:4f4826db33ff8aba117028ebdad1d6f0ffe2a9f75c4973289b810f7959946099"
     },
     {
       "id": "creator-signal.site.founder-story",
@@ -12941,9 +12997,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.founder-story@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.founder-story",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-founder-story.html",
+          "contentHash": "sha256:2b2c2310b51d909144cf05e957fb7b616111faa8b1f744e3031014af8d8fcd6a"
+        }
       },
-      "contentHash": "sha256:8f208d122f2e903b78f614043a31039f15ed7fb96a740cf895df1024b4eb23d0"
+      "contentHash": "sha256:9616641bbac16231d44428d37d0213d34724188d2a60c7e1e8bf40f0b6d1fa4a"
     },
     {
       "id": "creator-signal.site.header",
@@ -13184,9 +13247,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.header@1.2.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.header",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-header.html",
+          "contentHash": "sha256:c2a427f62f6421dfc1854fc4a77e9b162f2ffce4cde8b270e1b4c202cce8e2f8"
+        }
       },
-      "contentHash": "sha256:946211ab3ca3f68f2449a19bfb2bf6f541a7be6977e7ce68a4c98da773262bef"
+      "contentHash": "sha256:1e88c9f82c989a4c99b7e60a1c8faa9821a114a90f4b1915e5ac839bbcdca1c3"
     },
     {
       "id": "creator-signal.site.hero",
@@ -13396,9 +13466,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.hero@1.2.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.hero",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-hero.html",
+          "contentHash": "sha256:339c45ef92caaf627f95f62795ff9fa0cf3e846c3e26e77a42e4865ed239baa5"
+        }
       },
-      "contentHash": "sha256:c12d0e322bc9e443e5afc16c33a597e39f3afa33bb5e30daaf8aa63c4c082c44"
+      "contentHash": "sha256:2e65b03140b44ae6d1cefaa850b35bf18a837c3e3b34a6c101b5b4eb18b21ede"
     },
     {
       "id": "creator-signal.site.mautic-form",
@@ -13640,9 +13717,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.mautic-form@2.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.mautic-form",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-mautic-form.html",
+          "contentHash": "sha256:e7691ae49e62a2c4310d78b3296e6768ae8029aebf8e7d55a4d07a658ae73e49"
+        }
       },
-      "contentHash": "sha256:56935d54dfb30a455a42be1a5dec67b0ff2ad6b3070be03323d2e8ee293538ef"
+      "contentHash": "sha256:b7de7c56673165bcbcb800feb064230661e0ad00821095d3ba8560ca96b30073"
     },
     {
       "id": "creator-signal.site.pattern.article-content-page",
@@ -13788,9 +13872,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pattern.article-content-page@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pattern.article-content-page",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-article-content-page.html",
+          "contentHash": "sha256:71b5c71e7fb6748aa041c11d297f303cca471b2f8c4cdcb8110cb42384733c0d"
+        }
       },
-      "contentHash": "sha256:2d297a7db476bd01465984cb3d7374ed5f753e7918bf177abef101111609ebef"
+      "contentHash": "sha256:0e0374d632c56384d8f68e6e4cecdbbae6d881b4fea58c03c29b7d951c6ef37d"
     },
     {
       "id": "creator-signal.site.pattern.comparison-section",
@@ -13936,9 +14027,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pattern.comparison-section@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pattern.comparison-section",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-comparison-section.html",
+          "contentHash": "sha256:ed311fcf7d5cd5eefcf4b53bc80532af2094f93ac06cf2504361ef679e4189ff"
+        }
       },
-      "contentHash": "sha256:c452084a63fa499e05afdb87437941f9841ec5e14a1b85813f4fbd646c3cc241"
+      "contentHash": "sha256:950e73ef787b19818d97556d509ad386a56e1c28fe4e4aa54b58aa0237c703fe"
     },
     {
       "id": "creator-signal.site.pattern.contact-page",
@@ -14085,9 +14183,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pattern.contact-page@2.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pattern.contact-page",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-contact-page.html",
+          "contentHash": "sha256:f236a973b0b06ae2ad734e869a19debe58790ca062e127d3a7818d9e5e3b664d"
+        }
       },
-      "contentHash": "sha256:b960e088f6cbfe626f28e3bac7c619476d82a0ee91ff051c92a411b237680b8e"
+      "contentHash": "sha256:e9c97e73383f5f99fa2e6a4764df9c6e13a50859e9ce4ee2507390764aa3fcb1"
     },
     {
       "id": "creator-signal.site.pattern.content-page",
@@ -14233,9 +14338,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pattern.content-page@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pattern.content-page",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-content-page.html",
+          "contentHash": "sha256:2b865ec860f9bb0a572502edaacdb33cb8366d16ba8c172f19b3bd249328cad1"
+        }
       },
-      "contentHash": "sha256:265036500067faa5a20178331a07773a0307f2ddd66a70d0880048e81209cb47"
+      "contentHash": "sha256:1083331e5a26b6b777e3e7c7bcd2e725e774e556f3abb5ff3e337089ff0aef05"
     },
     {
       "id": "creator-signal.site.pattern.early-access-page",
@@ -14383,9 +14495,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pattern.early-access-page@2.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pattern.early-access-page",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-early-access-page.html",
+          "contentHash": "sha256:38110b156f564a1d3d31af5c8b523e1fc72ff74164d22bbc9a9f7e910d6711f8"
+        }
       },
-      "contentHash": "sha256:68307a6d463dcb4d71bf12e9cc23f6170da23be908fb9cf6bc6d4882e516c8b7"
+      "contentHash": "sha256:5887cf6fb90f6e1eefb46ae94d976413ef8c686cb3b05d2202e5ff7ec2772d99"
     },
     {
       "id": "creator-signal.site.pattern.empty-state",
@@ -14531,9 +14650,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pattern.empty-state@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pattern.empty-state",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-empty-state.html",
+          "contentHash": "sha256:25fac94586dbcf645afb7473661c24ac65a58be50e14391e1dec4a39828b0697"
+        }
       },
-      "contentHash": "sha256:4305a6fede0cb5d71787a856d038b9fdf64326919bc9c08abd9e45254a5792d1"
+      "contentHash": "sha256:92677107d3a1b5b526abed7b8eaf935b59597a34bb98168c16d0313a8f7d14d0"
     },
     {
       "id": "creator-signal.site.pattern.error-state",
@@ -14679,9 +14805,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pattern.error-state@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pattern.error-state",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-error-state.html",
+          "contentHash": "sha256:b3c9b0848c89d9ba72ca4fa875edf664d60cb612722e98a7d0fd356f1f584dbb"
+        }
       },
-      "contentHash": "sha256:450b9a33f9ed6735828ff2d92daa401977b4dcf18b67fe5124f78a44b0621f2c"
+      "contentHash": "sha256:736992432dec8592f99450ec44e0f52a8ac8059872f4313a71da88b5a140d1b5"
     },
     {
       "id": "creator-signal.site.pattern.features-page",
@@ -14827,9 +14960,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pattern.features-page@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pattern.features-page",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-features-page.html",
+          "contentHash": "sha256:b9e05d124e9c54fb2bbad5fb4b0353a95ee628b5efbe7fced6591d96a0c35977"
+        }
       },
-      "contentHash": "sha256:510969d3ce974e2e20cda7866ad015097b69a8e05b6d3a9f861edf2f03082693"
+      "contentHash": "sha256:7ab5caee69f45ac6241db21eca07379a1895af821b75b71d66ccf9e4ec58d42f"
     },
     {
       "id": "creator-signal.site.pattern.feedback-page",
@@ -14976,9 +15116,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pattern.feedback-page@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pattern.feedback-page",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-feedback-page.html",
+          "contentHash": "sha256:846acfccd3fff4c3f41dd8dbf52140d2988cd21b27c7fe772141e0888cae8d5d"
+        }
       },
-      "contentHash": "sha256:c2304f618809d4393d88637baa29afd200d9611752d5a1f9710b0cd17ed0566a"
+      "contentHash": "sha256:4b05a7e0e11bd35abff0ba3c3b0dd435577807baffb28767edc5130db5145f6c"
     },
     {
       "id": "creator-signal.site.pattern.home-v2-page",
@@ -15124,9 +15271,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pattern.home-v2-page@2.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pattern.home-v2-page",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-home-v2-page.html",
+          "contentHash": "sha256:f728c154ac46f118578fc7d7b2634e622fe17f153b71ba690f48b1ad8fe2b36b"
+        }
       },
-      "contentHash": "sha256:2ca35724bc1ff4e22339627b789dd62f4e8c6df2fb52e70cda0e3683c0b9e1e9"
+      "contentHash": "sha256:f6528c2e28d6195a45864f4e4397a0d19ff06a49fdf0d0572574fb0caca86c47"
     },
     {
       "id": "creator-signal.site.pattern.legal-trust-page",
@@ -15272,9 +15426,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pattern.legal-trust-page@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pattern.legal-trust-page",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-legal-trust-page.html",
+          "contentHash": "sha256:2ab1145e7a1d282f73fc12327f06873b8d070be67776031abb3952eae2c4bc54"
+        }
       },
-      "contentHash": "sha256:becae50f9264128239728e8304579af2b71dba3e972ad65cd4ab6306af459316"
+      "contentHash": "sha256:eaed9c7bf46e3ebc6e22cf9c2c45b287973613a915b4d24f46764076523afe0d"
     },
     {
       "id": "creator-signal.site.pattern.not-found-state",
@@ -15420,9 +15581,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pattern.not-found-state@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pattern.not-found-state",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-not-found-state.html",
+          "contentHash": "sha256:f6c69e7eb61064e8f086c0f4370f3f62f1bd798053523cff04cc76fa81c1b459"
+        }
       },
-      "contentHash": "sha256:067d5cc88940a133fb37c71f5fc4cbabdb62adde7dedf42b027cd8e8b5d5460c"
+      "contentHash": "sha256:e9305ffd9a64d37817fd36cabbc1d58fb3d0a4e97c67d9b6ba2b97115d48d5ff"
     },
     {
       "id": "creator-signal.site.pattern.offline-state",
@@ -15568,9 +15736,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pattern.offline-state@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pattern.offline-state",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-offline-state.html",
+          "contentHash": "sha256:edd9d789b0f14268e190cd7e968ce0da3af9701af48320ef6f987e5a91163e1a"
+        }
       },
-      "contentHash": "sha256:5b5d940d9ef5633409885549bfed32bfbaa75d967522aa91dbd8744a0fc31a46"
+      "contentHash": "sha256:6b27dcc7823f192855bfb963fda23db5263a49de9b94a1d58ad64c6bf64a7005"
     },
     {
       "id": "creator-signal.site.pattern.pricing-page",
@@ -15716,9 +15891,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pattern.pricing-page@1.1.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pattern.pricing-page",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-pricing-page.html",
+          "contentHash": "sha256:cc8d2142f15b29b4770b4b730dd80c1a35f69be98d5855c3d746898425126e7a"
+        }
       },
-      "contentHash": "sha256:6a0c8a4628b301ba39012ebd7c0943f1e5287241b4c86d4daf7b837eccfa080f"
+      "contentHash": "sha256:1ed14073e03a1934be680cab147da7cc7dbd75b64c6c1e00e674109b6d525719"
     },
     {
       "id": "creator-signal.site.pattern.product-page",
@@ -15864,9 +16046,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pattern.product-page@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pattern.product-page",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-product-page.html",
+          "contentHash": "sha256:16983776d039bcada9a5a575b4e028dc4accd55b8722ef9ffa00d15e28429b69"
+        }
       },
-      "contentHash": "sha256:b23cb18576111f99dd411d1e2febfa284c8eb31ad9904cf681d7829d83b5c9a7"
+      "contentHash": "sha256:8ba3155495d96bbe69298c4f637c47b702f4f6288e4276869f9bb422a52141fa"
     },
     {
       "id": "creator-signal.site.pricing-plans",
@@ -16146,9 +16335,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.pricing-plans@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.pricing-plans",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pricing-plans.html",
+          "contentHash": "sha256:8edf318a16b4333db66a55a636686668d5cf908664f79c1f0152c08c7f0929c0"
+        }
       },
-      "contentHash": "sha256:3bdfdacc015a3b3cdda8cd43e77be98d9c0c7fa6ee44c1751045e94ccb40f9a6"
+      "contentHash": "sha256:1e5fc8f15d366a62161faf4abd45450b136fc8fdc71e9685ef1b2d0b946c95d5"
     },
     {
       "id": "creator-signal.site.process-steps",
@@ -16372,9 +16568,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.process-steps@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.process-steps",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-process-steps.html",
+          "contentHash": "sha256:c61985953eab92db5f72703665960c06548d4356f690ad817d200c7555ad39b0"
+        }
       },
-      "contentHash": "sha256:6a31ec876c5fbd9d2e9e99665cc33c9329f013e119a8f2d589de204516f3d0ae"
+      "contentHash": "sha256:a69bb60be1a1c94e98dd84d7b4cd9e6b1986f1ff0182e1b463424b89f611d90b"
     },
     {
       "id": "creator-signal.site.public-document",
@@ -16573,9 +16776,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.public-document@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.public-document",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-public-document.html",
+          "contentHash": "sha256:1a1e438bff589b8956f59675bb30347b2c7a1996a1d3aeeed25215e5dafd3a6b"
+        }
       },
-      "contentHash": "sha256:a1bc2930c13914412a7d4c5b2d0f0e47459aec24388a49fc35e6e6c29e66c328"
+      "contentHash": "sha256:fd1a1d3c983da29831ee937901063b6fda0a8f0523a37a8f3621ee675c107639"
     },
     {
       "id": "creator-signal.site.recovery-state",
@@ -16788,9 +16998,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.recovery-state@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.recovery-state",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-recovery-state.html",
+          "contentHash": "sha256:c9e08de8a6c565f063f13c19d12a68c8c5e69053cdd97304cc784a3d6223bacf"
+        }
       },
-      "contentHash": "sha256:7ae6df96044e7d7a28843cba24cf5664198cf927fc5d8ac62c08870f72e238ea"
+      "contentHash": "sha256:ecfa02e26194f1d4822bc44f1eaa121567cccfc7362daef63b46f9c097e759b9"
     },
     {
       "id": "creator-signal.site.rich-text-section",
@@ -16981,9 +17198,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.rich-text-section@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.rich-text-section",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-rich-text-section.html",
+          "contentHash": "sha256:9b5cc414503f54f1e3f63cc2d0f81d5f254c6f912194b86996ddcff5b4298628"
+        }
       },
-      "contentHash": "sha256:e4e9a27587c5b1eba737da3002b065f3f929c0994214994a52942aa560fc2a51"
+      "contentHash": "sha256:70af5a8d85eb6d9a819edad73e47434b75b93e4065f397ae4b74e5d96dc22ce4"
     },
     {
       "id": "creator-signal.site.section-intro",
@@ -17174,9 +17398,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.section-intro@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.section-intro",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-section-intro.html",
+          "contentHash": "sha256:0edbaa05992999fb82c09f41db4b65332d3295294c9cf46a9802c957de54c33f"
+        }
       },
-      "contentHash": "sha256:091e2ee422ce3556f4c01385fe2b9df5e1bba807a2bd2221c5e1e31eada067a4"
+      "contentHash": "sha256:469e82093e3771c6a041a30f5333adb200e3b6af2d5d8e6683dc1800de0e703f"
     },
     {
       "id": "creator-signal.site.signal-comparison",
@@ -17419,9 +17650,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.signal-comparison@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.signal-comparison",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-signal-comparison.html",
+          "contentHash": "sha256:f8cf15d614e1e355c5805d2284bb57879c6daf71a72bfb46ba5a3c9c6f15ac58"
+        }
       },
-      "contentHash": "sha256:ccbfac47a63f825eb4c92084a4616c071404adec703201b2bb8d3fb7ff3d4d4c"
+      "contentHash": "sha256:42206264b9f28efa6e5c56af060a42ba09e4277b06a8c12a344f3a5e52bb007a"
     },
     {
       "id": "creator-signal.site.signal-strip",
@@ -17606,9 +17844,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.signal-strip@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.signal-strip",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-signal-strip.html",
+          "contentHash": "sha256:7b0dec02a1e517c1da875f0f6da4a3cc790013f693d7e7dcf0d295d9cd4cae67"
+        }
       },
-      "contentHash": "sha256:9a84aba5ef0d1ebc5a0082a53491c64fb74105bfa2edffc39937064fad98dee2"
+      "contentHash": "sha256:23175729ca8d79ca35d846290c1bfb67303f4793d5970f210479b1bf30224c6f"
     },
     {
       "id": "creator-signal.site.testimonial",
@@ -17784,9 +18029,16 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.testimonial@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.testimonial",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-testimonial.html",
+          "contentHash": "sha256:53623a7e77a751ca4999e3e7ed4ef46e1777f3f98889537488863cebc78fbbc1"
+        }
       },
-      "contentHash": "sha256:164f52b1245654a0f748498ff9a5cccf30e4c148ddc1ca4056bc86e46924f1f4"
+      "contentHash": "sha256:abf75301a173830a30c78d8c483d49558e4a9336de4ea362ee3aa6619e284b08"
     },
     {
       "id": "creator-signal.site.two-column-layout",
@@ -17945,13 +18197,20 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.two-column-layout@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "executable": {
+          "schemaVersion": "creator-signal.component-library-specimens/v1",
+          "bundleReference": "integrations/creator-signal/specimens/manifest.json",
+          "entryId": "creator-signal.site.two-column-layout",
+          "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-two-column-layout.html",
+          "contentHash": "sha256:afac3e6bf2b6d68616741e6e16b78ef5d64bd8ec8bca27378e364b25521d0c47"
+        }
       },
-      "contentHash": "sha256:913aefe83eacfb9d12328fede740394809315d970a43856b5d8341f8228587f6"
+      "contentHash": "sha256:71fc1c08f584a27b1e5b5bd1cc5012f436aad1226bebe1e515bf7f2d489d76fa"
     }
   ],
   "checksum": {
     "algorithm": "sha256",
-    "value": "sha256:9f7157826eaac242e3fb826f24df11752701ef9077723a50ee5cc4de75ca37ad"
+    "value": "sha256:71f52987b86cf0add2691fc7fe530edf101e0f01efeb34d01f168cb7caa72535"
   }
 }

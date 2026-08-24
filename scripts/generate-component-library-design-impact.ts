@@ -21,6 +21,10 @@ import { heroComponent } from '../integrations/creator-signal/pack/hero-componen
 import { twoColumnComponent } from '../integrations/creator-signal/pack/two-column-component'
 import { creatorSignalPluginIdentity } from '../integrations/creator-signal/plugin-contract'
 import {
+  CREATOR_SIGNAL_SPECIMEN_BUNDLE_REFERENCE,
+  validateCreatorSignalComponentSpecimenBundle,
+} from './lib/creator-signal-component-specimens'
+import {
   buildDesignImpactManifest,
   validateDesignImpactManifest,
 } from './lib/component-library-design-impact'
@@ -33,6 +37,11 @@ const packagePath = resolve(import.meta.dir, '../package.json')
 const designSystemLockPath = resolve(
   import.meta.dir,
   '../integrations/creator-signal/design-system/lock.json',
+)
+const creatorSignalSpecimenBundlePath = resolve(
+  import.meta.dir,
+  '..',
+  CREATOR_SIGNAL_SPECIMEN_BUNDLE_REFERENCE,
 )
 
 const PackageSchema = Type.Object(
@@ -59,6 +68,13 @@ const packageJson = await readValidatedJson(packagePath, PackageSchema)
 const designSystemLock = await readValidatedJson(
   designSystemLockPath,
   DesignSystemLockFileSchema,
+)
+const specimenBundleRaw = await readValidatedJson(
+  creatorSignalSpecimenBundlePath,
+  Type.Object({}, { additionalProperties: true }),
+)
+const specimenBundle = validateCreatorSignalComponentSpecimenBundle(
+  specimenBundleRaw,
 )
 const pluginModuleIds = [
   mauticForm,
@@ -96,6 +112,13 @@ const manifest = buildDesignImpactManifest({
     ),
     templateRoles: new Set(['header', 'footer', 'skip-link']),
   },
+  specimenArtifacts: specimenBundle.entries.map((entry) => ({
+    schemaVersion: specimenBundle.schemaVersion,
+    bundleReference: CREATOR_SIGNAL_SPECIMEN_BUNDLE_REFERENCE,
+    entryId: entry.id,
+    htmlReference: entry.htmlReference,
+    contentHash: entry.htmlHash,
+  })),
 })
 const rendered = `${JSON.stringify(manifest, null, 2)}\n`
 

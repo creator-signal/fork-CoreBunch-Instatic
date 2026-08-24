@@ -68,6 +68,7 @@ module / Visual Component / pattern / template
 | Retained versions, migration paths and impact previews | `src/core/component-library/version.ts`, `migration.ts` |
 | Descendant-aware, non-destructive slot-to-data upgrades | `src/core/component-library/treeMigration.ts` |
 | Bundled Creator Signal definitions | `src/modules/base/componentLibrary.ts`, `componentLibraryForms.ts`, `componentLibraryVisualComponents.ts` |
+| Complete downstream design-impact contract | `docs/features/component-library-design-impact-manifest.json` |
 | Application-owned Visual Components | `src/core/visual-components-schema/registry.ts` |
 | Pattern definitions and materialization | `src/core/component-library/patterns.ts`, `src/modules/base/componentLibraryPatterns.ts` |
 | Catalogue dialog and Components projection | `src/admin/pages/site/panels/LayersPanel/` |
@@ -181,6 +182,32 @@ components. Registration rejects a leaf that declares any slot.
 `source.type` is one of `built-in`, `site`, `design-system` or `plugin`. Design-system and plugin sources carry their stable owner ID so editor surfaces can identify ownership.
 
 `status` is `stable`, `experimental` or `deprecated`. A deprecated entry may name `replacementEntryId`; it cannot replace itself.
+
+### Design-impact manifest
+
+`component-library-design-impact-manifest.json` is the governed,
+machine-readable projection for downstream design review. It is generated from
+the complete built-in registry plus the selected Creator Signal plugin pack;
+documentation is not scraped and rendered markup is not copied. Each record
+retains the executable definition, real owner and implementation taxonomy,
+dependency limitations, accessibility gates, a stable specimen contract
+reference and any registry-owned rendered preview reference.
+
+The manifest records the Instatic version, an executable-registry content
+revision, selected plugin versions, the Component Library entry schema version
+and the consumed Creator Signal design-system lock revision. Each entry has a
+SHA-256 content hash and the complete manifest has a SHA-256 checksum. The
+source revision deliberately hashes the executable registry content instead of
+the Git commit containing the generated file, avoiding a self-referential
+revision that would become stale as soon as it was committed.
+
+Run `bun run component-library:design-impact` to regenerate the projection and
+`bun run component-library:design-impact:check` in CI or release evidence. The
+check fails on registry drift, duplicate identities, unresolved backing
+implementations, missing ownership, unsupported schemas, invalid specimen
+references or checksum/hash drift. Capability- and provider-backed entries
+state their limitations explicitly; manifest presence is never runtime,
+browser or provider acceptance evidence.
 
 ## Registration
 

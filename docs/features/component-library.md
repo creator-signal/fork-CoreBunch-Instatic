@@ -212,6 +212,38 @@ references or checksum/hash drift. Capability- and provider-backed entries
 state their limitations explicitly; manifest presence is never runtime,
 browser or provider acceptance evidence.
 
+### Rendered form specimen bundle
+
+`docs/features/component-library-form-specimens/manifest.json` is the
+deterministic rendered projection for every executable built-in entry in the
+Forms category. `scripts/lib/component-library-form-specimens.ts` derives the
+set from `componentLibraryRegistry`, materializes pattern entries through
+`componentLibraryPatternRegistry`, publishes ordinary page nodes through
+`publishPage()`, and emits one static HTML document per full catalogue entry
+ID. The current projection contains 41 entries and 74 named scenarios covering
+presets, variants, authored states, capability fallbacks and safe local
+provider translations.
+
+Every Forms entry owns its rendered-preview reference through
+`src/modules/base/componentLibraryFormSpecimenReference.ts`; the design-impact
+manifest and the specimen bundle therefore fail together when an entry is
+added, removed, renamed or rendered differently. Run
+`bun run component-library:form-specimens` to regenerate both the per-entry
+documents and bundle manifest. Run
+`bun run component-library:form-specimens:check` to reject missing, obsolete or
+non-deterministic output.
+
+`bun run component-library:form-specimens:browser` serves the generated
+documents through the real module-JS channel, checks each entry at desktop and
+mobile widths, and exercises validation, success, session draft, persistent
+draft and attachment retry/cleanup journeys against synthetic local handlers.
+Its machine-readable evidence is
+`.tmp/component-library-form-specimens/acceptance.json`. The handlers implement
+the public browser contract without external calls; server persistence,
+scanner and provider acceptance remain separate evidence classes.
+
+### Creator Signal executable specimens
+
 The Creator Signal executable specimens are generated separately with
 `bun run component-library:creator-signal-specimens`. The generator derives its
 inventory from `creatorSignalComponentLibraryEntries`, reuses exact starter
@@ -554,9 +586,11 @@ opens either boundary before focusing an invalid descendant.
 - `docs/features/templates.md` — template-owned site chrome.
 - `docs/features/site-search.md` — published index and Search Results capability.
 - `docs/features/file-attachments.md` — private form upload and scanner capability.
+- `docs/features/cms-native-forms.md` — form publishing, browser runtime and specimen acceptance.
 - `docs/features/component-library-catalogue.md` — complete issue #11 catalogue traceability matrix and capability gates.
 - `docs/reference/component-html-seo-contract.md` — semantic HTML, structured data, SEO, native hooks and design-token contract for every built-in entry.
 - `docs/reference/typebox-patterns.md` — boundary validation.
 - Source-of-truth files: `src/core/component-library/`
 - Focused tests: `src/__tests__/component-library/componentLibraryRegistry.test.ts`,
+  `src/__tests__/component-library/componentLibraryFormSpecimens.test.ts`,
   `src/__tests__/plugins/creatorSignalPublicAuthoringGuardrails.test.ts`

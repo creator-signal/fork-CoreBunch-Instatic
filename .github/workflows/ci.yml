@@ -112,6 +112,12 @@ jobs:
       - name: Verify Component Library design-impact manifest
         run: bun run component-library:design-impact:check
 
+      - name: Verify CMS-native form specimen bundle
+        run: bun run component-library:form-specimens:check
+
+      - name: Verify CMS-native form specimens in a browser
+        run: bun run component-library:form-specimens:browser
+
       - name: Lint site pack
         run: bun run instatic-plugin lint integrations/creator-signal
 
@@ -134,6 +140,14 @@ jobs:
           name: creator-signal-public-acceptance
           path: .tmp/creator-signal-public-acceptance
           if-no-files-found: warn
+
+      - name: Upload CMS-native form specimen acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: component-library-form-specimen-acceptance
+          path: .tmp/component-library-form-specimens
+          if-no-files-found: error
 
       - name: Upload Component Library specimen evidence
         if: always()

@@ -3,7 +3,7 @@
   "generatedFrom": {
     "instatic": {
       "version": "0.0.40",
-      "sourceRevision": "sha256:c958854e71a7711f3da8ed25b2a5e7cf7f1db0774335be588f4d8b1c89843b13",
+      "sourceRevision": "sha256:2e6c47e076ba3d550dd7e13373c547d062e997c98f2e4ebd87ee88a8f9bc07c8",
       "revisionKind": "executable-registry-content"
     },
     "componentLibraryEntrySchemaVersion": "1.0.0",
@@ -1314,6 +1314,10 @@
               "remediation": "Provide a specific title and a useful alternative when provider content cannot load."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.captcha.html"
         }
       },
       "availability": {
@@ -1327,9 +1331,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.captcha@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.captcha.html"
+        }
       },
-      "contentHash": "sha256:c3c5ca1036b6ee3e757af43fa0bcbecee715a25f7cac4d48af72c921cf3b4177"
+      "contentHash": "sha256:1247dacbe1b30930aab5e337e961eb8668a81c112dede09bee741b1edd871b7b"
     },
     {
       "id": "creator-signal.site.catalogue.card",
@@ -1857,6 +1864,10 @@
               "remediation": "Assign a stable field ID that is not used by another control."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.checkbox.html"
         }
       },
       "availability": {
@@ -1866,9 +1877,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.checkbox@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.checkbox.html"
+        }
       },
-      "contentHash": "sha256:37dc754758149e8dbbed3f10a986788b606b9977f86ad80e4af475e3fe027826"
+      "contentHash": "sha256:e39e9ee45d22fc28fbdc5b7c5cefe1dbe2290f14f473159c244e230ad91bc011"
     },
     {
       "id": "creator-signal.site.catalogue.checkbox-group",
@@ -1927,6 +1941,10 @@
         },
         "accessibility": {
           "checks": []
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.checkbox-group.html"
         }
       },
       "availability": {
@@ -1936,9 +1954,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.checkbox-group@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.checkbox-group.html"
+        }
       },
-      "contentHash": "sha256:cf56ae6a6c0639444575aaca2244a94645c06aa2bb671382beaa63b9c7605cee"
+      "contentHash": "sha256:f8c3b956319039ace62b0678a7149a5c094f661c8c203aa9a3126a282767e616"
     },
     {
       "id": "creator-signal.site.catalogue.code-block",
@@ -2293,6 +2314,10 @@
               "remediation": "Assign a stable field ID that is not used by another control."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.date-input.html"
         }
       },
       "availability": {
@@ -2302,9 +2327,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.date-input@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.date-input.html"
+        }
       },
-      "contentHash": "sha256:f4026b74e2fee1dc4055a2e3d39abc2be7663fc0dbe2f1fb2f7f6214f21293d0"
+      "contentHash": "sha256:6b3dda6cb64dfc5d90326a582a85c20d971b68f8d302d756ead96d3b6e85e82c"
     },
     {
       "id": "creator-signal.site.catalogue.delete-draft",
@@ -2395,6 +2423,10 @@
               "remediation": "Provide a specific label value that explains the component's purpose."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.delete-draft.html"
         }
       },
       "availability": {
@@ -2406,9 +2438,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.delete-draft@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.delete-draft.html"
+        }
       },
-      "contentHash": "sha256:e86fc64955544120417b94a1a3908576e6cab6841f8a7cfa65eebe2a27c52476"
+      "contentHash": "sha256:b6a100356dd1a7f50a5afae592db4dc6f106d8795d5f4db1ad45367b087d2909"
     },
     {
       "id": "creator-signal.site.catalogue.dialog",
@@ -2963,6 +2998,10 @@
               "remediation": "Assign a stable field ID that is not used by another control."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.email-input.html"
         }
       },
       "availability": {
@@ -2972,9 +3011,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.email-input@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.email-input.html"
+        }
       },
-      "contentHash": "sha256:36051d74cf8864a77aea9052c3a6d6975023cd2e4abf416d0e05e9a0406a6515"
+      "contentHash": "sha256:d26a524ecb321b3869ead134b59b9a9be787566bc625608dad0341fd305702a8"
     },
     {
       "id": "creator-signal.site.catalogue.embed",
@@ -3368,6 +3410,10 @@
               "remediation": "Verify aggregate and per-file progress remain available to assistive technology."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.file-attachment.html"
         }
       },
       "availability": {
@@ -3379,9 +3425,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.file-attachment@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.file-attachment.html"
+        }
       },
-      "contentHash": "sha256:759fed680eb8ad0c792dd0d51343abda991dee2b7eed5f6f5bedbb3349042cc3"
+      "contentHash": "sha256:5044d852f80b34935084b61557d7efd61ece7d0ec85d9cbea1dcd8541daacba3"
     },
     {
       "id": "creator-signal.site.catalogue.form-accordion",
@@ -3449,6 +3498,10 @@
               "remediation": "Keep each native summary specific and preserve validation-to-focus behavior."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-accordion.html"
         }
       },
       "availability": {
@@ -3458,9 +3511,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-accordion@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-accordion.html"
+        }
       },
-      "contentHash": "sha256:36eac673e23760fc9f72a9e72f58319ab5e474ce1ff33fa2577f2c06ab2d4d14"
+      "contentHash": "sha256:a418e13bae9ba9cbe11af5724fe2472ddfe01eba4ebf2267ad80066c9967fbe3"
     },
     {
       "id": "creator-signal.site.catalogue.form-actions",
@@ -3538,6 +3594,10 @@
         },
         "accessibility": {
           "checks": []
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-actions.html"
         }
       },
       "availability": {
@@ -3547,9 +3607,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-actions@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-actions.html"
+        }
       },
-      "contentHash": "sha256:921863487f61926a189236f193f028399a40b2acbc36166b6390bce95e8e3be2"
+      "contentHash": "sha256:12a8843b8597f9159cb6b35d639879edcd37768a004113868a574b70334ef7d7"
     },
     {
       "id": "creator-signal.site.catalogue.form-container",
@@ -3665,6 +3728,10 @@
               "remediation": "Run validation through nested disclosure fixtures and verify focus placement."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-container.html"
         }
       },
       "availability": {
@@ -3674,9 +3741,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-container@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-container.html"
+        }
       },
-      "contentHash": "sha256:790bb906ed5cbe62405b3ff68daa68b56c119704749969c1202b2536afdb0320"
+      "contentHash": "sha256:6204d3c415809fc02282ebd7cf3fce2365cc032c09d042e47bd4ce74a9ac1f0d"
     },
     {
       "id": "creator-signal.site.catalogue.form-embed",
@@ -3824,6 +3894,10 @@
               "remediation": "Provide a specific title and a useful alternative when provider content cannot load."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-embed.html"
         }
       },
       "availability": {
@@ -3835,9 +3909,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-embed@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-embed.html"
+        }
       },
-      "contentHash": "sha256:0a6ddf2c199d81cbb7d566e4abbe20ef72bff8ce61aeab93370bf29b8a81172f"
+      "contentHash": "sha256:c0c95bd49f912cb1cb36014e6bf3bf36375b5589012a04549bcd77724794a1c0"
     },
     {
       "id": "creator-signal.site.catalogue.form-error",
@@ -3927,6 +4004,10 @@
               "remediation": "Verify aria-invalid, aria-errormessage, announcement and first-invalid focus behavior."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-error.html"
         }
       },
       "availability": {
@@ -3936,9 +4017,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-error@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-error.html"
+        }
       },
-      "contentHash": "sha256:88e93a6ccb4332fbc152b09ec4fbb1c75c88935b35c4b68804f53cc51a9a9173"
+      "contentHash": "sha256:c173d6913ba1782fad998386b6b85ff5e4c980357f6d6fd569618ab36406874c"
     },
     {
       "id": "creator-signal.site.catalogue.form-field-group",
@@ -4025,6 +4109,10 @@
         },
         "accessibility": {
           "checks": []
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-field-group.html"
         }
       },
       "availability": {
@@ -4034,9 +4122,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-field-group@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-field-group.html"
+        }
       },
-      "contentHash": "sha256:20efa717269d2ec1222c62576f4e42ac3520bc502cd705b9298a42cfde7a1d7d"
+      "contentHash": "sha256:dc624da5e67f869b3b89209f9c53069f0137b241ebdee9dba001cac09d982866"
     },
     {
       "id": "creator-signal.site.catalogue.form-help",
@@ -4137,6 +4228,10 @@
               "remediation": "Verify aria-describedby includes the authored help message."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-help.html"
         }
       },
       "availability": {
@@ -4146,9 +4241,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-help@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-help.html"
+        }
       },
-      "contentHash": "sha256:6be712b42a7e6539d7bf47151d4293f7e36afc5728511b0e1e87e43c0b2a75ba"
+      "contentHash": "sha256:f2442420d401d9df940cb9ecf36ba7bbae41e2165f9b40c1e934a17d7c4dcb65"
     },
     {
       "id": "creator-signal.site.catalogue.form-label",
@@ -4238,6 +4336,10 @@
               "remediation": "Provide a specific text value that explains the component's purpose."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-label.html"
         }
       },
       "availability": {
@@ -4247,9 +4349,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-label@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-label.html"
+        }
       },
-      "contentHash": "sha256:2f836d6ba5234003fdeb7c60445708033f067d1c39fb826e44b48df2769369f6"
+      "contentHash": "sha256:2fe526794d223a7e251baabc710e04b7b406efd9d6cc47e45d8e670382197de4"
     },
     {
       "id": "creator-signal.site.catalogue.form-message",
@@ -4354,6 +4459,10 @@
               "remediation": "Run the form runtime announcement and focus behavior tests."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-message.html"
         }
       },
       "availability": {
@@ -4363,9 +4472,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-message@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-message.html"
+        }
       },
-      "contentHash": "sha256:d8772d48e37bf52a3ff9d91754906921275e9265b95a358cde341dbcbaf0da8c"
+      "contentHash": "sha256:920523028fcbe825da1969afe79b518b8e5f7aa285712b356c85a1afcbc44af0"
     },
     {
       "id": "creator-signal.site.catalogue.form-panel",
@@ -4429,6 +4541,10 @@
         },
         "accessibility": {
           "checks": []
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-panel.html"
         }
       },
       "availability": {
@@ -4438,9 +4554,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-panel@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-panel.html"
+        }
       },
-      "contentHash": "sha256:f62c04df2ead36e0eeb4f5e5b3ea2ae1313ab2221e7f44a1ac12de45a32a8cd3"
+      "contentHash": "sha256:bd74073495a952694a956756a6f22d6a86c148571dbe11fd803121931f40bfdb"
     },
     {
       "id": "creator-signal.site.catalogue.form-step",
@@ -4514,6 +4633,10 @@
         },
         "accessibility": {
           "checks": []
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-step.html"
         }
       },
       "availability": {
@@ -4523,9 +4646,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-step@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-step.html"
+        }
       },
-      "contentHash": "sha256:356b4989bf65c245f5245cab9d3102e224555c8c9112465f4f94da07d1292c84"
+      "contentHash": "sha256:89bfeffe008432b6621d4c86dda177c15163d6ac77c893c45e26b4403a787f6f"
     },
     {
       "id": "creator-signal.site.catalogue.form-summary-review",
@@ -4581,6 +4707,10 @@
         },
         "accessibility": {
           "checks": []
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-summary-review.html"
         }
       },
       "availability": {
@@ -4590,9 +4720,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-summary-review@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-summary-review.html"
+        }
       },
-      "contentHash": "sha256:628fe9a246e2f671ab4ab433aacf00710133a25de7185491c59b3cf70204d2a4"
+      "contentHash": "sha256:79bf5aea90724b87982ff9b2393d3ec09286873265836151f8e0504bc243a4f5"
     },
     {
       "id": "creator-signal.site.catalogue.form-tabs",
@@ -4684,6 +4817,10 @@
               "remediation": "Keep validation state connected to the shared Tabs activation contract."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-tabs.html"
         }
       },
       "availability": {
@@ -4693,9 +4830,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-tabs@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-tabs.html"
+        }
       },
-      "contentHash": "sha256:8d13958366a02a4800acd50936190c2fe64ba15a1d5e777170d7c834b70e635c"
+      "contentHash": "sha256:437c385feb25b4cb86ee02eb986280d7142bd241a53a58807bba24b208380819"
     },
     {
       "id": "creator-signal.site.catalogue.gallery",
@@ -5226,6 +5366,10 @@
         },
         "accessibility": {
           "checks": []
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.hidden-field.html"
         }
       },
       "availability": {
@@ -5235,9 +5379,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.hidden-field@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.hidden-field.html"
+        }
       },
-      "contentHash": "sha256:3bef6140264cad141c0b5b4752809984c17327bf420acd01147439c13e4edd8d"
+      "contentHash": "sha256:8956d065545a3a00255a8247b4a2cd477f7ecab7e8821036099d96a8eb4de77c"
     },
     {
       "id": "creator-signal.site.catalogue.icon",
@@ -6361,6 +6508,10 @@
               "remediation": "Provide a specific label value that explains the component's purpose."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.next-step.html"
         }
       },
       "availability": {
@@ -6370,9 +6521,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.next-step@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.next-step.html"
+        }
       },
-      "contentHash": "sha256:8ec4bb88a65a035ef73aa2cc8ff97014b866c0137b802e6bb3b49b23b2fb014b"
+      "contentHash": "sha256:5bd938676849efe9cb3ace005c27ad58b29e38b4e4f5d9b34005f819659175e6"
     },
     {
       "id": "creator-signal.site.catalogue.notice",
@@ -6673,6 +6827,10 @@
               "remediation": "Assign a stable field ID that is not used by another control."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.number-input.html"
         }
       },
       "availability": {
@@ -6682,9 +6840,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.number-input@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.number-input.html"
+        }
       },
-      "contentHash": "sha256:ca767066de1b40b49b552fb557f63096c8ea4a675ec6844356d5160faabfe410"
+      "contentHash": "sha256:61b5208f0282de7f0f722458c54e211a309148e78f315e375127dc73e2bfa3a9"
     },
     {
       "id": "creator-signal.site.catalogue.option",
@@ -6758,6 +6919,10 @@
         },
         "accessibility": {
           "checks": []
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.option.html"
         }
       },
       "availability": {
@@ -6767,9 +6932,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.option@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.option.html"
+        }
       },
-      "contentHash": "sha256:895e6a2f3213a32e0165072444488c8b389a669a65a9a9a3399a81a851504e46"
+      "contentHash": "sha256:f9b89cbf8e491ffe1bdf96fc913ed4715f2c98b741b48a636c12be55596248bb"
     },
     {
       "id": "creator-signal.site.catalogue.option-group",
@@ -6839,6 +7007,10 @@
         },
         "accessibility": {
           "checks": []
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.option-group.html"
         }
       },
       "availability": {
@@ -6848,9 +7020,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.option-group@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.option-group.html"
+        }
       },
-      "contentHash": "sha256:e5e5b1dd9465b224680b76d585f9889c7236d004fc5687ae1e67bd722055e78e"
+      "contentHash": "sha256:9f2d752274f49f511a352c2400b4792fd45ea576affc98aa59e309555e3cd2c8"
     },
     {
       "id": "creator-signal.site.catalogue.pdf-viewer",
@@ -7283,6 +7458,10 @@
               "remediation": "Preserve source order and the shared Wizard runtime."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.previous-next-actions.html"
         }
       },
       "availability": {
@@ -7292,9 +7471,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.previous-next-actions@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.previous-next-actions.html"
+        }
       },
-      "contentHash": "sha256:d5de42f2ccbcba8df9744544249cd0adc98e0f10c8ec5cbc0f46dffd0923cd80"
+      "contentHash": "sha256:7f35fa9371bb07b2a2d826e3ae6d12e1d05f46801ecb1e4e9b3bfab1bd2ba218"
     },
     {
       "id": "creator-signal.site.catalogue.previous-step",
@@ -7378,6 +7560,10 @@
               "remediation": "Provide a specific label value that explains the component's purpose."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.previous-step.html"
         }
       },
       "availability": {
@@ -7387,9 +7573,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.previous-step@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.previous-step.html"
+        }
       },
-      "contentHash": "sha256:58fe0b32c89184d8bb12b6c93a9fd936efea955ab826a64d3601bd898619134e"
+      "contentHash": "sha256:2aaa4d120bc4dbd25925455fda944976256741643043cc5137eeba45b503f485"
     },
     {
       "id": "creator-signal.site.catalogue.progress-bar",
@@ -7706,6 +7895,10 @@
               "remediation": "Assign a stable field ID that is not used by another control."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.radio.html"
         }
       },
       "availability": {
@@ -7715,9 +7908,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.radio@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.radio.html"
+        }
       },
-      "contentHash": "sha256:980351010a45b9d81584f014252a0ade886693d111b4f9df28b7ff859c09a44d"
+      "contentHash": "sha256:bb40f80538851c2bfeb2a1843da8da45cabeb2e66330d2acb813176f6b29dfae"
     },
     {
       "id": "creator-signal.site.catalogue.radio-group",
@@ -7776,6 +7972,10 @@
         },
         "accessibility": {
           "checks": []
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.radio-group.html"
         }
       },
       "availability": {
@@ -7785,9 +7985,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.radio-group@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.radio-group.html"
+        }
       },
-      "contentHash": "sha256:c68401c5f3a07526a3c07d20fc032c3f925282a9916498ccda072e4a8b0f7869"
+      "contentHash": "sha256:9913457d6be85dbccd0c3f985eff701ed76b95f5478ed202a253b0a0f544d3f0"
     },
     {
       "id": "creator-signal.site.catalogue.reset-button",
@@ -7878,6 +8081,10 @@
               "remediation": "Provide a specific label value that explains the component's purpose."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.reset-button.html"
         }
       },
       "availability": {
@@ -7887,9 +8094,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.reset-button@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.reset-button.html"
+        }
       },
-      "contentHash": "sha256:b09bd7d2ed8b87cfa4a9a7e488fe508e316fa4e427b059bdc9a90bbb20cfde83"
+      "contentHash": "sha256:ed2bd8316bbc83c060e6728e35df047c8f9d954e76f2fdde86f6209aba24f257"
     },
     {
       "id": "creator-signal.site.catalogue.reusable-form-fragment",
@@ -7989,6 +8199,10 @@
               "remediation": "Provide a specific label value that explains the component's purpose."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.reusable-form-fragment.html"
         }
       },
       "availability": {
@@ -7998,9 +8212,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.reusable-form-fragment@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.reusable-form-fragment.html"
+        }
       },
-      "contentHash": "sha256:aaa6978366c0cd94d662f8c0101f5dfed7167bdebc9d21fc661efeb30618279d"
+      "contentHash": "sha256:64642a5154885390f146704ed1a8d8d426b774213dc94cb1f6faa821cacc6bcb"
     },
     {
       "id": "creator-signal.site.catalogue.reusable-section",
@@ -8242,6 +8459,10 @@
               "remediation": "Provide a specific label value that explains the component's purpose."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.save-draft.html"
         }
       },
       "availability": {
@@ -8253,9 +8474,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.save-draft@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.save-draft.html"
+        }
       },
-      "contentHash": "sha256:a5ce0e66cfd0343f1e70c27679d9551f7d7a1cffb56b509ab9433262018faff8"
+      "contentHash": "sha256:97673a45c38b66bbfe6abd9f8030243c38bbc55c48cd206b0f50b345a45dc39d"
     },
     {
       "id": "creator-signal.site.catalogue.search",
@@ -8533,6 +8757,10 @@
               "remediation": "Assign a stable field ID that is not used by another control."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.select.html"
         }
       },
       "availability": {
@@ -8542,9 +8770,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.select@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.select.html"
+        }
       },
-      "contentHash": "sha256:8c6c33ed644d53f579130372bb03fb176a183f614a990bc01cf63a5b3384e98b"
+      "contentHash": "sha256:50e4f70176615be33a44d16a355d934bb02e2ab4676218bc5ec2f6170ab2426d"
     },
     {
       "id": "creator-signal.site.catalogue.semantic-list",
@@ -9375,6 +9606,10 @@
               "remediation": "Provide a specific label value that explains the component's purpose."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.submit.html"
         }
       },
       "availability": {
@@ -9384,9 +9619,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.submit@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.submit.html"
+        }
       },
-      "contentHash": "sha256:a7e7d503dbae252a85e843303d5e41bdb5c1dd922181062cc3e2008cfae8a3f6"
+      "contentHash": "sha256:7e650ab06bf1193ba4fe30d7e7b1fc0d443584740c11b4219f87871c59f5e4c4"
     },
     {
       "id": "creator-signal.site.catalogue.switch",
@@ -9513,6 +9751,10 @@
               "remediation": "Assign a stable field ID that is not used by another control."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.switch.html"
         }
       },
       "availability": {
@@ -9522,9 +9764,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.switch@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.switch.html"
+        }
       },
-      "contentHash": "sha256:0809e4aad020f14faec69276dac7f1075f2df3e987a846f20767a59caaf15da5"
+      "contentHash": "sha256:38f32360470c7c5f53147856cce9c28464b7b8fa15d6070f7d3cda6bff9075c9"
     },
     {
       "id": "creator-signal.site.catalogue.tab-panel",
@@ -10315,6 +10560,10 @@
               "remediation": "Assign a stable field ID that is not used by another control."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.telephone-input.html"
         }
       },
       "availability": {
@@ -10324,9 +10573,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.telephone-input@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.telephone-input.html"
+        }
       },
-      "contentHash": "sha256:cf8ebc2fc7718c1acb1b06886a909e15e3de315834de23c83b6c3e941edff707"
+      "contentHash": "sha256:08030e83db0fd3b97e511041290711d1c2208d75cf06c859abbc8f0ca8f48ded"
     },
     {
       "id": "creator-signal.site.catalogue.template-footer",
@@ -10617,6 +10869,10 @@
         },
         "accessibility": {
           "checks": []
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.terms-and-conditions.html"
         }
       },
       "availability": {
@@ -10628,9 +10884,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.terms-and-conditions@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.terms-and-conditions.html"
+        }
       },
-      "contentHash": "sha256:50e1b2b09c7634a99ac3522715e35016b78a62f7c7be02e384016fa69d971910"
+      "contentHash": "sha256:7c4899cbe4ac618d51a5d803754096973a24b99e315f8744d85c5a4997809209"
     },
     {
       "id": "creator-signal.site.catalogue.text-area",
@@ -10746,6 +11005,10 @@
               "remediation": "Assign a stable field ID that is not used by another control."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.text-area.html"
         }
       },
       "availability": {
@@ -10755,9 +11018,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.text-area@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.text-area.html"
+        }
       },
-      "contentHash": "sha256:f8557508c6e9d86848960799dfbe59b6ed36edcf91a044900c6672aa017f44d7"
+      "contentHash": "sha256:43ee5d6ce6e80f78c058c2e4b44800a4544856c087cd2030de894691d7a0b5b6"
     },
     {
       "id": "creator-signal.site.catalogue.text-input",
@@ -10882,6 +11148,10 @@
               "remediation": "Assign a stable field ID that is not used by another control."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.text-input.html"
         }
       },
       "availability": {
@@ -10891,9 +11161,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.text-input@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.text-input.html"
+        }
       },
-      "contentHash": "sha256:9b34841448dc36cf72360e8992ac8d2fd6a1326a9ae743d621a25b9159a4248b"
+      "contentHash": "sha256:33e616c01407886de0d53f68766f58391353bbfe74da615a2cec0b733f9c8eb6"
     },
     {
       "id": "creator-signal.site.catalogue.timeline",
@@ -11080,6 +11353,10 @@
               "remediation": "Assign a stable field ID that is not used by another control."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.url-input.html"
         }
       },
       "availability": {
@@ -11089,9 +11366,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.url-input@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.url-input.html"
+        }
       },
-      "contentHash": "sha256:91585261bb53b9808f25213a9f4576ec205cf66fca14b4fd96924e640db2dc0e"
+      "contentHash": "sha256:992cbbe589c02df363a51d2783d0937b0466160f416cf6a56fc6915fc4c64cff"
     },
     {
       "id": "creator-signal.site.catalogue.wizard",
@@ -11169,6 +11449,10 @@
               "remediation": "Preserve the persistent draft runtime contract."
             }
           ]
+        },
+        "preview": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.wizard.html"
         }
       },
       "availability": {
@@ -11180,9 +11464,12 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.wizard@1.0.0",
-        "rendered": null
+        "rendered": {
+          "type": "wireframe",
+          "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.wizard.html"
+        }
       },
-      "contentHash": "sha256:0a25a25fdfc650e53df1a4ab71e615c8aff909b26f51a6b34071bde41d8d6ab9"
+      "contentHash": "sha256:6ff4af7734b28c11f9981e55bbcdfa500505535dcd18fd102d1be51fd8f06aaf"
     },
     {
       "id": "creator-signal.site.catalogue.youtube-embed",
@@ -18211,6 +18498,6 @@
   ],
   "checksum": {
     "algorithm": "sha256",
-    "value": "sha256:71f52987b86cf0add2691fc7fe530edf101e0f01efeb34d01f168cb7caa72535"
+    "value": "sha256:b28add41202a94232dfe2c42014823244e7d4379de67af4d653f30804434d7f3"
   }
 }

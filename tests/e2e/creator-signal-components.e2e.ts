@@ -25,7 +25,45 @@ const FORM_ROUTES: readonly FormRoute[] = [
   { path: '/report-an-error', title: 'Report an error', provider: 'Managed Form' },
 ]
 
+const TWO_COLUMN_LAYOUT_CANVAS_SELECTOR =
+  '[data-plugin-module="creator-signal.site.two-column-layout-shell"] > [data-plugin-children="true"]'
+
 test.describe('Creator Signal route-wide WYSIWYG component projection', () => {
+  test('Two Column Layout exposes its two regions as a WYSIWYG component canvas', async ({ page }) => {
+    await openSiteEditor(page)
+    await openSitePanel(page)
+    await page.getByRole('button', {
+      name: 'Open component Two Column Layout',
+      exact: true,
+    }).click()
+
+    const frame = canvasFrame(page)
+    const layout = frame.locator(TWO_COLUMN_LAYOUT_CANVAS_SELECTOR)
+    const columns = layout.locator('.two-column-layout-column')
+    const placeholders = layout.locator(
+      '[data-canvas-module-placeholder][data-variant="block"]',
+    )
+
+    await expect(layout).toBeVisible()
+    await expect(columns).toHaveCount(2)
+    await expect(placeholders).toHaveCount(2)
+    await expect(placeholders.nth(0)).toContainText('Left column')
+    await expect(placeholders.nth(1)).toContainText('Right column')
+    await expect(placeholders).toContainText([
+      'Page components placed here render in this column.',
+      'Page components placed here render in this column.',
+    ])
+
+    const boxes = await columns.evaluateAll((elements) => elements.map((element) => {
+      const rect = element.getBoundingClientRect()
+      return { height: rect.height, left: rect.left, top: rect.top, width: rect.width }
+    }))
+    expect(boxes[0].height).toBeGreaterThanOrEqual(100)
+    expect(boxes[1].height).toBeGreaterThanOrEqual(100)
+    expect(Math.abs(boxes[0].top - boxes[1].top)).toBeLessThanOrEqual(1)
+    expect(boxes[1].left).toBeGreaterThan(boxes[0].left + boxes[0].width)
+  })
+
   test('every installed public route exposes selectable real components without a page-pattern wrapper', async ({ page }) => {
     await openSiteEditor(page)
     await openSitePanel(page)
@@ -70,7 +108,7 @@ test.describe('Creator Signal route-wide WYSIWYG component projection', () => {
           name: 'Two Column Layout',
           exact: true,
         }).count()) {
-          const layout = canvasFrame(page).locator('.two-column-layout')
+          const layout = canvasFrame(page).locator(TWO_COLUMN_LAYOUT_CANVAS_SELECTOR)
           await expect(layout).toBeVisible()
           await expect(layout.locator('.two-column-layout-column')).toHaveCount(2)
           await expect.poll(async () => layout.evaluate((element) => {

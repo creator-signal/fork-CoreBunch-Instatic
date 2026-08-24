@@ -41,11 +41,31 @@ describe('SlotOutletEditor — edit-mode gating', () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it('renders the dashed placeholder in VC edit mode', () => {
+  it('renders a visible WYSIWYG content-region placeholder in VC edit mode', () => {
     setVCMode()
-    render(<SlotOutletEditor {...defaultProps} />)
-    // The placeholder contains the slot name text
-    expect(screen.getByText(/Slot: children/i)).toBeDefined()
+    const { container } = render(<SlotOutletEditor {...defaultProps} />)
+    expect(screen.getByText('Children content region')).toBeDefined()
+    expect(screen.getByText(
+      'Page components placed here render in this region.',
+    )).toBeDefined()
+    expect(
+      container.querySelector('[data-canvas-module-placeholder]')
+        ?.getAttribute('data-variant'),
+    ).toBe('block')
+  })
+
+  it('describes left and right outlets as columns', () => {
+    setVCMode()
+    const { rerender } = render(
+      <SlotOutletEditor {...defaultProps} props={{ slotName: 'left' }} />,
+    )
+    expect(screen.getByText('Left column')).toBeDefined()
+    expect(screen.getByText(
+      'Page components placed here render in this column.',
+    )).toBeDefined()
+
+    rerender(<SlotOutletEditor {...defaultProps} props={{ slotName: 'right' }} />)
+    expect(screen.getByText('Right column')).toBeDefined()
   })
 
   it('does not render when switching from VC mode to page mode', () => {

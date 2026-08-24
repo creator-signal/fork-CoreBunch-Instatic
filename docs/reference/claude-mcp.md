@@ -236,6 +236,7 @@ To invalidate the server-side grant or personal token, open Instatic **AI → MC
 
 ## Related
 
+- `docs/reference/mcp-end-user-testing.md` — client-neutral connection acceptance, reversible draft test, evidence, and revocation procedure.
 - `docs/features/mcp-connectors.md` — MCP protocol, authorization, tools, and data model.
 - `docs/features/auth-and-access.md` — Instatic sessions, capabilities, MFA, and step-up authentication.
 - `server/ai/mcp/paths.ts` — canonical MCP and OAuth endpoint paths.

@@ -90,6 +90,22 @@ export async function openLayersPanel(page: Page): Promise<void> {
   await expect(tree).toBeVisible()
 }
 
+/** Open the governed Components projection in Explorer → Layers. */
+export async function openComponentsPanel(page: Page): Promise<void> {
+  const tree = page.getByRole('tree', { name: 'Component page hierarchy' })
+  if (!(await tree.isVisible().catch(() => false))) {
+    const explorer = page.getByRole('complementary', { name: 'Explorer' })
+    if (!(await explorer.isVisible().catch(() => false))) {
+      await page.getByRole('button', { name: 'Open Explorer panel' }).click()
+    }
+    await explorer.getByRole('button', { name: 'Layers', exact: true }).click()
+    const layersView = page.getByTestId('layers-view-control')
+    await layersView.getByRole('button', { name: 'Components', exact: true }).click()
+  }
+  await expect(page.getByTestId('component-layers-panel-ready')).toBeVisible()
+  await expect(tree).toBeVisible()
+}
+
 type ExplorerTab = 'Site' | 'Code' | 'Media'
 
 /** Open one of the consolidated Explorer tabs and wait for it to become active. */

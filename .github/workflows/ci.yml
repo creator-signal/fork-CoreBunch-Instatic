@@ -147,6 +147,9 @@ jobs:
       - name: Verify published public-site acceptance
         run: bun run verify:creator-signal-public-acceptance
 
+      - name: Verify authenticated Creator Signal component authoring
+        run: bun run verify:creator-signal-editor-authoring
+
       - name: Upload public-site acceptance evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -169,6 +172,16 @@ jobs:
         with:
           name: creator-signal-component-specimens
           path: .tmp/creator-signal-component-specimens
+          if-no-files-found: warn
+
+      - name: Upload authenticated editor evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: creator-signal-editor-authoring
+          path: |
+            .tmp/creator-signal-editor-results
+            .tmp/creator-signal-editor-report
           if-no-files-found: warn
 
       - name: Upload comparison plugin

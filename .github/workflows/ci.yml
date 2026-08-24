@@ -106,6 +106,9 @@ jobs:
       - name: Verify Creator Signal Design System lock
         run: bun run creator-signal:design-system:check
 
+      - name: Verify Creator Signal Component Library specimens
+        run: bun run component-library:creator-signal-specimens:check
+
       - name: Verify Component Library design-impact manifest
         run: bun run component-library:design-impact:check
 
@@ -114,6 +117,9 @@ jobs:
 
       - name: Build site pack
         run: bun run instatic-plugin build integrations/creator-signal
+
+      - name: Verify Creator Signal Component Library specimens in a browser
+        run: bun run verify:creator-signal-component-specimens:browser
 
       - name: Verify Design System in a browser
         run: bun run verify:creator-signal-design-system:browser
@@ -127,6 +133,14 @@ jobs:
         with:
           name: creator-signal-public-acceptance
           path: .tmp/creator-signal-public-acceptance
+          if-no-files-found: warn
+
+      - name: Upload Component Library specimen evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: creator-signal-component-specimens
+          path: .tmp/creator-signal-component-specimens
           if-no-files-found: warn
 
       - name: Upload comparison plugin

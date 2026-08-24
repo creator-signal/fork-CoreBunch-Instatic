@@ -225,6 +225,34 @@ plugin to exercise the complete local browser matrix. Provider entries stay in
 an explicit non-delivering state during that verifier; a rendered specimen does
 not claim an external provider response.
 
+### Non-form design-impact specimens
+
+`component-library-non-form-specimens.json` is the deterministic static bundle
+for the 60 built-in entries outside the Forms category. The executable registry
+selects the entries; each specimen is materialized from its real primitive,
+Visual Component, pattern, capability backing or template-role definition and
+rendered by `@core/publisher.publishPage`. The bundle includes every declared
+variant, explicit capability-unavailable scenarios, broken-image scenarios,
+publisher module JavaScript, synthetic local assets and per-document hashes.
+
+The bundle keeps the Creator Signal asset boundary replaceable. Its documents
+reference `/assets/design-system/`, while the bundle pins those paths and
+checksums to `integrations/creator-signal/design-system/lock.json`. A downstream
+review projection can substitute a candidate lock at that boundary without
+copying Instatic HTML or component CSS into a second renderer.
+
+Run `bun run component-library:non-form-specimens` to regenerate the bundle,
+`bun run component-library:non-form-specimens:check` to reject missing,
+obsolete, duplicate or stale specimens, and
+`bun run verify:component-library-non-form-specimens:browser` for axe,
+theme, forced-colour, reduced-motion, responsive and declared-interaction
+acceptance. The browser command serves only the generated bundle, its embedded
+synthetic assets, pinned local design-system files and publisher module
+JavaScript; any external network request fails the run. Evidence is written to
+`.tmp/component-library-non-form-specimens/acceptance.json` with every entry and
+scenario outcome. This remains local/source acceptance and does not activate a
+provider or deploy an environment.
+
 ## Registration
 
 Use the singleton for application registrations:

@@ -149,6 +149,13 @@ describe('Component Library design-impact manifest', () => {
       entry.definition.implementation.type === 'capability-backed' &&
       entry.definition.requirements.providerAdapters.length === 0
     )?.availability.mode).toBe('capability-gated')
+    expect(first.entries.filter((entry) =>
+      entry.registryOrigin === 'built-in' && entry.definition.category !== 'Forms'
+    ).every((entry) => entry.specimen.bundleEntryReference?.includes(entry.id)))
+      .toBe(true)
+    expect(first.entries.filter((entry) =>
+      entry.registryOrigin !== 'built-in' || entry.definition.category === 'Forms'
+    ).every((entry) => entry.specimen.bundleEntryReference === null)).toBe(true)
   })
 
   it('keeps the checked manifest converged with the executable registries', () => {
@@ -206,6 +213,12 @@ describe('Component Library design-impact manifest', () => {
       .specimen.executable!.entryId = 'creator-signal.site.not-this-entry'
     expect(() => validateDesignImpactManifest(executableSpecimenDrift)).toThrow(
       'executable specimen for another entry',
+    )
+
+    const bundleDrift = structuredClone(manifest)
+    bundleDrift.entries[0]!.specimen.bundleEntryReference = 'not-the-bundle-entry'
+    expect(() => validateDesignImpactManifest(bundleDrift)).toThrow(
+      'invalid specimen bundle reference',
     )
 
     const hashDrift = structuredClone(manifest)

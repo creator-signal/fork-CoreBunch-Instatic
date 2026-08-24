@@ -12,8 +12,10 @@ import {
 } from '@core/utils/typeboxHelpers'
 
 export const DESIGN_IMPACT_MANIFEST_SCHEMA_VERSION =
-  'instatic.component-library-design-impact/v1' as const
+  'instatic.component-library-design-impact/v2' as const
 export const COMPONENT_LIBRARY_ENTRY_SCHEMA_VERSION = '1.0.0' as const
+export const NON_FORM_BUILT_IN_SPECIMEN_BUNDLE_PATH =
+  'docs/features/component-library-non-form-specimens.json' as const
 
 const SHA256_PATTERN = '^sha256:[a-f0-9]{64}$'
 const SEMVER_PATTERN =
@@ -68,6 +70,10 @@ const DesignImpactSpecimenSchema = Type.Object(
       },
       { additionalProperties: false },
     )),
+    bundleEntryReference: Type.Union([
+      Type.String({ minLength: 1 }),
+      Type.Null(),
+    ]),
   },
   { additionalProperties: false },
 )
@@ -265,6 +271,10 @@ export function buildDesignImpactManifest(
         ...(specimenArtifacts.has(definition.id)
           ? { executable: specimenArtifacts.get(definition.id)! }
           : {}),
+        bundleEntryReference: specimenBundleEntryReference(
+          definition,
+          entryInput.registryOrigin,
+        ),
       },
     }
     assertRenderedSpecimenReference(definition)
@@ -395,6 +405,16 @@ export function validateDesignImpactManifest(
       assertRepositoryRelativeReference(
         entry.specimen.executable.htmlReference,
         entry.id,
+      )
+    }
+    if (
+      entry.specimen.bundleEntryReference !== specimenBundleEntryReference(
+        entry.definition,
+        entry.registryOrigin,
+      )
+    ) {
+      throw new Error(
+        `[design-impact] Entry "${entry.id}" has an invalid specimen bundle reference.`,
       )
     }
     assertRenderedSpecimenReference(entry.definition)
@@ -600,6 +620,14 @@ function implementationReference(
 
 function specimenContractReference(entry: ComponentLibraryEntry): string {
   return `instatic://component-library/${entry.id}@${entry.version}`
+}
+
+function specimenBundleEntryReference(
+  entry: ComponentLibraryEntry,
+  registryOrigin: 'built-in' | 'plugin',
+): string | null {
+  if (registryOrigin !== 'built-in' || entry.category === 'Forms') return null
+  return `instatic://component-library/specimen-bundle/non-form/${entry.id}`
 }
 
 function assertRenderedSpecimenReference(entry: ComponentLibraryEntry): void {

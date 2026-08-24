@@ -112,6 +112,9 @@ jobs:
       - name: Verify Component Library design-impact manifest
         run: bun run component-library:design-impact:check
 
+      - name: Verify non-form Component Library specimens
+        run: bun run component-library:non-form-specimens:check
+
       - name: Lint site pack
         run: bun run instatic-plugin lint integrations/creator-signal
 
@@ -123,6 +126,17 @@ jobs:
 
       - name: Verify Design System in a browser
         run: bun run verify:creator-signal-design-system:browser
+
+      - name: Verify non-form specimens in a browser
+        run: bun run verify:component-library-non-form-specimens:browser
+
+      - name: Upload non-form specimen acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: component-library-non-form-specimen-acceptance
+          path: .tmp/component-library-non-form-specimens
+          if-no-files-found: warn
 
       - name: Verify published public-site acceptance
         run: bun run verify:creator-signal-public-acceptance

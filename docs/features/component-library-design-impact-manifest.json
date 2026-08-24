@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "instatic.component-library-design-impact/v1",
+  "schemaVersion": "instatic.component-library-design-impact/v2",
   "generatedFrom": {
     "instatic": {
       "version": "0.0.40",
@@ -258,9 +258,10 @@
           "entryId": "creator-signal.site.call-to-action",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-call-to-action.html",
           "contentHash": "sha256:e0c9caf0d648fc2872813288e8b09b6eba5d6a6a1a383fb16cacc5913eb6a507"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:c51aa6e9dfec42575aa5be89da59988c293bb6c48c0769bf870109e3304b996a"
+      "contentHash": "sha256:a89574440ccbda9331ff0f4021d8fa7be85d9c3e6de1e62ebf47580a385a6359"
     },
     {
       "id": "creator-signal.site.campaign-hero",
@@ -513,9 +514,10 @@
           "entryId": "creator-signal.site.campaign-hero",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-campaign-hero.html",
           "contentHash": "sha256:4b1c964deece2d62b1be9a70e6169904b3ee7ee420f184a3f394f140a678aa79"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:7583004a9ea5985b9a262da418d4004db4717f98e942bfc92898f097b025321f"
+      "contentHash": "sha256:c680d2cd1b4c75eb84518080665f25abd84266e5373ccf7b04ed0ecc294b9201"
     },
     {
       "id": "creator-signal.site.catalogue.accordion",
@@ -623,9 +625,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.accordion@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.accordion"
       },
-      "contentHash": "sha256:5b3158e704798a32b27a105fe8204b18c3b7c1c26007adbabbead0293daf5d15"
+      "contentHash": "sha256:07a730da3ba98ee945818c2eb8e8c4aac7e9c74fffdb4e61cbecd7d2861a7cb9"
     },
     {
       "id": "creator-signal.site.catalogue.accordion-item",
@@ -714,9 +717,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.accordion-item@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.accordion-item"
       },
-      "contentHash": "sha256:b3aa6d1f9fcb6cb5adcfc79405c4b3646c3186c5679e6af1003d96e8ddb4c6e9"
+      "contentHash": "sha256:bc8afd5e3e7f6f6623930a9aa0c98a0a5b65cb44489247e8d12bcd16aa72c2eb"
     },
     {
       "id": "creator-signal.site.catalogue.audio",
@@ -838,9 +842,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.audio@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.audio"
       },
-      "contentHash": "sha256:9282561ae0f06f7559afc7a8e2203b8df5f91904d078e8c498b824c80f8df85c"
+      "contentHash": "sha256:415cb01425d16663b029004c77eee8ace12f51405faa4c5975870dfcb5f7feec"
     },
     {
       "id": "creator-signal.site.catalogue.badge",
@@ -955,9 +960,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.badge@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.badge"
       },
-      "contentHash": "sha256:3e1a102faba3768a6febd92b65d51f22a9770939e19b5f1cf3790275485d846c"
+      "contentHash": "sha256:af24118098da70e1e16336a50dfa0851804294ece3e4dd7a8993ea7f82f890ff"
     },
     {
       "id": "creator-signal.site.catalogue.breadcrumb",
@@ -1093,9 +1099,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.breadcrumb@2.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.breadcrumb"
       },
-      "contentHash": "sha256:5a6badff7e952db0c7b7a7eab55b7a9c16f69718131ba9628b2a945ceb521cc6"
+      "contentHash": "sha256:185a3f36a43619883f8fd223238ee1c59c29a56bd615da172c84a0dbff5e1992"
     },
     {
       "id": "creator-signal.site.catalogue.button",
@@ -1208,9 +1215,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.button@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.button"
       },
-      "contentHash": "sha256:9f80ec23b0f5ce4706cfeb2ee21daf4d048eb67a1b9e808c76cba406b6b5dd90"
+      "contentHash": "sha256:627bdf8013f9f5e87b2f75724711652a94118778e1f54d339cbcbc88d254a8bc"
     },
     {
       "id": "creator-signal.site.catalogue.captcha",
@@ -1327,9 +1335,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.captcha@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:c3c5ca1036b6ee3e757af43fa0bcbecee715a25f7cac4d48af72c921cf3b4177"
+      "contentHash": "sha256:09da8de5ed63d3873034973883f43359e81429ea9f75d3041ac83e473fa801db"
     },
     {
       "id": "creator-signal.site.catalogue.card",
@@ -1527,9 +1536,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.card@2.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.card"
       },
-      "contentHash": "sha256:eb07b5e569ce4b99dbec6e4062c2b1c2f951d1c7c0b7b82aae9f65d9b4b502a3"
+      "contentHash": "sha256:0ac4b12fca2fffa8224b957527d1b52f45242cacf1cf5d258af1d61815339e39"
     },
     {
       "id": "creator-signal.site.catalogue.card-grid",
@@ -1594,9 +1604,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.card-grid@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.card-grid"
       },
-      "contentHash": "sha256:cf7c9d901f86c7e7a59ced48d7656646a7f481ffd8dbf48559d6c5f0fc76b7d2"
+      "contentHash": "sha256:79b349373714bddc4bf325026455657f92193381e2e74dd8fb385dfe69e3bb4b"
     },
     {
       "id": "creator-signal.site.catalogue.carousel",
@@ -1739,9 +1750,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.carousel@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.carousel"
       },
-      "contentHash": "sha256:f1fa6e2ad2e52951cbdf9ffec05ea85b4050117b44e626b64a1b466a0591d67e"
+      "contentHash": "sha256:0048153d1d210f896f682e3e95800daedc4f913c2f0134ac14816836f9c741cd"
     },
     {
       "id": "creator-signal.site.catalogue.checkbox",
@@ -1866,9 +1878,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.checkbox@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:37dc754758149e8dbbed3f10a986788b606b9977f86ad80e4af475e3fe027826"
+      "contentHash": "sha256:88134f7b8d2bcd6074415727d6c1241057c46fb8e45118006a797575c4d051eb"
     },
     {
       "id": "creator-signal.site.catalogue.checkbox-group",
@@ -1936,9 +1949,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.checkbox-group@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:cf56ae6a6c0639444575aaca2244a94645c06aa2bb671382beaa63b9c7605cee"
+      "contentHash": "sha256:07f4c3a1d88a57e491e050d547bf29150ea27daf47b0ced57e3f27752e61451e"
     },
     {
       "id": "creator-signal.site.catalogue.code-block",
@@ -2035,9 +2049,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.code-block@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.code-block"
       },
-      "contentHash": "sha256:ca14ba834a30c5ffbe744e81e0ee1bc600ad28a0a5b45a25de73ed44d391af85"
+      "contentHash": "sha256:17b66ceb4fee742fe3c043460dcb8b6e650d4dc4a72ee352fe1ec9ad763f77ee"
     },
     {
       "id": "creator-signal.site.catalogue.comparison-table",
@@ -2097,9 +2112,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.comparison-table@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.comparison-table"
       },
-      "contentHash": "sha256:5529050ea7383863e5e47d934e26a9ba94c2beeefd34d90731a23be971926192"
+      "contentHash": "sha256:440039637df8acc73f3d1c28ef854738f63dd765e374883753ce8a402f78b59f"
     },
     {
       "id": "creator-signal.site.catalogue.container",
@@ -2166,9 +2182,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.container@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.container"
       },
-      "contentHash": "sha256:7ded5021d596de4e5bf001968f8e71778a916413146707d062ed85b497048bb8"
+      "contentHash": "sha256:ecfc4480a8d838284c928942b720ca8e7787bbca1b2877d1896136c5325bdde8"
     },
     {
       "id": "creator-signal.site.catalogue.date-input",
@@ -2302,9 +2319,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.date-input@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:f4026b74e2fee1dc4055a2e3d39abc2be7663fc0dbe2f1fb2f7f6214f21293d0"
+      "contentHash": "sha256:ad6bbed0d1027c1fe06c3756538abd4c02f1de21134abf176d3104327b0a763a"
     },
     {
       "id": "creator-signal.site.catalogue.delete-draft",
@@ -2406,9 +2424,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.delete-draft@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:e86fc64955544120417b94a1a3908576e6cab6841f8a7cfa65eebe2a27c52476"
+      "contentHash": "sha256:82352752d3da81029a7aafa6c0344631bdcdf4bfd50938c5bc49313133d8674e"
     },
     {
       "id": "creator-signal.site.catalogue.dialog",
@@ -2575,9 +2594,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.dialog@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.dialog"
       },
-      "contentHash": "sha256:777b92b2b91721990e85af9a98f749e729f31e4c9da4c20f7ef53f9b77e0313b"
+      "contentHash": "sha256:6f75208a2a02eb9915bec03cc5f6929e7bc0365bb2d73179b5cb0af99e8a4130"
     },
     {
       "id": "creator-signal.site.catalogue.download",
@@ -2674,9 +2694,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.download@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.download"
       },
-      "contentHash": "sha256:1c5b9ce6f3d705f664b2d421dd3edd39b3110d31dba2364c8c311566e26c47c3"
+      "contentHash": "sha256:590280e2e222cb0b1169f4b3f30bf340c031d1882b3eefc9b4d837539d1ac2f0"
     },
     {
       "id": "creator-signal.site.catalogue.drawer",
@@ -2836,9 +2857,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.drawer@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.drawer"
       },
-      "contentHash": "sha256:d7d6f22c52c5d3c0b383e111cb17106b9c3400b69eed19f46034575ded696e24"
+      "contentHash": "sha256:b1416763e9abfb705f66d47ae4d47cb2c5b0a3c394a9e59d84be3702e72e61ec"
     },
     {
       "id": "creator-signal.site.catalogue.email-input",
@@ -2972,9 +2994,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.email-input@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:36051d74cf8864a77aea9052c3a6d6975023cd2e4abf416d0e05e9a0406a6515"
+      "contentHash": "sha256:4d2846010c55a174890e87ae6af2c46aa314b71c1a3af4e18d09094c1e9a315b"
     },
     {
       "id": "creator-signal.site.catalogue.embed",
@@ -3105,9 +3128,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.embed@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.embed"
       },
-      "contentHash": "sha256:7ba7eb199be5c12383b65716336bba5c455a6ed2dd776e299c00331da0d26bcf"
+      "contentHash": "sha256:a3a8d7467f9ab354a0103b41fb907776d4c2220c349b233b58bd115985cbfaec"
     },
     {
       "id": "creator-signal.site.catalogue.empty-state",
@@ -3167,9 +3191,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.empty-state@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.empty-state"
       },
-      "contentHash": "sha256:d6f330e1ab02a934902195469ebd406ded17d5bcb609185fc800e5bb9f50eba2"
+      "contentHash": "sha256:910e130ffae226ec3d7ae2c06f275dcd733347395a84aeab9002825b03e68768"
     },
     {
       "id": "creator-signal.site.catalogue.faq-list",
@@ -3229,9 +3254,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.faq-list@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.faq-list"
       },
-      "contentHash": "sha256:963461cd124ffc2aba42b84eac5d5fa0d672b5811ad7d2aaaac85550f8db9bc1"
+      "contentHash": "sha256:5725433920199caacd71d2bbfeca3dcabb108ac97d072c14a3187f29f986de81"
     },
     {
       "id": "creator-signal.site.catalogue.file-attachment",
@@ -3379,9 +3405,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.file-attachment@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:759fed680eb8ad0c792dd0d51343abda991dee2b7eed5f6f5bedbb3349042cc3"
+      "contentHash": "sha256:e651d4ee7cf2f27b51a075709f945833eeec55dd5607bc1d9a0d40b646ea70c9"
     },
     {
       "id": "creator-signal.site.catalogue.form-accordion",
@@ -3458,9 +3485,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-accordion@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:36eac673e23760fc9f72a9e72f58319ab5e474ce1ff33fa2577f2c06ab2d4d14"
+      "contentHash": "sha256:d6f64f5153eed72ee7f8428f64a93575ec05eeb1f4df066f76a6b8fe258a5ccd"
     },
     {
       "id": "creator-signal.site.catalogue.form-actions",
@@ -3547,9 +3575,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-actions@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:921863487f61926a189236f193f028399a40b2acbc36166b6390bce95e8e3be2"
+      "contentHash": "sha256:30167c07f291264ba21b277a44b2b7b26112055ddd25f557258ee42b159e50c5"
     },
     {
       "id": "creator-signal.site.catalogue.form-container",
@@ -3674,9 +3703,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-container@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:790bb906ed5cbe62405b3ff68daa68b56c119704749969c1202b2536afdb0320"
+      "contentHash": "sha256:a6dce905cbf6a137af9c3118a6449d4d7d039c0ee880f62ad49dbc35c6acc2f7"
     },
     {
       "id": "creator-signal.site.catalogue.form-embed",
@@ -3835,9 +3865,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-embed@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:0a6ddf2c199d81cbb7d566e4abbe20ef72bff8ce61aeab93370bf29b8a81172f"
+      "contentHash": "sha256:27481ef07a85ec4196b3fe28ecb1717ab9592f2ad33dd5024385758b56503b5d"
     },
     {
       "id": "creator-signal.site.catalogue.form-error",
@@ -3936,9 +3967,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-error@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:88e93a6ccb4332fbc152b09ec4fbb1c75c88935b35c4b68804f53cc51a9a9173"
+      "contentHash": "sha256:0f9d79f48360e7fc0f559a1dbafd8e9a7c896f91736040f31e8e0c2fcade4887"
     },
     {
       "id": "creator-signal.site.catalogue.form-field-group",
@@ -4034,9 +4066,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-field-group@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:20efa717269d2ec1222c62576f4e42ac3520bc502cd705b9298a42cfde7a1d7d"
+      "contentHash": "sha256:bd08924d04096c64af0f9e2caac5c2db6b5fd80bcfc5ce44c531996a8ea38514"
     },
     {
       "id": "creator-signal.site.catalogue.form-help",
@@ -4146,9 +4179,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-help@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:6be712b42a7e6539d7bf47151d4293f7e36afc5728511b0e1e87e43c0b2a75ba"
+      "contentHash": "sha256:6fb9504209ed222475bcb82ba4c630a2ff5e7fd755fb83c42ebd0d7619df2779"
     },
     {
       "id": "creator-signal.site.catalogue.form-label",
@@ -4247,9 +4281,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-label@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:2f836d6ba5234003fdeb7c60445708033f067d1c39fb826e44b48df2769369f6"
+      "contentHash": "sha256:fc3b5f54cbdc8cde688e742d65671eb7cb7505ef5444e13c01912f9d3d73b1c3"
     },
     {
       "id": "creator-signal.site.catalogue.form-message",
@@ -4363,9 +4398,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-message@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:d8772d48e37bf52a3ff9d91754906921275e9265b95a358cde341dbcbaf0da8c"
+      "contentHash": "sha256:7de902b3c15fd20e055bc88c5960b0e0354679bd16e1ec6e20e52f39942c6955"
     },
     {
       "id": "creator-signal.site.catalogue.form-panel",
@@ -4438,9 +4474,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-panel@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:f62c04df2ead36e0eeb4f5e5b3ea2ae1313ab2221e7f44a1ac12de45a32a8cd3"
+      "contentHash": "sha256:eefd53e1c5aa7e4799fe144523a48d60be8dffc9bcedaeb5afbcb1ddd4b059e8"
     },
     {
       "id": "creator-signal.site.catalogue.form-step",
@@ -4523,9 +4560,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-step@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:356b4989bf65c245f5245cab9d3102e224555c8c9112465f4f94da07d1292c84"
+      "contentHash": "sha256:94371fa5270449d83e73598882d4b6faf6c0dcba2048c86a38aae40c84da01c8"
     },
     {
       "id": "creator-signal.site.catalogue.form-summary-review",
@@ -4590,9 +4628,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-summary-review@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:628fe9a246e2f671ab4ab433aacf00710133a25de7185491c59b3cf70204d2a4"
+      "contentHash": "sha256:5541571183f0193f008b00126b4348b87156355f7e09a132f90d7c41f16b4758"
     },
     {
       "id": "creator-signal.site.catalogue.form-tabs",
@@ -4693,9 +4732,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.form-tabs@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:8d13958366a02a4800acd50936190c2fe64ba15a1d5e777170d7c834b70e635c"
+      "contentHash": "sha256:3f1c0a7498ecd4fdf1f3f3b4c8b1087a34657f6d58c3413d51b4e394f625a8bc"
     },
     {
       "id": "creator-signal.site.catalogue.gallery",
@@ -4768,9 +4808,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.gallery@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.gallery"
       },
-      "contentHash": "sha256:44565e5d5bc8789624dd5a4ef8a5ec033a8bb11172c4a46fabccb22dba23f871"
+      "contentHash": "sha256:faaa1a7ff8cbf73bed813b4fcc3d9c93e71087d756e7fbb200373e62b7ea39e4"
     },
     {
       "id": "creator-signal.site.catalogue.grid",
@@ -4830,9 +4871,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.grid@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.grid"
       },
-      "contentHash": "sha256:5c745763f94c000b96895fae4fb58e117dabebb69432af68adaa5a67d4f064a1"
+      "contentHash": "sha256:097fdb1bcd7b4739eddcb42ae55eb1b13c065e29e7b55f40bdd1ccc8f758ede7"
     },
     {
       "id": "creator-signal.site.catalogue.heading",
@@ -4939,9 +4981,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.heading@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.heading"
       },
-      "contentHash": "sha256:37a6b5d129d488201e8c511bccc39441097e99cc72d844ae471fed4281b1b017"
+      "contentHash": "sha256:c3bf00e8ef659d6709d646bbc1e66561cc2e968c035389dee61353088b4f5dc4"
     },
     {
       "id": "creator-signal.site.catalogue.hero",
@@ -5131,9 +5174,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.hero@2.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.hero"
       },
-      "contentHash": "sha256:9bdeb7e983c5622b23589d1cd8ed149a440a83df5ffb8bf8de17b6fe57efdbfd"
+      "contentHash": "sha256:6d4c7331df15e6ab60fc79c316100fb0e043ce3d5f77d18600cd5cfca2787e9f"
     },
     {
       "id": "creator-signal.site.catalogue.hidden-field",
@@ -5235,9 +5279,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.hidden-field@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:3bef6140264cad141c0b5b4752809984c17327bf420acd01147439c13e4edd8d"
+      "contentHash": "sha256:b030b89cbb0306881e5642b3fc4fbdc6dd9a341f686feaa18eb6ba713f9e8794"
     },
     {
       "id": "creator-signal.site.catalogue.icon",
@@ -5331,9 +5376,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.icon@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.icon"
       },
-      "contentHash": "sha256:b6aa05db6f409ac66f4076618ec5ed2684b615eaa7eb092824d764b53748548f"
+      "contentHash": "sha256:f0c6050a16e13d115a5c81136fec3e96200f34b65cfd53e8b165d999c6f00522"
     },
     {
       "id": "creator-signal.site.catalogue.icon-list",
@@ -5393,9 +5439,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.icon-list@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.icon-list"
       },
-      "contentHash": "sha256:80fa513755b397ddce905bedb72d0c4bf2a5e1a9cd906ee995bfbea0862652b5"
+      "contentHash": "sha256:02adcc126201d41cb55f90b5e266e02e532eba42c97154d3c0c8c266e573485b"
     },
     {
       "id": "creator-signal.site.catalogue.image",
@@ -5482,9 +5529,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.image@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.image"
       },
-      "contentHash": "sha256:b55c445cccc248094fbb30e0028ec87579b00ec666b918c3719b0234beddb92c"
+      "contentHash": "sha256:a55f797db8f302c9e40d948e866240c0b1041052a1da04593aa352ff9edb14ef"
     },
     {
       "id": "creator-signal.site.catalogue.language-navigation",
@@ -5586,9 +5634,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.language-navigation@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.language-navigation"
       },
-      "contentHash": "sha256:5e301f8d0fb53393d283f9ddeaba0665b2d3e6996dd599fb570d8b573ee0f755"
+      "contentHash": "sha256:b62d1e244bf768701af68c4281b4b5a0aaba046ac739e290a927cde888a0dd97"
     },
     {
       "id": "creator-signal.site.catalogue.link",
@@ -5678,9 +5727,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.link@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.link"
       },
-      "contentHash": "sha256:06b33f52010f8bc2f550063535152ddff9b6c8b8df7b588d301f7fd198c5c2dc"
+      "contentHash": "sha256:3294139fc8803cbc1b6a02f81640bcf2710cb7d9599cde9b2f1d31409f542df5"
     },
     {
       "id": "creator-signal.site.catalogue.list",
@@ -5798,9 +5848,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.list@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.list"
       },
-      "contentHash": "sha256:6806a6c723c3b8f81aa0b3f745bfe9cf9daf1c78a16f574586ccb2808013d29c"
+      "contentHash": "sha256:956fe3efe6c598e4d1c6a7520117d2daa108c642857b5bd1324c7835bb022f37"
     },
     {
       "id": "creator-signal.site.catalogue.logo-cloud",
@@ -5860,9 +5911,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.logo-cloud@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.logo-cloud"
       },
-      "contentHash": "sha256:84d6b06cc757d231ecf31c29e85131c0184d423fe6053577929f05a0bca691d8"
+      "contentHash": "sha256:03b185b932ced56f5872167d072973ed9ff33c1317506bc254491511c99fdcbb"
     },
     {
       "id": "creator-signal.site.catalogue.map",
@@ -5974,9 +6026,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.map@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.map"
       },
-      "contentHash": "sha256:42536f5d65373ab0daa5ba0c9411026faffcb11086264e4142670fdffd95708f"
+      "contentHash": "sha256:301c3f29be1367c98d55a862a33ac3e16544432f6c6ad5ee3ba2fd16c25f55f4"
     },
     {
       "id": "creator-signal.site.catalogue.media",
@@ -6130,9 +6183,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.media@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.media"
       },
-      "contentHash": "sha256:405599437bebf1cd234de71b068076dbd2d09fc273daf295587d04ffe0979969"
+      "contentHash": "sha256:35cd66eb6a8aaec2beb9acc5868ac5509b5e57fd6d9d2223e4f8a6324f0a1e1d"
     },
     {
       "id": "creator-signal.site.catalogue.navigation",
@@ -6275,9 +6329,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.navigation@2.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.navigation"
       },
-      "contentHash": "sha256:cabdd121122adc3306686e23d2308350804f8661b8976f95b2c596780c07aed3"
+      "contentHash": "sha256:13c3d47b54b2b5ddcbed251690d497d120a14e3adaad9cc9b8c820a269ddd078"
     },
     {
       "id": "creator-signal.site.catalogue.next-step",
@@ -6370,9 +6425,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.next-step@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:8ec4bb88a65a035ef73aa2cc8ff97014b866c0137b802e6bb3b49b23b2fb014b"
+      "contentHash": "sha256:f07464432cb38711371ee1650184508f2306626bec9764c2c23cf9c0bbb3e8c4"
     },
     {
       "id": "creator-signal.site.catalogue.notice",
@@ -6546,9 +6602,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.notice@2.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.notice"
       },
-      "contentHash": "sha256:9b643d1d6140e2a8b1de4b88b1b75ef72ecd86517986c0c31c18e41c724bd4f0"
+      "contentHash": "sha256:867d99cb927ddb25ba69b483e7dfefca95fe2a25ffd04df6f5de507ad366b91e"
     },
     {
       "id": "creator-signal.site.catalogue.number-input",
@@ -6682,9 +6739,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.number-input@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:ca767066de1b40b49b552fb557f63096c8ea4a675ec6844356d5160faabfe410"
+      "contentHash": "sha256:7f785e41bdb6e5b0ce3ec8cc0304854d1d18fefc81b0dd562be4675fee97868f"
     },
     {
       "id": "creator-signal.site.catalogue.option",
@@ -6767,9 +6825,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.option@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:895e6a2f3213a32e0165072444488c8b389a669a65a9a9a3399a81a851504e46"
+      "contentHash": "sha256:447dbdf98eb8e52b44ed63dce89376879f6d9ddae0294863e349da0f89a2029a"
     },
     {
       "id": "creator-signal.site.catalogue.option-group",
@@ -6848,9 +6907,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.option-group@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:e5e5b1dd9465b224680b76d585f9889c7236d004fc5687ae1e67bd722055e78e"
+      "contentHash": "sha256:a1c9d4893192a20f6e1257609dcb0a1e155f892201391b732565c5e871ccf7cb"
     },
     {
       "id": "creator-signal.site.catalogue.pdf-viewer",
@@ -6961,9 +7021,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.pdf-viewer@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.pdf-viewer"
       },
-      "contentHash": "sha256:383697b06ea50d26c8097dcd1ab5a6492719e2d081fde64e657807abaf57c62e"
+      "contentHash": "sha256:a8c8fc37ae5ef87b7d0dc00906daccb52ee5a388227a8e13f6a75256866cea3d"
     },
     {
       "id": "creator-signal.site.catalogue.person-profile",
@@ -7126,9 +7187,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.person-profile@2.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.person-profile"
       },
-      "contentHash": "sha256:5ca154aae6b71c1a7304fccf5c2c5964e72996e852bfdb1ddb40f10e7805c5f8"
+      "contentHash": "sha256:67b6c2196d88336a8503535ef256d8ac454c842c76a6e07ff0299677390b9def"
     },
     {
       "id": "creator-signal.site.catalogue.plain-text",
@@ -7212,9 +7274,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.plain-text@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.plain-text"
       },
-      "contentHash": "sha256:f9c84d12adb5fe1063ea5bc56f249ae879ecb923d3940805b5926c70e7040e83"
+      "contentHash": "sha256:30a2a0674359265c6936d0ea36ed7a5cb97ecf372b8e8f32f42dca8fe79b2829"
     },
     {
       "id": "creator-signal.site.catalogue.previous-next-actions",
@@ -7292,9 +7355,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.previous-next-actions@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:d5de42f2ccbcba8df9744544249cd0adc98e0f10c8ec5cbc0f46dffd0923cd80"
+      "contentHash": "sha256:e5a69edd40311cfd9affb0fff4f1b24fc82b413396dbe99a49c9ebb2253a1719"
     },
     {
       "id": "creator-signal.site.catalogue.previous-step",
@@ -7387,9 +7451,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.previous-step@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:58fe0b32c89184d8bb12b6c93a9fd936efea955ab826a64d3601bd898619134e"
+      "contentHash": "sha256:2139b422db8070be299b0bd73c4549f3209edce80f5db7187c6ec007150fcbe9"
     },
     {
       "id": "creator-signal.site.catalogue.progress-bar",
@@ -7486,9 +7551,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.progress-bar@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.progress-bar"
       },
-      "contentHash": "sha256:ba6a22c89c5b23a78976fe5d548dca67ba5451f1d43ec140a1800dba3f6b5df0"
+      "contentHash": "sha256:e54c95f4a316d3f4ded34dc6cfd909e069e3ab783ffc45adfe7a3f2d2e76b4bd"
     },
     {
       "id": "creator-signal.site.catalogue.quote",
@@ -7588,9 +7654,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.quote@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.quote"
       },
-      "contentHash": "sha256:afdf3918f197db09f37c1e7ca94b420c85104ad4213f278c8ae6a0591c3b975e"
+      "contentHash": "sha256:b61c7a3f817120094a497fb95edc1385f104ae64975055bdf5039e9d9d2744c6"
     },
     {
       "id": "creator-signal.site.catalogue.radio",
@@ -7715,9 +7782,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.radio@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:980351010a45b9d81584f014252a0ade886693d111b4f9df28b7ff859c09a44d"
+      "contentHash": "sha256:2a72c5cbbf67c0ee98542a2b570918ad5e99b39b0bde6558aca11322797cf130"
     },
     {
       "id": "creator-signal.site.catalogue.radio-group",
@@ -7785,9 +7853,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.radio-group@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:c68401c5f3a07526a3c07d20fc032c3f925282a9916498ccda072e4a8b0f7869"
+      "contentHash": "sha256:51a15e419b6b7e5a49d79057ec8f6d77c7144fad3b774488c6ba96ef51d15d15"
     },
     {
       "id": "creator-signal.site.catalogue.reset-button",
@@ -7887,9 +7956,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.reset-button@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:b09bd7d2ed8b87cfa4a9a7e488fe508e316fa4e427b059bdc9a90bbb20cfde83"
+      "contentHash": "sha256:4a9569e752cf34620bd557b1fe2f5493051a633d680a651fff1f6d336dc566b6"
     },
     {
       "id": "creator-signal.site.catalogue.reusable-form-fragment",
@@ -7998,9 +8068,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.reusable-form-fragment@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:aaa6978366c0cd94d662f8c0101f5dfed7167bdebc9d21fc661efeb30618279d"
+      "contentHash": "sha256:841ae06f6062212f33cc85e71cd1d867c92a178bf8a8a870669f07c29e30d919"
     },
     {
       "id": "creator-signal.site.catalogue.reusable-section",
@@ -8074,9 +8145,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.reusable-section@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.reusable-section"
       },
-      "contentHash": "sha256:270d46afa44f8988c10ad199ab9c6a6063ac8270d62f5151f2c739d9c996f4be"
+      "contentHash": "sha256:f73b9393f1bf6ec69176f315b9d9085679bee80da43527c9bdf2364b1f17745c"
     },
     {
       "id": "creator-signal.site.catalogue.rich-text",
@@ -8149,9 +8221,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.rich-text@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.rich-text"
       },
-      "contentHash": "sha256:63e2418c147adafa858bab1c202e11a2a8a025b23d7149a16909fc48b21d4e6e"
+      "contentHash": "sha256:b2d4c26d8234de6d4285a4fe55208516622efcd6aefe4e52f7954310c74d3995"
     },
     {
       "id": "creator-signal.site.catalogue.save-draft",
@@ -8253,9 +8326,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.save-draft@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:a5ce0e66cfd0343f1e70c27679d9551f7d7a1cffb56b509ab9433262018faff8"
+      "contentHash": "sha256:2df6324691c66da38158c072f1bc3bccdea4f5cb90dc68125e5932d161b661ff"
     },
     {
       "id": "creator-signal.site.catalogue.search",
@@ -8353,9 +8427,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.search@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.search"
       },
-      "contentHash": "sha256:988cd28053aa2421b8cfe29fbb6e0281612e2f4ff8eaee23a92105c9953e99b0"
+      "contentHash": "sha256:8de85d183f53f5873f27d112c05e4a7941d52fb715238fd5972f957381785dda"
     },
     {
       "id": "creator-signal.site.catalogue.section",
@@ -8423,9 +8498,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.section@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.section"
       },
-      "contentHash": "sha256:4f4c9392108b060d9f1086ae429e240f5fe0c475f68ca76441f29bd3fdbbd7a2"
+      "contentHash": "sha256:5131298b5cf01c5dc2d61c22631cf9443480663d070bd47b406167cb2429bdc6"
     },
     {
       "id": "creator-signal.site.catalogue.select",
@@ -8542,9 +8618,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.select@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:8c6c33ed644d53f579130372bb03fb176a183f614a990bc01cf63a5b3384e98b"
+      "contentHash": "sha256:8f9fc51157aab7203cc648e97169635143ea5c523a4c32fd673c452648009a37"
     },
     {
       "id": "creator-signal.site.catalogue.semantic-list",
@@ -8616,9 +8693,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.semantic-list@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.semantic-list"
       },
-      "contentHash": "sha256:eb97ffcee824776c2c5b68dad414863ccceb40524fdd03115f5ef3574d9c288e"
+      "contentHash": "sha256:db29a188cd6ac7961ce914ed106048480b50844347cd9a736d4cc6717483b330"
     },
     {
       "id": "creator-signal.site.catalogue.separator",
@@ -8703,9 +8781,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.separator@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.separator"
       },
-      "contentHash": "sha256:e8578a5aeedd3a3e164c3002a53b450b3e8897e9ee3b4b68470cae44c82abf1d"
+      "contentHash": "sha256:cb1560ee8aa15aa4ebdb74c05f8c0f7a46bc46c7e063a6739f076752ef7a6a7e"
     },
     {
       "id": "creator-signal.site.catalogue.share-links",
@@ -8807,9 +8886,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.share-links@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.share-links"
       },
-      "contentHash": "sha256:c271f0b0bfba7330ce3d058c7febb28355c77da726d484f92a7820cd990a92c7"
+      "contentHash": "sha256:97f0ea27647a8703b3dd544decf6b037accc8df36080b94aaa24bfc2192f6aea"
     },
     {
       "id": "creator-signal.site.catalogue.shared-content-fragment",
@@ -8912,9 +8992,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.shared-content-fragment@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.shared-content-fragment"
       },
-      "contentHash": "sha256:c6b110ec37be18ab9bde667cd819be4f53e88059a97dc7e904c5be7f76b65e7b"
+      "contentHash": "sha256:7b9744ba25c3294f9a712a188f11be032ed6fda0fbe4e5668ea42ca9a47aef2a"
     },
     {
       "id": "creator-signal.site.catalogue.statistics",
@@ -8974,9 +9055,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.statistics@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.statistics"
       },
-      "contentHash": "sha256:651c88ff9744dca97da360a749b07b46ea23586fa59516d903981fd6bd278053"
+      "contentHash": "sha256:06c75b98e924d2bcf3942f23bdaef1adc5b32eae750c96db7423d07368345da4"
     },
     {
       "id": "creator-signal.site.catalogue.steps",
@@ -9036,9 +9118,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.steps@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.steps"
       },
-      "contentHash": "sha256:23e633a965cd03341bafd6a7741d3721f598f33e38043da3790b120c44282d84"
+      "contentHash": "sha256:f2115beacb9e371305f96ecf25b335b39b3150751c555f2ccdde28e7d3c7b613"
     },
     {
       "id": "creator-signal.site.catalogue.structured-content",
@@ -9148,9 +9231,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.structured-content@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.structured-content"
       },
-      "contentHash": "sha256:90f6ff27303dbc672fa07f95d9642fe207e3d68282a4fa6995824844085dcbe4"
+      "contentHash": "sha256:1b5f7abab561121e2ab680eaa8c6f58ac3db4623e2d5a29f323ab64e26696dcc"
     },
     {
       "id": "creator-signal.site.catalogue.structured-content-list",
@@ -9293,9 +9377,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.structured-content-list@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.structured-content-list"
       },
-      "contentHash": "sha256:31dccd230a0a81b83bf77d735c648209c0f95f40582deb746536dd8dede89aae"
+      "contentHash": "sha256:b6f381cba58e2471a45c36f3aedab6bd01e5118e6e5a9638f940d68cf3d00827"
     },
     {
       "id": "creator-signal.site.catalogue.submit",
@@ -9384,9 +9469,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.submit@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:a7e7d503dbae252a85e843303d5e41bdb5c1dd922181062cc3e2008cfae8a3f6"
+      "contentHash": "sha256:3f49caaaf5ac31e6e2319c1eb6827b61efc2df140004f2b59e6a88002bc06ef6"
     },
     {
       "id": "creator-signal.site.catalogue.switch",
@@ -9522,9 +9608,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.switch@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:0809e4aad020f14faec69276dac7f1075f2df3e987a846f20767a59caaf15da5"
+      "contentHash": "sha256:dba9a96df254c03b72e8f1f45c4a3c046866590280a09af46ce1416c54c0a7a2"
     },
     {
       "id": "creator-signal.site.catalogue.tab-panel",
@@ -9626,9 +9713,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.tab-panel@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.tab-panel"
       },
-      "contentHash": "sha256:754a83cf49df7f8b5e5f63c40b7ea21f72ca714cfdfb7cade03560e25e3488c7"
+      "contentHash": "sha256:c9b177d8691bcf1ab188b323709d3d96185f7fce5694d132755be9d85bf72fff"
     },
     {
       "id": "creator-signal.site.catalogue.table",
@@ -9725,9 +9813,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.table@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.table"
       },
-      "contentHash": "sha256:fa58a8386eb5c32ed7ca0fdfa2c0a7ae7c392ee000bd42c8640324fb88cf990a"
+      "contentHash": "sha256:d12dc4f51b37416fccb510f47ce003e2f74d1cec934c2fe1e88ff60fda42177f"
     },
     {
       "id": "creator-signal.site.catalogue.table-of-contents",
@@ -9863,9 +9952,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.table-of-contents@2.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.table-of-contents"
       },
-      "contentHash": "sha256:7842bc9b69a8d3ac304f286db5542699cde15759234f51ba120746805e9482a5"
+      "contentHash": "sha256:0a644497c45073ad69ce094d2c5f28ab73db3cd395edb76cf2ee3b1b86b90f2b"
     },
     {
       "id": "creator-signal.site.catalogue.tabs",
@@ -9988,9 +10078,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.tabs@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.tabs"
       },
-      "contentHash": "sha256:d838c7e1cc47a14e2cb0f6a76fe5bef629ce63587d54e6350e5e6f39c77a59ad"
+      "contentHash": "sha256:356e1f006c8d899518c0cd5c39cef15b38bec4ad454a2d52d00deedd9b49313d"
     },
     {
       "id": "creator-signal.site.catalogue.teaser",
@@ -10188,9 +10279,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.teaser@2.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.teaser"
       },
-      "contentHash": "sha256:17b3ef31cb474cf88c8547cc6e2925d5ebdb3eb72207a4e5862d04bc87f968fc"
+      "contentHash": "sha256:1684c6a6de1e21fcc1a201f691f2d6f24699fd0e4e7452e6437fa2bfb8fb6958"
     },
     {
       "id": "creator-signal.site.catalogue.telephone-input",
@@ -10324,9 +10416,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.telephone-input@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:cf8ebc2fc7718c1acb1b06886a909e15e3de315834de23c83b6c3e941edff707"
+      "contentHash": "sha256:c918338ac1374486f65963d0e5b401a1930528dd6c49883a901252ca9a528114"
     },
     {
       "id": "creator-signal.site.catalogue.template-footer",
@@ -10386,9 +10479,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.template-footer@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.template-footer"
       },
-      "contentHash": "sha256:50bdf7b646f49919293ef1b7fe49a955b7dbd52fbff936d55569846ad5998ee0"
+      "contentHash": "sha256:10f96717548d594e47486ac77bf0b67f58d4e9117cdd183eae79987b25c6d377"
     },
     {
       "id": "creator-signal.site.catalogue.template-header",
@@ -10467,9 +10561,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.template-header@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.template-header"
       },
-      "contentHash": "sha256:8487aaf66ba4098b05251c0651b486628f28af344b531be776c2898f7a264ecf"
+      "contentHash": "sha256:f2be1ef687a6ef9871c262dfd72c2b40c580a46a42d14581f42f5790a36d3487"
     },
     {
       "id": "creator-signal.site.catalogue.template-skip-link",
@@ -10554,9 +10649,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.template-skip-link@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.template-skip-link"
       },
-      "contentHash": "sha256:37e0fd83c00b90b6b57ce2e38a00ba18f6061ecec6cd76385c7b453f3c0f323c"
+      "contentHash": "sha256:5f95ea5c3320a273fc753cff56778a593a8a7092fe01b78edbd89fdea8370d1a"
     },
     {
       "id": "creator-signal.site.catalogue.terms-and-conditions",
@@ -10628,9 +10724,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.terms-and-conditions@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:50e1b2b09c7634a99ac3522715e35016b78a62f7c7be02e384016fa69d971910"
+      "contentHash": "sha256:a460d07e8dbb967330a676d60f702f785e77503e0f0dfa096de0be7e5b7905a2"
     },
     {
       "id": "creator-signal.site.catalogue.text-area",
@@ -10755,9 +10852,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.text-area@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:f8557508c6e9d86848960799dfbe59b6ed36edcf91a044900c6672aa017f44d7"
+      "contentHash": "sha256:c7c4f02db735c67fad8e4e3c3468c4cb3eecccdbcc50f2e3669790164c780e8b"
     },
     {
       "id": "creator-signal.site.catalogue.text-input",
@@ -10891,9 +10989,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.text-input@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:9b34841448dc36cf72360e8992ac8d2fd6a1326a9ae743d621a25b9159a4248b"
+      "contentHash": "sha256:f225634ad1caaac98dca29d38c37fd544fcff4c622ff47d420bcf5bad2ead50f"
     },
     {
       "id": "creator-signal.site.catalogue.timeline",
@@ -10953,9 +11052,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.timeline@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.timeline"
       },
-      "contentHash": "sha256:8482b00de9f10746f09b4373577e46601950e5a457f22d7b44d2daa39a01ffab"
+      "contentHash": "sha256:3a74be9943a96ef62c611fdeadfad0cd33d5e1dcd54bcb9a18de0876a1bb1f73"
     },
     {
       "id": "creator-signal.site.catalogue.url-input",
@@ -11089,9 +11189,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.url-input@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:91585261bb53b9808f25213a9f4576ec205cf66fca14b4fd96924e640db2dc0e"
+      "contentHash": "sha256:ac554429d4b15fac38cc86db2a9aa11ca14c89af5056183236ba53907126e724"
     },
     {
       "id": "creator-signal.site.catalogue.wizard",
@@ -11180,9 +11281,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.wizard@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:0a25a25fdfc650e53df1a4ab71e615c8aff909b26f51a6b34071bde41d8d6ab9"
+      "contentHash": "sha256:413d7677b0e037e17c3c4f4fdf8cab82f46217f2927b4332314fa603f79726c7"
     },
     {
       "id": "creator-signal.site.catalogue.youtube-embed",
@@ -11302,9 +11404,10 @@
       },
       "specimen": {
         "contractReference": "instatic://component-library/creator-signal.site.catalogue.youtube-embed@1.0.0",
-        "rendered": null
+        "rendered": null,
+        "bundleEntryReference": "instatic://component-library/specimen-bundle/non-form/creator-signal.site.catalogue.youtube-embed"
       },
-      "contentHash": "sha256:66887de637378856c75559ecefe4460a2d43dd95857b89cd10fd4e545ff8a880"
+      "contentHash": "sha256:a418013386f62dc2fba0a30560b7e036469847c9fb2c30bf9db0e3f0a03f1dc1"
     },
     {
       "id": "creator-signal.site.comparison-section",
@@ -11574,9 +11677,10 @@
           "entryId": "creator-signal.site.comparison-section",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-comparison-section.html",
           "contentHash": "sha256:66a387dd7072a72490431f75e163ec0cbb5a3b4bd9409c9b8088a9055913a5ec"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:67cca4460f533ce4210715b63baa1afd4d7cb2fd7d9a10ffc68a548b4e6df2bd"
+      "contentHash": "sha256:00f4c9c2c510451b7fc03a4ef10b6db1633fc5432b46c70c19f07a5d8cd6e46a"
     },
     {
       "id": "creator-signal.site.consent-banner",
@@ -11792,9 +11896,10 @@
           "entryId": "creator-signal.site.consent-banner",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-consent-banner.html",
           "contentHash": "sha256:03940555a09b86c4341c59f85315ba5f4643b111c557b88c064d6e678236d141"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:d373c29e59da6d27bd24a53e4d42aeb0f818bcb822c51300be633730c251055c"
+      "contentHash": "sha256:478c3320d49d151a93e026e0fb877eed0ac948f9d9e5b07da063de340dd8d448"
     },
     {
       "id": "creator-signal.site.crm-iframe-form",
@@ -12065,9 +12170,10 @@
           "entryId": "creator-signal.site.crm-iframe-form",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-crm-iframe-form.html",
           "contentHash": "sha256:26e68e18cccc221b796219be99489c0b1857a5b478378bddf33bc41cf833561e"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:dea81671c10a11f468448f4db4580c48625525342ab45fb2edcd065e49c4fb05"
+      "contentHash": "sha256:bc74bdd1c397d1543667a809b9c5144463141935d742af429c840b3edd24c576"
     },
     {
       "id": "creator-signal.site.faq",
@@ -12305,9 +12411,10 @@
           "entryId": "creator-signal.site.faq",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-faq.html",
           "contentHash": "sha256:daf4757403ffc0a58def0d02c0c3701485696b468666ac7e39cf62b8873ed9ff"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:5bf4c73a821c5adcad5ffa3d5c0edad743bc520005e09189bd46e9ab318075f0"
+      "contentHash": "sha256:b07076cca3f3afdf9d89178f6d6dcbdd5ac3b46594fd5f3b349ed50d94291ca8"
     },
     {
       "id": "creator-signal.site.feature-grid",
@@ -12545,9 +12652,10 @@
           "entryId": "creator-signal.site.feature-grid",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-feature-grid.html",
           "contentHash": "sha256:9d4c6c138a4273a15f7cd1dbcdb51d4e4cddb4a40e83239f4cc52269498f2254"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:8c30a4af72ea1b3b581df513cada366e6b425bacd3b8d0b7b5f0ca67978d1e3b"
+      "contentHash": "sha256:6db64521ef9302c3feb174257745c1df6862212ad78560c00e73aa5ba2bac56f"
     },
     {
       "id": "creator-signal.site.footer",
@@ -12767,9 +12875,10 @@
           "entryId": "creator-signal.site.footer",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-footer.html",
           "contentHash": "sha256:87c5cf2d296dd9914c3baa11ac5de2f1b8c0433933c818a2b90bc96b7d68f555"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:4f4826db33ff8aba117028ebdad1d6f0ffe2a9f75c4973289b810f7959946099"
+      "contentHash": "sha256:d017664f8368bcc2f85ed4d8f6e28fe2b0ef4ba6635ee2e813cf3ffc7fe38269"
     },
     {
       "id": "creator-signal.site.founder-story",
@@ -13004,9 +13113,10 @@
           "entryId": "creator-signal.site.founder-story",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-founder-story.html",
           "contentHash": "sha256:2b2c2310b51d909144cf05e957fb7b616111faa8b1f744e3031014af8d8fcd6a"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:9616641bbac16231d44428d37d0213d34724188d2a60c7e1e8bf40f0b6d1fa4a"
+      "contentHash": "sha256:13832b2e6c3e66c8d67440333aa3d736c4eebaebbed901df03fd8de919b5f65e"
     },
     {
       "id": "creator-signal.site.header",
@@ -13254,9 +13364,10 @@
           "entryId": "creator-signal.site.header",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-header.html",
           "contentHash": "sha256:c2a427f62f6421dfc1854fc4a77e9b162f2ffce4cde8b270e1b4c202cce8e2f8"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:1e88c9f82c989a4c99b7e60a1c8faa9821a114a90f4b1915e5ac839bbcdca1c3"
+      "contentHash": "sha256:a135f07877cd54ef8a5e0f430e33cb42cdbd8ab82188c4f951d3d52d912d1cd6"
     },
     {
       "id": "creator-signal.site.hero",
@@ -13473,9 +13584,10 @@
           "entryId": "creator-signal.site.hero",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-hero.html",
           "contentHash": "sha256:339c45ef92caaf627f95f62795ff9fa0cf3e846c3e26e77a42e4865ed239baa5"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:2e65b03140b44ae6d1cefaa850b35bf18a837c3e3b34a6c101b5b4eb18b21ede"
+      "contentHash": "sha256:0480d47758d22d9b10665f685089de7dd0bc729008b75c164329d0a37c68415e"
     },
     {
       "id": "creator-signal.site.mautic-form",
@@ -13724,9 +13836,10 @@
           "entryId": "creator-signal.site.mautic-form",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-mautic-form.html",
           "contentHash": "sha256:e7691ae49e62a2c4310d78b3296e6768ae8029aebf8e7d55a4d07a658ae73e49"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:b7de7c56673165bcbcb800feb064230661e0ad00821095d3ba8560ca96b30073"
+      "contentHash": "sha256:0d748b7c574ffad795fa9e2a297e8d7b52c1fbaf3491ae8d8d27145e900605f7"
     },
     {
       "id": "creator-signal.site.pattern.article-content-page",
@@ -13879,9 +13992,10 @@
           "entryId": "creator-signal.site.pattern.article-content-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-article-content-page.html",
           "contentHash": "sha256:71b5c71e7fb6748aa041c11d297f303cca471b2f8c4cdcb8110cb42384733c0d"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:0e0374d632c56384d8f68e6e4cecdbbae6d881b4fea58c03c29b7d951c6ef37d"
+      "contentHash": "sha256:acb4dab27e36ec58559bca3b204911d6daf8e1bbf8b3e20c2dfc6185e3208677"
     },
     {
       "id": "creator-signal.site.pattern.comparison-section",
@@ -14034,9 +14148,10 @@
           "entryId": "creator-signal.site.pattern.comparison-section",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-comparison-section.html",
           "contentHash": "sha256:ed311fcf7d5cd5eefcf4b53bc80532af2094f93ac06cf2504361ef679e4189ff"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:950e73ef787b19818d97556d509ad386a56e1c28fe4e4aa54b58aa0237c703fe"
+      "contentHash": "sha256:e4ee06eff94c6dc5e01b3d2531f35c1516dc5c4128c22ed07a932c009caac855"
     },
     {
       "id": "creator-signal.site.pattern.contact-page",
@@ -14190,9 +14305,10 @@
           "entryId": "creator-signal.site.pattern.contact-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-contact-page.html",
           "contentHash": "sha256:f236a973b0b06ae2ad734e869a19debe58790ca062e127d3a7818d9e5e3b664d"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:e9c97e73383f5f99fa2e6a4764df9c6e13a50859e9ce4ee2507390764aa3fcb1"
+      "contentHash": "sha256:7c6c599c71834230036f4fa7c72159dcc0655d59755e776d0017bc18f6aaa80a"
     },
     {
       "id": "creator-signal.site.pattern.content-page",
@@ -14345,9 +14461,10 @@
           "entryId": "creator-signal.site.pattern.content-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-content-page.html",
           "contentHash": "sha256:2b865ec860f9bb0a572502edaacdb33cb8366d16ba8c172f19b3bd249328cad1"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:1083331e5a26b6b777e3e7c7bcd2e725e774e556f3abb5ff3e337089ff0aef05"
+      "contentHash": "sha256:f74e38dcfe99756d53d35c06b227fdb0b8d459d26572560af91127f7a0fed20a"
     },
     {
       "id": "creator-signal.site.pattern.early-access-page",
@@ -14502,9 +14619,10 @@
           "entryId": "creator-signal.site.pattern.early-access-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-early-access-page.html",
           "contentHash": "sha256:38110b156f564a1d3d31af5c8b523e1fc72ff74164d22bbc9a9f7e910d6711f8"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:5887cf6fb90f6e1eefb46ae94d976413ef8c686cb3b05d2202e5ff7ec2772d99"
+      "contentHash": "sha256:ed6e95ad1d9e67e666e9cb632a1bc3ed05899c16219d83ebf4774f4a0ea5cadd"
     },
     {
       "id": "creator-signal.site.pattern.empty-state",
@@ -14657,9 +14775,10 @@
           "entryId": "creator-signal.site.pattern.empty-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-empty-state.html",
           "contentHash": "sha256:25fac94586dbcf645afb7473661c24ac65a58be50e14391e1dec4a39828b0697"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:92677107d3a1b5b526abed7b8eaf935b59597a34bb98168c16d0313a8f7d14d0"
+      "contentHash": "sha256:98c3b3e10e793c8286ebba1e71bacee837a738f30135e862e92acfea8015b8a0"
     },
     {
       "id": "creator-signal.site.pattern.error-state",
@@ -14812,9 +14931,10 @@
           "entryId": "creator-signal.site.pattern.error-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-error-state.html",
           "contentHash": "sha256:b3c9b0848c89d9ba72ca4fa875edf664d60cb612722e98a7d0fd356f1f584dbb"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:736992432dec8592f99450ec44e0f52a8ac8059872f4313a71da88b5a140d1b5"
+      "contentHash": "sha256:6ca047abdb31527a03a8e46d8df4841ba50f472a5bd9181385cea4092e4331bc"
     },
     {
       "id": "creator-signal.site.pattern.features-page",
@@ -14967,9 +15087,10 @@
           "entryId": "creator-signal.site.pattern.features-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-features-page.html",
           "contentHash": "sha256:b9e05d124e9c54fb2bbad5fb4b0353a95ee628b5efbe7fced6591d96a0c35977"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:7ab5caee69f45ac6241db21eca07379a1895af821b75b71d66ccf9e4ec58d42f"
+      "contentHash": "sha256:1df4f725d0883639654936bb1ce93e9f4f7ac78e01cff90faa7d9c3321df6420"
     },
     {
       "id": "creator-signal.site.pattern.feedback-page",
@@ -15123,9 +15244,10 @@
           "entryId": "creator-signal.site.pattern.feedback-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-feedback-page.html",
           "contentHash": "sha256:846acfccd3fff4c3f41dd8dbf52140d2988cd21b27c7fe772141e0888cae8d5d"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:4b05a7e0e11bd35abff0ba3c3b0dd435577807baffb28767edc5130db5145f6c"
+      "contentHash": "sha256:a2fb4c605c6df798c5702d4af84c825ff577d270028f134a4e3cff251ba4bcf8"
     },
     {
       "id": "creator-signal.site.pattern.home-v2-page",
@@ -15278,9 +15400,10 @@
           "entryId": "creator-signal.site.pattern.home-v2-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-home-v2-page.html",
           "contentHash": "sha256:f728c154ac46f118578fc7d7b2634e622fe17f153b71ba690f48b1ad8fe2b36b"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:f6528c2e28d6195a45864f4e4397a0d19ff06a49fdf0d0572574fb0caca86c47"
+      "contentHash": "sha256:1a6e8b4d72312395f28fe42b9e68e171b4dae7e8e424c33ca2950a1811765baa"
     },
     {
       "id": "creator-signal.site.pattern.legal-trust-page",
@@ -15433,9 +15556,10 @@
           "entryId": "creator-signal.site.pattern.legal-trust-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-legal-trust-page.html",
           "contentHash": "sha256:2ab1145e7a1d282f73fc12327f06873b8d070be67776031abb3952eae2c4bc54"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:eaed9c7bf46e3ebc6e22cf9c2c45b287973613a915b4d24f46764076523afe0d"
+      "contentHash": "sha256:54d71a56a3e131fcb2630a25b8e097e7dab1810cc5eb49b870159236e395ba0b"
     },
     {
       "id": "creator-signal.site.pattern.not-found-state",
@@ -15588,9 +15712,10 @@
           "entryId": "creator-signal.site.pattern.not-found-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-not-found-state.html",
           "contentHash": "sha256:f6c69e7eb61064e8f086c0f4370f3f62f1bd798053523cff04cc76fa81c1b459"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:e9305ffd9a64d37817fd36cabbc1d58fb3d0a4e97c67d9b6ba2b97115d48d5ff"
+      "contentHash": "sha256:fb4495962050c7669b3bc6df68c97d23b90e843b35b1e46f416be9a5926f4613"
     },
     {
       "id": "creator-signal.site.pattern.offline-state",
@@ -15743,9 +15868,10 @@
           "entryId": "creator-signal.site.pattern.offline-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-offline-state.html",
           "contentHash": "sha256:edd9d789b0f14268e190cd7e968ce0da3af9701af48320ef6f987e5a91163e1a"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:6b27dcc7823f192855bfb963fda23db5263a49de9b94a1d58ad64c6bf64a7005"
+      "contentHash": "sha256:b22c8c97c7546ed619e14b63ed6919ebe1e8bddbc986e55c84536b3fc9a29788"
     },
     {
       "id": "creator-signal.site.pattern.pricing-page",
@@ -15898,9 +16024,10 @@
           "entryId": "creator-signal.site.pattern.pricing-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-pricing-page.html",
           "contentHash": "sha256:cc8d2142f15b29b4770b4b730dd80c1a35f69be98d5855c3d746898425126e7a"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:1ed14073e03a1934be680cab147da7cc7dbd75b64c6c1e00e674109b6d525719"
+      "contentHash": "sha256:c6813f48683a7d9e916f33acdbbe229fd1e45c47d6527b8109530c2ced47c7b2"
     },
     {
       "id": "creator-signal.site.pattern.product-page",
@@ -16053,9 +16180,10 @@
           "entryId": "creator-signal.site.pattern.product-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-product-page.html",
           "contentHash": "sha256:16983776d039bcada9a5a575b4e028dc4accd55b8722ef9ffa00d15e28429b69"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:8ba3155495d96bbe69298c4f637c47b702f4f6288e4276869f9bb422a52141fa"
+      "contentHash": "sha256:907d5201dff7cfd087acfccb8dfff24b115e9828c6490b56ec1c3f1bd1c29109"
     },
     {
       "id": "creator-signal.site.pricing-plans",
@@ -16342,9 +16470,10 @@
           "entryId": "creator-signal.site.pricing-plans",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pricing-plans.html",
           "contentHash": "sha256:8edf318a16b4333db66a55a636686668d5cf908664f79c1f0152c08c7f0929c0"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:1e5fc8f15d366a62161faf4abd45450b136fc8fdc71e9685ef1b2d0b946c95d5"
+      "contentHash": "sha256:b4533114576da9706116850d86f8c3c559483c08907cf79e0d435af5cc3ce9e5"
     },
     {
       "id": "creator-signal.site.process-steps",
@@ -16575,9 +16704,10 @@
           "entryId": "creator-signal.site.process-steps",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-process-steps.html",
           "contentHash": "sha256:c61985953eab92db5f72703665960c06548d4356f690ad817d200c7555ad39b0"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:a69bb60be1a1c94e98dd84d7b4cd9e6b1986f1ff0182e1b463424b89f611d90b"
+      "contentHash": "sha256:14c3fba85905937770e963bf52dd768ce064b5673bbc4c0f60e87778f30d4896"
     },
     {
       "id": "creator-signal.site.public-document",
@@ -16783,9 +16913,10 @@
           "entryId": "creator-signal.site.public-document",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-public-document.html",
           "contentHash": "sha256:1a1e438bff589b8956f59675bb30347b2c7a1996a1d3aeeed25215e5dafd3a6b"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:fd1a1d3c983da29831ee937901063b6fda0a8f0523a37a8f3621ee675c107639"
+      "contentHash": "sha256:9c66057fb0632e968e2bae452639a181282034017730a63fca215d3bf7f8bff2"
     },
     {
       "id": "creator-signal.site.recovery-state",
@@ -17005,9 +17136,10 @@
           "entryId": "creator-signal.site.recovery-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-recovery-state.html",
           "contentHash": "sha256:c9e08de8a6c565f063f13c19d12a68c8c5e69053cdd97304cc784a3d6223bacf"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:ecfa02e26194f1d4822bc44f1eaa121567cccfc7362daef63b46f9c097e759b9"
+      "contentHash": "sha256:2f57b5f38bb99cbd761ddf6a2adc7286a39c6e9319e39a781768d09ee8a25c8b"
     },
     {
       "id": "creator-signal.site.rich-text-section",
@@ -17205,9 +17337,10 @@
           "entryId": "creator-signal.site.rich-text-section",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-rich-text-section.html",
           "contentHash": "sha256:9b5cc414503f54f1e3f63cc2d0f81d5f254c6f912194b86996ddcff5b4298628"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:70af5a8d85eb6d9a819edad73e47434b75b93e4065f397ae4b74e5d96dc22ce4"
+      "contentHash": "sha256:f52dff32c85b103a6a53f66f626c05ff4206903853c7fc6c25c337614c6ef09e"
     },
     {
       "id": "creator-signal.site.section-intro",
@@ -17405,9 +17538,10 @@
           "entryId": "creator-signal.site.section-intro",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-section-intro.html",
           "contentHash": "sha256:0edbaa05992999fb82c09f41db4b65332d3295294c9cf46a9802c957de54c33f"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:469e82093e3771c6a041a30f5333adb200e3b6af2d5d8e6683dc1800de0e703f"
+      "contentHash": "sha256:af261b6411ade35c4a18d7257d3219f1f7f050d7e511a1bc8f8e4b8a7eb5d35d"
     },
     {
       "id": "creator-signal.site.signal-comparison",
@@ -17657,9 +17791,10 @@
           "entryId": "creator-signal.site.signal-comparison",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-signal-comparison.html",
           "contentHash": "sha256:f8cf15d614e1e355c5805d2284bb57879c6daf71a72bfb46ba5a3c9c6f15ac58"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:42206264b9f28efa6e5c56af060a42ba09e4277b06a8c12a344f3a5e52bb007a"
+      "contentHash": "sha256:cf02ea374f6cb8537f32cf030752a401c48824b8064dc6e8944f49468f929d0c"
     },
     {
       "id": "creator-signal.site.signal-strip",
@@ -17851,9 +17986,10 @@
           "entryId": "creator-signal.site.signal-strip",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-signal-strip.html",
           "contentHash": "sha256:7b0dec02a1e517c1da875f0f6da4a3cc790013f693d7e7dcf0d295d9cd4cae67"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:23175729ca8d79ca35d846290c1bfb67303f4793d5970f210479b1bf30224c6f"
+      "contentHash": "sha256:c3880994782c8f566e3351382cb650fcf97a6bd4cf46ab2d037d8371e7abb08c"
     },
     {
       "id": "creator-signal.site.testimonial",
@@ -18036,9 +18172,10 @@
           "entryId": "creator-signal.site.testimonial",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-testimonial.html",
           "contentHash": "sha256:53623a7e77a751ca4999e3e7ed4ef46e1777f3f98889537488863cebc78fbbc1"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:abf75301a173830a30c78d8c483d49558e4a9336de4ea362ee3aa6619e284b08"
+      "contentHash": "sha256:48ca7f8dae1335f9cd1578adfc34a48a0f6f46b48c19366a1218dbcc0da8c7aa"
     },
     {
       "id": "creator-signal.site.two-column-layout",
@@ -18204,13 +18341,14 @@
           "entryId": "creator-signal.site.two-column-layout",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-two-column-layout.html",
           "contentHash": "sha256:afac3e6bf2b6d68616741e6e16b78ef5d64bd8ec8bca27378e364b25521d0c47"
-        }
+        },
+        "bundleEntryReference": null
       },
-      "contentHash": "sha256:71fc1c08f584a27b1e5b5bd1cc5012f436aad1226bebe1e515bf7f2d489d76fa"
+      "contentHash": "sha256:4a9517f526835b687148a08db99fe88b9d4f153444a49f0806672085a2b7cc08"
     }
   ],
   "checksum": {
     "algorithm": "sha256",
-    "value": "sha256:71f52987b86cf0add2691fc7fe530edf101e0f01efeb34d01f168cb7caa72535"
+    "value": "sha256:61bc689f385f4f76c584faa5a53e92b38bdc9dfa1ffa0a54c424b03de50c360b"
   }
 }

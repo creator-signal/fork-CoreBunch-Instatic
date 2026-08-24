@@ -1,6 +1,6 @@
 import { definePlugin, permissions } from '@core/plugin-sdk'
 import { creatorSignalComponentLibraryEntries } from './component-library'
-import { creatorSignalPluginVersion } from './design-system/contract'
+import { creatorSignalPluginIdentity } from './plugin-contract'
 import crmIframeForm from './modules/crm-iframe-form'
 import mauticForm from './modules/mautic-form'
 import { creatorSignalSiteModules } from './modules/site-components'
@@ -8,12 +8,12 @@ import { creatorSignalRenderProfile } from './pack/design-system'
 import { pack } from './pack/site'
 
 export default definePlugin({
-  id: 'creator-signal.site',
-  name: 'Creator Signal public site',
+  id: creatorSignalPluginIdentity.id,
+  name: creatorSignalPluginIdentity.name,
   // This version is also the bootstrap reconciliation boundary. Advance it
   // whenever the bundled technical pack changes so preserved installations
   // run the package upgrade and reseed managed collaboration documents.
-  version: creatorSignalPluginVersion,
+  version: creatorSignalPluginIdentity.version,
   description: 'Creator Signal starter pages, author layouts, Mautic forms, consent and analytics integrations.',
   author: { name: 'Creator Signal', url: 'https://creatorsignal.me' },
   license: 'MIT',

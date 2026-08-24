@@ -106,6 +106,9 @@ jobs:
       - name: Verify Creator Signal Design System lock
         run: bun run creator-signal:design-system:check
 
+      - name: Verify Component Library design-impact manifest
+        run: bun run component-library:design-impact:check
+
       - name: Lint site pack
         run: bun run instatic-plugin lint integrations/creator-signal
 

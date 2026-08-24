@@ -191,6 +191,7 @@ Three categories, three voices:
 | [reference/use-async-resource.md](reference/use-async-resource.md) | `useAsyncResource` — canonical single-resource async load hook; when to use and when not to |
 | [reference/repository-branches.md](reference/repository-branches.md) | Creator Signal integration/release branches, upstream mirror, and sync workflow |
 | [reference/claude-mcp.md](reference/claude-mcp.md)               | Connect Claude Code or a Claude custom connector to Instatic over MCP |
+| [reference/mcp-end-user-testing.md](reference/mcp-end-user-testing.md) | Safely test authentication, least-privilege tools, draft edits, cleanup and revocation from any MCP client |
 
 ### Operations
 

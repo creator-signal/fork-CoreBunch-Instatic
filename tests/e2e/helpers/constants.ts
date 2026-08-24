@@ -23,7 +23,8 @@ export const PUBLIC_BASE_URL =
  * Saved owner authentication state. The `setup` project writes this after
  * first-run setup; specs that opt in start already logged in as the owner.
  */
-export const OWNER_STATE_FILE = '.tmp/e2e-owner-state.json'
+export const OWNER_STATE_FILE =
+  process.env.E2E_OWNER_STATE_FILE ?? '.tmp/e2e-owner-state.json'
 
 /**
  * An empty (logged-out) storage state. Specs that **publish** (which triggers a

@@ -15,8 +15,8 @@
 import { mkdir, rm } from 'node:fs/promises'
 import { bunCommand, viteCommand } from './lib/bunCommand'
 
-const DATABASE_PATH = './.tmp/e2e-agent.db'
-const UPLOADS_DIR = './.tmp/e2e-uploads'
+const DATABASE_PATH = process.env.E2E_DATABASE_PATH ?? './.tmp/e2e-agent.db'
+const UPLOADS_DIR = process.env.E2E_UPLOADS_DIR ?? './.tmp/e2e-uploads'
 const CMS_PORT = process.env.E2E_CMS_PORT ?? '3002'
 const VITE_PORT = process.env.E2E_VITE_PORT ?? '5174'
 

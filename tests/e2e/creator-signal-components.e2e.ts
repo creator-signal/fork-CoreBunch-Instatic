@@ -25,6 +25,126 @@ const FORM_ROUTES: readonly FormRoute[] = [
   { path: '/report-an-error', title: 'Report an error', provider: 'Managed Form' },
 ]
 
+test.describe('Creator Signal route-wide WYSIWYG component projection', () => {
+  test('every installed public route exposes selectable real components without a page-pattern wrapper', async ({ page }) => {
+    await openSiteEditor(page)
+    await openSitePanel(page)
+    const installedPages = page.getByRole('treeitem', { name: /^Open page / })
+    await expect(installedPages).toHaveCount(26)
+    const pageNames = await installedPages.evaluateAll((items) => items.map((item) =>
+      item.getAttribute('aria-label') ?? item.textContent ?? '',
+    ))
+
+    for (const pageName of pageNames) {
+      await test.step(pageName, async () => {
+        await openSitePanel(page)
+        const pageItem = page.getByRole('treeitem', { name: pageName, exact: true })
+        await pageItem.click()
+        await openComponentsPanel(page)
+
+        const tree = page.getByRole('tree', { name: 'Component page hierarchy' })
+        await expect(tree).not.toContainText('Missing library entry')
+        await expect(tree).not.toContainText('creator-signal.site.pattern.')
+
+        const selectableComponents = tree.locator(
+          '[role="treeitem"][data-node-id]:not([aria-level="1"])',
+        )
+        const selectableCount = await selectableComponents.count()
+        expect(selectableCount).toBeGreaterThan(0)
+        const pageTitle = pageName.replace(/^Open page /, '')
+        for (let index = 0; index < selectableCount; index += 1) {
+          const row = selectableComponents.nth(index)
+          const label = (await row.innerText()).trim()
+          if (label === pageTitle || label.startsWith('Slot:')) continue
+          await row.click()
+          await expect(page.getByTestId('component-properties-view')).toBeVisible()
+        }
+
+        const renderedPage = canvasFrame(page).locator('body')
+        await expect(renderedPage).toBeVisible()
+        await expect.poll(async () => (await renderedPage.innerText()).trim().length)
+          .toBeGreaterThan(0)
+        await expect(renderedPage).not.toContainText('Slot: left')
+        await expect(renderedPage).not.toContainText('Slot: right')
+        if (await tree.getByRole('treeitem', {
+          name: 'Two Column Layout',
+          exact: true,
+        }).count()) {
+          const layout = canvasFrame(page).locator('.two-column-layout')
+          await expect(layout).toBeVisible()
+          await expect(layout.locator('.two-column-layout-column')).toHaveCount(2)
+          await expect.poll(async () => layout.evaluate((element) => {
+            const style = getComputedStyle(element)
+            return [style.display, style.gridTemplateColumns]
+          })).toEqual(expect.arrayContaining(['grid']))
+        }
+      })
+    }
+  })
+})
+
+test.describe('Creator Signal direct top-level page composition', () => {
+  test('Home supports add, configure, drag, remove and reload without a pattern owner', async ({ page }) => {
+    const replacementHeading = 'A directly authored final step'
+    await openSiteEditor(page)
+    await openSitePanel(page)
+    const pageItem = page.getByRole('treeitem', {
+      name: /^Open page Creator Signal —/,
+    })
+    await pageItem.click()
+    await openComponentsPanel(page)
+
+    const tree = page.getByRole('tree', { name: 'Component page hierarchy' })
+    const callToActions = () => tree.getByRole('treeitem', {
+      name: 'Call to Action',
+      exact: true,
+    })
+    await expect(tree).not.toContainText('creator-signal.site.pattern.home-v2-page')
+    await expect(callToActions()).toHaveCount(1)
+    const originalId = await requiredNodeId(callToActions())
+
+    await tree.locator('[role="treeitem"][aria-level="1"]').click()
+    await page.getByRole('button', { name: 'Open Component Library' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Component Library' })
+    await dialog.getByRole('searchbox', { name: 'Search Component Library' })
+      .fill('Call to Action')
+    await dialog.getByRole('option', { name: /Call to Action/ }).click()
+    await dialog.getByRole('button', { name: 'Insert component' }).click()
+    await expect(dialog).toBeHidden()
+
+    await expect(callToActions()).toHaveCount(2)
+    const ids = await componentNodeIds(callToActions())
+    const replacementId = ids.find((id) => id !== originalId) ?? ''
+    expect(replacementId).not.toBe('')
+    const replacement = tree.locator(`[data-node-id="${replacementId}"]`)
+    const original = tree.locator(`[data-node-id="${originalId}"]`)
+    await replacement.click()
+    await setPropValue(page, 'heading', replacementHeading)
+    await expect(canvasFrame(page).getByText(replacementHeading, { exact: true }))
+      .toBeVisible()
+
+    await dragTreeRowBefore(page, replacement, original)
+    await expect.poll(async () => componentNodeIds(callToActions()))
+      .toEqual([replacementId, originalId])
+
+    await original.click()
+    const shortcut = process.platform === 'darwin' ? 'Meta' : 'Control'
+    await page.keyboard.press(`${shortcut}+Backspace`)
+    await confirmDeleteIfShown(page)
+    await expect(callToActions()).toHaveCount(1)
+
+    await page.reload()
+    await openSiteEditor(page)
+    await openSitePanel(page)
+    await page.getByRole('treeitem', { name: /^Open page Creator Signal —/ }).click()
+    await openComponentsPanel(page)
+    await expect(page.getByRole('tree', { name: 'Component page hierarchy' }))
+      .not.toContainText('creator-signal.site.pattern.home-v2-page')
+    await expect(canvasFrame(page).getByText(replacementHeading, { exact: true }))
+      .toBeVisible()
+  })
+})
+
 test.describe('Creator Signal page-body authoring through Components', () => {
   for (const route of FORM_ROUTES) {
     test(`${route.path} supports select, replace, move, remove and reload`, async ({ page }) => {

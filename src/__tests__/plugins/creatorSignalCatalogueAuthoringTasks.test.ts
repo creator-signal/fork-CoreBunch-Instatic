@@ -164,10 +164,14 @@ describe('Creator Signal catalogue authoring tasks', () => {
             entryId: entry.id,
             entryVersion: entry.version,
           })
-          expect(fragment?.rootIds).toHaveLength(1)
-          const root = fragment?.nodes[fragment.rootIds[0]!]
-          expect(root?.catalogueInstance?.pattern?.authorableNodeIds.length, entry.id)
-            .toBeGreaterThan(0)
+          expect(fragment?.rootIds.length, entry.id).toBeGreaterThan(0)
+          expect(Object.values(fragment?.nodes ?? {}).some(
+            (node) => node.catalogueInstance?.entryId === entry.id,
+          ), entry.id).toBe(false)
+          for (const rootId of fragment?.rootIds ?? []) {
+            expect(fragment?.nodes[rootId]?.catalogueInstance?.entryId, `${entry.id}/${rootId}`)
+              .not.toContain('.pattern.')
+          }
         }
       }
 

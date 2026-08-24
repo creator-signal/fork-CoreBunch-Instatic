@@ -230,10 +230,6 @@ describe('Creator Signal public authoring guardrails', () => {
   it('allows authors to reshape Feedback and remove its standalone iframe from the right slot', () => {
     const site = governedSite()
     const page = site.pages.find((candidate) => candidate.slug === 'feedback')!
-    const pattern = Object.values(page.nodes).find(
-      (node) => node.catalogueInstance?.entryId ===
-        'creator-signal.site.pattern.feedback-page',
-    )!
     const form = Object.values(page.nodes).find(
       (node) => node.catalogueInstance?.entryId === 'creator-signal.site.crm-iframe-form',
     )!
@@ -243,11 +239,11 @@ describe('Creator Signal public authoring guardrails', () => {
     )!
     const addedHero = structuredClone(hero)
     addedHero.id = 'author-added-hero'
-    addedHero.parentId = pattern.id
+    addedHero.parentId = page.rootNodeId
     delete page.nodes[form.id]
     page.nodes[addedHero.id] = addedHero
     rightSlot.children = rightSlot.children.filter((nodeId) => nodeId !== form.id)
-    pattern.children.push(addedHero.id)
+    page.nodes[page.rootNodeId]!.children.push(addedHero.id)
     reindexNodeParents(page.nodes)
 
     expect(analysePublicAuthoringPolicy(site, localRegistry)).toEqual([])

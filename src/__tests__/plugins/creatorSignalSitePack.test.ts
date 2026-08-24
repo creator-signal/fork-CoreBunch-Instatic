@@ -189,7 +189,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.7.0')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.8.0')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -250,13 +250,13 @@ describe('Creator Signal site pack', () => {
 
     for (const page of publicPages) {
       const body = page.nodes[page.rootNodeId]
-      expect(body.children).toHaveLength(1)
-      const pattern = page.nodes[body.children[0]!]
-      expect(pattern.catalogueInstance?.entryId).toStartWith('creator-signal.site.pattern.')
-      expect(pattern.catalogueInstance?.pattern?.authorableNodeIds).toEqual(pattern.children)
-      for (const nodeId of pattern.children) {
+      expect(body.children.length).toBeGreaterThan(0)
+      expect(Object.values(page.nodes).some((node) => node.catalogueInstance?.pattern))
+        .toBe(false)
+      for (const nodeId of body.children) {
         const component = page.nodes[nodeId]
         expect(component.catalogueInstance?.entryId).toStartWith('creator-signal.site.')
+        expect(component.catalogueInstance?.entryId).not.toStartWith('creator-signal.site.pattern.')
         if (component.catalogueInstance?.entryId !== 'creator-signal.site.two-column-layout') {
           expect(component.children).toEqual([])
         }
@@ -288,8 +288,12 @@ describe('Creator Signal site pack', () => {
       (node) => node.moduleId === 'base.slot-instance' && node.props.slotName === 'right',
     )!
 
-    expect(feedback.nodes[feedback.nodes[feedback.rootNodeId].children[0]!]
-      .catalogueInstance?.entryId).toBe('creator-signal.site.pattern.feedback-page')
+    expect(feedback.nodes[feedback.rootNodeId].children.map(
+      (nodeId) => feedback.nodes[nodeId]?.catalogueInstance?.entryId,
+    )).toEqual([
+      'creator-signal.site.hero',
+      'creator-signal.site.two-column-layout',
+    ])
     expect(layout.moduleId).toBe('base.visual-component-ref')
     expect(layout.props.componentId).toBe('creator-signal.site/component/two-column-layout')
     expect(feedback.nodes[leftSlot.children[0]!]).toMatchObject({
@@ -309,30 +313,37 @@ describe('Creator Signal site pack', () => {
       .toEqual(creatorSignalPatternEntries.map((entry) => entry.id))
 
     for (const entry of creatorSignalPatternEntries) {
+      const definition = creatorSignalPatternDefinitions.find(
+        (candidate) => candidate.id === entry.id,
+      )!
       const fragment = componentLibraryPatternRegistry.materialize(entry.id, {
         entryId: entry.id,
         entryVersion: entry.version,
         variantId: 'default',
       })
-      const root = fragment?.nodes[fragment.rootIds[0]!]
-      expect(root?.catalogueInstance?.entryId).toBe(entry.id)
-      expect(root?.catalogueInstance?.pattern?.authorableNodeIds).toHaveLength(
-        root?.children.length ?? 0,
-      )
+      expect(fragment).toBeDefined()
+      if (!fragment) throw new Error(`Pattern ${entry.id} did not materialize`)
+      expect(definition.materialization).toBe('children')
+      expect(fragment.rootIds).toHaveLength(definition.authorableNodeKeys.length)
+      expect(Object.values(fragment.nodes).some((node) =>
+        node.catalogueInstance?.entryId === entry.id || node.catalogueInstance?.pattern))
+        .toBe(false)
+      expect(fragment.rootIds.every((nodeId) =>
+        Boolean(fragment.nodes[nodeId]?.catalogueInstance))).toBe(true)
       expect(entry.constraints.allowedChildEntryIds).toBeUndefined()
     }
   })
 
-  it('seeds every public route from its registered governed page pattern', () => {
+  it('expands every public route recipe into direct page components', () => {
     for (const reference of creatorSignalPageAuthoringReference) {
       const slug = reference.route === '/' ? 'index' : reference.route.slice(1)
       const page = publicPages.find((candidate) => candidate.slug === slug)!
       const body = page.nodes[page.rootNodeId]
-      const pattern = page.nodes[body.children[0]!]
-      expect(pattern.catalogueInstance?.entryId).toBe(reference.patternId)
-      expect(pattern.children.map(
+      expect(body.children.map(
         (nodeId) => page.nodes[nodeId]?.catalogueInstance?.entryId,
       )).toEqual(reference.componentEntryIds)
+      expect(Object.values(page.nodes).some((node) =>
+        node.catalogueInstance?.entryId === reference.patternId)).toBe(false)
     }
   })
 
@@ -359,6 +370,17 @@ describe('Creator Signal site pack', () => {
         'creator-signal.site.call-to-action',
       ],
     }))
+
+    const homePage = publicPages.find((page) => page.slug === 'index')!
+    expect(homePage.nodes[homePage.rootNodeId].children.map(
+      (nodeId) => homePage.nodes[nodeId]?.catalogueInstance?.entryId,
+    )).toEqual(home!.componentEntryIds)
+    for (const slug of ['legal/billing', 'trust/security', 'support', 'status']) {
+      const page = publicPages.find((candidate) => candidate.slug === slug)!
+      expect(page.nodes[page.rootNodeId].children.map(
+        (nodeId) => page.nodes[nodeId]?.catalogueInstance?.entryId,
+      )).toEqual(['creator-signal.site.public-document'])
+    }
   })
 
   it('keeps identity, sign-up, onboarding and dashboard ownership outside Instatic', () => {

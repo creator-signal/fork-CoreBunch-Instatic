@@ -777,6 +777,7 @@ function pagePattern(
   return {
     id,
     rootKey: 'root',
+    materialization: 'children',
     nodes: [
       {
         key: 'root',

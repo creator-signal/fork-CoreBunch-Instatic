@@ -1,7 +1,8 @@
 # Creator Signal page-body authoring audit
 
-This audit records the governed 0.7.0 starter composition for every public
-route. It is enforced by `creatorSignalPageAuthoringReference` and
+This audit records the governed 0.8.0 starter composition for every public
+route. The site uses one shared chrome template; every route body contains its
+real component roots and no persisted page-pattern wrapper. It is enforced by `creatorSignalPageAuthoringReference` and
 `creatorSignalPageBodyComponentBoundaries` in `pack/site.ts` plus the
 route-driven `creatorSignalPageBodyAuthoring.test.ts` regression gate.
 
@@ -16,6 +17,8 @@ Boundary classifications are intentional:
 `Columns(Intro | Managed)` means Two Column Layout (**Layout**) with Section
 Intro (**Atomic**) in the Left slot and Managed Form (**Provider**) in the Right
 slot. `Columns(Intro | CRM)` uses Embedded CRM Form (**Provider**) instead.
+Populated slots render their real contents without structural labels or padding
+on the canvas, while empty slots remain discoverable drop targets.
 
 | Route | Pattern | Current page-body tree | Boundary result | Migration from 0.6.0 |
 | --- | --- | --- | --- | --- |
@@ -53,6 +56,12 @@ inside real layout slots. The immutable `retained-0.6.0-hashes.ts` boundary
 recognises only untouched 0.6.0 starter rows. Any authored difference blocks
 the whole migration for manual mapping. A successful migration writes draft
 rows only; it never publishes content.
+
+Retained 0.7.0 rows use the same real child components beneath one technical
+`creator-signal.site.pattern.*` container. The 0.8.0 migration recognises only
+that exact presentation-free wrapper, promotes its children into the page body,
+and preserves authored component IDs, fields, ordering, nested slots and page
+publication status. It never publishes automatically.
 
 The audit found no other bundled page-body responsibility. Feature collections,
 plans, steps, FAQ items and navigation-like lists are intentionally atomic

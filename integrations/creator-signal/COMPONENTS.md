@@ -56,9 +56,10 @@ Grids, Process Steps, Pricing Plans, Founder Story, FAQ and Call to Action to
 implement the approved reference flow. Early Access uses Campaign Hero, Signal
 Strip, typed Feature Grids, one Two Column Layout with separate Section Intro
 and Managed Form slot fills, and a Testimonial. Content and provider catalogue
-components are leaves; Two Column Layout is the explicit real-slot container. The stable
-`home-v2-page` and `early-access-page` pattern roots provide their initial
-order, which authors may then adjust.
+components are leaves; Two Column Layout is the explicit real-slot container.
+The `home-v2-page` and `early-access-page` recipes provide the initial order,
+then disappear: their real components become direct page roots that authors can
+select, configure, drag or remove independently.
 
 ## Hero component anatomy
 

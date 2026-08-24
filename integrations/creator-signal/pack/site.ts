@@ -1003,20 +1003,17 @@ function applyPagePattern(page: StarterPage): void {
     entryVersion: version,
     variantId: 'default',
   })
-  const rootId = fragment?.rootIds[0]
-  const root = rootId ? fragment?.nodes[rootId] : undefined
-  if (!fragment || !rootId || !root) {
+  if (!fragment || fragment.rootIds.length === 0) {
     throw new Error(`[creator-signal] Pattern "${page.patternId}" could not materialize.`)
   }
-  const authorableNodeIds = root.catalogueInstance?.pattern?.authorableNodeIds ?? []
-  if (authorableNodeIds.length !== page.blocks.length) {
+  if (fragment.rootIds.length !== page.blocks.length) {
     throw new Error(
-      `[creator-signal] Pattern "${page.patternId}" exposes ${authorableNodeIds.length}/${page.blocks.length} route blocks.`,
+      `[creator-signal] Pattern "${page.patternId}" expands to ${fragment.rootIds.length}/${page.blocks.length} route components.`,
     )
   }
 
   for (const [index, block] of page.blocks.entries()) {
-    const nodeId = authorableNodeIds[index]!
+    const nodeId = fragment.rootIds[index]!
     const node = fragment.nodes[nodeId]
     if (!node) {
       throw new Error(
@@ -1030,13 +1027,22 @@ function applyPagePattern(page: StarterPage): void {
     }
   }
 
-  for (const [nodeId, node] of Object.entries(fragment.nodes)) {
-    if (nodeId === rootId) continue
-    compiledPage.nodes[nodeId] = node
+  const placeholderParent = Object.values(compiledPage.nodes).find((node) =>
+    node.children.includes(placeholderNode.id))
+  if (!placeholderParent) {
+    throw new Error(`[creator-signal] Page "${page.slug}" pattern placeholder has no parent.`)
   }
-  compiledPage.nodes[placeholderNode.id] = {
-    ...root,
-    id: placeholderNode.id,
+  const placeholderIndex = placeholderParent.children.indexOf(placeholderNode.id)
+  placeholderParent.children.splice(placeholderIndex, 1, ...fragment.rootIds)
+  delete compiledPage.nodes[placeholderNode.id]
+
+  for (const [nodeId, node] of Object.entries(fragment.nodes)) {
+    compiledPage.nodes[nodeId] = {
+      ...node,
+      ...(fragment.rootIds.includes(nodeId)
+        ? { parentId: placeholderParent.id }
+        : {}),
+    }
   }
 }
 

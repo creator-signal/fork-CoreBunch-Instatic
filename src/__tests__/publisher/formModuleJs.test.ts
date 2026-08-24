@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'bun:test'
 import { FormModule } from '../../modules/base/forms'
+import { FORM_DRAFT_RUNTIME_JS } from '../../modules/base/forms/formDraftRuntimeJs'
 import { FORM_RUNTIME_JS } from '../../modules/base/forms/formRuntimeJs'
 
 describe('base.form module-JS emission', () => {
   it('emits the form runtime as js when mode is cms', () => {
     const out = FormModule.render({ ...FormModule.defaults, mode: 'cms' }, [])
-    expect(out.js).toBe(FORM_RUNTIME_JS)
+    expect(out.js).toBe(FORM_RUNTIME_JS + FORM_DRAFT_RUNTIME_JS)
     expect(out.html).toContain('data-instatic-form-mode="cms"')
   })
 

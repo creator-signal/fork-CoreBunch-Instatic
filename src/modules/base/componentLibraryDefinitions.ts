@@ -6,6 +6,7 @@ import type {
   ComponentLibraryField,
 } from '@core/component-library'
 import { creatorSignalCatalogueEntryId } from '@core/page-tree'
+import { componentLibraryFormSpecimenReference } from './componentLibraryFormSpecimenReference'
 
 function creatorSignalCatalogueSource(): ComponentLibraryEntry['source'] {
   return {
@@ -121,11 +122,26 @@ function catalogueSlots(
   }))
 }
 
+function renderedPreview(
+  category: string,
+  entryId: string,
+): Pick<ComponentLibraryEntry, 'preview'> | Record<string, never> {
+  return category === 'Forms'
+    ? {
+        preview: {
+          type: 'wireframe',
+          reference: componentLibraryFormSpecimenReference(entryId),
+        },
+      }
+    : {}
+}
+
 export function primitiveEntry(
   options: PrimitiveEntryOptions,
 ): ComponentLibraryEntry {
+  const entryId = creatorSignalCatalogueEntryId(options.id)
   return {
-    id: creatorSignalCatalogueEntryId(options.id),
+    id: entryId,
     version: options.version ?? '1.0.0',
     name: options.name,
     description: options.description,
@@ -181,14 +197,16 @@ export function primitiveEntry(
     accessibility: {
       checks: options.accessibilityChecks ?? [],
     },
+    ...renderedPreview(options.category, entryId),
   }
 }
 
 export function templateComponentEntry(
   options: TemplateComponentEntryOptions,
 ): ComponentLibraryEntry {
+  const entryId = creatorSignalCatalogueEntryId(options.id)
   return {
-    id: creatorSignalCatalogueEntryId(options.id),
+    id: entryId,
     version: options.version ?? '1.0.0',
     name: options.name,
     description: options.description,
@@ -219,14 +237,16 @@ export function templateComponentEntry(
     accessibility: {
       checks: options.accessibilityChecks ?? [],
     },
+    ...renderedPreview(options.category, entryId),
   }
 }
 
 export function visualComponentEntry(
   options: VisualComponentEntryOptions,
 ): ComponentLibraryEntry {
+  const entryId = creatorSignalCatalogueEntryId(options.id)
   return {
-    id: creatorSignalCatalogueEntryId(options.id),
+    id: entryId,
     version: options.version ?? '1.0.0',
     name: options.name,
     description: options.description,
@@ -266,14 +286,16 @@ export function visualComponentEntry(
     accessibility: {
       checks: options.accessibilityChecks ?? [],
     },
+    ...renderedPreview(options.category, entryId),
   }
 }
 
 export function patternEntry(
   options: PatternEntryOptions,
 ): ComponentLibraryEntry {
+  const entryId = creatorSignalCatalogueEntryId(options.id)
   return {
-    id: creatorSignalCatalogueEntryId(options.id),
+    id: entryId,
     version: options.version ?? '1.0.0',
     name: options.name,
     description: options.description,
@@ -321,6 +343,7 @@ export function patternEntry(
     accessibility: {
       checks: options.accessibilityChecks ?? [],
     },
+    ...renderedPreview(options.category, entryId),
   }
 }
 

@@ -271,8 +271,10 @@ export const FormModule: ModuleDefinition<FormProps> = {
       // plain HTML form submissions and ship zero JS.
       ...(props.mode === 'cms'
         ? {
-            js: FORM_RUNTIME_JS
-              + (props.draftMode && props.draftMode !== 'none' ? FORM_DRAFT_RUNTIME_JS : ''),
+            // Module-JS assets are content-addressed and deduplicated by module
+            // ID, so their body cannot vary by authored props. The draft
+            // runtime is inert unless a form declares data-instatic-draft-mode.
+            js: FORM_RUNTIME_JS + FORM_DRAFT_RUNTIME_JS,
           }
         : {}),
     }

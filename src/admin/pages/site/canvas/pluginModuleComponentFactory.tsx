@@ -131,7 +131,11 @@ export const editorPluginModuleComponentFactory: PluginModuleComponentFactory = 
       // slot for nested React subtrees. Render the static HTML in one
       // sibling div, mount children in another, outside the dangerous boundary.
       return (
-        <div className={props.mcClassName} data-plugin-canvas-module="true">
+        <div
+          className={props.mcClassName}
+          data-plugin-canvas-module="true"
+          data-plugin-module={definition.id}
+        >
           <div dangerouslySetInnerHTML={{ __html: html }} />
           <div data-plugin-children="true">{props.children}</div>
         </div>
@@ -141,6 +145,7 @@ export const editorPluginModuleComponentFactory: PluginModuleComponentFactory = 
       <div
         className={props.mcClassName}
         data-plugin-canvas-module="true"
+        data-plugin-module={definition.id}
         dangerouslySetInnerHTML={{ __html: html }}
       />
     )

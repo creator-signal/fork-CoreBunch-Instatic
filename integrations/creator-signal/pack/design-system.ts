@@ -262,7 +262,8 @@ p { line-height: var(--cs-type-body-large-line-height); }
   margin: 0 auto;
   padding: var(--cs-spacing-16) 0;
 }
-.two-column-layout {
+.two-column-layout,
+[data-plugin-module="creator-signal.site.two-column-layout-shell"] > [data-plugin-children="true"] {
   display: grid;
   width: calc(100% - (2 * var(--cs-spacing-8)));
   max-width: var(--cs-size-content-max);
@@ -494,7 +495,8 @@ p { line-height: var(--cs-type-body-large-line-height); }
   .site-header nav a:not(.button) { display: none; }
   .hero-section, .campaign-hero { grid-template-columns: minmax(0, 1fr); }
   .hero-art, .campaign-hero-art { min-height: 20rem; }
-  .two-column-layout { grid-template-columns: 1fr; gap: var(--cs-spacing-8); }
+  .two-column-layout,
+  [data-plugin-module="creator-signal.site.two-column-layout-shell"] > [data-plugin-children="true"] { grid-template-columns: 1fr; gap: var(--cs-spacing-8); }
   .section-intro.column-section-intro { max-width: none; padding-top: 0; }
   .feature-grid, .feature-grid-1, .feature-grid-2, .feature-grid-3, .signal-comparison-grid, .pricing-grid, .founder-story-inner, .process-steps { grid-template-columns: 1fr; }
   .pricing-card ul { min-height: 0; }
@@ -509,7 +511,8 @@ p { line-height: var(--cs-type-body-large-line-height); }
   .site-brand small { display: none; }
   .site-header { padding-inline: var(--cs-spacing-4); }
   .site-header nav .button { padding-inline: var(--cs-spacing-4); font-size: var(--cs-type-body-small-size); }
-  .hero-section, .campaign-hero, .content-section, .two-column-layout, .signal-comparison, .process-section, .pricing-plans, .comparison-section, .recovery-state, .public-document { width: calc(100% - (2 * var(--cs-spacing-5))); }
+  .hero-section, .campaign-hero, .content-section, .two-column-layout, .signal-comparison, .process-section, .pricing-plans, .comparison-section, .recovery-state, .public-document,
+  [data-plugin-module="creator-signal.site.two-column-layout-shell"] > [data-plugin-children="true"] { width: calc(100% - (2 * var(--cs-spacing-5))); }
   .hero-art, .campaign-hero-art, .founder-portrait { min-height: 17rem; }
   .feature-section[data-feature-tone="signature"] { width: 100%; padding-inline: var(--cs-spacing-5); }
   .signal-comparison-card, .pricing-card { padding: var(--cs-spacing-6); }

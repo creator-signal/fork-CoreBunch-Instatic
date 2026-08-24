@@ -171,7 +171,7 @@ describe('Creator Signal route-wide page-body authoring boundary', () => {
     expect(moduleOutput.html).not.toContain('cs-mautic-copy')
     expect(moduleOutput.css).not.toContain('.cs-mautic {\n  display: grid;')
     expect(creatorSignalRenderProfile.stylesheet).toContain(
-      '.two-column-layout { grid-template-columns: 1fr;',
+      '[data-plugin-module="creator-signal.site.two-column-layout-shell"] > [data-plugin-children="true"] { grid-template-columns: 1fr;',
     )
   })
 })

@@ -143,7 +143,17 @@ describe('ComponentLibraryDialog dependency availability', () => {
 
   it('explains every unavailable dependency and blocks insertion', () => {
     componentLibraryRegistry.register(dependencyEntry)
-    render(<ComponentLibraryDialog open onClose={() => {}} />)
+    render(
+      <ComponentLibraryDialog
+        open
+        onClose={() => {}}
+        dependencyState={{
+          capabilities: { 'test.delivery': 'unavailable' },
+          providerAdapters: { 'test.mailer': 'unavailable' },
+          plugins: { 'test.delivery-plugin': 'unavailable' },
+        }}
+      />,
+    )
 
     fireEvent.change(screen.getByLabelText('Search Component Library'), {
       target: { value: dependencyEntry.name },

@@ -73,7 +73,7 @@ const specimenBundle = validateCreatorSignalComponentSpecimenBundle(
 
 function manifestInput(): DesignImpactManifestInput {
   return {
-    instaticVersion: '0.0.40',
+    instaticVersion: '0.0.41',
     builtInEntries: BUILT_IN_COMPONENT_LIBRARY_ENTRIES,
     plugins: [{
       ...creatorSignalPluginIdentity,

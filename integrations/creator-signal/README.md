@@ -140,6 +140,12 @@ Any authored difference in the older hash-governed packs blocks the whole
 migration for manual mapping; it is never overwritten heuristically. For a
 0.7.0 recipe wrapper, authored differences beneath that exact wrapper are
 preserved because the migration removes only the presentation-free wrapper.
+The exact machine-owned 0.8.1 Feedback iframe is the sole bounded exception:
+when both shared templates are already current and no missing, additional or
+structural blocker exists, the migration may emit that one Feedback row beside
+unrelated authored pages. Those authored rows remain classified for review but
+are absent from the migration manifest and are never replaced. An altered
+Feedback provider or any broader repair keeps the whole migration blocked.
 Page classification hashes the semantic tree independently of generated node
 IDs, so exporting or compiling the same retained content in another process
 does not create a false authored-content result. Text, properties, metadata,

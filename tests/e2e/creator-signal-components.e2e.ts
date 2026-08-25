@@ -15,7 +15,7 @@ type FormRoute = {
 
 const FORM_ROUTES: readonly FormRoute[] = [
   { path: '/contact', title: 'Contact', provider: 'Managed Form' },
-  { path: '/feedback', title: 'Feedback', provider: 'Embedded CRM Form' },
+  { path: '/feedback', title: 'Feedback', provider: 'Managed Form' },
   { path: '/wishlist', title: 'Join the wishlist', provider: 'Managed Form' },
   { path: '/early-access', title: 'Creator Signal Early Access', provider: 'Managed Form' },
   { path: '/waitlist', title: 'Join the waitlist', provider: 'Managed Form' },

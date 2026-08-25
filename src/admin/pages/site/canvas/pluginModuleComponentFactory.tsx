@@ -132,6 +132,7 @@ export const editorPluginModuleComponentFactory: PluginModuleComponentFactory = 
       // sibling div, mount children in another, outside the dangerous boundary.
       return (
         <div
+          {...props.nodeWrapperProps}
           className={props.mcClassName}
           data-plugin-canvas-module="true"
           data-plugin-module={definition.id}
@@ -143,6 +144,7 @@ export const editorPluginModuleComponentFactory: PluginModuleComponentFactory = 
     }
     return (
       <div
+        {...props.nodeWrapperProps}
         className={props.mcClassName}
         data-plugin-canvas-module="true"
         data-plugin-module={definition.id}

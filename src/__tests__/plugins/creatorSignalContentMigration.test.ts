@@ -414,6 +414,54 @@ describe('Creator Signal 0.2.0 content migration', () => {
     ]).toBe('Author-retained Feedback heading')
   })
 
+  it('repairs only the exact Feedback iframe beside unrelated authored pages', () => {
+    const source = retainedFeedbackIframeManifest()
+    const home = source.rows.find((row) => row.slug === 'index')!
+    const earlyAccess = source.rows.find((row) => row.slug === 'early-access')!
+    home.cells = { ...home.cells, seoTitle: 'Author-retained Home SEO title' }
+    earlyAccess.cells = { ...earlyAccess.cells, seoTitle: 'Author-retained Early Access SEO title' }
+
+    const result = prepareCreatorSignalContentMigration(source, timestamp)
+
+    expect(result.report.ready).toBe(true)
+    expect(result.report.blockers).toEqual([])
+    expect(result.report.summary).toMatchObject({
+      legacyEligible: 1,
+      authoredContent: 2,
+      rowsInMigration: 1,
+      template: 'current',
+      notFoundTemplate: 'current',
+    })
+    expect(result.report.pages.filter((page) => page.state === 'authored-content').map((page) => page.slug).sort())
+      .toEqual(['early-access', 'index'])
+    expect(result.manifest?.rows).toHaveLength(1)
+    expect(result.manifest?.rows[0]?.id).toBe('creator-signal.site/page/feedback')
+    expect(result.manifest?.rows.some((row) => row.id === home.id || row.id === earlyAccess.id)).toBe(false)
+    expect(home.cells.seoTitle).toBe('Author-retained Home SEO title')
+    expect(earlyAccess.cells.seoTitle).toBe('Author-retained Early Access SEO title')
+  })
+
+  it('does not let the surgical Feedback repair bypass another migration blocker', () => {
+    const source = retainedFeedbackIframeManifest()
+    const additional = structuredClone(source.rows.find((row) => row.slug === 'products')!)
+    additional.id = 'author/page/additional'
+    additional.slug = 'author-additional'
+    additional.cells = { ...additional.cells, slug: 'author-additional' }
+    source.rows.push(additional)
+
+    const result = prepareCreatorSignalContentMigration(source, timestamp)
+
+    expect(result.report.ready).toBe(false)
+    expect(result.manifest).toBeNull()
+    expect(result.report.pages.find((page) => page.slug === 'feedback')).toMatchObject({
+      state: 'legacy-eligible',
+      retainedVersion: '0.8.1-feedback-iframe',
+    })
+    expect(result.report.blockers).toEqual(expect.arrayContaining([
+      expect.stringContaining('Additional page "author-additional"'),
+    ]))
+  })
+
   it('blocks a Feedback iframe that differs from the exact retained machine-owned node', () => {
     const source = retainedFeedbackIframeManifest()
     const feedback = pageFromRow(source.rows.find((row) => row.slug === 'feedback')!)

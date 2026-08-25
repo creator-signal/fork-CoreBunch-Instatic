@@ -6,6 +6,17 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.43 - 2026-08-25
+
+### Retained authoring-safe Feedback migration
+
+- Allowed the exact one-row Feedback iframe repair to proceed beside unrelated
+  authored pages while keeping those authored rows out of the migration.
+- Kept missing or additional pages, template conflicts, altered Feedback
+  providers and every broader migration fail-closed.
+- Added mixed retained/authored coverage proving the repair preserves Home and
+  Early Access authoring while replacing only the machine-owned Feedback node.
+
 ## 0.0.42 - 2026-08-25
 
 ### Local WYSIWYG Feedback authoring

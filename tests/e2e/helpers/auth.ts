@@ -1,5 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 import { OWNER } from './constants'
+import { expectReadyWithLazyChunkRecovery } from './readiness'
 
 /**
  * Authentication + first-run setup helpers, written to mirror what a real owner
@@ -77,7 +78,8 @@ export async function logout(page: Page): Promise<void> {
 
 /** The owner is authenticated once the account menu trigger is on screen. */
 export async function expectLoggedIn(page: Page): Promise<void> {
-  await expect(page.getByTestId('account-menu-trigger')).toBeVisible({
-    timeout: 20_000,
-  })
+  await expectReadyWithLazyChunkRecovery(
+    page,
+    page.getByTestId('account-menu-trigger'),
+  )
 }

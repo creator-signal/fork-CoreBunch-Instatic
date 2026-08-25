@@ -10,6 +10,9 @@ The registry is metadata over Instatic's existing modules, Visual Components, pa
 
 - `src/core/component-library/schemas.ts` is the source of truth for entry metadata.
 - Every entry declares one implementation type: Primitive, Visual Component, Pattern, Template component or Capability-backed.
+- Creator Signal entries declare an authoring composition of `leaf` or
+  `container`. A leaf cannot expose slots; ordered child-like data uses a typed
+  repeater field instead.
 - IDs are stable and namespaced; entry versions are semantic versions.
 - Presets and variants store approved values and continue to reference one canonical implementation.
 - `ComponentLibraryRegistry` validates every registration, rejects accidental duplicates and provides deterministic ordering.
@@ -18,6 +21,8 @@ The registry is metadata over Instatic's existing modules, Visual Components, pa
 - Entry-specific accessibility contracts distinguish automated diagnostics,
   behavior tests and manual review; site policy alone selects publication
   blockers.
+- `SiteSettings.publicAuthoring` optionally turns an integration catalogue
+  into a fail-closed public surface. Sites without it remain freeform.
 - The bundled Creator Signal catalogue is explicit in `src/modules/base/componentLibrary.ts`; it is not inferred from every registered HTML module.
 - Components view opens a searchable, filterable catalogue and stamps library identity on the inserted backing node in the same undo transaction.
 - Add to canvas lists governed non-form entries under Components, groups
@@ -61,7 +66,9 @@ module / Visual Component / pattern / template
 | Search, filters and deterministic ordering | `src/core/component-library/query.ts` |
 | Capability/provider/plugin health | `src/core/component-library/availability.ts` |
 | Retained versions, migration paths and impact previews | `src/core/component-library/version.ts`, `migration.ts` |
+| Descendant-aware, non-destructive slot-to-data upgrades | `src/core/component-library/treeMigration.ts` |
 | Bundled Creator Signal definitions | `src/modules/base/componentLibrary.ts`, `componentLibraryForms.ts`, `componentLibraryVisualComponents.ts` |
+| Complete downstream design-impact contract | `docs/features/component-library-design-impact-manifest.json` |
 | Application-owned Visual Components | `src/core/visual-components-schema/registry.ts` |
 | Pattern definitions and materialization | `src/core/component-library/patterns.ts`, `src/modules/base/componentLibraryPatterns.ts` |
 | Catalogue dialog and Components projection | `src/admin/pages/site/panels/LayersPanel/` |
@@ -91,6 +98,7 @@ const emailInput: ComponentLibraryEntry = {
     name: 'Creator Signal',
   },
   status: 'stable',
+  composition: 'leaf',
   implementation: {
     type: 'primitive',
     moduleId: 'base.input',
@@ -133,7 +141,14 @@ Every mapped entry declares the `creator-signal.site` design-system source with
 the author-facing provider name `Creator Signal`. The Components provider filter
 and `site_list_component_library` MCP response read that same registry metadata.
 
-An omitted parent, child or slot allow-list means unrestricted. A present empty allow-list means none are permitted. This preserves the difference between an unconstrained container and a deliberately closed boundary.
+An omitted document, parent, child or slot allow-list means unrestricted. A
+present empty allow-list means none are permitted. `allowedDocumentKinds`
+limits an entry to ordinary pages or templates, while
+`maxInstancesPerDocument` prevents duplicate singleton chrome such as a shared
+header. `src/core/component-library/placement.ts` applies these rules to the
+picker, drag-and-drop, Agent/MCP insertion and server write validation. This
+preserves the difference between an unconstrained container and a deliberately
+closed boundary.
 
 ### Implementation taxonomy
 
@@ -147,11 +162,128 @@ An omitted parent, child or slot allow-list means unrestricted. A present empty 
 
 Capability-backed entries cannot register without a real dependency. This keeps incomplete UI-only entries out of the available catalogue.
 
+### Leaf data and composition containers
+
+`composition: 'leaf'` means the component owns its complete published HTML.
+Its fields may include a `repeater`, which stores an ordered array of records
+with declared text, URL, number, boolean and select properties. Navigation,
+Breadcrumb, Table of Contents, Person Profile, Hero, Card/Teaser and Notice use
+this model for links or actions. Authors edit the records in one component
+properties surface; the renderer owns the list, anchor, button, accessibility
+and structured-data markup.
+
+`composition: 'container'` is reserved for genuine arbitrary composition.
+Reusable Section, Accordion, Tabs, Carousel, Modal/Dialog, Drawer and Reusable
+Form Fragment retain slots because their children are independently authored
+components. Registration rejects a leaf that declares any slot.
+
 ### Sources and lifecycle status
 
 `source.type` is one of `built-in`, `site`, `design-system` or `plugin`. Design-system and plugin sources carry their stable owner ID so editor surfaces can identify ownership.
 
 `status` is `stable`, `experimental` or `deprecated`. A deprecated entry may name `replacementEntryId`; it cannot replace itself.
+
+### Design-impact manifest
+
+`component-library-design-impact-manifest.json` is the governed,
+machine-readable projection for downstream design review. It is generated from
+the complete built-in registry plus the selected Creator Signal plugin pack;
+documentation is not scraped and rendered markup is not copied. Each record
+retains the executable definition, real owner and implementation taxonomy,
+dependency limitations, accessibility gates, a stable specimen contract
+reference and any registry-owned rendered preview reference. Creator Signal
+records also link to the executable specimen bundle at
+`integrations/creator-signal/specimens/manifest.json` and the exact published
+HTML artifact owned by that bundle.
+
+The manifest records the Instatic version, an executable-registry content
+revision, selected plugin versions, the Component Library entry schema version
+and the consumed Creator Signal design-system lock revision. Each entry has a
+SHA-256 content hash and the complete manifest has a SHA-256 checksum. The
+source revision deliberately hashes the executable registry content instead of
+the Git commit containing the generated file, avoiding a self-referential
+revision that would become stale as soon as it was committed.
+
+Run `bun run component-library:design-impact` to regenerate the projection and
+`bun run component-library:design-impact:check` in CI or release evidence. The
+check fails on registry drift, duplicate identities, unresolved backing
+implementations, missing ownership, unsupported schemas, invalid specimen
+references or checksum/hash drift. Capability- and provider-backed entries
+state their limitations explicitly; manifest presence is never runtime,
+browser or provider acceptance evidence.
+
+### Rendered form specimen bundle
+
+`docs/features/component-library-form-specimens/manifest.json` is the
+deterministic rendered projection for every executable built-in entry in the
+Forms category. `scripts/lib/component-library-form-specimens.ts` derives the
+set from `componentLibraryRegistry`, materializes pattern entries through
+`componentLibraryPatternRegistry`, publishes ordinary page nodes through
+`publishPage()`, and emits one static HTML document per full catalogue entry
+ID. The current projection contains 41 entries and 74 named scenarios covering
+presets, variants, authored states, capability fallbacks and safe local
+provider translations.
+
+Every Forms entry owns its rendered-preview reference through
+`src/modules/base/componentLibraryFormSpecimenReference.ts`; the design-impact
+manifest and the specimen bundle therefore fail together when an entry is
+added, removed, renamed or rendered differently. Run
+`bun run component-library:form-specimens` to regenerate both the per-entry
+documents and bundle manifest. Run
+`bun run component-library:form-specimens:check` to reject missing, obsolete or
+non-deterministic output.
+
+`bun run component-library:form-specimens:browser` serves the generated
+documents through the real module-JS channel, checks each entry at desktop and
+mobile widths, and exercises validation, success, session draft, persistent
+draft and attachment retry/cleanup journeys against synthetic local handlers.
+Its machine-readable evidence is
+`.tmp/component-library-form-specimens/acceptance.json`. The handlers implement
+the public browser contract without external calls; server persistence,
+scanner and provider acceptance remain separate evidence classes.
+
+### Creator Signal executable specimens
+
+The Creator Signal executable specimens are generated separately with
+`bun run component-library:creator-signal-specimens`. The generator derives its
+inventory from `creatorSignalComponentLibraryEntries`, reuses exact starter
+route subtrees where available, materializes remaining patterns through
+`componentLibraryPatternRegistry`, and publishes every result through
+`publishPage`. Run
+`bun run component-library:creator-signal-specimens:check` to reject a missing,
+obsolete, duplicate or byte-drifted artifact. Run
+`bun run verify:creator-signal-component-specimens:browser` after building the
+plugin to exercise the complete local browser matrix. Provider entries stay in
+an explicit non-delivering state during that verifier; a rendered specimen does
+not claim an external provider response.
+
+### Non-form design-impact specimens
+
+`component-library-non-form-specimens.json` is the deterministic static bundle
+for the 60 built-in entries outside the Forms category. The executable registry
+selects the entries; each specimen is materialized from its real primitive,
+Visual Component, pattern, capability backing or template-role definition and
+rendered by `@core/publisher.publishPage`. The bundle includes every declared
+variant, explicit capability-unavailable scenarios, broken-image scenarios,
+publisher module JavaScript, synthetic local assets and per-document hashes.
+
+The bundle keeps the Creator Signal asset boundary replaceable. Its documents
+reference `/assets/design-system/`, while the bundle pins those paths and
+checksums to `integrations/creator-signal/design-system/lock.json`. A downstream
+review projection can substitute a candidate lock at that boundary without
+copying Instatic HTML or component CSS into a second renderer.
+
+Run `bun run component-library:non-form-specimens` to regenerate the bundle,
+`bun run component-library:non-form-specimens:check` to reject missing,
+obsolete, duplicate or stale specimens, and
+`bun run verify:component-library-non-form-specimens:browser` for axe,
+theme, forced-colour, reduced-motion, responsive and declared-interaction
+acceptance. The browser command serves only the generated bundle, its embedded
+synthetic assets, pinned local design-system files and publisher module
+JavaScript; any external network request fails the run. Evidence is written to
+`.tmp/component-library-non-form-specimens/acceptance.json` with every entry and
+scenario outcome. This remains local/source acceptance and does not activate a
+provider or deploy an environment.
 
 ## Registration
 
@@ -183,12 +315,19 @@ Registration is deliberately explicit. A low-level HTML module can remain availa
 Shared authored structures such as Hero, Card, Navigation, Notice, Reusable
 Section, Download and Progress Bar are application-owned Visual Components.
 Their immutable definitions live in `componentLibraryVisualComponents.ts` and
-are resolved through the same component-reference, slot, publisher and
+are resolved through the same component-reference and publisher paths as
 persistence paths as site-authored Visual Components. A site definition may
 explicitly override a built-in ID; otherwise authors insert the built-in
 definition without copying it into site data. Governed Properties write only
 declared parameter overrides and approved variants, and component-only server
 diff validation applies the same contract.
+
+Leaf component version 2 definitions replace their former Link/Button slots
+with typed repeaters. Load validation copies recognized legacy slot children
+into the new records before slot reconciliation and then removes the obsolete
+slot nodes. If a legacy subtree contains an unexpected module, the migration
+rolls back and destructive reconciliation is skipped, preserving stored
+content for explicit repair.
 
 Modal / Dialog and Drawer share the `base.overlay` implementation rather than
 forking focus and dismissal logic. Their unenhanced output is a native
@@ -321,7 +460,8 @@ The browser-bridged MCP surface honours this same boundary. A connection with
 `site.components.edit`. `site_insert_component`,
 `site_update_component_field`, and `site_apply_component_option` reuse the
 registry, placement policy, page-tree actions and retained definition version.
-They include plugin-owned entries, reject undeclared fields and option IDs, and
+They include plugin-owned entries, reject undeclared fields, nested repeater
+keys and option IDs, and
 never publish implicitly. See [MCP connections](mcp-connectors.md).
 
 `resolveComponentLibraryPlacement()` is the shared composition policy for
@@ -358,6 +498,38 @@ identity, so rendered output is identical. Ineligible nodes remain freeform and
 editable only through authorised HTML mode. Pattern and Visual Component
 conversion require their later structure/slot mapping workflows and are not
 silently approximated by this primitive path.
+
+## Public-authoring policy
+
+`src/core/page-tree/publicAuthoringPolicy.ts` defines the declarative policy
+shape stored at `SiteSettings.publicAuthoring`. A plugin pack may install its
+own policy through `definePack({ publicAuthoring })`; `server/plugins/pack.ts`
+checks owner identity and reconciles the policy with the technical pack.
+Normal shell writes cannot add, remove or weaken the policy.
+
+`src/core/component-library/publicAuthoring.ts` is the shared analyser. It
+validates current entry definitions and variants, exact pattern composition,
+typed fields, component-owned appearance, protected template chrome, fixed
+asset roles/treatments and semantic page-title/primary-action limits. Its
+diagnostics always include a stable code, document path and remediation.
+
+The same analyser is called from:
+
+- `server/writePolicy/pageDiff.ts` for transactional page saves;
+- `server/collab/updateGuard.ts` for Yjs page updates, including full writers
+  when a policy is active;
+- `server/publish/publishSite.ts` before any publish-side database or artefact
+  write.
+
+The shell guard in `server/writePolicy/siteDiff.ts` also prevents site-local
+framework, font, breakpoint, style, file, dependency and runtime changes while
+component-owned appearance is active. Pack-owned Visual Components listed by
+the policy are immutable through both HTTP and collaborative authoring.
+
+This is an opt-in site contract. An absent policy returns no diagnostics and
+does not change ordinary Instatic authoring. Direct storage mutation is outside
+the supported authoring API; the publisher still re-runs the complete policy
+and refuses invalid trees or missing protected records.
 
 ## Versioning and migration
 
@@ -432,6 +604,8 @@ opens either boundary before focusing an invalid descendant.
 - Do not skip semantic versions or invent an implicit migration across an unregistered gap.
 - Do not include provider credentials or secret configuration in requirements or availability.
 - Do not import internal files from outside the module; use `@core/component-library`.
+- Do not special-case an integration in the editor, write handler or publisher;
+  persist a declarative `SiteSettings.publicAuthoring` policy instead.
 
 ## Related
 
@@ -440,8 +614,11 @@ opens either boundary before focusing an invalid descendant.
 - `docs/features/templates.md` — template-owned site chrome.
 - `docs/features/site-search.md` — published index and Search Results capability.
 - `docs/features/file-attachments.md` — private form upload and scanner capability.
+- `docs/features/cms-native-forms.md` — form publishing, browser runtime and specimen acceptance.
 - `docs/features/component-library-catalogue.md` — complete issue #11 catalogue traceability matrix and capability gates.
 - `docs/reference/component-html-seo-contract.md` — semantic HTML, structured data, SEO, native hooks and design-token contract for every built-in entry.
 - `docs/reference/typebox-patterns.md` — boundary validation.
 - Source-of-truth files: `src/core/component-library/`
-- Focused tests: `src/__tests__/component-library/componentLibraryRegistry.test.ts`
+- Focused tests: `src/__tests__/component-library/componentLibraryRegistry.test.ts`,
+  `src/__tests__/component-library/componentLibraryFormSpecimens.test.ts`,
+  `src/__tests__/plugins/creatorSignalPublicAuthoringGuardrails.test.ts`

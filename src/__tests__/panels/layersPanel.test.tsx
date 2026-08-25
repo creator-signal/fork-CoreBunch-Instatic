@@ -148,9 +148,28 @@ describe('Explorer Layers projections', () => {
       expect(useEditorStore.getState().layersViewMode).toBe('components')
     })
     const componentTree = screen.getByTestId('component-layers-tree')
-    expect(within(componentTree).getByText('Container')).toBeDefined()
+    expect(within(componentTree).getByRole('treeitem', { name: 'Container' })).toBeDefined()
     expect(within(componentTree).queryByText('Hero')).toBeNull()
     expect(within(componentTree).queryByText('Slot: actions')).toBeNull()
+  })
+
+  it('removes a selected governed component from the Components tree shortcut', async () => {
+    render(<DndContext><ExplorerPanel /></DndContext>)
+    fireEvent.click(screen.getByRole('button', { name: 'Components' }))
+
+    const componentTree = screen.getByTestId('component-layers-tree')
+    const component = within(componentTree).getByRole('treeitem', {
+      name: 'Container',
+    })
+    fireEvent.click(component)
+    fireEvent.keyDown(component, { key: 'Backspace', ctrlKey: true })
+
+    await waitFor(() => {
+      expect(useEditorStore.getState().site?.pages[0]?.nodes.pattern).toBeUndefined()
+    })
+    expect(within(componentTree).queryByRole('treeitem', {
+      name: 'Container',
+    })).toBeNull()
   })
 
   it('shows an empty Components view for an imported-only page', async () => {

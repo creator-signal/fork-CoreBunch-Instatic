@@ -28,6 +28,19 @@ describe('release image security contract', () => {
     expect(workflow.match(/^\s*uses:\s+[^\s]+@(?![0-9a-f]{40}(?:\s|$))[^\s]+/gm) ?? []).toEqual([])
   })
 
+  it('stamps both release images with the exact version, revision and creation labels', () => {
+    for (const dockerfile of [runtimeDockerfile, mediaDockerfile]) {
+      expect(dockerfile).toContain('LABEL org.opencontainers.image.version="${INSTATIC_VERSION}"')
+      expect(dockerfile).toContain('LABEL org.opencontainers.image.revision="${INSTATIC_REVISION}"')
+      expect(dockerfile).toContain('LABEL org.opencontainers.image.created="${INSTATIC_CREATED}"')
+    }
+    expect(workflow.match(/INSTATIC_VERSION=\$\{\{ steps\.version\.outputs\.version \}\}/g))
+      .toHaveLength(2)
+    expect(workflow.match(/INSTATIC_REVISION=\$\{\{ github\.sha \}\}/g)).toHaveLength(2)
+    expect(workflow.match(/INSTATIC_CREATED=\$\{\{ steps\.version\.outputs\.created \}\}/g))
+      .toHaveLength(2)
+  })
+
   it('refreshes runtime packages and selects the reviewed media dependencies', () => {
     expect(runtimeDockerfile).toContain('apk upgrade --no-cache')
     expect(mediaDockerfile).toContain('apk upgrade --no-cache')

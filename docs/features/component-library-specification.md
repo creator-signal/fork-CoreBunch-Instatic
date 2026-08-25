@@ -34,6 +34,7 @@ Template-owned site footer, legal and supplementary navigation chrome.
 - Registry ID: `creator-signal.site.catalogue.template-footer`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: template-component
 - Backing implementation: template role `footer`
@@ -58,6 +59,7 @@ Template-owned site header and primary navigation chrome.
 - Registry ID: `creator-signal.site.catalogue.template-header`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: template-component
 - Backing implementation: template role `header`
@@ -90,6 +92,7 @@ Template-owned keyboard shortcut to the primary content region.
 - Registry ID: `creator-signal.site.catalogue.template-skip-link`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: template-component
 - Backing implementation: template role `skip-link`
@@ -125,6 +128,7 @@ A responsive two-column authored layout.
 - Registry ID: `creator-signal.site.catalogue.grid`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.grid`
@@ -149,6 +153,7 @@ A neutral content container with a controlled semantic element.
 - Registry ID: `creator-signal.site.catalogue.container`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.container`
@@ -175,6 +180,7 @@ A centrally defined section frame with governed content.
 - Registry ID: `creator-signal.site.catalogue.reusable-section`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.reusable-section`
@@ -207,6 +213,7 @@ A semantic section that groups related page content.
 - Registry ID: `creator-signal.site.catalogue.section`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.container` with preset `section`
@@ -237,6 +244,7 @@ A semantic thematic break using approved width, colour and spacing tokens.
 - Registry ID: `creator-signal.site.catalogue.separator`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.separator`
@@ -266,8 +274,9 @@ No additional platform dependency.
 An ordered navigation trail for the current page hierarchy.
 
 - Registry ID: `creator-signal.site.catalogue.breadcrumb`
-- Version: `1.0.0`
+- Version: `2.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.breadcrumb`
@@ -282,12 +291,18 @@ An ordered navigation trail for the current page hierarchy.
 | Field | Author label | Control | Required | Advanced | Purpose |
 |---|---|---|:---:|:---:|---|
 | `label` | Accessible label | text | Yes | No | Controls the accessible label used by this Breadcrumb instance. |
+| `items` | Links | repeater | Yes | No | Ordered links from the broadest page to the current page. |
 
-#### Slots
+##### Links item contract
 
-| Slot | Purpose | Cardinality | Allowed content |
-|---|---|---|---|
-| `items` (Links) | Ordered, descriptive links in the navigation sequence. | 1–many | `creator-signal.site.catalogue.link` |
+Cardinality: 1–many breadcrumb link records, kept in author order.
+
+| Property | Author label | Type | Required | Allowed values |
+|---|---|---|:---:|---|
+| `label` | Link text | text | Yes | Any valid value |
+| `href` | Destination | url | Yes | Any valid value |
+| `target` | Open in | select | Yes | `_self`, `_blank`, `_parent` |
+| `current` | Current page | boolean | No | Any valid value |
 
 #### Dependencies
 
@@ -307,6 +322,7 @@ A locale switcher supplied by the configured localisation capability.
 - Registry ID: `creator-signal.site.catalogue.language-navigation`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.loop` with preset `configured-locales`
@@ -343,8 +359,9 @@ This entry exposes no instance properties.
 A labelled navigation region with governed link content.
 
 - Registry ID: `creator-signal.site.catalogue.navigation`
-- Version: `1.0.0`
+- Version: `2.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.navigation`
@@ -359,6 +376,18 @@ A labelled navigation region with governed link content.
 | Field | Author label | Control | Required | Advanced | Purpose |
 |---|---|---|:---:|:---:|---|
 | `label` | Accessible label | text | Yes | No | Controls the accessible label used by this Navigation instance. |
+| `items` | Navigation items | repeater | Yes | No | Ordered links rendered as one semantic navigation list. |
+
+##### Navigation items item contract
+
+Cardinality: 1–many navigation link records, kept in author order.
+
+| Property | Author label | Type | Required | Allowed values |
+|---|---|---|:---:|---|
+| `label` | Link text | text | Yes | Any valid value |
+| `href` | Destination | url | Yes | Any valid value |
+| `target` | Open in | select | Yes | `_self`, `_blank`, `_parent` |
+| `current` | Current page | boolean | No | Any valid value |
 
 #### Variants
 
@@ -366,12 +395,6 @@ A labelled navigation region with governed link content.
 |---|---|---|
 | `horizontal` | Horizontal | `{"orientation":"horizontal"}` |
 | `vertical` | Vertical | `{"orientation":"vertical"}` |
-
-#### Slots
-
-| Slot | Purpose | Cardinality | Allowed content |
-|---|---|---|---|
-| `items` (Navigation items) | Links and approved supplementary actions. | 1–many | `creator-signal.site.catalogue.link`, `creator-signal.site.catalogue.button` |
 
 #### Dependencies
 
@@ -390,6 +413,7 @@ Privacy-preserving share destinations supplied by an approved policy capability.
 - Registry ID: `creator-signal.site.catalogue.share-links`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.loop` with preset `approved-networks`
@@ -426,8 +450,9 @@ This entry exposes no instance properties.
 A labelled set of links to headings on the current page.
 
 - Registry ID: `creator-signal.site.catalogue.table-of-contents`
-- Version: `1.0.0`
+- Version: `2.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.table-of-contents`
@@ -443,12 +468,17 @@ A labelled set of links to headings on the current page.
 |---|---|---|:---:|:---:|---|
 | `label` | Accessible label | text | Yes | No | Controls the accessible label used by this Table of Contents instance. |
 | `heading` | Visible heading | text | Yes | No | Controls the visible heading used by this Table of Contents instance. |
+| `items` | Links | repeater | Yes | No | Ordered fragment links to headings on this page. |
 
-#### Slots
+##### Links item contract
 
-| Slot | Purpose | Cardinality | Allowed content |
-|---|---|---|---|
-| `items` (Links) | Ordered, descriptive links in the navigation sequence. | 1–many | `creator-signal.site.catalogue.link` |
+Cardinality: 1–many section link records, kept in author order.
+
+| Property | Author label | Type | Required | Allowed values |
+|---|---|---|:---:|---|
+| `label` | Link text | text | Yes | Any valid value |
+| `href` | Destination | url | Yes | Any valid value |
+| `target` | Open in | select | Yes | `_self`, `_blank`, `_parent` |
 
 #### Dependencies
 
@@ -468,8 +498,9 @@ No additional platform dependency.
 A contained summary with optional media and action.
 
 - Registry ID: `creator-signal.site.catalogue.card`
-- Version: `1.0.0`
+- Version: `2.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.card`
@@ -489,6 +520,18 @@ A contained summary with optional media and action.
 | `description` | Description | rich-text | No | No | Controls the description used by this Card instance. |
 | `href` | Destination | url | No | No | Controls the destination used by this Card instance. |
 | `actionLabel` | Action label | text | No | No | Controls the action label used by this Card instance. |
+| `actions` | Actions | repeater | No | No | Ordered links or native buttons rendered by this component. |
+
+##### Actions item contract
+
+Cardinality: 0–3 action records, kept in author order.
+
+| Property | Author label | Type | Required | Allowed values |
+|---|---|---|:---:|---|
+| `label` | Label | text | Yes | Any valid value |
+| `kind` | Action type | select | Yes | `link`, `button` |
+| `href` | Destination | url | No | Any valid value |
+| `target` | Open in | select | Yes | `_self`, `_blank`, `_parent` |
 
 #### Variants
 
@@ -498,12 +541,6 @@ A contained summary with optional media and action.
 | `horizontal` | Horizontal | `{"variant":"horizontal"}` |
 | `compact` | Compact | `{"variant":"compact"}` |
 | `featured` | Featured | `{"variant":"featured"}` |
-
-#### Slots
-
-| Slot | Purpose | Cardinality | Allowed content |
-|---|---|---|---|
-| `actions` (Actions) | Approved buttons and links. | 0–3 | `creator-signal.site.catalogue.button`, `creator-signal.site.catalogue.link` |
 
 #### Dependencies
 
@@ -522,6 +559,7 @@ A responsive collection composed from the shared Card definition.
 - Registry ID: `creator-signal.site.catalogue.card-grid`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.card-grid`
@@ -546,6 +584,7 @@ A described link to a downloadable site asset.
 - Registry ID: `creator-signal.site.catalogue.download`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.download`
@@ -579,8 +618,9 @@ No additional platform dependency.
 A major page introduction with optional media and actions.
 
 - Registry ID: `creator-signal.site.catalogue.hero`
-- Version: `1.0.0`
+- Version: `2.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.hero`
@@ -598,6 +638,18 @@ A major page introduction with optional media and actions.
 | `heading` | Heading | text | Yes | No | Controls the heading used by this Hero instance. |
 | `body` | Body | rich-text | No | No | Controls the body used by this Hero instance. |
 | `image` | Image | image | No | No | Controls the image used by this Hero instance. |
+| `actions` | Actions | repeater | No | No | Ordered links or native buttons rendered by this component. |
+
+##### Actions item contract
+
+Cardinality: 0–3 action records, kept in author order.
+
+| Property | Author label | Type | Required | Allowed values |
+|---|---|---|:---:|---|
+| `label` | Label | text | Yes | Any valid value |
+| `kind` | Action type | select | Yes | `link`, `button` |
+| `href` | Destination | url | No | Any valid value |
+| `target` | Open in | select | Yes | `_self`, `_blank`, `_parent` |
 
 #### Variants
 
@@ -606,12 +658,6 @@ A major page introduction with optional media and actions.
 | `image-left` | Image left | `{"variant":"image-left"}` |
 | `image-right` | Image right | `{"variant":"image-right"}` |
 | `text-only` | Text only | `{"variant":"text-only"}` |
-
-#### Slots
-
-| Slot | Purpose | Cardinality | Allowed content |
-|---|---|---|---|
-| `actions` (Actions) | Approved buttons and links. | 0–3 | `creator-signal.site.catalogue.button`, `creator-signal.site.catalogue.link` |
 
 #### Dependencies
 
@@ -631,6 +677,7 @@ A static or generated collection using one governed item template.
 - Registry ID: `creator-signal.site.catalogue.list`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.list`
@@ -662,8 +709,9 @@ No additional platform dependency.
 Highlights important information with an approved semantic type.
 
 - Registry ID: `creator-signal.site.catalogue.notice`
-- Version: `1.0.0`
+- Version: `2.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.notice`
@@ -679,6 +727,18 @@ Highlights important information with an approved semantic type.
 |---|---|---|:---:|:---:|---|
 | `title` | Title | text | Yes | No | Controls the title used by this Notice / Callout instance. |
 | `body` | Body | rich-text | No | No | Controls the body used by this Notice / Callout instance. |
+| `actions` | Actions | repeater | No | No | Ordered links or native buttons rendered by this component. |
+
+##### Actions item contract
+
+Cardinality: 0–3 action records, kept in author order.
+
+| Property | Author label | Type | Required | Allowed values |
+|---|---|---|:---:|---|
+| `label` | Label | text | Yes | Any valid value |
+| `kind` | Action type | select | Yes | `link`, `button` |
+| `href` | Destination | url | No | Any valid value |
+| `target` | Open in | select | Yes | `_self`, `_blank`, `_parent` |
 
 #### Variants
 
@@ -688,12 +748,6 @@ Highlights important information with an approved semantic type.
 | `success` | Success | `{"variant":"success"}` |
 | `warning` | Warning | `{"variant":"warning"}` |
 | `error` | Error | `{"variant":"error"}` |
-
-#### Slots
-
-| Slot | Purpose | Cardinality | Allowed content |
-|---|---|---|---|
-| `actions` (Actions) | Approved buttons and links. | 0–3 | `creator-signal.site.catalogue.button`, `creator-signal.site.catalogue.link` |
 
 #### Dependencies
 
@@ -710,8 +764,9 @@ No additional platform dependency.
 A named person with portrait, role, biography and governed links.
 
 - Registry ID: `creator-signal.site.catalogue.person-profile`
-- Version: `1.0.0`
+- Version: `2.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.person-profile`
@@ -729,6 +784,17 @@ A named person with portrait, role, biography and governed links.
 | `name` | Name | text | Yes | No | Controls the name used by this Person Profile instance. |
 | `role` | Role | text | No | No | Controls the role used by this Person Profile instance. |
 | `biography` | Biography | rich-text | No | No | Controls the biography used by this Person Profile instance. |
+| `links` | Profile links | repeater | No | No | Ordered links associated with this person. |
+
+##### Profile links item contract
+
+Cardinality: 0–5 profile link records, kept in author order.
+
+| Property | Author label | Type | Required | Allowed values |
+|---|---|---|:---:|---|
+| `label` | Link text | text | Yes | Any valid value |
+| `href` | Destination | url | Yes | Any valid value |
+| `target` | Open in | select | Yes | `_self`, `_blank`, `_parent` |
 
 #### Variants
 
@@ -737,12 +803,6 @@ A named person with portrait, role, biography and governed links.
 | `vertical` | Vertical | `{"variant":"vertical"}` |
 | `horizontal` | Horizontal | `{"variant":"horizontal"}` |
 | `compact` | Compact | `{"variant":"compact"}` |
-
-#### Slots
-
-| Slot | Purpose | Cardinality | Allowed content |
-|---|---|---|---|
-| `links` (Profile links) | Approved links associated with this person. | 0–5 | `creator-signal.site.catalogue.link` |
 
 #### Dependencies
 
@@ -761,6 +821,7 @@ A quotation with a required visible citation.
 - Registry ID: `creator-signal.site.catalogue.quote`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.quote`
@@ -799,8 +860,9 @@ No additional platform dependency.
 A promotional Card preset that reuses the Card definition.
 
 - Registry ID: `creator-signal.site.catalogue.teaser`
-- Version: `1.0.0`
+- Version: `2.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.card`
@@ -820,6 +882,18 @@ A promotional Card preset that reuses the Card definition.
 | `description` | Description | rich-text | No | No | Controls the description used by this Teaser instance. |
 | `href` | Destination | url | Yes | No | Controls the destination used by this Teaser instance. |
 | `actionLabel` | Action label | text | No | No | Controls the action label used by this Teaser instance. |
+| `actions` | Actions | repeater | No | No | Ordered links or native buttons rendered by this component. |
+
+##### Actions item contract
+
+Cardinality: 0–3 action records, kept in author order.
+
+| Property | Author label | Type | Required | Allowed values |
+|---|---|---|:---:|---|
+| `label` | Label | text | Yes | Any valid value |
+| `kind` | Action type | select | Yes | `link`, `button` |
+| `href` | Destination | url | No | Any valid value |
+| `target` | Open in | select | Yes | `_self`, `_blank`, `_parent` |
 
 #### Variants
 
@@ -849,6 +923,7 @@ Whitespace-preserving text with safe language metadata.
 - Registry ID: `creator-signal.site.catalogue.code-block`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.code-block`
@@ -884,6 +959,7 @@ A section heading using the shared text implementation.
 - Registry ID: `creator-signal.site.catalogue.heading`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.text` with preset `heading`
@@ -924,6 +1000,7 @@ A semantic paragraph or short text fragment.
 - Registry ID: `creator-signal.site.catalogue.plain-text`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.text` with preset `paragraph`
@@ -957,6 +1034,7 @@ Sanitised formatted editorial content with one semantic wrapper.
 - Registry ID: `creator-signal.site.catalogue.rich-text`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.rich-text`
@@ -984,6 +1062,7 @@ An ordered or unordered semantic list.
 - Registry ID: `creator-signal.site.catalogue.semantic-list`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.list`
@@ -1013,6 +1092,7 @@ A labelled native progress indicator.
 - Registry ID: `creator-signal.site.catalogue.progress-bar`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.progress`
@@ -1048,6 +1128,7 @@ Index-backed search across eligible published pages.
 - Registry ID: `creator-signal.site.catalogue.search`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.loop` with preset `published-pages`
@@ -1086,6 +1167,7 @@ References centrally managed content fields without owning page layout.
 - Registry ID: `creator-signal.site.catalogue.shared-content-fragment`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.loop` with preset `content-fragment`
@@ -1120,6 +1202,7 @@ Renders one governed CMS record through an approved display component.
 - Registry ID: `creator-signal.site.catalogue.structured-content`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.loop` with preset `single-record`
@@ -1155,6 +1238,7 @@ Queries governed CMS records through the shared collection contract.
 - Registry ID: `creator-signal.site.catalogue.structured-content-list`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.loop` with preset `record-collection`
@@ -1200,6 +1284,7 @@ A captioned semantic table for genuinely tabular editorial data.
 - Registry ID: `creator-signal.site.catalogue.table`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.table`
@@ -1237,6 +1322,7 @@ A short status or category label using approved semantic variants.
 - Registry ID: `creator-signal.site.catalogue.badge`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.badge`
@@ -1279,6 +1365,7 @@ A captioned table comparing any set of options or features.
 - Registry ID: `creator-signal.site.catalogue.comparison-table`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.comparison-table`
@@ -1303,6 +1390,7 @@ Explains an empty collection or unavailable result with a next action.
 - Registry ID: `creator-signal.site.catalogue.empty-state`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.empty-state`
@@ -1327,6 +1415,7 @@ Frequently asked questions composed from native Accordion items.
 - Registry ID: `creator-signal.site.catalogue.faq-list`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.faq`
@@ -1351,6 +1440,7 @@ An approved symbolic icon with controlled semantics and size.
 - Registry ID: `creator-signal.site.catalogue.icon`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.icon`
@@ -1386,6 +1476,7 @@ A concise repeated list ready for approved icon decoration.
 - Registry ID: `creator-signal.site.catalogue.icon-list`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.icon-list`
@@ -1410,6 +1501,7 @@ A governed group of partner or organisation logos.
 - Registry ID: `creator-signal.site.catalogue.logo-cloud`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.logo-cloud`
@@ -1434,6 +1526,7 @@ A responsive group of key measurements.
 - Registry ID: `creator-signal.site.catalogue.statistics`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.statistics`
@@ -1458,6 +1551,7 @@ A semantic ordered sequence of actions.
 - Registry ID: `creator-signal.site.catalogue.steps`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.steps`
@@ -1482,6 +1576,7 @@ A semantic ordered sequence of dated milestones.
 - Registry ID: `creator-signal.site.catalogue.timeline`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.timeline`
@@ -1508,6 +1603,7 @@ A labelled group of native disclosure sections.
 - Registry ID: `creator-signal.site.catalogue.accordion`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.accordion`
@@ -1548,6 +1644,7 @@ One native disclosure section inside an Accordion.
 - Registry ID: `creator-signal.site.catalogue.accordion-item`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.accordion-item`
@@ -1581,6 +1678,7 @@ A call to action rendered as a button or link.
 - Registry ID: `creator-signal.site.catalogue.button`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.button`
@@ -1618,6 +1716,7 @@ A controlled sequence of governed content slides.
 - Registry ID: `creator-signal.site.catalogue.carousel`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.carousel`
@@ -1664,6 +1763,7 @@ Supporting content presented from a governed viewport edge.
 - Registry ID: `creator-signal.site.catalogue.drawer`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.drawer`
@@ -1717,6 +1817,7 @@ An inline or grouped navigation link.
 - Registry ID: `creator-signal.site.catalogue.link`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.link`
@@ -1751,6 +1852,7 @@ A consent-delayed OpenStreetMap embed.
 - Registry ID: `creator-signal.site.catalogue.map`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.provider-embed` with preset `openstreetmap`
@@ -1793,6 +1895,7 @@ Focused interactive content with governed dismissal and focus.
 - Registry ID: `creator-signal.site.catalogue.dialog`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.dialog`
@@ -1847,6 +1950,7 @@ One labelled panel inside Tabs.
 - Registry ID: `creator-signal.site.catalogue.tab-panel`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.tab-panel`
@@ -1882,6 +1986,7 @@ A labelled set of progressively enhanced content panels.
 - Registry ID: `creator-signal.site.catalogue.tabs`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.tabs`
@@ -1931,6 +2036,7 @@ A native audio player with an accessible title and transcript link.
 - Registry ID: `creator-signal.site.catalogue.audio`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.audio`
@@ -1969,6 +2075,7 @@ An ordered responsive collection of governed images.
 - Registry ID: `creator-signal.site.catalogue.gallery`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.gallery`
@@ -1999,6 +2106,7 @@ An image selected from the Media Library.
 - Registry ID: `creator-signal.site.catalogue.image`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.image`
@@ -2033,6 +2141,7 @@ Accessible hosted audio or video using one governed display definition.
 - Registry ID: `creator-signal.site.catalogue.media`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.media`
@@ -2081,6 +2190,7 @@ An embedded PDF with a native fallback and direct download link.
 - Registry ID: `creator-signal.site.catalogue.pdf-viewer`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.pdf-viewer`
@@ -2118,6 +2228,7 @@ A consent-delayed privacy-enhanced YouTube video.
 - Registry ID: `creator-signal.site.catalogue.youtube-embed`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.provider-embed` with preset `youtube`
@@ -2163,6 +2274,7 @@ A consent-delayed third-party embed resolved through an approved adapter.
 - Registry ID: `creator-signal.site.catalogue.embed`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.provider-embed` with preset `provider-embed`
@@ -2209,6 +2321,7 @@ A provider-neutral form verification boundary.
 - Registry ID: `creator-signal.site.catalogue.captcha`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.provider-embed` with preset `hcaptcha`
@@ -2251,6 +2364,7 @@ A form control for an independent yes/no choice.
 - Registry ID: `creator-signal.site.catalogue.checkbox`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.checkbox`
@@ -2289,6 +2403,7 @@ A fieldset of independently selectable Checkbox controls.
 - Registry ID: `creator-signal.site.catalogue.checkbox-group`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.checkbox-group`
@@ -2313,6 +2428,7 @@ A calendar date.
 - Registry ID: `creator-signal.site.catalogue.date-input`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.input` with preset `date`
@@ -2357,6 +2473,7 @@ Delete the current persistent recovery record.
 - Registry ID: `creator-signal.site.catalogue.delete-draft`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.form-draft-action` with preset `delete-draft`
@@ -2397,6 +2514,7 @@ An email address.
 - Registry ID: `creator-signal.site.catalogue.email-input`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.input` with preset `email`
@@ -2441,6 +2559,7 @@ A validation message associated with one form control.
 - Registry ID: `creator-signal.site.catalogue.form-error`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.form-message` with preset `error`
@@ -2480,6 +2599,7 @@ Persistent instructions associated with one form control.
 - Registry ID: `creator-signal.site.catalogue.form-help`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.form-message` with preset `help`
@@ -2520,6 +2640,7 @@ A private, malware-scanned file upload for CMS-native forms.
 - Registry ID: `creator-signal.site.catalogue.file-attachment`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.input` with preset `private-scanned`
@@ -2567,6 +2688,7 @@ Form-aware sections composed from native Accordion items.
 - Registry ID: `creator-signal.site.catalogue.form-accordion`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.form-accordion`
@@ -2597,6 +2719,7 @@ A governed layout boundary for submit and secondary actions.
 - Registry ID: `creator-signal.site.catalogue.form-actions`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.container` with preset `actions`
@@ -2627,6 +2750,7 @@ A CMS-native or custom form boundary.
 - Registry ID: `creator-signal.site.catalogue.form-container`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.form`
@@ -2667,6 +2791,7 @@ An approved internal or provider form embedded behind consent and sandbox policy
 - Registry ID: `creator-signal.site.catalogue.form-embed`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.provider-embed` with preset `provider-form`
@@ -2720,6 +2845,7 @@ A governed layout boundary for one field, its label, help and error.
 - Registry ID: `creator-signal.site.catalogue.form-field-group`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.container` with preset `field-group`
@@ -2750,6 +2876,7 @@ A submission status or result message for a form.
 - Registry ID: `creator-signal.site.catalogue.form-message`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.form-message` with preset `status`
@@ -2791,6 +2918,7 @@ A recoverable, progressively enhanced wizard step.
 - Registry ID: `creator-signal.site.catalogue.form-step`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.form-step`
@@ -2819,6 +2947,7 @@ Form-aware sections using the shared Tabs keyboard and fallback contract.
 - Registry ID: `creator-signal.site.catalogue.form-tabs`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.form-tabs`
@@ -2857,6 +2986,7 @@ A fixed or context-derived value submitted without a visible control.
 - Registry ID: `creator-signal.site.catalogue.hidden-field`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.input` with preset `hidden`
@@ -2892,6 +3022,7 @@ A visible label for a form control.
 - Registry ID: `creator-signal.site.catalogue.form-label`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.label`
@@ -2926,6 +3057,7 @@ Move to the next authored form step.
 - Registry ID: `creator-signal.site.catalogue.next-step`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.form-draft-action` with preset `next-step`
@@ -2964,6 +3096,7 @@ A numeric value.
 - Registry ID: `creator-signal.site.catalogue.number-input`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.input` with preset `number`
@@ -3008,6 +3141,7 @@ One selectable value inside a Select.
 - Registry ID: `creator-signal.site.catalogue.option`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.option`
@@ -3036,6 +3170,7 @@ A labelled group of related Select options.
 - Registry ID: `creator-signal.site.catalogue.option-group`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.option-group`
@@ -3063,6 +3198,7 @@ A titled semantic group for related form content.
 - Registry ID: `creator-signal.site.catalogue.form-panel`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.form-panel`
@@ -3087,6 +3223,7 @@ A paired navigation action group for authored Wizard steps.
 - Registry ID: `creator-signal.site.catalogue.previous-next-actions`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.previous-next-actions`
@@ -3117,6 +3254,7 @@ Move to the previous authored form step.
 - Registry ID: `creator-signal.site.catalogue.previous-step`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.form-draft-action` with preset `previous-step`
@@ -3155,6 +3293,7 @@ One mutually exclusive choice in a radio group.
 - Registry ID: `creator-signal.site.catalogue.radio`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.radio`
@@ -3193,6 +3332,7 @@ A fieldset of mutually exclusive Radio controls sharing one name.
 - Registry ID: `creator-signal.site.catalogue.radio-group`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.radio-group`
@@ -3217,6 +3357,7 @@ Resets the containing form through the shared form-action module.
 - Registry ID: `creator-signal.site.catalogue.reset-button`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.submit` with preset `reset`
@@ -3256,6 +3397,7 @@ A centrally governed form-field fragment with an explicit binding prefix.
 - Registry ID: `creator-signal.site.catalogue.reusable-form-fragment`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: visual-component
 - Backing implementation: Visual Component `base.vc.reusable-form-fragment`
@@ -3295,6 +3437,7 @@ Persist recoverable form progress across sessions or devices.
 - Registry ID: `creator-signal.site.catalogue.save-draft`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed module `base.form-draft-action` with preset `save-draft`
@@ -3335,6 +3478,7 @@ A select control containing approved options.
 - Registry ID: `creator-signal.site.catalogue.select`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.select`
@@ -3371,6 +3515,7 @@ Submits the containing form.
 - Registry ID: `creator-signal.site.catalogue.submit`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.submit`
@@ -3404,6 +3549,7 @@ A review step with editable summary content and final actions.
 - Registry ID: `creator-signal.site.catalogue.form-summary-review`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: pattern
 - Backing implementation: pattern `base.pattern.form-summary-review`
@@ -3428,6 +3574,7 @@ An on/off choice backed by the canonical checkbox control.
 - Registry ID: `creator-signal.site.catalogue.switch`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.checkbox` with preset `switch`
@@ -3472,6 +3619,7 @@ A telephone number.
 - Registry ID: `creator-signal.site.catalogue.telephone-input`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.input` with preset `tel`
@@ -3516,6 +3664,7 @@ Records agreement to an explicit versioned terms source.
 - Registry ID: `creator-signal.site.catalogue.terms-and-conditions`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed pattern `base.pattern.terms-and-conditions`
@@ -3542,6 +3691,7 @@ A multi-line form input.
 - Registry ID: `creator-signal.site.catalogue.text-area`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.textarea`
@@ -3580,6 +3730,7 @@ General short text.
 - Registry ID: `creator-signal.site.catalogue.text-input`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.input` with preset `text`
@@ -3624,6 +3775,7 @@ A web address.
 - Registry ID: `creator-signal.site.catalogue.url-input`
 - Version: `1.0.0`
 - Status: stable
+- Composition: leaf
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: primitive
 - Backing implementation: module `base.input` with preset `url`
@@ -3668,6 +3820,7 @@ A persistent multi-step CMS-native form with review and recovery.
 - Registry ID: `creator-signal.site.catalogue.wizard`
 - Version: `1.0.0`
 - Status: stable
+- Composition: container
 - Source: design system `creator-signal.site` (Creator Signal)
 - Taxonomy: capability-backed
 - Backing implementation: capability-backed pattern `base.pattern.form-wizard`

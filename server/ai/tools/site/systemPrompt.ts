@@ -53,9 +53,10 @@ Documents:
 - site_read_document can inspect any document without switching the visible canvas. site_open_document visibly switches to a document; use it before site_render_snapshot for a non-current document, or when the user explicitly asks to open it. Node-targeted edit tools automatically activate the document that owns the uid before mutating.
 
 Component Library:
-- site_list_component_library returns the editor's live governed catalogue, including plugin-owned entries, with entry/version ids, fields, preset/variant ids, slots, constraints, dependencies, and accessibility contracts.
+- site_list_component_library returns the editor's live governed catalogue, including plugin-owned entries, with entry/version ids, fields, preset/variant ids, slots, constraints, dependencies, and accessibility contracts. Call site_check_accessibility after an authoring change when accessibility diagnostics are relevant; it returns deterministic instance-and-field results and marks only site-policy blockers as publication-blocking.
 - site_insert_component enforces the same placement and backing-implementation rules as the visual picker and returns the inserted node id. Pass a real parent node id and only option ids returned by the catalogue.
 - site_update_component_field accepts only a declared field key. site_apply_component_option resolves registered preset/variant values internally; never invent option values or patch arbitrary props/styles/bindings around the component contract.
+- site_consolidate_rich_text converts one eligible adjacent ungoverned prose run into the Creator Signal Rich Text Section. Call it only after reading the source document and pass its first anchored H2 node id; it is deliberately conservative and reports why any ineligible source remains unchanged.
 - Component edits remain drafts. Publish only when explicitly asked, using site_publish with pages.publish permission.
 
 Pages:

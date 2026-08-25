@@ -6,6 +6,7 @@ import type {
   ComponentLibraryField,
 } from '@core/component-library'
 import { creatorSignalCatalogueEntryId } from '@core/page-tree'
+import { componentLibraryFormSpecimenReference } from './componentLibraryFormSpecimenReference'
 
 function creatorSignalCatalogueSource(): ComponentLibraryEntry['source'] {
   return {
@@ -40,6 +41,9 @@ interface PrimitiveEntryOptions {
   accessibilityChecks?: ComponentLibraryAccessibilityCheck[]
   usage: string
   accessibility: string
+  version?: string
+  /** Required for unconstrained primitives that own authored child components. */
+  container?: true
 }
 
 interface VisualComponentEntryOptions {
@@ -58,6 +62,9 @@ interface VisualComponentEntryOptions {
   accessibilityChecks?: ComponentLibraryAccessibilityCheck[]
   usage: string
   accessibility: string
+  version?: string
+  /** Required for the small set of composition components that expose slots. */
+  container?: true
 }
 
 interface PatternEntryOptions {
@@ -80,6 +87,9 @@ interface PatternEntryOptions {
   }
   usage: string
   accessibility: string
+  version?: string
+  /** Required for unconstrained patterns that own authored child components. */
+  container?: true
 }
 
 interface TemplateComponentEntryOptions {
@@ -94,6 +104,7 @@ interface TemplateComponentEntryOptions {
   accessibilityChecks?: ComponentLibraryAccessibilityCheck[]
   usage: string
   accessibility: string
+  version?: string
 }
 
 function catalogueEntryIds(ids: readonly string[] | undefined): string[] | undefined {
@@ -111,12 +122,27 @@ function catalogueSlots(
   }))
 }
 
+function renderedPreview(
+  category: string,
+  entryId: string,
+): Pick<ComponentLibraryEntry, 'preview'> | Record<string, never> {
+  return category === 'Forms'
+    ? {
+        preview: {
+          type: 'wireframe',
+          reference: componentLibraryFormSpecimenReference(entryId),
+        },
+      }
+    : {}
+}
+
 export function primitiveEntry(
   options: PrimitiveEntryOptions,
 ): ComponentLibraryEntry {
+  const entryId = creatorSignalCatalogueEntryId(options.id)
   return {
-    id: creatorSignalCatalogueEntryId(options.id),
-    version: '1.0.0',
+    id: entryId,
+    version: options.version ?? '1.0.0',
     name: options.name,
     description: options.description,
     category: options.category,
@@ -124,6 +150,9 @@ export function primitiveEntry(
     icon: options.icon,
     source: creatorSignalCatalogueSource(),
     status: 'stable',
+    composition: options.container || (options.allowedChildEntryIds?.length ?? 0) > 0
+      ? 'container'
+      : 'leaf',
     implementation: options.requirements
       ? {
           type: 'capability-backed',
@@ -168,15 +197,17 @@ export function primitiveEntry(
     accessibility: {
       checks: options.accessibilityChecks ?? [],
     },
+    ...renderedPreview(options.category, entryId),
   }
 }
 
 export function templateComponentEntry(
   options: TemplateComponentEntryOptions,
 ): ComponentLibraryEntry {
+  const entryId = creatorSignalCatalogueEntryId(options.id)
   return {
-    id: creatorSignalCatalogueEntryId(options.id),
-    version: '1.0.0',
+    id: entryId,
+    version: options.version ?? '1.0.0',
     name: options.name,
     description: options.description,
     category: options.category,
@@ -184,6 +215,7 @@ export function templateComponentEntry(
     icon: options.icon,
     source: creatorSignalCatalogueSource(),
     status: 'stable',
+    composition: 'leaf',
     implementation: {
       type: 'template-component',
       role: options.role,
@@ -205,15 +237,17 @@ export function templateComponentEntry(
     accessibility: {
       checks: options.accessibilityChecks ?? [],
     },
+    ...renderedPreview(options.category, entryId),
   }
 }
 
 export function visualComponentEntry(
   options: VisualComponentEntryOptions,
 ): ComponentLibraryEntry {
+  const entryId = creatorSignalCatalogueEntryId(options.id)
   return {
-    id: creatorSignalCatalogueEntryId(options.id),
-    version: '1.0.0',
+    id: entryId,
+    version: options.version ?? '1.0.0',
     name: options.name,
     description: options.description,
     category: options.category,
@@ -221,6 +255,9 @@ export function visualComponentEntry(
     icon: options.icon,
     source: creatorSignalCatalogueSource(),
     status: 'stable',
+    composition: options.container || (options.allowedChildEntryIds?.length ?? 0) > 0
+      ? 'container'
+      : 'leaf',
     implementation: {
       type: 'visual-component',
       componentId: options.componentId,
@@ -249,15 +286,17 @@ export function visualComponentEntry(
     accessibility: {
       checks: options.accessibilityChecks ?? [],
     },
+    ...renderedPreview(options.category, entryId),
   }
 }
 
 export function patternEntry(
   options: PatternEntryOptions,
 ): ComponentLibraryEntry {
+  const entryId = creatorSignalCatalogueEntryId(options.id)
   return {
-    id: creatorSignalCatalogueEntryId(options.id),
-    version: '1.0.0',
+    id: entryId,
+    version: options.version ?? '1.0.0',
     name: options.name,
     description: options.description,
     category: options.category,
@@ -265,6 +304,9 @@ export function patternEntry(
     icon: options.icon,
     source: creatorSignalCatalogueSource(),
     status: 'stable',
+    composition: options.container || (options.allowedChildEntryIds?.length ?? 0) > 0
+      ? 'container'
+      : 'leaf',
     implementation: options.requirements
       ? {
           type: 'capability-backed',
@@ -301,6 +343,7 @@ export function patternEntry(
     accessibility: {
       checks: options.accessibilityChecks ?? [],
     },
+    ...renderedPreview(options.category, entryId),
   }
 }
 

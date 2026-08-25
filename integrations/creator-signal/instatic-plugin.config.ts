@@ -1,12 +1,19 @@
 import { definePlugin, permissions } from '@core/plugin-sdk'
 import { creatorSignalComponentLibraryEntries } from './component-library'
+import { creatorSignalPluginIdentity } from './plugin-contract'
+import crmIframeForm from './modules/crm-iframe-form'
 import mauticForm from './modules/mautic-form'
+import { creatorSignalSiteModules } from './modules/site-components'
+import { creatorSignalRenderProfile } from './pack/design-system'
 import { pack } from './pack/site'
 
 export default definePlugin({
-  id: 'creator-signal.site',
-  name: 'Creator Signal public site',
-  version: '0.1.10',
+  id: creatorSignalPluginIdentity.id,
+  name: creatorSignalPluginIdentity.name,
+  // This version is also the bootstrap reconciliation boundary. Advance it
+  // whenever the bundled technical pack changes so preserved installations
+  // run the package upgrade and reseed managed collaboration documents.
+  version: creatorSignalPluginIdentity.version,
   description: 'Creator Signal starter pages, author layouts, Mautic forms, consent and analytics integrations.',
   author: { name: 'Creator Signal', url: 'https://creatorsignal.me' },
   license: 'MIT',
@@ -26,7 +33,7 @@ export default definePlugin({
     'replay-api.creatorsignal.me',
     'errors-api.creatorsignal.me',
   ],
-  modules: [mauticForm],
+  modules: [mauticForm, crmIframeForm, ...creatorSignalSiteModules],
   componentLibrary: creatorSignalComponentLibraryEntries,
   pack,
   settings: [
@@ -42,12 +49,17 @@ export default definePlugin({
   frontend: {
     assets: [
       {
+        kind: 'script',
+        src: creatorSignalRenderProfile.theme.bootstrapAsset,
+        placement: 'head',
+        strategy: 'sync',
+      },
+      {
         kind: 'link',
         attrs: {
           rel: 'icon',
-          type: 'image/png',
-          sizes: '192x192',
-          href: 'assets/icons/creator-signal-192.png',
+          type: 'image/x-icon',
+          href: 'assets/design-system/brand/favicon.ico',
         },
       },
       {
@@ -55,8 +67,8 @@ export default definePlugin({
         attrs: {
           rel: 'icon',
           type: 'image/png',
-          sizes: '512x512',
-          href: 'assets/icons/creator-signal-512.png',
+          sizes: '192x192',
+          href: 'assets/design-system/brand/pwa-192.png',
         },
       },
       {
@@ -64,23 +76,30 @@ export default definePlugin({
         attrs: {
           rel: 'apple-touch-icon',
           type: 'image/png',
-          sizes: '192x192',
-          href: 'assets/icons/creator-signal-192.png',
+          sizes: '180x180',
+          href: 'assets/design-system/brand/apple-touch-icon-180.png',
         },
       },
       {
         kind: 'link',
         attrs: {
           rel: 'manifest',
-          href: 'assets/icons/site.webmanifest',
+          href: 'assets/design-system/site.webmanifest',
         },
       },
       {
-        kind: 'meta',
-        attrs: {
-          name: 'theme-color',
-          content: '#3A4A2E',
-        },
+        kind: 'script',
+        src: creatorSignalRenderProfile.theme.controlAsset,
+        placement: 'body-end',
+        strategy: 'module',
+      },
+      // Mautic's supported generated-form embed injects its own initializer
+      // after the provider script has loaded. This explicit declaration keeps
+      // the published CSP aligned with that provider contract.
+      {
+        kind: 'script-inline',
+        content: 'window.CreatorSignalMauticEmbed = Object.freeze({ version: "v1" });',
+        placement: 'body-end',
       },
       { kind: 'script', src: 'frontend/analytics.js', placement: 'body-end', strategy: 'defer' },
     ],

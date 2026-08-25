@@ -47,3 +47,33 @@ export async function getPublishedRuntimeAsset(
     bytes: row.content_bytes,
   }
 }
+
+/**
+ * Return the runtime files referenced by active published page versions.
+ * A technical artefact rebuild copies these immutable bytes into the new
+ * static slot without rebuilding JavaScript from a possibly newer draft.
+ */
+export async function listActivePublishedRuntimeAssets(
+  db: DbClient,
+): Promise<PublishedRuntimeAssetRecord[]> {
+  const { rows } = await db<RuntimeAssetRow>`
+    select distinct
+      published_runtime_assets.public_path,
+      published_runtime_assets.content_type,
+      published_runtime_assets.content_bytes
+    from published_runtime_assets
+    join data_row_versions
+      on data_row_versions.id = published_runtime_assets.data_row_version_id
+    join data_rows
+      on data_rows.active_version_id = data_row_versions.id
+    where data_rows.table_id = 'pages'
+      and data_rows.status = 'published'
+      and data_rows.deleted_at is null
+    order by published_runtime_assets.public_path asc
+  `
+  return rows.map((row) => ({
+    publicPath: row.public_path,
+    contentType: row.content_type,
+    bytes: row.content_bytes,
+  }))
+}

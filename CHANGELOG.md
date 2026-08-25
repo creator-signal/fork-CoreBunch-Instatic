@@ -6,6 +6,293 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.43 - 2026-08-25
+
+### Retained authoring-safe Feedback migration
+
+- Allowed the exact one-row Feedback iframe repair to proceed beside unrelated
+  authored pages while keeping those authored rows out of the migration.
+- Kept missing or additional pages, template conflicts, altered Feedback
+  providers and every broader migration fail-closed.
+- Added mixed retained/authored coverage proving the repair preserves Home and
+  Early Access authoring while replacing only the machine-owned Feedback node.
+
+## 0.0.42 - 2026-08-25
+
+### Local WYSIWYG Feedback authoring
+
+- Replaced the Feedback page's production-hosted iframe with the same
+  capability-backed Managed Form component used by every other public intake
+  route, while retaining independently authorable Two Column slots.
+- Added a fail-closed retained-content repair that changes only the exact
+  machine-owned 0.8.1 Feedback iframe node and preserves all other authored
+  page components, IDs, order, fields and publication metadata.
+- Updated the Feedback insertion recipe to materialize a governed
+  `creator_signal_feedback` Managed Form instead of a remote iframe.
+
+## 0.0.41 - 2026-08-25
+
+### Stable authorable Creator Signal page composition
+
+- Expanded optional Creator Signal page recipes into their real child
+  components so retained pages no longer persist an opaque page-pattern owner;
+  every page section remains independently selectable, configurable, movable,
+  replaceable and removable through the Components editor.
+- Rendered the protected Two Column Layout definition as real responsive left
+  and right WYSIWYG slot placeholders while preserving author-controlled slot
+  content in ordinary pages.
+- Clarified that patterns are insertion recipes, shared-template content is
+  edited once in the CMS, and plugin releases own technical definitions rather
+  than authored page or template content.
+
+## 0.0.40 - 2026-08-24
+
+### Creator Signal retained-content operations
+
+- Shipped the governed Creator Signal retained-content classifier inside the
+  runtime image so operators can prepare an untouched backup, hash report,
+  content-only migration archive and equivalent import-preview JSON without a
+  separate source checkout; classification remains fail-closed and never
+  imports or publishes content automatically.
+
+## 0.0.39 - 2026-08-24
+
+### Governed Creator Signal reference site and forms
+
+- Rebuilt the complete Creator Signal public route set from the governed
+  reference design while keeping starter patterns optional and every page body
+  freely authorable after insertion.
+- Added purpose-specific Waitlist and Beta routes, governed Mautic aliases and
+  production-shaped managed-form submission under the published content
+  security policy, including validation, latency, failure and unavailable
+  states.
+- Added a standalone CRM iframe provider component with bounded resizing,
+  fallback behaviour and source-owned acceptance for the Feedback route.
+- Split all managed-form pages into separately selectable Section Intro,
+  Two Column Layout and provider components, with responsive copy-first reading
+  order across Contact, Wishlist, Early Access and every public intake route.
+- Audited every public route and nested slot boundary, verified all current
+  catalogue entries through discovery, insertion, configuration, revision and
+  removal, and added route-wide browser and accessibility regression gates.
+- Advanced the bundled Creator Signal technical pack to 0.7.0 and recognised
+  exact untouched 0.4.0, 0.5.0 and 0.6.0 starter content through an explicit,
+  preview-only migration that never overwrites or publishes authored pages.
+
+## 0.0.38 - 2026-08-21
+
+### Complete Creator Signal authoring acceptance
+
+- Consolidated eligible adjacent prose into one governed Rich Text component
+  through the shared editor and MCP operation, preserving semantic source
+  content and author-controlled revisions.
+- Proved discover, insert, configure, preview, publish, revise and removal
+  tasks for all 33 Creator Signal catalogue entries through the editor and MCP
+  bridge, while keeping shared chrome single-owned and leaf entries slot-free.
+- Added explicit semantic, keyboard, focus, dismissal, announcement, form,
+  media, motion, contrast, touch and no-JavaScript accessibility contracts for
+  every catalogue entry, including field-level deterministic diagnostics and
+  policy-only publication blockers.
+- Advanced the bundled Creator Signal technical pack to 0.4.0 so retained
+  installations receive the accepted catalogue upgrade without replacing or
+  publishing authored pages.
+
+## 0.0.37 - 2026-08-21
+
+### Production-look Creator Signal authoring parity
+
+- Rebuilt all 24 public routes from opinionated `creator-signal.site`
+  components while keeping shared header, footer and privacy choices reusable
+  through the site template.
+- Kept every leaf component slot-free and field-driven, including repeatable
+  navigation, footer, feature, FAQ, comparison and pricing data.
+- Restored public card, generated-form and CTA styling, retained responsive
+  component rules, and removed the mobile privacy page's horizontal overflow.
+- Advanced the technical pack to 0.3.9 without replacing authored pages and
+  made retained-content migration classification deterministic.
+- Added a governed 72-capture page and section comparison report, 8 interaction
+  checks, SEO/schema verification and deterministic browser baselines in CI.
+
+## 0.0.36 - 2026-08-21
+
+### Creator Signal Website v2 and retained-site migration
+
+- Added the governed Home v2 and Early Access flows, campaign components,
+  responsive states, SEO contracts and visual acceptance baselines.
+- Recognised exact retained 0.1.11 and 0.2.0-0.2.6 starter content as explicit
+  migration predecessors while continuing to block unknown authored changes.
+- Added newly governed pages only when their reserved IDs are absent, repaired
+  only exact historical shared templates, and advanced the technical plugin
+  reconciliation boundary to 0.3.5.
+
+## 0.0.35 - 2026-08-21
+
+### Fixed
+
+- Kept the packaged plugin module registry identical to its configured module
+  list, including the Creator Signal comparison and recovery components, and
+  fail plugin builds when direct module exports drift from that registry.
+
+## 0.0.34 - 2026-08-20
+
+### Complete Creator Signal authoring experience
+
+- Made the shared Header, Footer and Privacy Choices template-only singletons,
+  kept ordinary pages content-only, and applied the same placement rules to
+  editor insertion, drag-and-drop, server writes and Agent/MCP authoring.
+- Integrated the versioned Creator Signal design system, governed public
+  patterns and authoring guardrails as the single source for component fields,
+  assets, responsive behavior, themes and published semantics.
+- Added durable 23-route page/section authoring references plus desktop,
+  tablet and mobile visual, accessibility, SEO, consent, form, degraded-state
+  and unknown-route acceptance evidence.
+- Aligned component previews, full-page Preview and published rendering while
+  retaining editor-only sandbox protections and preserving authored pages
+  during technical plugin upgrades.
+- Added accessible navigation, skip links, persistent privacy choices,
+  long-content and 200% reflow handling, forced-colour/reduced-motion support,
+  and governed not-found, comparison and recovery experiences.
+
+## 0.0.33 - 2026-08-14
+
+### Creator Signal production parity
+
+- Restored the complete shared Creator Signal design contract across all 23
+  governed routes while keeping leaf components field-driven and reserving
+  slots for true containers.
+- Added route-by-route desktop, tablet and mobile visual, semantic, SEO and
+  structured-data parity verification, plus consent and form interaction
+  checks against the current public site.
+- Made plugin-owned component styles available in isolated previews and
+  deduplicated the shared stylesheet in public, preview and Agent/MCP output.
+- Rebuilt published static artifacts from active published snapshots during
+  technical plugin upgrades without replacing authored pages, publishing
+  drafts or discarding installed runtime assets.
+- Extended safe opinionated semantic markup support and locked the full
+  Creator Signal component, upgrade, publisher, security and Agent/MCP
+  contracts with regression coverage.
+
+## 0.0.32 - 2026-08-14
+
+### Preserved site-pack collaboration repair
+
+- Advanced the bundled Creator Signal plugin to 0.2.1 so installations that
+  already contain the 0.2.0 plugin execute the technical-pack upgrade instead
+  of incorrectly treating the changed component contract as current.
+- Reused the collaboration-aware pack reconciliation path to replace stale
+  managed component lineages from authoritative rows while starter and
+  authored pages remain create-only and are never overwritten or published.
+- Locked the bootstrap reconciliation version in the governed site-pack test
+  and documented that the authored-content migration remains version 0.2.0.
+
+## 0.0.31 - 2026-08-14
+
+### Creator Signal authoring and SEO acceptance
+
+- Preserved each terminal page's title, description, canonical URL, locale,
+  robots policy and social metadata when shared templates wrap published pages.
+- Made draft Preview compose the same shared template chrome and Visual
+  Component overrides as public rendering while leaving non-routable component
+  edit surfaces unwrapped.
+- Started collaboration invalidation before managed starter reconciliation so
+  upgraded Visual Component parameter contracts replace stale editor lineages
+  before an author can bind to them.
+
+## 0.0.30 - 2026-08-14
+
+### Creator Signal shared-template persistence
+
+- Replaced the invalid shared-template slug with the authoring-safe
+  `creator-signal-site-template` slug.
+- Added a backup-first, exact-content repair for the previously generated
+  invalid template row while blocking automatic replacement of authored data.
+- Added full-pack persistence validation so every governed starter page and
+  shared template crosses the same boundary used by normal authoring.
+
+## 0.0.29 - 2026-08-14
+
+### Media-edge security
+
+- Updated the media-edge build toolchain from Go 1.26.5 to Go 1.26.6, fixing
+  CVE-2026-39821 and CVE-2026-46600 in the compiled standard library.
+- Retained the v0.0.28 governed Creator Signal authoring release content in
+  this replacement release; v0.0.28 was rejected by the candidate scan and
+  never published to immutable semver image tags or deployed.
+
+## 0.0.28 - 2026-08-14
+
+### Governed Creator Signal authoring
+
+- Replaced slots on non-container Creator Signal components with typed fields
+  and repeatable data, while retaining slots only for structural composition.
+- Added opinionated semantic output for the Creator Signal catalogue, including
+  authorable navigation, rich text, feature, testimonial, FAQ, document, form,
+  header, footer, consent, hero, and call-to-action content.
+- Added a sanitised rich-text editor, shared site chrome, page-level SEO and
+  structured metadata, and the same governed component model for Agent and MCP
+  authoring.
+
+### Safe starter-site lifecycle
+
+- Made starter pages an empty-site bootstrap only so plugin upgrades cannot
+  replace or publish authored pages.
+- Rebuilt the 23-page Creator Signal starter site as structured component data
+  with one shared template and preserved its existing public appearance.
+- Added a previewable, backup-first migration for exact legacy starter content;
+  authored or conflicting content is blocked from automatic replacement.
+
+## 0.0.27 - 2026-08-13
+
+### Media-edge security
+
+- Updated the media-edge Caddy build to `golang.org/x/net` 0.56.0, fixing
+  CVE-2026-46600 in DNS record parsing after the v0.0.26 candidate scan stopped
+  publication.
+- Retained the v0.0.26 content-addressed published module JavaScript repair in
+  this replacement release; v0.0.26 was never published to immutable image
+  tags or deployed.
+
+## 0.0.26 - 2026-08-13
+
+### Published module JavaScript cache safety
+
+- Replaced process-local publish counters in module JavaScript URLs with the
+  SHA-256 identity of the exact published script body.
+- Rejected missing, malformed, and stale content identities at the asset route
+  so one cache key can never serve different JavaScript after a restart or
+  deployment.
+- Made successfully verified module JavaScript assets immutable and added
+  regression coverage for body changes, stale URLs, previews, and public
+  rendering.
+
+## 0.0.25 - 2026-08-13
+
+### Creator Signal public forms
+
+- Published governed Contact, Feedback, Join Wishlist, Ask a Question,
+  Feature Request, and Error Report routes in the Creator Signal starter site.
+- Replaced environment-specific Mautic form IDs and generated callback names
+  with a validated, versioned alias registry that fails visibly when its
+  contract is missing or malformed.
+- Preserved module-declared Mautic origins when plugin scripts relax a
+  published page's Content Security Policy, and added regression coverage for
+  the combined module/plugin publishing path.
+- Bumped the embedded Creator Signal plugin to `0.1.11` so preserved
+  installations upgrade and can republish the expanded 23-page public site.
+
+### Governed public authoring
+
+- Added a machine-readable Creator Signal public-authoring contract and bound
+  governed Component Library identities and variants to its allow-list.
+- Recorded canonical generated design-system adapter identities without
+  duplicating raw token values, and governed public theme, responsive, asset,
+  and content roles.
+
+### Creator Signal release governance
+
+- Established protected `creator-signal/develop` integration and
+  `creator-signal/main` release branches, with CI and upstream-refresh rules
+  that preserve the fork's accepted release ancestry.
+
 ## 0.0.24 - 2026-08-10
 
 ### Release image security

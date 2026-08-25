@@ -51,7 +51,7 @@ function makeSnapshot(page: ReturnType<typeof makePage>): PublishedPageSnapshot 
   return {
     cmsSnapshotVersion: 1,
     pageRowId: page.id,
-    site: makeSite({ pages: [page] }),
+    site: makeSite({ pages: [structuredClone(page)] }),
   }
 }
 
@@ -370,6 +370,41 @@ describe('publishDraftSite — Layer A static artefacts', () => {
     expect(cssRes.status).toBe(200)
     expect(cssRes.headers.get('content-type')).toContain('text/css')
     expect(snapshotLookupCalled).toBe(false)
+  })
+
+  it('technically rebuilds from published content without leaking newer draft edits', async () => {
+    const staticPage = makePage({
+      root: { moduleId: 'base.body', props: {}, children: ['heading'] },
+      heading: { moduleId: 'base.text', props: { text: 'Published copy', tag: 'h1' }, children: [] },
+    })
+    staticPage.id = 'static-page'
+    staticPage.slug = 'about'
+    staticPage.title = 'About'
+
+    const dynamicPage = makePage({
+      root: { moduleId: 'base.body', props: {}, children: [] },
+    })
+    dynamicPage.id = 'dynamic-page'
+    dynamicPage.slug = 'news'
+    dynamicPage.title = 'News'
+
+    const db = buildFakeDb(staticPage, dynamicPage)
+    const { publishDraftSite } = await import('../../../server/publish/publishSite')
+    await publishDraftSite(db, 'user-1', uploadsDir)
+
+    staticPage.nodes.heading.props.text = 'Unpublished draft copy'
+    const slotBefore = await getActiveSlot(uploadsDir)
+
+    const { rebuildPublishedSiteArtifacts } = await import(
+      '../../../server/publish/rebuildPublishedSite'
+    )
+    const rebuilt = await rebuildPublishedSiteArtifacts(db, uploadsDir)
+
+    expect(rebuilt.rebuiltPages).toBe(1)
+    expect(await getActiveSlot(uploadsDir)).not.toBe(slotBefore)
+    const html = await readArtefact(uploadsDir, '/about')
+    expect(html).toContain('Published copy')
+    expect(html).not.toContain('Unpublished draft copy')
   })
 
   it('does NOT write disk artefact when uploadsDir is not provided', async () => {

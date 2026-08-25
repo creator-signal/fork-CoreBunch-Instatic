@@ -31,8 +31,9 @@ import {
   MoveNodeInputSchema,
   RenameNodeInputSchema,
   DuplicateNodeInputSchema,
-  ListComponentLibraryInputSchema,
+  ListComponentLibraryInputSchema, CheckComponentLibraryAccessibilityInputSchema,
   InsertComponentLibraryEntryInputSchema,
+  ConsolidateRichTextInputSchema,
   UpdateComponentLibraryFieldInputSchema,
   ApplyComponentLibraryOptionInputSchema,
   ApplyCssInputSchema,
@@ -104,7 +105,7 @@ import {
   runReadDocument,
 } from './documentTools'
 import { getErrorMessage } from '@core/utils/errorMessage'
-import { runApplyComponentLibraryOption, runInsertComponentLibraryEntry, runListComponentLibrary, runUpdateComponentLibraryField } from './componentLibraryTools'
+import { runApplyComponentLibraryOption, runCheckComponentLibraryAccessibility, runConsolidateRichText, runInsertComponentLibraryEntry, runListComponentLibrary, runUpdateComponentLibraryField } from './componentLibraryTools'
 
 // Live access to the editor store. Routed through `./storeRef` so this module
 // has no static import edge back into `editor-store/store.ts`.
@@ -663,8 +664,12 @@ export async function executeAgentTool(
         return runDuplicateNode(parseValue(DuplicateNodeInputSchema, rawInput))
       case 'site_list_component_library':
         return runListComponentLibrary(parseValue(ListComponentLibraryInputSchema, rawInput))
+      case 'site_check_accessibility':
+        return (parseValue(CheckComponentLibraryAccessibilityInputSchema, rawInput), runCheckComponentLibraryAccessibility(getStoreState()))
       case 'site_insert_component':
         return await runInsertComponentLibraryEntry(parseValue(InsertComponentLibraryEntryInputSchema, rawInput), getStoreState())
+      case 'site_consolidate_rich_text':
+        return runConsolidateRichText(parseValue(ConsolidateRichTextInputSchema, rawInput), getStoreState())
       case 'site_update_component_field':
         return runUpdateComponentLibraryField(parseValue(UpdateComponentLibraryFieldInputSchema, rawInput), getStoreState())
       case 'site_apply_component_option':

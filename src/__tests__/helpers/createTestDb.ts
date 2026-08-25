@@ -35,9 +35,7 @@ export async function createTestDb(): Promise<TestDb> {
     return {
       db,
       cleanup: async () => {
-        // TODO: extend DbClient with a close() method to properly terminate the
-        // Postgres connection pool. For now the process-level teardown is enough
-        // for the opt-in PG test mode.
+        await db.close?.()
       },
     }
   }
@@ -51,10 +49,7 @@ export async function createTestDb(): Promise<TestDb> {
   return {
     db,
     cleanup: async () => {
-      // Remove the entire temp directory. bun:sqlite doesn't expose a close()
-      // method on our DbClient interface; on macOS/Linux the file can still be
-      // deleted while the handle is open, and the handle goes out of scope once
-      // the test function returns.
+      await db.close?.()
       await fs.rm(path.dirname(tmpFile), { recursive: true, force: true })
     },
   }

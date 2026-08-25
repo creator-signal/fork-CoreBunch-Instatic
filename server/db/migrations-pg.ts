@@ -1296,4 +1296,16 @@ export const pgMigrations: Migration[] = [
        where schema_json like '%"catalogueEntryId"%base.%';
     `,
   },
+  {
+    // Keep the complete PageSeo object in the pages system table. The legacy
+    // seoTitle/seoDescription cells remain populated for compatibility.
+    id: '029_page_seo_metadata',
+    sql: `
+      update data_tables
+         set fields_json = fields_json ||
+           '[{"type":"longText","id":"seo","label":"SEO metadata","builtIn":true}]'::jsonb
+       where id = 'pages'
+         and not (fields_json @> '[{"id":"seo"}]'::jsonb);
+    `,
+  },
 ]

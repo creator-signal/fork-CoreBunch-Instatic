@@ -393,9 +393,11 @@ describe('PropertyControlRenderer — type dispatch', () => {
     expect(html).toContain('data-testid="property-control-href"')
   })
 
-  it('richtext → does not render a visible site-editor control', () => {
+  it('richtext → renders one formatted-content editor for the complete field', () => {
     const html = renderControl({ type: 'richtext', label: 'Content' }, 'content', '')
-    expect(html).toBe('')
+    expect(html).toContain('data-testid="property-control-content"')
+    expect(html).toContain('data-testid="richtext-control-content"')
+    expect(html).toContain('aria-label="Content formatting"')
   })
 
 })

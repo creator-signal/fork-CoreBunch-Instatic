@@ -108,7 +108,7 @@ heroComponent.params = [
     id: heroParamIds.artwork,
     name: 'Artwork',
     type: 'image',
-    description: 'Optional MinIO-backed media image. The signal artwork remains as the fallback.',
+    description: 'Optional MinIO-backed media image. The production signal artwork remains as the fallback.',
     defaultValue: '',
     required: false,
   },

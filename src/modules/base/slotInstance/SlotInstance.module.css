@@ -9,10 +9,18 @@
  */
 
 .container {
+  min-width: 0;
   border: 1px solid var(--border-muted);
   border-radius: var(--radius);
   background: var(--bg-surface);
   overflow: hidden;
+}
+
+.populated {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
 }
 
 .header {
@@ -38,4 +46,9 @@
 .content {
   min-height: 24px;
   padding: 4px;
+}
+
+.populated .content {
+  min-height: 0;
+  padding: 0;
 }

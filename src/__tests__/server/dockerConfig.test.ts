@@ -44,6 +44,14 @@ describe('self-host docker config', () => {
     expect(dockerfile).toContain('COPY --chown=bun:bun tsconfig*.json ./')
   })
 
+  it('ships the governed Creator Signal content migration dependency closure', () => {
+    const dockerfile = readFileSync('Dockerfile', 'utf8')
+
+    expect(dockerfile).toContain(
+      'COPY --from=build --chown=bun:bun /app/integrations/creator-signal /app/operator-tools/creator-signal',
+    )
+  })
+
   it('builds and bundles the isolated Plain Text showcase starter', () => {
     const dockerfile = readFileSync('Dockerfile', 'utf8')
 
@@ -69,6 +77,19 @@ describe('self-host docker config', () => {
     const serverIndex = readFileSync('server/index.ts', 'utf8')
 
     expect(serverIndex).toContain("'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS'")
+  })
+
+  it('starts collaboration invalidation before managed starter reconciliation', () => {
+    const serverIndex = readFileSync('server/index.ts', 'utf8')
+    const relayStart = serverIndex.indexOf('const collabRelay = createCollabRelay(db)')
+    const starterReconcile = serverIndex.indexOf('if (config.starterSite)')
+    const relayDrain = serverIndex.indexOf('await collabRelay.flushAll()')
+    const socketStart = serverIndex.indexOf('const server = Bun.serve')
+
+    expect(relayStart).toBeGreaterThan(-1)
+    expect(relayStart).toBeLessThan(starterReconcile)
+    expect(relayDrain).toBeGreaterThan(starterReconcile)
+    expect(relayDrain).toBeLessThan(socketStart)
   })
 
   it('defines a production compose stack with health checks and persistent data', () => {

@@ -1,0 +1,239 @@
+/* Generated from typography/source.json v0.1.0. Do not edit. */
+/* Fredoka Variable / latin-ext */
+@font-face {
+  font-family: "Fredoka Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 700;
+  src: url("./fonts/fredoka-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+/* Fredoka Variable / latin */
+@font-face {
+  font-family: "Fredoka Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 700;
+  src: url("./fonts/fredoka-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+/* Mulish Variable / latin-ext */
+@font-face {
+  font-family: "Mulish Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 1000;
+  src: url("./fonts/mulish-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+/* Mulish Variable / latin */
+@font-face {
+  font-family: "Mulish Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 1000;
+  src: url("./fonts/mulish-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+/* Caveat Variable / latin-ext */
+@font-face {
+  font-family: "Caveat Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 700;
+  src: url("./fonts/caveat-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+/* Caveat Variable / latin */
+@font-face {
+  font-family: "Caveat Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 700;
+  src: url("./fonts/caveat-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+:root {
+  --cs-font-family-fredoka: "Fredoka Variable", "Trebuchet MS", "Arial Rounded MT Bold", Arial, sans-serif;
+  --cs-font-family-fredoka-fallback: "Trebuchet MS", "Arial Rounded MT Bold", Arial, sans-serif;
+  --cs-font-family-mulish: "Mulish Variable", "Avenir Next", Avenir, "Segoe UI", Arial, sans-serif;
+  --cs-font-family-mulish-fallback: "Avenir Next", Avenir, "Segoe UI", Arial, sans-serif;
+  --cs-font-family-caveat: "Caveat Variable", "Segoe Print", "Bradley Hand", cursive;
+  --cs-font-family-caveat-fallback: "Segoe Print", "Bradley Hand", cursive;
+  --cs-font-family-display: var(--cs-font-family-fredoka);
+  --cs-font-family-heading: var(--cs-font-family-fredoka);
+  --cs-font-family-body: var(--cs-font-family-mulish);
+  --cs-font-family-ui: var(--cs-font-family-mulish);
+  --cs-font-family-data: var(--cs-font-family-mulish);
+  --cs-font-family-decorative: var(--cs-font-family-caveat);
+  --cs-type-display-family: var(--cs-font-family-fredoka);
+  --cs-type-display-size: clamp(2.75rem, 1.75rem + 3vw, 5rem);
+  --cs-type-display-line-height: 1.02;
+  --cs-type-display-weight: 600;
+  --cs-type-display-tracking: -0.035em;
+  --cs-type-heading1-family: var(--cs-font-family-fredoka);
+  --cs-type-heading1-size: clamp(2.125rem, 1.5rem + 2vw, 3.5rem);
+  --cs-type-heading1-line-height: 1.08;
+  --cs-type-heading1-weight: 600;
+  --cs-type-heading1-tracking: -0.03em;
+  --cs-type-heading2-family: var(--cs-font-family-fredoka);
+  --cs-type-heading2-size: clamp(1.625rem, 1.25rem + 1.2vw, 2.375rem);
+  --cs-type-heading2-line-height: 1.14;
+  --cs-type-heading2-weight: 600;
+  --cs-type-heading2-tracking: -0.02em;
+  --cs-type-heading3-family: var(--cs-font-family-fredoka);
+  --cs-type-heading3-size: 1.375rem;
+  --cs-type-heading3-line-height: 1.2;
+  --cs-type-heading3-weight: 600;
+  --cs-type-heading3-tracking: -0.012em;
+  --cs-type-body-large-family: var(--cs-font-family-mulish);
+  --cs-type-body-large-size: 1.125rem;
+  --cs-type-body-large-line-height: 1.6;
+  --cs-type-body-large-weight: 400;
+  --cs-type-body-large-tracking: 0;
+  --cs-type-body-family: var(--cs-font-family-mulish);
+  --cs-type-body-size: 1rem;
+  --cs-type-body-line-height: 1.55;
+  --cs-type-body-weight: 400;
+  --cs-type-body-tracking: 0;
+  --cs-type-body-small-family: var(--cs-font-family-mulish);
+  --cs-type-body-small-size: 0.875rem;
+  --cs-type-body-small-line-height: 1.5;
+  --cs-type-body-small-weight: 400;
+  --cs-type-body-small-tracking: 0;
+  --cs-type-label-family: var(--cs-font-family-mulish);
+  --cs-type-label-size: 0.875rem;
+  --cs-type-label-line-height: 1.3;
+  --cs-type-label-weight: 700;
+  --cs-type-label-tracking: 0.01em;
+  --cs-type-control-family: var(--cs-font-family-mulish);
+  --cs-type-control-size: 1rem;
+  --cs-type-control-line-height: 1.25;
+  --cs-type-control-weight: 700;
+  --cs-type-control-tracking: 0;
+  --cs-type-data-family: var(--cs-font-family-mulish);
+  --cs-type-data-size: 1rem;
+  --cs-type-data-line-height: 1.35;
+  --cs-type-data-weight: 600;
+  --cs-type-data-tracking: 0;
+  --cs-type-data-large-family: var(--cs-font-family-mulish);
+  --cs-type-data-large-size: 1.5rem;
+  --cs-type-data-large-line-height: 1.2;
+  --cs-type-data-large-weight: 700;
+  --cs-type-data-large-tracking: -0.01em;
+  --cs-type-decorative-family: var(--cs-font-family-caveat);
+  --cs-type-decorative-size: 1.5rem;
+  --cs-type-decorative-line-height: 1.2;
+  --cs-type-decorative-weight: 600;
+  --cs-type-decorative-tracking: 0;
+}
+
+[data-cs-fonts="fallback"] {
+  --cs-font-family-fredoka: var(--cs-font-family-fredoka-fallback);
+  --cs-font-family-mulish: var(--cs-font-family-mulish-fallback);
+  --cs-font-family-caveat: var(--cs-font-family-caveat-fallback);
+}
+
+.cs-type-display {
+  font-family: var(--cs-type-display-family);
+  font-size: var(--cs-type-display-size);
+  line-height: var(--cs-type-display-line-height);
+  font-weight: var(--cs-type-display-weight);
+  letter-spacing: var(--cs-type-display-tracking);
+}
+
+.cs-type-heading1 {
+  font-family: var(--cs-type-heading1-family);
+  font-size: var(--cs-type-heading1-size);
+  line-height: var(--cs-type-heading1-line-height);
+  font-weight: var(--cs-type-heading1-weight);
+  letter-spacing: var(--cs-type-heading1-tracking);
+}
+
+.cs-type-heading2 {
+  font-family: var(--cs-type-heading2-family);
+  font-size: var(--cs-type-heading2-size);
+  line-height: var(--cs-type-heading2-line-height);
+  font-weight: var(--cs-type-heading2-weight);
+  letter-spacing: var(--cs-type-heading2-tracking);
+}
+
+.cs-type-heading3 {
+  font-family: var(--cs-type-heading3-family);
+  font-size: var(--cs-type-heading3-size);
+  line-height: var(--cs-type-heading3-line-height);
+  font-weight: var(--cs-type-heading3-weight);
+  letter-spacing: var(--cs-type-heading3-tracking);
+}
+
+.cs-type-body-large {
+  font-family: var(--cs-type-body-large-family);
+  font-size: var(--cs-type-body-large-size);
+  line-height: var(--cs-type-body-large-line-height);
+  font-weight: var(--cs-type-body-large-weight);
+  letter-spacing: var(--cs-type-body-large-tracking);
+}
+
+.cs-type-body {
+  font-family: var(--cs-type-body-family);
+  font-size: var(--cs-type-body-size);
+  line-height: var(--cs-type-body-line-height);
+  font-weight: var(--cs-type-body-weight);
+  letter-spacing: var(--cs-type-body-tracking);
+}
+
+.cs-type-body-small {
+  font-family: var(--cs-type-body-small-family);
+  font-size: var(--cs-type-body-small-size);
+  line-height: var(--cs-type-body-small-line-height);
+  font-weight: var(--cs-type-body-small-weight);
+  letter-spacing: var(--cs-type-body-small-tracking);
+}
+
+.cs-type-label {
+  font-family: var(--cs-type-label-family);
+  font-size: var(--cs-type-label-size);
+  line-height: var(--cs-type-label-line-height);
+  font-weight: var(--cs-type-label-weight);
+  letter-spacing: var(--cs-type-label-tracking);
+}
+
+.cs-type-control {
+  font-family: var(--cs-type-control-family);
+  font-size: var(--cs-type-control-size);
+  line-height: var(--cs-type-control-line-height);
+  font-weight: var(--cs-type-control-weight);
+  letter-spacing: var(--cs-type-control-tracking);
+}
+
+.cs-type-data {
+  font-family: var(--cs-type-data-family);
+  font-size: var(--cs-type-data-size);
+  line-height: var(--cs-type-data-line-height);
+  font-weight: var(--cs-type-data-weight);
+  letter-spacing: var(--cs-type-data-tracking);
+  font-variant-numeric: tabular-nums;
+}
+
+.cs-type-data-large {
+  font-family: var(--cs-type-data-large-family);
+  font-size: var(--cs-type-data-large-size);
+  line-height: var(--cs-type-data-large-line-height);
+  font-weight: var(--cs-type-data-large-weight);
+  letter-spacing: var(--cs-type-data-large-tracking);
+  font-variant-numeric: tabular-nums;
+}
+
+.cs-type-decorative {
+  font-family: var(--cs-type-decorative-family);
+  font-size: var(--cs-type-decorative-size);
+  line-height: var(--cs-type-decorative-line-height);
+  font-weight: var(--cs-type-decorative-weight);
+  letter-spacing: var(--cs-type-decorative-tracking);
+}

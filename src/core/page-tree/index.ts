@@ -98,6 +98,16 @@ export {
   SiteAccessibilityPolicySchema,
   SiteSearchSettingsSchema,
 } from './siteSettings'
+export {
+  PublicAuthoringAssetFieldPolicySchema,
+  PublicAuthoringPolicySchema,
+  PublicAuthoringPatternPolicySchema,
+  PublicAuthoringTemplatePolicySchema,
+} from './publicAuthoringPolicy'
+export type {
+  PublicAuthoringAssetFieldPolicy,
+  PublicAuthoringPolicy,
+} from './publicAuthoringPolicy'
 
 // Condition helpers
 export { conditionId, conditionLabel, makeConditionDef, parseConditions } from './condition'

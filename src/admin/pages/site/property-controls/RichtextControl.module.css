@@ -1,0 +1,70 @@
+.root {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: var(--space-3xs);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4xs);
+}
+
+.toolbarButton {
+  flex: 0 0 auto;
+}
+
+.editor {
+  min-height: 180px;
+  max-height: 420px;
+  overflow: auto;
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  color: var(--text);
+}
+
+.editor:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.editor :global(.tiptap) {
+  min-height: 180px;
+  padding: var(--space-s);
+  outline: 0;
+  font-size: var(--text-s);
+  line-height: 1.55;
+}
+
+.editor :global(.tiptap > :first-child) {
+  margin-top: 0;
+}
+
+.editor :global(.tiptap > :last-child) {
+  margin-bottom: 0;
+}
+
+.editor :global(a) {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.editor :global(blockquote) {
+  margin-inline: 0;
+  padding-inline-start: var(--space-s);
+  border-inline-start: 3px solid var(--border-muted);
+  color: var(--text-muted);
+}
+
+.linkDialogBody {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.linkError {
+  margin: 0;
+  color: var(--danger);
+  font-size: var(--text-xs);
+}

@@ -21,19 +21,23 @@ import type { CoreCapability } from '../auth/capabilities'
 import { deepEqual } from '@core/utils/deepEqual'
 import { ForbiddenSiteChangeError } from './siteDiff'
 import {
+  assertPublicAuthoringPage,
   componentLibraryPatternRegistry,
   componentLibraryRegistry,
+  isManagedGovernedPatternNode,
+  isValidGovernedPatternBoundary,
   resolveComponentLibraryPlacement,
   type ComponentLibraryEntry,
   type ComponentLibraryImplementation,
 } from '@core/component-library'
 import { registry, resolvePropertyControlCategory } from '@core/module-engine'
-import type { CatalogueInstanceMetadata, Page, PageNode } from '@core/page-tree'
+import type {
+  CatalogueInstanceMetadata,
+  Page,
+  PageNode,
+  PublicAuthoringPolicy,
+} from '@core/page-tree'
 import '@modules/base'
-import {
-  isManagedGovernedPatternNode,
-  isValidGovernedPatternBoundary,
-} from './pageDiffPatterns'
 
 type PageChangeKind = 'components' | 'structure' | 'content' | 'style'
 
@@ -49,6 +53,7 @@ interface PageDiffInput {
   changedPages: readonly Page[]
   deletedPageIds: ReadonlySet<string>
   capabilities: readonly CoreCapability[]
+  publicAuthoringPolicy?: PublicAuthoringPolicy
 }
 
 function allowed(capabilities: readonly CoreCapability[], kind: PageChangeKind): boolean {
@@ -84,8 +89,24 @@ export function validatePageWriteDiff({
   changedPages,
   deletedPageIds,
   capabilities,
+  publicAuthoringPolicy,
 }: PageDiffInput): void {
+  if (publicAuthoringPolicy) {
+    for (const page of changedPages) {
+      assertPublicAuthoringPage(page, publicAuthoringPolicy, componentLibraryRegistry)
+    }
+    for (const template of publicAuthoringPolicy.templates) {
+      if (deletedPageIds.has(template.pageId)) {
+        throw new ForbiddenSiteChangeError(
+          'structure',
+          `pages.${template.pageId}`,
+          'the template-controlled public chrome cannot be deleted',
+        )
+      }
+    }
+  }
   if (
+    !publicAuthoringPolicy &&
     capabilities.includes('site.structure.edit') &&
     capabilities.includes('site.content.edit') &&
     capabilities.includes('site.style.edit')
@@ -129,7 +150,14 @@ function diffPage(capabilities: readonly CoreCapability[], previous: Page, next:
     requireChange(capabilities, 'structure', `${pagePath}.template`, 'template settings changed')
   }
 
-  diffNodes(capabilities, pagePath, previous.nodes, next.nodes, next.rootNodeId)
+  diffNodes(
+    capabilities,
+    pagePath,
+    previous.nodes,
+    next.nodes,
+    next.rootNodeId,
+    next.template ? 'template' : 'page',
+  )
 }
 
 function diffNodes(
@@ -138,6 +166,7 @@ function diffNodes(
   previous: Record<string, PageNode>,
   next: Record<string, PageNode>,
   nextRootNodeId: string,
+  documentKind: 'page' | 'template',
 ): void {
   const nodeIds = new Set([...Object.keys(previous), ...Object.keys(next)])
   for (const nodeId of nodeIds) {
@@ -179,6 +208,7 @@ function diffNodes(
       previous,
       next,
       nextRootNodeId,
+      documentKind,
     )
   }
 }
@@ -191,6 +221,7 @@ function diffNode(
   previousNodes: Record<string, PageNode>,
   nextNodes: Record<string, PageNode>,
   nextRootNodeId: string,
+  documentKind: 'page' | 'template',
 ): void {
   if (previous.moduleId !== next.moduleId) {
     requireChange(capabilities, 'structure', `${nodePath}.moduleId`, 'module changed')
@@ -212,7 +243,12 @@ function diffNode(
       if (!capabilities.includes('site.structure.edit')) {
         for (const changedId of changedIds) {
           if (!nextNodes[changedId]) continue
-          const placement = placementForNode(changedId, nextNodes, nextRootNodeId)
+          const placement = placementForNode(
+            changedId,
+            nextNodes,
+            nextRootNodeId,
+            documentKind,
+          )
           if (!placement.allowed) {
             throw new ForbiddenSiteChangeError(
               'components',
@@ -436,6 +472,7 @@ function placementForNode(
   nodeId: string,
   nodes: Record<string, PageNode>,
   rootNodeId: string,
+  documentKind: 'page' | 'template',
 ) {
   const node = nodes[nodeId]
   const entry = node ? governedEntryForNode(node) : undefined
@@ -463,6 +500,12 @@ function placementForNode(
     ? parentEntry?.slots.find((candidate) => candidate.id === slotName)
     : undefined
   return resolveComponentLibraryPlacement(entry, {
+    documentKind,
+    existingDocumentEntryCount: Object.values(nodes).filter(
+      (candidate) =>
+        candidate.id !== nodeId &&
+        candidate.catalogueInstance?.entryId === entry.id,
+    ).length,
     ...(parentEntry ? { parentEntry } : {}),
     ...(slot ? { slot } : {}),
     parentIsPageRoot: targetParent?.id === rootNodeId,
@@ -627,4 +670,3 @@ function propChangeKind(moduleId: string, propKey: string): PageChangeKind {
   if (!control) return 'structure'
   return resolvePropertyControlCategory(control) === 'content' ? 'content' : 'structure'
 }
-

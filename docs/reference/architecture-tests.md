@@ -19,7 +19,7 @@ Catalog of every test in `src/__tests__/architecture/`. These are structural gat
 
 | Test                                          | What it enforces                                                                 |
 |-----------------------------------------------|----------------------------------------------------------------------------------|
-| `creator-signal-branch-contract.test.ts`      | CI, release ancestry checks, contributor rules, and branch docs use `creator-signal/main`; upstream refreshes use `fork-origin/main`. |
+| `creator-signal-branch-contract.test.ts`      | CI, release ancestry, upstream mirroring, contributor rules, and branch docs preserve the `creator-signal/develop` integration and `creator-signal/main` release model. |
 | `release-image-security.test.ts`              | Release images, scanner inputs, action revisions, digest scans, and promotion ordering remain pinned and gated. |
 
 See [docs/reference/repository-branches.md](repository-branches.md) and

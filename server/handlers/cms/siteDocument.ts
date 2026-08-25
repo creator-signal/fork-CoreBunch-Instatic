@@ -90,6 +90,10 @@ import { Type, type Static } from '@core/utils/typeboxHelpers'
 import { CMS_API_PREFIX } from './shared'
 import { ForbiddenSiteChangeError, validateSiteWriteDiff } from '../../writePolicy/siteDiff'
 import { validatePageWriteDiff } from '../../writePolicy/pageDiff'
+import {
+  PublicAuthoringPolicyError,
+  isProtectedPublicAuthoringVisualComponent,
+} from '@core/component-library'
 
 const SITE_WRITE_CAPABILITIES = [
   'site.components.edit',
@@ -210,6 +214,7 @@ export async function handleSiteDocumentRoutes(req: Request, db: DbClient): Prom
     const previousShell = await getDraftSite(db)
     const shell = validateSite(body.site)
     validateSiteWriteDiff(previousShell, shell, user.capabilities)
+    const publicAuthoringPolicy = shell.settings.publicAuthoring
 
     // The shell ships with EVERY save, changed or not. Detecting "actually
     // changed" here (CPU work, outside the transaction) lets phase 2 skip the
@@ -249,6 +254,18 @@ export async function handleSiteDocumentRoutes(req: Request, db: DbClient): Prom
         user.capabilities, 'components', body.changedComponents.length, componentDeleteIds, 'component',
       )
       if (forbidden) return forbidden
+      if (publicAuthoringPolicy) {
+        const protectedId = [...changedComponentIds, ...componentDeleteIds].find((id) =>
+          isProtectedPublicAuthoringVisualComponent(publicAuthoringPolicy, id),
+        )
+        if (protectedId) {
+          throw new ForbiddenSiteChangeError(
+            'components',
+            `components.${protectedId}`,
+            'the Visual Component is protected by the public-authoring policy',
+          )
+        }
+      }
     }
     const keptComponentIds = new Set<string>(changedComponentIds)
     for (const vc of existingVCs) {
@@ -329,6 +346,7 @@ export async function handleSiteDocumentRoutes(req: Request, db: DbClient): Prom
       changedPages: pages,
       deletedPageIds: pageDeleteIds,
       capabilities: user.capabilities,
+      ...(publicAuthoringPolicy ? { publicAuthoringPolicy } : {}),
     })
 
     // ─── Phase 2: ONE transaction, dependency order enforced here ───────────
@@ -446,6 +464,12 @@ export async function handleSiteDocumentRoutes(req: Request, db: DbClient): Prom
     return jsonResponse({ ok: true, seq })
   } catch (err) {
     if (err instanceof SiteValidationError) return badRequest(err.message)
+    if (err instanceof PublicAuthoringPolicyError) {
+      return jsonResponse(
+        { error: err.message, diagnostics: err.diagnostics },
+        { status: 422 },
+      )
+    }
     if (err instanceof ForbiddenSiteChangeError) {
       return jsonResponse(
         { error: err.message, kind: err.kind, path: err.path },

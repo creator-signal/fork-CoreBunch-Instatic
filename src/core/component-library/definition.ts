@@ -36,6 +36,53 @@ function assertEntryInvariants(entry: ComponentLibraryEntry): void {
     'accessibility.checks',
     entry.accessibility?.checks.map((check) => check.rule) ?? [],
   )
+  assertUniqueIds(
+    'accessibility.notApplicable',
+    entry.accessibility?.notApplicable?.map((check) => check.rule) ?? [],
+  )
+  const declaredAccessibilityRules = new Set(
+    entry.accessibility?.checks.map((check) => check.rule) ?? [],
+  )
+  for (const notApplicable of entry.accessibility?.notApplicable ?? []) {
+    if (declaredAccessibilityRules.has(notApplicable.rule)) {
+      throw new ComponentLibraryDefinitionError(
+        `accessibility.notApplicable.${notApplicable.rule}`,
+        `Accessibility rule "${notApplicable.rule}" cannot be both applicable and not applicable.`,
+      )
+    }
+  }
+
+  if (entry.composition === 'leaf' && entry.slots.length > 0) {
+    throw new ComponentLibraryDefinitionError(
+      'slots',
+      'A leaf component cannot declare slots. Use typed fields for its authored data.',
+    )
+  }
+
+  for (const field of entry.fields) {
+    if (field.type !== 'repeater') continue
+    assertUniqueIds(
+      `fields.${field.key}.itemFields`,
+      field.itemFields.map((itemField) => itemField.key),
+    )
+    if (field.maxItems !== undefined && field.maxItems < field.minItems) {
+      throw new ComponentLibraryDefinitionError(
+        `fields.${field.key}.maxItems`,
+        'maxItems must be greater than or equal to minItems.',
+      )
+    }
+    for (const itemField of field.itemFields) {
+      if (
+        itemField.type === 'select' &&
+        (!itemField.options || itemField.options.length === 0)
+      ) {
+        throw new ComponentLibraryDefinitionError(
+          `fields.${field.key}.itemFields.${itemField.key}.options`,
+          'A repeater select field must declare at least one option.',
+        )
+      }
+    }
+  }
 
   if (entry.replacementEntryId === entry.id) {
     throw new ComponentLibraryDefinitionError(

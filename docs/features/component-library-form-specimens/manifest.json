@@ -1,0 +1,1507 @@
+{
+  "schemaVersion": "instatic.component-library-form-specimens/v1",
+  "generatedFrom": {
+    "source": "executable-built-in-forms-registry",
+    "registryContentHash": "sha256:a3ce6d3908ae160fd0e6b265f8de5089ea2fe65d34ccde98e7f3d3d784fee796",
+    "designImpactManifest": "docs/features/component-library-design-impact-manifest.json"
+  },
+  "summary": {
+    "entryCount": 41,
+    "scenarioCount": 74,
+    "capabilityBackedCount": 7,
+    "providerBackedCount": 1
+  },
+  "entries": [
+    {
+      "entryId": "creator-signal.site.catalogue.captcha",
+      "entryVersion": "1.0.0",
+      "name": "CAPTCHA",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.captcha.html",
+      "implementationTaxonomy": "capability-backed",
+      "backingReference": "base.provider-embed",
+      "providerBacked": true,
+      "limitations": [
+        "The local specimen uses a synthetic sandbox for capability \"forms.captcha\".",
+        "The provider adapter \"captcha.hcaptcha\" remains disabled; only its real fallback is rendered."
+      ],
+      "scenarios": [
+        {
+          "id": "provider-unavailable",
+          "label": "Provider disabled fallback",
+          "state": "unavailable",
+          "subjectNodeIds": [
+            "specimen-captcha-subject-unavailable-001"
+          ],
+          "browserChecks": [
+            "provider-fallback"
+          ]
+        }
+      ],
+      "documentHash": "sha256:4a58c5887681b8ed01b6d7b8741ec83f30fca753ef81fe2bae4c0acacf2532ab",
+      "contentHash": "sha256:ffcb196d5cd07f769aafac426d3cadb70eed84c4f325d0769308556f794db740"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.checkbox",
+      "entryVersion": "1.0.0",
+      "name": "Checkbox",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.checkbox.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.checkbox",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "required-checked",
+          "label": "Required checked state",
+          "state": "required",
+          "subjectNodeIds": [
+            "specimen-checkbox-subject-required-001"
+          ],
+          "fieldId": "checkbox-choice",
+          "browserChecks": [
+            "form-control-relationships",
+            "keyboard-choice"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled state",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-checkbox-subject-disabled-002"
+          ],
+          "fieldId": "checkbox-choice-disabled",
+          "browserChecks": [
+            "disabled-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:20cef27e248bc2ec6ee37df3ac6f30625507763ce91c4929c27a4e599e2b93f8",
+      "contentHash": "sha256:f266e88ae8135d76ff66ed799d476125a2e0c229a41da4c19da638dadd110682"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.checkbox-group",
+      "entryVersion": "1.0.0",
+      "name": "Checkbox Group",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.checkbox-group.html",
+      "implementationTaxonomy": "pattern",
+      "backingReference": "base.pattern.checkbox-group",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Default",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-checkbox-group-pattern-001"
+          ],
+          "browserChecks": [
+            "fieldset-legend",
+            "keyboard-choice"
+          ]
+        }
+      ],
+      "documentHash": "sha256:43d70c6980ac3c5d167e18fb76e80708c3b8d80bc12d5ed8791a1edbf438bc3c",
+      "contentHash": "sha256:cd6e09a98d7d7cb9b46931a5cade61ebcfd38b737f6fa9a0e891c18cf32b5a2c"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.date-input",
+      "entryVersion": "1.0.0",
+      "name": "Date Input",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.date-input.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.input",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "required",
+          "label": "Required control",
+          "state": "required",
+          "subjectNodeIds": [
+            "specimen-date-input-subject-required-001"
+          ],
+          "fieldId": "date-input-required",
+          "browserChecks": [
+            "form-control-relationships",
+            "invalid-focus"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled control",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-date-input-subject-disabled-006"
+          ],
+          "fieldId": "date-input-disabled",
+          "browserChecks": [
+            "disabled-state"
+          ]
+        },
+        {
+          "id": "read-only",
+          "label": "Read-only control",
+          "state": "read-only",
+          "subjectNodeIds": [
+            "specimen-date-input-subject-readonly-011"
+          ],
+          "fieldId": "date-input-readonly",
+          "browserChecks": [
+            "read-only-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:2e583b3e776eb65c9b03562979f5c9c81c08e0136ff6d822cd2b05c7a8eeaa6e",
+      "contentHash": "sha256:a6db9195821e66e7a8c43207fef895281fcca793b3a976ba9d40a9578ecefce7"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.delete-draft",
+      "entryVersion": "1.0.0",
+      "name": "Delete Draft",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.delete-draft.html",
+      "implementationTaxonomy": "capability-backed",
+      "backingReference": "base.form-draft-action",
+      "providerBacked": false,
+      "limitations": [
+        "The local specimen uses a synthetic sandbox for capability \"forms.drafts\"."
+      ],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Enabled draft or step action",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-delete-draft-subject-default-001"
+          ],
+          "fieldId": "draft-value",
+          "browserChecks": [
+            "draft-runtime",
+            "draft-cleanup"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled action",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-delete-draft-subject-disabled-002"
+          ],
+          "browserChecks": [
+            "disabled-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:00b2c2ada6be6726cd486f7b483bd760e63035d41d22ddd781c47ece6e613066",
+      "contentHash": "sha256:d7c72da0e002e9eaf32849aadffbf445bd1bfecaaadf00b33734240dc525fc13"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.email-input",
+      "entryVersion": "1.0.0",
+      "name": "Email Input",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.email-input.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.input",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "required",
+          "label": "Required control",
+          "state": "required",
+          "subjectNodeIds": [
+            "specimen-email-input-subject-required-001"
+          ],
+          "fieldId": "email-input-required",
+          "browserChecks": [
+            "form-control-relationships",
+            "invalid-focus"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled control",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-email-input-subject-disabled-006"
+          ],
+          "fieldId": "email-input-disabled",
+          "browserChecks": [
+            "disabled-state"
+          ]
+        },
+        {
+          "id": "read-only",
+          "label": "Read-only control",
+          "state": "read-only",
+          "subjectNodeIds": [
+            "specimen-email-input-subject-readonly-011"
+          ],
+          "fieldId": "email-input-readonly",
+          "browserChecks": [
+            "read-only-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:bb38139bdd92d6176387addd864daeb8ab5d029f8b3da18bc12c1bf5d9fffd81",
+      "contentHash": "sha256:c9305be934d94416846611d12d7d311d586da07f314e6e2aef86acaba3d5d43a"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.file-attachment",
+      "entryVersion": "1.0.0",
+      "name": "File Attachment",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.file-attachment.html",
+      "implementationTaxonomy": "capability-backed",
+      "backingReference": "base.input",
+      "providerBacked": false,
+      "limitations": [
+        "The local specimen uses a synthetic sandbox for capability \"forms.attachments\"."
+      ],
+      "scenarios": [
+        {
+          "id": "required-local-scan",
+          "label": "Required private attachment with retry",
+          "state": "required",
+          "subjectNodeIds": [
+            "specimen-file-attachment-subject-required-001"
+          ],
+          "fieldId": "synthetic-attachment",
+          "browserChecks": [
+            "attachment-local-scan",
+            "attachment-retry",
+            "attachment-cleanup"
+          ]
+        }
+      ],
+      "documentHash": "sha256:ba6edf6621ebedbc91ae22050e4238cc162bc1482c2a1da9386d2d95a54587a6",
+      "contentHash": "sha256:edc4f1262ba7e6518e156c41e970a2146fbbdebfd4610d73fe8d24554679fc43"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.form-accordion",
+      "entryVersion": "1.0.0",
+      "name": "Form Accordion",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-accordion.html",
+      "implementationTaxonomy": "pattern",
+      "backingReference": "base.pattern.form-accordion",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Default",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-form-accordion-pattern-001"
+          ],
+          "browserChecks": [
+            "accordion-keyboard",
+            "invalid-focus"
+          ]
+        }
+      ],
+      "documentHash": "sha256:25851cbe9c7464ad99c2332c6557a3ee2e940f433208d3fcc93aaddbc224df37",
+      "contentHash": "sha256:9250d5a2769aa7ecdb0c9b0b5bdec2dc2cc504eff3730671f481b0061dfd879a"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.form-actions",
+      "entryVersion": "1.0.0",
+      "name": "Form Actions",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-actions.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.container",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "default-disabled-pending",
+          "label": "Default, reset and pending actions",
+          "state": "pending",
+          "subjectNodeIds": [
+            "specimen-form-actions-subject-default-004"
+          ],
+          "browserChecks": [
+            "keyboard-actions"
+          ]
+        }
+      ],
+      "documentHash": "sha256:03b0a156818ac80d8fd416eb286f0fa4738e4d5319ffd06ea91acf4e3e13460e",
+      "contentHash": "sha256:a95199a62d0341da0a66228b37579d8674a8f0ebd1813c7ae2e3a8b2545ab03c"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.form-container",
+      "entryVersion": "1.0.0",
+      "name": "Form Container",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-container.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.form",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "default-session-recovery",
+          "label": "Default and session recovery",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-form-container-subject-default-009"
+          ],
+          "browserChecks": [
+            "form-runtime",
+            "session-draft-cleanup"
+          ]
+        }
+      ],
+      "documentHash": "sha256:cdea96a60474d0b327c5c201938124e0d15ec48b8c1ef1a85b4705a1baea7edf",
+      "contentHash": "sha256:6a7727f7c7fbeedadeb401af7fdaf84f8efda376605779bb13a3af151c72561d"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.form-embed",
+      "entryVersion": "1.0.0",
+      "name": "Form Embed",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-embed.html",
+      "implementationTaxonomy": "capability-backed",
+      "backingReference": "base.provider-embed",
+      "providerBacked": false,
+      "limitations": [
+        "The local specimen uses a synthetic sandbox for capability \"forms.embed\"."
+      ],
+      "scenarios": [
+        {
+          "id": "responsive",
+          "label": "Responsive",
+          "state": "unavailable",
+          "subjectNodeIds": [
+            "specimen-form-embed-subject-responsive-001"
+          ],
+          "variantId": "responsive",
+          "browserChecks": [
+            "provider-fallback",
+            "no-external-request"
+          ]
+        },
+        {
+          "id": "fixed",
+          "label": "Fixed",
+          "state": "unavailable",
+          "subjectNodeIds": [
+            "specimen-form-embed-subject-fixed-002"
+          ],
+          "variantId": "fixed",
+          "browserChecks": [
+            "provider-fallback",
+            "no-external-request"
+          ]
+        },
+        {
+          "id": "content-driven",
+          "label": "Content driven",
+          "state": "unavailable",
+          "subjectNodeIds": [
+            "specimen-form-embed-subject-content-driven-003"
+          ],
+          "variantId": "content-driven",
+          "browserChecks": [
+            "provider-fallback",
+            "no-external-request"
+          ]
+        }
+      ],
+      "documentHash": "sha256:3232ba6dfbeffbbf1874511fe1e7b08cdbff31ebeeaca428f7d6e5dbd559006e",
+      "contentHash": "sha256:11d33d6472c41da92cb65a5c76e6662dfaabad1cff90e4191a6baad5d2c8b36c"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.form-error",
+      "entryVersion": "1.0.0",
+      "name": "Field Error",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-error.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.form-message",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "error",
+          "label": "Field Error: error",
+          "state": "error",
+          "subjectNodeIds": [
+            "specimen-form-error-subject-error-001"
+          ],
+          "fieldId": "message-value",
+          "browserChecks": [
+            "status-announcement"
+          ]
+        }
+      ],
+      "documentHash": "sha256:0d061511ee0363d542f6a45f678591561a09a4d3c01b66d5253049fb6621f89e",
+      "contentHash": "sha256:f19eb96b8f7b3fc81ce8faeed0b888ca4cf1720c9e7bee6f97a1b302298b6619"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.form-field-group",
+      "entryVersion": "1.0.0",
+      "name": "Form Field Group",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-field-group.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.container",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "label-help-error",
+          "label": "Label, help, error and control group",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-form-field-group-subject-default-005"
+          ],
+          "fieldId": "field-group-value",
+          "browserChecks": [
+            "form-control-relationships"
+          ]
+        }
+      ],
+      "documentHash": "sha256:ad0e20bbb921053593ff9f4a17f83c4e810c845badfabe27d4545e7a3d6a9dc7",
+      "contentHash": "sha256:056339efb0ec00e6e07916f3301d38da0c31a2e7f543cf594e1f52c00d1e288b"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.form-help",
+      "entryVersion": "1.0.0",
+      "name": "Field Help",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-help.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.form-message",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "help",
+          "label": "Field Help: help",
+          "state": "help",
+          "subjectNodeIds": [
+            "specimen-form-help-subject-help-001"
+          ],
+          "fieldId": "message-value",
+          "browserChecks": [
+            "status-announcement"
+          ]
+        }
+      ],
+      "documentHash": "sha256:2e9914eadcdf24f0b4dba86ee5ed3b93200e712caa3d3ba5e657221fad5a9b45",
+      "contentHash": "sha256:d78af5aef23896511e2103c62311a46429f460f3364478a9dfaf336f46344de4"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.form-label",
+      "entryVersion": "1.0.0",
+      "name": "Label",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-label.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.label",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "explicit",
+          "label": "Explicit label target",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-form-label-subject-explicit-001"
+          ],
+          "fieldId": "label-email",
+          "browserChecks": [
+            "form-control-relationships"
+          ]
+        },
+        {
+          "id": "automatic",
+          "label": "Automatic next-control target",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-form-label-subject-auto-003"
+          ],
+          "fieldId": "label-telephone",
+          "browserChecks": [
+            "form-control-relationships"
+          ]
+        }
+      ],
+      "documentHash": "sha256:21a35ab3543674c0a9fb2199adee3d3f564299337c873f022134752bc79e0fc6",
+      "contentHash": "sha256:f7e2216de4eb12768cd4083afdce30717c6a475305adb43262a568dcc7660eb6"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.form-message",
+      "entryVersion": "1.0.0",
+      "name": "Form Status",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-message.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.form-message",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "pending",
+          "label": "Form Status: pending",
+          "state": "pending",
+          "subjectNodeIds": [
+            "specimen-form-message-subject-pending-001"
+          ],
+          "browserChecks": [
+            "status-announcement"
+          ]
+        },
+        {
+          "id": "success",
+          "label": "Form Status: success",
+          "state": "success",
+          "subjectNodeIds": [
+            "specimen-form-message-subject-success-002"
+          ],
+          "browserChecks": [
+            "status-announcement"
+          ]
+        },
+        {
+          "id": "error",
+          "label": "Form Status: error",
+          "state": "error",
+          "subjectNodeIds": [
+            "specimen-form-message-subject-error-003"
+          ],
+          "browserChecks": [
+            "status-announcement"
+          ]
+        }
+      ],
+      "documentHash": "sha256:4823192c481b6f995a0603dcf081826ca7b8c6b940d70b111a313990fd245212",
+      "contentHash": "sha256:25bafcb9ae6f508472a40c6b3de9d33dd87974585e18d204fd9f9d761cafb779"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.form-panel",
+      "entryVersion": "1.0.0",
+      "name": "Panel",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-panel.html",
+      "implementationTaxonomy": "pattern",
+      "backingReference": "base.pattern.form-panel",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Default",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-form-panel-pattern-001"
+          ],
+          "browserChecks": [
+            "semantic-pattern"
+          ]
+        }
+      ],
+      "documentHash": "sha256:1ca89d9b46462d2837cebbdfdeb5d0af0147c89d06166980b0d48f52c247796a",
+      "contentHash": "sha256:0c15393ab2dbd64531c31aa31d00cc182730fdcb4f249e2f80ad1a1ec2a6d137"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.form-step",
+      "entryVersion": "1.0.0",
+      "name": "Form Step",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-step.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.form-step",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "step",
+          "label": "Ordinary step",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-form-step-subject-step-008"
+          ],
+          "fieldId": "step-value",
+          "browserChecks": [
+            "wizard-keyboard"
+          ]
+        },
+        {
+          "id": "review",
+          "label": "Review step",
+          "state": "review",
+          "subjectNodeIds": [
+            "specimen-form-step-subject-review-010"
+          ],
+          "browserChecks": [
+            "wizard-keyboard"
+          ]
+        }
+      ],
+      "documentHash": "sha256:3dc3d3fc4bf9f2fef85c70037643a65e4282a6460f99250514c2090040ee2f8d",
+      "contentHash": "sha256:40a0d2ef88233c5ad030896b8d3b06891de3834b5bdd0045e35e556bd636bd15"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.form-summary-review",
+      "entryVersion": "1.0.0",
+      "name": "Summary / Review",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-summary-review.html",
+      "implementationTaxonomy": "pattern",
+      "backingReference": "base.pattern.form-summary-review",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Default",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-form-summary-review-pattern-001"
+          ],
+          "browserChecks": [
+            "wizard-keyboard",
+            "draft-cleanup"
+          ]
+        }
+      ],
+      "documentHash": "sha256:7e0a513aed56d5a063a347d2f256180afe13afdcd17684e206bfea8864a20fb7",
+      "contentHash": "sha256:bf56406532a690cc8ab63ec29a21bb83abf775570ce535f4deb588dfa2fe520d"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.form-tabs",
+      "entryVersion": "1.0.0",
+      "name": "Form Tabs",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.form-tabs.html",
+      "implementationTaxonomy": "pattern",
+      "backingReference": "base.pattern.form-tabs",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "horizontal",
+          "label": "Horizontal",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-form-tabs-pattern-001"
+          ],
+          "variantId": "horizontal",
+          "browserChecks": [
+            "tabs-keyboard",
+            "invalid-focus"
+          ]
+        },
+        {
+          "id": "vertical",
+          "label": "Vertical",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-form-tabs-pattern-011"
+          ],
+          "variantId": "vertical",
+          "browserChecks": [
+            "tabs-keyboard",
+            "invalid-focus"
+          ]
+        }
+      ],
+      "documentHash": "sha256:68811203182858da144f5e9d622e8983c9e74ff11b45ae31ff1c99f51fb30686",
+      "contentHash": "sha256:e85afb341513f3143948b8b80c14eb3c625c63fe8bf04878b910ecbd2a3015ef"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.hidden-field",
+      "entryVersion": "1.0.0",
+      "name": "Hidden Field",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.hidden-field.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.input",
+      "providerBacked": false,
+      "limitations": [
+        "Hidden controls intentionally have no focusable or visual provider UI."
+      ],
+      "scenarios": [
+        {
+          "id": "hidden",
+          "label": "Fixed synthetic metadata",
+          "state": "hidden",
+          "subjectNodeIds": [
+            "specimen-hidden-field-subject-hidden-001"
+          ],
+          "fieldId": "source-context",
+          "browserChecks": [
+            "hidden-field-contract"
+          ]
+        }
+      ],
+      "documentHash": "sha256:26d78d2b3fd174952fca49f62a67ef0d36b9ce2d9b77a1927c5d6afbd668941b",
+      "contentHash": "sha256:ce0b60a585b22eaf8d6f158936089fca6ab918f377ddc85bef8fafa10bbc8d3b"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.next-step",
+      "entryVersion": "1.0.0",
+      "name": "Next Step",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.next-step.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.form-draft-action",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Enabled draft or step action",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-next-step-subject-default-001"
+          ],
+          "fieldId": "draft-value",
+          "browserChecks": [
+            "draft-runtime",
+            "draft-cleanup"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled action",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-next-step-subject-disabled-002"
+          ],
+          "browserChecks": [
+            "disabled-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:fad200ef300d0adf8a43526431b3bfb644f42f1a6d7c9183cd3bec848b41c9d1",
+      "contentHash": "sha256:6c7bf509f3be9a51ec0ffac282f6d8b363e6aae7b0d72743a921958d2ac6cb9e"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.number-input",
+      "entryVersion": "1.0.0",
+      "name": "Number Input",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.number-input.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.input",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "required",
+          "label": "Required control",
+          "state": "required",
+          "subjectNodeIds": [
+            "specimen-number-input-subject-required-001"
+          ],
+          "fieldId": "number-input-required",
+          "browserChecks": [
+            "form-control-relationships",
+            "invalid-focus"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled control",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-number-input-subject-disabled-006"
+          ],
+          "fieldId": "number-input-disabled",
+          "browserChecks": [
+            "disabled-state"
+          ]
+        },
+        {
+          "id": "read-only",
+          "label": "Read-only control",
+          "state": "read-only",
+          "subjectNodeIds": [
+            "specimen-number-input-subject-readonly-011"
+          ],
+          "fieldId": "number-input-readonly",
+          "browserChecks": [
+            "read-only-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:98e6343a0cc4affd690b8c1394cefc4afb06dc1c810dab7e63893425770275c2",
+      "contentHash": "sha256:43d7400b686b37bef550a34cfab5e42ebc9cb866c1ae5e795439d35207eeeadd"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.option",
+      "entryVersion": "1.0.0",
+      "name": "Option",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.option.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.option",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Selected or grouped option",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-option-subject-default-001"
+          ],
+          "fieldId": "status",
+          "browserChecks": [
+            "option-contract"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled option state",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-option-subject-disabled-002"
+          ],
+          "fieldId": "status",
+          "browserChecks": [
+            "disabled-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:3e8680f5d35e69a88e3d6f4fb57773e2a903fbadd9a6a9858a0c213c70da4147",
+      "contentHash": "sha256:b4c77783dbda1fb765d023a173d5ab6e8fda7473706536b3c8e800c77d162da8"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.option-group",
+      "entryVersion": "1.0.0",
+      "name": "Option Group",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.option-group.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.option-group",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Selected or grouped option",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-option-group-subject-default-003"
+          ],
+          "fieldId": "status",
+          "browserChecks": [
+            "option-contract"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled option state",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-option-group-subject-disabled-005"
+          ],
+          "fieldId": "status",
+          "browserChecks": [
+            "disabled-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:3ee8315480fa5197d477aca24c4c0600cbda1d4bb2f6951c6240a5bb527eef15",
+      "contentHash": "sha256:b514e351337dc21d53a547be5b0730874ed3dc542729bd00024ba51ff35e9147"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.previous-next-actions",
+      "entryVersion": "1.0.0",
+      "name": "Previous / Next Actions",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.previous-next-actions.html",
+      "implementationTaxonomy": "pattern",
+      "backingReference": "base.pattern.previous-next-actions",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Default",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-previous-next-actions-pattern-001"
+          ],
+          "browserChecks": [
+            "wizard-keyboard",
+            "draft-cleanup"
+          ]
+        }
+      ],
+      "documentHash": "sha256:b10704388539ed9b7587111491ee5fc5100e1c2f0dbbb252f48ce6e179981364",
+      "contentHash": "sha256:ef9ef9960214eed3dc40b5fdd2d5e59d5ee2cb91a2dba4eb2f4ef554c3f6f721"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.previous-step",
+      "entryVersion": "1.0.0",
+      "name": "Previous Step",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.previous-step.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.form-draft-action",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Enabled draft or step action",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-previous-step-subject-default-001"
+          ],
+          "fieldId": "draft-value",
+          "browserChecks": [
+            "draft-runtime",
+            "draft-cleanup"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled action",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-previous-step-subject-disabled-002"
+          ],
+          "browserChecks": [
+            "disabled-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:18e1399973b63de25afac0b127213649fe83f1be53378ecb43bf3b0418cb47c6",
+      "contentHash": "sha256:379f11729a8de58fbef412692e61696f692ba7c4309a542bbb5ca1f56c84c2fe"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.radio",
+      "entryVersion": "1.0.0",
+      "name": "Radio",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.radio.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.radio",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "required-checked",
+          "label": "Required checked state",
+          "state": "required",
+          "subjectNodeIds": [
+            "specimen-radio-subject-required-001"
+          ],
+          "fieldId": "radio-choice",
+          "browserChecks": [
+            "form-control-relationships",
+            "keyboard-choice"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled state",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-radio-subject-disabled-002"
+          ],
+          "fieldId": "radio-choice-disabled",
+          "browserChecks": [
+            "disabled-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:4453d0aa31d90f8fdce42eb87184f798688f806a719761b177a0f6bcc10bf125",
+      "contentHash": "sha256:b216fd1d07e5a191ef1b06e9921975db0a04ce2088d57de57304d56b55baea3e"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.radio-group",
+      "entryVersion": "1.0.0",
+      "name": "Radio Button Group",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.radio-group.html",
+      "implementationTaxonomy": "pattern",
+      "backingReference": "base.pattern.radio-group",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Default",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-radio-group-pattern-001"
+          ],
+          "browserChecks": [
+            "fieldset-legend",
+            "keyboard-choice"
+          ]
+        }
+      ],
+      "documentHash": "sha256:72749e2abf90b67f94e6b98cb68d2ae745b8a736849850e92821b64250cae0a7",
+      "contentHash": "sha256:b52517effeb15aee289a2c7170cc60b3b973862f93333270259900e28381905b"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.reset-button",
+      "entryVersion": "1.0.0",
+      "name": "Reset Button",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.reset-button.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.submit",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Enabled action",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-reset-button-subject-default-001"
+          ],
+          "browserChecks": [
+            "keyboard-actions"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled action",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-reset-button-subject-disabled-002"
+          ],
+          "browserChecks": [
+            "disabled-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:e40f1eba45efb8d7c8e795a75123fce0ffbd57775f065d00ccc262afd08cd3da",
+      "contentHash": "sha256:4a51ec08390fc870b5f26685a3e11c3af1233a166cd4f755af3cfe728b339ccc"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.reusable-form-fragment",
+      "entryVersion": "1.0.0",
+      "name": "Reusable Form Fragment",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.reusable-form-fragment.html",
+      "implementationTaxonomy": "visual-component",
+      "backingReference": "base.vc.reusable-form-fragment",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "binding-prefix",
+          "label": "Reusable fields with a stable binding prefix",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-reusable-form-fragment-subject-default-007"
+          ],
+          "fieldId": "shipping-fragment-email",
+          "browserChecks": [
+            "reusable-binding-prefix",
+            "form-control-relationships"
+          ]
+        }
+      ],
+      "documentHash": "sha256:7a849403e72408cc4e9b1cab71063ba387a9f5a8ae6bb5a8983f064e5e90c6bb",
+      "contentHash": "sha256:07e188fafad80ec1380545550141954c07fe9f0b35c90b71352002b2727d020e"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.save-draft",
+      "entryVersion": "1.0.0",
+      "name": "Save Draft",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.save-draft.html",
+      "implementationTaxonomy": "capability-backed",
+      "backingReference": "base.form-draft-action",
+      "providerBacked": false,
+      "limitations": [
+        "The local specimen uses a synthetic sandbox for capability \"forms.drafts\"."
+      ],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Enabled draft or step action",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-save-draft-subject-default-001"
+          ],
+          "fieldId": "draft-value",
+          "browserChecks": [
+            "draft-runtime",
+            "draft-cleanup"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled action",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-save-draft-subject-disabled-002"
+          ],
+          "browserChecks": [
+            "disabled-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:da4456d25930390b625d2eef6109a1ad03c3e492e764b49aaee05430dacae64b",
+      "contentHash": "sha256:a0cb3b92831e6bdedbe60cf9565c0a6546dd5084e92326cea989c39896ee52c4"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.select",
+      "entryVersion": "1.0.0",
+      "name": "Select",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.select.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.select",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "required",
+          "label": "Required select",
+          "state": "required",
+          "subjectNodeIds": [
+            "specimen-select-subject-required-003"
+          ],
+          "fieldId": "select-required",
+          "browserChecks": [
+            "form-control-relationships",
+            "invalid-focus"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled select",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-select-subject-disabled-008"
+          ],
+          "fieldId": "select-disabled",
+          "browserChecks": [
+            "disabled-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:7e4dfbad43fcc5aa68468939e8168ed427f5a23bf32a1d8b254ecc1ca3ce1a70",
+      "contentHash": "sha256:03d5d92a1d98f535f61edccd75cadae592a59379649e64d761989044451eb7ac"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.submit",
+      "entryVersion": "1.0.0",
+      "name": "Submit Button",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.submit.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.submit",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Enabled action",
+          "state": "default",
+          "subjectNodeIds": [
+            "specimen-submit-subject-default-001"
+          ],
+          "browserChecks": [
+            "keyboard-actions"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled action",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-submit-subject-disabled-002"
+          ],
+          "browserChecks": [
+            "disabled-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:c39df7a9d8dac8c5b03434159f1607fa598c871238d1d1cf7018bb0a9a870d87",
+      "contentHash": "sha256:0de4ee476e2b08ac87b7ee720b84a3ff27e63da75024c20580b8bc0c00e7c540"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.switch",
+      "entryVersion": "1.0.0",
+      "name": "Switch",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.switch.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.checkbox",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "required-checked",
+          "label": "Required checked state",
+          "state": "required",
+          "subjectNodeIds": [
+            "specimen-switch-subject-required-001"
+          ],
+          "fieldId": "switch-choice",
+          "browserChecks": [
+            "form-control-relationships",
+            "keyboard-choice"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled state",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-switch-subject-disabled-002"
+          ],
+          "fieldId": "switch-choice-disabled",
+          "browserChecks": [
+            "disabled-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:c55ec618fc1cc63a65ff67a5c26bd448f5e7fb88f8c65f6ac416196e60a7b036",
+      "contentHash": "sha256:daa26e53a9ae1060564ca001b90ccf7cf68902003eb45645dcc28c8d9bf571c1"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.telephone-input",
+      "entryVersion": "1.0.0",
+      "name": "Telephone Input",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.telephone-input.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.input",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "required",
+          "label": "Required control",
+          "state": "required",
+          "subjectNodeIds": [
+            "specimen-telephone-input-subject-required-001"
+          ],
+          "fieldId": "telephone-input-required",
+          "browserChecks": [
+            "form-control-relationships",
+            "invalid-focus"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled control",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-telephone-input-subject-disabled-006"
+          ],
+          "fieldId": "telephone-input-disabled",
+          "browserChecks": [
+            "disabled-state"
+          ]
+        },
+        {
+          "id": "read-only",
+          "label": "Read-only control",
+          "state": "read-only",
+          "subjectNodeIds": [
+            "specimen-telephone-input-subject-readonly-011"
+          ],
+          "fieldId": "telephone-input-readonly",
+          "browserChecks": [
+            "read-only-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:b44927aac09705d416b9537ea7915aab5515f727d07bbf9445421f9a77e02e75",
+      "contentHash": "sha256:a8cbaad3606f85ad55c159836c121e7fcce51748488dcebcd13c619d722e719b"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.terms-and-conditions",
+      "entryVersion": "1.0.0",
+      "name": "Terms and Conditions",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.terms-and-conditions.html",
+      "implementationTaxonomy": "capability-backed",
+      "backingReference": "base.pattern.terms-and-conditions",
+      "providerBacked": false,
+      "limitations": [
+        "The local specimen uses a synthetic sandbox for capability \"forms.versioned-consent\"."
+      ],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Default",
+          "state": "sandbox",
+          "subjectNodeIds": [
+            "specimen-terms-and-conditions-pattern-001"
+          ],
+          "browserChecks": [
+            "versioned-consent",
+            "keyboard-choice"
+          ]
+        }
+      ],
+      "documentHash": "sha256:46f2f2b547c5cac60f5bb68568f5bc597c4911f668407df198d650fdc4314c97",
+      "contentHash": "sha256:47b80bc32c0d828fda967e1465a5e171a16db25ebad16f1b75c2950c1e22e19e"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.text-area",
+      "entryVersion": "1.0.0",
+      "name": "Text Area",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.text-area.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.textarea",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "required",
+          "label": "Required control",
+          "state": "required",
+          "subjectNodeIds": [
+            "specimen-text-area-subject-required-001"
+          ],
+          "fieldId": "text-area-required",
+          "browserChecks": [
+            "form-control-relationships",
+            "invalid-focus"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled control",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-text-area-subject-disabled-006"
+          ],
+          "fieldId": "text-area-disabled",
+          "browserChecks": [
+            "disabled-state"
+          ]
+        },
+        {
+          "id": "read-only",
+          "label": "Read-only control",
+          "state": "read-only",
+          "subjectNodeIds": [
+            "specimen-text-area-subject-readonly-011"
+          ],
+          "fieldId": "text-area-readonly",
+          "browserChecks": [
+            "read-only-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:fa612954d509377934ed7b4bbdff5887f7d83ff1eb134c16ff461264de035a15",
+      "contentHash": "sha256:e2b66f3c21186de034693067c75f74c802f326a104871b1613004e0a33453422"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.text-input",
+      "entryVersion": "1.0.0",
+      "name": "Text Input",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.text-input.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.input",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "required",
+          "label": "Required control",
+          "state": "required",
+          "subjectNodeIds": [
+            "specimen-text-input-subject-required-001"
+          ],
+          "fieldId": "text-input-required",
+          "browserChecks": [
+            "form-control-relationships",
+            "invalid-focus"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled control",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-text-input-subject-disabled-006"
+          ],
+          "fieldId": "text-input-disabled",
+          "browserChecks": [
+            "disabled-state"
+          ]
+        },
+        {
+          "id": "read-only",
+          "label": "Read-only control",
+          "state": "read-only",
+          "subjectNodeIds": [
+            "specimen-text-input-subject-readonly-011"
+          ],
+          "fieldId": "text-input-readonly",
+          "browserChecks": [
+            "read-only-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:a8edabbff67e77d17f13d4f700972a4cd97033118084315ffbf99389edca35c7",
+      "contentHash": "sha256:348406040689ffb239d6fcae118933a851022a345e77bf3f7a3595c2c37d8ccf"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.url-input",
+      "entryVersion": "1.0.0",
+      "name": "URL Input",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.url-input.html",
+      "implementationTaxonomy": "primitive",
+      "backingReference": "base.input",
+      "providerBacked": false,
+      "limitations": [],
+      "scenarios": [
+        {
+          "id": "required",
+          "label": "Required control",
+          "state": "required",
+          "subjectNodeIds": [
+            "specimen-url-input-subject-required-001"
+          ],
+          "fieldId": "url-input-required",
+          "browserChecks": [
+            "form-control-relationships",
+            "invalid-focus"
+          ]
+        },
+        {
+          "id": "disabled",
+          "label": "Disabled control",
+          "state": "disabled",
+          "subjectNodeIds": [
+            "specimen-url-input-subject-disabled-006"
+          ],
+          "fieldId": "url-input-disabled",
+          "browserChecks": [
+            "disabled-state"
+          ]
+        },
+        {
+          "id": "read-only",
+          "label": "Read-only control",
+          "state": "read-only",
+          "subjectNodeIds": [
+            "specimen-url-input-subject-readonly-011"
+          ],
+          "fieldId": "url-input-readonly",
+          "browserChecks": [
+            "read-only-state"
+          ]
+        }
+      ],
+      "documentHash": "sha256:e831ccfb5e20867a9107df60c2ae636d46b4e298e57a0bbf7ec53e1f1b8a36ac",
+      "contentHash": "sha256:60dfdeea95500b33a7ea6a294951919b9c762492b872ece6ae8f56a558037feb"
+    },
+    {
+      "entryId": "creator-signal.site.catalogue.wizard",
+      "entryVersion": "1.0.0",
+      "name": "Wizard",
+      "reference": "docs/features/component-library-form-specimens/creator-signal.site.catalogue.wizard.html",
+      "implementationTaxonomy": "capability-backed",
+      "backingReference": "base.pattern.form-wizard",
+      "providerBacked": false,
+      "limitations": [
+        "The local specimen uses a synthetic sandbox for capability \"forms.drafts\"."
+      ],
+      "scenarios": [
+        {
+          "id": "default",
+          "label": "Default",
+          "state": "sandbox",
+          "subjectNodeIds": [
+            "specimen-wizard-pattern-001"
+          ],
+          "browserChecks": [
+            "wizard-keyboard",
+            "draft-cleanup"
+          ]
+        }
+      ],
+      "documentHash": "sha256:684004ddc5afe9d4075ccac22c7ad3154bcd44c042c3aab1731caf5b66a71e44",
+      "contentHash": "sha256:ff1ec661591fab100f14ce6149fad7c5357e8aa5a1d02c32d0f220d301b8853e"
+    }
+  ],
+  "checksum": {
+    "algorithm": "sha256",
+    "value": "sha256:2ddef0219155f3761e855f97ba8661038abe06e9ec88590afcc06f149cbf65fb"
+  }
+}

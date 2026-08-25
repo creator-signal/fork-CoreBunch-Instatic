@@ -1,12 +1,16 @@
 import type {
+  ComponentLibraryDocumentKind,
   ComponentLibraryEntry,
   ComponentLibraryImplementationType,
   ComponentLibrarySlot,
 } from './schemas'
 
 export type ComponentLibraryPlacementIssueCode =
+  | 'document-rejects-entry'
+  | 'document-entry-limit'
   | 'parent-required'
   | 'parent-ungoverned'
+  | 'parent-is-leaf'
   | 'parent-rejects-child'
   | 'slot-rejects-entry'
   | 'slot-rejects-implementation'
@@ -21,6 +25,10 @@ export type ComponentLibraryPlacementResult =
     }
 
 export interface ComponentLibraryPlacementContext {
+  /** Editable document receiving the component. */
+  documentKind?: ComponentLibraryDocumentKind
+  /** Current instances of this entry in the document, excluding a moved node. */
+  existingDocumentEntryCount?: number
   /** Governed parent entry, or the slot owner's entry for named slots. */
   parentEntry?: ComponentLibraryEntry
   /** The page-tree root is the only intentionally ungoverned parent. */
@@ -40,6 +48,30 @@ export function resolveComponentLibraryPlacement(
   entry: ComponentLibraryEntry,
   context: ComponentLibraryPlacementContext,
 ): ComponentLibraryPlacementResult {
+  const allowedDocumentKinds = entry.constraints.allowedDocumentKinds
+  if (
+    allowedDocumentKinds !== undefined &&
+    (!context.documentKind || !allowedDocumentKinds.includes(context.documentKind))
+  ) {
+    return denied(
+      'document-rejects-entry',
+      allowedDocumentKinds.length === 1 && allowedDocumentKinds[0] === 'template'
+        ? `${entry.name} is shared site chrome and can only be placed in a template.`
+        : `${entry.name} can only be placed in ${formatDocumentKinds(allowedDocumentKinds)}.`,
+    )
+  }
+
+  const maxInstances = entry.constraints.maxInstancesPerDocument
+  if (
+    maxInstances !== undefined &&
+    (context.existingDocumentEntryCount ?? 0) >= maxInstances
+  ) {
+    return denied(
+      'document-entry-limit',
+      `${entry.name} allows at most ${maxInstances} instance${maxInstances === 1 ? '' : 's'} per ${context.documentKind ?? 'document'}.`,
+    )
+  }
+
   const allowedParents = entry.constraints.allowedParentEntryIds
   if (
     allowedParents !== undefined &&
@@ -48,6 +80,13 @@ export function resolveComponentLibraryPlacement(
     return denied(
       'parent-required',
       `${entry.name} must be placed inside ${formatEntryIds(allowedParents)}.`,
+    )
+  }
+
+  if (context.parentEntry?.composition === 'leaf') {
+    return denied(
+      'parent-is-leaf',
+      `${context.parentEntry.name} owns its complete content and cannot contain child components.`,
     )
   }
 
@@ -95,6 +134,13 @@ export function resolveComponentLibraryPlacement(
   }
 
   return { allowed: true }
+}
+
+function formatDocumentKinds(kinds: readonly ComponentLibraryDocumentKind[]): string {
+  if (kinds.length === 0) return 'an approved document'
+  const labels = kinds.map((kind) => kind === 'template' ? 'templates' : 'pages')
+  if (labels.length === 1) return labels[0]!
+  return `${labels.slice(0, -1).join(', ')} or ${labels.at(-1)}`
 }
 
 function denied(

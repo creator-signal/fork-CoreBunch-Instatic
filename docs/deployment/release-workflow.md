@@ -30,20 +30,21 @@ ghcr.io/creator-signal/instatic-media-edge:latest
 Release flow:
 
 1. Update `package.json` and `CHANGELOG.md` to the new version.
-2. Merge the release change through a pull request to protected `creator-signal/main`.
-3. Tag that exact `creator-signal/main` commit, for example `v0.0.24`.
-4. Run the Bun build, test, and lint gates.
-5. Build each image once and push only its `sha-<commit>` candidate tag.
-6. Scan both exact candidate digests for HIGH and CRITICAL OS/library findings.
-7. Apply the immutable semver tag to those accepted digests.
-8. Resolve and scan both published digests again in a separate job.
-9. Update the minor and `latest` aliases only after that independent scan passes.
-10. Create the GitHub Release and upload the release bundle and site plugin.
+2. Merge the release change through a pull request to protected `creator-signal/develop`.
+3. Promote the accepted candidate through a pull request from `creator-signal/develop` to protected `creator-signal/main`.
+4. Tag that exact `creator-signal/main` commit, for example `v0.0.24`.
+5. Run the Bun build, test, and lint gates.
+6. Build each image once and push only its `sha-<commit>` candidate tag.
+7. Scan both exact candidate digests for HIGH and CRITICAL OS/library findings.
+8. Apply the immutable semver tag to those accepted digests.
+9. Resolve and scan both published digests again in a separate job.
+10. Update the minor and `latest` aliases only after that independent scan passes.
+11. Create the GitHub Release and upload the release bundle and site plugin.
 
 ## Tag a release
 
-Create a tag only after the version change is merged and exact
-`creator-signal/main` CI passes:
+Create a tag only after the version change is promoted from
+`creator-signal/develop` and exact `creator-signal/main` CI passes:
 
 ```sh
 git tag v0.0.24

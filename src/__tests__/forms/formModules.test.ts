@@ -75,6 +75,21 @@ describe('base form primitive modules', () => {
     expect(output.html).toContain('<input type="text" name="company"')
     expect(output.html).toContain('<input name="email">')
     expect(output.html).toContain('</form>')
+    expect(output.js).toContain('__instaticFormRuntimeLoaded')
+    expect(output.js).toContain('__instaticFormDraftRuntimeLoaded')
+  })
+
+  it('keeps the CMS form module-JS body invariant across draft modes', () => {
+    const ordinary = FormModule.render({
+      ...FormModule.defaults,
+      draftMode: 'none',
+    }, []).js
+    const recoverable = FormModule.render({
+      ...FormModule.defaults,
+      draftMode: 'persistent',
+    }, []).js
+
+    expect(ordinary).toBe(recoverable)
   })
 
   it('renders labels and text-like controls as semantic HTML', () => {

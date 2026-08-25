@@ -29,3 +29,38 @@ describe('pageFromRow template target', () => {
     expect(page.template).toBeUndefined()
   })
 })
+
+describe('pageFromRow SEO metadata', () => {
+  it('round-trips the complete page SEO contract', () => {
+    const seo = {
+      title: 'A useful title',
+      description: 'A useful description.',
+      canonicalUrl: 'https://example.test/useful',
+      language: 'en-AU',
+      robots: { index: true, follow: true, archive: true },
+      openGraph: { title: 'Social title', type: 'article' as const },
+      twitter: { card: 'summary' as const, title: 'Social title' },
+    }
+    const cells = pageToCells({
+      ...pageFromRow(baseRow({ title: 'T', slug: 'useful' })),
+      seo,
+    })
+
+    expect(JSON.parse(String(cells.seo))).toEqual(seo)
+    expect(cells.seoTitle).toBe('A useful title')
+    expect(cells.seoDescription).toBe('A useful description.')
+    expect(pageFromRow(baseRow(cells)).seo).toEqual(seo)
+  })
+
+  it('reads legacy title and description cells when full metadata is absent', () => {
+    expect(pageFromRow(baseRow({
+      title: 'T',
+      slug: 'legacy',
+      seoTitle: 'Legacy title',
+      seoDescription: 'Legacy description.',
+    })).seo).toEqual({
+      title: 'Legacy title',
+      description: 'Legacy description.',
+    })
+  })
+})

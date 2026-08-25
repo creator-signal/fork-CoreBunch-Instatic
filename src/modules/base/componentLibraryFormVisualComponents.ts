@@ -58,6 +58,7 @@ export const BUILT_IN_FORM_VISUAL_COMPONENT_LIBRARY_ENTRIES:
 readonly ComponentLibraryEntry[] = [
   visualComponentEntry({
     id: 'base.reusable-form-fragment',
+    container: true,
     name: 'Reusable Form Fragment',
     description: 'A centrally governed form-field fragment with an explicit binding prefix.',
     category: 'Forms',

@@ -145,6 +145,7 @@ Three categories, three voices:
 | [features/visual-components.md](features/visual-components.md)   | VCs, slots, params, instantiation, recursion guard                   |
 | [features/component-library.md](features/component-library.md)   | Governed catalogue metadata, registry, search and dependency health |
 | [features/plain-text-component.md](features/plain-text-component.md) | Plain Text governed properties, sample pages and isolated acceptance |
+| [features/rich-text-consolidation.md](features/rich-text-consolidation.md) | Lossless adjacent-prose conversion into the governed Rich Text Section |
 | [features/content-storage.md](features/content-storage.md)       | `data_tables` + `data_rows` — the universal content store           |
 | [features/content-workspace.md](features/content-workspace.md)   | Content workspace UI: collections, entries, body editor, settings panel |
 | [features/data-workspace.md](features/data-workspace.md)         | Data workspace UI: DataInspector, field management, DataGrid        |
@@ -188,8 +189,9 @@ Three categories, three voices:
 | [reference/editor-history.md](reference/editor-history.md)       | Patch-based undo/redo history: `HistoryEntry`, `mutate*` helpers, coalescing |
 | [reference/react-compiler.md](reference/react-compiler.md)       | React Compiler memoization rule, three exceptions, enforcement gates |
 | [reference/use-async-resource.md](reference/use-async-resource.md) | `useAsyncResource` — canonical single-resource async load hook; when to use and when not to |
-| [reference/repository-branches.md](reference/repository-branches.md) | Creator Signal integration, upstream comparison, and sync workflow |
+| [reference/repository-branches.md](reference/repository-branches.md) | Creator Signal integration/release branches, upstream mirror, and sync workflow |
 | [reference/claude-mcp.md](reference/claude-mcp.md)               | Connect Claude Code or a Claude custom connector to Instatic over MCP |
+| [reference/mcp-end-user-testing.md](reference/mcp-end-user-testing.md) | Safely test authentication, least-privilege tools, draft edits, cleanup and revocation from any MCP client |
 
 ### Operations
 

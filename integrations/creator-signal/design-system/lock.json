@@ -1,0 +1,131 @@
+{
+  "schema": "creator-signal-design-system-lock/v1",
+  "source": {
+    "repository": "https://github.com/creator-signal/sales-pulse.git",
+    "revision": "1afc33bd5a8037bb2ec79fb512423268b9b771bb",
+    "package": "@creator-signal/design-system",
+    "packageVersion": "0.1.0",
+    "scopes": [
+      "packages/design-system",
+      "packages/brand-assets",
+      "ref/design/brand"
+    ]
+  },
+  "files": [
+    {
+      "source": "packages/design-system/generated/tokens.css",
+      "target": "assets/design-system/tokens.css",
+      "sha256": "432f60617da72148bac0390cc072ae5b54f07efb8e184c885cee9e4f8583880a"
+    },
+    {
+      "source": "packages/design-system/generated/typography.css",
+      "target": "assets/design-system/typography.css",
+      "sha256": "9764c4390c16b74c0072b917fec891613aaa7de00532d5420d8f4545e6ffa5a6"
+    },
+    {
+      "source": "packages/design-system/generated/theme-runtime.css",
+      "target": "assets/design-system/theme-runtime.css",
+      "sha256": "93c213634aa26beeed669dcffdcd222c44ecd1494ed8587c915379187f23150e"
+    },
+    {
+      "source": "packages/design-system/generated/theme-bootstrap.js",
+      "target": "assets/design-system/theme-bootstrap.js",
+      "sha256": "fa6b079c0489828e774f2f118f5e146e329d7e6406f53ac1c43cd5ab771de24a"
+    },
+    {
+      "source": "packages/design-system/theme/runtime.mjs",
+      "target": "assets/design-system/theme-runtime.js",
+      "sha256": "9bd54c02648dc854a9285e034350d62da2473a2a2d63ec6ce07fbffff22ab5eb"
+    },
+    {
+      "source": "packages/design-system/generated/adapters.json",
+      "target": "assets/design-system/adapters.json",
+      "sha256": "7c25aeb3dc0be963a7b1c6d177e195eff98d44840304733d2df6dec9ff02e296"
+    },
+    {
+      "source": "packages/design-system/generated/token-metadata.json",
+      "target": "assets/design-system/metadata.json",
+      "sha256": "6d4a9e979abcf56083e6cc075291f0b56dd453d72c8ea70df15e62701abb32d1"
+    },
+    {
+      "source": "packages/design-system/generated/fonts/caveat-latin-ext-wght-normal.woff2",
+      "target": "assets/design-system/fonts/caveat-latin-ext-wght-normal.woff2",
+      "sha256": "f626b95c1efa95cf6b7c9b043d3bbe8862b6abbe5f55a082102f33f7de2fd4f9"
+    },
+    {
+      "source": "packages/design-system/generated/fonts/caveat-latin-wght-normal.woff2",
+      "target": "assets/design-system/fonts/caveat-latin-wght-normal.woff2",
+      "sha256": "891951df5e8b5b0f0bc760d31375405e795c666b5add70437de12d4a6482b33f"
+    },
+    {
+      "source": "packages/design-system/generated/fonts/fredoka-latin-ext-wght-normal.woff2",
+      "target": "assets/design-system/fonts/fredoka-latin-ext-wght-normal.woff2",
+      "sha256": "18a1723c878c0d8acc2e45a108fd62fbb976e408337804afa2908982fac13e2a"
+    },
+    {
+      "source": "packages/design-system/generated/fonts/fredoka-latin-wght-normal.woff2",
+      "target": "assets/design-system/fonts/fredoka-latin-wght-normal.woff2",
+      "sha256": "99d6c78e043710d4f83ed90716779798b7b04eb690f73e0ad0e8f32d1f0e98c2"
+    },
+    {
+      "source": "packages/design-system/generated/fonts/mulish-latin-ext-wght-normal.woff2",
+      "target": "assets/design-system/fonts/mulish-latin-ext-wght-normal.woff2",
+      "sha256": "e1ccc8579a0437969464ba8bb1bb5e423306fa16746521d1f05040243b9a7a58"
+    },
+    {
+      "source": "packages/design-system/generated/fonts/mulish-latin-wght-normal.woff2",
+      "target": "assets/design-system/fonts/mulish-latin-wght-normal.woff2",
+      "sha256": "8d1d33d6beea5a722b8f336d79c61c07405949457e37b5e65454c72dc10aba1a"
+    },
+    {
+      "source": "ref/design/brand/generated/delivery/creator-signal-mark/light-background.svg",
+      "target": "assets/design-system/brand/creator-signal-mark-light.svg",
+      "sha256": "e383f4c96d27f892fd71626e93167caf5738344f00d3c237521fb76fa16d297d"
+    },
+    {
+      "source": "ref/design/brand/generated/delivery/creator-signal-mark/reversed.svg",
+      "target": "assets/design-system/brand/creator-signal-mark-reversed.svg",
+      "sha256": "afee5daa3da3f330eee29e1b2aabdfbe087241b2ffdb78a25216e2571a92b7f1"
+    },
+    {
+      "source": "ref/design/brand/generated/social/creator-signal-1200x630.png",
+      "target": "assets/design-system/brand/creator-signal-social.png",
+      "sha256": "b1a8ce920f22ca418cf16aa5468485daa7bec85ec12284c5fd309bd94f5a6544"
+    },
+    {
+      "source": "ref/design/brand/generated/social/sales-pulse-1200x630.png",
+      "target": "assets/design-system/brand/sales-pulse-social.png",
+      "sha256": "826db46f631e6f473889cd7f61327cac266dae1539fe45e92ac775c86a679e55"
+    },
+    {
+      "source": "ref/design/brand/generated/favicon/favicon.ico",
+      "target": "assets/design-system/brand/favicon.ico",
+      "sha256": "aead5c490f5a79161665cbd86c2fbfa05ed86b669fcd98f97ffaeb9f030eab66"
+    },
+    {
+      "source": "ref/design/brand/generated/web/apple-touch-icon-180.png",
+      "target": "assets/design-system/brand/apple-touch-icon-180.png",
+      "sha256": "355fdf75b74d2c72f09b05b5e9943b42247532d080e7c8d137dd8a22f46c4bcd"
+    },
+    {
+      "source": "ref/design/brand/generated/web/pwa-192.png",
+      "target": "assets/design-system/brand/pwa-192.png",
+      "sha256": "4b39ab85d5899a1ba2f6d14e3846f0d09a1d1247e073f3dbb5b7e1e6b4675a84"
+    },
+    {
+      "source": "ref/design/brand/generated/web/pwa-512.png",
+      "target": "assets/design-system/brand/pwa-512.png",
+      "sha256": "9954ad344692e844e50dc39f8220038f3cdcfb44ec01d18aa4ee1011f196bc07"
+    },
+    {
+      "source": "ref/design/brand/generated/web/pwa-maskable-512.png",
+      "target": "assets/design-system/brand/pwa-maskable-512.png",
+      "sha256": "7b15a9dd7b0435bf4362d9afd7ed5b866f3976fe93732b837e05e9f425e932ac"
+    },
+    {
+      "source": "ref/design/brand/generated/delivery/creator-signal-mark/light-background.svg",
+      "target": "icon.svg",
+      "sha256": "e383f4c96d27f892fd71626e93167caf5738344f00d3c237521fb76fa16d297d"
+    }
+  ]
+}

@@ -3,14 +3,19 @@ export {
   ComponentLibraryAccessibilityCategorySchema,
   ComponentLibraryAccessibilityCheckSchema,
   ComponentLibraryAccessibilityContractSchema,
+  ComponentLibraryAccessibilityNotApplicableSchema,
   ComponentLibraryAccessibilityRuleSchema,
+  COMPONENT_LIBRARY_ACCESSIBILITY_RULES,
   ComponentLibraryConstraintsSchema,
+  ComponentLibraryCompositionSchema,
+  ComponentLibraryDocumentKindSchema,
   ComponentLibraryDependencyHealthSchema,
   ComponentLibraryDependencyIssueSchema,
   ComponentLibraryDependencyStateSchema,
   ComponentLibraryDocumentationSchema,
   ComponentLibraryEntrySchema,
   ComponentLibraryFieldSchema,
+  ComponentLibraryRepeaterItemFieldSchema,
   ComponentLibraryImplementationSchema,
   ComponentLibraryImplementationTypeSchema,
   ComponentLibraryPreviewSchema,
@@ -25,14 +30,18 @@ export type {
   ComponentLibraryAccessibilityCategory,
   ComponentLibraryAccessibilityCheck,
   ComponentLibraryAccessibilityContract,
+  ComponentLibraryAccessibilityNotApplicable,
   ComponentLibraryAccessibilityRule,
   ComponentLibraryAvailability,
   ComponentLibraryConstraints,
+  ComponentLibraryComposition,
+  ComponentLibraryDocumentKind,
   ComponentLibraryDependencyHealth,
   ComponentLibraryDependencyIssue,
   ComponentLibraryDependencyState,
   ComponentLibraryEntry,
   ComponentLibraryField,
+  ComponentLibraryRepeaterItemField,
   ComponentLibraryImplementation,
   ComponentLibraryImplementationType,
   ComponentLibraryRequirements,
@@ -95,6 +104,16 @@ export {
   findComponentLibraryConversionCandidates,
 } from './conversion'
 
+export {
+  analyseCoherentRichTextConversion,
+  applyCoherentRichTextConversion,
+} from './coherentRichTextConversion'
+
+export type {
+  CoherentRichTextConversionAnalysis,
+  CoherentRichTextConversionCandidate,
+} from './coherentRichTextConversion'
+
 export type {
   ComponentLibraryConversionAnalysis,
   ComponentLibraryConversionCandidate,
@@ -109,6 +128,18 @@ export {
   planComponentLibraryMigration,
   resolveComponentLibraryInstanceStatus,
 } from './migration'
+
+export {
+  ComponentLibraryTreeMigrationRegistry,
+  componentLibraryTreeMigrationRegistry,
+  migrateComponentLibraryTrees,
+} from './treeMigration'
+
+export type {
+  ComponentLibraryTreeMigration,
+  ComponentLibraryTreeMigrationContext,
+  ComponentLibraryTreeMigrationReport,
+} from './treeMigration'
 
 export type {
   ComponentLibraryInstanceStatus,
@@ -126,6 +157,22 @@ export {
   ComponentLibraryPatternRegistry,
   componentLibraryPatternRegistry,
 } from './patterns'
+
+export {
+  isManagedGovernedPatternNode,
+  isValidGovernedPatternBoundary,
+} from './patternGovernance'
+
+export {
+  PublicAuthoringPolicyError,
+  analysePublicAuthoringPage,
+  analysePublicAuthoringPolicy,
+  assertPublicAuthoringPage,
+  assertPublicAuthoringPolicyPublishable,
+  isProtectedPublicAuthoringVisualComponent,
+} from './publicAuthoring'
+
+export type { PublicAuthoringDiagnostic } from './publicAuthoringTypes'
 
 export type {
   ComponentLibraryPatternDefinition,

@@ -19,14 +19,13 @@
 import { nanoid } from 'nanoid'
 import type { SiteDocument } from '@core/page-tree'
 import type { PublishedPageRuntimeAssets } from '@core/site-runtime'
-import type { PublishedRuntimePackageImportmap, SiteCssBundle } from '@core/publisher'
+import type { PublishedRuntimePackageImportmap } from '@core/publisher'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
-import { registry } from '@core/module-engine'
 import {
   assertComponentLibraryAccessibilityPublishable,
+  assertPublicAuthoringPolicyPublishable,
   componentLibraryRegistry,
 } from '@core/component-library'
-import { isTemplatePage, resolveNotFoundTemplate } from '@core/templates'
 import { searchIndexService } from '@core/search'
 import type { DbClient } from '../db/client'
 import { nextDataRowVersionNumber } from '../repositories/data'
@@ -43,18 +42,7 @@ import {
   buildRuntimePackageImportmap,
   serializeImportmapForCsp,
 } from './runtime/packageImportmap'
-import { renderPublishedNotFound, renderPublishedSnapshot } from './publicRenderer'
-import { prefetchMediaAssets } from './mediaPrefetch'
-import { applyPublishedHtmlPipeline } from './publishedHtmlPipeline'
-import {
-  NOT_FOUND_ARTEFACT_URL_PATH,
-  prepareInactiveSlot,
-  swapSlot,
-  writeArtefact,
-  writeStaticAsset,
-} from './staticArtefact'
-import { buildPublishedSiteCssBundle } from './siteCssBundle'
-import { bakePublishedDataRowArtefacts } from './bakeDataRows'
+import { bakePublishedSiteArtifacts } from './bakeSiteArtifacts'
 import { bumpPublishVersion, getPublishVersion, withPublishLock } from './publishState'
 import { runPublishFlush } from './publishFlush'
 
@@ -111,6 +99,8 @@ async function publishDraftSiteLocked(
   // paths under that same lock, so reading outside the transaction is stable.
   const site = await getDraftSiteDocument(db)
   if (!site) throw new Error('draft site not found')
+
+  assertPublicAuthoringPolicyPublishable(site, componentLibraryRegistry)
 
   assertComponentLibraryAccessibilityPublishable(
     site,
@@ -224,92 +214,14 @@ async function publishDraftSiteLocked(
   const nextPublishVersion = getPublishVersion() + 1
   if (uploadsDir) {
     try {
-      const { slot, slotDir } = await prepareInactiveSlot(uploadsDir)
-
-      // Every distinct static asset referenced by ANY baked artefact.
-      // Content-hashed filenames dedupe identical bytes across pages to a
-      // single write. The page-invariant CSS trio (reset/framework/style) is
-      // computed ONCE per publish via the version-keyed memo — the all-pages
-      // walk no longer repeats per page. Only `userStyles` is page-scoped.
-      const assetsByPath = new Map<string, Uint8Array>()
-      const encoder = new TextEncoder()
-      const collectCssFiles = (cssBundle: SiteCssBundle): void => {
-        for (const file of [cssBundle.reset, cssBundle.framework, cssBundle.style, cssBundle.userStyles]) {
-          if (file.content.length === 0) continue
-          const publicPath = `/_instatic/css/${file.filename}`
-          if (!assetsByPath.has(publicPath)) assetsByPath.set(publicPath, encoder.encode(file.content))
-        }
-      }
-      for (const snapshot of snapshots) {
-        const page = snapshot.site.pages.find((p) => p.id === snapshot.pageRowId)
-        if (!page || isTemplatePage(page)) continue // template pages only ever wrap; never baked at their own slug
-        const mediaAssets = await prefetchMediaAssets(page, snapshot.site, registry, db)
-        collectCssFiles(buildPublishedSiteCssBundle(snapshot.site, registry, page, nextPublishVersion, { mediaAssets }))
-      }
-      for (const asset of runtimeAssetFiles) {
-        if (!assetsByPath.has(asset.publicPath)) assetsByPath.set(asset.publicPath, asset.bytes)
-      }
-
-      // The 404 page: bake the notFound template (wrapped in its everywhere
-      // layout chain) to `404.html`. Baked FIRST so a literal page with slug
-      // `404` — if anyone creates one — overwrites it below and stays
-      // authoritative for both `/404` and the static-export error page.
-      const notFoundPage = resolveNotFoundTemplate(publishedSite)
-      const notFoundSnapshot = notFoundPage
-        ? snapshots.find((s) => s.pageRowId === notFoundPage.id)
-        : undefined
-      if (notFoundSnapshot) {
-        try {
-          const rendered = await renderPublishedNotFound(notFoundSnapshot, {
-            db,
-            url: new URL(`http://localhost${NOT_FOUND_ARTEFACT_URL_PATH}`),
-            publishVersion: nextPublishVersion,
-          })
-          if (rendered) {
-            const html = await applyPublishedHtmlPipeline(rendered, db)
-            await writeArtefact(slotDir, NOT_FOUND_ARTEFACT_URL_PATH, html)
-            collectCssFiles(rendered.cssBundle)
-          }
-        } catch (err) {
-          console.error('[publish:site] failed to bake the 404 artefact (falls through to live renderer):', err)
-        }
-      }
-
-      // HTML artefacts (or hole shells) for every page. A page that fails to
-      // render (e.g. a VC ref cycle) is skipped and falls through to the live
-      // renderer at request time — one bad page never aborts the whole bake.
-      for (const snapshot of snapshots) {
-        const page = snapshot.site.pages.find((p) => p.id === snapshot.pageRowId)
-        if (!page || isTemplatePage(page)) continue // template pages only ever wrap; never baked at their own slug
-        const urlPath = page.slug === 'index' ? '/' : `/${page.slug}`
-        try {
-          const syntheticUrl = new URL(`http://localhost${urlPath}`)
-          const rendered = await renderPublishedSnapshot(snapshot, {
-            db,
-            url: syntheticUrl,
-            publishVersion: nextPublishVersion,
-          })
-          const html = await applyPublishedHtmlPipeline(rendered, db)
-          await writeArtefact(slotDir, urlPath, html)
-          // The render's own bundle covers template-composed hashes the raw
-          // page bundle above cannot (the merged page's userStyles).
-          collectCssFiles(rendered.cssBundle)
-        } catch (err) {
-          console.error('[publish:site] failed to bake artefact for', urlPath, '(falls through to live renderer):', err)
-        }
-      }
-
-      // Data-row artefacts: every published row whose table has an entry
-      // template bakes into the same slot. Without this the slot swap would
-      // strand every previously-baked row artefact in the inactive slot and
-      // ALL row routes would fall to the live renderer after a full publish.
-      const rowBake = await bakePublishedDataRowArtefacts(db, slotDir, nextPublishVersion)
-      for (const cssBundle of rowBake.cssBundles) collectCssFiles(cssBundle)
-
-      for (const [publicPath, bytes] of assetsByPath) {
-        await writeStaticAsset(slotDir, publicPath, bytes)
-      }
-      await swapSlot(uploadsDir, slot)
+      await bakePublishedSiteArtifacts({
+        db,
+        uploadsDir,
+        publishedSite,
+        snapshots,
+        runtimeAssetFiles,
+        publishVersion: nextPublishVersion,
+      })
     } catch (err) {
       console.error('[publish:site] static artefact write failed (live renderer remains active):', err)
     }

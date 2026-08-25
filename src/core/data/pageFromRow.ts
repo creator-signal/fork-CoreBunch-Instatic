@@ -19,7 +19,7 @@
  */
 
 import type { Page, PageNode, PageTemplateConfig } from '@core/page-tree'
-import { parsePageTemplate } from '@core/page-tree'
+import { parsePageSeo, parsePageTemplate } from '@core/page-tree'
 import type { DataRow, DataRowCells } from '@core/data/schemas'
 
 // ---------------------------------------------------------------------------
@@ -55,6 +55,10 @@ export function pageFromRow(row: DataRow): Page {
 
   // Template reconstruction
   const template = readTemplateFromCells(cells)
+  const seo = parsePageSeo(readSeoCell(cells.seo)) ?? parsePageSeo({
+    title: cells.seoTitle,
+    description: cells.seoDescription,
+  })
 
   return {
     id: row.id,
@@ -62,10 +66,20 @@ export function pageFromRow(row: DataRow): Page {
     title,
     nodes,
     rootNodeId,
+    ...(seo ? { seo } : {}),
     ...(template !== null ? { template } : {}),
     ownerUserId: row.authorUserId ?? null,
     createdByUserId: row.createdByUserId ?? null,
     updatedByUserId: row.updatedByUserId ?? null,
+  }
+}
+
+function readSeoCell(value: unknown): unknown {
+  if (typeof value !== 'string') return value
+  try {
+    return JSON.parse(value)
+  } catch {
+    return undefined
   }
 }
 
@@ -103,6 +117,12 @@ export function pageToCells(page: Page): DataRowCells {
     cells.templateEnabled = true
     cells.templateTarget = page.template.target
     cells.templatePriority = page.template.priority
+  }
+
+  if (page.seo) {
+    cells.seo = JSON.stringify(page.seo)
+    if (page.seo.title !== undefined) cells.seoTitle = page.seo.title
+    if (page.seo.description !== undefined) cells.seoDescription = page.seo.description
   }
 
   return cells

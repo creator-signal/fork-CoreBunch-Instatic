@@ -4,7 +4,7 @@ Instatic is pre-1.0 and not yet recommended for hostile multi-user environments 
 
 ## Supported Versions
 
-Security fixes target the latest `main` branch and the latest tagged release. Before 1.0, older tags are not maintained as long-term supported branches.
+Security fixes target `creator-signal/develop`, are promoted to `creator-signal/main`, and ship in the latest tagged release. Before 1.0, older tags are not maintained as long-term supported branches.
 
 ## Reporting A Vulnerability
 

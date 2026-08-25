@@ -1,46 +1,75 @@
-import { compilePackPages, definePack, type PagePackEntry } from '@core/plugin-sdk'
-import { creatorSignalCss } from './design-system'
-import { heroComponent } from './hero-component'
+import {
+  compilePackPages,
+  definePack,
+  escapeHtml,
+  type PagePackEntry,
+} from '@core/plugin-sdk'
+import { componentLibraryPatternRegistry } from '@core/component-library'
+import type { Page, PageSeo } from '@core/page-tree'
+import { creatorSignalComponentLibraryEntries } from '../component-library'
+import { creatorSignalBrandAssets } from '../design-system/contract'
+import { consentBanner, sectionIntro, siteFooter, siteHeader } from '../modules/site-components'
+import {
+  creatorSignalPatternForRole,
+  creatorSignalPublicAuthoringPolicy,
+} from '../public-authoring-contract'
+import { creatorSignalRenderProfile } from './design-system'
+import { heroComponent, heroParamIds } from './hero-component'
+import { twoColumnComponent, twoColumnSlotIds } from './two-column-component'
 
-const header = `<header class="site-header">
-  <a class="site-brand" href="/" aria-label="Creator Signal home">
-    <span class="brand-signal" aria-hidden="true"><i></i><i></i><i></i></span>
-    <span><strong>Creator Signal</strong><small>Clearer signals for independent creative businesses.</small></span>
-  </a>
-  <nav aria-label="Main navigation">
-    <a href="/products">Products</a>
-    <a href="/features">Features</a>
-    <a href="/pricing">Pricing</a>
-    <a href="/contact">Contact</a>
-    <a class="button button-primary" href="https://salespulse.creatorsignal.me">Sign in</a>
-  </nav>
-</header>`
+interface ModuleBlock {
+  kind: 'module'
+  entryId: string
+  moduleId: string
+  props: Record<string, unknown>
+}
 
-const footer = `<footer class="site-footer">
-  <div class="footer-meta">
-    <div><strong>Creator Signal</strong><p>Clearer signals for independent creative businesses.</p></div>
-    <small>© 2026 Creator Signal</small>
-  </div>
-  <nav aria-label="Footer navigation">
-    <a href="/products">Products</a>
-    <a href="/products/sales-pulse">Sales Pulse</a>
-    <a href="/features">Features</a>
-    <a href="/pricing">Pricing</a>
-    <a href="/contact">Contact</a>
-    <a href="/legal/privacy">Privacy</a>
-    <a href="/legal/terms">Terms</a>
-    <a href="https://status.creatorsignal.me">Status</a>
-  </nav>
-</footer>
-<aside class="consent" data-consent-banner aria-label="Privacy choices">
-  <div><strong>Your privacy choices</strong><p>Aggregate traffic measurement is enabled when configured. Optional journey analytics only runs with your permission.</p></div>
-  <div class="consent-actions">
-    <button class="button button-secondary" data-analytics-choice="denied">Essential only</button>
-    <button class="button button-primary" data-analytics-choice="granted">Allow optional analytics</button>
-  </div>
-</aside>`
+interface HeroBlock {
+  kind: 'hero'
+  entryId: 'creator-signal.site.hero'
+  props: Record<string, unknown>
+}
 
-const chrome = (main: string) => `${header}<main>${main}</main>${footer}`
+type LeafBlock = ModuleBlock | HeroBlock
+
+interface TwoColumnBlock {
+  kind: 'two-column'
+  entryId: 'creator-signal.site.two-column-layout'
+  componentId: typeof twoColumnComponent.id
+  slots: Record<(typeof twoColumnSlotIds)[keyof typeof twoColumnSlotIds], LeafBlock[]>
+}
+
+type PageBlock = LeafBlock | TwoColumnBlock
+
+interface StarterPage {
+  id: string
+  slug: string
+  title: string
+  description: string
+  patternId: string
+  blocks: PageBlock[]
+}
+
+type OwnedPagePatternRole =
+  | 'home-v2'
+  | 'early-access'
+  | 'content-page'
+  | 'product-page'
+  | 'pricing'
+  | 'features'
+  | 'contact'
+  | 'feedback'
+  | 'legal-trust'
+  | 'article-content'
+  | 'not-found-state'
+
+function pagePatternId(role: OwnedPagePatternRole): string {
+  const mapping = creatorSignalPatternForRole(role)
+  if (mapping.ownership !== 'pattern') {
+    throw new Error(`[creator-signal] Page pattern role "${role}" is not pattern-owned.`)
+  }
+  return mapping.patternId
+}
 
 const legalRelease = {
   version: '2026-08-02',
@@ -48,93 +77,339 @@ const legalRelease = {
   operator: 'Creator Signal is operated by INSIGHT VISION PTY LTD (ACN 601 335 460), Australia.',
 }
 
-const legalReleaseParagraphs = () => [
+const paragraphHtml = (paragraphs: readonly string[]): string =>
+  paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('')
+
+const legalReleaseParagraphs = (): string[] => [
   `Version ${legalRelease.version}. Effective ${legalRelease.effectiveDate}.`,
   legalRelease.operator,
 ]
 
-const signalVisual = `<div class="signal-visual" aria-hidden="true"><span></span><span></span><span></span><span></span></div>`
+const moduleBlock = (
+  name: string,
+  props: Record<string, unknown>,
+): ModuleBlock => ({
+  kind: 'module',
+  entryId: `creator-signal.site.${name}`,
+  moduleId: `creator-signal.site.${name}`,
+  props,
+})
 
 const hero = (
-  label: string,
-  title: string,
+  eyebrow: string,
+  heading: string,
   body: string,
-  href: string,
-  action: string,
-) => `<section class="hero-section">
-  <div class="hero-copy">
-    <p class="eyebrow">${label}</p>
-    <h1>${title}</h1>
-    <p class="hero-body">${body}</p>
-    <div class="actions"><a class="button button-primary" href="${href}">${action}</a></div>
-  </div>
-  <div class="hero-art" aria-label="Creator Signal visual">${signalVisual}</div>
-</section>`
+  actionUrl: string,
+  actionLabel: string,
+  artwork = '',
+): HeroBlock => ({
+  kind: 'hero',
+  entryId: 'creator-signal.site.hero',
+  props: {
+    [heroParamIds.eyebrow]: eyebrow,
+    [heroParamIds.heading]: heading,
+    [heroParamIds.body]: body,
+    [heroParamIds.actionLabel]: actionLabel,
+    [heroParamIds.actionUrl]: actionUrl,
+    [heroParamIds.artwork]: artwork,
+  },
+})
 
 const features = (
-  label: string,
+  eyebrow: string,
   heading: string,
-  intro: string,
-  cards: Array<[string, string, string]>,
-) => `<section class="content-section">
-  <div class="section-intro"><p class="eyebrow">${label}</p><h2>${heading}</h2><p>${intro}</p></div>
-  <div class="feature-grid">${cards.map(([number, title, body]) =>
-    `<article class="feature-card"><span class="feature-number">${number}</span><h3>${title}</h3><p>${body}</p></article>`,
-  ).join('')}</div>
-</section>`
+  introduction: string,
+  items: Array<[string, string, string]>,
+  sectionId = 'features',
+  tone: 'default' | 'signature' = 'default',
+): ModuleBlock => moduleBlock('feature-grid', {
+  eyebrow,
+  heading,
+  introduction,
+  sectionId,
+  tone,
+  items: items.map(([marker, itemHeading, body]) => ({
+    marker,
+    heading: itemHeading,
+    body,
+  })),
+})
 
-const cta = (
-  label: string,
+const campaignHero = (props: Record<string, unknown>): ModuleBlock =>
+  moduleBlock('campaign-hero', props)
+
+const signalStrip = (): ModuleBlock => moduleBlock('signal-strip', {
+  label: 'Creator Signal promises',
+  items: [
+    { text: "You've got this" },
+    { text: 'Skip the maths' },
+    { text: 'No spreadsheets, no stress' },
+    { text: 'Grow with confidence' },
+    { text: 'Every sale sends a signal' },
+    { text: 'Zero data-nerd required' },
+  ],
+})
+
+const callToAction = (
+  eyebrow: string,
   heading: string,
   body: string,
-  href: string,
-  action: string,
-) => `<section class="cta-section">
-  <div class="cta-copy"><p class="eyebrow">${label}</p><h2>${heading}</h2><p>${body}</p></div>
-  <div class="actions"><a class="button button-primary" href="${href}">${action}</a></div>
-</section>`
+  actionUrl: string,
+  actionLabel: string,
+  sectionId = 'next-step',
+): ModuleBlock => moduleBlock('call-to-action', {
+  eyebrow,
+  heading,
+  body,
+  actionUrl,
+  actionLabel,
+  sectionId,
+})
 
-const prose = (heading: string, paragraphs: string[]) => `<section class="content-section narrow-content">
-  <h2>${heading}</h2>
-  <div class="prose-content">${paragraphs.map((text) => `<p>${text}</p>`).join('')}</div>
-</section>`
-
-const testimonial = (
-  quote: string,
-  attribution: string,
-  role: string,
-) => `<figure class="testimonial">
-  <blockquote>“${quote}”</blockquote>
-  <figcaption><strong>${attribution}</strong><span>${role}</span></figcaption>
-</figure>`
-
-const faq = (
+const richText = (
   heading: string,
-  items: Array<[string, string]>,
-) => `<section class="content-section narrow-content">
-  <h2>${heading}</h2>
-  <div class="faq-list">${items.map(([question, answer]) =>
-    `<details><summary>${question}</summary><p>${answer}</p></details>`,
-  ).join('')}</div>
-</section>`
+  paragraphs: string[],
+  sectionId: string,
+): ModuleBlock => moduleBlock('rich-text-section', {
+  heading,
+  body: paragraphHtml(paragraphs),
+  sectionId,
+})
+
+const managedForm = (props: Record<string, unknown>): ModuleBlock => ({
+  kind: 'module',
+  entryId: 'creator-signal.site.mautic-form',
+  moduleId: 'creator-signal.site.mautic-form',
+  props: {
+    mauticBaseUrl: 'https://marketing.creatorsignal.me',
+    registryPath: '/media/creator-signal/forms-v1.js',
+    ...props,
+  },
+})
+
+const sectionIntroduction = (props: Record<string, unknown>): ModuleBlock => ({
+  kind: 'module',
+  entryId: 'creator-signal.site.section-intro',
+  moduleId: sectionIntro.id,
+  props,
+})
+
+const twoColumn = (left: LeafBlock[], right: LeafBlock[]): TwoColumnBlock => ({
+  kind: 'two-column',
+  entryId: 'creator-signal.site.two-column-layout',
+  componentId: twoColumnComponent.id,
+  slots: { left, right },
+})
+
+type ManagedFormDefinition = readonly [
+  eyebrow: string,
+  heading: string,
+  introduction: string,
+  successMessage: string,
+  formAlias: string,
+  campaignCode: string,
+]
+
+const managedFormColumns = (
+  form: ManagedFormDefinition,
+  formSectionId: string,
+): TwoColumnBlock => twoColumn(
+  [sectionIntroduction({
+    eyebrow: form[0],
+    heading: form[1],
+    introduction: form[2],
+    sectionId: `${form[5]}-introduction`,
+  })],
+  [managedForm({
+    successMessage: form[3],
+    sectionId: formSectionId,
+    formAlias: form[4],
+    formCode: form[4],
+    campaignCode: form[5],
+  })],
+)
 
 const publicDocument = (
   id: string,
   slug: string,
   title: string,
-  summary: string,
+  description: string,
   paragraphs: string[],
-): PagePackEntry => ({
+): StarterPage => ({
   id,
   slug,
   title,
-  html: chrome(`<article class="public-document">
-    <header class="public-document-header"><p class="eyebrow">Creator Signal</p><h1>${title}</h1><p>${summary}</p></header>
-    <div class="prose-content">${[...legalReleaseParagraphs(), ...paragraphs].map((text) => `<p>${text}</p>`).join('')}</div>
-  </article>`),
+  description,
+  patternId: pagePatternId('legal-trust'),
+  blocks: [moduleBlock('public-document', {
+    eyebrow: 'Creator Signal',
+    heading: title,
+    summary: description,
+    body: paragraphHtml([...legalReleaseParagraphs(), ...paragraphs]),
+    dateModified: legalRelease.version,
+  })],
 })
 
-const publicDocuments: PagePackEntry[] = [
+/**
+ * Exact 0.1.11 starter specification used only by the retained migration
+ * reconstruction. Apply current catalogue changes to the cloned starterPages
+ * below so the historical classifier cannot drift with the active pack.
+ */
+export const legacyCreatorSignalStarterPages0111: StarterPage[] = [
+  {
+    id: 'home',
+    slug: 'index',
+    title: 'Creator Signal',
+    description: 'Calm, useful tools that help independent creators understand what is working and act with confidence.',
+    patternId: pagePatternId('product-page'),
+    blocks: [
+      hero('Creator Signal', 'Turn creative business data into a clearer next move.', 'Creator Signal builds calm, useful tools that help independent creators understand what is working and act with confidence.', '/products/sales-pulse', 'Explore Sales Pulse', creatorSignalBrandAssets.creatorSignalSocial),
+      features('Built for working creators', 'Less spreadsheet archaeology. More useful signals.', 'Bring scattered marketplace activity into focused experiences without giving up control of your work or data.', [
+        ['01', 'See the whole picture', 'Bring sales history and current activity into one considered view.'],
+        ['02', 'Keep your data yours', 'Use private, exportable records with straightforward controls.'],
+        ['03', 'Act with context', 'Use trends and catalogue signals to decide what deserves attention next.'],
+      ]),
+      callToAction('One useful signal at a time', 'Start with Sales Pulse.', 'Connect your sales history and build a clearer business record over time.', '/products/sales-pulse', 'See Sales Pulse'),
+    ],
+  },
+  {
+    id: 'products',
+    slug: 'products',
+    title: 'Products',
+    description: 'Focused products for clearer creative-business decisions.',
+    patternId: pagePatternId('product-page'),
+    blocks: [
+      hero('Creator Signal products', 'Products for clearer creative-business decisions.', 'Creator Signal products turn complex business information into focused, practical experiences. Start with Sales Pulse, with more products to follow.', '/products/sales-pulse', 'Explore Sales Pulse', creatorSignalBrandAssets.creatorSignalSocial),
+      features('Products', 'Available now.', 'Our product catalogue will grow as we build more focused tools for independent creators.', [
+        ['SP', 'Sales Pulse', 'Understand what is selling, what is changing and where to focus next.'],
+      ]),
+      callToAction('Sales Pulse', 'See the signal in your sales.', 'Explore Sales Pulse features, plans and the supported creator-sales workflow.', '/products/sales-pulse', 'View Sales Pulse'),
+    ],
+  },
+  {
+    id: 'sales-pulse',
+    slug: 'products/sales-pulse',
+    title: 'Sales Pulse',
+    description: 'Turn marketplace history into a calm view of what is selling, what is changing and where to look next.',
+    patternId: pagePatternId('product-page'),
+    blocks: [
+      hero('Sales Pulse', 'See the signal in your sales.', 'Sales Pulse turns marketplace history into a calm, useful view of what is selling, what is changing and where to look next.', '/pricing', 'View pricing', creatorSignalBrandAssets.salesPulseSocial),
+      features('What it does', 'A dashboard made for creative work.', 'Understand performance without rebuilding the same spreadsheet every week.', [
+        ['01', 'Connected history', 'Import supported marketplace sales and keep a durable record.'],
+        ['02', 'Useful comparisons', 'See products, periods and patterns in a consistent view.'],
+        ['03', 'Private by design', 'Your operational data is not an advertising product.'],
+      ]),
+      callToAction('Ready when you are', 'Bring your sales history into focus.', 'Review the plans or ask a question before you connect.', '/pricing', 'Compare plans'),
+    ],
+  },
+  {
+    id: 'features',
+    slug: 'features',
+    title: 'Features',
+    description: 'Reliable imports, readable analysis and clear controls for independent creators.',
+    patternId: pagePatternId('features'),
+    blocks: [
+      hero('Features', 'Practical tools, deliberately focused.', 'Creator Signal prioritises reliable imports, readable analysis and clear controls over noisy dashboards.', '/pricing', 'See pricing', creatorSignalBrandAssets.salesPulseSocial),
+      features('Capabilities', 'Built around the work you already do.', 'Each capability is designed to reduce repeated administration and make the next decision easier.', [
+        ['01', 'Sales imports', 'Bring supported marketplace history into a consistent ledger.'],
+        ['02', 'Performance views', 'Compare products and time periods without manual cleanup.'],
+        ['03', 'Exportable records', 'Keep access to the information you have connected.'],
+        ['04', 'Guided signals', 'Surface useful changes without pretending every fluctuation is a trend.'],
+        ['05', 'Secure access', 'Use central identity, protected sessions and explicit entitlements.'],
+        ['06', 'Operational transparency', 'See service health and receive clear failure states.'],
+      ]),
+    ],
+  },
+  {
+    id: 'pricing',
+    slug: 'pricing',
+    title: 'Pricing',
+    description: 'Straightforward AUD monthly Sales Pulse plans with access boundaries shown before checkout.',
+    patternId: pagePatternId('pricing'),
+    blocks: [
+      hero('Pricing', 'Choose the Sales Pulse plan that fits your work.', 'Straightforward AUD monthly plans with the access boundary shown before checkout.', 'https://salespulse.creatorsignal.me', 'Open Sales Pulse', creatorSignalBrandAssets.salesPulseSocial),
+      features('Sales Pulse plans', 'Free, Starter and Pro.', 'Product access is funded by subscriptions, not advertising profiles.', [
+        ['01', 'Free — $0', 'Start with the core workflow and understand whether Sales Pulse fits.'],
+        ['02', 'Starter — $5 AUD monthly', 'Build a durable sales record and unlock the supported starter capabilities.'],
+        ['03', 'Pro — $10 AUD monthly', 'Use the full analysis experience and broader product comparisons.'],
+      ], 'plans'),
+      callToAction('Talk to us', 'Have a question before subscribing?', 'Tell us what you sell and what you need to understand.', '/contact', 'Contact Creator Signal'),
+    ],
+  },
+]
+
+const formPages = [
+  { id: 'contact', slug: 'contact', title: 'Contact', description: 'Contact Creator Signal about a creative business, Sales Pulse or support question.', hero: ['Contact Creator Signal', 'Tell us what you are trying to understand.', 'Send a short note about your creative business, Sales Pulse or a support question. We will use the details only to respond and follow up as requested.', '/legal/privacy', 'Read our privacy notice'], form: ['Contact', 'Send a message', 'Required fields are identified in the form.', 'Thanks — your message has been received.', 'creator_signal_contact', 'contact'] },
+  { id: 'feedback', slug: 'feedback', title: 'Feedback', description: 'Share feedback that can make Creator Signal more useful.', hero: ['Feedback', 'Help us make Creator Signal more useful.', 'Tell us what worked, what felt unclear and what would improve your experience. You can choose whether we may follow up about your feedback.', '/legal/privacy', 'Read our privacy notice'], form: ['Feedback', 'Share your feedback', 'Required fields are identified in the form. Choose the follow-up option only if we may contact you about this feedback.', 'Thanks — your feedback helps us improve Creator Signal.', 'creator_signal_feedback', 'feedback'] },
+  { id: 'wishlist', slug: 'wishlist', title: 'Join the wishlist', description: 'Join a Creator Signal product wishlist for availability and early-access updates.', hero: ['Join the wishlist', 'Tell us what you want to use next.', 'Join a product wishlist and give purpose-specific permission for availability and early-access updates. This does not subscribe you to general marketing.', '/legal/privacy', 'Read our privacy notice'], form: ['Wishlist', 'Join the wishlist', 'Required fields are identified in the form. Your permission covers availability and early-access updates for this request, not general marketing.', 'You are on the wishlist — thanks for your interest.', 'creator_signal_wishlist', 'wishlist'] },
+  { id: 'ask-a-question', slug: 'ask-a-question', title: 'Ask a question', description: 'Ask about Sales Pulse, an account, Creator Signal or working with us.', hero: ['Ask a question', 'What would you like to know?', 'Ask about Sales Pulse, your account, Creator Signal or working with us. We will use your details to answer your question.', '/legal/privacy', 'Read our privacy notice'], form: ['Question', 'Ask a question', 'Required fields are identified in the form.', 'Thanks — we have received your question.', 'creator_signal_question', 'question'] },
+  { id: 'feature-request', slug: 'feature-request', title: 'Feature request', description: 'Describe the problem, workflow and outcome behind a product idea.', hero: ['Feature request', 'Describe the outcome you need.', 'Tell us about the problem, workflow and outcome behind your idea so we can evaluate it in context.', '/legal/privacy', 'Read our privacy notice'], form: ['Feature request', 'Request a feature', 'Required fields are identified in the form. Describe the problem and the outcome you need.', 'Thanks — your feature request has been recorded.', 'creator_signal_feature_request', 'feature_request'] },
+  { id: 'report-an-error', slug: 'report-an-error', title: 'Report an error', description: 'Report a reproducible Creator Signal product error without sharing sensitive data.', hero: ['Error report', 'Tell us what went wrong.', 'Share steps we can use to reproduce the problem. Do not include passwords, access keys, payment details or customer data.', 'https://status.creatorsignal.me', 'Check service status'], form: ['Error report', 'Report an error', 'Required fields are identified in the form. Do not include passwords, access keys, payment details or customer data.', 'Thanks — your error report has been recorded.', 'creator_signal_error_report', 'error_report'] },
+] as const
+
+// These pages are additive to the current pack. Keep them out of the retained
+// 0.1.11 starter specification so upgrade classification never mistakes an
+// authored historical page for source-owned intake content.
+const intakeFormPages = [
+  { id: 'waitlist', slug: 'waitlist', title: 'Join the waitlist', description: 'Get a purpose-specific launch update and help Creator Signal understand what would be most useful for your Spoonflower shop.', hero: ['Waitlist', 'Be the first to know when Creator Signal is ready.', 'Join the waitlist for launch availability updates. Optional answers help us understand who we are building for. This is not a general marketing subscription.', '/legal/privacy', 'Read our privacy notice'], form: ['Waitlist', 'Join the waitlist', 'Required fields are identified in the form. Your permission covers Creator Signal launch availability and this waitlist request, not general marketing.', 'You are on the waitlist — thanks for your interest.', 'creator_signal_waitlist', 'waitlist'] },
+  { id: 'beta', slug: 'beta', title: 'Try it early', description: 'Apply to test Creator Signal early and share what would make it more useful for Spoonflower designers.', hero: ['Early testing', 'Help us test Creator Signal before anyone else.', 'Apply to test the product early and tell us what you think. Optional answers help us balance the beta cohort. This is not a general marketing subscription.', '/legal/privacy', 'Read our privacy notice'], form: ['Early testing', 'Apply to test it early', 'Required fields are identified in the form. Your permission covers this beta application and early testing, not general marketing.', 'Thanks — your early-access application has been received.', 'creator_signal_beta_application', 'beta_application'] },
+] as const
+
+for (const page of formPages) {
+  legacyCreatorSignalStarterPages0111.push({
+    id: page.id,
+    slug: page.slug,
+    title: page.title,
+    description: page.description,
+    patternId: pagePatternId('contact'),
+    blocks: [
+      hero(...page.hero),
+      managedForm({
+        eyebrow: page.form[0],
+        heading: page.form[1],
+        introduction: page.form[2],
+        successMessage: page.form[3],
+        formAlias: page.form[4],
+        formCode: page.form[4],
+        campaignCode: page.form[5],
+      }),
+    ],
+  })
+}
+
+legacyCreatorSignalStarterPages0111.push(
+  {
+    id: 'privacy',
+    slug: 'legal/privacy',
+    title: 'Privacy',
+    description: 'How Creator Signal uses information to operate its services and the choices available to you.',
+    patternId: pagePatternId('article-content'),
+    blocks: [
+      hero('Legal', 'Privacy should be understandable.', 'This notice explains the information Creator Signal uses to operate its services and the choices available to you.', '/contact', 'Contact us'),
+      richText('Information we use', [
+        ...legalReleaseParagraphs(),
+        'We process account and authentication information to provide secure access, subscription and entitlement information to operate paid features, and data you choose to connect to provide Sales Pulse.',
+        'When you contact us, we use the details you submit to respond. Optional product journey analytics is disabled until you grant consent. Aggregate traffic measurement is configured to avoid advertising profiles.',
+        'We retain information only for operational, security, legal and support needs, apply access controls, and use service providers only for defined platform functions.',
+      ], 'information-we-use'),
+    ],
+  },
+  {
+    id: 'terms',
+    slug: 'legal/terms',
+    title: 'Terms',
+    description: 'Acceptable use, subscriptions, connected data and service responsibilities for Creator Signal.',
+    patternId: pagePatternId('article-content'),
+    blocks: [
+      hero('Legal', 'Clear expectations for using Creator Signal.', 'These terms describe acceptable use, subscriptions, connected data and service responsibilities.', '/contact', 'Contact us'),
+      richText('Service terms', [
+        ...legalReleaseParagraphs(),
+        'You are responsible for your account, the authority to connect marketplace information, and the accuracy of information you provide. Do not misuse the service or attempt unauthorised access.',
+        'Subscription prices, included capabilities and renewal terms are shown before checkout. You retain ownership of your connected business information.',
+        'Services may change as they improve. Material changes and important limitations will be communicated where practical.',
+      ], 'service-terms'),
+    ],
+  },
   publicDocument('billing', 'legal/billing', 'Subscriptions, Cancellation and Refunds', 'How Sales Pulse plans renew, change, cancel and qualify for refunds.', [
     'Current plan prices, billing frequency and included capabilities are shown before checkout. Paid plans renew until they are cancelled.',
     'You can cancel future renewal from the product account area. Access continues until the end of the paid billing period unless a refund or legal requirement changes that outcome.',
@@ -185,82 +460,656 @@ const publicDocuments: PagePackEntry[] = [
     'Incident updates describe customer impact, mitigation progress and restoration. A follow-up is provided for material events when the investigation is complete.',
     'Visit status.creatorsignal.me for the operational view or contact support if your experience is not reflected there.',
   ]),
+)
+
+const currentFormPages = [...formPages, ...intakeFormPages]
+
+const formSectionIdByPageId = new Map(
+  currentFormPages.map((page) => [page.id, `${page.form[5]}-form`] as const),
+)
+
+const starterPages: StarterPage[] = legacyCreatorSignalStarterPages0111.map((page) => ({
+  ...page,
+  blocks: page.blocks.map((block) => ({
+    ...block,
+    props: block.kind === 'hero'
+      ? { ...block.props, [heroParamIds.artwork]: '' }
+      : block.moduleId === 'creator-signal.site.mautic-form'
+        ? { ...block.props, sectionId: formSectionIdByPageId.get(page.id) }
+        : { ...block.props },
+  })),
+}))
+
+for (const formPage of formPages) {
+  const page = starterPages.find((candidate) => candidate.slug === formPage.slug)
+  if (!page) throw new Error(`[creator-signal] Missing ${formPage.title} starter page.`)
+  const formSectionId = formSectionIdByPageId.get(formPage.id)
+  if (!formSectionId) throw new Error(`[creator-signal] Missing ${formPage.title} form section ID.`)
+  if (formPage.id === 'feedback') page.patternId = pagePatternId('feedback')
+  page.blocks = [page.blocks[0]!, managedFormColumns(formPage.form, formSectionId)]
+}
+
+const intakeStarterPages: StarterPage[] = intakeFormPages.map((page) => (
+  {
+    id: page.id,
+    slug: page.slug,
+    title: page.title,
+    description: page.description,
+    patternId: pagePatternId('contact'),
+    blocks: [
+      hero(...page.hero),
+      managedFormColumns(page.form, formSectionIdByPageId.get(page.id)!),
+    ],
+  }
+))
+
+const homeV2Page = starterPages.find((page) => page.slug === 'index')
+if (!homeV2Page) throw new Error('[creator-signal] Missing Home starter page.')
+homeV2Page.patternId = pagePatternId('home-v2')
+homeV2Page.title = 'Creator Signal — Stop guessing, design what sells'
+homeV2Page.description = "Creator Signal turns Spoonflower sales into a clear, visual picture of what's actually selling, using your own design thumbnails instead of spreadsheets."
+homeV2Page.blocks = [
+  campaignHero({
+    eyebrow: 'Every sale sends a signal',
+    heading: 'Stop guessing. Design what sells.',
+    body: "Creator Signal turns your Spoonflower sales data into a clear, visual picture of what's actually selling, using your own design thumbnails, not spreadsheets.",
+    primaryActionLabel: 'Get started free',
+    primaryActionUrl: 'https://salespulse.creatorsignal.me/sign-up',
+    secondaryActionLabel: 'See how it works',
+    secondaryActionUrl: '#how-it-works',
+    footnote: 'Free forever plan. No spreadsheets, no stress.',
+    artwork: creatorSignalBrandAssets.salesPulseSocial,
+    artworkAlt: 'A preview of the Sales Pulse visual sales dashboard.',
+  }),
+  signalStrip(),
+  moduleBlock('signal-comparison', {
+    eyebrow: "Let's see what's working",
+    heading: 'From this, to this.',
+    introduction: 'Compare the limited marketplace view with the clearer Creator Signal experience.',
+    beforeLabel: 'From',
+    beforeBody: 'Thirty days, sales counts only and one bare-bones chart.',
+    afterLabel: 'To',
+    afterBody: "Your own design thumbnails, sorted by what's working.",
+    artwork: creatorSignalBrandAssets.salesPulseSocial,
+    artworkAlt: 'Sales Pulse showing sales through visual design thumbnails.',
+    sectionId: 'signal-comparison',
+  }),
+  features("Let's take a look", "Right now, you've got three options.", 'None of these approaches was really built for independent designers.', [
+    ['01', 'Design blind', 'Upload, cross your fingers and hope something sells. It is the spaghetti-at-the-wall approach, and it is exhausting.'],
+    ['02', "Squint at Spoonflower's own stats", 'A useful starting point, but only thirty days, sales counts and one bare-bones chart — no trends, categories or repeat customers.'],
+    ['03', 'Wrangle it yourself', 'Copy and paste into a spreadsheet or a generic AI tool, then try to make sense of it alone.'],
+  ], 'market-gap', 'signature'),
+  moduleBlock('process-steps', {
+    eyebrow: "Here's the good news",
+    heading: 'How it works: connect, see, grow.',
+    introduction: 'Real-time, visual insight into your own sales data — no spreadsheets or scary graphs — so you can design with confidence instead of guesswork.',
+    sectionId: 'how-it-works',
+    items: [
+      { marker: '1', heading: 'Connect your shop', body: 'Link your Spoonflower store in a few easy steps. Your data stays yours, always.' },
+      { marker: '2', heading: 'See your signal', body: "Your sales come to life as your own design thumbnails, sorted by what's working." },
+      { marker: '3', heading: 'Grow with confidence', body: 'Make more of what is selling and design with a plan instead of a guess.' },
+    ],
+  }),
+  features('See it for yourself', 'What Creator Signal actually shows you.', 'Start with the essentials and reveal more of your signal when you are ready.', [
+    ['Free', "See what's selling", 'Revenue and sales overview, growth over time and your top-selling designs.'],
+    ['Starter', 'Slice it your way', 'Filter by time and product type, then see sales broken down by category.'],
+    ['Pro', 'Know your shop inside out', 'Explore collection-level sales, repeat customers, trends and what to design next.'],
+  ], 'features'),
+  features('Why designers trust us', 'The values behind the signal.', 'Useful, respectful and honest by design.', [
+    ['01', 'Your data stays yours', 'We never sell or share your operational data. It stays protected and used for your own signal.'],
+    ['02', 'We build what you need', 'Features follow what designers ask for and where the evidence shows real value.'],
+    ['03', 'We keep it real', 'Honest numbers, clear limits, no hype and no pressure.'],
+    ['04', 'By a designer, for designers', 'Every decision is tested against whether it would actually help an independent designer.'],
+    ['05', "We're human too", 'Built by a designer and her techy best friend, with support from actual people.'],
+    ['06', 'Wherever you design', 'Mobile, tablet and desktop are included on every plan.'],
+  ], 'values', 'signature'),
+  moduleBlock('pricing-plans', {
+    eyebrow: 'Skip the maths',
+    heading: 'Pricing: find your fit.',
+    introduction: "Start free. Upgrade whenever you're ready to see more of your signal.",
+    footnote: 'Mobile, tablet and desktop are included on every plan. Plus support from an actual human.',
+    sectionId: 'pricing',
+    items: [
+      { name: 'Free', price: '$0', cadence: '', description: 'Start with the core workflow.', features: 'Revenue and sales overview\nSales growth over time\nYour top 3 selling designs', actionLabel: 'Start free', actionUrl: 'https://salespulse.creatorsignal.me/sign-up', emphasis: 'default' },
+      { name: 'Starter', price: '$5 AUD', cadence: 'per month', description: 'Build a durable sales record.', features: 'Everything in Free\nFilter by time and product type\nYour top 6 selling designs\nSales broken down by category', actionLabel: 'Start Starter', actionUrl: 'https://salespulse.creatorsignal.me/sign-up', emphasis: 'featured' },
+      { name: 'Pro', price: '$10 AUD', cadence: 'per month', description: 'Use the complete analysis experience.', features: "Everything in Starter\nCollection-level sales\nRepeat-customer insight\nWhat's trending and what to design next", actionLabel: 'Start Pro', actionUrl: 'https://salespulse.creatorsignal.me/sign-up', emphasis: 'default' },
+    ],
+  }),
+  moduleBlock('founder-story', {
+    eyebrow: 'By a designer, for designers',
+    heading: 'About the founder: meet the maker.',
+    body: "<p>I'm a Spoonflower designer myself. I got tired of guessing what to design next with almost nothing to go on — just thirty days of history and a bare-bones chart, with no dollar figures or real story behind the numbers.</p><p>So I built the tool I wished existed: something that turns your own sales history into a clear signal you can actually see through your own thumbnails. I built it for myself, and for every designer who has wasted hours exporting to spreadsheets and still felt stuck guessing.</p>",
+    attribution: 'Lahni',
+    role: 'Founder, Creator Signal',
+    portrait: '',
+    portraitAlt: '',
+    sectionId: 'about',
+  }),
+  moduleBlock('faq', {
+    heading: 'FAQ: good to know.',
+    sectionId: 'faq',
+    items: [
+      { question: 'Is my Spoonflower data safe with you?', answer: 'Yes. We never sell or share your data. It is used only to show you your own sales clearly.' },
+      { question: 'Do I need to be good with spreadsheets or numbers?', answer: 'Not even a little. Creator Signal shows your sales as your own design thumbnails — no spreadsheets or scary graphs.' },
+      { question: 'Will this replace my Spoonflower dashboard?', answer: 'It works alongside it. Spoonflower still runs your shop; Creator Signal gives you the fuller picture.' },
+      { question: 'Can I cancel anytime?', answer: 'Anytime. There is no lock-in and no awkward email needed.' },
+      { question: "I'm just getting started and do not have many sales yet. Is this still for me?", answer: 'Yes. The Free plan is built for exactly that. Start there and upgrade whenever you are ready.' },
+      { question: 'Does this work on my phone?', answer: 'Yes. Mobile, tablet and desktop are all included.' },
+    ],
+  }),
+  callToAction('You have got this', 'Grow your Spoonflower shop with confidence.', 'Real signal, zero data-nerd required.', 'https://salespulse.creatorsignal.me/sign-up', 'Get started free', 'get-started'),
 ]
 
-const entries: PagePackEntry[] = [
-  {
-    id: 'home', slug: 'index', title: 'Creator Signal',
-    html: chrome(hero('Creator Signal', 'Turn creative business data into a clearer next move.', 'Creator Signal builds calm, useful tools that help independent creators understand what is working and act with confidence.', '/products/sales-pulse', 'Explore Sales Pulse') + features('Built for working creators', 'Less spreadsheet archaeology. More useful signals.', 'Bring scattered marketplace activity into focused experiences without giving up control of your work or data.', [['01', 'See the whole picture', 'Bring sales history and current activity into one considered view.'], ['02', 'Keep your data yours', 'Use private, exportable records with straightforward controls.'], ['03', 'Act with context', 'Use trends and catalogue signals to decide what deserves attention next.']]) + cta('One useful signal at a time', 'Start with Sales Pulse.', 'Connect your sales history and build a clearer business record over time.', '/products/sales-pulse', 'See Sales Pulse')),
-  },
-  {
-    id: 'products', slug: 'products', title: 'Products',
-    html: chrome(hero('Creator Signal products', 'Products for clearer creative-business decisions.', 'Creator Signal products turn complex business information into focused, practical experiences. Start with Sales Pulse, with more products to follow.', '/products/sales-pulse', 'Explore Sales Pulse') + features('Products', 'Available now.', 'Our product catalogue will grow as we build more focused tools for independent creators.', [['SP', 'Sales Pulse', 'Understand what is selling, what is changing and where to focus next.']]) + cta('Sales Pulse', 'See the signal in your sales.', 'Explore Sales Pulse features, plans and the supported creator-sales workflow.', '/products/sales-pulse', 'View Sales Pulse')),
-  },
-  {
-    id: 'sales-pulse', slug: 'products/sales-pulse', title: 'Sales Pulse',
-    html: chrome(hero('Sales Pulse', 'See the signal in your sales.', 'Sales Pulse turns marketplace history into a calm, useful view of what is selling, what is changing and where to look next.', '/pricing', 'View pricing') + features('What it does', 'A dashboard made for creative work.', 'Understand performance without rebuilding the same spreadsheet every week.', [['01', 'Connected history', 'Import supported marketplace sales and keep a durable record.'], ['02', 'Useful comparisons', 'See products, periods and patterns in a consistent view.'], ['03', 'Private by design', 'Your operational data is not an advertising product.']]) + cta('Ready when you are', 'Bring your sales history into focus.', 'Review the plans or ask a question before you connect.', '/pricing', 'Compare plans')),
-  },
-  {
-    id: 'features', slug: 'features', title: 'Features',
-    html: chrome(hero('Features', 'Practical tools, deliberately focused.', 'Creator Signal prioritises reliable imports, readable analysis and clear controls over noisy dashboards.', '/pricing', 'See pricing') + features('Capabilities', 'Built around the work you already do.', 'Each capability is designed to reduce repeated administration and make the next decision easier.', [['01', 'Sales imports', 'Bring supported marketplace history into a consistent ledger.'], ['02', 'Performance views', 'Compare products and time periods without manual cleanup.'], ['03', 'Exportable records', 'Keep access to the information you have connected.'], ['04', 'Guided signals', 'Surface useful changes without pretending every fluctuation is a trend.'], ['05', 'Secure access', 'Use central identity, protected sessions and explicit entitlements.'], ['06', 'Operational transparency', 'See service health and receive clear failure states.']])),
-  },
-  {
-    id: 'pricing', slug: 'pricing', title: 'Pricing',
-    html: chrome(hero('Pricing', 'Choose the Sales Pulse plan that fits your work.', 'Straightforward AUD monthly plans with the access boundary shown before checkout.', 'https://salespulse.creatorsignal.me', 'Open Sales Pulse') + features('Sales Pulse plans', 'Free, Starter and Pro.', 'Product access is funded by subscriptions, not advertising profiles.', [['01', 'Free — $0', 'Start with the core workflow and understand whether Sales Pulse fits.'], ['02', 'Starter — $5 AUD monthly', 'Build a durable sales record and unlock the supported starter capabilities.'], ['03', 'Pro — $10 AUD monthly', 'Use the full analysis experience and broader product comparisons.']]) + cta('Talk to us', 'Have a question before subscribing?', 'Tell us what you sell and what you need to understand.', '/contact', 'Contact Creator Signal')),
-  },
-  {
-    id: 'contact', slug: 'contact', title: 'Contact',
-    html: chrome(hero('Contact Creator Signal', 'Tell us what you are trying to understand.', 'Send a short note about your creative business, Sales Pulse or a support question. We will use the details only to respond and follow up as requested.', '/legal/privacy', 'Read our privacy notice') + '<section class="content-section"><div data-creator-signal-mautic-form="true"></div></section>'),
-  },
-  {
-    id: 'privacy', slug: 'legal/privacy', title: 'Privacy',
-    html: chrome(hero('Legal', 'Privacy should be understandable.', 'This notice explains the information Creator Signal uses to operate its services and the choices available to you.', '/contact', 'Contact us') + prose('Information we use', [...legalReleaseParagraphs(), 'We process account and authentication information to provide secure access, subscription and entitlement information to operate paid features, and data you choose to connect to provide Sales Pulse.', 'When you contact us, we use the details you submit to respond. Optional product journey analytics is disabled until you grant consent. Aggregate traffic measurement is configured to avoid advertising profiles.', 'We retain information only for operational, security, legal and support needs, apply access controls, and use service providers only for defined platform functions.'])),
-  },
-  {
-    id: 'terms', slug: 'legal/terms', title: 'Terms',
-    html: chrome(hero('Legal', 'Clear expectations for using Creator Signal.', 'These terms describe acceptable use, subscriptions, connected data and service responsibilities.', '/contact', 'Contact us') + prose('Service terms', [...legalReleaseParagraphs(), 'You are responsible for your account, the authority to connect marketplace information, and the accuracy of information you provide. Do not misuse the service or attempt unauthorised access.', 'Subscription prices, included capabilities and renewal terms are shown before checkout. You retain ownership of your connected business information.', 'Services may change as they improve. Material changes and important limitations will be communicated where practical.'])),
-  },
-  ...publicDocuments,
+const earlyAccessPage: StarterPage = {
+  id: 'early-access',
+  slug: 'early-access',
+  title: 'Creator Signal Early Access',
+  description: 'Join the Creator Signal launch list or volunteer to help test Sales Pulse early.',
+  patternId: pagePatternId('early-access'),
+  blocks: [
+    campaignHero({
+      eyebrow: 'Coming soon',
+      heading: 'Stop guessing. Design what sells.',
+      body: "Creator Signal turns your Spoonflower sales into a clear, visual picture of what's actually selling. We are putting the finishing touches on it now.",
+      primaryActionLabel: 'Choose your update',
+      primaryActionUrl: '#early-access-form',
+      secondaryActionLabel: 'See what is coming',
+      secondaryActionUrl: '#early-access-features',
+      footnote: 'Free to join. No spam and no pressure.',
+      artwork: creatorSignalBrandAssets.salesPulseSocial,
+      artworkAlt: 'A preview of the Sales Pulse visual sales dashboard.',
+    }),
+    signalStrip(),
+    features('Choose what suits you', 'Launch news or early testing.', 'Use the one form below to tell us how you would like to hear from Creator Signal.', [
+      ['01', 'Be the first to know', 'Choose launch notification if you want one useful update when Creator Signal is ready.'],
+      ['02', 'Help us test it first', 'Choose early testing if you are happy to try the product and share honest feedback before launch.'],
+    ], 'early-access-options'),
+    managedFormColumns([
+      'Join the list',
+      'Choose your early-access update',
+      'Required fields are identified in the form. Choose launch notification, early testing or both. This permission is specific to this request and is not general marketing consent.',
+      'You are on the Creator Signal early-access list — thank you.',
+      'creator_signal_wishlist',
+      'early_access',
+    ], 'early-access-form'),
+    features('In case you are wondering', 'What is Creator Signal?', 'A clearer view of your own Spoonflower sales, built around the way designers work.', [
+      ['01', "See what's selling", 'See real sales through your own design thumbnails without rebuilding a spreadsheet.'],
+      ['02', 'Filter it your way', 'Explore the time periods, product types and categories that matter to your work.'],
+      ['03', 'Know your shop inside out', 'Understand repeat customers, trends and the context behind what to design next.'],
+    ], 'early-access-features'),
+    features('What guides us', 'The values behind the signal.', 'The product should stay useful, respectful and honest as it grows.', [
+      ['01', 'Your data stays yours', 'We never sell your operational data or turn it into an advertising profile.'],
+      ['02', 'We keep it real', 'Honest numbers, clear limits and no pressure.'],
+      ['03', 'By a designer, for designers', 'Built by someone who understands the questions behind the data.'],
+    ], 'early-access-values', 'signature'),
+    moduleBlock('testimonial', {
+      quote: 'I built the tool I wished existed: something that turns your own sales history into a clear signal you can actually see.',
+      attribution: 'Lahni',
+      role: 'Founder, Creator Signal',
+    }),
+  ],
+}
+const wishlistIndex = starterPages.findIndex((page) => page.slug === 'wishlist')
+if (wishlistIndex < 0) throw new Error('[creator-signal] Missing Wishlist starter page.')
+starterPages.splice(wishlistIndex + 1, 0, earlyAccessPage)
+starterPages.splice(wishlistIndex + 2, 0, ...intakeStarterPages)
+
+const notFoundPage: StarterPage = {
+  id: 'not-found',
+  slug: 'creator-signal-not-found',
+  title: 'Page not found',
+  description: 'The requested Creator Signal page could not be found.',
+  patternId: pagePatternId('not-found-state'),
+  blocks: [moduleBlock('recovery-state', {
+    state: 'not-found',
+    heading: 'We cannot find that page',
+    body: 'The address may have changed or the page may no longer exist.',
+    actionLabel: 'Return home',
+    actionUrl: '/',
+    sectionId: 'not-found-state',
+  })],
+}
+const governedPages = [...starterPages, notFoundPage]
+
+function pageSeo(page: StarterPage): PageSeo {
+  const pageTitle = page.slug === 'index' ? page.title : `${page.title} | Creator Signal`
+  const path = page.slug === 'index' ? '' : `/${page.slug}`
+  const article = page.slug.startsWith('legal/') || page.slug.startsWith('trust/')
+  return {
+    title: pageTitle,
+    description: page.description,
+    canonicalUrl: `https://creatorsignal.me${path}`,
+    language: 'en-AU',
+    robots: page.slug === 'early-access'
+      ? { index: false, follow: true, archive: false }
+      : { index: true, follow: true, archive: true },
+    openGraph: { title: pageTitle, description: page.description, type: article ? 'article' : 'website' },
+    twitter: { card: 'summary', title: pageTitle, description: page.description },
+  }
+}
+
+const placeholder = (index: number): string => `<div data-creator-signal-block="${index}"></div>`
+const entries: PagePackEntry[] = governedPages.map((page) => ({
+  id: page.id,
+  slug: page.slug,
+  title: page.title,
+  html: placeholder(0),
+}))
+
+const sharedBlocks: PageBlock[] = [
+  moduleBlock('header', { ...siteHeader.defaults, items: [...siteHeader.defaults.items as unknown[]] }),
+  moduleBlock('footer', { ...siteFooter.defaults, items: [...siteFooter.defaults.items as unknown[]] }),
+  moduleBlock('consent-banner', { ...consentBanner.defaults }),
 ]
 
-const compiled = compilePackPages('creator-signal.site', entries, creatorSignalCss)
-const contact = compiled.pages.find((page) => page.id.endsWith('/contact'))!
-const mauticNode = Object.values(contact.nodes).find((node) => {
-  const attributes = node.props.htmlAttributes
-  return typeof attributes === 'object' && attributes !== null &&
-    (attributes as Record<string, unknown>)['data-creator-signal-mautic-form'] === 'true'
+export interface CreatorSignalPageAuthoringReference {
+  route: string
+  title: string
+  description: string
+  patternId: string
+  componentEntryIds: string[]
+  componentTree: CreatorSignalPageBodyComponentReference[]
+  migration: 'none' | 'preview-0.6.0-to-0.7.0'
+}
+
+export type CreatorSignalPageBodyBoundary = 'atomic-component' | 'layout-container' | 'provider-component'
+
+export interface CreatorSignalPageBodyComponentReference {
+  entryId: string
+  boundary: CreatorSignalPageBodyBoundary
+  slots?: Readonly<Record<string, CreatorSignalPageBodyComponentReference[]>>
+}
+
+/**
+ * Explicit ownership audit for every catalogue entry used in a public page
+ * body. Atomic entries keep one coherent responsibility and expose their copy
+ * or repeaters as governed fields. Layout entries own only real slots. Provider
+ * entries own only delivery configuration and runtime state.
+ */
+export const creatorSignalPageBodyComponentBoundaries: Readonly<Record<string, CreatorSignalPageBodyBoundary>> = {
+  'creator-signal.site.hero': 'atomic-component',
+  'creator-signal.site.campaign-hero': 'atomic-component',
+  'creator-signal.site.signal-strip': 'atomic-component',
+  'creator-signal.site.signal-comparison': 'atomic-component',
+  'creator-signal.site.feature-grid': 'atomic-component',
+  'creator-signal.site.process-steps': 'atomic-component',
+  'creator-signal.site.pricing-plans': 'atomic-component',
+  'creator-signal.site.founder-story': 'atomic-component',
+  'creator-signal.site.call-to-action': 'atomic-component',
+  'creator-signal.site.rich-text-section': 'atomic-component',
+  'creator-signal.site.testimonial': 'atomic-component',
+  'creator-signal.site.faq': 'atomic-component',
+  'creator-signal.site.comparison-section': 'atomic-component',
+  'creator-signal.site.recovery-state': 'atomic-component',
+  'creator-signal.site.public-document': 'atomic-component',
+  'creator-signal.site.section-intro': 'atomic-component',
+  'creator-signal.site.two-column-layout': 'layout-container',
+  'creator-signal.site.mautic-form': 'provider-component',
+  'creator-signal.site.crm-iframe-form': 'provider-component',
+}
+
+function pageBodyComponentReference(block: PageBlock): CreatorSignalPageBodyComponentReference {
+  const boundary = creatorSignalPageBodyComponentBoundaries[block.entryId]
+  if (!boundary) {
+    throw new Error(`[creator-signal] Page-body component "${block.entryId}" has no authoring boundary audit.`)
+  }
+  return block.kind === 'two-column'
+    ? {
+        entryId: block.entryId,
+        boundary,
+        slots: Object.fromEntries(Object.entries(block.slots).map(([slotName, slotBlocks]) => [
+          slotName,
+          slotBlocks.map(pageBodyComponentReference),
+        ])),
+      }
+    : { entryId: block.entryId, boundary }
+}
+
+const routeWideFormMigrationPageIds = new Set([
+  'contact',
+  'wishlist',
+  'waitlist',
+  'beta',
+  'ask-a-question',
+  'feature-request',
+  'report-an-error',
+  'early-access',
+])
+
+/** Durable route-to-component contract consumed by tests and parity reports. */
+export const creatorSignalPageAuthoringReference: readonly CreatorSignalPageAuthoringReference[] =
+  starterPages.map((page) => ({
+    route: page.slug === 'index' ? '/' : `/${page.slug}`,
+    title: page.title,
+    description: page.description,
+    patternId: page.patternId,
+    componentEntryIds: page.blocks.map((block) => block.entryId),
+    componentTree: page.blocks.map(pageBodyComponentReference),
+    migration: routeWideFormMigrationPageIds.has(page.id)
+      ? 'preview-0.6.0-to-0.7.0'
+      : 'none',
+  }))
+
+export const creatorSignalNotFoundAuthoringReference: CreatorSignalPageAuthoringReference = {
+  route: '/404',
+  title: notFoundPage.title,
+  description: notFoundPage.description,
+  patternId: notFoundPage.patternId,
+  componentEntryIds: notFoundPage.blocks.map((block) => block.entryId),
+  componentTree: notFoundPage.blocks.map(pageBodyComponentReference),
+  migration: 'none',
+}
+
+export const creatorSignalSharedTemplateEntryIds = sharedBlocks.map(
+  (block) => block.entryId,
+)
+
+entries.push({
+  id: 'site-template',
+  slug: 'creator-signal-site-template',
+  title: 'Creator Signal site template',
+  html: `${placeholder(0)}<main id="main-content" tabindex="-1"><instatic-outlet></instatic-outlet></main>${placeholder(1)}${placeholder(2)}`,
 })
-if (!mauticNode) {
-  throw new Error('Creator Signal contact page is missing its Mautic form placeholder.')
-}
-mauticNode.moduleId = 'creator-signal.site.mautic-form'
-mauticNode.props = {
-  heading: 'Send a message',
-  introduction: 'Required fields are identified in the form.',
-  successMessage: 'Thanks — your message has been received.',
-  mauticBaseUrl: 'https://marketing.creatorsignal.me',
-  formId: '3',
-  formApiName: 'creatorsignalcontactenquiry',
-  formCode: 'creator_signal_contact',
-  campaignCode: 'contact',
-}
-mauticNode.classIds = []
 
-const authorLayouts = [
-  { id: 'hero', name: 'Creator Signal hero', html: hero('Eyebrow', 'A clear headline.', 'Add a useful, plain-language introduction for this page.', '#', 'Primary action'), css: creatorSignalCss },
-  { id: 'feature-grid', name: 'Creator Signal feature grid', html: features('Capabilities', 'A focused feature set.', 'Explain what this group helps the visitor do.', [['01', 'First feature', 'Describe the outcome, not only the mechanism.'], ['02', 'Second feature', 'Keep the copy short enough to scan.'], ['03', 'Third feature', 'Use another card only when it adds information.']]), css: creatorSignalCss },
-  { id: 'call-to-action', name: 'Creator Signal call to action', html: cta('Next step', 'Give the visitor one clear next move.', 'Explain what happens after they choose it.', '#', 'Take the next step'), css: creatorSignalCss },
-  { id: 'prose', name: 'Creator Signal rich text', html: prose('Section heading', ['Write the first paragraph here.', 'Add supporting detail here.']), css: creatorSignalCss },
-  { id: 'testimonial', name: 'Creator Signal testimonial', html: testimonial('Add a short customer quotation that supports the page promise.', 'Customer name', 'Role or business'), css: creatorSignalCss },
-  { id: 'faq', name: 'Creator Signal FAQ', html: faq('Frequently asked questions', [['What should visitors know first?', 'Write a direct answer that helps the visitor decide what to do next.'], ['Where can they get more help?', 'Link to the relevant product, policy or contact route.']]), css: creatorSignalCss },
-]
+const compiled = compilePackPages(
+  'creator-signal.site',
+  entries,
+  creatorSignalRenderProfile.stylesheet,
+)
+// The compiler needs the shared CSS to resolve authored class names to stable
+// class IDs, especially inside the Hero Visual Component. Governed modules
+// emit the render-profile stylesheet through the publisher's deduplicated
+// framework bundle, so the technical pack retains empty class references.
+// Re-emitting desktop declarations in a later style bundle would override the
+// module stylesheet's responsive cascade.
+const compiledClassReferences = compiled.classes
+  .filter((rule) => rule.kind === 'class')
+  .map((rule) => ({
+    ...rule,
+    styles: {},
+    contextStyles: {},
+  }))
+const entryVersion = new Map(
+  creatorSignalComponentLibraryEntries.map((entry) => [entry.id, entry.version]),
+)
+
+function applyBlocks(pageSlug: string, blocks: PageBlock[]): void {
+  const page = compiled.pages.find((candidate) => candidate.slug === pageSlug)
+  if (!page) throw new Error(`[creator-signal] Missing compiled page "${pageSlug}".`)
+
+  const matched = new Set<number>()
+  for (const node of Object.values(page.nodes)) {
+    const attributes = node.props.htmlAttributes
+    if (!attributes || typeof attributes !== 'object' || Array.isArray(attributes)) continue
+    const rawIndex = (attributes as Record<string, unknown>)['data-creator-signal-block']
+    if (typeof rawIndex !== 'string' || !/^\d+$/.test(rawIndex)) continue
+    const index = Number(rawIndex)
+    const block = blocks[index]
+    if (!block) throw new Error(`[creator-signal] Page "${pageSlug}" has an unknown block ${index}.`)
+    if (block.kind === 'two-column') {
+      throw new Error(`[creator-signal] Page "${pageSlug}" cannot compile a two-column layout from a flat placeholder.`)
+    }
+
+    const version = entryVersion.get(block.entryId)
+    if (!version) throw new Error(`[creator-signal] Missing Component Library entry "${block.entryId}".`)
+    node.moduleId = block.kind === 'hero' ? 'base.visual-component-ref' : block.moduleId
+    node.props = block.kind === 'hero'
+      ? { componentId: heroComponent.id, propOverrides: block.props }
+      : { ...block.props }
+    node.children = []
+    node.classIds = []
+    node.catalogueInstance = {
+      entryId: block.entryId,
+      entryVersion: version,
+      variantId: 'default',
+    }
+    matched.add(index)
+  }
+  if (matched.size !== blocks.length) {
+    throw new Error(`[creator-signal] Page "${pageSlug}" compiled ${matched.size}/${blocks.length} governed blocks.`)
+  }
+}
+
+function applyLeafBlock(
+  patternId: string,
+  node: Page['nodes'][string],
+  block: LeafBlock,
+  label: string,
+): void {
+  if (node.catalogueInstance?.entryId !== block.entryId) {
+    throw new Error(
+      `[creator-signal] Pattern "${patternId}" ${label} does not map to "${block.entryId}".`,
+    )
+  }
+  const expectedModuleId = block.kind === 'hero' ? 'base.visual-component-ref' : block.moduleId
+  if (node.moduleId !== expectedModuleId) {
+    throw new Error(
+      `[creator-signal] Pattern "${patternId}" ${label} uses "${node.moduleId}", expected "${expectedModuleId}".`,
+    )
+  }
+  node.props = block.kind === 'hero'
+    ? { componentId: heroComponent.id, propOverrides: block.props }
+    : { ...block.props }
+  node.children = []
+  node.classIds = []
+}
+
+function applyTwoColumnBlock(
+  patternId: string,
+  nodes: Page['nodes'],
+  node: Page['nodes'][string],
+  block: TwoColumnBlock,
+  label: string,
+): void {
+  if (
+    node.catalogueInstance?.entryId !== block.entryId ||
+    node.moduleId !== 'base.visual-component-ref'
+  ) {
+    throw new Error(
+      `[creator-signal] Pattern "${patternId}" ${label} is not the governed Two Column Layout.`,
+    )
+  }
+  node.props = { componentId: block.componentId, propOverrides: {} }
+  node.classIds = []
+
+  for (const slotName of [twoColumnSlotIds.left, twoColumnSlotIds.right] as const) {
+    const slotNode = node.children
+      .map((childId) => nodes[childId])
+      .find((child) => child?.moduleId === 'base.slot-instance' && child.props.slotName === slotName)
+    if (!slotNode) {
+      throw new Error(
+        `[creator-signal] Pattern "${patternId}" ${label} has no "${slotName}" slot.`,
+      )
+    }
+    const slotBlocks = block.slots[slotName]
+    if (slotNode.children.length !== slotBlocks.length) {
+      throw new Error(
+        `[creator-signal] Pattern "${patternId}" ${label} exposes ${slotNode.children.length}/${slotBlocks.length} "${slotName}" slot components.`,
+      )
+    }
+    for (const [slotIndex, slotBlock] of slotBlocks.entries()) {
+      const slotChild = nodes[slotNode.children[slotIndex]!]
+      if (!slotChild) {
+        throw new Error(
+          `[creator-signal] Pattern "${patternId}" ${label} has a missing "${slotName}" slot child.`,
+        )
+      }
+      applyLeafBlock(patternId, slotChild, slotBlock, `${label} ${slotName} component ${slotIndex}`)
+    }
+  }
+}
+
+function applyPagePattern(page: StarterPage): void {
+  const compiledPage = compiled.pages.find((candidate) => candidate.slug === page.slug)
+  if (!compiledPage) throw new Error(`[creator-signal] Missing compiled page "${page.slug}".`)
+
+  const placeholderNode = Object.values(compiledPage.nodes).find((node) => {
+    const attributes = node.props.htmlAttributes
+    return Boolean(
+      attributes &&
+      typeof attributes === 'object' &&
+      !Array.isArray(attributes) &&
+      (attributes as Record<string, unknown>)['data-creator-signal-block'] === '0',
+    )
+  })
+  if (!placeholderNode) {
+    throw new Error(`[creator-signal] Page "${page.slug}" has no governed pattern placeholder.`)
+  }
+
+  const version = entryVersion.get(page.patternId)
+  if (!version) throw new Error(`[creator-signal] Missing pattern entry "${page.patternId}".`)
+  const fragment = componentLibraryPatternRegistry.materialize(page.patternId, {
+    entryId: page.patternId,
+    entryVersion: version,
+    variantId: 'default',
+  })
+  if (!fragment || fragment.rootIds.length === 0) {
+    throw new Error(`[creator-signal] Pattern "${page.patternId}" could not materialize.`)
+  }
+  if (fragment.rootIds.length !== page.blocks.length) {
+    throw new Error(
+      `[creator-signal] Pattern "${page.patternId}" expands to ${fragment.rootIds.length}/${page.blocks.length} route components.`,
+    )
+  }
+
+  for (const [index, block] of page.blocks.entries()) {
+    const nodeId = fragment.rootIds[index]!
+    const node = fragment.nodes[nodeId]
+    if (!node) {
+      throw new Error(
+        `[creator-signal] Pattern "${page.patternId}" block ${index} is missing.`,
+      )
+    }
+    if (block.kind === 'two-column') {
+      applyTwoColumnBlock(page.patternId, fragment.nodes, node, block, `block ${index}`)
+    } else {
+      applyLeafBlock(page.patternId, node, block, `block ${index}`)
+    }
+  }
+
+  const placeholderParent = Object.values(compiledPage.nodes).find((node) =>
+    node.children.includes(placeholderNode.id))
+  if (!placeholderParent) {
+    throw new Error(`[creator-signal] Page "${page.slug}" pattern placeholder has no parent.`)
+  }
+  const placeholderIndex = placeholderParent.children.indexOf(placeholderNode.id)
+  placeholderParent.children.splice(placeholderIndex, 1, ...fragment.rootIds)
+  delete compiledPage.nodes[placeholderNode.id]
+
+  for (const [nodeId, node] of Object.entries(fragment.nodes)) {
+    compiledPage.nodes[nodeId] = {
+      ...node,
+      ...(fragment.rootIds.includes(nodeId)
+        ? { parentId: placeholderParent.id }
+        : {}),
+    }
+  }
+}
+
+for (const page of governedPages) {
+  applyPagePattern(page)
+  const compiledPage = compiled.pages.find((candidate) => candidate.slug === page.slug)!
+  compiledPage.seo = page === notFoundPage
+    ? {
+        ...pageSeo(page),
+        canonicalUrl: 'https://creatorsignal.me/404',
+        robots: { index: false, follow: true, archive: false },
+      }
+    : pageSeo(page)
+}
+
+applyBlocks('creator-signal-site-template', sharedBlocks)
+const siteTemplate = compiled.pages.find((page) => page.slug === 'creator-signal-site-template')!
+siteTemplate.template = {
+  enabled: true,
+  target: { kind: 'everywhere' },
+  priority: 0,
+}
+const notFoundTemplate = compiled.pages.find((page) => page.slug === notFoundPage.slug)!
+notFoundTemplate.template = {
+  enabled: true,
+  target: { kind: 'notFound' },
+  priority: 0,
+}
+
+/**
+ * Pack compilation and ordinary catalogue insertion use generated node IDs.
+ * Starter and migration pages instead need reproducible IDs so two builds of
+ * the same source produce the same page-cell hashes. Authored page IDs are
+ * never rewritten by this helper because it runs only on the bundled pack.
+ */
+function stabilisePackPageNodeIds(page: Page): void {
+  const orderedIds: string[] = []
+  const parentById = new Map<string, string | null>()
+  const visited = new Set<string>()
+
+  const visit = (nodeId: string, parentId: string | null): void => {
+    if (visited.has(nodeId)) return
+    const node = page.nodes[nodeId]
+    if (!node) throw new Error(`[creator-signal] Page "${page.slug}" references missing node "${nodeId}".`)
+    visited.add(nodeId)
+    orderedIds.push(nodeId)
+    parentById.set(nodeId, parentId)
+    for (const childId of node.children) visit(childId, nodeId)
+  }
+
+  visit(page.rootNodeId, null)
+  for (const nodeId of Object.keys(page.nodes).sort()) visit(nodeId, null)
+
+  const prefix = page.id.replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '')
+  const nextIdByCurrentId = new Map(orderedIds.map((nodeId, index) => [
+    nodeId,
+    `${prefix}--node-${String(index).padStart(3, '0')}`,
+  ]))
+  const remap = (nodeId: string): string => {
+    const nextId = nextIdByCurrentId.get(nodeId)
+    if (!nextId) throw new Error(`[creator-signal] Page "${page.slug}" could not stabilise node "${nodeId}".`)
+    return nextId
+  }
+
+  const nextNodes: Page['nodes'] = {}
+  for (const currentId of orderedIds) {
+    const node = page.nodes[currentId]!
+    const pattern = node.catalogueInstance?.pattern
+    const nextId = remap(currentId)
+    nextNodes[nextId] = {
+      ...node,
+      id: nextId,
+      children: node.children.map(remap),
+      parentId: parentById.get(currentId) === null
+        ? null
+        : remap(parentById.get(currentId)!),
+      ...(node.catalogueInstance
+        ? {
+            catalogueInstance: {
+              ...node.catalogueInstance,
+              ...(pattern
+                ? {
+                    pattern: {
+                      ...pattern,
+                      authorableNodeIds: pattern.authorableNodeIds.map(remap),
+                    },
+                  }
+                : {}),
+            },
+          }
+        : {}),
+    }
+  }
+
+  page.nodes = nextNodes
+  page.rootNodeId = remap(page.rootNodeId)
+}
+
+for (const page of compiled.pages) stabilisePackPageNodeIds(page)
 
 const pack = definePack({
   pluginId: 'creator-signal.site',
-  visualComponents: [heroComponent],
+  publicAuthoring: creatorSignalPublicAuthoringPolicy,
+  visualComponents: [heroComponent, twoColumnComponent],
   pages: compiled.pages,
-  conditions: compiled.conditions,
-  layouts: authorLayouts,
+  conditions: [],
 })
-pack.classes.push(...compiled.classes)
-export { pack }
+pack.classes.push(...compiledClassReferences)
+
+export { pack, starterPages }

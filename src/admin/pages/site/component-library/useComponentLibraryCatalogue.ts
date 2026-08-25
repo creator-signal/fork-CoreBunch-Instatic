@@ -24,6 +24,7 @@ export function useComponentLibraryDependencyState(
   active: boolean,
   override?: ComponentLibraryDependencyState,
 ): ComponentLibraryDependencyState {
+  useSyncExternalStore(subscribe, generation, generation)
   const searchHealth = useEditorStore((state) =>
     searchCapabilityHealth(state.site),
   )
@@ -65,6 +66,24 @@ export function useComponentLibraryDependencyState(
       'forms.drafts': formDraftHealth,
     },
     providerAdapters: providerAdapterRegistry.dependencyHealth(),
-    plugins: {},
+    plugins: installedComponentLibraryPlugins(componentLibraryRegistry.list()),
   }
+}
+
+/**
+ * Plugin catalogue entries exist only while their owning editor package is
+ * active. The editor plugin loader unregisters the entire source on disable or
+ * uninstall, so a live entry is the authoritative client-side availability
+ * signal and does not need a second, racing plugin-status request.
+ */
+export function installedComponentLibraryPlugins(
+  entries: readonly ComponentLibraryEntry[],
+): ComponentLibraryDependencyState['plugins'] {
+  const plugins: ComponentLibraryDependencyState['plugins'] = {}
+  for (const entry of entries) {
+    if (entry.source.type === 'plugin') {
+      plugins[entry.source.pluginId] = 'available'
+    }
+  }
+  return plugins
 }

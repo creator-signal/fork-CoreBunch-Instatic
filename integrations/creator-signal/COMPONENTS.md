@@ -11,9 +11,13 @@ media storage.
 
 ## TL;DR
 
-- Use a **Visual Component** for reusable, parameterised page sections.
-- Use a **saved layout** for copyable starter markup whose instances may diverge.
-- Use a **module** for behaviour, runtime JavaScript, external services, or a specialised property schema.
+- Use a **Visual Component** for a reusable fixed tree with scalar parameters.
+- Use a governed **pattern** for an approved multi-component page or section
+  composition whose child components remain authorable after insertion.
+- Use a governed **module component** for opinionated markup, repeatable typed
+  data, runtime behaviour or external services.
+- Only structural container components may expose child slots. Leaf components
+  use scalar fields and repeaters.
 - Build Visual Component trees with `defineComponent` and `h` from `@core/plugin-sdk`.
 - Wrap the component tree in `base.body`.
 - Give every component and parameter a stable, plugin-namespaced ID.
@@ -29,13 +33,33 @@ media storage.
 | Requirement | Instatic extension | Creator Signal example |
 | --- | --- | --- |
 | Reusable section with per-instance fields | Visual Component | `integrations/creator-signal/pack/hero-component.ts` |
-| Starter section authors freely restructure after insertion | Saved layout | `authorLayouts` in `integrations/creator-signal/pack/site.ts` |
+| Opinionated section with repeatable data | Governed module component | `integrations/creator-signal/modules/site-components/index.ts` |
+| Approved page/section composition | Component Library pattern | `integrations/creator-signal/component-library.ts` |
+| Copyable structure intentionally allowed to diverge | Saved layout | Not used by the Creator Signal pack |
 | Runtime JavaScript or an external integration | Module | `integrations/creator-signal/modules/mautic-form.ts` |
 | Shared typography, colour, spacing, and responsive rules | Pack stylesheet | `integrations/creator-signal/pack/design-system.ts` |
 
-The Hero is available both as a Visual Component and as a saved layout. Use the
-Visual Component when instances must retain one governed design. Use the layout
-when an author needs to change the section structure for one page.
+The Hero is a Visual Component. The other public blocks are governed module
+components so their typed properties can include repeaters while their HTML
+structure remains consistent.
+
+The public page and section patterns are registered beside those entries in
+`component-library.ts`. Their stable IDs use
+`creator-signal.site.pattern.*`, their roots record the catalogue instance,
+and only their declared child component nodes are authorable. Route seeds use
+the same registry materializer, so the Insert experience and installed site
+cannot drift into separate structures.
+
+The Home and Early Access compositions exercise the full module-component
+model. Home uses Campaign Hero, Signal Strip, Signal Comparison, three Feature
+Grids, Process Steps, Pricing Plans, Founder Story, FAQ and Call to Action to
+implement the approved reference flow. Early Access uses Campaign Hero, Signal
+Strip, typed Feature Grids, one Two Column Layout with separate Section Intro
+and Managed Form slot fills, and a Testimonial. Content and provider catalogue
+components are leaves; Two Column Layout is the explicit real-slot container.
+The `home-v2-page` and `early-access-page` recipes provide the initial order,
+then disappear: their real components become direct page roots that authors can
+select, configure, drag or remove independently.
 
 ## Hero component anatomy
 
@@ -51,16 +75,19 @@ base.body
     │   └── div.actions
     │       └── base.button
     └── div.hero-art
-        ├── base.image
-        └── div.signal-visual
+        ├── base.image (optional authored artwork)
+        └── div.signal-visual (production fallback)
+            └── four decorative spans
 ```
 
 The component exposes `Eyebrow`, `Heading`, `Introduction`, `Action label`,
 `Action URL`, and `Artwork`. The first five bind to text or button properties.
 `Artwork` binds to `base.image.props.src`.
 
-An empty artwork value renders the CSS signal visual. Selecting an image from
-the Media workspace supplies the image value. On the Creator Signal production
+An empty artwork value renders the governed Creator Signal mark from the locked
+brand-asset pipeline. Selecting an image from the Media workspace supplies the
+image value. The primary starter marketing routes use governed generated social
+artwork rather than a synthetic placeholder. On the Creator Signal production
 stack that upload and its generated variants use the MinIO adapter configured
 in `server/media/minioStorageAdapter.ts`.
 
@@ -109,6 +136,11 @@ Do not pass `content-section` by itself. A Visual Component stores class IDs,
 whereas HTML compiled by `compilePackPages` starts with class names and links
 them to IDs during compilation.
 
+The token, typography, theme and brand values are owned by Sales Pulse and
+consumed through `integrations/creator-signal/design-system/lock.json`. Add only
+semantic `var(--cs-...)` declarations to the Instatic adapter. Do not copy a
+hex value, font family or theme algorithm into a component stylesheet.
+
 ### 3. Add stable typed parameters
 
 Parameter IDs survive display-name changes and are the binding contract:
@@ -150,9 +182,11 @@ Keep a design-time default in `node.props`. At render time the component
 instance value replaces that property, falling back to the parameter default
 when the instance has no override.
 
-Use a `base.slot-outlet` when authors need to insert an arbitrary child subtree
-instead of editing a typed property. Slot behaviour and synchronisation are
-defined in `docs/features/visual-components.md`.
+Use a `base.slot-outlet` only when the Component Library entry is explicitly a
+container. Navigation, cards, FAQs, calls to action, documents and other leaf
+components use repeaters or rich-text fields and must remain slot-free. Slot
+behaviour and synchronisation are defined in
+`docs/features/visual-components.md`.
 
 ### 5. Register the implementation and authoring contract
 
@@ -165,7 +199,6 @@ const pack = definePack({
   visualComponents: [heroComponent, exampleComponent],
   pages: compiled.pages,
   conditions: compiled.conditions,
-  layouts: authorLayouts,
 })
 ```
 
@@ -236,14 +269,18 @@ Extend `src/__tests__/plugins/creatorSignalSitePack.test.ts` to verify:
 - every parameter has a matching `propBindings` entry;
 - referenced class IDs exist in `pack.classes`;
 - image parameters bind to a `base.image` property;
-- required modules and layouts remain registered.
+- required modules and governed entries remain registered;
+- every leaf entry declares no slots; intentional containers declare named slots and tests prove their starter children resolve to governed entries.
 
 Run the integration gates:
 
 ```sh
+bun run creator-signal:design-system:check
+bun run component-library:creator-signal-specimens:check
 bun test src/__tests__/plugins/creatorSignalSitePack.test.ts
 bun run instatic-plugin lint integrations/creator-signal
 bun run instatic-plugin build integrations/creator-signal
+bun run verify:creator-signal-component-specimens:browser
 bun run build
 bun test
 bun run lint
@@ -277,6 +314,7 @@ affect only the selected reference.
 | Exposing a raw Visual Component directly in Insert → Components | Register a governed `ComponentLibraryEntry` with an explicit owner and field contract |
 | Hard-coded object-storage URLs | An `image` parameter bound to `base.image.props.src` |
 | JavaScript embedded in a Visual Component | A registered module such as `integrations/creator-signal/modules/mautic-form.ts` |
+| Rebuilding an approved page sequence from ad hoc containers | Insert the stable `creator-signal.site.pattern.*` entry |
 | Editing generated `pack/site.json` | Edit TypeScript sources and rebuild the plugin |
 
 ## Related
@@ -284,7 +322,9 @@ affect only the selected reference.
 - `integrations/creator-signal/pack/hero-component.ts` — reference component
 - `integrations/creator-signal/component-library.ts` — governed authoring entries
 - `integrations/creator-signal/pack/design-system.ts` — public design system
-- `integrations/creator-signal/pack/site.ts` — pack registration and saved layouts
+- `integrations/creator-signal/pack/site.ts` — governed starter pages and shared template
+- `integrations/creator-signal/modules/site-components/index.ts` — opinionated leaf renderers
+- `integrations/creator-signal/AUTHORING.md` — shared-template, route, component and visual-report reference
 - `src/core/plugin-sdk/builders/tree.ts` — `defineComponent` and `h`
 - `src/core/plugin-sdk/builders/definePack.ts` — pack registration
 - `docs/features/visual-components.md` — component data model, slots, editor, and publisher

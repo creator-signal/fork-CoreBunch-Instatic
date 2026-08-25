@@ -163,6 +163,69 @@ describe('parsePluginPack', () => {
 })
 
 describe('applyPluginPackToSite', () => {
+  const starterPages = [
+    { ...baselineSite.pages[0]!, title: 'Pack Home' },
+    { ...baselineSite.pages[0]!, id: 'pricing', slug: 'pricing', title: 'Pricing' },
+  ]
+
+  it('imports starter pages only when the page roster is empty', () => {
+    const emptySite = { ...baselineSite, pages: [] }
+    const result = applyPluginPackToSite('acme.canvas', emptySite, {
+      visualComponents: [],
+      pages: starterPages,
+      classes: [],
+      layouts: [],
+    })
+
+    expect(result.site.pages).toEqual(starterPages)
+    expect(result.pageImport).toEqual({
+      installedIds: ['home', 'pricing'],
+      skippedIds: [],
+    })
+    expect(result.replaced.pages).toEqual([])
+  })
+
+  it('preserves every authored page and skips the complete starter page set', () => {
+    const authoredSite = structuredClone(baselineSite)
+    authoredSite.pages[0]!.title = 'Author edited this title'
+    const before = structuredClone(authoredSite.pages)
+    const result = applyPluginPackToSite('acme.canvas', authoredSite, {
+      visualComponents: [],
+      pages: starterPages,
+      classes: [],
+      layouts: [],
+    })
+
+    expect(result.site.pages).toEqual(before)
+    expect(result.pageImport).toEqual({
+      installedIds: [],
+      skippedIds: ['home', 'pricing'],
+    })
+    expect(result.replaced.pages).toEqual([])
+  })
+
+  it('is idempotent for page content after the initial empty-site import', () => {
+    const initial = applyPluginPackToSite('acme.canvas', { ...baselineSite, pages: [] }, {
+      visualComponents: [],
+      pages: starterPages,
+      classes: [],
+      layouts: [],
+    })
+    const authored = structuredClone(initial.site)
+    authored.pages[0]!.title = 'Live authored home'
+
+    const reinstalled = applyPluginPackToSite('acme.canvas', authored, {
+      visualComponents: [],
+      pages: starterPages.map((page) => ({ ...page, title: `${page.title} v2` })),
+      classes: [],
+      layouts: [],
+    })
+
+    expect(reinstalled.site.pages).toEqual(authored.pages)
+    expect(reinstalled.pageImport.installedIds).toEqual([])
+    expect(reinstalled.pageImport.skippedIds).toEqual(['home', 'pricing'])
+  })
+
   it('inserts new entries and reports replaced ids', () => {
     const pack = {
       visualComponents: [],

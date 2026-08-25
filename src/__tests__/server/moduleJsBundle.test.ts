@@ -3,6 +3,8 @@ import { collectSiteModuleAssets } from '../../../server/publish/siteModuleAsset
 import {
   buildSiteModuleJsMap,
   injectModuleScripts,
+  moduleJsContentHash,
+  resolvePublishedModuleJsAssets,
 } from '../../../server/publish/moduleJsBundle'
 import { makeModule, makePage, makeRegistry, makeSite } from '../publisher/helpers'
 
@@ -61,27 +63,46 @@ describe('site module-JS map', () => {
 })
 
 describe('injectModuleScripts', () => {
-  it('appends sorted, versioned, deferred script tags before </body> and relaxes CSP', () => {
-    const html = injectModuleScripts(HTML_DOC, ['z.widget', 'a.widget'], 7)
+  it('appends sorted, content-addressed, deferred script tags before </body> and relaxes CSP', () => {
+    const aHash = moduleJsContentHash('A_BODY')
+    const zHash = moduleJsContentHash('Z_BODY')
+    const html = injectModuleScripts(HTML_DOC, [
+      { id: 'z.widget', contentHash: zHash },
+      { id: 'a.widget', contentHash: aHash },
+    ])
     const aIdx = html.indexOf('data-instatic-module-js="a.widget"')
     const zIdx = html.indexOf('data-instatic-module-js="z.widget"')
     expect(aIdx).toBeGreaterThan(-1)
     expect(zIdx).toBeGreaterThan(aIdx)
-    expect(html).toContain('<script src="/_instatic/module-js/a.widget.js?v=7" defer data-instatic-module-js="a.widget"></script>')
+    expect(html).toContain(`<script src="/_instatic/module-js/a.widget.js?v=${aHash}" defer data-instatic-module-js="a.widget"></script>`)
     expect(zIdx).toBeLessThan(html.indexOf('</body>'))
     expect(html).toContain("script-src 'self';")
     expect(html).not.toContain("script-src 'none';")
   })
 
   it('does nothing (and keeps CSP locked) for an empty id list', () => {
-    const html = injectModuleScripts(HTML_DOC, [], 7)
+    const html = injectModuleScripts(HTML_DOC, [])
     expect(html).toBe(HTML_DOC)
     expect(html).toContain("script-src 'none';")
   })
 
   it('is idempotent', () => {
-    const once = injectModuleScripts(HTML_DOC, ['a.widget'], 7)
-    const twice = injectModuleScripts(once, ['a.widget'], 7)
+    const assets = [{ id: 'a.widget', contentHash: moduleJsContentHash('A_BODY') }]
+    const once = injectModuleScripts(HTML_DOC, assets)
+    const twice = injectModuleScripts(once, assets)
     expect(twice).toBe(once)
+  })
+
+  it('changes the public URL whenever a module body changes', () => {
+    const first = resolvePublishedModuleJsAssets(
+      ['test.jsy'],
+      new Map([['test.jsy', 'FIRST_BODY']]),
+    )
+    const second = resolvePublishedModuleJsAssets(
+      ['test.jsy'],
+      new Map([['test.jsy', 'SECOND_BODY']]),
+    )
+    expect(first[0]?.contentHash).not.toBe(second[0]?.contentHash)
+    expect(injectModuleScripts(HTML_DOC, first)).not.toBe(injectModuleScripts(HTML_DOC, second))
   })
 })

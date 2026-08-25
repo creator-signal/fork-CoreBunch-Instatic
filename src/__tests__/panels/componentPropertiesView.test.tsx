@@ -197,7 +197,7 @@ describe('ComponentPropertiesView', () => {
       {
         catalogueInstance: {
           entryId: publicId('base.hero'),
-          entryVersion: '1.0.0',
+          entryVersion: '2.0.0',
         },
       },
     )
@@ -239,5 +239,66 @@ describe('ComponentPropertiesView', () => {
       useEditorStore.getState().site!.pages[0]!.nodes[nodeId]!
         .catalogueInstance?.variantId,
     ).toBe('image-left')
+  })
+
+  it('authors Navigation as ordered link data without exposing a slot', () => {
+    const store = useEditorStore.getState()
+    const page = store.site!.pages[0]!
+    const nodeId = store.insertComponentRef(
+      page.rootNodeId,
+      'base.vc.navigation',
+      undefined,
+      {
+        catalogueInstance: {
+          entryId: publicId('base.navigation'),
+          entryVersion: '2.0.0',
+        },
+      },
+    )
+    if (!nodeId) throw new Error('Navigation insertion failed')
+    const node = useEditorStore.getState().site!.pages[0]!.nodes[nodeId]!
+    const entry = componentLibraryRegistry.getOrThrow(publicId('base.navigation'))
+
+    const definition = registry.get('base.visual-component-ref')!
+    const view = render(
+      <ComponentPropertiesView
+        node={node}
+        definition={definition}
+        entry={entry}
+        latestEntry={entry}
+      />,
+    )
+    const rerenderCurrent = () => view.rerender(
+      <ComponentPropertiesView
+        node={useEditorStore.getState().site!.pages[0]!.nodes[nodeId]!}
+        definition={definition}
+        entry={entry}
+        latestEntry={entry}
+      />,
+    )
+
+    expect(screen.queryByText('Slots')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Add navigation link' }))
+    rerenderCurrent()
+    fireEvent.change(screen.getByLabelText('Link text'), {
+      target: { value: 'About us' },
+    })
+    rerenderCurrent()
+    fireEvent.change(screen.getByLabelText('Destination'), {
+      target: { value: '/about' },
+    })
+    rerenderCurrent()
+    fireEvent.click(screen.getByRole('switch', { name: 'Current page' }))
+
+    expect(
+      useEditorStore.getState().site!.pages[0]!.nodes[nodeId]!.props.propOverrides,
+    ).toMatchObject({
+      items: [{
+        label: 'About us',
+        href: '/about',
+        target: '_self',
+        current: true,
+      }],
+    })
   })
 })

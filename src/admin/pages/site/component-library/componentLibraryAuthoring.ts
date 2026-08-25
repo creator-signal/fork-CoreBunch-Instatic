@@ -4,6 +4,7 @@ import {
   resolveComponentLibraryPlacement,
   type ComponentLibraryEntry,
   type ComponentLibraryImplementation,
+  type ComponentLibraryPlacementResult,
 } from '@core/component-library'
 import { getMissingModuleDependencies, registry } from '@core/module-engine'
 import type {
@@ -50,10 +51,7 @@ export function insertComponentLibraryEntry(
   }
 
   const implementation = backingImplementation(entry.implementation)
-  const placement = resolveComponentLibraryPlacement(
-    entry,
-    componentLibraryPlacementContext(page, location.parentId),
-  )
+  const placement = resolveComponentLibraryEntryPlacement(page, entry, location)
   if (!placement.allowed) return { ok: false, error: placement.message }
 
   const presetId = options.presetId ??
@@ -146,7 +144,27 @@ export function insertComponentLibraryEntry(
   return { ok: true, nodeId, metadata }
 }
 
-function componentLibraryPlacementContext(page: Page, targetParentId: string) {
+/**
+ * Resolve the insertion policy without mutating the page. The picker, Agent/MCP
+ * bridge and insertion action use this same preflight so disabled UI explains
+ * the exact policy the write path enforces.
+ */
+export function resolveComponentLibraryEntryPlacement(
+  page: Page,
+  entry: ComponentLibraryEntry,
+  location: InsertLocation,
+): ComponentLibraryPlacementResult {
+  return resolveComponentLibraryPlacement(
+    entry,
+    componentLibraryPlacementContext(page, location.parentId, entry.id),
+  )
+}
+
+function componentLibraryPlacementContext(
+  page: Page,
+  targetParentId: string,
+  entryId: string,
+) {
   const targetParent = page.nodes[targetParentId]
   const slotOwner = targetParent?.moduleId === 'base.slot-instance'
     ? parentNode(page, targetParent)
@@ -160,6 +178,10 @@ function componentLibraryPlacementContext(page: Page, targetParentId: string) {
     ? parentEntry?.slots.find((candidate) => candidate.id === slotName)
     : undefined
   return {
+    documentKind: page.template ? 'template' as const : 'page' as const,
+    existingDocumentEntryCount: Object.values(page.nodes).filter(
+      (node) => node.catalogueInstance?.entryId === entryId,
+    ).length,
     ...(parentEntry ? { parentEntry } : {}),
     ...(slot ? { slot } : {}),
     parentIsPageRoot: targetParentId === page.rootNodeId,

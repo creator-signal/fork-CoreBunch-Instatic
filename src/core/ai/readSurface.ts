@@ -295,7 +295,7 @@ function collectPageModuleCss(page: Page, site: SiteDocument, registry: IModuleR
     cspSources: new Map<string, Set<string>>(),
   }
   renderNode(page.rootNodeId, { page, site, registry, breakpointId: undefined }, acc)
-  return Array.from(acc.cssMap.values()).join('\n')
+  return [...new Set(acc.cssMap.values())].join('\n')
 }
 
 function collectAgentDocumentClassCss(page: Page, site: SiteDocument): string {

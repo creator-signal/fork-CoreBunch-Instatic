@@ -4,7 +4,11 @@ import { registry } from '@core/module-engine'
 import { publishPage } from '@core/publisher'
 import { buildRouteFrame } from '@core/templates/contextFrames'
 import { buildPublishedSiteCssBundle } from './siteCssBundle'
-import { buildPublishedSiteModuleJsMap } from './moduleJsBundle'
+import {
+  buildPublishedSiteModuleJsMap,
+  resolvePublishedModuleJsAssets,
+} from './moduleJsBundle'
+import type { PublishedModuleJsAsset } from './moduleJsBundle'
 import { resolveTemplateChain, resolveNotFoundTemplate, composeTemplateChain } from '@core/templates'
 import type { TemplateRenderDataContext } from '@core/templates/dynamicBindings'
 import { prefetchLoopData, publishedDataRowToLoopItem } from './loopPrefetch'
@@ -42,15 +46,14 @@ export interface RendererOutput {
   slug: string
   siteId: string
   /**
-   * Sorted moduleIds whose published JS this page must load — already
-   * intersected with the site module-JS map, so `injectModuleScripts` can
-   * emit tags without any further lookup.
+   * Sorted module assets whose published JS this page must load. Each carries
+   * the SHA-256 identity of the exact body the asset route must serve.
    */
-  jsModuleIds: string[]
+  jsModuleAssets: PublishedModuleJsAsset[]
   /**
    * Publish version this page was rendered at (the bake passes the NEXT
-   * version, live renders the current one) — stamped into module-js `?v=`
-   * URLs so they cache-bust in lockstep with hole placeholders.
+   * version, live renders the current one). Used by hole placeholders; module
+   * JavaScript has its own content-derived identity.
    */
   publishVersion: number
   /**
@@ -90,7 +93,7 @@ async function renderMergedTemplate(
   snapshot: PublishedPageSnapshot,
   templateContext: TemplateRenderDataContext | undefined,
   ctx: RenderPublishedSnapshotContext,
-): Promise<{ html: string; jsModuleIds: string[]; publishVersion: number; cssBundle: SiteCssBundle }> {
+): Promise<{ html: string; jsModuleAssets: PublishedModuleJsAsset[]; publishVersion: number; cssBundle: SiteCssBundle }> {
   const publishVersion = ctx.publishVersion ?? getPublishVersion()
   const moduleJsMap = buildPublishedSiteModuleJsMap(snapshot.site, registry)
   const loopData = await prefetchLoopData(merged, snapshot.site, ctx.db, ctx.url)
@@ -114,8 +117,8 @@ async function renderMergedTemplate(
   // Per-page injection set = candidates from the render (emitted ∪ hole
   // subtrees) ∩ the site module-JS map — over-inclusive candidates from
   // unbaked holes are filtered down to modules that actually ship JS.
-  const jsModuleIds = published.jsModuleIds.filter((id) => moduleJsMap.has(id))
-  return { html: published.html, jsModuleIds, publishVersion, cssBundle }
+  const jsModuleAssets = resolvePublishedModuleJsAssets(published.jsModuleIds, moduleJsMap)
+  return { html: published.html, jsModuleAssets, publishVersion, cssBundle }
 }
 
 export async function renderPublishedSnapshot(

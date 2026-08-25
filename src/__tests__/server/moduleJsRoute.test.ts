@@ -10,6 +10,7 @@ import {
   isModuleJsAssetPath,
 } from '../../../server/handlers/cms/moduleJs'
 import { resetForTests } from '../../../server/publish/renderCache'
+import { moduleJsContentHash } from '../../../server/publish/moduleJsBundle'
 import { makeModule } from '../publisher/helpers'
 import { registry } from '../../core/module-engine/registry'
 
@@ -122,13 +123,24 @@ describe('isModuleJsAssetPath', () => {
 })
 
 describe('handleModuleJsAssetRequest', () => {
-  it('serves a known module with text/javascript and a 1h public cache', async () => {
-    const [req, url] = moduleJsRequest('/_instatic/module-js/test.jsy.js?v=0')
+  const runtimeBody = '(function(){/* test runtime */})();'
+
+  it('serves a known module for its exact content hash with an immutable public cache', async () => {
+    const hash = moduleJsContentHash(runtimeBody)
+    const [req, url] = moduleJsRequest(`/_instatic/module-js/test.jsy.js?v=${hash}`)
     const res = await handleModuleJsAssetRequest(req, url, { db: makeFakeDb(makeSnapshot()) })
     expect(res.status).toBe(200)
     expect(res.headers.get('content-type')).toBe('text/javascript; charset=utf-8')
-    expect(res.headers.get('cache-control')).toBe('public, max-age=3600')
+    expect(res.headers.get('cache-control')).toBe('public, max-age=31536000, immutable')
     expect(await res.text()).toContain('test runtime')
+  })
+
+  it('404s missing, malformed, and stale content identities', async () => {
+    for (const suffix of ['', '?v=0', `?v=${'0'.repeat(64)}`]) {
+      const [req, url] = moduleJsRequest(`/_instatic/module-js/test.jsy.js${suffix}`)
+      const res = await handleModuleJsAssetRequest(req, url, { db: makeFakeDb(makeSnapshot()) })
+      expect(res.status).toBe(404)
+    }
   })
 
   it('404s for a moduleId with no published js', async () => {

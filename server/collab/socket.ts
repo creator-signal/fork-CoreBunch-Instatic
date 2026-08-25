@@ -49,11 +49,14 @@ import {
 import { requireCapability, userHasCapability } from '../auth/authz'
 import { safeParseValue, Type } from '@core/utils/typeboxHelpers'
 import type { CoreCapability } from '@core/capabilities'
+import type { PublicAuthoringPolicy } from '@core/page-tree'
 import { validateGuardedUpdate } from './updateGuard'
 import { originAllowed } from '../auth/security'
 import type { DbClient } from '../db/client'
 import { jsonResponse } from '../http'
 import type { CollabRelay, RelayDoc } from './relay'
+import { getDraftSite } from '../repositories/site'
+import { registerShellWriteListener } from '../repositories/rowWriteEvents'
 
 export { SITE_SOCKET_PATH }
 
@@ -157,14 +160,17 @@ export interface CollabSocketData {
   identity: CollabPresenceIdentity
   /**
    * True when the user holds ALL of SITE_WRITE_CAPABILITIES — the common
-   * case, which skips the per-update capability guard entirely. Every other
-   * connection — partial writers (e.g. content-only editors) AND read-only
-   * viewers (zero write capabilities) — pays a fork+diff validation per
-   * update frame instead (see ./updateGuard.ts). A viewer's edit has no
+   * case, which skips the per-update capability guard only when the site has
+   * no public-authoring policy. Governed sites validate full writers too.
+   * Every other connection — partial writers (e.g. content-only editors) AND
+   * read-only viewers (zero write capabilities) — pays a fork+diff validation
+   * per update frame instead (see ./updateGuard.ts). A viewer's edit has no
    * matching capability for any category, so the guard refuses it and resets
    * the sender, exactly like a partial writer straying out of its lane.
    */
   fullSiteWriter: boolean
+  /** Policy snapshot loaded at connection time; pack activation resets the shell. */
+  publicAuthoringPolicy?: PublicAuthoringPolicy
   /** The user's granted capabilities — the guard's validation input. */
   capabilities: readonly CoreCapability[]
   /** Doc ids this connection retained in the relay (released on close). */
@@ -183,6 +189,37 @@ interface UpgradeCapableServer {
   upgrade(req: Request, options: { data: CollabSocketData }): boolean
 }
 
+export type PublicAuthoringPolicyResolver = () => Promise<
+  PublicAuthoringPolicy | undefined
+>
+
+/**
+ * Cache the current site policy and invalidate it on every authoritative shell
+ * write. The next collaboration update refreshes before deciding whether the
+ * full-writer fast path is available, so a pack activation cannot leave an
+ * already-open socket with stale authoring authority.
+ */
+export function createPublicAuthoringPolicyResolver(
+  db: DbClient,
+): PublicAuthoringPolicyResolver {
+  let invalidationGeneration = 0
+  let cachedGeneration = -1
+  let cached: PublicAuthoringPolicy | undefined
+  registerShellWriteListener(() => {
+    invalidationGeneration += 1
+  })
+  return async () => {
+    while (cachedGeneration !== invalidationGeneration) {
+      const readGeneration = invalidationGeneration
+      const next = (await getDraftSite(db))?.settings.publicAuthoring
+      if (readGeneration !== invalidationGeneration) continue
+      cached = next
+      cachedGeneration = readGeneration
+    }
+    return cached ? structuredClone(cached) : undefined
+  }
+}
+
 /**
  * Gate + upgrade the socket request. Returns `null` when the connection was
  * upgraded (the caller must then return `undefined` from `fetch`), or an
@@ -192,6 +229,8 @@ export async function handleCollabSocketUpgrade(
   req: Request,
   db: DbClient,
   server: UpgradeCapableServer,
+  resolvePublicAuthoringPolicy: PublicAuthoringPolicyResolver = async () =>
+    (await getDraftSite(db))?.settings.publicAuthoring,
 ): Promise<Response | null> {
   // CSWSH defense — a cookie-bearing cross-origin handshake is rejected
   // before auth even runs.
@@ -201,6 +240,7 @@ export async function handleCollabSocketUpgrade(
   const user = await requireCapability(req, db, 'site.read')
   if (user instanceof Response) return user
   const fullSiteWriter = SITE_WRITE_CAPABILITIES.every((cap) => userHasCapability(user, cap))
+  const publicAuthoringPolicy = await resolvePublicAuthoringPolicy()
   const upgraded = server.upgrade(req, {
     data: {
       userId: user.id,
@@ -211,6 +251,9 @@ export async function handleCollabSocketUpgrade(
         gravatarHash: user.gravatarHash,
       },
       fullSiteWriter,
+      ...(publicAuthoringPolicy
+        ? { publicAuthoringPolicy: structuredClone(publicAuthoringPolicy) }
+        : {}),
       capabilities: user.capabilities,
       boundDocs: new Set(),
       probedDocs: new Set(),
@@ -234,7 +277,10 @@ interface CollabPublisher {
  * returns (the server handle is the publisher). Also owns the site-wide
  * awareness instance.
  */
-export function createCollabSocketLayer(relay: CollabRelay) {
+export function createCollabSocketLayer(
+  relay: CollabRelay,
+  resolvePublicAuthoringPolicy: PublicAuthoringPolicyResolver = async () => undefined,
+) {
   let publisher: CollabPublisher | null = null
   const presenceDoc = new Y.Doc()
   const awareness = new awarenessProtocol.Awareness(presenceDoc)
@@ -383,11 +429,25 @@ export function createCollabSocketLayer(relay: CollabRelay) {
       // nothing and passes as a no-op. Both non-step1 message types (step2
       // replies and updates) carry `varUint8Array update` after the type
       // varUint, so one extraction covers whatever a client might send.
-      if (messageType !== SYNC_STEP_1 && !ws.data.fullSiteWriter) {
+      if (messageType !== SYNC_STEP_1) {
+        const currentPolicy = await resolvePublicAuthoringPolicy()
+        if (currentPolicy) ws.data.publicAuthoringPolicy = currentPolicy
+        else delete ws.data.publicAuthoringPolicy
+      }
+      if (
+        messageType !== SYNC_STEP_1 &&
+        (!ws.data.fullSiteWriter || ws.data.publicAuthoringPolicy)
+      ) {
         const guardDecoder = decoding.createDecoder(frame.payload)
         decoding.readVarUint(guardDecoder)
         const update = decoding.readVarUint8Array(guardDecoder)
-        const verdict = validateGuardedUpdate(frame.docId, doc, update, ws.data.capabilities)
+        const verdict = validateGuardedUpdate(
+          frame.docId,
+          doc,
+          update,
+          ws.data.capabilities,
+          ws.data.publicAuthoringPolicy,
+        )
         if (!verdict.ok) {
           console.warn(`[collab] rejected ${frame.docId} update from ${ws.data.userId}: ${verdict.reason}`)
           // The sender's local doc holds the forbidden change — a TARGETED

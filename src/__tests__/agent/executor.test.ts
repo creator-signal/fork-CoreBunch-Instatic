@@ -16,12 +16,124 @@ import { executeAgentTool } from '@site/agent'
 import type { AiToolOutput } from '@core/ai'
 import { classNamesForClassIds, creatorSignalCatalogueEntryId } from '@core/page-tree'
 import { componentLibraryRegistry } from '@core/component-library'
+import { registry } from '@core/module-engine'
 import { BUILT_IN_COMPONENT_LIBRARY_ENTRIES } from '@modules/base/componentLibrary'
+import { creatorSignalRichTextEntry } from '../../../integrations/creator-signal/component-library'
+import { richTextSection } from '../../../integrations/creator-signal/modules/site-components'
 import '@modules/base'
 
 const publicId = creatorSignalCatalogueEntryId
 
 describe('executeAgentTool — governed Component Library', () => {
+  it('consolidates the same anchored prose model used by the Component Library preview', async () => {
+    componentLibraryRegistry.register(creatorSignalRichTextEntry)
+    registry.registerOrReplace(richTextSection)
+    try {
+      const { rootId } = freshStore()
+      const headingId = useEditorStore.getState().insertNode('base.text', {
+        text: 'Working agreements',
+        tag: 'h2',
+        htmlAttributes: { id: 'agreements', lang: 'en-AU' },
+      }, rootId)
+      const paragraphId = useEditorStore.getState().insertNode('base.text', {
+        text: 'We communicate clearly.',
+        tag: 'p',
+        htmlAttributes: {},
+      }, rootId)
+
+      const result = expectToolData<{
+        entryId: string
+        replacedNodeIds: string[]
+        preview: { heading: string; sectionId: string; headingLanguage: string; body: string }
+      }>(await executeAgentTool('site_consolidate_rich_text', { nodeId: headingId }))
+      expect(result.entryId).toBe('creator-signal.site.rich-text-section')
+      expect(result.replacedNodeIds).toEqual([headingId, paragraphId])
+      expect(result.preview).toEqual({
+        heading: 'Working agreements',
+        sectionId: 'agreements',
+        headingLanguage: 'en-AU',
+        body: '<p>We communicate clearly.</p>',
+      })
+      const page = activePage()
+      expect(page.nodes[headingId]).toBeUndefined()
+      expect(page.nodes[paragraphId]).toBeUndefined()
+      const replacementId = page.nodes[page.rootNodeId]!.children[0]!
+      expect(page.nodes[replacementId]?.catalogueInstance).toEqual({
+        entryId: 'creator-signal.site.rich-text-section',
+        entryVersion: '1.0.0',
+      })
+      useEditorStore.getState().undo()
+      expect(activePage().nodes[headingId]?.props.text).toBe('Working agreements')
+      expect(activePage().nodes[paragraphId]?.props.text).toBe('We communicate clearly.')
+    } finally {
+      componentLibraryRegistry.unregister(creatorSignalRichTextEntry.id)
+    }
+  })
+
+  it('shares template placement and singleton limits with Agent/MCP authoring', async () => {
+    const entryId = 'test.shared-chrome'
+    componentLibraryRegistry.register({
+      id: entryId,
+      version: '1.0.0',
+      name: 'Shared chrome',
+      description: 'A template-owned singleton component.',
+      category: 'Test',
+      tags: ['template', 'shared'],
+      icon: 'layout',
+      source: { type: 'built-in' },
+      status: 'stable',
+      composition: 'leaf',
+      implementation: { type: 'primitive', moduleId: 'base.text' },
+      fields: [],
+      variants: [],
+      presets: [],
+      slots: [],
+      constraints: {
+        allowedDocumentKinds: ['template'],
+        maxInstancesPerDocument: 1,
+      },
+      requirements: { capabilities: [], providerAdapters: [], plugins: [] },
+      documentation: { usage: 'Edit in the shared template.' },
+    })
+    try {
+      const { rootId } = freshStore()
+      const listed = expectToolData<{
+        entries: Array<{ constraints: Record<string, unknown> }>
+      }>(await executeAgentTool('site_list_component_library', {
+        search: 'Shared chrome',
+      }))
+      expect(listed.entries[0]?.constraints).toEqual({
+        allowedDocumentKinds: ['template'],
+        maxInstancesPerDocument: 1,
+      })
+
+      const pageInsert = await executeAgentTool('site_insert_component', {
+        entryId,
+        parentId: rootId,
+      })
+      expectToolError(pageInsert)
+      expect(pageInsert.error).toContain('can only be placed in a template')
+
+      const pageId = useEditorStore.getState().activePageId!
+      expectToolOk(await executeAgentTool('site_set_page_template', {
+        pageId,
+        target: { kind: 'everywhere' },
+      }))
+      expectToolOk(await executeAgentTool('site_insert_component', {
+        entryId,
+        parentId: rootId,
+      }))
+      const duplicate = await executeAgentTool('site_insert_component', {
+        entryId,
+        parentId: rootId,
+      })
+      expectToolError(duplicate)
+      expect(duplicate.error).toContain('at most 1 instance per template')
+    } finally {
+      componentLibraryRegistry.unregister(entryId)
+    }
+  })
+
   it('lists live plugin-owned entries without exposing registered option values', async () => {
     componentLibraryRegistry.register({
       id: 'test.mcp-plugin-button',
@@ -150,6 +262,45 @@ describe('executeAgentTool — governed Component Library', () => {
     })
     expectToolError(wrongType)
     expect(activePage().nodes[inserted.nodeId]?.props.label).toBe('Buy now')
+  })
+
+  it('authors typed Navigation records through the shared Agent and MCP tool contract', async () => {
+    const { rootId } = freshStore()
+    const inserted = expectToolData<{ nodeId: string; entryVersion: string }>(
+      await executeAgentTool('site_insert_component', {
+        entryId: publicId('base.navigation'),
+        parentId: rootId,
+      }),
+    )
+    expect(inserted.entryVersion).toBe('2.0.0')
+
+    expectToolOk(await executeAgentTool('site_update_component_field', {
+      nodeId: inserted.nodeId,
+      fieldKey: 'items',
+      value: [{
+        label: 'About us',
+        href: '/about',
+        target: '_self',
+        current: true,
+      }],
+    }))
+    expect(activePage().nodes[inserted.nodeId]?.props.propOverrides).toMatchObject({
+      items: [{ label: 'About us', href: '/about', target: '_self', current: true }],
+    })
+
+    const undeclared = await executeAgentTool('site_update_component_field', {
+      nodeId: inserted.nodeId,
+      fieldKey: 'items',
+      value: [{
+        label: 'Unsafe',
+        href: '/unsafe',
+        target: '_self',
+        current: false,
+        onclick: 'run()',
+      }],
+    })
+    expectToolError(undeclared)
+    expect(undeclared.error).toContain('undeclared key')
   })
 
   it('enforces placement and resolves registered variants by id', async () => {

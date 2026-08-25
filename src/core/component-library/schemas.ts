@@ -138,7 +138,7 @@ export const ComponentLibraryStatusSchema = Type.Union([
 
 export type ComponentLibraryStatus = Static<typeof ComponentLibraryStatusSchema>
 
-const ComponentLibraryFieldTypeSchema = Type.Union([
+const ComponentLibraryScalarFieldTypeSchema = Type.Union([
   Type.Literal('text'),
   Type.Literal('rich-text'),
   Type.Literal('number'),
@@ -151,20 +151,94 @@ const ComponentLibraryFieldTypeSchema = Type.Union([
   Type.Literal('design-token'),
 ])
 
-export const ComponentLibraryFieldSchema = Type.Object(
+const ComponentLibraryRepeaterItemFieldTypeSchema = Type.Union([
+  Type.Literal('text'),
+  Type.Literal('number'),
+  Type.Literal('boolean'),
+  Type.Literal('select'),
+  Type.Literal('url'),
+])
+
+const ComponentLibraryRepeaterOptionSchema = Type.Object(
+  {
+    label: Type.String({ minLength: 1 }),
+    value: Type.String(),
+  },
+  { additionalProperties: false },
+)
+
+export const ComponentLibraryRepeaterItemFieldSchema = Type.Object(
+  {
+    key: PropertyKeySchema,
+    label: Type.String({ minLength: 1 }),
+    description: Type.Optional(Type.String()),
+    type: ComponentLibraryRepeaterItemFieldTypeSchema,
+    required: Type.Boolean(),
+    options: Type.Optional(Type.Array(ComponentLibraryRepeaterOptionSchema)),
+  },
+  { additionalProperties: false },
+)
+
+export type ComponentLibraryRepeaterItemField = Static<
+  typeof ComponentLibraryRepeaterItemFieldSchema
+>
+
+const ComponentLibraryScalarFieldSchema = Type.Object(
   {
     /** Canonical backing prop key; camelCase module properties are valid. */
     key: PropertyKeySchema,
     label: Type.String({ minLength: 1 }),
     description: Type.Optional(Type.String()),
-    type: ComponentLibraryFieldTypeSchema,
+    type: ComponentLibraryScalarFieldTypeSchema,
     required: Type.Boolean(),
     advanced: Type.Optional(Type.Boolean()),
   },
   { additionalProperties: false },
 )
 
+const ComponentLibraryRepeaterFieldSchema = Type.Object(
+  {
+    /** Canonical backing prop key containing an ordered array of records. */
+    key: PropertyKeySchema,
+    label: Type.String({ minLength: 1 }),
+    description: Type.Optional(Type.String()),
+    type: Type.Literal('repeater'),
+    required: Type.Boolean(),
+    advanced: Type.Optional(Type.Boolean()),
+    itemLabel: Type.String({ minLength: 1 }),
+    itemFields: Type.Array(ComponentLibraryRepeaterItemFieldSchema, {
+      minItems: 1,
+    }),
+    minItems: Type.Integer({ minimum: 0 }),
+    maxItems: Type.Optional(Type.Integer({ minimum: 0 })),
+  },
+  { additionalProperties: false },
+)
+
+export const ComponentLibraryFieldSchema = Type.Union([
+  ComponentLibraryScalarFieldSchema,
+  ComponentLibraryRepeaterFieldSchema,
+])
+
 export type ComponentLibraryField = Static<typeof ComponentLibraryFieldSchema>
+
+export const ComponentLibraryCompositionSchema = Type.Union([
+  Type.Literal('leaf'),
+  Type.Literal('container'),
+])
+
+export type ComponentLibraryComposition = Static<
+  typeof ComponentLibraryCompositionSchema
+>
+
+export const ComponentLibraryDocumentKindSchema = Type.Union([
+  Type.Literal('page'),
+  Type.Literal('template'),
+])
+
+export type ComponentLibraryDocumentKind = Static<
+  typeof ComponentLibraryDocumentKindSchema
+>
 
 const ComponentLibraryOptionSchema = Type.Object(
   {
@@ -198,6 +272,10 @@ export type ComponentLibrarySlot = Static<typeof ComponentLibrarySlotSchema>
 
 export const ComponentLibraryConstraintsSchema = Type.Object(
   {
+    allowedDocumentKinds: Type.Optional(
+      Type.Array(ComponentLibraryDocumentKindSchema, { uniqueItems: true }),
+    ),
+    maxInstancesPerDocument: Type.Optional(Type.Integer({ minimum: 1 })),
     allowedParentEntryIds: Type.Optional(
       Type.Array(NamespacedIdSchema, { uniqueItems: true }),
     ),
@@ -234,21 +312,27 @@ export const ComponentLibraryDocumentationSchema = Type.Object(
   { additionalProperties: false },
 )
 
-export const ComponentLibraryAccessibilityRuleSchema = Type.Union([
-  Type.Literal('a11y.accessible-name'),
-  Type.Literal('a11y.heading-order'),
-  Type.Literal('a11y.form-control-label'),
-  Type.Literal('a11y.unique-field-id'),
-  Type.Literal('a11y.keyboard-contract'),
-  Type.Literal('a11y.focus-contract'),
-  Type.Literal('a11y.announcement-contract'),
-  Type.Literal('a11y.no-javascript-fallback'),
-  Type.Literal('a11y.provider-fallback'),
-  Type.Literal('a11y.image-alternative'),
-  Type.Literal('a11y.motion-control'),
-  Type.Literal('a11y.contrast'),
-  Type.Literal('a11y.touch-target'),
-])
+export const COMPONENT_LIBRARY_ACCESSIBILITY_RULES = [
+  'a11y.semantic-structure',
+  'a11y.accessible-name',
+  'a11y.heading-order',
+  'a11y.form-control-label',
+  'a11y.unique-field-id',
+  'a11y.keyboard-contract',
+  'a11y.focus-contract',
+  'a11y.dismissal-contract',
+  'a11y.announcement-contract',
+  'a11y.no-javascript-fallback',
+  'a11y.provider-fallback',
+  'a11y.image-alternative',
+  'a11y.motion-control',
+  'a11y.contrast',
+  'a11y.touch-target',
+] as const
+
+export const ComponentLibraryAccessibilityRuleSchema = Type.Union(
+  COMPONENT_LIBRARY_ACCESSIBILITY_RULES.map((rule) => Type.Literal(rule)),
+)
 
 export type ComponentLibraryAccessibilityRule = Static<
   typeof ComponentLibraryAccessibilityRuleSchema
@@ -258,6 +342,7 @@ export const ComponentLibraryAccessibilityCategorySchema = Type.Union([
   Type.Literal('semantic'),
   Type.Literal('keyboard'),
   Type.Literal('focus'),
+  Type.Literal('dismissal'),
   Type.Literal('naming'),
   Type.Literal('heading'),
   Type.Literal('form'),
@@ -266,6 +351,7 @@ export const ComponentLibraryAccessibilityCategorySchema = Type.Union([
   Type.Literal('contrast'),
   Type.Literal('touch'),
   Type.Literal('provider'),
+  Type.Literal('no-javascript'),
 ])
 
 export type ComponentLibraryAccessibilityCategory = Static<
@@ -298,9 +384,24 @@ export type ComponentLibraryAccessibilityCheck = Static<
   typeof ComponentLibraryAccessibilityCheckSchema
 >
 
+export const ComponentLibraryAccessibilityNotApplicableSchema = Type.Object(
+  {
+    rule: ComponentLibraryAccessibilityRuleSchema,
+    rationale: Type.String({ minLength: 1 }),
+  },
+  { additionalProperties: false },
+)
+
+export type ComponentLibraryAccessibilityNotApplicable = Static<
+  typeof ComponentLibraryAccessibilityNotApplicableSchema
+>
+
 export const ComponentLibraryAccessibilityContractSchema = Type.Object(
   {
     checks: Type.Array(ComponentLibraryAccessibilityCheckSchema),
+    notApplicable: Type.Optional(
+      Type.Array(ComponentLibraryAccessibilityNotApplicableSchema),
+    ),
   },
   { additionalProperties: false },
 )
@@ -329,6 +430,8 @@ export const ComponentLibraryEntrySchema = Type.Object(
     icon: LocalIdSchema,
     source: ComponentLibrarySourceSchema,
     status: ComponentLibraryStatusSchema,
+    /** Explicit authoring shape. Leaf components must never expose slots. */
+    composition: Type.Optional(ComponentLibraryCompositionSchema),
     replacementEntryId: Type.Optional(NamespacedIdSchema),
     implementation: ComponentLibraryImplementationSchema,
     fields: Type.Array(ComponentLibraryFieldSchema),

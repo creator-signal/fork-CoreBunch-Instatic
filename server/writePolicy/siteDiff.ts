@@ -92,6 +92,44 @@ export function validateSiteWriteDiff(
   next: SiteShell,
   capabilities: readonly CoreCapability[],
 ): void {
+  // A plugin pack is the only normal writer of a public-authoring policy.
+  // Once installed, ordinary site writes cannot remove, replace or weaken it.
+  if (!deepEqual(previous?.settings.publicAuthoring, next.settings.publicAuthoring)) {
+    fail(
+      'structure',
+      'settings.publicAuthoring',
+      'public-authoring policy changes require an owning plugin pack reconciliation',
+    )
+  }
+
+  const publicAuthoring = previous?.settings.publicAuthoring
+  if (publicAuthoring) {
+    if (!deepEqual(previous?.settings.framework, next.settings.framework)) {
+      fail('style', 'settings.framework', 'governed appearance is component-owned')
+    }
+    if (!deepEqual(previous?.settings.fonts, next.settings.fonts)) {
+      fail('style', 'settings.fonts', 'governed typography is component-owned')
+    }
+    if (!deepEqual(previous?.breakpoints, next.breakpoints)) {
+      fail('style', 'breakpoints', 'governed responsive behavior is component-owned')
+    }
+    if (!deepEqual(previous?.styleRules, next.styleRules)) {
+      fail('style', 'styleRules', 'governed styles are reconciled by the owning plugin pack')
+    }
+    if (!deepEqual(previous?.conditions, next.conditions)) {
+      fail('style', 'conditions', 'governed responsive conditions are component-owned')
+    }
+    if (!deepEqual(previous?.files, next.files)) {
+      fail('structure', 'files', 'governed public files are reconciled by the owning plugin pack')
+    }
+    if (!deepEqual(previous?.packageJson, next.packageJson)) {
+      fail('structure', 'packageJson', 'governed public dependencies are policy-owned')
+    }
+    if (!deepEqual(previous?.runtime, next.runtime)) {
+      fail('structure', 'runtime', 'governed public runtime configuration is policy-owned')
+    }
+  }
+
   // Fast path: a caller with the full set never needs the diff — they can
   // make any change. Saves cycles on the common case.
   if (
@@ -242,5 +280,4 @@ function diffFiles(
     }
   }
 }
-
 

@@ -20,18 +20,7 @@
  */
 
 import type { Page, SiteDocument } from '@core/page-tree'
-import {
-  resolveTemplateChain,
-  treeHasOutlet,
-  type RouteResolutionContext,
-} from '@core/templates'
-
-/** Breadth rank: lower wraps higher. Non-template pages are the innermost. */
-function levelRank(page: Page): number {
-  const target = page.template?.target
-  if (!target) return 2
-  return target.kind === 'everywhere' ? 0 : 1
-}
+import { resolvePageWrapperTemplates } from '@core/templates'
 
 /**
  * The templates that wrap `activeDoc` at publish time, ordered outermost-first.
@@ -39,24 +28,5 @@ function levelRank(page: Page): number {
  * matching wrapper template has an outlet to host it).
  */
 export function resolveEditorWrapperTemplates(site: SiteDocument, activeDoc: Page): Page[] {
-  const myRank = levelRank(activeDoc)
-  // An `everywhere` template (rank 0) is the broadest — never wrapped.
-  if (myRank <= 0) return []
-
-  const target = activeDoc.template?.target
-  let ctx: RouteResolutionContext
-  if (target?.kind === 'postTypes') {
-    const tableSlug = target.tableSlugs[0]
-    if (!tableSlug) return []
-    ctx = { kind: 'entry', tableSlug }
-  } else {
-    ctx = { kind: 'page' }
-  }
-
-  // Keep only templates strictly broader than the active doc (so a sibling
-  // postTypes winner for the same route never wraps another postTypes template)
-  // that actually have an outlet to host the wrapped content.
-  return resolveTemplateChain(site, ctx).filter(
-    (page) => page.id !== activeDoc.id && levelRank(page) < myRank && treeHasOutlet(page),
-  )
+  return resolvePageWrapperTemplates(site, activeDoc)
 }

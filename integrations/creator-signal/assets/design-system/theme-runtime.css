@@ -1,0 +1,81 @@
+/* Generated from theme/source.json v0.1.0. Do not edit. */
+/* Behavioural theme adapter layered after tokens.css. */
+:root {
+  color-scheme: light;
+  scrollbar-color: var(--cs-border-strong) var(--cs-surface-canvas);
+  accent-color: var(--cs-action-primary-background);
+}
+
+[data-cs-theme="light"] {
+  color-scheme: light;
+}
+
+[data-cs-theme="dark"] {
+  color-scheme: dark;
+}
+
+::selection {
+  background: var(--cs-selection-background);
+  color: var(--cs-selection-foreground);
+}
+
+[data-cs-image-surface] {
+  background-color: var(--cs-surface-base);
+  color-scheme: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --cs-motion-duration-fast: 0ms;
+    --cs-motion-duration-normal: 0ms;
+    --cs-motion-duration-slow: 0ms;
+    --cs-motion-easing-standard: linear;
+    --cs-motion-easing-emphasised: linear;
+  }
+}
+
+@media (forced-colors: active) {
+  :root,
+  [data-cs-theme] {
+    --cs-surface-canvas: Canvas;
+    --cs-surface-base: Canvas;
+    --cs-surface-subtle: Canvas;
+    --cs-surface-raised: Canvas;
+    --cs-text-primary: CanvasText;
+    --cs-text-secondary: CanvasText;
+    --cs-text-muted: GrayText;
+    --cs-border-default: CanvasText;
+    --cs-border-strong: CanvasText;
+    --cs-action-primary-background: ButtonFace;
+    --cs-action-primary-foreground: ButtonText;
+    --cs-action-secondary-background: ButtonFace;
+    --cs-action-secondary-foreground: ButtonText;
+    --cs-focus-ring: Highlight;
+    --cs-selection-background: Highlight;
+    --cs-selection-foreground: HighlightText;
+    scrollbar-color: auto;
+    forced-color-adjust: auto;
+  }
+}
+
+@media print {
+  :root,
+  [data-cs-theme] {
+    /* The runtime sets color-scheme inline for the first frame. Print must win. */
+    color-scheme: light !important;
+    --cs-surface-canvas: #FFFFFF;
+    --cs-surface-base: #FFFFFF;
+    --cs-surface-subtle: #FFFFFF;
+    --cs-surface-raised: #FFFFFF;
+    --cs-text-primary: #000000;
+    --cs-text-secondary: #000000;
+    --cs-text-muted: #333333;
+    --cs-border-default: #666666;
+    --cs-border-strong: #000000;
+    --cs-action-primary-background: #FFFFFF;
+    --cs-action-primary-foreground: #000000;
+    --cs-action-secondary-background: #FFFFFF;
+    --cs-action-secondary-foreground: #000000;
+    --cs-focus-ring: #000000;
+  }
+}

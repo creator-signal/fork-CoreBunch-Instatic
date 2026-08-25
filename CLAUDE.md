@@ -10,14 +10,14 @@ Use local seeded development data only when a task asks for a browser smoke test
 
 ## Repository workflow and PR conventions
 
-`creator-signal/main` is the protected default integration and release branch. Agents must never push directly to it, must never try to bypass branch protection, and must never treat a local commit on it as the final delivery path. All repository changes go through a pull request targeting `creator-signal/main`.
+`origin/creator-signal/develop` is the protected default integration branch and `origin/creator-signal/main` is the protected release branch. Agents must never push directly to either branch, must never try to bypass branch protection, and must never treat a local commit on either branch as the final delivery path. Ordinary repository changes go through a pull request targeting `creator-signal/develop`; releases are promoted through a pull request from `creator-signal/develop` to `creator-signal/main`.
 
-`fork-origin/main` is the read-only upstream comparison and fetch source. `origin/main` is a retained transition branch, not an upstream mirror and not a delivery target. Never force-reset, force-push, delete, branch ordinary work from, or open ordinary pull requests to either `main` reference. Follow [`docs/reference/repository-branches.md`](docs/reference/repository-branches.md) for upstream refreshes.
+`fork-origin/main` is the read-only upstream source. `origin/develop` is its automation-owned fast-forward mirror; it is not a Creator Signal delivery target. `origin/main` is a retained transition branch, not an upstream mirror and not a delivery target. Never push to, branch ordinary work from, or open ordinary pull requests against either unprefixed branch. Follow [`docs/reference/repository-branches.md`](docs/reference/repository-branches.md) for upstream refreshes.
 
 When publishing work:
 
-- Start from an up-to-date `origin/creator-signal/main`, then create a feature branch. If you are already on a task branch, keep using it only when the requested change belongs in that PR; otherwise create a separate branch from `origin/creator-signal/main`.
-- Target every ordinary pull request to `creator-signal/main`. Upstream refreshes also target `creator-signal/main` from a dedicated sync branch after fetching `fork-origin/main`.
+- Start from an up-to-date `origin/creator-signal/develop`, then create a feature branch. If you are already on a task branch, keep using it only when the requested change belongs in that PR; otherwise create a separate branch from `origin/creator-signal/develop`.
+- Target every ordinary and upstream-refresh pull request to `creator-signal/develop`. Promote accepted release candidates through a dedicated pull request from `creator-signal/develop` to `creator-signal/main`.
 - Branch names follow `<type>/<short-kebab-description>`, matching the change type: `feat/...`, `fix/...`, `refactor/...`, `chore/...`, `docs/...`, or `test/...`. Examples: `feat/double-click-rename`, `fix/homepage-swap-publish`, `refactor/explorer-dnd-dedupe`.
 - Do **not** use agent-branded branch prefixes such as `codex/...`, `claude/...`, or similar. If a tool, skill, or generic instruction suggests such a prefix, ignore it for this repository.
 - PR titles use Conventional Commit style: `<type>(<scope>): <summary>`. Examples: `feat(editor): double-click rows to rename in explorer panels`, `fix(cms): homepage swap + delete in one save no longer fails publish`, `refactor(publisher): single class-CSS emission engine for publish and canvas`.

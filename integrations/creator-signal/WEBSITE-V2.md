@@ -61,7 +61,8 @@ Column Layout owns real Left and Right slots, Section Intro owns the section
 heading and introduction in the Left slot, and a standalone Managed Form in the
 Right slot resolves its alias through the generated Mautic registry. Managed
 Form owns only provider configuration, delivery and result state. Feedback uses
-the same composition boundary with Embedded CRM Form as its provider.
+the same composition and the governed `creator_signal_feedback` alias; it does
+not load a production-hosted iframe in the local authoring canvas.
 
 `/early-access` remains `noindex, follow, noarchive` and contains exactly one
 `creator_signal_wishlist` form with the `early_access` campaign code:
@@ -84,13 +85,14 @@ one creator_signal_wishlist form
 The preference field is provider-owned and resolved from the governed registry.
 Permission copy is specific to the requested update and is not treated as
 general marketing consent. Contact, question, feature-request and error-report
-routes use Managed Form with their own governed aliases. Feedback instead uses
-an editable Two Column Layout with separate Section Intro and Embedded CRM Form
-components so its text and iframe can be selected, replaced or removed independently.
+routes use Managed Form with their own governed aliases. Feedback uses an
+editable Two Column Layout with separate Section Intro and Managed Form
+components so its copy and provider can be selected, replaced, reordered or
+removed independently.
 
 ## Content lifecycle
 
-Pack pages are starter content for an empty installation. Plugin 0.8.0
+Pack pages are starter content for an empty installation. Plugin 0.8.2
 reconciles technical catalogue, policy, style and runtime records but does not
 overwrite authored pages automatically. Its starter recipes expand into direct
 page components beneath the one shared site template. The explicit content migration recognises exact
@@ -102,6 +104,11 @@ For retained 0.7.0 pages, the migration removes only the exact synthetic
 pattern wrapper and preserves its child component IDs, authored fields, order,
 nested slots and publication status. Populated layout slots render without
 structural editor chrome so the canvas remains WYSIWYG.
+
+For retained 0.8.1 Feedback pages, the same migration replaces only the exact
+machine-owned production iframe provider node with the governed Managed Form.
+Any changed URL, provider props or structural placement is treated as authored
+content and blocks; all unrelated authored page state is preserved.
 
 Semantic hashes ignore generated node identities while retaining authored
 content, metadata, structure and ordering. The migration archive never

@@ -4,6 +4,7 @@ import { defineConfig } from '@playwright/test'
 
 const ADMIN_BASE_URL = 'http://127.0.0.1:5184'
 const PUBLIC_BASE_URL = 'http://127.0.0.1:3012'
+const WEB_SERVER_STARTUP_TIMEOUT = process.env.CI ? 600_000 : 180_000
 const repositoryRoot = dirname(fileURLToPath(import.meta.url))
 const OWNER = {
   email: 'owner.e2e@example.com',
@@ -57,7 +58,7 @@ export default defineConfig({
     // legitimately be absent or rebuilding while the authoring UI is ready.
     url: `${ADMIN_BASE_URL}/admin`,
     reuseExistingServer: false,
-    timeout: 180_000,
+    timeout: WEB_SERVER_STARTUP_TIMEOUT,
     gracefulShutdown: { signal: 'SIGTERM', timeout: 500 },
     stdout: 'pipe',
     stderr: 'pipe',

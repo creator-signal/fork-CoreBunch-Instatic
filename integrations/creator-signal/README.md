@@ -116,10 +116,10 @@ relying on plugin upgrade reconciliation.
 
 ### Upgrade existing retained starter content
 
-Installing plugin 0.8.0 runs the versioned technical-pack upgrade, installs the
-public-authoring policy and does not change existing pages automatically. The
-authored-content migration remains version 0.2.0 and now unwraps retained 0.7.0
-page recipes without publishing.
+Installing plugin 0.8.1 runs the versioned technical-pack upgrade, installs the
+public-authoring policy and WYSIWYG Two Column definition, and does not change
+existing pages automatically. The authored-content migration remains version
+0.2.0 and now unwraps retained 0.7.0 page recipes without publishing.
 Export the complete site from **Admin → Export**, then run the read-only
 classifier:
 

@@ -6,6 +6,21 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.41 - 2026-08-25
+
+### Stable authorable Creator Signal page composition
+
+- Expanded optional Creator Signal page recipes into their real child
+  components so retained pages no longer persist an opaque page-pattern owner;
+  every page section remains independently selectable, configurable, movable,
+  replaceable and removable through the Components editor.
+- Rendered the protected Two Column Layout definition as real responsive left
+  and right WYSIWYG slot placeholders while preserving author-controlled slot
+  content in ordinary pages.
+- Clarified that patterns are insertion recipes, shared-template content is
+  edited once in the CMS, and plugin releases own technical definitions rather
+  than authored page or template content.
+
 ## 0.0.40 - 2026-08-24
 
 ### Creator Signal retained-content operations

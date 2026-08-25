@@ -1,6 +1,6 @@
 # Creator Signal page-body authoring audit
 
-This audit records the governed 0.8.0 starter composition for every public
+This audit records the governed 0.8.1 starter composition for every public
 route. The site uses one shared chrome template; every route body contains its
 real component roots and no persisted page-pattern wrapper. It is enforced by `creatorSignalPageAuthoringReference` and
 `creatorSignalPageBodyComponentBoundaries` in `pack/site.ts` plus the

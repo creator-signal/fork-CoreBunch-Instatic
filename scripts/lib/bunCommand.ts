@@ -11,5 +11,6 @@ export function bunRunCommand(...args: string[]): string[] {
 }
 
 export function viteCommand(...args: string[]): string[] {
-  return bunCommand(viteEntrypointPath, ...args)
+  const configuredRuntime = process.env.INSTATIC_VITE_RUNTIME?.trim()
+  return [configuredRuntime || process.execPath, viteEntrypointPath, ...args]
 }

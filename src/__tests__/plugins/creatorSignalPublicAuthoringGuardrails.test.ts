@@ -227,11 +227,11 @@ describe('Creator Signal public authoring guardrails', () => {
     ]))
   })
 
-  it('allows authors to reshape Feedback and remove its standalone iframe from the right slot', () => {
+  it('allows authors to reshape Feedback and remove its managed form from the right slot', () => {
     const site = governedSite()
     const page = site.pages.find((candidate) => candidate.slug === 'feedback')!
     const form = Object.values(page.nodes).find(
-      (node) => node.catalogueInstance?.entryId === 'creator-signal.site.crm-iframe-form',
+      (node) => node.catalogueInstance?.entryId === 'creator-signal.site.mautic-form',
     )!
     const rightSlot = page.nodes[form.parentId!]!
     const hero = Object.values(page.nodes).find(

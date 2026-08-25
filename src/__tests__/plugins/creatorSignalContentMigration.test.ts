@@ -9,7 +9,7 @@ import {
   type SiteBundleArchiveManifest,
 } from '@core/data/bundleArchive'
 import type { DataRow, DataTable } from '@core/data/schemas'
-import { pageToCells } from '@core/data/pageFromRow'
+import { pageFromRow, pageToCells } from '@core/data/pageFromRow'
 import type { Page } from '@core/page-tree'
 import { legacyCreatorSignalPageHashes0111 } from '../../../integrations/creator-signal/migrations/legacy-0.1.11-hashes'
 import { legacyCreatorSignalPages0111 } from '../../../integrations/creator-signal/migrations/legacy-0.1.11'
@@ -102,7 +102,9 @@ function retainedPatternWrappedPage(page: Page, patternId: string): Page {
   const wrapped = structuredClone(page)
   const body = wrapped.nodes[wrapped.rootNodeId]
   if (!body || body.moduleId !== 'base.body') throw new Error(`Missing body for ${page.slug}`)
-  const version = creatorSignalPatternEntries.find((entry) => entry.id === patternId)?.version
+  const version = patternId === 'creator-signal.site.pattern.feedback-page'
+    ? '1.0.0'
+    : creatorSignalPatternEntries.find((entry) => entry.id === patternId)?.version
   if (!version) throw new Error(`Missing pattern entry ${patternId}`)
   const wrapperId = `${wrapped.id}/retained-pattern-wrapper`
   const componentIds = [...body.children]
@@ -143,6 +145,58 @@ function retainedPatternWrappedManifest(): SiteBundleArchiveManifest {
     tables: [pagesTable],
     rows: pages.map(rowFor),
   }
+}
+
+function currentManifest(): SiteBundleArchiveManifest {
+  return {
+    schemaVersion: 1,
+    exportedAt: timestamp,
+    sourceSiteName: 'Creator Signal 0.8.2',
+    tables: [pagesTable],
+    rows: pack.pages.map((page) => rowFor(structuredClone(page))),
+  }
+}
+
+function retainedFeedbackIframeManifest(): SiteBundleArchiveManifest {
+  const source = currentManifest()
+  source.sourceSiteName = 'Creator Signal 0.8.1 with retained authored copy'
+  const feedbackRow = source.rows.find((row) => row.slug === 'feedback')!
+  const feedback = pageFromRow(feedbackRow)
+  const provider = Object.values(feedback.nodes).find((node) =>
+    node.moduleId === 'creator-signal.site.mautic-form')!
+  provider.moduleId = 'creator-signal.site.crm-iframe-form'
+  provider.props = {
+    formUrl: 'https://marketing.creatorsignal.me/form/creator-signal-feedback',
+    sectionId: 'feedback-form',
+    iframeTitle: 'Creator Signal feedback form',
+    fallbackLabel: 'Open the feedback form in a new tab',
+    initialHeight: 640,
+    maximumHeight: 2400,
+    minimumHeight: 320,
+    loadingMessage: 'Loading the feedback form…',
+    unavailableMessage: 'The feedback form cannot be displayed here right now.',
+  }
+  provider.catalogueInstance = {
+    entryId: 'creator-signal.site.crm-iframe-form',
+    entryVersion: '2.0.0',
+    variantId: 'default',
+  }
+  const hero = Object.values(feedback.nodes).find((node) =>
+    node.catalogueInstance?.entryId === 'creator-signal.site.hero')!
+  hero.props = {
+    ...hero.props,
+    propOverrides: {
+      ...(hero.props.propOverrides as Record<string, unknown>),
+      'creator-signal.site.hero.heading': 'Author-retained Feedback heading',
+    },
+  }
+  feedbackRow.cells = {
+    ...feedbackRow.cells,
+    ...pageToCells(feedback),
+    seoTitle: 'Author-retained Feedback SEO title',
+  }
+  feedbackRow.seq = 37
+  return source
 }
 
 function legacyManifest(): SiteBundleArchiveManifest {
@@ -303,6 +357,77 @@ describe('Creator Signal 0.2.0 content migration', () => {
       .toBe(false)
     expect(migrated.status).toBe('published')
     expect(result.report.apply.publishesAutomatically).toBe(false)
+  })
+
+  it('surgically replaces the exact retained Feedback iframe without changing authored page state', () => {
+    const source = retainedFeedbackIframeManifest()
+    const retained = source.rows.find((row) => row.slug === 'feedback')!
+    const retainedPage = pageFromRow(retained)
+    const retainedProvider = Object.values(retainedPage.nodes).find((node) =>
+      node.moduleId === 'creator-signal.site.crm-iframe-form')!
+
+    const result = prepareCreatorSignalContentMigration(source, timestamp)
+
+    expect(result.report.ready).toBe(true)
+    expect(result.report.pages.find((page) => page.slug === 'feedback')).toMatchObject({
+      state: 'legacy-eligible',
+      retainedVersion: '0.8.1-feedback-iframe',
+    })
+    expect(result.report.summary).toMatchObject({
+      legacyEligible: 1,
+      alreadyCurrent: 25,
+      authoredContent: 0,
+      rowsInMigration: 1,
+      template: 'current',
+      notFoundTemplate: 'current',
+    })
+    const migrated = result.manifest?.rows[0]
+    expect(migrated).toMatchObject({
+      id: retained.id,
+      slug: 'feedback',
+      status: 'published',
+      seq: 37,
+      publishedAt: retained.publishedAt,
+    })
+    expect(migrated?.cells.seoTitle).toBe('Author-retained Feedback SEO title')
+    const migratedPage = pageFromRow(migrated!)
+    expect(migratedPage.nodes[retainedProvider.id]).toMatchObject({
+      id: retainedProvider.id,
+      parentId: retainedProvider.parentId,
+      moduleId: 'creator-signal.site.mautic-form',
+      catalogueInstance: {
+        entryId: 'creator-signal.site.mautic-form',
+        entryVersion: '2.0.0',
+        variantId: 'default',
+      },
+      props: {
+        formAlias: 'creator_signal_feedback',
+        formCode: 'creator_signal_feedback',
+        campaignCode: 'feedback',
+        sectionId: 'feedback-form',
+      },
+    })
+    const migratedHero = Object.values(migratedPage.nodes).find((node) =>
+      node.catalogueInstance?.entryId === 'creator-signal.site.hero')!
+    expect((migratedHero.props.propOverrides as Record<string, unknown>)[
+      'creator-signal.site.hero.heading'
+    ]).toBe('Author-retained Feedback heading')
+  })
+
+  it('blocks a Feedback iframe that differs from the exact retained machine-owned node', () => {
+    const source = retainedFeedbackIframeManifest()
+    const feedback = pageFromRow(source.rows.find((row) => row.slug === 'feedback')!)
+    const provider = Object.values(feedback.nodes).find((node) =>
+      node.moduleId === 'creator-signal.site.crm-iframe-form')!
+    provider.props.formUrl = 'https://marketing.creatorsignal.me/form/author-changed-feedback'
+    source.rows.find((row) => row.slug === 'feedback')!.cells = pageToCells(feedback)
+
+    const result = prepareCreatorSignalContentMigration(source, timestamp)
+
+    expect(result.report.ready).toBe(false)
+    expect(result.manifest).toBeNull()
+    expect(result.report.pages.find((page) => page.slug === 'feedback')?.state)
+      .toBe('authored-content')
   })
 
   it('repairs only the exact invalid 0.0.29 shared template', () => {

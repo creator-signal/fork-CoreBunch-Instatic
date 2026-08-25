@@ -6,6 +6,19 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.42 - 2026-08-25
+
+### Local WYSIWYG Feedback authoring
+
+- Replaced the Feedback page's production-hosted iframe with the same
+  capability-backed Managed Form component used by every other public intake
+  route, while retaining independently authorable Two Column slots.
+- Added a fail-closed retained-content repair that changes only the exact
+  machine-owned 0.8.1 Feedback iframe node and preserves all other authored
+  page components, IDs, order, fields and publication metadata.
+- Updated the Feedback insertion recipe to materialize a governed
+  `creator_signal_feedback` Managed Form instead of a remote iframe.
+
 ## 0.0.41 - 2026-08-25
 
 ### Stable authorable Creator Signal page composition

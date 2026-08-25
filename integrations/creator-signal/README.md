@@ -116,10 +116,11 @@ relying on plugin upgrade reconciliation.
 
 ### Upgrade existing retained starter content
 
-Installing plugin 0.8.1 runs the versioned technical-pack upgrade, installs the
+Installing plugin 0.8.2 runs the versioned technical-pack upgrade, installs the
 public-authoring policy and WYSIWYG Two Column definition, and does not change
 existing pages automatically. The authored-content migration remains version
-0.2.0 and now unwraps retained 0.7.0 page recipes without publishing.
+0.2.0, unwraps retained 0.7.0 page recipes, and surgically replaces the exact
+machine-owned 0.8.1 Feedback iframe with a Managed Form without publishing.
 Export the complete site from **Admin → Export**, then run the read-only
 classifier:
 

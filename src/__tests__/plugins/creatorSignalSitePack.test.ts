@@ -189,7 +189,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.8.1')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.8.2')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -276,7 +276,7 @@ describe('Creator Signal site pack', () => {
     ]))
   })
 
-  it('composes Feedback from independently editable columns, copy and iframe components', () => {
+  it('composes Feedback from independently editable columns, copy and managed form components', () => {
     const feedback = publicPages.find((page) => page.slug === 'feedback')!
     const nodes = Object.values(feedback.nodes)
     const layout = nodes.find((node) =>
@@ -302,10 +302,16 @@ describe('Creator Signal site pack', () => {
       props: { heading: 'Share your feedback' },
     })
     expect(feedback.nodes[rightSlot.children[0]!]).toMatchObject({
-      moduleId: 'creator-signal.site.crm-iframe-form',
-      catalogueInstance: { entryId: 'creator-signal.site.crm-iframe-form' },
-      props: { formUrl: 'https://marketing.creatorsignal.me/form/creator-signal-feedback' },
+      moduleId: 'creator-signal.site.mautic-form',
+      catalogueInstance: { entryId: 'creator-signal.site.mautic-form' },
+      props: {
+        formAlias: 'creator_signal_feedback',
+        formCode: 'creator_signal_feedback',
+        campaignCode: 'feedback',
+        sectionId: 'feedback-form',
+      },
     })
+    expect(nodes.some((node) => node.moduleId === 'creator-signal.site.crm-iframe-form')).toBe(false)
   })
 
   it('materializes every governed public pattern through the editor registry', () => {
@@ -605,7 +611,7 @@ describe('Creator Signal site pack', () => {
     expect(output).toContain('class="signal-comparison-grid"')
   })
 
-  it('publishes Feedback as left-column copy followed by a standalone right-column iframe', () => {
+  it('publishes Feedback as left-column copy followed by a standalone right-column managed form', () => {
     const modules = Object.fromEntries(registry.list().map((module) => [module.id, module]))
     for (const definition of creatorSignalPlugin.modules) {
       modules[definition.id] = pluginModuleToHostModule(
@@ -627,12 +633,13 @@ describe('Creator Signal site pack', () => {
 
     expect(output).toContain('class="two-column-layout"')
     expect(output).toContain('<h2 id="feedback-introduction">Share your feedback</h2>')
-    expect(output).toContain('src="https://marketing.creatorsignal.me/form/creator-signal-feedback"')
+    expect(output).toContain('data-form-alias="creator_signal_feedback"')
     expect(output.indexOf('Share your feedback')).toBeLessThan(
-      output.indexOf('data-cs-crm-iframe-form'),
+      output.indexOf('data-form-alias="creator_signal_feedback"'),
     )
     expect(output.match(/Share your feedback/g)).toHaveLength(1)
-    expect(output).not.toContain('data-form-alias="creator_signal_feedback"')
+    expect(output).not.toContain('data-cs-crm-iframe-form')
+    expect(output).not.toContain('https://marketing.creatorsignal.me/form/creator-signal-feedback')
   })
 
   it('publishes the governed not-found template through the shared site chrome', () => {

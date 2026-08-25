@@ -122,6 +122,48 @@ test.describe('Creator Signal route-wide WYSIWYG component projection', () => {
 })
 
 test.describe('Creator Signal direct top-level page composition', () => {
+  test('Home plugin sections expose canvas hover and selection affordances', async ({ page }) => {
+    await openSiteEditor(page)
+    await openSitePanel(page)
+    await page.getByRole('treeitem', {
+      name: /^Open page Creator Signal —/,
+    }).click()
+    await openComponentsPanel(page)
+
+    const tree = page.getByRole('tree', { name: 'Component page hierarchy' })
+    const homepageSections = tree.locator(
+      '[role="treeitem"][aria-level="3"][data-node-id]',
+    )
+    await expect(homepageSections).toHaveCount(11)
+
+    for (let index = 0; index < await homepageSections.count(); index += 1) {
+      const row = homepageSections.nth(index)
+      const nodeId = await requiredNodeId(row)
+      const label = (await row.innerText()).trim()
+
+      await test.step(label, async () => {
+        const canvasNode = canvasFrame(page).locator(
+          `[data-plugin-canvas-module="true"][data-node-id="${nodeId}"]`,
+        )
+        await expect(canvasNode).toHaveCount(1)
+        await canvasNode.scrollIntoViewIfNeeded()
+        await canvasNode.hover({ position: { x: 4, y: 4 } })
+        await expect(page.locator(
+          `[data-canvas-hover-ring="true"][data-node-id="${nodeId}"]`,
+        )).toBeVisible()
+
+        await canvasNode.click({ position: { x: 4, y: 4 } })
+        const selectionRings = page.locator(
+          `[data-canvas-selection-ring="true"][data-node-id="${nodeId}"]`,
+        )
+        await expect(selectionRings).toHaveCount(3)
+        await expect(selectionRings.first()).toBeVisible()
+        await expect(row).toHaveAttribute('aria-selected', 'true')
+        await expect(page.getByTestId('component-properties-view')).toBeVisible()
+      })
+    }
+  })
+
   test('Home supports add, configure, drag, remove and reload without a pattern owner', async ({ page }) => {
     const replacementHeading = 'A directly authored final step'
     await openSiteEditor(page)

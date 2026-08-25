@@ -153,9 +153,11 @@ test.describe('Creator Signal direct top-level page composition', () => {
         )).toBeVisible()
 
         await canvasNode.click({ position: { x: 4, y: 4 } })
-        await expect(page.locator(
+        const selectionRings = page.locator(
           `[data-canvas-selection-ring="true"][data-node-id="${nodeId}"]`,
-        )).toBeVisible()
+        )
+        await expect(selectionRings).toHaveCount(3)
+        await expect(selectionRings.first()).toBeVisible()
         await expect(row).toHaveAttribute('aria-selected', 'true')
         await expect(page.getByTestId('component-properties-view')).toBeVisible()
       })

@@ -1,6 +1,6 @@
 # Creator Signal page-body authoring audit
 
-This audit records the governed 0.8.1 starter composition for every public
+This audit records the governed 0.8.2 starter composition for every public
 route. The site uses one shared chrome template; every route body contains its
 real component roots and no persisted page-pattern wrapper. It is enforced by `creatorSignalPageAuthoringReference` and
 `creatorSignalPageBodyComponentBoundaries` in `pack/site.ts` plus the
@@ -16,7 +16,7 @@ Boundary classifications are intentional:
 
 `Columns(Intro | Managed)` means Two Column Layout (**Layout**) with Section
 Intro (**Atomic**) in the Left slot and Managed Form (**Provider**) in the Right
-slot. `Columns(Intro | CRM)` uses Embedded CRM Form (**Provider**) instead.
+slot.
 Populated slots render their real contents without structural labels or padding
 on the canvas, while empty slots remain discoverable drop targets.
 
@@ -28,7 +28,7 @@ on the canvas, while empty slots remain discoverable drop targets.
 | `/features` | Features Page | Hero → Feature Grid | Atomic leaves | None |
 | `/pricing` | Pricing Page | Hero → Feature Grid → Call to Action | Atomic leaves | None |
 | `/contact` | Contact Page | Hero → Columns(Intro \| Managed) | Atomic + Layout + Provider | Preview required |
-| `/feedback` | Feedback Page | Hero → Columns(Intro \| CRM) | Atomic + Layout + Provider | None; already composed in 0.6.0 |
+| `/feedback` | Feedback Page | Hero → Columns(Intro \| Managed) | Atomic + Layout + Provider | Preview required for the 0.8.1 iframe repair |
 | `/wishlist` | Contact Page | Hero → Columns(Intro \| Managed) | Atomic + Layout + Provider | Preview required |
 | `/early-access` | Early Access Page | Campaign Hero → Signal Strip → Feature Grid → Columns(Intro \| Managed) → Feature Grid → Feature Grid → Testimonial | Atomic + Layout + Provider | Preview required |
 | `/waitlist` | Contact Page | Hero → Columns(Intro \| Managed) | Atomic + Layout + Provider | Preview required |
@@ -56,6 +56,11 @@ inside real layout slots. The immutable `retained-0.6.0-hashes.ts` boundary
 recognises only untouched 0.6.0 starter rows. Any authored difference blocks
 the whole migration for manual mapping. A successful migration writes draft
 rows only; it never publishes content.
+
+Retained 0.8.1 Feedback rows receive a narrower repair: only the exact
+machine-owned iframe provider in the Right slot is changed to the governed
+Managed Form. The rest of the page, including authored component IDs, fields,
+order and publication metadata, is preserved. A near-match blocks.
 
 Retained 0.7.0 rows use the same real child components beneath one technical
 `creator-signal.site.pattern.*` container. The 0.8.0 migration recognises only

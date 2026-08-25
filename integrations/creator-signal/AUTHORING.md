@@ -93,7 +93,7 @@ Every row below is wrapped by the shared template. The sequence column lists onl
 | `/features` | Features | Hero → Feature Grid |
 | `/pricing` | Pricing | Hero → Feature Grid → Call to Action |
 | `/contact` | Contact | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
-| `/feedback` | Feedback | Hero → Two Column Layout (Left: Section Intro; Right: Embedded CRM Form) |
+| `/feedback` | Feedback | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
 | `/wishlist` | Join the wishlist | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
 | `/early-access` | Creator Signal Early Access | Campaign Hero → Signal Strip → Feature Grid → Two Column Layout (Left: Section Intro; Right: Managed Form) → Feature Grid → Feature Grid → Testimonial |
 | `/waitlist` | Join the waitlist | Hero → Two Column Layout (Left: Section Intro; Right: Managed Form) |
@@ -135,7 +135,7 @@ instead of duplicating it as a second implementation.
 | CTA | `creator-signal.site.pattern.call-to-action` | Existing Call to Action component |
 | FAQ | `creator-signal.site.pattern.faq` | Existing native-disclosure FAQ component |
 | Contact/intake page | `creator-signal.site.pattern.contact-page` | Hero → Two Column Layout with independent Section Intro and capability-backed Managed Form |
-| Feedback page | `creator-signal.site.pattern.feedback-page` | Hero → Two Column Layout with an independent Section Intro in the Left slot and Embedded CRM Form in the Right slot |
+| Feedback page | `creator-signal.site.pattern.feedback-page` | Hero → Two Column Layout with an independent Section Intro in the Left slot and capability-backed Managed Form in the Right slot |
 | Legal/trust document | `creator-signal.site.pattern.legal-trust-page` | Recipe that inserts one directly selectable versioned Public Document |
 | Article/content page | `creator-signal.site.pattern.article-content-page` | Hero → Rich Text Section |
 | Comparison section | `creator-signal.site.pattern.comparison-section` | Captioned row-and-column Comparison Section |
@@ -182,12 +182,14 @@ The catalogue contract lives in `integrations/creator-signal/component-library.t
 
 ## Embedded CRM Form resizing
 
-Use **Embedded CRM Form** when Mautic exposes a complete HTTPS form page. The
+Use **Embedded CRM Form** only when an author deliberately needs to embed a
+complete approved HTTPS form page that has no governed form-registry entry. The
 author chooses its Mautic URL, accessible iframe title, fallback link text and
 bounded initial/minimum/maximum height. The visible fallback link always opens
-the same form in a new tab. The component owns only the embed: place it in the
-Right slot of **Two Column Layout** for the Feedback treatment, and place an
-independent **Section Intro** or another suitable component in the Left slot.
+the same form in a new tab. It is an optional general-purpose component, not a
+site-template or route dependency. Creator Signal's governed public intake
+routes use **Managed Form** so Local, preview and public rendering resolve the
+same registry-backed capability without loading a production provider iframe.
 The built-in Teaser is not used by the starter because its contract requires a
 navigation destination; static form-introduction copy does not.
 
@@ -200,16 +202,17 @@ Feedback Page
     ├── Left
     │   └── Section Intro
     └── Right
-        └── Embedded CRM Form
+        └── Managed Form (`creator_signal_feedback`)
 ```
 
 Every named node above has its own Component Library entry and remains
 selectable. A `Missing library entry` label means the editor is running stale
 plugin catalogue records, not that the content has been intentionally hidden.
-Reconcile/install plugin 0.8.1 and use the previewed content migration for
-retained 0.7.0 pages. It removes only the exact technical recipe wrapper,
-preserves the authored child component IDs, fields and order, and never
-publishes automatically.
+Reconcile/install plugin 0.8.2 and use the previewed content migration for
+retained pages. It removes only an exact 0.7.0 technical recipe wrapper and
+replaces only the exact machine-owned 0.8.1 Feedback iframe node. Other
+authored component IDs, fields, order and publication metadata are preserved,
+and the migration never publishes automatically.
 
 If the Mautic form and public page have the same origin, Instatic observes the
 iframe document and updates its height automatically. For the usual

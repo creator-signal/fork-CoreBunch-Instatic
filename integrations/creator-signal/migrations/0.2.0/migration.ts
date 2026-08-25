@@ -144,6 +144,10 @@ const currentPatternVersionById = new Map(
   creatorSignalPatternEntries.map((entry) => [entry.id, entry.version]),
 )
 
+const retainedPatternVersionsById = new Map<string, ReadonlySet<string>>([
+  ['creator-signal.site.pattern.feedback-page', new Set(['1.0.0', '2.0.0'])],
+])
+
 export function retainedCreatorSignalPageVersion(
   pageId: string,
   hash: string,
@@ -215,6 +219,12 @@ export function prepareCreatorSignalContentMigration(
     const expandedCells = !retainedVersion && expectedPatternId
       ? expandCurrentPageRecipe(row, expectedPatternId)
       : null
+    const expandedFeedbackCells = expandedCells
+      ? repairRetainedFeedbackProvider({ ...row, cells: expandedCells }, target) ?? expandedCells
+      : null
+    const feedbackProviderRepair = !retainedVersion
+      ? repairRetainedFeedbackProvider(row, target)
+      : null
     if (currentHash === targetHash) {
       previews.push({ id: target.id, slug: target.slug, state: 'already-current', currentHash, legacyHash, targetHash })
     } else if (retainedVersion) {
@@ -235,7 +245,7 @@ export function prepareCreatorSignalContentMigration(
         updatedByUserId: null,
         updatedBy: null,
       })
-    } else if (expandedCells) {
+    } else if (expandedFeedbackCells) {
       previews.push({
         id: target.id,
         slug: target.slug,
@@ -247,7 +257,24 @@ export function prepareCreatorSignalContentMigration(
       })
       migrationRows.push({
         ...row,
-        cells: expandedCells,
+        cells: expandedFeedbackCells,
+        updatedAt: now,
+        updatedByUserId: null,
+        updatedBy: null,
+      })
+    } else if (feedbackProviderRepair) {
+      previews.push({
+        id: target.id,
+        slug: target.slug,
+        state: 'legacy-eligible',
+        currentHash,
+        legacyHash,
+        retainedVersion: '0.8.1-feedback-iframe',
+        targetHash,
+      })
+      migrationRows.push({
+        ...row,
+        cells: feedbackProviderRepair,
         updatedAt: now,
         updatedByUserId: null,
         updatedBy: null,
@@ -453,6 +480,8 @@ function expandCurrentPageRecipe(
 ): DataRow['cells'] | null {
   const expectedVersion = currentPatternVersionById.get(expectedPatternId)
   if (!expectedVersion) return null
+  const acceptedVersions = retainedPatternVersionsById.get(expectedPatternId)
+    ?? new Set([expectedVersion])
 
   const page = pageFromRow(row)
   const body = page.nodes[page.rootNodeId]
@@ -462,7 +491,7 @@ function expandCurrentPageRecipe(
     !wrapper ||
     wrapper.moduleId !== 'base.container' ||
     wrapper.catalogueInstance?.entryId !== expectedPatternId ||
-    wrapper.catalogueInstance.entryVersion !== expectedVersion ||
+    !acceptedVersions.has(wrapper.catalogueInstance.entryVersion) ||
     !wrapper.catalogueInstance.pattern ||
     !isTechnicalPageRecipeWrapper(wrapper, expectedPatternId)
   ) {
@@ -505,6 +534,87 @@ function isTechnicalPageRecipeWrapper(
     wrapper.locked === undefined &&
     wrapper.hidden === undefined
   )
+}
+
+const retainedFeedbackIframeProps = {
+  formUrl: 'https://marketing.creatorsignal.me/form/creator-signal-feedback',
+  sectionId: 'feedback-form',
+  iframeTitle: 'Creator Signal feedback form',
+  fallbackLabel: 'Open the feedback form in a new tab',
+  initialHeight: 640,
+  maximumHeight: 2400,
+  minimumHeight: 320,
+  loadingMessage: 'Loading the feedback form…',
+  unavailableMessage: 'The feedback form cannot be displayed here right now.',
+} as const
+
+/**
+ * Plugin 0.8.1 seeded Feedback with a production-hosted iframe even though the
+ * governed Mautic registry already provides a local, capability-backed form.
+ * Replace only that exact machine-owned provider node. The page's other
+ * components, node IDs, order, authored fields and publication metadata remain
+ * untouched; any near-match is treated as authored content and blocks.
+ */
+function repairRetainedFeedbackProvider(
+  row: DataRow,
+  target: (typeof pack.pages)[number],
+): DataRow['cells'] | null {
+  if (row.slug !== 'feedback' || target.slug !== 'feedback') return null
+
+  const page = pageFromRow(row)
+  const retainedProviders = Object.values(page.nodes).filter((node) =>
+    node.moduleId === 'creator-signal.site.crm-iframe-form')
+  if (retainedProviders.length !== 1) return null
+  const retained = retainedProviders[0]!
+  const parent = retained.parentId ? page.nodes[retained.parentId] : null
+  if (
+    canonicalSha256(retained.props) !== canonicalSha256(retainedFeedbackIframeProps) ||
+    canonicalSha256(retained.catalogueInstance) !== canonicalSha256({
+      entryId: 'creator-signal.site.crm-iframe-form',
+      entryVersion: '2.0.0',
+      variantId: 'default',
+    }) ||
+    retained.children.length !== 0 ||
+    retained.classIds.length !== 0 ||
+    Object.keys(retained.breakpointOverrides).length !== 0 ||
+    (retained.inlineStyles && Object.keys(retained.inlineStyles).length !== 0) ||
+    retained.propBindings !== undefined ||
+    retained.dynamicBindings !== undefined ||
+    retained.label !== undefined ||
+    retained.locked !== undefined ||
+    retained.hidden !== undefined ||
+    !parent ||
+    parent.moduleId !== 'base.slot-instance' ||
+    parent.props.slotName !== 'right' ||
+    parent.children.length !== 1 ||
+    parent.children[0] !== retained.id
+  ) {
+    return null
+  }
+
+  const targetProviders = Object.values(target.nodes).filter((node) =>
+    node.moduleId === 'creator-signal.site.mautic-form')
+  if (targetProviders.length !== 1) {
+    throw new Error('[creator-signal migration] Current Feedback target must contain one Managed Form.')
+  }
+  const targetProvider = targetProviders[0]!
+  if (!targetProvider.catalogueInstance) {
+    throw new Error('[creator-signal migration] Current Feedback Managed Form has no catalogue contract.')
+  }
+
+  page.nodes[retained.id] = {
+    ...retained,
+    moduleId: targetProvider.moduleId,
+    props: structuredClone(targetProvider.props),
+    catalogueInstance: structuredClone(targetProvider.catalogueInstance),
+  }
+  return {
+    ...row.cells,
+    body: {
+      nodes: page.nodes,
+      rootNodeId: page.rootNodeId,
+    },
+  }
 }
 
 function blockedReport(blocker: string): CreatorSignalMigrationReport {

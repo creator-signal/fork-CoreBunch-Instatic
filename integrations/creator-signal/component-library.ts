@@ -9,7 +9,6 @@ import { VisualComponentRefModule } from '@modules/base/visualComponentRef'
 import { heroComponent, heroParamIds } from './pack/hero-component'
 import { twoColumnComponent, twoColumnSlotIds } from './pack/two-column-component'
 import mauticForm from './modules/mautic-form'
-import crmIframeForm from './modules/crm-iframe-form'
 import {
   campaignHero,
   callToAction,
@@ -794,7 +793,7 @@ function pagePattern(
 function formColumnsPattern(
   id: string,
   childEntryIds: readonly string[],
-  providerEntryId: typeof creatorSignalMauticFormEntry.id | typeof creatorSignalCrmIframeFormEntry.id,
+  providerDefaults: Readonly<Record<string, unknown>> = mauticForm.defaults,
 ): ComponentLibraryPatternDefinition {
   if (childEntryIds.filter((entryId) => entryId === creatorSignalTwoColumnEntry.id).length !== 1) {
     throw new Error(
@@ -844,30 +843,12 @@ function formColumnsPattern(
     sectionIntro.id,
     { ...sectionIntro.defaults },
   )
-  const formNode = providerEntryId === creatorSignalCrmIframeFormEntry.id
-    ? componentNode(
-        'form-provider',
-        creatorSignalCrmIframeFormEntry.id,
-        crmIframeForm.id,
-        {
-          ...crmIframeForm.defaults,
-          sectionId: 'feedback-form',
-          formUrl: 'https://marketing.creatorsignal.me/form/creator-signal-feedback',
-          iframeTitle: 'Creator Signal feedback form',
-          fallbackLabel: 'Open the feedback form in a new tab',
-          loadingMessage: 'Loading the feedback form…',
-          unavailableMessage: 'The feedback form cannot be displayed here right now.',
-          initialHeight: 640,
-          minimumHeight: 320,
-          maximumHeight: 2400,
-        },
-      )
-    : componentNode(
-        'form-provider',
-        creatorSignalMauticFormEntry.id,
-        mauticForm.id,
-        { ...mauticForm.defaults },
-      )
+  const formNode = componentNode(
+    'form-provider',
+    creatorSignalMauticFormEntry.id,
+    mauticForm.id,
+    { ...providerDefaults },
+  )
 
   return {
     ...definition,
@@ -956,12 +937,26 @@ export const creatorSignalPatternDefinitions: readonly ComponentLibraryPatternDe
     .map((entry) => {
       const state = recoveryPatternStates[entry.patternId]
       if (state) return recoveryPattern(entry.patternId, state, entry.childEntryIds)
-      if (entry.patternId === 'creator-signal.site.pattern.feedback-page')
-        return formColumnsPattern(entry.patternId, entry.childEntryIds, creatorSignalCrmIframeFormEntry.id)
       if (
+        entry.patternId === 'creator-signal.site.pattern.feedback-page' ||
         entry.patternId === 'creator-signal.site.pattern.contact-page' ||
         entry.patternId === 'creator-signal.site.pattern.early-access-page'
-      ) return formColumnsPattern(entry.patternId, entry.childEntryIds, creatorSignalMauticFormEntry.id)
+      ) {
+        return formColumnsPattern(
+          entry.patternId,
+          entry.childEntryIds,
+          entry.patternId === 'creator-signal.site.pattern.feedback-page'
+            ? {
+                ...mauticForm.defaults,
+                sectionId: 'feedback-form',
+                formAlias: 'creator_signal_feedback',
+                formCode: 'creator_signal_feedback',
+                campaignCode: 'feedback',
+                successMessage: 'Thanks — your feedback helps us improve Creator Signal.',
+              }
+            : mauticForm.defaults,
+        )
+      }
       return pagePattern(entry.patternId, entry.childEntryIds)
     }),
 ]
@@ -1024,7 +1019,7 @@ export const creatorSignalPatternEntries: readonly ComponentLibraryEntry[] = [
   patternEntry({ id: 'creator-signal.site.pattern.pricing-page', version: '1.1.0', name: 'Pricing Page', description: 'Hero, a concise plan-card repeater and one next action.', tags: ['pricing', 'plans', 'cards'], usage: 'Use as a starting composition for the public plan overview and edit plan data or sections as needed.', accessibility: 'Keep plan names, prices and access boundaries understandable without relying on colour.' }),
   patternEntry({ id: 'creator-signal.site.pattern.features-page', name: 'Features Page', description: 'Hero and governed feature collection.', tags: ['features', 'capabilities', 'landing page'], usage: 'Use as a starting composition for a focused capability overview, then adjust it freely.', accessibility: 'Keep feature headings short and outcome focused.' }),
   patternEntry({ id: 'creator-signal.site.pattern.contact-page', version: '2.0.0', name: 'Contact Page', description: 'Hero followed by an editable two-column layout containing separate introductory copy and a capability-backed managed Mautic form.', tags: ['contact', 'form', 'mautic', 'columns'], usage: 'Use as a starting composition for contact and intake routes; edit the section copy and provider independently and choose a governed form alias rather than custom HTML.', accessibility: 'Keep the Section Intro before the managed form in reading order and preserve form labels, status announcements and privacy context.' }),
-  patternEntry({ id: 'creator-signal.site.pattern.feedback-page', name: 'Feedback Page', description: 'Hero followed by an editable two-column layout containing separate introductory copy and CRM embed components.', tags: ['feedback', 'form', 'iframe', 'columns'], usage: 'Use as the Feedback starting composition. Edit, reorder, replace, add or remove content independently in either column.', accessibility: 'Keep the Section Intro heading before the embedded form in reading order and preserve the iframe title and fallback link.' }),
+  patternEntry({ id: 'creator-signal.site.pattern.feedback-page', version: '2.0.0', name: 'Feedback Page', description: 'Hero followed by an editable two-column layout containing separate introductory copy and a capability-backed managed Mautic form.', tags: ['feedback', 'form', 'mautic', 'columns'], usage: 'Use as the Feedback starting composition. Edit, reorder, replace, add or remove content independently in either column, and choose a governed form alias rather than a remote iframe.', accessibility: 'Keep the Section Intro heading before the managed form in reading order and preserve form labels, status announcements and privacy context.' }),
   patternEntry({ id: 'creator-signal.site.pattern.legal-trust-page', name: 'Legal or Trust Page', description: 'One versioned semantic public document.', tags: ['legal', 'trust', 'document'], usage: 'Use as a starting composition for legal, trust, support and status documents, then adjust its sections freely.', accessibility: 'Use coherent rich text, meaningful headings and readable link labels.' }),
   patternEntry({ id: 'creator-signal.site.pattern.article-content-page', name: 'Article or Content Page', description: 'Hero and one coherent long-form content section.', tags: ['article', 'content', 'long form'], usage: 'Use as a starting composition for editorial content, then adjust its components freely.', accessibility: 'Keep heading hierarchy logical inside the authored body.' }),
   patternEntry({ id: 'creator-signal.site.pattern.comparison-section', name: 'Comparison Section', description: 'A semantic three-option comparison section.', tags: ['comparison', 'table', 'section'], usage: 'Use inside a page for genuine row-and-column comparisons.', accessibility: 'Retain the visible caption and complete row and column headings.' }),

@@ -8,7 +8,6 @@ import { componentLibraryPatternRegistry } from '@core/component-library'
 import type { Page, PageSeo } from '@core/page-tree'
 import { creatorSignalComponentLibraryEntries } from '../component-library'
 import { creatorSignalBrandAssets } from '../design-system/contract'
-import crmIframeForm from '../modules/crm-iframe-form'
 import { consentBanner, sectionIntro, siteFooter, siteHeader } from '../modules/site-components'
 import {
   creatorSignalPatternForRole,
@@ -193,13 +192,6 @@ const sectionIntroduction = (props: Record<string, unknown>): ModuleBlock => ({
   entryId: 'creator-signal.site.section-intro',
   moduleId: sectionIntro.id,
   props,
-})
-
-const embeddedCrmForm = (props: Record<string, unknown>): ModuleBlock => ({
-  kind: 'module',
-  entryId: 'creator-signal.site.crm-iframe-form',
-  moduleId: crmIframeForm.id,
-  props: { ...crmIframeForm.defaults, ...props },
 })
 
 const twoColumn = (left: LeafBlock[], right: LeafBlock[]): TwoColumnBlock => ({
@@ -489,45 +481,13 @@ const starterPages: StarterPage[] = legacyCreatorSignalStarterPages0111.map((pag
 }))
 
 for (const formPage of formPages) {
-  if (formPage.id === 'feedback') continue
   const page = starterPages.find((candidate) => candidate.slug === formPage.slug)
   if (!page) throw new Error(`[creator-signal] Missing ${formPage.title} starter page.`)
   const formSectionId = formSectionIdByPageId.get(formPage.id)
   if (!formSectionId) throw new Error(`[creator-signal] Missing ${formPage.title} form section ID.`)
+  if (formPage.id === 'feedback') page.patternId = pagePatternId('feedback')
   page.blocks = [page.blocks[0]!, managedFormColumns(formPage.form, formSectionId)]
 }
-
-const feedbackPage = starterPages.find((page) => page.slug === 'feedback')
-if (!feedbackPage) throw new Error('[creator-signal] Missing Feedback starter page.')
-feedbackPage.patternId = pagePatternId('feedback')
-feedbackPage.blocks = [
-  hero(
-    'Feedback',
-    'Help us make Creator Signal more useful.',
-    'Tell us what worked, what felt unclear and what would improve your experience. You can choose whether we may follow up about your feedback.',
-    '/legal/privacy',
-    'Read our privacy notice',
-  ),
-  twoColumn(
-    [sectionIntroduction({
-      eyebrow: 'Feedback',
-      heading: 'Share your feedback',
-      introduction: 'Required fields are identified in the form. Choose the follow-up option only if we may contact you about this feedback.',
-      sectionId: 'feedback-introduction',
-    })],
-    [embeddedCrmForm({
-      sectionId: 'feedback-form',
-      formUrl: 'https://marketing.creatorsignal.me/form/creator-signal-feedback',
-      iframeTitle: 'Creator Signal feedback form',
-      fallbackLabel: 'Open the feedback form in a new tab',
-      loadingMessage: 'Loading the feedback form…',
-      unavailableMessage: 'The feedback form cannot be displayed here right now.',
-      initialHeight: 640,
-      minimumHeight: 320,
-      maximumHeight: 2400,
-    })],
-  ),
-]
 
 const intakeStarterPages: StarterPage[] = intakeFormPages.map((page) => (
   {

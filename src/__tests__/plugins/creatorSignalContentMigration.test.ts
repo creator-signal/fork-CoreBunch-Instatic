@@ -157,6 +157,18 @@ function currentManifest(): SiteBundleArchiveManifest {
   }
 }
 
+function applyPreparedMigration(
+  source: SiteBundleArchiveManifest,
+  migration: SiteBundleArchiveManifest,
+): SiteBundleArchiveManifest {
+  const applied = structuredClone(source)
+  const replacements = new Map(migration.rows.map((row) => [row.id, row]))
+  applied.rows = applied.rows.map((row) => replacements.get(row.id) ?? row)
+  const existingIds = new Set(applied.rows.map((row) => row.id))
+  applied.rows.push(...migration.rows.filter((row) => !existingIds.has(row.id)))
+  return applied
+}
+
 function retainedFeedbackIframeManifest(): SiteBundleArchiveManifest {
   const source = currentManifest()
   source.sourceSiteName = 'Creator Signal 0.8.1 with retained authored copy'
@@ -357,6 +369,106 @@ describe('Creator Signal 0.2.0 content migration', () => {
       .toBe(false)
     expect(migrated.status).toBe('published')
     expect(result.report.apply.publishesAutomatically).toBe(false)
+
+    const second = prepareCreatorSignalContentMigration(
+      applyPreparedMigration(source, result.manifest!),
+      timestamp,
+    )
+    expect(second.report.ready).toBe(true)
+    expect(second.report.blockers).toEqual([])
+    expect(second.report.summary).toMatchObject({
+      legacyEligible: 0,
+      authoredContent: 1,
+      rowsInMigration: 0,
+      template: 'current',
+      notFoundTemplate: 'current',
+    })
+    expect(second.manifest?.rows).toEqual([])
+  })
+
+  it('repairs only the exact stale artwork left by the retained 0.7.0 expansion', () => {
+    const source = currentManifest()
+    const retainedArtwork = '/uploads/plugins/creator-signal.site/0.7.0/assets/design-system/brand/sales-pulse-social.png'
+    let retainedReferences = 0
+
+    for (const slug of ['index', 'early-access']) {
+      const row = source.rows.find((candidate) => candidate.slug === slug)!
+      const page = pageFromRow(row)
+      for (const node of Object.values(page.nodes)) {
+        if (typeof node.props.artwork !== 'string') continue
+        node.props = { ...node.props, artwork: retainedArtwork }
+        retainedReferences += 1
+      }
+      row.cells = {
+        ...row.cells,
+        body: { nodes: page.nodes, rootNodeId: page.rootNodeId },
+      }
+    }
+    expect(retainedReferences).toBe(3)
+
+    const result = prepareCreatorSignalContentMigration(source, timestamp)
+
+    expect(result.report.ready).toBe(true)
+    expect(result.report.blockers).toEqual([])
+    expect(result.report.summary).toMatchObject({
+      legacyEligible: 2,
+      alreadyCurrent: 24,
+      authoredContent: 0,
+      rowsInMigration: 2,
+      template: 'current',
+      notFoundTemplate: 'current',
+    })
+    expect(result.report.pages.filter((page) => page.retainedVersion === '0.7.0-expanded-artwork')
+      .map((page) => page.slug).sort()).toEqual(['early-access', 'index'])
+    for (const row of result.manifest!.rows) {
+      const target = pack.pages.find((page) => page.id === row.id)!
+      expect(canonicalPageCellsSha256(row.cells))
+        .toBe(canonicalPageCellsSha256(pageToCells(target)))
+    }
+
+    const second = prepareCreatorSignalContentMigration(
+      applyPreparedMigration(source, result.manifest!),
+      timestamp,
+    )
+    expect(second.report.ready).toBe(true)
+    expect(second.report.summary).toMatchObject({
+      legacyEligible: 0,
+      alreadyCurrent: 26,
+      authoredContent: 0,
+      rowsInMigration: 0,
+    })
+    expect(second.manifest?.rows).toEqual([])
+  })
+
+  it('does not rewrite a stale-artwork page containing another authored difference', () => {
+    const source = currentManifest()
+    const homeRow = source.rows.find((row) => row.slug === 'index')!
+    const home = pageFromRow(homeRow)
+    const hero = Object.values(home.nodes).find((node) =>
+      node.moduleId === 'creator-signal.site.campaign-hero')!
+    hero.props = {
+      ...hero.props,
+      heading: 'Author changed this heading',
+      artwork: '/uploads/plugins/creator-signal.site/0.7.0/assets/design-system/brand/sales-pulse-social.png',
+    }
+    homeRow.cells = {
+      ...homeRow.cells,
+      body: { nodes: home.nodes, rootNodeId: home.rootNodeId },
+    }
+
+    const result = prepareCreatorSignalContentMigration(source, timestamp)
+
+    expect(result.report.ready).toBe(true)
+    expect(result.report.blockers).toEqual([])
+    expect(result.report.pages.find((page) => page.slug === 'index')?.state)
+      .toBe('authored-content')
+    expect(result.report.summary).toMatchObject({
+      authoredContent: 1,
+      rowsInMigration: 0,
+    })
+    expect(result.manifest?.rows).toEqual([])
+    expect(hero.props.heading).toBe('Author changed this heading')
+    expect(hero.props.artwork).toBe('/uploads/plugins/creator-signal.site/0.7.0/assets/design-system/brand/sales-pulse-social.png')
   })
 
   it('surgically replaces the exact retained Feedback iframe without changing authored page state', () => {
@@ -439,6 +551,21 @@ describe('Creator Signal 0.2.0 content migration', () => {
     expect(result.manifest?.rows.some((row) => row.id === home.id || row.id === earlyAccess.id)).toBe(false)
     expect(home.cells.seoTitle).toBe('Author-retained Home SEO title')
     expect(earlyAccess.cells.seoTitle).toBe('Author-retained Early Access SEO title')
+
+    const second = prepareCreatorSignalContentMigration(
+      applyPreparedMigration(source, result.manifest!),
+      timestamp,
+    )
+    expect(second.report.ready).toBe(true)
+    expect(second.report.blockers).toEqual([])
+    expect(second.report.summary).toMatchObject({
+      legacyEligible: 0,
+      authoredContent: 3,
+      rowsInMigration: 0,
+      template: 'current',
+      notFoundTemplate: 'current',
+    })
+    expect(second.manifest?.rows).toEqual([])
   })
 
   it('does not let the surgical Feedback repair bypass another migration blocker', () => {

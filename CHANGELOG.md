@@ -6,6 +6,19 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.44 - 2026-08-25
+
+### Idempotent retained-content migration
+
+- Repaired the exact stale `0.7.0` artwork references left on Home and Early
+  Access by the earlier WYSIWYG recipe expansion, but only when the complete
+  repaired page matches the current governed target.
+- Preserved authored near-matches without emitting replacement rows and kept
+  missing pages, additional pages, template conflicts and altered retained
+  Feedback providers fail-closed.
+- Made repeated wrapper and Feedback migration preparation safe and
+  idempotent, including authored-only zero-row no-op results.
+
 ## 0.0.43 - 2026-08-25
 
 ### Retained authoring-safe Feedback migration

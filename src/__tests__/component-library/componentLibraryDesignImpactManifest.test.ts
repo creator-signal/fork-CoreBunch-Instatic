@@ -36,6 +36,7 @@ const manifestPath = resolve(
   import.meta.dir,
   '../../../docs/features/component-library-design-impact-manifest.json',
 )
+const packagePath = resolve(import.meta.dir, '../../../package.json')
 const designSystemLockPath = resolve(
   import.meta.dir,
   '../../../integrations/creator-signal/design-system/lock.json',
@@ -57,6 +58,14 @@ const DesignSystemLockSchema = Type.Object(
   },
   { additionalProperties: true },
 )
+const packageResult = safeParseJson(
+  readFileSync(packagePath, 'utf8'),
+  Type.Object(
+    { version: Type.String({ minLength: 1 }) },
+    { additionalProperties: true },
+  ),
+)
+if (!packageResult.ok) throw packageResult.error
 const lockResult = safeParseJson(
   readFileSync(designSystemLockPath, 'utf8'),
   DesignSystemLockSchema,
@@ -73,7 +82,7 @@ const specimenBundle = validateCreatorSignalComponentSpecimenBundle(
 
 function manifestInput(): DesignImpactManifestInput {
   return {
-    instaticVersion: '0.0.43',
+    instaticVersion: packageResult.value.version,
     builtInEntries: BUILT_IN_COMPONENT_LIBRARY_ENTRIES,
     plugins: [{
       ...creatorSignalPluginIdentity,

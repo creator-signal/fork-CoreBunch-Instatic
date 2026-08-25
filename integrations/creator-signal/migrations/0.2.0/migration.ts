@@ -220,11 +220,17 @@ export function prepareCreatorSignalContentMigration(
     const expandedCells = !retainedVersion && expectedPatternId
       ? expandCurrentPageRecipe(row, expectedPatternId)
       : null
-    const expandedFeedbackCells = expandedCells
-      ? repairRetainedFeedbackProvider({ ...row, cells: expandedCells }, target) ?? expandedCells
+    const expandedArtworkCells = expandedCells
+      ? repairRetainedExpandedArtwork({ ...row, cells: expandedCells }, target) ?? expandedCells
+      : null
+    const expandedFeedbackCells = expandedArtworkCells
+      ? repairRetainedFeedbackProvider({ ...row, cells: expandedArtworkCells }, target) ?? expandedArtworkCells
       : null
     const feedbackProviderRepair = !retainedVersion
       ? repairRetainedFeedbackProvider(row, target)
+      : null
+    const expandedArtworkRepair = !retainedVersion
+      ? repairRetainedExpandedArtwork(row, target)
       : null
     if (currentHash === targetHash) {
       previews.push({ id: target.id, slug: target.slug, state: 'already-current', currentHash, legacyHash, targetHash })
@@ -276,6 +282,23 @@ export function prepareCreatorSignalContentMigration(
       migrationRows.push({
         ...row,
         cells: feedbackProviderRepair,
+        updatedAt: now,
+        updatedByUserId: null,
+        updatedBy: null,
+      })
+    } else if (expandedArtworkRepair) {
+      previews.push({
+        id: target.id,
+        slug: target.slug,
+        state: 'legacy-eligible',
+        currentHash,
+        legacyHash,
+        retainedVersion: '0.7.0-expanded-artwork',
+        targetHash,
+      })
+      migrationRows.push({
+        ...row,
+        cells: expandedArtworkRepair,
         updatedAt: now,
         updatedByUserId: null,
         updatedBy: null,
@@ -435,7 +458,18 @@ export function prepareCreatorSignalContentMigration(
     && feedbackPreview?.retainedVersion === '0.8.1-feedback-iframe'
     && templateState === 'current'
     && notFoundTemplateState === 'current'
-  const effectiveBlockers = surgicalFeedbackRepairBesideAuthoredContent
+  const feedbackRow = rowById.get('creator-signal.site/page/feedback')
+  const unresolvedRetainedFeedbackProvider = feedbackPreview?.state === 'authored-content'
+    && feedbackRow !== undefined
+    && Object.values(pageFromRow(feedbackRow).nodes).some((node) =>
+      node.moduleId === 'creator-signal.site.crm-iframe-form')
+  const authoredContentNoOp = blockers.length === 0
+    && authoredContentBlockers.length > 0
+    && migrationRows.length === 0
+    && templateState === 'current'
+    && notFoundTemplateState === 'current'
+    && !unresolvedRetainedFeedbackProvider
+  const effectiveBlockers = surgicalFeedbackRepairBesideAuthoredContent || authoredContentNoOp
     ? blockers
     : [...blockers, ...authoredContentBlockers]
   const ready = effectiveBlockers.length === 0
@@ -478,6 +512,49 @@ export function prepareCreatorSignalContentMigration(
       rows: migrationRows,
     },
   }
+}
+
+const retainedExpandedArtworkUrl = '/uploads/plugins/creator-signal.site/0.7.0/assets/design-system/brand/sales-pulse-social.png'
+const currentExpandedArtworkUrl = '/uploads/plugins/creator-signal.site/0.8.2/assets/design-system/brand/sales-pulse-social.png'
+
+/**
+ * The 0.7.0 recipe expansion deliberately retained component props while it
+ * removed the technical wrapper. Home and Early Access therefore kept the
+ * versioned 0.7.0 artwork URL even after every other field matched the current
+ * page. Repair only `artwork` props with that exact machine-owned value, and
+ * accept the candidate only when its complete canonical page hash equals the
+ * current governed target. Any additional authored difference remains intact.
+ */
+function repairRetainedExpandedArtwork(
+  row: DataRow,
+  target: (typeof pack.pages)[number],
+): DataRow['cells'] | null {
+  const page = pageFromRow({
+    ...row,
+    cells: structuredClone(row.cells),
+  })
+  let replacements = 0
+
+  for (const node of Object.values(page.nodes)) {
+    if (node.props.artwork !== retainedExpandedArtworkUrl) continue
+    node.props = {
+      ...node.props,
+      artwork: currentExpandedArtworkUrl,
+    }
+    replacements += 1
+  }
+  if (replacements === 0) return null
+
+  const candidate = {
+    ...row.cells,
+    body: {
+      nodes: page.nodes,
+      rootNodeId: page.rootNodeId,
+    },
+  }
+  return canonicalPageCellsSha256(candidate) === canonicalPageCellsSha256(pageToCells(target))
+    ? candidate
+    : null
 }
 
 /**

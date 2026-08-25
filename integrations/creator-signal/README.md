@@ -119,8 +119,10 @@ relying on plugin upgrade reconciliation.
 Installing plugin 0.8.2 runs the versioned technical-pack upgrade, installs the
 public-authoring policy and WYSIWYG Two Column definition, and does not change
 existing pages automatically. The authored-content migration remains version
-0.2.0, unwraps retained 0.7.0 page recipes, and surgically replaces the exact
-machine-owned 0.8.1 Feedback iframe with a Managed Form without publishing.
+0.2.0, unwraps retained 0.7.0 page recipes, repairs the exact stale artwork
+references left by an earlier recipe expansion, and surgically replaces the
+exact machine-owned 0.8.1 Feedback iframe with a Managed Form without
+publishing.
 Export the complete site from **Admin → Export**, then run the read-only
 classifier:
 
@@ -131,21 +133,28 @@ bun run integrations/creator-signal/migrations/0.2.0/prepare.ts preview \
 
 The preview is ready only when every retained route is either the exact 0.1.11
 starter, the exact governed 0.2.0-0.2.6, 0.3.5, 0.4.0, 0.5.0 or 0.6.0 pack, a
-0.7.0 page beneath its exact technical recipe wrapper, or already uses the
-current model; no unexpected page would inherit the new shared template; and both
-governed template IDs are available. A newly governed page is added only when
-its reserved ID is absent. An occupied ID with any other content blocks the
-whole migration.
+0.7.0 page beneath its exact technical recipe wrapper, the exact expanded
+0.7.0 output whose only difference is a known machine-owned artwork URL, or
+already uses the current model; no unexpected page would inherit the new shared
+template; and both governed template IDs are available. A newly governed page
+is added only when its reserved ID is absent. An occupied ID with any other
+content blocks the whole migration.
 Any authored difference in the older hash-governed packs blocks the whole
 migration for manual mapping; it is never overwritten heuristically. For a
 0.7.0 recipe wrapper, authored differences beneath that exact wrapper are
 preserved because the migration removes only the presentation-free wrapper.
-The exact machine-owned 0.8.1 Feedback iframe is the sole bounded exception:
-when both shared templates are already current and no missing, additional or
-structural blocker exists, the migration may emit that one Feedback row beside
-unrelated authored pages. Those authored rows remain classified for review but
-are absent from the migration manifest and are never replaced. An altered
-Feedback provider or any broader repair keeps the whole migration blocked.
+After expansion, the classifier replaces only the exact versioned `artwork`
+properties that remain on Home and Early Access, and only when that candidate's
+complete canonical hash equals the current governed page. Any additional
+authored difference prevents that repair and remains untouched. The exact
+machine-owned 0.8.1 Feedback iframe is another bounded repair: when both shared
+templates are already current and no missing, additional or structural blocker
+exists, the migration may emit that one Feedback row beside unrelated authored
+pages. Those authored rows remain classified for review but are absent from the
+migration manifest and are never replaced. A subsequent authored-only result
+with no migration rows is a successful no-op, so running the classifier again
+is idempotent. An altered retained Feedback provider or any broader pending
+repair keeps the whole migration blocked.
 Page classification hashes the semantic tree independently of generated node
 IDs, so exporting or compiling the same retained content in another process
 does not create a false authored-content result. Text, properties, metadata,

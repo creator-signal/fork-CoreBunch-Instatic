@@ -206,7 +206,7 @@ Feedback Page
 Every named node above has its own Component Library entry and remains
 selectable. A `Missing library entry` label means the editor is running stale
 plugin catalogue records, not that the content has been intentionally hidden.
-Reconcile/install plugin 0.8.0 and use the previewed content migration for
+Reconcile/install plugin 0.8.1 and use the previewed content migration for
 retained 0.7.0 pages. It removes only the exact technical recipe wrapper,
 preserves the authored child component IDs, fields and order, and never
 publishes automatically.

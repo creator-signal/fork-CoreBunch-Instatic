@@ -79,17 +79,28 @@ damaged patterns, missing template chrome, unsupported heading levels and
 unmapped asset fields therefore fail with an actionable location.
 
 The shared template identified by the policy owns the Header, Footer and
-Privacy Choices components exactly once. Ordinary pages contain one approved
-pattern and cannot author independent copies of that chrome. The shared
-template is immutable through normal page authoring and is reconciled only by
-the owning technical pack.
+Privacy Choices components exactly once. Authors edit their typed content once
+through that template; ordinary pages inherit the result and cannot author
+independent copies of the shared chrome. The policy protects the template's
+required structure and singleton ownership without freezing the authorable
+Header, Footer or Privacy Choices fields.
+
+Page patterns are optional insertion recipes, not persisted page owners. When
+an author inserts a recipe, Instatic discards its recipe root and places the
+materialised child components directly in the ordinary page body. Those
+components remain independently selectable, configurable, movable,
+replaceable and removable. Authors can also create a page from the shared
+template and compose it directly from permitted components without adding or
+releasing a page-specific pattern.
 
 ## Bypass boundary
 
 Normal HTTP and collaborative authoring cannot remove or weaken the policy,
 change pack-owned styles/runtime dependencies, or edit the protected Hero and
-Two Column Layout Visual Component definitions. Plugin pack reconciliation is the sole supported policy and
-technical-record update path.
+Two Column Layout Visual Component definitions. Plugin pack reconciliation is
+the sole supported policy, component-definition and technical-record update
+path. Page and shared-template content remains CMS-owned after the initial
+starter import and is never a plugin reconciliation target.
 
 Direct database/storage mutation is not a supported authoring path. Publication
 still fails closed for an invalid governed tree, missing protected component or

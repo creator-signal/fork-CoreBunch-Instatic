@@ -188,6 +188,7 @@ export function prepareCreatorSignalContentMigration(
   const previews: PageMigrationPreview[] = []
   const migrationRows: DataRow[] = []
   const blockers: string[] = []
+  const authoredContentBlockers: string[] = []
 
   for (const target of currentPages) {
     const row = rowById.get(target.id)
@@ -281,7 +282,7 @@ export function prepareCreatorSignalContentMigration(
       })
     } else {
       previews.push({ id: target.id, slug: target.slug, state: 'authored-content', currentHash, legacyHash, targetHash })
-      blockers.push(`Page "${target.slug}" differs from every recognised retained starter and the current target; it requires manual mapping.`)
+      authoredContentBlockers.push(`Page "${target.slug}" differs from every recognised retained starter and the current target; it requires manual mapping.`)
     }
   }
 
@@ -426,13 +427,24 @@ export function prepareCreatorSignalContentMigration(
     }
   }
 
-  const ready = blockers.length === 0
+  const feedbackPreview = previews.find((page) => page.id === 'creator-signal.site/page/feedback')
+  const surgicalFeedbackRepairBesideAuthoredContent = blockers.length === 0
+    && authoredContentBlockers.length > 0
+    && migrationRows.length === 1
+    && migrationRows[0]?.id === 'creator-signal.site/page/feedback'
+    && feedbackPreview?.retainedVersion === '0.8.1-feedback-iframe'
+    && templateState === 'current'
+    && notFoundTemplateState === 'current'
+  const effectiveBlockers = surgicalFeedbackRepairBesideAuthoredContent
+    ? blockers
+    : [...blockers, ...authoredContentBlockers]
+  const ready = effectiveBlockers.length === 0
   const report: CreatorSignalMigrationReport = {
     schema: 'creator-signal.site/content-migration-report/v1',
     migration: CREATOR_SIGNAL_CONTENT_MIGRATION,
     ready,
     pages: previews,
-    blockers,
+    blockers: effectiveBlockers,
     summary: {
       legacyEligible: previews.filter((page) => page.state === 'legacy-eligible').length,
       alreadyCurrent: previews.filter((page) => page.state === 'already-current').length,

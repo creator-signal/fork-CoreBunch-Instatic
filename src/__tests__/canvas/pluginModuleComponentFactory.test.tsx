@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'bun:test'
 import React from 'react'
-import { cleanup, render, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import type { ModuleComponentProps } from '@core/module-engine'
 import type { PluginModuleDefinition } from '@core/plugin-sdk'
 import { CanvasDocumentContext } from '@site/canvas/CanvasContexts'
@@ -21,13 +21,81 @@ const definition: PluginModuleDefinition = {
   }),
 }
 
-const componentProps = {
+const componentProps: ModuleComponentProps = {
   nodeId: 'card-1',
   props: definition.defaults,
+  isSelected: false,
   mcClassName: 'canvas-node',
-} as ModuleComponentProps
+}
 
-describe('editorPluginModuleComponentFactory module CSS', () => {
+describe('editorPluginModuleComponentFactory', () => {
+  it('forwards the canvas identity and hover contract to a leaf plugin module', () => {
+    const Component = editorPluginModuleComponentFactory(definition)
+    let hoverCount = 0
+    let leaveCount = 0
+
+    const view = render(
+      <Component
+        {...componentProps}
+        nodeWrapperProps={{
+          'data-node-id': 'card-1',
+          'data-module-id': definition.id,
+          'data-hovered': 'true',
+          tabIndex: 0,
+          style: { marginTop: '8px' },
+          onMouseEnter: () => { hoverCount += 1 },
+          onMouseLeave: () => { leaveCount += 1 },
+        }}
+      />,
+    )
+
+    const wrapper = view.container.querySelector<HTMLElement>('[data-plugin-canvas-module="true"]')
+    expect(wrapper?.getAttribute('data-node-id')).toBe('card-1')
+    expect(wrapper?.getAttribute('data-module-id')).toBe(definition.id)
+    expect(wrapper?.getAttribute('data-hovered')).toBe('true')
+    expect(wrapper?.tabIndex).toBe(0)
+    expect(wrapper?.style.marginTop).toBe('8px')
+
+    fireEvent.mouseEnter(wrapper as HTMLElement)
+    fireEvent.mouseLeave(wrapper as HTMLElement)
+    expect(hoverCount).toBe(1)
+    expect(leaveCount).toBe(1)
+  })
+
+  it('forwards the canvas selection and click contract to a plugin module with children', () => {
+    const Component = editorPluginModuleComponentFactory({
+      ...definition,
+      id: 'acme.preview.stack',
+      canHaveChildren: true,
+    })
+    let clickCount = 0
+
+    const view = render(
+      <Component
+        {...componentProps}
+        isSelected
+        nodeWrapperProps={{
+          'data-node-id': 'stack-1',
+          'data-module-id': 'acme.preview.stack',
+          'data-canvas-selected': 'true',
+          tabIndex: 0,
+          onClick: () => { clickCount += 1 },
+        }}
+      >
+        <span data-testid="plugin-child">Child</span>
+      </Component>,
+    )
+
+    const wrapper = view.container.querySelector<HTMLElement>('[data-plugin-canvas-module="true"]')
+    expect(wrapper?.getAttribute('data-node-id')).toBe('stack-1')
+    expect(wrapper?.getAttribute('data-module-id')).toBe('acme.preview.stack')
+    expect(wrapper?.getAttribute('data-canvas-selected')).toBe('true')
+    expect(view.getByTestId('plugin-child')).toBeTruthy()
+
+    fireEvent.click(wrapper as HTMLElement)
+    expect(clickCount).toBe(1)
+  })
+
   it('installs the render stylesheet in the canvas iframe document, not the admin document', async () => {
     const canvasDocument = document.implementation.createHTMLDocument('Canvas')
     const Component = editorPluginModuleComponentFactory(definition)

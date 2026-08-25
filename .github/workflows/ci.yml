@@ -185,6 +185,8 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.60.0-noble@sha256:9bd26ad900bb5e0f4dee75839e957a89ae89c2b7ab1e76050e559790e946b948
     env:
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      # Vite's Bun child can stall before binding inside the Actions job container.
+      INSTATIC_VITE_RUNTIME: node
     steps:
       - name: Checkout
         uses: actions/checkout@v4

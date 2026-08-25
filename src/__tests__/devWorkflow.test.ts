@@ -77,6 +77,18 @@ describe('development workflow', () => {
     expect(startScript).not.toContain("['bun'")
   })
 
+  it('lets CI run only the Vite child through Node', () => {
+    const previousRuntime = process.env.INSTATIC_VITE_RUNTIME
+    process.env.INSTATIC_VITE_RUNTIME = 'node'
+    try {
+      expect(viteCommand('--host', '127.0.0.1')[0]).toBe('node')
+      expect(bunCommand('server/index.ts')[0]).toBe(process.execPath)
+    } finally {
+      if (previousRuntime === undefined) delete process.env.INSTATIC_VITE_RUNTIME
+      else process.env.INSTATIC_VITE_RUNTIME = previousRuntime
+    }
+  })
+
   it('Vite proxies CMS API and uploaded media to the local Bun server', () => {
     const viteConfig = readSiteFile('vite.config.ts')
 

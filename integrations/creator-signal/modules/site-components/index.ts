@@ -43,6 +43,8 @@ export interface ComparisonItem {
 
 export type RecoveryStateKind = 'empty' | 'error' | 'offline' | 'not-found'
 
+export const twoColumnLayoutShellId = 'creator-signal.site.two-column-layout-shell'
+
 const text = (value: unknown): string => typeof value === 'string' ? value : ''
 // The publisher escapes scalar text controls before render(). Emit that
 // already-safe value without asking the SDK template tag to escape it again.
@@ -71,6 +73,30 @@ const lines = (value: unknown): string[] => text(value)
 const withCreatorSignalCss = (markup: string) => ({
   html: markup,
   css: creatorSignalSiteCss,
+})
+
+/**
+ * Structural owner for the reusable Two Column Layout visual component.
+ *
+ * Keeping the render-profile CSS on the component root makes its isolated
+ * Component Library editor use the same layout contract as a populated page.
+ * The editor host exposes nested React nodes through data-plugin-children;
+ * the render profile aliases that host-only outlet to the published
+ * .two-column-layout selector without changing published markup.
+ */
+export const twoColumnLayoutShell = defineModule({
+  id: twoColumnLayoutShellId,
+  name: 'Two Column Layout shell',
+  description: 'Owns the governed responsive layout for the reusable two-column component.',
+  category: 'Creator Signal',
+  htmlTag: 'section',
+  canHaveChildren: true,
+  defaults: {},
+  schema: {},
+  render: ({ children }) => withCreatorSignalCss(
+    html`<section class="two-column-layout">${raw(children.join(''))}</section>`,
+  ),
+  preview: () => withCreatorSignalCss(''),
 })
 
 function navigationItems(value: unknown, primaryClass = false): ReturnType<typeof raw>[] {
@@ -754,6 +780,7 @@ export const publicDocument = defineModule({
 })
 
 export const creatorSignalSiteModules = [
+  twoColumnLayoutShell,
   siteHeader,
   siteFooter,
   consentBanner,

@@ -48,7 +48,7 @@ export const creatorSignalPublicPatternCatalogue = [
 
 export const creatorSignalPublicAuthoringContract = {
   id: 'creator-signal.public-authoring',
-  version: '1.4.0',
+  version: '1.5.0',
   designSystem: creatorSignalDesignSystemDependency,
   permittedComponents: [
     {

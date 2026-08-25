@@ -178,20 +178,26 @@ describe('Creator Signal content authoring workflows', () => {
     }
   })
 
-  it('materializes reusable patterns with retained catalogue and authoring identity', () => {
+  it('materializes reusable page recipes as direct authorable components', () => {
     for (const entry of creatorSignalPatternEntries) {
       const fragment = componentLibraryPatternRegistry.materialize(entry.id, {
         entryId: entry.id,
         entryVersion: entry.version,
         variantId: 'default',
       })
-      const root = fragment?.nodes[fragment.rootIds[0]!]
-      expect(root?.catalogueInstance).toMatchObject({
-        entryId: entry.id,
-        entryVersion: entry.version,
-        variantId: 'default',
-      })
-      expect(root?.catalogueInstance?.pattern?.authorableNodeIds).toEqual(root?.children)
+      expect(fragment?.rootIds.length, entry.id).toBeGreaterThan(0)
+      expect(Object.values(fragment?.nodes ?? {}).some(
+        (node) => node.catalogueInstance?.entryId === entry.id,
+      ), entry.id).toBe(false)
+      for (const rootId of fragment?.rootIds ?? []) {
+        const root = fragment?.nodes[rootId]
+        expect(root?.catalogueInstance?.entryId, `${entry.id}/${rootId}`).toStartWith(
+          'creator-signal.site.',
+        )
+        expect(root?.catalogueInstance?.entryId, `${entry.id}/${rootId}`).not.toContain(
+          '.pattern.',
+        )
+      }
     }
   })
 

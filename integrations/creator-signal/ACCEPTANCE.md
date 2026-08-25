@@ -17,6 +17,23 @@ The command writes actual screenshots and `report.json` under
 check fails. Passing this command proves source readiness only; it does not
 deploy, converge or accept a production environment.
 
+The Component Library uses a separate isolated-specimen gate after the same
+plugin build:
+
+```sh
+bun run component-library:creator-signal-specimens:check
+bun run verify:creator-signal-component-specimens:browser
+```
+
+`integrations/creator-signal/specimens/manifest.json` drives that verifier. It
+serves every publisher-produced artifact, blocks external requests, rejects any
+provider delivery attempt, captures one desktop review image per entry and
+checks desktop/tablet/mobile containment, system/light/dark themes, Axe WCAG AA,
+reduced motion, forced colours, image failure and declared interactions. Its
+report and images are written under `.tmp/creator-signal-component-specimens`.
+This gate proves isolated local specimens; it does not replace route-level
+public acceptance or an external provider test.
+
 For a non-accepting local browser preview of the same published output, run
 the script with `--serve-only` and optionally set
 `CREATOR_SIGNAL_PUBLIC_ACCEPTANCE_PORT`. The preview intentionally does not

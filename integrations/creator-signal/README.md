@@ -26,8 +26,9 @@ page roster, and publish the complete site automatically.
   Call to Action, Rich Text Section, Testimonial, FAQ, Comparison, Recovery
   State, Public Document, Managed Form, Section Intro, Two Column Layout and
   Embedded CRM Form components.
-- Fifteen stable page/section patterns plus explicit Hero, CTA and FAQ mappings;
-  starter routes materialize the same registry definitions authors insert.
+- Fifteen stable page/section insertion recipes plus explicit Hero, CTA and FAQ
+  mappings; recipes expand into the same ordinary components authors insert and
+  never persist an opaque pattern owner in a page.
 - Eight Mautic-backed public forms that resolve governed aliases through the
   Mautic-generated registry and emit typed success/failure events.
 - The host-level MinIO adapter for originals, variants, avatars, and fonts.
@@ -115,9 +116,10 @@ relying on plugin upgrade reconciliation.
 
 ### Upgrade existing retained starter content
 
-Installing plugin 0.7.0 runs the versioned technical-pack upgrade, installs the
-public-authoring policy and does not change existing pages. The authored-content
-migration remains version 0.2.0.
+Installing plugin 0.8.1 runs the versioned technical-pack upgrade, installs the
+public-authoring policy and WYSIWYG Two Column definition, and does not change
+existing pages automatically. The authored-content migration remains version
+0.2.0 and now unwraps retained 0.7.0 page recipes without publishing.
 Export the complete site from **Admin → Export**, then run the read-only
 classifier:
 
@@ -127,13 +129,16 @@ bun run integrations/creator-signal/migrations/0.2.0/prepare.ts preview \
 ```
 
 The preview is ready only when every retained route is either the exact 0.1.11
-starter, the exact governed 0.2.0-0.2.6, 0.3.5, 0.4.0, 0.5.0 or 0.6.0 pack, or already uses
-the current model; no unexpected page would inherit the new shared template; and both
+starter, the exact governed 0.2.0-0.2.6, 0.3.5, 0.4.0, 0.5.0 or 0.6.0 pack, a
+0.7.0 page beneath its exact technical recipe wrapper, or already uses the
+current model; no unexpected page would inherit the new shared template; and both
 governed template IDs are available. A newly governed page is added only when
 its reserved ID is absent. An occupied ID with any other content blocks the
 whole migration.
-Any authored difference blocks the whole migration for manual mapping; it is
-never overwritten heuristically.
+Any authored difference in the older hash-governed packs blocks the whole
+migration for manual mapping; it is never overwritten heuristically. For a
+0.7.0 recipe wrapper, authored differences beneath that exact wrapper are
+preserved because the migration removes only the presentation-free wrapper.
 Page classification hashes the semantic tree independently of generated node
 IDs, so exporting or compiling the same retained content in another process
 does not create a false authored-content result. Text, properties, metadata,
@@ -173,9 +178,11 @@ own opinionated semantic HTML. Navigation links, feature cards and FAQ items are
 repeaters; complete prose and public documents use one sanitised rich-text
 value rather than a stack of paragraph nodes. The visual editor, Agent tools
 and MCP use the same Component Library entries and field validation.
-Registered `creator-signal.site.pattern.*` roots compose those leaves into
-approved page and section structures; saved layouts remain reserved for
-structures that authors are intentionally allowed to copy and diverge.
+Registered `creator-signal.site.pattern.*` recipes compose those leaves into
+approved page and section structures at insertion time. The recipe root is
+discarded, so the page stores only independently authorable components; saved
+layouts remain reserved for structures that authors are intentionally allowed
+to copy and diverge.
 
 `integrations/creator-signal/AUTHORING.md` is the complete route, section,
 component and shared-template reference. Its parity command generates a
@@ -195,8 +202,18 @@ runs against pages produced by Instatic's real public publishing pipeline.
 create, edit, revision, preview, publish, unpublish, media, pattern, legal,
 product-page, theme, catalogue-task and guardrail acceptance matrix. Run it
 with `bun run verify:creator-signal-content-workflows`; run
-`bun run verify:creator-signal-authoring-tasks` to write the 34-entry editor
+`bun run verify:creator-signal-authoring-tasks` to write the 37-entry editor
 and MCP task matrix from the registered catalogue.
+
+`integrations/creator-signal/specimens/manifest.json` is the generated,
+registry-driven design-impact bundle for all 37 current entries: 22 components
+and 15 patterns. Each row references one publisher-produced HTML document and
+retains field contracts, accessibility intent, fixture provenance, ordered
+pattern-child lineage, replaceable design-system assets and provider state.
+Regenerate it with `bun run component-library:creator-signal-specimens`, reject
+drift with `bun run component-library:creator-signal-specimens:check`, and run
+`bun run verify:creator-signal-component-specimens:browser` after the plugin
+build for the responsive, theme, accessibility and degraded-state matrix.
 
 `integrations/creator-signal/ACCESSIBILITY.md` records the entry-specific
 accessibility contracts and the equivalent editor/MCP diagnostic tool. Run

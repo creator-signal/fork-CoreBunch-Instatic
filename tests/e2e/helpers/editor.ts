@@ -1,5 +1,6 @@
 import { expect, type FrameLocator, type Page } from '@playwright/test'
 import { OWNER } from './constants'
+import { expectReadyWithLazyChunkRecovery } from './readiness'
 
 /**
  * Site editor / visual builder helpers. Each one is a small wrapper around the
@@ -14,7 +15,7 @@ import { OWNER } from './constants'
 
 /** The editor is ready once the canvas surface and its insert notch are shown. */
 export async function expectEditorReady(page: Page): Promise<void> {
-  await expect(page.getByTestId('canvas-root')).toBeVisible({ timeout: 20_000 })
+  await expectReadyWithLazyChunkRecovery(page, page.getByTestId('canvas-root'))
   await expect(page.getByTestId('canvas-notch')).toBeVisible()
 }
 
@@ -87,6 +88,22 @@ export async function openLayersPanel(page: Page): Promise<void> {
     }
     await explorer.getByRole('button', { name: 'Layers', exact: true }).click()
   }
+  await expect(tree).toBeVisible()
+}
+
+/** Open the governed Components projection in Explorer → Layers. */
+export async function openComponentsPanel(page: Page): Promise<void> {
+  const tree = page.getByRole('tree', { name: 'Component page hierarchy' })
+  if (!(await tree.isVisible().catch(() => false))) {
+    const explorer = page.getByRole('complementary', { name: 'Explorer' })
+    if (!(await explorer.isVisible().catch(() => false))) {
+      await page.getByRole('button', { name: 'Open Explorer panel' }).click()
+    }
+    await explorer.getByRole('button', { name: 'Layers', exact: true }).click()
+    const layersView = page.getByTestId('layers-view-control')
+    await layersView.getByRole('button', { name: 'Components', exact: true }).click()
+  }
+  await expect(page.getByTestId('component-layers-panel-ready')).toBeVisible()
   await expect(tree).toBeVisible()
 }
 

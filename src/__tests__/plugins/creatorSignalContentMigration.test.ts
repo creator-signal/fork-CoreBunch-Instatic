@@ -10,6 +10,7 @@ import {
 } from '@core/data/bundleArchive'
 import type { DataRow, DataTable } from '@core/data/schemas'
 import { pageToCells } from '@core/data/pageFromRow'
+import type { Page } from '@core/page-tree'
 import { legacyCreatorSignalPageHashes0111 } from '../../../integrations/creator-signal/migrations/legacy-0.1.11-hashes'
 import { legacyCreatorSignalPages0111 } from '../../../integrations/creator-signal/migrations/legacy-0.1.11'
 import {
@@ -42,6 +43,13 @@ import {
   prepareCreatorSignalContentMigration,
   retainedCreatorSignalPageVersion,
 } from '../../../integrations/creator-signal/migrations/0.2.0/migration'
+import { creatorSignalPatternEntries } from '../../../integrations/creator-signal/component-library'
+import {
+  creatorSignalNotFoundAuthoringReference,
+  creatorSignalPageAuthoringReference,
+  pack,
+} from '../../../integrations/creator-signal/pack/site'
+import { creatorSignalPublicPatternRootProps } from '../../../integrations/creator-signal/public-authoring-contract'
 
 const timestamp = '2026-08-14T00:00:00.000Z'
 
@@ -66,7 +74,7 @@ const pagesTable: DataTable = {
   updatedAt: timestamp,
 }
 
-function rowFor(page: (typeof legacyCreatorSignalPages0111)[number]): DataRow {
+function rowFor(page: Page): DataRow {
   return {
     id: page.id,
     tableId: 'pages',
@@ -87,6 +95,53 @@ function rowFor(page: (typeof legacyCreatorSignalPages0111)[number]): DataRow {
     publishedAt: timestamp,
     scheduledPublishAt: null,
     deletedAt: null,
+  }
+}
+
+function retainedPatternWrappedPage(page: Page, patternId: string): Page {
+  const wrapped = structuredClone(page)
+  const body = wrapped.nodes[wrapped.rootNodeId]
+  if (!body || body.moduleId !== 'base.body') throw new Error(`Missing body for ${page.slug}`)
+  const version = creatorSignalPatternEntries.find((entry) => entry.id === patternId)?.version
+  if (!version) throw new Error(`Missing pattern entry ${patternId}`)
+  const wrapperId = `${wrapped.id}/retained-pattern-wrapper`
+  const componentIds = [...body.children]
+  body.children = [wrapperId]
+  for (const nodeId of componentIds) wrapped.nodes[nodeId]!.parentId = wrapperId
+  wrapped.nodes[wrapperId] = {
+    id: wrapperId,
+    moduleId: 'base.container',
+    props: creatorSignalPublicPatternRootProps(patternId),
+    breakpointOverrides: {},
+    children: componentIds,
+    classIds: [],
+    parentId: body.id,
+    catalogueInstance: {
+      entryId: patternId,
+      entryVersion: version,
+      variantId: 'default',
+      pattern: { authorableNodeIds: componentIds },
+    },
+  }
+  return wrapped
+}
+
+function retainedPatternWrappedManifest(): SiteBundleArchiveManifest {
+  const pages = pack.pages.map((page) => {
+    if (page.template?.target.kind === 'everywhere') return page
+    const patternId = page.template?.target.kind === 'notFound'
+      ? creatorSignalNotFoundAuthoringReference.patternId
+      : creatorSignalPageAuthoringReference.find((reference) =>
+          reference.route === (page.slug === 'index' ? '/' : `/${page.slug}`))?.patternId
+    if (!patternId) throw new Error(`Missing authoring reference for ${page.slug}`)
+    return retainedPatternWrappedPage(page, patternId)
+  })
+  return {
+    schemaVersion: 1,
+    exportedAt: timestamp,
+    sourceSiteName: 'Creator Signal 0.7.0',
+    tables: [pagesTable],
+    rows: pages.map(rowFor),
   }
 }
 
@@ -194,15 +249,60 @@ describe('Creator Signal 0.2.0 content migration', () => {
     const home = result.manifest?.rows.find((row) =>
       row.id === 'creator-signal.site/page/home')
     const body = home?.cells.body as { nodes: Record<string, { children: string[]; catalogueInstance?: { entryId: string } }>; rootNodeId: string }
-    expect(body.nodes[body.rootNodeId].children).toHaveLength(1)
-    const patternNode = body.nodes[body.nodes[body.rootNodeId].children[0]!]
-    expect(patternNode.catalogueInstance?.entryId).toBe(
-      'creator-signal.site.pattern.home-v2-page',
-    )
-    for (const nodeId of patternNode.children) {
+    expect(body.nodes[body.rootNodeId].children).toHaveLength(11)
+    for (const nodeId of body.nodes[body.rootNodeId].children) {
       expect(body.nodes[nodeId].catalogueInstance?.entryId).toStartWith('creator-signal.site.')
+      expect(body.nodes[nodeId].catalogueInstance?.entryId)
+        .not.toStartWith('creator-signal.site.pattern.')
       expect(body.nodes[nodeId].children).toEqual([])
     }
+  })
+
+  it('unwraps retained 0.7.0 page recipes without losing authored component state', () => {
+    const source = retainedPatternWrappedManifest()
+    const home = source.rows.find((row) => row.id === 'creator-signal.site/page/home')!
+    const sourceBody = home.cells.body as {
+      nodes: Record<string, { children: string[]; props: Record<string, unknown>; catalogueInstance?: { entryId: string } }>
+      rootNodeId: string
+    }
+    const wrapperId = sourceBody.nodes[sourceBody.rootNodeId]!.children[0]!
+    const wrapper = sourceBody.nodes[wrapperId]!
+    const firstComponentId = wrapper.children[0]!
+    sourceBody.nodes[firstComponentId]!.props.heading = 'Author-retained campaign heading'
+    wrapper.children = [wrapper.children.at(-1)!, ...wrapper.children.slice(0, -1)]
+
+    const result = prepareCreatorSignalContentMigration(source, timestamp)
+
+    expect(result.report.ready).toBe(true)
+    expect(result.report.pages.find((page) => page.id === home.id)).toMatchObject({
+      state: 'legacy-eligible',
+      retainedVersion: '0.7.0-pattern-wrapper',
+    })
+    expect(result.report.summary).toMatchObject({
+      legacyEligible: 26,
+      authoredContent: 0,
+      template: 'current',
+      notFoundTemplate: 'repair',
+      rowsInMigration: 27,
+    })
+
+    expect(result.manifest).not.toBeNull()
+    const migrated = result.manifest!.rows.find((row) => row.id === home.id)
+    if (!migrated) throw new Error('Missing migrated Home row')
+    const migratedBody = migrated.cells.body as {
+      nodes: Record<string, { children: string[]; props: Record<string, unknown>; catalogueInstance?: { entryId: string } }>
+      rootNodeId: string
+    }
+    expect(migratedBody.nodes[wrapperId]).toBeUndefined()
+    expect(migratedBody.nodes[migratedBody.rootNodeId]!.children)
+      .toEqual(wrapper.children)
+    expect(migratedBody.nodes[firstComponentId]!.props.heading)
+      .toBe('Author-retained campaign heading')
+    expect(Object.values(migratedBody.nodes).some((node) =>
+      node.catalogueInstance?.entryId.startsWith('creator-signal.site.pattern.')))
+      .toBe(false)
+    expect(migrated.status).toBe('published')
+    expect(result.report.apply.publishesAutomatically).toBe(false)
   })
 
   it('repairs only the exact invalid 0.0.29 shared template', () => {

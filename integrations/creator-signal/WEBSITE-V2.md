@@ -90,12 +90,18 @@ components so its text and iframe can be selected, replaced or removed independe
 
 ## Content lifecycle
 
-Pack pages are starter content for an empty installation. Plugin 0.7.0
+Pack pages are starter content for an empty installation. Plugin 0.8.0
 reconciles technical catalogue, policy, style and runtime records but does not
-overwrite authored pages. The explicit content migration recognises exact
+overwrite authored pages automatically. Its starter recipes expand into direct
+page components beneath the one shared site template. The explicit content migration recognises exact
 retained 0.1.11, 0.2.0-0.2.6, 0.3.5, 0.4.0, 0.5.0 and 0.6.0 starter content, produces a
 reviewable `merge-overwrite` archive, and blocks the complete migration if any
 page or template contains an unrecognised authored difference.
+
+For retained 0.7.0 pages, the migration removes only the exact synthetic
+pattern wrapper and preserves its child component IDs, authored fields, order,
+nested slots and publication status. Populated layout slots render without
+structural editor chrome so the canvas remains WYSIWYG.
 
 Semantic hashes ignore generated node identities while retaining authored
 content, metadata, structure and ordering. The migration archive never

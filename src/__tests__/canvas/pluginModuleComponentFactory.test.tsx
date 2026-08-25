@@ -38,6 +38,9 @@ describe('editorPluginModuleComponentFactory module CSS', () => {
       </CanvasDocumentContext.Provider>,
     )
 
+    expect(view.container.querySelector('[data-plugin-canvas-module="true"]')
+      ?.getAttribute('data-plugin-module')).toBe(definition.id)
+
     await waitFor(() => {
       const style = canvasDocument.head.querySelector(
         'style[data-plugin-module="acme.preview.card"]',

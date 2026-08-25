@@ -41,6 +41,8 @@ import {
   type ComponentLayerDropResolution,
 } from './componentLayersDnd'
 import { getDomDropZone } from '@site/panels/DomPanel/domPanelDnd'
+import { getKeybindingForCommand } from '@admin/spotlight/keybindings'
+import { useConfirmDelete } from '@admin/shared/dialogs/ConfirmDeleteDialog'
 import styles from './ComponentLayersTree.module.css'
 
 interface ComponentLayersTreeProps {
@@ -367,6 +369,8 @@ function ComponentLayerTreeRow({
     id: row.sourcePageId ? row.key : row.nodeId,
     disabled: !canMove || searchResult || row.readOnly,
   })
+  const deleteNode = useEditorStore((state) => state.deleteNode)
+  const confirmDelete = useConfirmDelete()
   const setRowRef = (element: HTMLDivElement | null) => {
     draggable.setNodeRef(element)
     droppable.setNodeRef(element)
@@ -388,6 +392,8 @@ function ComponentLayerTreeRow({
       selected={selected}
       locked={row.readOnly}
       dragging={draggable.isDragging}
+      {...(draggableEnabled ? draggable.attributes : {})}
+      {...(draggableEnabled ? draggable.listeners : {})}
       role="treeitem"
       aria-level={depth + 1}
       aria-selected={selected}
@@ -396,8 +402,6 @@ function ComponentLayerTreeRow({
       data-node-id={row.sourcePageId ? undefined : row.nodeId}
       data-source-node-id={row.sourcePageId ? row.nodeId : undefined}
       className={cn(dropClass)}
-      {...(draggableEnabled ? draggable.attributes : {})}
-      {...(draggableEnabled ? draggable.listeners : {})}
       onClick={() => {
         if (!row.sourcePageId) onSelect(row.nodeId)
       }}
@@ -408,6 +412,20 @@ function ComponentLayerTreeRow({
         if (!row.sourcePageId) useEditorStore.getState().hoverNode(null)
       }}
       onKeyDown={(event) => {
+        if (
+          draggableEnabled &&
+          getKeybindingForCommand('layers.delete')?.match(event)
+        ) {
+          event.preventDefault()
+          event.stopPropagation()
+          confirmDelete({
+            title: 'Delete layer?',
+            description: `${row.label} and any of its children will be removed. This can be undone with Ctrl/Cmd+Z.`,
+            confirmLabel: 'Delete',
+            commit: () => deleteNode(row.nodeId),
+          })
+          return
+        }
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault()
           if (!row.sourcePageId) onSelect(row.nodeId)

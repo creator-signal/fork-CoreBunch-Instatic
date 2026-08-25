@@ -1,0 +1,2585 @@
+{
+  "schemaVersion": "creator-signal.component-library-specimens/v1",
+  "plugin": {
+    "id": "creator-signal.site",
+    "version": "0.8.1"
+  },
+  "designSystem": {
+    "owner": "@creator-signal/design-system",
+    "revision": "1afc33bd5a8037bb2ec79fb512423268b9b771bb",
+    "replaceableAssets": [
+      "integrations/creator-signal/assets/design-system/tokens.css",
+      "integrations/creator-signal/assets/design-system/typography.css",
+      "integrations/creator-signal/assets/design-system/theme-runtime.css",
+      "integrations/creator-signal/assets/design-system/theme-bootstrap.js",
+      "integrations/creator-signal/assets/design-system/theme-runtime.js"
+    ]
+  },
+  "summary": {
+    "entryCount": 37,
+    "componentCount": 22,
+    "patternCount": 15
+  },
+  "entries": [
+    {
+      "id": "creator-signal.site.call-to-action",
+      "version": "1.0.0",
+      "name": "Call to Action",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-call-to-action.html",
+      "htmlHash": "sha256:ab2c94baa277a5095bf570514137438ea36d36d859e59896c9f34cf9726b1fe7",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "index"
+      },
+      "fields": [
+        {
+          "key": "eyebrow",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "heading",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "body",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "actionLabel",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "actionUrl",
+          "type": "url",
+          "required": true
+        },
+        {
+          "key": "sectionId",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Keep labels descriptive and preserve the component heading hierarchy.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.heading-order",
+          "a11y.semantic-structure",
+          "a11y.touch-target"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": [
+          "a11y.touch-target"
+        ]
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.campaign-hero",
+      "version": "1.0.0",
+      "name": "Campaign Hero",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-campaign-hero.html",
+      "htmlHash": "sha256:a51832e367474e3991e0467f3c483a71d4c7d2fb6f6a02564497bc1c5f8025d2",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "index"
+      },
+      "fields": [
+        {
+          "key": "eyebrow",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "heading",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "body",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "primaryActionLabel",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "primaryActionUrl",
+          "type": "url",
+          "required": true
+        },
+        {
+          "key": "secondaryActionLabel",
+          "type": "text",
+          "required": false
+        },
+        {
+          "key": "secondaryActionUrl",
+          "type": "url",
+          "required": false
+        },
+        {
+          "key": "footnote",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "artwork",
+          "type": "image",
+          "required": false
+        },
+        {
+          "key": "artworkAlt",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Keep one H1, name both actions by outcome, and provide alternative text when the artwork conveys information.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.heading-order",
+          "a11y.image-alternative",
+          "a11y.semantic-structure",
+          "a11y.touch-target"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": [
+          "a11y.touch-target"
+        ]
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.comparison-section",
+      "version": "1.0.0",
+      "name": "Comparison Section",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-comparison-section.html",
+      "htmlHash": "sha256:bf0a27d870954bc7c743c7a3ff0d21565b90f29acf440a16d9f5f8eee14051ea",
+      "fixture": {
+        "source": "registry-defaults",
+        "sourceId": "creator-signal.site.comparison-section"
+      },
+      "fields": [
+        {
+          "key": "eyebrow",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "heading",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "introduction",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "sectionId",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "caption",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "firstLabel",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "secondLabel",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "thirdLabel",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "items",
+          "type": "repeater",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Keep the caption specific and write row labels that make sense independently of visual position.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.consent-banner",
+      "version": "1.0.0",
+      "name": "Privacy Choices",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-consent-banner.html",
+      "htmlHash": "sha256:f32bfb73f43c89bf093e6bf0710b277d6640e667cb0f1b311a108b55e6385e12",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "creator-signal-site-template"
+      },
+      "fields": [
+        {
+          "key": "heading",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "body",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "essentialLabel",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "optionalLabel",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Describe the optional purpose plainly and keep both choices equally understandable.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.announcement-contract",
+          "a11y.contrast",
+          "a11y.dismissal-contract",
+          "a11y.focus-contract",
+          "a11y.keyboard-contract",
+          "a11y.no-javascript-fallback",
+          "a11y.semantic-structure",
+          "a11y.touch-target"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": [
+          "a11y.announcement-contract",
+          "a11y.dismissal-contract",
+          "a11y.focus-contract",
+          "a11y.keyboard-contract",
+          "a11y.no-javascript-fallback",
+          "a11y.touch-target"
+        ]
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.crm-iframe-form",
+      "version": "2.0.0",
+      "name": "Embedded CRM Form",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-crm-iframe-form.html",
+      "htmlHash": "sha256:d13273555b6108c6c8e382d695bad84e9fcaa4299b14f8583b8dac03b32ad822",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "feedback"
+      },
+      "fields": [
+        {
+          "key": "sectionId",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "formUrl",
+          "type": "url",
+          "required": true
+        },
+        {
+          "key": "iframeTitle",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "fallbackLabel",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "loadingMessage",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "unavailableMessage",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "initialHeight",
+          "type": "number",
+          "required": true
+        },
+        {
+          "key": "minimumHeight",
+          "type": "number",
+          "required": true
+        },
+        {
+          "key": "maximumHeight",
+          "type": "number",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Provide a concise iframe title and fallback link. Verify keyboard flow in the hosted form before publishing.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.announcement-contract",
+          "a11y.contrast",
+          "a11y.focus-contract",
+          "a11y.keyboard-contract",
+          "a11y.no-javascript-fallback",
+          "a11y.provider-fallback",
+          "a11y.semantic-structure",
+          "a11y.touch-target"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": [
+          "a11y.announcement-contract",
+          "a11y.focus-contract",
+          "a11y.keyboard-contract",
+          "a11y.touch-target"
+        ]
+      },
+      "providerBoundary": {
+        "mode": "non-delivering-provider-state",
+        "providerEntryIds": [
+          "creator-signal.site.crm-iframe-form"
+        ]
+      }
+    },
+    {
+      "id": "creator-signal.site.faq",
+      "version": "1.0.0",
+      "name": "FAQ",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-faq.html",
+      "htmlHash": "sha256:d7c861499fab0306a01c2f262ff1f40a773a99712b5c8da7468b50dc6fad7e60",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "index"
+      },
+      "fields": [
+        {
+          "key": "heading",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "sectionId",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "items",
+          "type": "repeater",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Keep labels descriptive and preserve the component heading hierarchy.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.announcement-contract",
+          "a11y.contrast",
+          "a11y.focus-contract",
+          "a11y.heading-order",
+          "a11y.keyboard-contract",
+          "a11y.no-javascript-fallback",
+          "a11y.semantic-structure",
+          "a11y.touch-target"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": [
+          "a11y.announcement-contract",
+          "a11y.focus-contract",
+          "a11y.keyboard-contract",
+          "a11y.touch-target"
+        ]
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.feature-grid",
+      "version": "1.1.0",
+      "name": "Feature Grid",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-feature-grid.html",
+      "htmlHash": "sha256:60c4fcacfdbbe148e82ce8665630e82e535817d2c48a3302ae96bf6965d6d7a7",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "index"
+      },
+      "fields": [
+        {
+          "key": "eyebrow",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "heading",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "introduction",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "sectionId",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "tone",
+          "type": "select",
+          "required": true
+        },
+        {
+          "key": "items",
+          "type": "repeater",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Keep labels descriptive and preserve the component heading hierarchy.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.footer",
+      "version": "1.1.0",
+      "name": "Site Footer",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-footer.html",
+      "htmlHash": "sha256:fbc437113009959ca06750afcb51d2d7cecf3910897291ee8e06c0a9ceea81b9",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "creator-signal-site-template"
+      },
+      "fields": [
+        {
+          "key": "brandName",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "tagline",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "copyright",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "items",
+          "type": "repeater",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Keep link labels unique enough to make sense when read out of context.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.keyboard-contract",
+          "a11y.semantic-structure",
+          "a11y.touch-target"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": [
+          "a11y.keyboard-contract",
+          "a11y.touch-target"
+        ]
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.founder-story",
+      "version": "1.0.0",
+      "name": "Founder Story",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-founder-story.html",
+      "htmlHash": "sha256:60014af3c3674d2f2b6894247d3875654e5e76ba32d8aa29611f83a1afc87a07",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "index"
+      },
+      "fields": [
+        {
+          "key": "eyebrow",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "heading",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "body",
+          "type": "rich-text",
+          "required": true
+        },
+        {
+          "key": "attribution",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "role",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "portrait",
+          "type": "image",
+          "required": false
+        },
+        {
+          "key": "portraitAlt",
+          "type": "text",
+          "required": false
+        },
+        {
+          "key": "sectionId",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Keep a logical section heading and provide portrait alternative text when the image conveys identity.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.heading-order",
+          "a11y.image-alternative",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.header",
+      "version": "1.2.0",
+      "name": "Site Header",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-header.html",
+      "htmlHash": "sha256:86821f51edb05c48442d33ee80e2cf2371a8f85547be9571bfd878513ac67964",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "creator-signal-site-template"
+      },
+      "fields": [
+        {
+          "key": "brandName",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "tagline",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "homeUrl",
+          "type": "url",
+          "required": true
+        },
+        {
+          "key": "items",
+          "type": "repeater",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Use short navigation labels, one primary action, and a Home URL that returns to the site root.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.focus-contract",
+          "a11y.keyboard-contract",
+          "a11y.no-javascript-fallback",
+          "a11y.semantic-structure",
+          "a11y.touch-target"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": [
+          "a11y.focus-contract",
+          "a11y.keyboard-contract",
+          "a11y.touch-target"
+        ]
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.hero",
+      "version": "1.2.0",
+      "name": "Creator Signal Hero",
+      "kind": "component",
+      "implementationTaxonomy": "visual-component",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-hero.html",
+      "htmlHash": "sha256:bdc5536d180e58529e527ab0b3888150ef45469930cc08dd4edba25fda5be23e",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "products"
+      },
+      "fields": [
+        {
+          "key": "creator-signal.site.hero.eyebrow",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "creator-signal.site.hero.heading",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "creator-signal.site.hero.body",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "creator-signal.site.hero.action-label",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "creator-signal.site.hero.action-url",
+          "type": "url",
+          "required": true
+        },
+        {
+          "key": "creator-signal.site.hero.artwork",
+          "type": "image",
+          "required": false
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Use the Hero as the page-level H1 and keep later heading levels logical.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.heading-order",
+          "a11y.semantic-structure",
+          "a11y.touch-target"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": [
+          "a11y.touch-target"
+        ]
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.mautic-form",
+      "version": "2.0.0",
+      "name": "Managed Form",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-mautic-form.html",
+      "htmlHash": "sha256:6f831b6520c07857f0ee6a501af9680fc41a34f64d324b33cdb9abe805a22695",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "contact"
+      },
+      "fields": [
+        {
+          "key": "successMessage",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "sectionId",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "mauticBaseUrl",
+          "type": "url",
+          "required": true
+        },
+        {
+          "key": "formAlias",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "registryPath",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "formCode",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "campaignCode",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Keep labels descriptive and preserve the component heading hierarchy.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.announcement-contract",
+          "a11y.contrast",
+          "a11y.focus-contract",
+          "a11y.form-control-label",
+          "a11y.keyboard-contract",
+          "a11y.no-javascript-fallback",
+          "a11y.provider-fallback",
+          "a11y.semantic-structure",
+          "a11y.touch-target"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": [
+          "a11y.announcement-contract",
+          "a11y.focus-contract",
+          "a11y.form-control-label",
+          "a11y.keyboard-contract",
+          "a11y.touch-target"
+        ]
+      },
+      "providerBoundary": {
+        "mode": "non-delivering-provider-state",
+        "providerEntryIds": [
+          "creator-signal.site.mautic-form"
+        ]
+      }
+    },
+    {
+      "id": "creator-signal.site.pattern.article-content-page",
+      "version": "1.0.0",
+      "name": "Article or Content Page",
+      "kind": "pattern",
+      "implementationTaxonomy": "pattern",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-article-content-page.html",
+      "htmlHash": "sha256:a6ec7b3a7e9b7e55ed6cea02f7fd4affdd442b54872b61e5d7f482564b3700ad",
+      "fixture": {
+        "source": "pattern-materializer",
+        "sourceId": "creator-signal.site.pattern.article-content-page"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "Keep heading hierarchy logical inside the authored body.",
+        "rules": [
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [
+        {
+          "nodeKey": "hero",
+          "entryId": "creator-signal.site.hero",
+          "entryVersion": "1.2.0"
+        },
+        {
+          "nodeKey": "content",
+          "entryId": "creator-signal.site.rich-text-section",
+          "entryVersion": "1.0.0"
+        }
+      ],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.pattern.comparison-section",
+      "version": "1.0.0",
+      "name": "Comparison Section",
+      "kind": "pattern",
+      "implementationTaxonomy": "pattern",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-comparison-section.html",
+      "htmlHash": "sha256:b91767588292e4095510464e2625a62b33a73039a38783de1aec72f4695b1e1c",
+      "fixture": {
+        "source": "pattern-materializer",
+        "sourceId": "creator-signal.site.pattern.comparison-section"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "Retain the visible caption and complete row and column headings.",
+        "rules": [
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [
+        {
+          "nodeKey": "comparison",
+          "entryId": "creator-signal.site.comparison-section",
+          "entryVersion": "1.0.0"
+        }
+      ],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.pattern.contact-page",
+      "version": "2.0.0",
+      "name": "Contact Page",
+      "kind": "pattern",
+      "implementationTaxonomy": "pattern",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-contact-page.html",
+      "htmlHash": "sha256:142c2297d59313fcea84fca3fed62eda80dac32c0b820b1306d3ab12b92e0806",
+      "fixture": {
+        "source": "pattern-materializer",
+        "sourceId": "creator-signal.site.pattern.contact-page"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "Keep the Section Intro before the managed form in reading order and preserve form labels, status announcements and privacy context.",
+        "rules": [
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [
+        {
+          "nodeKey": "hero",
+          "entryId": "creator-signal.site.hero",
+          "entryVersion": "1.2.0"
+        },
+        {
+          "nodeKey": "form-columns",
+          "entryId": "creator-signal.site.two-column-layout",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "form-section-intro",
+          "entryId": "creator-signal.site.section-intro",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "form-provider",
+          "entryId": "creator-signal.site.mautic-form",
+          "entryVersion": "2.0.0"
+        }
+      ],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "non-delivering-provider-state",
+        "providerEntryIds": [
+          "creator-signal.site.mautic-form"
+        ]
+      }
+    },
+    {
+      "id": "creator-signal.site.pattern.content-page",
+      "version": "1.0.0",
+      "name": "Content Page",
+      "kind": "pattern",
+      "implementationTaxonomy": "pattern",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-content-page.html",
+      "htmlHash": "sha256:0559095beda0653f4401ca2312354d2dec03a8c5dcd7edcf3fdab17b1dac20ed",
+      "fixture": {
+        "source": "pattern-materializer",
+        "sourceId": "creator-signal.site.pattern.content-page"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "Keep headings logical inside the rich-text section.",
+        "rules": [
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [
+        {
+          "nodeKey": "hero",
+          "entryId": "creator-signal.site.hero",
+          "entryVersion": "1.2.0"
+        },
+        {
+          "nodeKey": "content",
+          "entryId": "creator-signal.site.rich-text-section",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "action",
+          "entryId": "creator-signal.site.call-to-action",
+          "entryVersion": "1.0.0"
+        }
+      ],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.pattern.early-access-page",
+      "version": "2.0.0",
+      "name": "Early Access Page",
+      "kind": "pattern",
+      "implementationTaxonomy": "pattern",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-early-access-page.html",
+      "htmlHash": "sha256:fc2a476aa2c369cfe30bc91780f05eabb5813993bc73f6a3ce456243429f490a",
+      "fixture": {
+        "source": "pattern-materializer",
+        "sourceId": "creator-signal.site.pattern.early-access-page"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "Keep the Section Intro before the form provider in reading order, preserve labelled forms and retain explicit permission copy.",
+        "rules": [
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [
+        {
+          "nodeKey": "campaign-hero",
+          "entryId": "creator-signal.site.campaign-hero",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "signal-strip",
+          "entryId": "creator-signal.site.signal-strip",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "features",
+          "entryId": "creator-signal.site.feature-grid",
+          "entryVersion": "1.1.0"
+        },
+        {
+          "nodeKey": "form-columns",
+          "entryId": "creator-signal.site.two-column-layout",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "features-2",
+          "entryId": "creator-signal.site.feature-grid",
+          "entryVersion": "1.1.0"
+        },
+        {
+          "nodeKey": "features-3",
+          "entryId": "creator-signal.site.feature-grid",
+          "entryVersion": "1.1.0"
+        },
+        {
+          "nodeKey": "testimonial",
+          "entryId": "creator-signal.site.testimonial",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "form-section-intro",
+          "entryId": "creator-signal.site.section-intro",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "form-provider",
+          "entryId": "creator-signal.site.mautic-form",
+          "entryVersion": "2.0.0"
+        }
+      ],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "non-delivering-provider-state",
+        "providerEntryIds": [
+          "creator-signal.site.mautic-form"
+        ]
+      }
+    },
+    {
+      "id": "creator-signal.site.pattern.empty-state",
+      "version": "1.0.0",
+      "name": "Empty State Page",
+      "kind": "pattern",
+      "implementationTaxonomy": "pattern",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-empty-state.html",
+      "htmlHash": "sha256:9f9b5385431704f9813daa473394283ffac5232568fc1b572724cddc915724aa",
+      "fixture": {
+        "source": "pattern-materializer",
+        "sourceId": "creator-signal.site.pattern.empty-state"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "Name the empty state in text and provide a useful action.",
+        "rules": [
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [
+        {
+          "nodeKey": "state",
+          "entryId": "creator-signal.site.recovery-state",
+          "entryVersion": "1.0.0"
+        }
+      ],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.pattern.error-state",
+      "version": "1.0.0",
+      "name": "Error State Page",
+      "kind": "pattern",
+      "implementationTaxonomy": "pattern",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-error-state.html",
+      "htmlHash": "sha256:91cebfa5621901441c145e8a1e4a66987afd6476b4a9239527a3e10fa0c18e07",
+      "fixture": {
+        "source": "pattern-materializer",
+        "sourceId": "creator-signal.site.pattern.error-state"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "Describe the failure without relying on colour and keep the recovery action specific.",
+        "rules": [
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [
+        {
+          "nodeKey": "state",
+          "entryId": "creator-signal.site.recovery-state",
+          "entryVersion": "1.0.0"
+        }
+      ],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.pattern.features-page",
+      "version": "1.0.0",
+      "name": "Features Page",
+      "kind": "pattern",
+      "implementationTaxonomy": "pattern",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-features-page.html",
+      "htmlHash": "sha256:138ca93ef6441959c06a4256c266c648cbfa3419eb264b8ef844c42d940d15d5",
+      "fixture": {
+        "source": "pattern-materializer",
+        "sourceId": "creator-signal.site.pattern.features-page"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "Keep feature headings short and outcome focused.",
+        "rules": [
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [
+        {
+          "nodeKey": "hero",
+          "entryId": "creator-signal.site.hero",
+          "entryVersion": "1.2.0"
+        },
+        {
+          "nodeKey": "features",
+          "entryId": "creator-signal.site.feature-grid",
+          "entryVersion": "1.1.0"
+        }
+      ],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.pattern.feedback-page",
+      "version": "1.0.0",
+      "name": "Feedback Page",
+      "kind": "pattern",
+      "implementationTaxonomy": "pattern",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-feedback-page.html",
+      "htmlHash": "sha256:13ac48e6933463418db626a1ec915db306d49c398d5d153654108684602aabd0",
+      "fixture": {
+        "source": "pattern-materializer",
+        "sourceId": "creator-signal.site.pattern.feedback-page"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "Keep the Section Intro heading before the embedded form in reading order and preserve the iframe title and fallback link.",
+        "rules": [
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [
+        {
+          "nodeKey": "hero",
+          "entryId": "creator-signal.site.hero",
+          "entryVersion": "1.2.0"
+        },
+        {
+          "nodeKey": "form-columns",
+          "entryId": "creator-signal.site.two-column-layout",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "form-section-intro",
+          "entryId": "creator-signal.site.section-intro",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "form-provider",
+          "entryId": "creator-signal.site.crm-iframe-form",
+          "entryVersion": "2.0.0"
+        }
+      ],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "non-delivering-provider-state",
+        "providerEntryIds": [
+          "creator-signal.site.crm-iframe-form"
+        ]
+      }
+    },
+    {
+      "id": "creator-signal.site.pattern.home-v2-page",
+      "version": "2.0.0",
+      "name": "Home Page",
+      "kind": "pattern",
+      "implementationTaxonomy": "pattern",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-home-v2-page.html",
+      "htmlHash": "sha256:7dd8ecfe631c4c185465744a9e44e886405fddd70a8391c815316279c0e7df39",
+      "fixture": {
+        "source": "pattern-materializer",
+        "sourceId": "creator-signal.site.pattern.home-v2-page"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "Keep heading order and action labels clear as the composition changes, and keep signup actions pointed at the Sales Pulse application.",
+        "rules": [
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [
+        {
+          "nodeKey": "campaign-hero",
+          "entryId": "creator-signal.site.campaign-hero",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "signal-strip",
+          "entryId": "creator-signal.site.signal-strip",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "signal-comparison",
+          "entryId": "creator-signal.site.signal-comparison",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "features",
+          "entryId": "creator-signal.site.feature-grid",
+          "entryVersion": "1.1.0"
+        },
+        {
+          "nodeKey": "process",
+          "entryId": "creator-signal.site.process-steps",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "features-2",
+          "entryId": "creator-signal.site.feature-grid",
+          "entryVersion": "1.1.0"
+        },
+        {
+          "nodeKey": "features-3",
+          "entryId": "creator-signal.site.feature-grid",
+          "entryVersion": "1.1.0"
+        },
+        {
+          "nodeKey": "pricing-plans",
+          "entryId": "creator-signal.site.pricing-plans",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "founder",
+          "entryId": "creator-signal.site.founder-story",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "faq",
+          "entryId": "creator-signal.site.faq",
+          "entryVersion": "1.0.0"
+        },
+        {
+          "nodeKey": "action",
+          "entryId": "creator-signal.site.call-to-action",
+          "entryVersion": "1.0.0"
+        }
+      ],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.pattern.legal-trust-page",
+      "version": "1.0.0",
+      "name": "Legal or Trust Page",
+      "kind": "pattern",
+      "implementationTaxonomy": "pattern",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-legal-trust-page.html",
+      "htmlHash": "sha256:8eb525dbbbfaf832d84c7157e16b754430f60517c42187c0c654be2a327955ba",
+      "fixture": {
+        "source": "pattern-materializer",
+        "sourceId": "creator-signal.site.pattern.legal-trust-page"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "Use coherent rich text, meaningful headings and readable link labels.",
+        "rules": [
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [
+        {
+          "nodeKey": "document",
+          "entryId": "creator-signal.site.public-document",
+          "entryVersion": "1.0.0"
+        }
+      ],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.pattern.not-found-state",
+      "version": "1.0.0",
+      "name": "Not Found Page",
+      "kind": "pattern",
+      "implementationTaxonomy": "pattern",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-not-found-state.html",
+      "htmlHash": "sha256:604ace169691950005b0119e74679b4f6ff9e740b12497851e2ff3d381e0bc92",
+      "fixture": {
+        "source": "pattern-materializer",
+        "sourceId": "creator-signal.site.pattern.not-found-state"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "State that the page was not found in text and provide a useful recovery action.",
+        "rules": [
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [
+        {
+          "nodeKey": "state",
+          "entryId": "creator-signal.site.recovery-state",
+          "entryVersion": "1.0.0"
+        }
+      ],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.pattern.offline-state",
+      "version": "1.0.0",
+      "name": "Offline State Page",
+      "kind": "pattern",
+      "implementationTaxonomy": "pattern",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-offline-state.html",
+      "htmlHash": "sha256:23ce0e44334bad218b7084ba391f156b276c3799512ac323f17e72490db7e55b",
+      "fixture": {
+        "source": "pattern-materializer",
+        "sourceId": "creator-signal.site.pattern.offline-state"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "State the connectivity problem in text and link to a reachable status or retry route.",
+        "rules": [
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [
+        {
+          "nodeKey": "state",
+          "entryId": "creator-signal.site.recovery-state",
+          "entryVersion": "1.0.0"
+        }
+      ],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.pattern.pricing-page",
+      "version": "1.1.0",
+      "name": "Pricing Page",
+      "kind": "pattern",
+      "implementationTaxonomy": "pattern",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-pricing-page.html",
+      "htmlHash": "sha256:c13ea897246ec41966416d062f11a5851a25dda2de509d32d27ab26c1ea435fb",
+      "fixture": {
+        "source": "pattern-materializer",
+        "sourceId": "creator-signal.site.pattern.pricing-page"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "Keep plan names, prices and access boundaries understandable without relying on colour.",
+        "rules": [
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [
+        {
+          "nodeKey": "hero",
+          "entryId": "creator-signal.site.hero",
+          "entryVersion": "1.2.0"
+        },
+        {
+          "nodeKey": "features",
+          "entryId": "creator-signal.site.feature-grid",
+          "entryVersion": "1.1.0"
+        },
+        {
+          "nodeKey": "action",
+          "entryId": "creator-signal.site.call-to-action",
+          "entryVersion": "1.0.0"
+        }
+      ],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.pattern.product-page",
+      "version": "1.0.0",
+      "name": "Product Page",
+      "kind": "pattern",
+      "implementationTaxonomy": "pattern",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-product-page.html",
+      "htmlHash": "sha256:d464e5d25ba4e9a8555873e7d22e340c09d3988423aeea159f6678bb781743f1",
+      "fixture": {
+        "source": "pattern-materializer",
+        "sourceId": "creator-signal.site.pattern.product-page"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "Keep card content scannable and action labels specific.",
+        "rules": [
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [
+        {
+          "nodeKey": "hero",
+          "entryId": "creator-signal.site.hero",
+          "entryVersion": "1.2.0"
+        },
+        {
+          "nodeKey": "features",
+          "entryId": "creator-signal.site.feature-grid",
+          "entryVersion": "1.1.0"
+        },
+        {
+          "nodeKey": "action",
+          "entryId": "creator-signal.site.call-to-action",
+          "entryVersion": "1.0.0"
+        }
+      ],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.pricing-plans",
+      "version": "1.0.0",
+      "name": "Pricing Plans",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pricing-plans.html",
+      "htmlHash": "sha256:c4dcb0b6a536c87b40a6cf74706d724274e13389645371092fa3668cf4dcdcef",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "index"
+      },
+      "fields": [
+        {
+          "key": "eyebrow",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "heading",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "introduction",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "footnote",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "sectionId",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "items",
+          "type": "repeater",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Write price cadence in text, include a descriptive feature list, and never communicate the featured plan through colour alone.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.heading-order",
+          "a11y.semantic-structure",
+          "a11y.touch-target"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": [
+          "a11y.touch-target"
+        ]
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.process-steps",
+      "version": "1.0.0",
+      "name": "Process Steps",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-process-steps.html",
+      "htmlHash": "sha256:43436cda7dc410babc95d4850b91213a747503c8610a1ecaffc4d80153bf0ddd",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "index"
+      },
+      "fields": [
+        {
+          "key": "eyebrow",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "heading",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "introduction",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "sectionId",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "items",
+          "type": "repeater",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Preserve ordered-list semantics and write markers that do not carry meaning without the step heading.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.public-document",
+      "version": "1.0.0",
+      "name": "Public Document",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-public-document.html",
+      "htmlHash": "sha256:ac3fd78b189089fc08da9fcf48a0a659bb626379749c856ae95c0fcdeb3cbd42",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "legal/billing"
+      },
+      "fields": [
+        {
+          "key": "eyebrow",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "heading",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "summary",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "body",
+          "type": "rich-text",
+          "required": true
+        },
+        {
+          "key": "dateModified",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Keep labels descriptive and preserve the component heading hierarchy.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.recovery-state",
+      "version": "1.0.0",
+      "name": "Recovery State",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-recovery-state.html",
+      "htmlHash": "sha256:6f1c26e5f536687b76e229ec92efb0b48aedef327e4c4d29f46fff2f711240d5",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "creator-signal-not-found"
+      },
+      "fields": [
+        {
+          "key": "state",
+          "type": "select",
+          "required": true
+        },
+        {
+          "key": "heading",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "body",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "actionLabel",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "actionUrl",
+          "type": "url",
+          "required": true
+        },
+        {
+          "key": "sectionId",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Name the state in text, explain what happened, and offer an action that works without relying on colour.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.announcement-contract",
+          "a11y.contrast",
+          "a11y.no-javascript-fallback",
+          "a11y.semantic-structure",
+          "a11y.touch-target"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": [
+          "a11y.announcement-contract",
+          "a11y.touch-target"
+        ]
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.rich-text-section",
+      "version": "1.0.0",
+      "name": "Rich Text Section",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-rich-text-section.html",
+      "htmlHash": "sha256:15c68c109e9bfc6027a55f321246a52416695f8c63f7c36434609f6a8740dab5",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "legal/privacy"
+      },
+      "fields": [
+        {
+          "key": "heading",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "body",
+          "type": "rich-text",
+          "required": true
+        },
+        {
+          "key": "sectionId",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "headingLanguage",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Keep labels descriptive and preserve the component heading hierarchy.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.section-intro",
+      "version": "1.0.0",
+      "name": "Section Intro",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-section-intro.html",
+      "htmlHash": "sha256:ea9082e5eac3bca9782d5b43a11eb9cc03aa27dc83514958fce964400b408fa1",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "contact"
+      },
+      "fields": [
+        {
+          "key": "eyebrow",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "heading",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "introduction",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "sectionId",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Keep the H2 in the page outline and use a unique section anchor.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.heading-order",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.signal-comparison",
+      "version": "1.0.0",
+      "name": "Signal Comparison",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-signal-comparison.html",
+      "htmlHash": "sha256:b089b020b238367718c92426c2b1406c6f2e168f43f8a978051676b34e24c923",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "index"
+      },
+      "fields": [
+        {
+          "key": "eyebrow",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "heading",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "introduction",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "beforeLabel",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "beforeBody",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "afterLabel",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "afterBody",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "artwork",
+          "type": "image",
+          "required": false
+        },
+        {
+          "key": "artworkAlt",
+          "type": "text",
+          "required": false
+        },
+        {
+          "key": "sectionId",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "State both sides in text and provide alternative text for informative artwork so the comparison never relies on imagery alone.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.heading-order",
+          "a11y.image-alternative",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.signal-strip",
+      "version": "1.0.0",
+      "name": "Signal Strip",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-signal-strip.html",
+      "htmlHash": "sha256:e4e8ddb331b8b3b82a77562883f2e10daa9114181f1375b2afeb9fcc0eb4aa04",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "index"
+      },
+      "fields": [
+        {
+          "key": "label",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "items",
+          "type": "repeater",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Keep each message short and preserve the list semantics; decorative separators remain hidden from assistive technology.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.no-javascript-fallback",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.testimonial",
+      "version": "1.0.0",
+      "name": "Testimonial",
+      "kind": "component",
+      "implementationTaxonomy": "primitive",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-testimonial.html",
+      "htmlHash": "sha256:4805e31a12595d5a6210ab7b274ea7264386be766629c4da3dc69005192c2bd8",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "early-access"
+      },
+      "fields": [
+        {
+          "key": "quote",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "attribution",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "role",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "accessibilityIntent": {
+        "guidance": "Keep labels descriptive and preserve the component heading hierarchy.",
+        "rules": [
+          "a11y.accessible-name",
+          "a11y.contrast",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    },
+    {
+      "id": "creator-signal.site.two-column-layout",
+      "version": "1.0.0",
+      "name": "Two Column Layout",
+      "kind": "component",
+      "implementationTaxonomy": "visual-component",
+      "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-two-column-layout.html",
+      "htmlHash": "sha256:64c87cfad723f1ba906595e274f2fe7641b9dd9ea9a786ad977589996f61ddce",
+      "fixture": {
+        "source": "starter-route",
+        "sourceId": "contact"
+      },
+      "fields": [],
+      "accessibilityIntent": {
+        "guidance": "Keep the reading order meaningful: left-column content is announced before right-column content.",
+        "rules": [
+          "a11y.contrast",
+          "a11y.semantic-structure"
+        ]
+      },
+      "patternChildLineage": [],
+      "browserContract": {
+        "viewports": [
+          "desktop",
+          "tablet",
+          "mobile"
+        ],
+        "themes": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "reducedMotion": true,
+        "forcedColors": true,
+        "imageUnavailable": true,
+        "interactions": []
+      },
+      "providerBoundary": {
+        "mode": "local-render",
+        "providerEntryIds": []
+      }
+    }
+  ],
+  "checksum": {
+    "algorithm": "sha256",
+    "value": "sha256:e5cac100396ff74cd328f4aaab253d22b39e768b1e61f03b77f240156731b3fc"
+  }
+}

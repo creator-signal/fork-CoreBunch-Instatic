@@ -4,7 +4,7 @@ MCP connections let external AI clients operate an Instatic instance through the
 
 This is the inverse of the **Providers** tab. Providers let Instatic call model APIs; MCP connections let outside clients call Instatic.
 
-For end-user setup commands and troubleshooting, read [`docs/reference/claude-mcp.md`](../reference/claude-mcp.md).
+For client-neutral acceptance and revocation, read [`docs/reference/mcp-end-user-testing.md`](../reference/mcp-end-user-testing.md). For Claude-specific setup commands, read [`docs/reference/claude-mcp.md`](../reference/claude-mcp.md).
 
 The wire server uses the stable split `@modelcontextprotocol/server` v2 package. That dependency remains allowed only under `server/ai/mcp/`; provider drivers continue to use their direct REST implementations.
 
@@ -240,6 +240,7 @@ Create and manual revoke actions retain the existing `ai.mcp_connector.created` 
 
 ## Related
 
+- `docs/reference/mcp-end-user-testing.md` — client-neutral connection, draft, cleanup, evidence, and revocation procedure.
 - `docs/reference/claude-mcp.md` — user setup for Claude Code and Claude custom connectors.
 - `docs/features/auth-and-access.md` — sessions, capabilities, MFA, and step-up authentication.
 - `server/ai/mcp/paths.ts` — canonical MCP and OAuth paths.

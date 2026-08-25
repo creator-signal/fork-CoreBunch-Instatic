@@ -6,6 +6,17 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.45 - 2026-08-26
+
+### Plugin canvas selection contract
+
+- Forwarded the complete canvas node identity and interaction contract through
+  both leaf and child-capable plugin module wrappers.
+- Restored WYSIWYG hover outlines, canvas click selection, Components-tree
+  synchronisation and property editing for plugin-backed page sections.
+- Added focused adapter coverage and authenticated browser acceptance for all
+  eleven direct plugin-backed Homepage sections.
+
 ## 0.0.44 - 2026-08-25
 
 ### Idempotent retained-content migration

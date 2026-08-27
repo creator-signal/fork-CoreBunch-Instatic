@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { activateInstalledEditorPlugins } from '@core/plugins/editorPluginLoader'
 import { bindDashboardWidgetIconResolver } from '@core/plugins/runtime'
 import { editorPluginModuleComponentFactory } from '@site/canvas/pluginModuleComponentFactory'
@@ -40,29 +40,57 @@ const activationCoordinator = createEditorPluginActivationCoordinator(
   },
 )
 
-export function useInstalledEditorPlugins(enabled = true): void {
+export type EditorPluginActivationStatus =
+  | 'disabled'
+  | 'activating'
+  | 'ready'
+  | 'failed'
+
+export function useInstalledEditorPlugins(enabled = true): EditorPluginActivationStatus {
+  const [status, setStatus] = useState<EditorPluginActivationStatus>(
+    enabled ? 'activating' : 'disabled',
+  )
+
   useEffect(() => {
     if (!enabled) {
       setEditorActivationFailures([])
       return
     }
 
+    let mounted = true
+
+    function observeActivation(activation: Promise<void>) {
+      void activation.then(
+        () => {
+          if (mounted) setStatus('ready')
+        },
+        (error: unknown) => {
+          console.error('Editor plugin activation failed', error)
+          if (mounted) setStatus('failed')
+        },
+      )
+    }
+
     function refreshPlugins() {
-      void activationCoordinator.refresh().catch(() => {
-        // The editor remains usable when plugin metadata cannot be loaded.
-      })
+      setStatus('activating')
+      observeActivation(activationCoordinator.refresh())
     }
 
     // Route layouts share this session-scoped pass. A transition that
     // unmounts one layout and mounts another attaches to the same promise,
     // so the shared registries are never reset by overlapping activations.
-    void activationCoordinator.activateInitial().catch(() => {
-      // The editor remains usable when plugin metadata cannot be loaded.
-    })
+    observeActivation(activationCoordinator.activateInitial())
     window.addEventListener(CMS_PLUGINS_CHANGED_EVENT, refreshPlugins)
 
     return () => {
+      mounted = false
       window.removeEventListener(CMS_PLUGINS_CHANGED_EVENT, refreshPlugins)
     }
   }, [enabled])
+
+  // When a previously disabled caller becomes enabled, keep the dependent
+  // editor surface closed during the render before the effect starts the
+  // activation pass.
+  if (enabled && status === 'disabled') return 'activating'
+  return status
 }

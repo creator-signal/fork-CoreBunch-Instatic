@@ -180,7 +180,7 @@ export function AdminCanvasLayout() {
     loaded: persistence.saveStatus.state !== 'loading',
   })
   useEditorLayoutPersistence()
-  useInstalledEditorPlugins(pluginBackgroundWorkEnabled)
+  const pluginActivationStatus = useInstalledEditorPlugins(pluginBackgroundWorkEnabled)
   // Mount the SSE bridge ONCE per admin tab — gives toasts on plugin
   // crashes from any route, drives the red dot on the Plugins nav link,
   // and keeps the open Plugins page list refreshed.
@@ -242,7 +242,7 @@ export function AdminCanvasLayout() {
           )}
         />
 
-        {loadEditorBody ? (
+        {loadEditorBody && pluginActivationStatus !== 'activating' ? (
           <LazyChunkBoundary
             location="site-editor-body"
             fallback={<AdminCanvasEditorBodyLoading />}

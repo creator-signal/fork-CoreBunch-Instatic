@@ -181,7 +181,7 @@ export function AdminCanvasLayout() {
     loaded: persistence.saveStatus.state !== 'loading',
   })
   useEditorLayoutPersistence()
-  const pluginActivationStatus = useInstalledEditorPlugins(pluginBackgroundWorkEnabled)
+  const pluginActivation = useInstalledEditorPlugins(pluginBackgroundWorkEnabled)
   // Mount the SSE bridge ONCE per admin tab — gives toasts on plugin
   // crashes from any route, drives the red dot on the Plugins nav link,
   // and keeps the open Plugins page list refreshed.
@@ -204,7 +204,7 @@ export function AdminCanvasLayout() {
   const loadEditorBody = usePostPaintEditorBodyGate()
 
   return (
-    <EditorPluginActivationContext value={pluginActivationStatus}>
+    <EditorPluginActivationContext value={pluginActivation}>
       <EditorPermissionsProvider value={permissions}>
         <div
           className={styles.shell}

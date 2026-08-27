@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { activateInstalledEditorPlugins } from '@core/plugins/editorPluginLoader'
 import { bindDashboardWidgetIconResolver } from '@core/plugins/runtime'
 import { editorPluginModuleComponentFactory } from '@site/canvas/pluginModuleComponentFactory'
 import { resolveDashboardWidgetIcon } from '@admin/pages/dashboard/widgetIcons'
 import { ensurePluginRuntime } from '@admin/pluginRuntimeBootstrap'
 import { CMS_PLUGINS_CHANGED_EVENT } from '@plugins/utils/pluginEvents'
-import { setEditorActivationFailures } from './editorPluginActivationErrors'
+import {
+  getEditorActivationErrors,
+  setEditorActivationFailures,
+} from './editorPluginActivationErrors'
 import { createEditorPluginActivationCoordinator } from './editorPluginActivationCoordinator'
 
 // Bind the dashboard widget icon resolver at module-load time, BEFORE
@@ -52,10 +55,17 @@ export type EditorPluginActivationStatus =
   | 'ready'
   | 'failed'
 
-export function useInstalledEditorPlugins(enabled = true): EditorPluginActivationStatus {
+export interface EditorPluginActivationState {
+  status: EditorPluginActivationStatus
+  retry: () => void
+}
+
+export function useInstalledEditorPlugins(enabled = true): EditorPluginActivationState {
+  const [retryRevision, setRetryRevision] = useState(0)
   const [status, setStatus] = useState<EditorPluginActivationStatus>(
     enabled ? 'activating' : 'disabled',
   )
+  const retry = useCallback(() => setRetryRevision((revision) => revision + 1), [])
 
   useEffect(() => {
     if (!enabled) {
@@ -68,7 +78,10 @@ export function useInstalledEditorPlugins(enabled = true): EditorPluginActivatio
     function observeActivation(activation: Promise<void>) {
       void activation.then(
         () => {
-          if (mounted) setStatus('ready')
+          if (!mounted) return
+          setStatus(Object.keys(getEditorActivationErrors()).length > 0
+            ? 'failed'
+            : 'ready')
         },
         (error: unknown) => {
           console.error('Editor plugin activation failed', error)
@@ -85,19 +98,21 @@ export function useInstalledEditorPlugins(enabled = true): EditorPluginActivatio
     // Route layouts share this session-scoped pass. A transition that
     // unmounts one layout and mounts another attaches to the same promise,
     // so the shared registries are never reset by overlapping activations.
-    observeActivation(activationCoordinator.activateInitial())
+    observeActivation(retryRevision === 0
+      ? activationCoordinator.activateInitial()
+      : activationCoordinator.refresh())
     window.addEventListener(CMS_PLUGINS_CHANGED_EVENT, refreshPlugins)
 
     return () => {
       mounted = false
       window.removeEventListener(CMS_PLUGINS_CHANGED_EVENT, refreshPlugins)
     }
-  }, [enabled])
+  }, [enabled, retryRevision])
 
   // When a previously disabled caller becomes enabled, keep the dependent
   // editor surface closed during the render before the effect starts the
   // activation pass.
-  if (!enabled) return 'disabled'
-  if (status === 'disabled') return 'activating'
-  return status
+  if (!enabled) return { status: 'disabled', retry }
+  if (status === 'disabled') return { status: 'activating', retry }
+  return { status, retry }
 }

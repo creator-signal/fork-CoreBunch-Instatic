@@ -13,6 +13,7 @@ import { readFileSync } from 'fs'
 import { join } from 'path'
 import { MemoryRouter } from '@admin/lib/routing'
 import { AdminCanvasLayout } from '@admin/layouts/AdminCanvasLayout'
+import { resetInstalledEditorPluginActivationForTests } from '@admin/pages/plugins/hooks/useInstalledEditorPlugins'
 import { AdminSessionProvider } from '@admin/session'
 import { StepUpProvider } from '@admin/shared/StepUp'
 import { useEditorStore } from '@site/store/store'
@@ -227,46 +228,12 @@ function loadSiteWithSelectedHeading() {
 }
 
 beforeEach(() => {
+  resetInstalledEditorPluginActivationForTests()
   resetStore()
   installAmbientFetch()
 })
 
 describe('AdminCanvasLayout — CMS site hydration gate', () => {
-  it('does not mount the component tree before retained plugins activate', async () => {
-    let resolvePlugins!: () => void
-    const pluginsReady = new Promise<void>((resolve) => {
-      resolvePlugins = resolve
-    })
-    let pluginFetchCalls = 0
-    const ambientFetch = globalThis.fetch
-    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
-      if (String(input).endsWith('/admin/api/cms/plugins')) {
-        pluginFetchCalls += 1
-        await pluginsReady
-        return new Response(JSON.stringify({ plugins: [], adminPages: [] }), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        })
-      }
-      return ambientFetch(input, init)
-    }) as typeof fetch
-
-    try {
-      renderEditorLayout()
-
-      expect(screen.getByRole('status', { name: 'Loading editor' })).toBeDefined()
-      expect(screen.queryByTestId('canvas-root')).toBeNull()
-
-      await act(async () => resolvePlugins())
-
-      expect(await screen.findByTestId('canvas-root')).toBeDefined()
-      expect(screen.queryByRole('status', { name: 'Loading editor' })).toBeNull()
-      expect(pluginFetchCalls).toBeGreaterThanOrEqual(1)
-    } finally {
-      globalThis.fetch = ambientFetch
-    }
-  })
-
   it('keeps the editor shell mounted while the CMS site hydrates', async () => {
     const loaded = makeSite({ name: 'Hydrated Site' })
     const originalFetch = globalThis.fetch
@@ -329,6 +296,41 @@ describe('AdminCanvasLayout — CMS site hydration gate', () => {
       expect(screen.queryByText(/loading site/i)).toBeNull()
     } finally {
       globalThis.fetch = originalFetch
+    }
+  })
+
+  it('does not declare the component tree ready before retained plugins activate', async () => {
+    let resolvePlugins!: () => void
+    const pluginsReady = new Promise<void>((resolve) => {
+      resolvePlugins = resolve
+    })
+    let pluginFetchCalls = 0
+    const ambientFetch = globalThis.fetch
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input).endsWith('/admin/api/cms/plugins')) {
+        pluginFetchCalls += 1
+        await pluginsReady
+        return new Response(JSON.stringify({ plugins: [], adminPages: [] }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        })
+      }
+      return ambientFetch(input, init)
+    }) as typeof fetch
+
+    try {
+      useEditorStore.setState({ layersViewMode: 'components' })
+      renderEditorLayout()
+
+      expect(await screen.findByTestId('canvas-root')).toBeDefined()
+      expect(screen.queryByTestId('component-layers-panel-ready')).toBeNull()
+
+      await act(async () => resolvePlugins())
+
+      expect(await screen.findByTestId('component-layers-panel-ready')).toBeDefined()
+      expect(pluginFetchCalls).toBeGreaterThanOrEqual(1)
+    } finally {
+      globalThis.fetch = ambientFetch
     }
   })
 

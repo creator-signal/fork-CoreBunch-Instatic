@@ -53,6 +53,7 @@ import { useEditorStore } from '@admin/pages/site/store/store'
 import { cmsAdapter } from '@core/persistence/cms'
 import { useAdminUi } from '@admin/state/adminUi'
 import { useInstalledEditorPlugins } from '@admin/pages/plugins/hooks/useInstalledEditorPlugins'
+import { EditorPluginActivationContext } from '@admin/pages/plugins/hooks/editorPluginActivationContext'
 import { usePluginEventBridge } from '@admin/pages/plugins/hooks/usePluginEventBridge'
 import { AdminSectionNavigation } from '@admin/shared/AdminSectionNavigation'
 import {
@@ -203,75 +204,76 @@ export function AdminCanvasLayout() {
   const loadEditorBody = usePostPaintEditorBodyGate()
 
   return (
-    <EditorPermissionsProvider value={permissions}>
-      <div
-        className={styles.shell}
-        data-editor-density={appearance.density}
-        data-editor-theme={appearance.theme}
-        data-editor-text-scale={appearance.textScale}
-      >
-        {/* ── Top toolbar (z-60, Guideline #374) ───────────────────────────── */}
-        {/* Toolbar is now a prop-driven shell — this layout supplies the
-            site brand, the preview overlay lazy mount, and
-            the editor-specific right slot (zoom / publish / settings). The
-            lazy mount gates on `previewOpen` so the chunk loads only when the
-            user actually opens preview. */}
-        <Toolbar
-          siteName={siteName}
-          faviconUrl={faviconUrl}
-          section="site"
-          adminNavigationSlot={(
-            <AdminSectionNavigation section="site" currentUser={currentUser} />
+    <EditorPluginActivationContext value={pluginActivationStatus}>
+      <EditorPermissionsProvider value={permissions}>
+        <div
+          className={styles.shell}
+          data-editor-density={appearance.density}
+          data-editor-theme={appearance.theme}
+          data-editor-text-scale={appearance.textScale}
+        >
+          {/* ── Top toolbar (z-60, Guideline #374) ───────────────────────────── */}
+          {/* Toolbar is now a prop-driven shell — this layout supplies the
+              site brand, the preview overlay lazy mount, and
+              the editor-specific right slot (zoom / publish / settings). The
+              lazy mount gates on `previewOpen` so the chunk loads only when the
+              user actually opens preview. */}
+          <Toolbar
+            siteName={siteName}
+            faviconUrl={faviconUrl}
+            section="site"
+            adminNavigationSlot={(
+              <AdminSectionNavigation section="site" currentUser={currentUser} />
+            )}
+            overlay={previewOpen && (
+              <Suspense fallback={null}>
+                <PreviewOverlay />
+              </Suspense>
+            )}
+            rightSlot={(
+              <>
+                <PeerAvatarStack />
+                <ZoomControls />
+                <PublishButton
+                  enabled={canPublishPages}
+                  saveStatus={persistence.saveStatus}
+                  runtimeDiagnostics={runtimeValidation.diagnostics}
+                  runtimeValidationPending={runtimeValidation.status === 'validating'}
+                />
+              </>
+            )}
+          />
+
+          {loadEditorBody ? (
+            <LazyChunkBoundary
+              location="site-editor-body"
+              fallback={<AdminCanvasEditorBodyLoading />}
+              resetKeys={[site?.id ?? null]}
+              onReset={AdminCanvasEditorBody.reset}
+            >
+              <AdminCanvasEditorBody
+                canEditDraftSite={canEditDraftSite}
+                canSaveSite={canSaveSite}
+                canUseAiChat={canUseAgent}
+                loadError={loadError}
+                runtimeValidation={runtimeValidation}
+              />
+            </LazyChunkBoundary>
+          ) : (
+            <AdminCanvasEditorBodyLoading />
           )}
-          overlay={previewOpen && (
+
+          {/* Settings Modal (portal-rendered, listens to adminUi.settingsOpen).
+              Lazy + conditional render — the 1300-line modal + its six section
+              subtree stays out of the eager graph until the user opens settings. */}
+          {settingsOpen && (
             <Suspense fallback={null}>
-              <PreviewOverlay />
+              <SettingsModal />
             </Suspense>
           )}
-          rightSlot={(
-            <>
-              <PeerAvatarStack />
-              <ZoomControls />
-              <PublishButton
-                enabled={canPublishPages}
-                saveStatus={persistence.saveStatus}
-                runtimeDiagnostics={runtimeValidation.diagnostics}
-                runtimeValidationPending={runtimeValidation.status === 'validating'}
-              />
-            </>
-          )}
-        />
-
-        {loadEditorBody && pluginActivationStatus !== 'activating' ? (
-          <LazyChunkBoundary
-            location="site-editor-body"
-            fallback={<AdminCanvasEditorBodyLoading />}
-            resetKeys={[site?.id ?? null]}
-            onReset={AdminCanvasEditorBody.reset}
-          >
-            <AdminCanvasEditorBody
-              canEditDraftSite={canEditDraftSite}
-              canSaveSite={canSaveSite}
-              canUseAiChat={canUseAgent}
-              loadError={loadError}
-              runtimeValidation={runtimeValidation}
-            />
-          </LazyChunkBoundary>
-        ) : (
-          <AdminCanvasEditorBodyLoading />
-        )}
-
-        {/* Settings Modal (portal-rendered, listens to adminUi.settingsOpen).
-            Lazy + conditional render — the 1300-line modal + its six section
-            subtree stays out of the eager graph until the user opens settings. */}
-        {settingsOpen && (
-          <Suspense fallback={null}>
-            <SettingsModal />
-          </Suspense>
-        )}
-
-      </div>
-    </EditorPermissionsProvider>
+        </div>
+      </EditorPermissionsProvider>
+    </EditorPluginActivationContext>
   )
 }
 

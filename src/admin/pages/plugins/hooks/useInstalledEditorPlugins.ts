@@ -20,8 +20,8 @@ import { createEditorPluginActivationCoordinator } from './editorPluginActivatio
 // resolver is ready before the activation pass it triggers.
 bindDashboardWidgetIconResolver(resolveDashboardWidgetIcon)
 
-const activationCoordinator = createEditorPluginActivationCoordinator(
-  async () => {
+function createActivationCoordinator() {
+  return createEditorPluginActivationCoordinator(async () => {
     // The runtime MUST be ready before any plugin module dynamic-imports
     // (the plugin bundle's `import * as React from 'react'` statements
     // resolve via the `/runtime/*.js` shims, which read
@@ -31,14 +31,20 @@ const activationCoordinator = createEditorPluginActivationCoordinator(
     return activateInstalledEditorPlugins({
       componentFactory: editorPluginModuleComponentFactory,
     })
-  },
-  (result) => {
+  }, (result) => {
     setEditorActivationFailures(result.failed)
     if (result.failed.length > 0) {
       console.error('Some editor plugins failed to activate', result.failed)
     }
-  },
-)
+  })
+}
+
+let activationCoordinator = createActivationCoordinator()
+
+/** Reset module-scoped session state between isolated browser-layout tests. */
+export function resetInstalledEditorPluginActivationForTests(): void {
+  activationCoordinator = createActivationCoordinator()
+}
 
 export type EditorPluginActivationStatus =
   | 'disabled'
@@ -91,6 +97,7 @@ export function useInstalledEditorPlugins(enabled = true): EditorPluginActivatio
   // When a previously disabled caller becomes enabled, keep the dependent
   // editor surface closed during the render before the effect starts the
   // activation pass.
-  if (enabled && status === 'disabled') return 'activating'
+  if (!enabled) return 'disabled'
+  if (status === 'disabled') return 'activating'
   return status
 }

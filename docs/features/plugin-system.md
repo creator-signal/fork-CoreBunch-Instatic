@@ -414,12 +414,12 @@ Each `activateSandboxedPluginModulePack` call constructs one QuickJS context via
 
 The browser editor path (`activatePluginModulePack`) evaluates the pack in the browser's own JS engine and registers no VM, so `packsByPlugin` stays empty on that path and dispose is a no-op.
 
-Browser activation is session-scoped and precedes mounting the Site editor
-body. Route layouts may attach to the same in-flight activation, but the
-component tree and canvas do not resolve stored plugin-backed nodes until that
-pass settles. A route unmount never cancels the shared pass. A rejected pass is
-reported, leaves the editor shell usable, and remains retryable on remount or a
-plugin-change event; a successful pass is reused until an explicit refresh.
+Browser activation is session-scoped. Route layouts may attach to the same
+in-flight activation, but the Site editor's Component tree does not resolve
+stored plugin-backed nodes or declare itself ready until that pass settles. A
+route unmount never cancels the shared pass. A rejected pass is reported,
+leaves the editor and its HTML view usable, and remains retryable on remount or
+a plugin-change event; a successful pass is reused until an explicit refresh.
 
 ### Disk-path containment
 

@@ -414,6 +414,13 @@ Each `activateSandboxedPluginModulePack` call constructs one QuickJS context via
 
 The browser editor path (`activatePluginModulePack`) evaluates the pack in the browser's own JS engine and registers no VM, so `packsByPlugin` stays empty on that path and dispose is a no-op.
 
+Browser activation is session-scoped. Route layouts may attach to the same
+in-flight activation, but the Site editor's Component tree does not resolve
+stored plugin-backed nodes or declare itself ready until that pass settles. A
+route unmount never cancels the shared pass. A rejected pass is reported,
+leaves the editor and its HTML view usable, and remains retryable on remount or
+a plugin-change event; a successful pass is reused until an explicit refresh.
+
 ### Disk-path containment
 
 Every server-side read of a plugin's on-disk files goes through `assertPathWithin(uploadsDir, resolvedPath)` from `server/util/pathWithin.ts` before any `readFile` or `rm` is issued. This covers:

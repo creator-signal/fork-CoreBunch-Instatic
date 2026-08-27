@@ -334,6 +334,50 @@ describe('AdminCanvasLayout — CMS site hydration gate', () => {
     }
   })
 
+  it('keeps failed plugin activation out of the Component tree and retries it', async () => {
+    let pluginFetchCalls = 0
+    let pluginRequestsCanSucceed = false
+    const ambientFetch = globalThis.fetch
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input).endsWith('/admin/api/cms/plugins')) {
+        pluginFetchCalls += 1
+        if (!pluginRequestsCanSucceed) {
+          return new Response(JSON.stringify({ error: 'temporarily unavailable' }), {
+            status: 503,
+            headers: { 'content-type': 'application/json' },
+          })
+        }
+        return new Response(JSON.stringify({ plugins: [], adminPages: [] }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        })
+      }
+      return ambientFetch(input, init)
+    }) as typeof fetch
+
+    try {
+      useEditorStore.setState({ layersViewMode: 'components' })
+      renderEditorLayout()
+
+      expect(await screen.findByTestId('canvas-root')).toBeDefined()
+      expect(await screen.findByRole('alert', {
+        name: 'Plugin components unavailable',
+      })).toBeDefined()
+      expect(screen.queryByTestId('component-layers-panel-ready')).toBeNull()
+
+      pluginRequestsCanSucceed = true
+      fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+
+      expect(await screen.findByTestId('component-layers-panel-ready')).toBeDefined()
+      expect(screen.queryByRole('alert', {
+        name: 'Plugin components unavailable',
+      })).toBeNull()
+      expect(pluginFetchCalls).toBeGreaterThanOrEqual(2)
+    } finally {
+      globalThis.fetch = ambientFetch
+    }
+  })
+
   it('does not overwrite an existing in-memory site when AdminCanvasLayout remounts during HMR', async () => {
     const existing = makeSite({ name: 'Existing HMR Site' })
     useEditorStore.setState({

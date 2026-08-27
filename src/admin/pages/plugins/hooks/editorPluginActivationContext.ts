@@ -1,9 +1,12 @@
 import { createContext, useContext } from 'react'
-import type { EditorPluginActivationStatus } from './useInstalledEditorPlugins'
+import type { EditorPluginActivationState } from './useInstalledEditorPlugins'
 
 export const EditorPluginActivationContext =
-  createContext<EditorPluginActivationStatus>('disabled')
+  createContext<EditorPluginActivationState>({
+    status: 'disabled',
+    retry: () => {},
+  })
 
-export function useEditorPluginActivationStatus(): EditorPluginActivationStatus {
+export function useEditorPluginActivationStatus(): EditorPluginActivationState {
   return useContext(EditorPluginActivationContext)
 }

@@ -30,7 +30,7 @@ const EMPTY_VISUAL_COMPONENTS = [] as const
  */
 export function LayersPanel({ editable = true }: LayersPanelProps) {
   const permissions = useEditorPermissions()
-  const pluginActivationStatus = useEditorPluginActivationStatus()
+  const pluginActivation = useEditorPluginActivationStatus()
   const [componentLibraryOpen, setComponentLibraryOpen] = useState(false)
   const mode = useEditorStore((state) => state.layersViewMode)
   const effectiveMode = permissions.canEditStructure ? mode : 'components'
@@ -121,7 +121,11 @@ export function LayersPanel({ editable = true }: LayersPanelProps) {
     <div className={styles.panel}>
       <div className={styles.viewMount} hidden={effectiveMode !== 'components'}>
         <ComponentLayersTree
-          projection={pluginActivationStatus === 'activating' ? null : projection}
+          projection={pluginActivation.status === 'activating' || pluginActivation.status === 'failed'
+            ? null
+            : projection}
+          activationFailed={pluginActivation.status === 'failed'}
+          onRetryActivation={pluginActivation.retry}
           canInsert={permissions.canEditComponents}
           canMove={permissions.canEditComponents || permissions.canEditStructure}
           canOpenTemplateSource={permissions.canEditStructure}

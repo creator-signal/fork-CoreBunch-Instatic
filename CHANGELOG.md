@@ -6,6 +6,17 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.46 - 2026-08-28
+
+### Authenticated editor plugin activation
+
+- Moved editor plugin activation outside individual route-layout lifetimes so
+  authenticated navigation shares one session-scoped registry rebuild.
+- Coalesced concurrent plugin lifecycle refreshes and kept a failed initial
+  activation retryable without overlapping registry resets.
+- Added deterministic coordinator coverage for route transitions, refresh
+  coalescing and recovery from an initial activation failure.
+
 ## 0.0.45 - 2026-08-26
 
 ### Plugin canvas selection contract

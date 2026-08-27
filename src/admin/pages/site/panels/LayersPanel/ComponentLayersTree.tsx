@@ -47,6 +47,8 @@ import styles from './ComponentLayersTree.module.css'
 
 interface ComponentLayersTreeProps {
   projection: ComponentTreeProjection | null
+  activationFailed?: boolean
+  onRetryActivation?: () => void
   canInsert?: boolean
   canMove?: boolean
   canOpenTemplateSource?: boolean
@@ -55,6 +57,8 @@ interface ComponentLayersTreeProps {
 
 export function ComponentLayersTree({
   projection,
+  activationFailed = false,
+  onRetryActivation,
   canInsert = true,
   canMove = true,
   canOpenTemplateSource = true,
@@ -207,7 +211,15 @@ export function ComponentLayersTree({
       </div>
 
       <div className={styles.treeArea}>
-        {!projection ? (
+        {activationFailed ? (
+          <section className={styles.empty} role="alert" aria-label="Plugin components unavailable">
+            <strong>Plugin components are unavailable</strong>
+            <span>The Component tree is paused so stored plugin-backed content is not shown as missing.</span>
+            <Button variant="secondary" size="sm" type="button" onClick={onRetryActivation}>
+              Try again
+            </Button>
+          </section>
+        ) : !projection ? (
           <SkeletonTree ariaLabel="Loading component layers" />
         ) : (
           <DndContext

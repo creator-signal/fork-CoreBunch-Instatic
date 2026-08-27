@@ -6,6 +6,17 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.47 - 2026-08-28
+
+### Retained plugin readiness and recovery
+
+- Activated retained editor plugins before resolving plugin-backed component
+  nodes after authenticated route transitions and remounts.
+- Kept rejected or partially failed activation out of the Component tree while
+  leaving the canvas and HTML view usable.
+- Added a visible retry action and focused recovery coverage so the Component
+  tree becomes ready only after a clean activation pass.
+
 ## 0.0.46 - 2026-08-28
 
 ### Authenticated editor plugin activation

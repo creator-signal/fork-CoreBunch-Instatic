@@ -300,7 +300,7 @@ componentLibraryRegistry.register(emailInput)
 
 `register()` validates the TypeBox shape and cross-field invariants. It rejects a duplicate ID. Use `registerOrReplace()` only for an intentional definition update such as a plugin lifecycle transition.
 
-`generation()` and `subscribe()` provide the same external-store integration shape as the module registry in `src/core/module-engine/registry.ts`. A registration, replacement or removal increments the generation once.
+`generation()` and `subscribe()` provide the same external-store integration shape as the module registry in `src/core/module-engine/registry.ts`. A registration, replacement or removal increments the generation once. React consumers retain the corresponding sorted `list()` snapshot returned through `useSyncExternalStore`; they do not discard the generation and read the registry separately, because React Compiler would then be free to retain a pre-activation catalogue.
 
 `list()` sorts by category, display name and stable ID. Registration order and plugin activation timing therefore do not change catalogue presentation.
 

@@ -13,18 +13,31 @@ import { useEditorStore } from '@site/store/store'
 
 const subscribe = (listener: () => void) =>
   componentLibraryRegistry.subscribe(listener)
-const generation = () => componentLibraryRegistry.generation()
+let entriesSnapshotGeneration = -1
+let entriesSnapshot = componentLibraryRegistry.list()
+
+function getEntriesSnapshot(): ComponentLibraryEntry[] {
+  const generation = componentLibraryRegistry.generation()
+  if (generation !== entriesSnapshotGeneration) {
+    entriesSnapshotGeneration = generation
+    entriesSnapshot = componentLibraryRegistry.list()
+  }
+  return entriesSnapshot
+}
 
 export function useComponentLibraryEntries(): ComponentLibraryEntry[] {
-  useSyncExternalStore(subscribe, generation, generation)
-  return componentLibraryRegistry.list()
+  return useSyncExternalStore(
+    subscribe,
+    getEntriesSnapshot,
+    getEntriesSnapshot,
+  )
 }
 
 export function useComponentLibraryDependencyState(
   active: boolean,
   override?: ComponentLibraryDependencyState,
 ): ComponentLibraryDependencyState {
-  useSyncExternalStore(subscribe, generation, generation)
+  const entries = useComponentLibraryEntries()
   const searchHealth = useEditorStore((state) =>
     searchCapabilityHealth(state.site),
   )
@@ -66,7 +79,7 @@ export function useComponentLibraryDependencyState(
       'forms.drafts': formDraftHealth,
     },
     providerAdapters: providerAdapterRegistry.dependencyHealth(),
-    plugins: installedComponentLibraryPlugins(componentLibraryRegistry.list()),
+    plugins: installedComponentLibraryPlugins(entries),
   }
 }
 

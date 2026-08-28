@@ -20,12 +20,48 @@ import { useEditorStore } from '@site/store/store'
 import { makeNode, makePage, makeSite } from '../fixtures'
 import type { CmsCurrentUser } from '@core/persistence'
 import { pageToCells } from '@core/data/pageFromRow'
+import {
+  componentLibraryRegistry,
+  type ComponentLibraryEntry,
+} from '@core/component-library'
 import '@modules/base/index'
 
 const LAYOUT_STORAGE_KEY = 'instatic-editor-layout-v2'
 const SRC_ROOT = join(import.meta.dir, '../..')
 
 const originalFetch = globalThis.fetch
+const retainedPluginEntry: ComponentLibraryEntry = {
+  id: 'test.plugin.retained-callout',
+  version: '1.0.0',
+  name: 'Retained callout',
+  description: 'A retained plugin entry activated after the editor first renders.',
+  category: 'Test',
+  tags: ['retained'],
+  icon: 'box',
+  source: {
+    type: 'plugin',
+    pluginId: 'test.plugin',
+    name: 'Test plugin',
+  },
+  status: 'stable',
+  implementation: {
+    type: 'primitive',
+    moduleId: 'base.text',
+  },
+  fields: [],
+  variants: [],
+  presets: [],
+  slots: [],
+  constraints: {},
+  requirements: {
+    capabilities: [],
+    providerAdapters: [],
+    plugins: ['test.plugin'],
+  },
+  documentation: {
+    usage: 'Regression fixture for retained plugin activation.',
+  },
+}
 
 /**
  * AdminCanvasLayout's mount fires `/admin/api/cms/plugins` and
@@ -88,6 +124,7 @@ function installAmbientFetch() {
 
 afterEach(() => {
   cleanup()
+  componentLibraryRegistry.unregister(retainedPluginEntry.id)
   globalThis.fetch = originalFetch
 })
 
@@ -332,6 +369,52 @@ describe('AdminCanvasLayout — CMS site hydration gate', () => {
     } finally {
       globalThis.fetch = ambientFetch
     }
+  })
+
+  it('reconciles a retained Component tree when the plugin registry activates', async () => {
+    const rootId = 'retained-root'
+    const nodeId = 'retained-plugin-node'
+    const page = makePage({
+      id: 'retained-page',
+      rootNodeId: rootId,
+      nodes: {
+        [rootId]: makeNode({
+          id: rootId,
+          moduleId: 'base.body',
+          children: [nodeId],
+        }),
+        [nodeId]: makeNode({
+          id: nodeId,
+          moduleId: 'base.text',
+          props: { text: 'Retained content', tag: 'p', align: 'left' },
+          catalogueInstance: {
+            entryId: retainedPluginEntry.id,
+            entryVersion: retainedPluginEntry.version,
+          },
+        }),
+      },
+    })
+    useEditorStore.setState({
+      site: makeSite({ pages: [page] }),
+      activePageId: page.id,
+      selectedNodeId: nodeId,
+      layersViewMode: 'components',
+    } as Parameters<typeof useEditorStore.setState>[0])
+
+    renderEditorLayout()
+
+    expect(await screen.findByText(
+      `Missing library entry: ${retainedPluginEntry.id}`,
+    )).toBeDefined()
+
+    act(() => {
+      componentLibraryRegistry.register(retainedPluginEntry)
+    })
+
+    expect((await screen.findAllByText(retainedPluginEntry.name)).length).toBeGreaterThan(0)
+    expect(screen.queryByText(
+      `Missing library entry: ${retainedPluginEntry.id}`,
+    )).toBeNull()
   })
 
   it('keeps failed plugin activation out of the Component tree and retries it', async () => {

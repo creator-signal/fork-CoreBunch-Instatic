@@ -29,7 +29,7 @@ import type {
   PluginModuleDefinition,
 } from '@core/plugin-sdk'
 import type { PluginModuleComponentFactory } from '@core/plugins/moduleAdapter'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useLayoutEffect, useRef } from 'react'
 import { CanvasDocumentContext } from './CanvasContexts'
 
 /**
@@ -43,6 +43,23 @@ interface InjectedModuleCss {
 }
 
 const injectedModuleCss = new WeakMap<Document, Map<string, InjectedModuleCss>>()
+
+const NESTED_PREVIEW_TAB_STOP_SELECTOR = [
+  'a[href]',
+  'area[href]',
+  'button:not([disabled])',
+  'input:not([disabled]):not([type="hidden"])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  'iframe',
+  'object',
+  'embed',
+  'audio[controls]',
+  'video[controls]',
+  'summary',
+  '[contenteditable="true"]',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ')
 
 /**
  * Tiny non-crypto hash — DJB2. Used purely to key the injected `<style>`
@@ -102,6 +119,7 @@ export const editorPluginModuleComponentFactory: PluginModuleComponentFactory = 
   const canHaveChildren = Boolean(definition.canHaveChildren)
   return function PluginCanvasModule(props: ModuleComponentProps) {
     const canvasDocument = useContext(CanvasDocumentContext)
+    const rootRef = useRef<HTMLDivElement>(null)
     const childList: string[] = []
     // Defensive wrap — a throwing plugin preview()/render() is caught by the
     // per-node ErrorBoundary above us, but that boundary swaps the entire
@@ -125,6 +143,17 @@ export const editorPluginModuleComponentFactory: PluginModuleComponentFactory = 
       if (!targetDocument) return
       return acquireModuleCss(targetDocument, definition.id, css)
     }, [canvasDocument, css])
+    useLayoutEffect(() => {
+      const root = rootRef.current
+      if (!root) return
+      const previewRoot = canHaveChildren
+        ? root.querySelector<HTMLElement>(':scope > [data-plugin-preview-html="true"]')
+        : root
+      if (!previewRoot) return
+      for (const element of previewRoot.querySelectorAll<HTMLElement>(NESTED_PREVIEW_TAB_STOP_SELECTOR)) {
+        element.tabIndex = -1
+      }
+    }, [html])
     if (canHaveChildren) {
       // dangerouslySetInnerHTML and children are mutually exclusive in React.
       // Plugins with `canHaveChildren: true` need both: rendered HTML + a
@@ -133,11 +162,12 @@ export const editorPluginModuleComponentFactory: PluginModuleComponentFactory = 
       return (
         <div
           {...props.nodeWrapperProps}
+          ref={rootRef}
           className={props.mcClassName}
           data-plugin-canvas-module="true"
           data-plugin-module={definition.id}
         >
-          <div dangerouslySetInnerHTML={{ __html: html }} />
+          <div data-plugin-preview-html="true" dangerouslySetInnerHTML={{ __html: html }} />
           <div data-plugin-children="true">{props.children}</div>
         </div>
       )
@@ -145,6 +175,7 @@ export const editorPluginModuleComponentFactory: PluginModuleComponentFactory = 
     return (
       <div
         {...props.nodeWrapperProps}
+        ref={rootRef}
         className={props.mcClassName}
         data-plugin-canvas-module="true"
         data-plugin-module={definition.id}

@@ -62,6 +62,31 @@ describe('editorPluginModuleComponentFactory', () => {
     expect(leaveCount).toBe(1)
   })
 
+  it('keeps one sequential keyboard stop for leaf plugin preview HTML', () => {
+    const Component = editorPluginModuleComponentFactory({
+      ...definition,
+      render: () => ({
+        html: '<article><a href="/details">Details</a><input aria-label="Email"></article>',
+      }),
+    })
+
+    const view = render(
+      <Component
+        {...componentProps}
+        nodeWrapperProps={{
+          'data-node-id': 'card-1',
+          'data-module-id': definition.id,
+          tabIndex: 0,
+        }}
+      />,
+    )
+
+    const wrapper = view.container.querySelector<HTMLElement>('[data-plugin-canvas-module="true"]')
+    expect(wrapper?.tabIndex).toBe(0)
+    expect(wrapper?.querySelector<HTMLAnchorElement>('a')?.tabIndex).toBe(-1)
+    expect(wrapper?.querySelector<HTMLInputElement>('input')?.tabIndex).toBe(-1)
+  })
+
   it('forwards the canvas selection and click contract to a plugin module with children', () => {
     const Component = editorPluginModuleComponentFactory({
       ...definition,
@@ -94,6 +119,31 @@ describe('editorPluginModuleComponentFactory', () => {
 
     fireEvent.click(wrapper as HTMLElement)
     expect(clickCount).toBe(1)
+  })
+
+  it('suppresses only preview-owned tab stops when a plugin module has child nodes', () => {
+    const Component = editorPluginModuleComponentFactory({
+      ...definition,
+      id: 'acme.preview.stack',
+      canHaveChildren: true,
+      render: () => ({ html: '<a href="/preview-action">Preview action</a>' }),
+    })
+
+    const view = render(
+      <Component
+        {...componentProps}
+        nodeWrapperProps={{
+          'data-node-id': 'stack-1',
+          'data-module-id': 'acme.preview.stack',
+          tabIndex: 0,
+        }}
+      >
+        <button data-node-id="child-1" tabIndex={0}>Child node</button>
+      </Component>,
+    )
+
+    expect(view.container.querySelector<HTMLAnchorElement>('[data-plugin-preview-html="true"] a')?.tabIndex).toBe(-1)
+    expect(view.getByRole('button', { name: 'Child node' }).tabIndex).toBe(0)
   })
 
   it('installs the render stylesheet in the canvas iframe document, not the admin document', async () => {

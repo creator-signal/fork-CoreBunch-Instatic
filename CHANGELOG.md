@@ -6,6 +6,17 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.52 - 2026-08-29
+
+### Design canvas visible keyboard focus
+
+- Restored an editor-owned visible focus ring for keyboard-focused canvas node
+  roots without exposing authored-site focus affordances in design mode.
+- Forwarded the existing admin accent through an isolated editor-chrome token
+  so canvas content keeps its own Framework token values.
+- Added reset and token-isolation regressions while keeping published output
+  unchanged.
+
 ## 0.0.51 - 2026-08-28
 
 ### Plugin canvas keyboard navigation

@@ -6,6 +6,16 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.51 - 2026-08-28
+
+### Plugin canvas keyboard navigation
+
+- Restored the browser's sequential Tab order inside the editor canvas so
+  plugin-backed component roots are keyboard reachable.
+- Kept nested preview-owned interactive descendants out of the editor's Tab
+  sequence while preserving child component roots as independent focus stops.
+- Added regressions for canvas Tab handling and plugin preview focus ownership.
+
 ## 0.0.50 - 2026-08-28
 
 ### Live Component Library catalogue

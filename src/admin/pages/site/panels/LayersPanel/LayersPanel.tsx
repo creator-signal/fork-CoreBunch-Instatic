@@ -17,10 +17,30 @@ interface LayersPanelProps {
 }
 
 const subscribeModuleRegistry = (listener: () => void) => registry.subscribe(listener)
-const getModuleRegistryGeneration = () => registry.generation()
 const subscribeComponentLibrary = (listener: () => void) =>
   componentLibraryRegistry.subscribe(listener)
-const getComponentLibraryGeneration = () => componentLibraryRegistry.generation()
+let moduleRegistrySnapshotGeneration = -1
+let moduleRegistrySnapshot = registry.list()
+let componentLibrarySnapshotGeneration = -1
+let componentLibrarySnapshot = componentLibraryRegistry.list()
+
+function getModuleRegistrySnapshot() {
+  const generation = registry.generation()
+  if (generation !== moduleRegistrySnapshotGeneration) {
+    moduleRegistrySnapshotGeneration = generation
+    moduleRegistrySnapshot = registry.list()
+  }
+  return moduleRegistrySnapshot
+}
+
+function getComponentLibrarySnapshot() {
+  const generation = componentLibraryRegistry.generation()
+  if (generation !== componentLibrarySnapshotGeneration) {
+    componentLibrarySnapshotGeneration = generation
+    componentLibrarySnapshot = componentLibraryRegistry.list()
+  }
+  return componentLibrarySnapshot
+}
 const EMPTY_VISUAL_COMPONENTS = [] as const
 
 /**
@@ -40,19 +60,19 @@ export function LayersPanel({ editable = true }: LayersPanelProps) {
   )
   const selectedNodeId = useEditorStore((state) => state.selectedNodeId)
   const site = useEditorStore((state) => state.site)
-  useSyncExternalStore(
+  const moduleDefinitions = useSyncExternalStore(
     subscribeModuleRegistry,
-    getModuleRegistryGeneration,
-    getModuleRegistryGeneration,
+    getModuleRegistrySnapshot,
+    getModuleRegistrySnapshot,
   )
-  useSyncExternalStore(
+  const catalogueEntries = useSyncExternalStore(
     subscribeComponentLibrary,
-    getComponentLibraryGeneration,
-    getComponentLibraryGeneration,
+    getComponentLibrarySnapshot,
+    getComponentLibrarySnapshot,
   )
 
   const moduleNames = Object.fromEntries(
-    registry.list().map((definition) => [definition.id, definition.name]),
+    moduleDefinitions.map((definition) => [definition.id, definition.name]),
   )
   const projection = page
     ? buildComponentTreeProjection({
@@ -62,7 +82,7 @@ export function LayersPanel({ editable = true }: LayersPanelProps) {
           : [],
         moduleNames,
         visualComponents,
-        catalogueEntries: componentLibraryRegistry.list(),
+        catalogueEntries,
       })
     : null
 

@@ -420,7 +420,10 @@ stored plugin-backed nodes or declare itself ready until that pass settles. A
 route unmount never cancels the shared pass. A rejected or partially failed
 pass leaves the editor and its HTML view usable, pauses the Component tree, and
 exposes a retry action instead of treating unresolved plugin entries as ready.
-A successful pass is reused until an explicit refresh.
+A successful pass is reused until an explicit refresh. The Components
+projection consumes stable module and Component Library registry snapshots;
+each registry generation change invalidates the React Compiler projection
+cache so retained plugin-backed nodes reconcile without a page or site edit.
 
 ### Disk-path containment
 

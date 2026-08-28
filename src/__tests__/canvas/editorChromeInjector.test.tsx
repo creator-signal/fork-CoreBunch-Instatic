@@ -16,6 +16,7 @@ afterEach(cleanup)
 
 /** A detached document whose :root carries admin typography and spacing tokens. */
 function makeParentDoc(): Document {
+  document.documentElement.style.setProperty('--accent-3', '#0369a1')
   document.documentElement.style.setProperty('--font-sans', '"Inter Variable", system-ui, sans-serif')
   document.documentElement.style.setProperty('--text-xs', 'clamp(10px, calc(9.629px + 0.095vw), 11px)')
   document.documentElement.style.setProperty('--text-s', 'clamp(11px, calc(10.629px + 0.095vw), 12px)')
@@ -31,6 +32,12 @@ describe('EditorChromeInjector font isolation', () => {
 
     const css = target.getElementById('instatic-editor-chrome')?.textContent ?? ''
     expect(css).not.toBe('')
+
+    // Canvas node focus is editor chrome, so its colour is forwarded under a
+    // namespaced token and applied by the unlayered chrome stylesheet.
+    expect(css).toContain('--chrome-canvas-focus: #0369a1;')
+    expect(css).toContain('[data-node-id]:focus-visible')
+    expect(css).toContain('outline: 2px solid var(--chrome-canvas-focus);')
 
     // The chrome font is exposed as a namespaced var carrying the editor font…
     expect(css).toContain('--chrome-font-sans: "Inter Variable", system-ui, sans-serif;')
@@ -57,5 +64,7 @@ describe('EditorChromeInjector font isolation', () => {
     expect(css).not.toMatch(/^\s*--space-xl:/m)
     expect(css).not.toContain('var(--space-s)')
     expect(css).not.toContain('var(--space-xl)')
+    expect(css).not.toMatch(/^\s*--accent-3:/m)
+    expect(css).not.toContain('var(--accent-3)')
   })
 })

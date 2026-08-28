@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'bun:test'
 import React from 'react'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import {
   componentLibraryRegistry,
   type ComponentLibraryEntry,
@@ -63,6 +63,30 @@ afterEach(() => {
 })
 
 describe('ComponentLibraryDialog dependency availability', () => {
+  it('reconciles an open catalogue when plugin entries register and refresh', async () => {
+    render(<ComponentLibraryDialog open onClose={() => {}} />)
+    fireEvent.change(screen.getByLabelText('Search Component Library'), {
+      target: { value: dependencyEntry.id },
+    })
+    expect(screen.getByText('No components match')).toBeDefined()
+
+    act(() => componentLibraryRegistry.register(dependencyEntry))
+
+    expect(
+      await screen.findByRole('heading', { name: dependencyEntry.name, level: 3 }),
+    ).toBeDefined()
+    expect(screen.queryByText('No components match')).toBeNull()
+
+    act(() => componentLibraryRegistry.unregister(dependencyEntry.id))
+
+    await waitFor(() => {
+      expect(screen.getByText('No components match')).toBeDefined()
+    })
+    expect(
+      screen.queryByRole('heading', { name: dependencyEntry.name, level: 3 }),
+    ).toBeNull()
+  })
+
   it('explains template-only placement before an author tries to insert', () => {
     componentLibraryRegistry.register(templateOnlyEntry)
     const page = makePage({

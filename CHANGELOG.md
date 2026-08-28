@@ -6,6 +6,17 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.50 - 2026-08-28
+
+### Live Component Library catalogue
+
+- Reconciled an already-open Component Library when plugin-backed entries
+  register after the editor first renders.
+- Removed stale searchable entries when a plugin catalogue unregisters or
+  refreshes, without requiring a route reload.
+- Returned the generation-keyed sorted entry snapshot directly through React's
+  external-store boundary so compiler caching cannot retain an old catalogue.
+
 ## 0.0.49 - 2026-08-28
 
 ### Plugin registry reconciliation

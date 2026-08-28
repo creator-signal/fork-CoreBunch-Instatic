@@ -131,15 +131,14 @@ const BUDGETS: ChunkBudget[] = [
   },
   {
     prefix: 'AdminCanvasEditorBody-',
-    maxBytes: 796_000,
+    maxBytes: 796_800,
     rationale:
       'post-paint Site editor body including collaboration, governed catalogue, ' +
       'repeater and private-attachment authoring (canvas + panels + modules + publisher). ' +
-      'Current 795,796 B raw / ~262 KB gzipped after making populated component slots ' +
-      'render without editor scaffolding and adding the retained-plugin activation failure/retry ' +
-      'state, while keeping Import HTML behind its own open-state lazy boundary. This is still ' +
-      'the main Site runtime ' +
-      'cost, but it must remain behind the shell lazy boundary.',
+      'Current 796,280 B raw / ~262 KB gzipped after adding the isolated visible-focus ' +
+      'chrome for editor-owned canvas node roots. The route shell and Import HTML remain ' +
+      'behind their separate lazy boundaries; this is still the main Site runtime cost, ' +
+      'but it must remain behind the shell lazy boundary.',
   },
   {
     prefix: 'ImportHtml-',

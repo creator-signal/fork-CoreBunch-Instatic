@@ -6,6 +6,17 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.48 - 2026-08-28
+
+### Release verification
+
+- Accounted for the bounded retained-plugin failure and retry UI in the
+  post-paint Site editor bundle budget.
+- Kept the editor body behind the route-shell lazy boundary and Import HTML
+  behind its separate open-state lazy boundary.
+- Superseded the unpublished 0.0.47 candidate after its exact release gate
+  rejected the previous bundle cap.
+
 ## 0.0.47 - 2026-08-28
 
 ### Retained plugin readiness and recovery

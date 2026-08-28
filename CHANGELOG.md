@@ -6,6 +6,17 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.53 - 2026-08-29
+
+### Release verification
+
+- Accounted for the isolated canvas-node visible-focus chrome in the existing
+  post-paint Site editor bundle budget.
+- Kept the Site route shell and Import HTML behind their separate lazy
+  boundaries while preserving the 0.0.52 failed release as immutable history.
+- Superseded the unpublished 0.0.52 candidate after its exact release gate
+  rejected the previous bundle cap.
+
 ## 0.0.52 - 2026-08-29
 
 ### Design canvas visible keyboard focus

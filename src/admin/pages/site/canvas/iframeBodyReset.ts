@@ -55,7 +55,11 @@ const CANVAS_CHROME_CSS = [
   '  user-select: text !important;',
   '  -webkit-user-select: text !important;',
   '}',
-  '*:focus, *:focus-visible {',
+  // Authored controls must not expose their published focus affordances while
+  // the canvas is in click-to-select mode. Editor-owned node roots are the
+  // exception: they are real keyboard stops and EditorChromeInjector gives
+  // them a visible, editor-owned focus ring.
+  '*:focus:not([data-node-id]), *:focus-visible:not([data-node-id]) {',
   '  outline: none !important;',
   '}',
   'iframe { pointer-events: none; }',

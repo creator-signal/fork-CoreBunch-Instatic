@@ -424,6 +424,9 @@ A successful pass is reused until an explicit refresh. The Components
 projection consumes stable module and Component Library registry snapshots;
 each registry generation change invalidates the React Compiler projection
 cache so retained plugin-backed nodes reconcile without a page or site edit.
+The open Component Library dialog consumes the same stable catalogue snapshot,
+so a post-mount plugin activation or refresh also updates searchable entries
+without a route reload.
 
 ### Disk-path containment
 

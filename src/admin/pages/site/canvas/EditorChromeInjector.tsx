@@ -78,6 +78,7 @@ const CHROME_TOKENS = [
  * beats the site's tokens in `@layer user-authored`.
  */
 const CHROME_TOKEN_ALIASES = [
+  ['--accent-3', '--chrome-canvas-focus'],
   ['--font-sans', '--chrome-font-sans'],
   ['--text-3xs', '--chrome-text-3xs'],
   ['--text-2xs', '--chrome-text-2xs'],
@@ -157,6 +158,14 @@ function buildTokenBlock(parentDoc: Document): string {
  * Module-scope constant: stable across renders, not captured into closures.
  */
 const CHROME_RULES = `
+/* Canvas nodes are editor-owned keyboard stops. The canvas reset suppresses
+ * authored focus affordances but deliberately excludes these roots, allowing
+ * this unlayered editor rule to remain visible over user-authored CSS. */
+[data-node-id]:focus-visible {
+  outline: 2px solid var(--chrome-canvas-focus);
+  outline-offset: 2px;
+}
+
 /* ── CanvasModulePlaceholder ───────────────────────────────────────────────
  * Reproduced from CanvasModulePlaceholder.module.css using stable
  * data-attribute selectors (data-canvas-module-placeholder, data-variant,

@@ -495,17 +495,6 @@ export const IframeFrameSurface = forwardRef<IframeFrameSurfaceHandle, IframeFra
           spaceHeld = true
           setCanvasSpacePanActive(parentDocument, 'iframe', true)
         }
-        // Block Tab navigation inside the canvas iframe. The author is
-        // designing, not using, the page — letting Tab walk through
-        // link / button controls inside the iframe surface the browser's
-        // default focus outline and traps the keyboard inside the
-        // preview. The canvas exposes its own keyboard model
-        // (arrow keys / Cmd+navigation) at the parent level.
-        if (e.key === 'Tab') {
-          e.preventDefault()
-          e.stopPropagation()
-          return
-        }
         forwardKeyboard(e)
       }
       const onKeyUp = (e: KeyboardEvent) => {

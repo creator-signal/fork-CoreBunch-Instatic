@@ -150,4 +150,21 @@ describe('canvas frame mounting', () => {
     expect(liveDoc!.documentElement.style.overflow).toBe('')
     expect(liveDoc!.body.style.overflow).toBe('')
   })
+
+  it('preserves native Tab navigation inside the design canvas frame', async () => {
+    render(<CanvasRoot />)
+
+    const frameDocument = await waitForCanvasFrameDocument('desktop')
+    const node = await waitForCanvasNodeInFrame('desktop', 'headline')
+    const event = new frameDocument.defaultView!.KeyboardEvent('keydown', {
+      key: 'Tab',
+      code: 'Tab',
+      bubbles: true,
+      cancelable: true,
+    })
+
+    node.dispatchEvent(event)
+
+    expect(event.defaultPrevented).toBeFalse()
+  })
 })

@@ -6,6 +6,18 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.49 - 2026-08-28
+
+### Plugin registry reconciliation
+
+- Reconciled retained Components-tree projections when plugin-backed module and
+  Component Library registries activate after the editor first renders.
+- Preserved truthful missing-entry states for unresolved definitions while
+  allowing newly registered definitions to appear without a route reload or
+  page-state mutation.
+- Added a retained-page regression that proves registry activation alone
+  invalidates the projected tree.
+
 ## 0.0.48 - 2026-08-28
 
 ### Release verification

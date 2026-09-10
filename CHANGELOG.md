@@ -6,6 +6,18 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.54 - 2026-09-10
+
+### Plugin refresh recovery
+
+- Fixed a remounted Site editor joining an already-active plugin refresh rather
+  than starting a competing request that could leave a new draft without its
+  desktop canvas.
+- Preserved the matching-pass guard so an older refresh cannot clear the
+  in-flight slot for a newer request.
+- Added scheduler and component-library fixture regressions for the retained
+  plugin and unavailable-dependency states.
+
 ## 0.0.53 - 2026-08-29
 
 ### Release verification

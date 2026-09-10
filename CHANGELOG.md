@@ -6,6 +6,18 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.55 - 2026-09-10
+
+### Release scan remediation
+
+- Updated the Tiptap suite and Sharp to their fixed releases after the
+  mandatory v0.0.54 candidate scan found HIGH-severity advisories.
+- Updated the Creator Signal media-edge Go dependency set, including
+  `golang.org/x/crypto` and gRPC, to releases that address the reported
+  HIGH and CRITICAL findings.
+- Preserved the failed v0.0.54 tag and candidate-digest history; this is a new
+  immutable patch-release candidate rather than a retag.
+
 ## 0.0.54 - 2026-09-10
 
 ### Plugin refresh recovery

@@ -53,6 +53,10 @@ const templateOnlyEntry: ComponentLibraryEntry = {
   name: 'Shared header',
   description: 'Shared site chrome for the template.',
   constraints: { allowedDocumentKinds: ['template'] },
+  // This case exercises placement policy. Dependency health has its own
+  // coverage and must not turn the placement assertion into an availability
+  // assertion when the surrounding suite changes its provider fixtures.
+  requirements: { capabilities: [], providerAdapters: [], plugins: [] },
 }
 
 afterEach(() => {

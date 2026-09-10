@@ -45,8 +45,9 @@ describe('release image security contract', () => {
     expect(runtimeDockerfile).toContain('apk upgrade --no-cache')
     expect(mediaDockerfile).toContain('apk upgrade --no-cache')
     expect(mediaGoMod).toContain('github.com/caddyserver/caddy/v2 v2.11.4')
-    expect(mediaGoMod).toContain('golang.org/x/text v0.39.0')
-    expect(mediaGoMod).toContain('google.golang.org/grpc v1.82.1')
+    expect(mediaGoMod).toContain('golang.org/x/crypto v0.55.0')
+    expect(mediaGoMod).toContain('golang.org/x/text v0.41.0')
+    expect(mediaGoMod).toContain('google.golang.org/grpc v1.83.2')
   })
 
   it('scans candidate and published digests before release completion', () => {

@@ -26,7 +26,9 @@ const publicId = creatorSignalCatalogueEntryId
 
 describe('executeAgentTool — governed Component Library', () => {
   it('consolidates the same anchored prose model used by the Component Library preview', async () => {
-    componentLibraryRegistry.register(creatorSignalRichTextEntry)
+    // The full suite can already have loaded the retained site pack. This test
+    // owns the definition it needs, regardless of that suite-level order.
+    componentLibraryRegistry.registerOrReplace(creatorSignalRichTextEntry)
     registry.registerOrReplace(richTextSection)
     try {
       const { rootId } = freshStore()

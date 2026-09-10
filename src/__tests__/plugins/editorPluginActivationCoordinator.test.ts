@@ -59,6 +59,62 @@ describe('editor plugin activation coordinator', () => {
     expect(accepted).toEqual([1, 2])
   })
 
+  it('keeps a remounted layout activating while a plugin refresh rebuilds registries', async () => {
+    const initial = deferred<string>()
+    const refresh = deferred<string>()
+    const pending = [initial, refresh]
+    let activationCount = 0
+    const coordinator = createEditorPluginActivationCoordinator(() => {
+      const activation = pending[activationCount]
+      activationCount += 1
+      if (!activation) throw new Error('unexpected activation')
+      return activation.promise
+    }, () => {})
+
+    const firstLayout = coordinator.activateInitial()
+    initial.resolve('initial-ready')
+    await firstLayout
+
+    // A plugin event starts a registry rebuild immediately before the draft
+    // transition mounts the next Site layout. The new layout must attach to
+    // that current pass, not resolve merely because the old initial pass did.
+    const refreshInProgress = coordinator.refresh()
+    const remountedLayout = coordinator.activateInitial()
+    expect(remountedLayout).toBe(refreshInProgress)
+
+    refresh.resolve('refresh-ready')
+    await remountedLayout
+    expect(activationCount).toBe(2)
+  })
+
+  it('propagates a refresh failure to a remounted layout so its retry starts a new pass', async () => {
+    const initial = deferred<string>()
+    const refresh = deferred<string>()
+    let activationCount = 0
+    const coordinator = createEditorPluginActivationCoordinator(() => {
+      activationCount += 1
+      if (activationCount === 1) return initial.promise
+      if (activationCount === 2) return refresh.promise
+      return Promise.resolve('retry-ready')
+    }, () => {})
+
+    const firstLayout = coordinator.activateInitial()
+    initial.resolve('initial-ready')
+    await firstLayout
+
+    const refreshInProgress = coordinator.refresh()
+    const remountedLayout = coordinator.activateInitial()
+    refresh.reject(new Error('refresh failed'))
+    await expect(refreshInProgress).rejects.toThrow('refresh failed')
+    await expect(remountedLayout).rejects.toThrow('refresh failed')
+
+    // The UI retries a failed refresh through `refresh()`. A remounted layout
+    // must receive the error instead of presenting a false ready state, then
+    // the explicit retry starts a genuinely new pass.
+    await coordinator.refresh()
+    expect(activationCount).toBe(3)
+  })
+
   it('retries an initial activation that rejects', async () => {
     const accepted: string[] = []
     let activationCount = 0

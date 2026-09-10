@@ -50,13 +50,9 @@ const dependencyEntry: ComponentLibraryEntry = {
 const templateOnlyEntry: ComponentLibraryEntry = {
   ...dependencyEntry,
   id: 'test.shared-header',
-  name: 'Shared header',
+  name: 'Test template-only header',
   description: 'Shared site chrome for the template.',
   constraints: { allowedDocumentKinds: ['template'] },
-  // This case exercises placement policy. Dependency health has its own
-  // coverage and must not turn the placement assertion into an availability
-  // assertion when the surrounding suite changes its provider fixtures.
-  requirements: { capabilities: ['test.delivery'], providerAdapters: [], plugins: [] },
 }
 
 afterEach(() => {
@@ -115,12 +111,13 @@ describe('ComponentLibraryDialog dependency availability', () => {
       />,
     )
     fireEvent.change(screen.getByLabelText('Search Component Library'), {
-      target: { value: templateOnlyEntry.name },
+      target: { value: templateOnlyEntry.id },
     })
 
     const notice = screen.getByRole('status')
     expect(within(notice).getByText('Choose the shared template')).toBeDefined()
     expect(notice.textContent).toContain('can only be placed in a template')
+    expect(screen.queryByText('Insertion unavailable')).toBeNull()
     expect(screen.getByRole('heading', { name: 'Placement' }).parentElement?.textContent)
       .toContain('Shared templates only')
     expect(screen.getByRole('button', { name: 'Insert component' }).getAttribute('aria-disabled'))

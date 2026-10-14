@@ -6,6 +6,17 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.57 - 2026-10-15
+
+### Release dependency corrections
+
+- Update Sharp to 0.35.5 and pin brace-expansion 5.0.11 and all transitive
+  prosemirror-view copies to 1.42.3 after the 0.0.56 image scan rejected the
+  retained vulnerable versions.
+- Build the media edge with Go 1.26.9 and golang.org/x/net 0.60.0, including
+  its required Go extension module updates. Preserve the existing publisher
+  scans and immutable release flow.
+
 ## 0.0.56 - 2026-10-14
 
 ### Retained published-site rebuild

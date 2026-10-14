@@ -6,6 +6,18 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.56 - 2026-10-14
+
+### Retained published-site rebuild
+
+- Reconcile historical page references with current publication metadata when
+  rebuilding public artefacts after a renderer or plugin upgrade.
+- Exclude only positively proven withdrawn or soft-deleted pages; retain exact
+  active published page versions, templates and runtime assets without reading
+  drafts or modifying stored content.
+- Fail with counts-only diagnostics for missing rows, active versions or
+  snapshots, preserving the live static slot and plugin rollback on failure.
+
 ## 0.0.55 - 2026-09-10
 
 ### Release scan remediation

@@ -23,7 +23,7 @@
  *   getDraftPublishStatus     — compare draft vs published state for the UI
  */
 import { createHash } from 'node:crypto'
-import type { DataRow } from '@core/data/schemas'
+import type { DataRow, DataRowStatus } from '@core/data/schemas'
 import type { SiteDocument } from '@core/page-tree'
 import type { PublishedPageRuntimeAssets } from '@core/site-runtime'
 import type { PublishedRuntimePackageImportmap } from '@core/publisher'
@@ -361,6 +361,24 @@ export async function listPublishedPageSnapshots(
     order by data_rows.created_at asc, data_rows.id asc
   `
   return rows.map(snapshotFromQueryRow)
+}
+
+export interface PagePublicationMetadata {
+  id: string
+  status: DataRowStatus
+  deleted_at: string | null
+  active_version_id: string | null
+}
+
+/** Read publication membership only; never load draft cells or author content. */
+export async function listPagePublicationMetadata(db: DbClient): Promise<PagePublicationMetadata[]> {
+  const { rows } = await db<PagePublicationMetadata>`
+    select id, status, deleted_at, active_version_id
+    from data_rows
+    where table_id = 'pages'
+    order by id asc
+  `
+  return rows
 }
 
 /**

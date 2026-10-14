@@ -518,6 +518,22 @@ The visitor-facing artefacts are:
 
 The published `SiteDocument` is stored once per publish in `site_snapshots` and referenced by `data_row_versions.site_snapshot_id`; the `PublishedPageSnapshot` reassembled from that join remains the canonical audit record — all three layers derive from it. At request time it is memoised per publish version (`server/publish/publishedSnapshotCache.ts`, shared by the public router's row resolution, the hole endpoint, and the loop endpoint), and `renderPublicResolution` serves a warm Layer B entry *before* any route resolution — a cache hit does zero DB work.
 
+Technical renderer/plugin rebuilds (`server/publish/rebuildPublishedSite.ts`) read
+only current page publication metadata alongside the exact active published
+snapshots. Historical non-template page references are excluded only when a
+retained row positively proves draft, unpublished, scheduled or soft-deleted
+status. The render roster takes every active page from its own published version
+and preserves the published shell and templates; it never reads draft cells,
+creates versions or changes row status. Missing rows, missing active versions,
+missing snapshots and inconsistent site identities block the rebuild, including
+when every published snapshot is missing. Failure diagnostics expose counts
+only. The complete-generation gate and atomic slot swap remain in force, so a
+failed plugin upgrade retains the old public slot and follows plugin rollback.
+
+This reconciliation qualifies retained-state startup before `Bun.serve` begins
+listening; it does not establish concurrency safety for live plugin upgrades.
+The existing mid-bake withdrawal/slot-swap race is tracked in fork issue #273.
+
 ---
 
 ## Adding a new module renderer

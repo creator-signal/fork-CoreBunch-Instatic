@@ -81,6 +81,13 @@ function buildFakeDb(
   return createFakeDb(async (sql: string, params: unknown[]): Promise<DbResult> => {
     const s = sql.replace(/\s+/g, ' ').trim().toLowerCase()
 
+    if (s.startsWith('select id, status, deleted_at, active_version_id')) {
+      return {
+        rows: [{ id: staticPage.id, status: 'published', deleted_at: null, active_version_id: 'v-static' }],
+        rowCount: 1,
+      }
+    }
+
     // ── snapshot getters (live render fallback / row bake) ────────────────
     // MUST precede the listDataRows branch below: getLatestPublishedSiteSnapshot
     // also contains `select data_rows.id` + `order by`.

@@ -9,8 +9,10 @@ import { handleCmsRequest } from '../../../server/handlers/cms'
 import { assertPathWithin } from '../../../server/util/pathWithin'
 import { hookBus } from '@core/plugins/hookBus'
 import { makeNode, makePage, makeSite } from '../fixtures'
+import type { PagePublicationMetadata } from '../../../server/repositories/publish'
+import { getActiveSlot, prepareInactiveSlot, readArtefact, swapSlot, writeArtefact } from '../../../server/publish/staticArtefact'
 
-function makeFakeDb() {
+function makeFakeDb(publicationMetadata: PagePublicationMetadata[] = []) {
   const admins: Record<string, unknown>[] = [
     {
       id: 'admin_1',
@@ -246,6 +248,9 @@ function makeFakeDb() {
     }
     // A successful plugin upgrade rebuilds derived public artefacts from the
     // active published snapshot. This handler fixture has no published site.
+    if (normalized.startsWith('select id, status, deleted_at, active_version_id')) {
+      return { rows: publicationMetadata as unknown as Row[], rowCount: publicationMetadata.length }
+    }
     if (
       normalized.includes('join site_snapshots') &&
       normalized.includes("data_rows.status = 'published'")
@@ -1573,9 +1578,11 @@ describe('CMS plugin handlers', () => {
     }
   })
 
-  it('rolls back to the prior version when the new version\'s activate hook throws', async () => {
+  it.each(['activate', 'publishedSnapshot'])('rolls back to the prior version and static slot on %s failure', async (failure) => {
     const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-rollback-'))
-    const db = makeFakeDb()
+    const db = makeFakeDb(failure === 'publishedSnapshot'
+      ? [{ id: 'retained-page', status: 'published', deleted_at: null, active_version_id: 'missing-version' }]
+      : [])
     const cookie = await createCookie(db)
     const baseManifest = (version: string) => ({
       id: 'acme.rollback',
@@ -1590,8 +1597,13 @@ describe('CMS plugin handlers', () => {
 
     try {
       const v1 = `export function activate() {}`
-      // v2 throws on activate to force rollback.
-      const v2 = `export function activate() { throw new Error('v2 activate exploded') }`
+      const v2 = failure === 'activate'
+        ? `export function activate() { throw new Error('v2 activate exploded') }`
+        : `export function activate() {}`
+
+      const oldSlot = await prepareInactiveSlot(uploadsDir)
+      await writeArtefact(oldSlot.slotDir, '/retained', 'Previous published output')
+      await swapSlot(uploadsDir, oldSlot.slot)
 
       const v1FormData = new FormData()
       v1FormData.set('file', pluginZip({
@@ -1621,6 +1633,9 @@ describe('CMS plugin handlers', () => {
       const body = await upgrade.json() as { error: string; plugins: { id: string; version: string; lifecycleStatus: string }[] }
       expect(body.error).toMatch(/Upgrade failed/)
       expect(body.error).toMatch(/Rolled back to version 1\.0\.0/)
+      if (failure === 'publishedSnapshot') expect(body.error).toContain('missingSnapshots=1')
+      expect(await getActiveSlot(uploadsDir)).toBe(oldSlot.slot)
+      expect(await readArtefact(uploadsDir, '/retained')).toBe('Previous published output')
 
       // DB row reflects the prior version.
       expect(db.plugins[0].version).toBe('1.0.0')

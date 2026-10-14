@@ -530,6 +530,10 @@ when every published snapshot is missing. Failure diagnostics expose counts
 only. The complete-generation gate and atomic slot swap remain in force, so a
 failed plugin upgrade retains the old public slot and follows plugin rollback.
 
+This reconciliation qualifies retained-state startup before `Bun.serve` begins
+listening; it does not establish concurrency safety for live plugin upgrades.
+The existing mid-bake withdrawal/slot-swap race is tracked in fork issue #273.
+
 ---
 
 ## Adding a new module renderer

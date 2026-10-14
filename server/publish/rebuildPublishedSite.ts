@@ -62,16 +62,19 @@ export function reconcilePublishedPageRoster(
   // Take each active page from its own immutable version, retaining each site's
   // published shell/templates. Never substitute the current draft for a page.
   const activePages = snapshots.flatMap((snapshot) =>
-    snapshot.site.pages.filter((page) => page.id === snapshot.pageRowId && !isTemplatePage(page)),
+    snapshot.site.pages.filter((page) => page.id === snapshot.pageRowId),
   )
   if (excludedPages.size > 0) {
-    console.warn(`[publish:rebuild] excludedPages=${excludedPages.size}, activePublishedPages=${activePages.length}`)
+    console.warn(`[publish:rebuild] excludedPages=${excludedPages.size}, activePublishedPages=${activePages.filter((page) => !isTemplatePage(page)).length}`)
   }
   return snapshots.map((snapshot) => ({
     ...snapshot,
     site: {
       ...snapshot.site,
-      pages: [...snapshot.site.pages.filter(isTemplatePage), ...activePages],
+      pages: [
+        ...snapshot.site.pages.filter((page) => isTemplatePage(page) && !snapshotsById.has(page.id)),
+        ...activePages,
+      ],
     },
   }))
 }

@@ -40,6 +40,20 @@ describe('technical rebuild publication roster', () => {
     expect(() => reconcilePublishedPageRoster([snapshot(active, [active, page('unknown')])], [row('active')])).toThrow('missingRows=1')
   })
 
+  it('uses current published template membership without duplicate page identities', () => {
+    const first = page('first')
+    const previousTemplate: Page = { ...page('second'), template: { enabled: true, priority: 0, target: { kind: 'everywhere' } } }
+    const second = page('second')
+    const activeTemplate: Page = { ...page('third'), template: { enabled: true, priority: 0, target: { kind: 'everywhere' } } }
+    const snapshots = [snapshot(first, [first, previousTemplate, page('third')]), snapshot(second, [first, second]), snapshot(activeTemplate, [activeTemplate])]
+    const reconciled = reconcilePublishedPageRoster(snapshots, [row('first'), row('second'), row('third')])
+    for (const result of reconciled) {
+      expect(result.site.pages.map((p) => p.id)).toEqual(['first', 'second', 'third'])
+      expect(result.site.pages.find((p) => p.id === 'second')?.template).toBeUndefined()
+      expect(result.site.pages.find((p) => p.id === 'third')?.template).toEqual(activeTemplate.template)
+    }
+  })
+
   it('rejects null or unresolved active published versions even with zero snapshots', () => {
     expect(() => reconcilePublishedPageRoster([], [{ ...row('active'), active_version_id: null }])).toThrow('missingActiveVersions=1')
     expect(() => reconcilePublishedPageRoster([], [row('active')])).toThrow('missingSnapshots=1')

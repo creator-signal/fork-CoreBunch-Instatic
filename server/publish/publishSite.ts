@@ -16,6 +16,7 @@
  * the sequencing, rendering, and disk artefacts. The dependency direction is
  * one-way: publish → repositories, never back.
  */
+import { assertDraftContentHash } from '../repositories/draftContentGuard'
 import { nanoid } from 'nanoid'
 import type { SiteDocument } from '@core/page-tree'
 import type { PublishedPageRuntimeAssets } from '@core/site-runtime'
@@ -75,6 +76,7 @@ export async function publishDraftSite(
   db: DbClient,
   adminUserId: string,
   uploadsDir?: string,
+  expectedDraftContentHash?: string,
 ): Promise<PublishResult> {
   // Flush the collab relay so the published snapshot includes edits still
   // inside the debounce window (publish bakes exactly what the admins see).
@@ -82,13 +84,16 @@ export async function publishDraftSite(
   await runPublishFlush()
   // Serialize against every other publish so the version read→bake→bump window
   // can't interleave and mis-stamp baked hole shells (ISS-038).
-  return withPublishLock(() => publishDraftSiteLocked(db, adminUserId, uploadsDir))
+  return withPublishLock(async () => {
+    return publishDraftSiteLocked(db, adminUserId, uploadsDir, expectedDraftContentHash)
+  })
 }
 
 async function publishDraftSiteLocked(
   db: DbClient,
   adminUserId: string,
   uploadsDir?: string,
+  expectedDraftContentHash?: string,
 ): Promise<PublishResult> {
   // ── Phase 1: read inputs + run every expensive non-DB build ──────────────
   // Dependency installs (`bun install` on a cold cache) and per-page esbuild
@@ -97,7 +102,12 @@ async function publishDraftSiteLocked(
   // write (autosaves, row publishes) behind it. `withPublishLock` already
   // serializes publishes, and version numbers are only allocated by publish
   // paths under that same lock, so reading outside the transaction is stable.
-  const site = await getDraftSiteDocument(db)
+  const site = expectedDraftContentHash === undefined
+    ? await getDraftSiteDocument(db)
+    : await db.transaction(async (tx) => {
+      await assertDraftContentHash(tx, expectedDraftContentHash)
+      return getDraftSiteDocument(tx)
+    })
   if (!site) throw new Error('draft site not found')
 
   assertPublicAuthoringPolicyPublishable(site, componentLibraryRegistry)
@@ -181,6 +191,7 @@ async function publishDraftSiteLocked(
 
   // ── Phase 2: short transaction — DB writes only ───────────────────────────
   await persistSitePublish(db, {
+    expectedDraftContentHash,
     siteSnapshotId,
     site: publishedSite,
     serializedImportmap: serializedImportmap

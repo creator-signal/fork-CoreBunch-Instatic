@@ -1,0 +1,107 @@
+import { describe, expect, it } from 'bun:test'
+import { createSqliteClient } from '../../../server/db/sqlite'
+import { runMigrations } from '../../../server/db/runMigrations'
+import { sqliteMigrations } from '../../../server/db/migrations-sqlite'
+import { createUser } from '../../../server/repositories/users'
+import { createSession } from '../../../server/auth/sessions'
+import { hashSessionToken, SESSION_COOKIE_NAME } from '../../../server/auth/tokens'
+import { createDataRow, saveDataRowDraft, listDataRows, listDataTables } from '../../../server/repositories/data'
+import { saveDraftSite } from '../../../server/repositories/site'
+import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
+import { getDraftContentHash, assertDraftContentHash, DraftContentChangedError, expectedDraftContentHash } from '../../../server/repositories/draftContentGuard'
+import { getDraftPublishStatus, persistSitePublish } from '../../../server/repositories/publish'
+import { handleImportRoute } from '../../../server/handlers/cms/import'
+import { handlePublishRoutes } from '../../../server/handlers/cms/publish'
+import { publishDraftSite } from '../../../server/publish/publishSite'
+import { registerPublishFlush } from '../../../server/publish/publishFlush'
+import { bumpPublishVersionSerialized } from '../../../server/publish/publishState'
+
+async function fixture() {
+  const db = createSqliteClient(':memory:')
+  await runMigrations(db, sqliteMigrations)
+  const test = { db, cleanup: async () => { await db.close?.(); Bun.gc(true) } }
+  await createUser(db, { id: 'owner', email: 'synthetic@example.test', displayName: 'Synthetic', passwordHash: 'unused', roleId: 'admin' })
+  const token = crypto.randomUUID()
+  await createSession(db, { idHash: await hashSessionToken(token), userId: 'owner', expiresAt: new Date('2030-01-01'), ipAddress: null, userAgent: 'test', stepUpExpiresAt: new Date('2030-01-01') })
+  await db`update sessions set last_seen_at = ${new Date('2029-01-01').toISOString()}`
+  await saveDraftSite(db, { id: 'default', name: 'Synthetic', files: [], visualComponents: [], breakpoints: [], settings: { shortcuts: {} }, styleRules: {}, packageJson: { dependencies: {}, devDependencies: {} }, runtime: normalizeSiteRuntimeConfig(undefined), createdAt: 1, updatedAt: 1 })
+  await createDataRow(db, { id: 'layout', tableId: 'layouts', slug: 'synthetic', cells: { title: 'Original' } }, 'owner')
+  const req = (path: string, hash?: string, body?: unknown) => { const request = new Request(`http://localhost/admin/api/cms/${path}`, { method: 'POST', headers: { cookie: `${SESSION_COOKIE_NAME}=${token}`, 'content-type': 'application/json', ...(hash === undefined ? {} : { 'X-Instatic-Expected-Draft-Hash': hash }) }, body: JSON.stringify(body ?? {}) }); request.headers.set('cookie', `${SESSION_COOKIE_NAME}=${token}`); return request }
+  const bundle = async () => ({ schemaVersion: 1, exportedAt: new Date().toISOString(), tables: await listDataTables(db), rows: (await listDataRows(db, 'layouts')).map((row) => ({ ...row, cells: { title: 'Imported' } })) })
+  return { ...test, req, bundle }
+}
+
+describe('atomic draft content guards', () => {
+  it('binds authored custom/layout content and status, ignoring bookkeeping timestamps', async () => {
+    const { db, cleanup } = await fixture()
+    try {
+      const initial = await getDraftContentHash(db)
+      await db`update data_rows set updated_at = '2026-01-01', seq = seq + 1 where id = 'layout'`
+      expect(await getDraftContentHash(db)).toBe(initial)
+      await db`update data_rows set status = 'unpublished' where id = 'layout'`
+      expect(await getDraftContentHash(db)).not.toBe(initial)
+      expect(await getDraftPublishStatus(db)).toMatchObject({ contentGuardVersion: 1, draftContentHash: await getDraftContentHash(db) })
+    } finally { await cleanup() }
+  })
+
+  it('rejects author edits between preview and import before overwriting', async () => {
+    const { db, req, bundle, cleanup } = await fixture()
+    try {
+      const hash = await getDraftContentHash(db)
+      const archive = await bundle()
+      await saveDataRowDraft(db, 'layout', { cells: { title: 'Author edit' }, slug: 'synthetic' }, 'owner')
+      const response = await handleImportRoute(req('import?strategy=merge-overwrite', hash, archive), db)
+      expect(response?.status).toBe(409)
+      expect(await response?.json()).toEqual({ error: 'draft_content_changed' })
+      expect((await listDataRows(db, 'layouts'))[0].cells.title).toBe('Author edit')
+    } finally { await cleanup() }
+  })
+
+  it('allows an unchanged guarded import and preserves legacy import compatibility', async () => {
+    const { db, req, bundle, cleanup } = await fixture()
+    try {
+      const response = await handleImportRoute(req('import?strategy=merge-overwrite', await getDraftContentHash(db), await bundle()), db)
+      expect(response?.status).toBe(200)
+      expect((await listDataRows(db, 'layouts'))[0].cells.title).toBe('Imported')
+      expect((await handleImportRoute(req('import?strategy=merge-add', undefined, await bundle()), db))?.status).toBe(200)
+    } finally { await cleanup() }
+  })
+
+  it('rejects collaborative changes during publish flush without publishing or deadlocking version bumps', async () => {
+    const { db, req, cleanup } = await fixture()
+    const hash = await getDraftContentHash(db)
+    const detach = registerPublishFlush(async () => {
+      await saveDataRowDraft(db, 'layout', { cells: { title: 'Collaboration edit' }, slug: 'synthetic' }, 'owner')
+      await bumpPublishVersionSerialized()
+    })
+    try {
+      const response = await handlePublishRoutes(req('publish', hash), db)
+      expect(response?.status).toBe(409)
+      expect((await db`select id from site_snapshots`).rows).toHaveLength(0)
+    } finally { detach(); await cleanup() }
+  })
+
+  it('rechecks inside persistence and rolls back before any published snapshot write', async () => {
+    const { db, cleanup } = await fixture()
+    try {
+      const hash = await getDraftContentHash(db)
+      await saveDataRowDraft(db, 'layout', { cells: { title: 'Build-time edit' }, slug: 'synthetic' }, 'owner')
+      await expect(persistSitePublish(db, { expectedDraftContentHash: hash, siteSnapshotId: 'blocked', site: {} as never, serializedImportmap: null, pages: [], publishedByUserId: 'owner' })).rejects.toBeInstanceOf(DraftContentChangedError)
+      expect((await db`select id from site_snapshots`).rows).toHaveLength(0)
+      await expect(db.transaction((tx) => assertDraftContentHash(tx, hash))).rejects.toBeInstanceOf(DraftContentChangedError)
+    } finally { await cleanup() }
+  })
+
+  it('allows unchanged guarded publication and normal legacy publication', async () => {
+    const { db, cleanup } = await fixture()
+    try {
+      expect(await publishDraftSite(db, 'owner', undefined, await getDraftContentHash(db))).toEqual({ publishedPages: 0 })
+      expect(await publishDraftSite(db, 'owner')).toEqual({ publishedPages: 0 })
+    } finally { await cleanup() }
+  })
+
+  it('strictly validates optional precondition headers', () => {
+    expect(expectedDraftContentHash(new Request('http://localhost'))).toBeUndefined()
+    expect(() => expectedDraftContentHash(new Request('http://localhost', { headers: { 'X-Instatic-Expected-Draft-Hash': 'bad' } }))).toThrow('invalid_draft_content_hash')
+  })
+})

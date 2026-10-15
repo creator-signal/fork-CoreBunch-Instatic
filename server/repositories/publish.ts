@@ -23,6 +23,7 @@
  *   getDraftPublishStatus     — compare draft vs published state for the UI
  */
 import { createHash } from 'node:crypto'
+import { assertDraftContentHash, getDraftContentHash, DRAFT_CONTENT_GUARD_VERSION } from './draftContentGuard'
 import type { DataRow, DataRowStatus } from '@core/data/schemas'
 import type { SiteDocument } from '@core/page-tree'
 import type { PublishedPageRuntimeAssets } from '@core/site-runtime'
@@ -56,6 +57,8 @@ export interface PublishedPageSnapshot {
 }
 
 interface DraftPublishStatus {
+  contentGuardVersion: number
+  draftContentHash: string
   hasPublishedVersion: boolean
   draftMatchesPublished: boolean
   draftPages: number
@@ -90,6 +93,7 @@ export interface PublishedPageVersionWrite {
 }
 
 export interface PersistSitePublishInput {
+  expectedDraftContentHash?: string
   siteSnapshotId: string
   /** The published site document — stored ONCE, referenced by every page version. */
   site: SiteDocument
@@ -182,9 +186,11 @@ export async function getDraftSiteDocument(db: DbClient): Promise<SiteDocument |
 }
 
 export async function getDraftPublishStatus(db: DbClient): Promise<DraftPublishStatus> {
+  const guard = { contentGuardVersion: DRAFT_CONTENT_GUARD_VERSION, draftContentHash: await getDraftContentHash(db) }
   const draftSite = await getDraftSiteDocument(db)
   if (!draftSite) {
     return {
+      ...guard,
       hasPublishedVersion: false,
       draftMatchesPublished: false,
       draftPages: 0,
@@ -223,6 +229,7 @@ export async function getDraftPublishStatus(db: DbClient): Promise<DraftPublishS
     .sort((a, b) => b - a)[0]
 
   return {
+    ...guard,
     hasPublishedVersion: publishedRows.length > 0,
     draftMatchesPublished,
     draftPages: draftSite.pages.length,
@@ -244,6 +251,7 @@ export async function persistSitePublish(
   input: PersistSitePublishInput,
 ): Promise<void> {
   await db.transaction(async (tx) => {
+    await assertDraftContentHash(tx, input.expectedDraftContentHash)
     // The site document is stored ONCE per publish; every page version row
     // references it. The content hash powers the publish-status check without
     // ever re-fetching the document.

@@ -18,6 +18,7 @@
  * Step-up matches the pattern used by `users.manage` delete / suspend
  * and the `plugins.install` / `plugins.lifecycle` mutation surface.
  */
+import { expectedDraftContentHash, DraftContentChangedError } from '../../repositories/draftContentGuard'
 import type { DbClient } from '../../db/client'
 import { requireCapability, requireStepUp } from '../../auth/authz'
 import { createAuditEvent } from '../../repositories/audit'
@@ -46,8 +47,10 @@ export async function handlePublishRoutes(
     // so the snapshot includes edits still inside the debounce window.
     let result: Awaited<ReturnType<typeof publishDraftSite>>
     try {
-      result = await publishDraftSite(db, user.id, options.uploadsDir)
+      result = await publishDraftSite(db, user.id, options.uploadsDir, expectedDraftContentHash(req))
     } catch (err) {
+      if (err instanceof DraftContentChangedError) return jsonResponse({ error: err.message }, { status: 409 })
+      if (err instanceof TypeError && err.message === 'invalid_draft_content_hash') return jsonResponse({ error: err.message }, { status: 400 })
       if (err instanceof RuntimeScriptBuildError) {
         return jsonResponse({ error: err.message }, { status: 422 })
       }

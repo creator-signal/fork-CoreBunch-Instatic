@@ -7,6 +7,8 @@ import { createSession } from '../../../server/auth/sessions'
 import { hashSessionToken, SESSION_COOKIE_NAME } from '../../../server/auth/tokens'
 import { createDataRow, saveDataRowDraft, listDataRows, listDataTables } from '../../../server/repositories/data'
 import { saveDraftSite } from '../../../server/repositories/site'
+import { pageToCells } from '@core/data/pageFromRow'
+import type { DbClient } from '../../../server/db/client'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import { getDraftContentHash, assertDraftContentHash, DraftContentChangedError, expectedDraftContentHash } from '../../../server/repositories/draftContentGuard'
 import { getDraftPublishStatus, persistSitePublish } from '../../../server/repositories/publish'
@@ -97,6 +99,41 @@ describe('atomic draft content guards', () => {
     try {
       expect(await publishDraftSite(db, 'owner', undefined, await getDraftContentHash(db))).toEqual({ publishedPages: 0 })
       expect(await publishDraftSite(db, 'owner')).toEqual({ publishedPages: 0 })
+    } finally { await cleanup() }
+  })
+
+  it('publishes an unchanged guarded page while preserving its authored body', async () => {
+    const { db, cleanup } = await fixture()
+    try {
+      await createDataRow(db, { id: 'home', tableId: 'pages', slug: 'index', cells: pageToCells({
+        id: 'home', title: 'Home', slug: 'index', rootNodeId: 'root', nodes: {
+          root: { id: 'root', moduleId: 'base.body', props: {}, children: ['text'], classIds: [], breakpointOverrides: {} },
+          text: { id: 'text', moduleId: 'base.text', props: { text: 'Synthetic governed migration' }, children: [], classIds: [], breakpointOverrides: {} },
+        },
+      }) }, 'owner')
+      const hash = await getDraftContentHash(db)
+      expect(await publishDraftSite(db, 'owner', undefined, hash)).toEqual({ publishedPages: 1 })
+      const rows = await listDataRows(db, 'pages')
+      expect(rows[0].status).toBe('published')
+      expect(rows[0].cells.title).toBe('Home')
+      expect(await getDraftContentHash(db)).not.toBe(hash)
+    } finally { await cleanup() }
+  })
+
+  it('locks fixed PostgreSQL content tables before the first guarded comparison read', async () => {
+    const { db, cleanup } = await fixture()
+    try {
+      const events: string[] = []
+      const tx = Object.assign(async (strings: TemplateStringsArray, ...values: unknown[]) => {
+        events.push('read')
+        return db(strings, ...values)
+      }, { dialect: 'postgres', unsafe: async (sql: string, params?: unknown[]) => {
+        if (sql.startsWith('lock table ')) { events.push(sql); return { rows: [], rowCount: 0 } }
+        return db.unsafe(sql, params)
+      } }) as DbClient
+      await assertDraftContentHash(tx, await getDraftContentHash(db))
+      expect(events[0]).toBe('lock table site, data_tables, data_rows, media_assets, media_folders, media_asset_folders, data_row_redirects in share row exclusive mode')
+      expect(events[1]).toBe('read')
     } finally { await cleanup() }
   })
 

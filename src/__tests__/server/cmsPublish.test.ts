@@ -29,7 +29,7 @@ function createPublishFakeDb() {
   const db = createFakeDb(async (rawSql, params): Promise<DbResult> => {
     const sql = rawSql.replace(/\s+/g, ' ').trim().toLowerCase()
 
-    // saveDraftSite â€” insert or update site row (NOT site_snapshots)
+    // saveDraftSite — insert or update site row (NOT site_snapshots)
     if (sql.includes('from media_assets') || sql.includes('from media_folders') || sql.includes('from data_row_redirects')) return { rows: [], rowCount: 0 }
     if (sql.includes('from data_tables')) {
       return { rows: ['pages', 'components', 'layouts', 'posts'].map((id) => ({ id, name: id, slug: id, kind: id === 'pages' ? 'page' : 'data', route_base: '', singular_label: id, plural_label: id, primary_field_id: 'title', fields_json: [], system: 1, created_at: '2026-01-01', updated_at: '2026-01-01', created_by_user_id: null, updated_by_user_id: null })), rowCount: 4 }
@@ -44,11 +44,11 @@ function createPublishFakeDb() {
       }
       return { rows: [], rowCount: 1 }
     }
-    // getDraftSite â€” select site row
+    // getDraftSite — select site row
     if (sql.startsWith('select id, name, settings_json')) {
       return { rows: state.site ? [state.site] : [], rowCount: state.site ? 1 : 0 }
     }
-    // createDataRow â€” insert into data_rows returning id
+    // createDataRow — insert into data_rows returning id
     if (sql.startsWith('insert into data_rows')) {
       const row = {
         id: params[0],
@@ -71,7 +71,7 @@ function createPublishFakeDb() {
       else state.dataRows.push(row)
       return { rows: [{ id: row.id }], rowCount: 1 }
     }
-    // saveDataRowDraft â€” update data_rows set cells_json, slug, updated_by_user_id, plugin_actor_id
+    // saveDataRowDraft — update data_rows set cells_json, slug, updated_by_user_id, plugin_actor_id
     // params: [0]=cells_json, [1]=slug, [2]=updated_by_user_id, [3]=plugin_actor_id, [4]=rowId
     if (sql.startsWith('update data_rows set cells_json')) {
       const row = state.dataRows.find((r) => r.id === params[4])
@@ -82,7 +82,7 @@ function createPublishFakeDb() {
       }
       return { rows: [], rowCount: row ? 1 : 0 }
     }
-    // listDataRows for pages â€” select from data_rows where table_id = 'pages'
+    // listDataRows for pages — select from data_rows where table_id = 'pages'
     if (sql.includes('from data_rows') && sql.includes('left join users')) {
       const matchingRows = state.dataRows.filter((r) => {
         if (r.deleted_at != null) return false
@@ -118,14 +118,14 @@ function createPublishFakeDb() {
         }))
       return { rows, rowCount: rows.length }
     }
-    // nextVersionNumber â€” max(version_number) + 1
+    // nextVersionNumber — max(version_number) + 1
     if (sql.startsWith('select coalesce(max(version_number)')) {
       const rowId = params[0] as string
       const rowVersions = state.dataRowVersions.filter((v) => v.row_id === rowId)
       const nextVersion = Math.max(0, ...rowVersions.map((v) => Number(v.version_number))) + 1
       return { rows: [{ next_version: nextVersion }], rowCount: 1 }
     }
-    // insert into site_snapshots â€” one per publish, referenced by version rows
+    // insert into site_snapshots — one per publish, referenced by version rows
     if (sql.startsWith('insert into site_snapshots')) {
       state.siteSnapshots.push({
         id: params[0],
@@ -153,7 +153,7 @@ function createPublishFakeDb() {
       })
       return { rows: [], rowCount: 1 }
     }
-    // savePublishedRuntimeAssets â€” insert into published_runtime_assets
+    // savePublishedRuntimeAssets — insert into published_runtime_assets
     if (sql.startsWith('insert into published_runtime_assets')) {
       state.runtimeAssets.push({
         id: params[0],
@@ -182,7 +182,7 @@ function createPublishFakeDb() {
       }
       return { rows: [], rowCount: row ? 1 : 0 }
     }
-    // getPublishedPageBySlug â€” join data_rows + data_row_versions + site_snapshots
+    // getPublishedPageBySlug — join data_rows + data_row_versions + site_snapshots
     if (sql.includes('site_snapshots.site_json') && sql.includes('data_rows.slug')) {
       const slug = params[0] as string
       const row = state.dataRows.find((r) => r.slug === slug && r.status === 'published')
@@ -203,7 +203,7 @@ function createPublishFakeDb() {
         rowCount: version && snap ? 1 : 0,
       }
     }
-    // getDraftPublishStatus â€” published rows join (selects the per-publish content hash)
+    // getDraftPublishStatus — published rows join (selects the per-publish content hash)
     if (sql.includes('site_snapshots.content_hash') && sql.includes('created_at asc')) {
       const rows = state.dataRows
         .filter((r) => r.status === 'published' && r.active_version_id && !r.deleted_at)

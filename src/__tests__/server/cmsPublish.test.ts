@@ -30,6 +30,10 @@ function createPublishFakeDb() {
     const sql = rawSql.replace(/\s+/g, ' ').trim().toLowerCase()
 
     // saveDraftSite — insert or update site row (NOT site_snapshots)
+    if (sql.includes('from media_assets') || sql.includes('from media_folders') || sql.includes('from data_row_redirects')) return { rows: [], rowCount: 0 }
+    if (sql.includes('from data_tables')) {
+      return { rows: ['pages', 'components', 'layouts', 'posts'].map((id) => ({ id, name: id, slug: id, kind: id === 'pages' ? 'page' : 'data', route_base: '', singular_label: id, plural_label: id, primary_field_id: 'title', fields_json: [], system: 1, created_at: '2026-01-01', updated_at: '2026-01-01', created_by_user_id: null, updated_by_user_id: null })), rowCount: 4 }
+    }
     if (sql.startsWith('insert into site (')) {
       state.site = {
         id: 'default',

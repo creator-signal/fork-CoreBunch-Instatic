@@ -35,6 +35,10 @@ page roster, and publish the complete site automatically.
 - Plausible pageviews, consent-gated OpenPanel events, GlitchTip browser monitoring, consent UI, and hashed Mautic attribution.
 - Header, footer, navigation and consent edited once as typed shared-template
   components. Ordinary pages contain only their page-specific components.
+  At 900px and below, the header's native Menu disclosure exposes every authored
+  destination. Enter/Space toggle it, Escape closes it and restores focus, and
+  choosing a destination closes it. Without JavaScript the links remain expanded.
+  Desktop renders the same navigation without a disclosure control.
 - Operator-approved initial legal, trust, support, and account-data copy marked
   with version `2026-08-02`, its effective date, and the verified operating
   company. External legal advice remains outside the site-pack contract.

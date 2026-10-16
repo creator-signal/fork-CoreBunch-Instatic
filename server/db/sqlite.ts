@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from 'node:async_hooks'
 import { Database } from 'bun:sqlite'
 import type { DbClient, DbResult } from './client'
 
@@ -84,10 +85,19 @@ export function createSqliteClient(filename: string): DbClient {
   db.exec('PRAGMA synchronous = NORMAL')
   db.exec('PRAGMA busy_timeout = 5000')
 
+  const transactionOwner = new AsyncLocalStorage<symbol>()
+  let exclusive: { owner: symbol; finished: Promise<void> } | undefined
+  const waitForExclusiveTransaction = async () => {
+    while (exclusive && transactionOwner.getStore() !== exclusive.owner) {
+      await exclusive.finished
+    }
+  }
+
   const fn = (async <Row = Record<string, unknown>>(
     strings: TemplateStringsArray,
     ...values: unknown[]
   ): Promise<DbResult<Row>> => {
+    if (exclusive && transactionOwner.getStore() !== exclusive.owner) await waitForExclusiveTransaction()
     const { sql, params } = renderTemplate(strings, values)
     // db.query() returns a prepared statement cached by the exact SQL string
     // (db.prepare() recompiles on every call). Tagged-template call sites
@@ -106,6 +116,7 @@ export function createSqliteClient(filename: string): DbClient {
     rawSql: string,
     params?: unknown[],
   ): Promise<DbResult<Row>> => {
+    if (exclusive && transactionOwner.getStore() !== exclusive.owner) await waitForExclusiveTransaction()
     // Multi-statement migration blocks arrive as a single SQL string with
     // semicolons. db.exec() handles them correctly; a prepared statement
     // (db.query) only runs the first statement.
@@ -128,8 +139,13 @@ export function createSqliteClient(filename: string): DbClient {
   // (ISS-040). Serialize them: each transaction runs to completion before the
   // next BEGIN, regardless of whether the previous one committed or threw.
   let txChain: Promise<unknown> = Promise.resolve()
-  fn.transaction = <T>(cb: (tx: DbClient) => Promise<T>): Promise<T> => {
-    const run = async (): Promise<T> => {
+  fn.transaction = <T>(cb: (tx: DbClient) => Promise<T>, options?: { isolateStatements?: boolean }): Promise<T> => {
+    // Existing transactions are non-reentrant. Fail explicitly rather than
+    // hanging if a guarded callback tries to enqueue a nested transaction.
+    if (exclusive && transactionOwner.getStore() === exclusive.owner) {
+      return Promise.reject(new Error('nested SQLite transaction is not supported'))
+    }
+    const execute = async (): Promise<T> => {
       // BEGIN is outside the try: if it throws, it propagates without a
       // ROLLBACK (nothing was opened), so a failed BEGIN can never roll back an
       // unrelated transaction. Serialization already guarantees BEGIN never
@@ -146,6 +162,21 @@ export function createSqliteClient(filename: string): DbClient {
           // swallow rollback failure — the original error is more important
         }
         throw err
+      }
+    }
+    const run = async (): Promise<T> => {
+      if (!options?.isolateStatements) return execute()
+      const owner = Symbol('sqlite-guarded-transaction')
+      let release!: () => void
+      const finished = new Promise<void>((resolve) => { release = resolve })
+      exclusive = { owner, finished }
+      try {
+        return await transactionOwner.run(owner, execute)
+      } finally {
+        // A detached task may retain the ALS token; only the currently active
+        // owner's token bypasses the gate, never a historical transaction.
+        exclusive = undefined
+        release()
       }
     }
     const result = txChain.then(run, run)

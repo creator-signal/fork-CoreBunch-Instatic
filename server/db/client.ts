@@ -30,7 +30,7 @@ export interface DbClient {
     ...values: unknown[]
   ): Promise<DbResult<Row>>
   unsafe<Row = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<DbResult<Row>>
-  transaction<T>(fn: (tx: DbClient) => Promise<T>): Promise<T>
+  transaction<T>(fn: (tx: DbClient) => Promise<T>, options?: { isolateStatements?: boolean }): Promise<T>
   /** Release adapter resources when the owner has a bounded client lifetime. */
   close?: () => void | Promise<void>
   readonly dialect: Dialect

@@ -51,7 +51,7 @@ export async function getDraftContentHash(db: DbClient): Promise<string> {
   }
   const contentShell = shell ? (({ createdAt: _created, updatedAt: _updated, ...content }) => content)(shell) : null
   const media = (await listMediaAssetsForExport(db)).toSorted((a, b) => a.id.localeCompare(b.id)).map((asset) => ({
-    id: asset.id, filename: asset.filename, mimeType: asset.mimeType, sizeBytes: asset.sizeBytes,
+    id: asset.id, publicPath: asset.publicPath, storageAdapterId: asset.storageAdapterId, externallyHosted: asset.externallyHosted, filename: asset.filename, mimeType: asset.mimeType, sizeBytes: asset.sizeBytes,
     altText: asset.altText, caption: asset.caption, title: asset.title, tags: asset.tags,
     width: asset.width, height: asset.height, durationMs: asset.durationMs,
     dominantColor: asset.dominantColor, blurHash: asset.blurHash, storagePath: asset.storagePath,
@@ -72,4 +72,16 @@ export async function assertDraftContentHash(tx: DbClient, expected?: string): P
     await tx.unsafe('lock table site, data_tables, data_rows, media_assets, media_folders, media_asset_folders, data_row_redirects in share row exclusive mode')
   }
   if (await getDraftContentHash(tx) !== expected) throw new DraftContentChangedError()
+}
+
+/** Guarded transactions reserve SQLite's connection against outside direct
+ * statements as well as other transactions. PostgreSQL uses fixed table locks.
+ */
+export function draftContentTransaction<T>(
+  db: DbClient, expected: string | undefined, operation: (tx: DbClient) => Promise<T>,
+): Promise<T> {
+  return db.transaction(async (tx) => {
+    await assertDraftContentHash(tx, expected)
+    return operation(tx)
+  }, { isolateStatements: expected !== undefined })
 }

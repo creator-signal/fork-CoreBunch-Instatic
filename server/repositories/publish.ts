@@ -23,7 +23,7 @@
  *   getDraftPublishStatus     — compare draft vs published state for the UI
  */
 import { createHash } from 'node:crypto'
-import { assertDraftContentHash, getDraftContentHash, DRAFT_CONTENT_GUARD_VERSION } from './draftContentGuard'
+import { draftContentTransaction, getDraftContentHash, DRAFT_CONTENT_GUARD_VERSION } from './draftContentGuard'
 import type { DataRow, DataRowStatus } from '@core/data/schemas'
 import type { SiteDocument } from '@core/page-tree'
 import type { PublishedPageRuntimeAssets } from '@core/site-runtime'
@@ -250,8 +250,7 @@ export async function persistSitePublish(
   db: DbClient,
   input: PersistSitePublishInput,
 ): Promise<void> {
-  await db.transaction(async (tx) => {
-    await assertDraftContentHash(tx, input.expectedDraftContentHash)
+  await draftContentTransaction(db, input.expectedDraftContentHash, async (tx) => {
     // The site document is stored ONCE per publish; every page version row
     // references it. The content hash powers the publish-status check without
     // ever re-fetching the document.

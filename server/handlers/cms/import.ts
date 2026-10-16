@@ -27,7 +27,7 @@
  *   bundles carrying a `site`:     ALSO `site.structure.edit` (the site
  *                                  shell replace is a structural edit)
  */
-import { assertDraftContentHash, expectedDraftContentHash, DraftContentChangedError } from '../../repositories/draftContentGuard'
+import { draftContentTransaction, expectedDraftContentHash, DraftContentChangedError } from '../../repositories/draftContentGuard'
 import { runPublishFlush } from '../../publish/publishFlush'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
@@ -199,7 +199,12 @@ export async function handleImportRoute(
   try { expectedHash = expectedDraftContentHash(req) } catch {
     return jsonResponse({ error: 'invalid_draft_content_hash' }, { status: 400 })
   }
-  if (expectedHash !== undefined) await runPublishFlush()
+  if (expectedHash !== undefined) {
+    if (bundle.media?.length || bundle.mediaFolders?.length || bundle.redirects?.length) {
+      return jsonResponse({ error: 'guarded_import_requires_content_only' }, { status: 400 })
+    }
+    await runPublishFlush()
+  }
   try {
   await serializeCollabAwareWrite(async () => {
     const affectedCollabRows = new Map(
@@ -222,8 +227,7 @@ export async function handleImportRoute(
 
   if (strategy === 'replace') {
     // Wipe-and-replace: delete all rows + custom tables, then reimport.
-    await db.transaction(async (tx) => {
-      await assertDraftContentHash(tx, expectedHash)
+    await draftContentTransaction(db, expectedHash, async (tx) => {
       // 1. Delete ALL data rows (covers all tables)
       await tx`delete from data_rows`
 
@@ -319,8 +323,7 @@ export async function handleImportRoute(
     })
   } else if (strategy === 'merge-add') {
     // Add what's missing; never overwrite existing content.
-    await db.transaction(async (tx) => {
-      await assertDraftContentHash(tx, expectedHash)
+    await draftContentTransaction(db, expectedHash, async (tx) => {
       // Tables: insert if absent, skip if the id already exists
       for (const table of bundle.tables) {
         const inserted = await insertDataTableIfAbsent(tx, {
@@ -363,8 +366,7 @@ export async function handleImportRoute(
     })
   } else {
     // merge-overwrite: upsert rows/tables; update existing with bundle values.
-    await db.transaction(async (tx) => {
-      await assertDraftContentHash(tx, expectedHash)
+    await draftContentTransaction(db, expectedHash, async (tx) => {
       // Pre-fetch all existing rows. An upsert can move an id from a table the
       // bundle does not mention, and both its old and new collab docs/rosters
       // must be invalidated after commit.

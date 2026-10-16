@@ -16,7 +16,7 @@
  * the sequencing, rendering, and disk artefacts. The dependency direction is
  * one-way: publish → repositories, never back.
  */
-import { assertDraftContentHash } from '../repositories/draftContentGuard'
+import { draftContentTransaction } from '../repositories/draftContentGuard'
 import { nanoid } from 'nanoid'
 import type { SiteDocument } from '@core/page-tree'
 import type { PublishedPageRuntimeAssets } from '@core/site-runtime'
@@ -104,10 +104,7 @@ async function publishDraftSiteLocked(
   // paths under that same lock, so reading outside the transaction is stable.
   const site = expectedDraftContentHash === undefined
     ? await getDraftSiteDocument(db)
-    : await db.transaction(async (tx) => {
-      await assertDraftContentHash(tx, expectedDraftContentHash)
-      return getDraftSiteDocument(tx)
-    })
+    : await draftContentTransaction(db, expectedDraftContentHash, getDraftSiteDocument)
   if (!site) throw new Error('draft site not found')
 
   assertPublicAuthoringPolicyPublishable(site, componentLibraryRegistry)

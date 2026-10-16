@@ -1,3 +1,5 @@
+import { zipSync } from 'fflate'
+import { handleImportArchiveRoute } from '../../../server/handlers/cms/importArchive'
 import { describe, expect, it } from 'bun:test'
 import { createSqliteClient } from '../../../server/db/sqlite'
 import { runMigrations } from '../../../server/db/runMigrations'
@@ -10,7 +12,7 @@ import { saveDraftSite } from '../../../server/repositories/site'
 import { pageToCells } from '@core/data/pageFromRow'
 import type { DbClient } from '../../../server/db/client'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
-import { getDraftContentHash, assertDraftContentHash, DraftContentChangedError, expectedDraftContentHash } from '../../../server/repositories/draftContentGuard'
+import { getDraftContentHash, assertDraftContentHash, draftContentTransaction, DraftContentChangedError, expectedDraftContentHash } from '../../../server/repositories/draftContentGuard'
 import { getDraftPublishStatus, persistSitePublish } from '../../../server/repositories/publish'
 import { handleImportRoute } from '../../../server/handlers/cms/import'
 import { handlePublishRoutes } from '../../../server/handlers/cms/publish'
@@ -134,6 +136,111 @@ describe('atomic draft content guards', () => {
       await assertDraftContentHash(tx, await getDraftContentHash(db))
       expect(events[0]).toBe('lock table site, data_tables, data_rows, media_assets, media_folders, media_asset_folders, data_row_redirects in share row exclusive mode')
       expect(events[1]).toBe('read')
+    } finally { await cleanup() }
+  })
+
+  it('holds same-connection author writes outside a guarded transaction until rollback', async () => {
+    const { db, cleanup } = await fixture()
+    const entered = Promise.withResolvers<void>()
+    const release = Promise.withResolvers<void>()
+    try {
+      const pending = draftContentTransaction(db, await getDraftContentHash(db), async (tx) => {
+        await tx`update data_rows set cells_json = ${{ title: 'Temporary migration' }} where id = 'layout'`
+        entered.resolve()
+        await release.promise
+        throw new DraftContentChangedError()
+      })
+      // Observe rejection immediately; this is an expected rollback.
+      const rejected = pending.then(() => null, (error: unknown) => error)
+      await entered.promise
+      let authorFinished = false
+      const author = db`update data_rows set cells_json = ${{ title: 'Author after preview' }} where id = 'layout'`.then(() => { authorFinished = true })
+      await Promise.resolve()
+      await Promise.resolve()
+      expect(authorFinished).toBe(false)
+      release.resolve()
+      expect(await rejected).toBeInstanceOf(DraftContentChangedError)
+      await author
+      expect((await listDataRows(db, 'layouts'))[0].cells.title).toBe('Author after preview')
+    } finally { release.resolve(); await cleanup() }
+  })
+
+  it('does not let an escaped historical owner bypass a later guarded transaction', async () => {
+    const { db, cleanup } = await fixture()
+    const wakeEscaped = Promise.withResolvers<void>()
+    const entered = Promise.withResolvers<void>()
+    const release = Promise.withResolvers<void>()
+    let escaped!: Promise<unknown>
+    let escapedFinished = false
+    try {
+      await draftContentTransaction(db, await getDraftContentHash(db), async () => {
+        escaped = (async () => {
+          await wakeEscaped.promise
+          await db`update data_rows set cells_json = ${{ title: 'Escaped owner' }} where id = 'layout'`
+          escapedFinished = true
+        })()
+      })
+      const current = draftContentTransaction(db, await getDraftContentHash(db), async () => {
+        entered.resolve()
+        await release.promise
+      })
+      await entered.promise
+      wakeEscaped.resolve()
+      await Promise.resolve()
+      await Promise.resolve()
+      expect(escapedFinished).toBe(false)
+      release.resolve()
+      await current
+      await escaped
+      expect((await listDataRows(db, 'layouts'))[0].cells.title).toBe('Escaped owner')
+    } finally { wakeEscaped.resolve(); release.resolve(); await cleanup() }
+  })
+
+  it('rejects nested guarded transactions explicitly and recovers the queue after failure', async () => {
+    const { db, cleanup } = await fixture()
+    try {
+      await draftContentTransaction(db, await getDraftContentHash(db), async () => {
+        await expect(db.transaction(async () => undefined)).rejects.toThrow('nested SQLite transaction is not supported')
+      })
+      await expect(draftContentTransaction(db, '0'.repeat(64), async () => undefined)).rejects.toBeInstanceOf(DraftContentChangedError)
+      await db.transaction(async (tx) => { await tx`update data_rows set cells_json = ${{ title: 'Queue recovered' }} where id = 'layout'` })
+      expect((await listDataRows(db, 'layouts'))[0].cells.title).toBe('Queue recovered')
+    } finally { await cleanup() }
+  })
+
+  it('denies guarded media payloads before collaboration flush or content mutation', async () => {
+    const { db, req, bundle, cleanup } = await fixture()
+    let flushed = false
+    const detach = registerPublishFlush(async () => { flushed = true })
+    try {
+      const original = await getDraftContentHash(db)
+      const payload = { ...await bundle(), mediaFolders: [{ id: 'folder', parentId: null, name: 'Folder', slug: 'folder', sortOrder: 0 }] }
+      const response = await handleImportRoute(req('import?strategy=merge-overwrite', original, payload), db)
+      expect(response?.status).toBe(400)
+      expect(flushed).toBe(false)
+      expect(await getDraftContentHash(db)).toBe(original)
+    } finally { detach(); await cleanup() }
+  })
+
+  it('retains the precondition through archive import and rejects ancillary data before writes', async () => {
+    const { db, req, bundle, cleanup } = await fixture()
+    const archiveRequest = (payload: unknown, hash: string) => {
+      const bytes = zipSync({ '.instatic/site-bundle.json': new TextEncoder().encode(JSON.stringify(payload)) }, { level: 0 })
+      const request = new Request('http://localhost/admin/api/cms/import/archive?strategy=merge-overwrite', {
+        method: 'POST', body: bytes, headers: { 'content-type': 'application/zip', 'X-Instatic-Expected-Draft-Hash': hash },
+      })
+      request.headers.set('cookie', req('test').headers.get('cookie')!)
+      return request
+    }
+    try {
+      const hash = await getDraftContentHash(db)
+      const payload = await bundle()
+      await saveDataRowDraft(db, 'layout', { cells: { title: 'Author archive edit' }, slug: 'synthetic' }, 'owner')
+      expect((await handleImportArchiveRoute(archiveRequest(payload, hash), db))?.status).toBe(409)
+      expect((await listDataRows(db, 'layouts'))[0].cells.title).toBe('Author archive edit')
+      const folders = { ...payload, mediaFolders: [{ id: 'folder', parentId: null, name: 'Folder', slug: 'folder', sortOrder: 0 }] }
+      expect((await handleImportArchiveRoute(archiveRequest(folders, await getDraftContentHash(db)), db))?.status).toBe(400)
+      expect((await db`select id from media_folders`).rows).toHaveLength(0)
     } finally { await cleanup() }
   })
 

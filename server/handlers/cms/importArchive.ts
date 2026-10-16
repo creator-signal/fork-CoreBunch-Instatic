@@ -39,6 +39,7 @@ import {
 } from '@core/data/bundleArchive'
 import { createCrc32 } from '../../archive/storedZip'
 import { CMS_API_PREFIX, type CmsHandlerOptions } from './shared'
+import { expectedDraftContentHash } from '../../repositories/draftContentGuard'
 import { handleImportRoute } from './import'
 
 const IMPORT_ARCHIVE_PATH = `${CMS_API_PREFIX}/import/archive`
@@ -103,6 +104,13 @@ export async function handleImportArchiveRoute(
   const selectedManifest = selection
     ? filterArchiveManifestForSelection(manifest, selection)
     : manifest
+
+  try {
+    if (expectedDraftContentHash(req) !== undefined &&
+        (selectedManifest.media?.length || selectedManifest.mediaFolders?.length || selectedManifest.redirects?.length)) {
+      return badRequest('guarded_import_requires_content_only')
+    }
+  } catch { return badRequest('invalid_draft_content_hash') }
 
   let stagedMedia: StagedArchiveMedia | null = null
   if (selectedManifest.media && selectedManifest.media.length > 0 && options.uploadsDir) {

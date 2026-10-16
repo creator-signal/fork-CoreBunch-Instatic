@@ -60,15 +60,15 @@ describe('SQLite adapter — concurrent transactions', () => {
 
       const failed = (async () => {
         await delay(10)
-        await expect(
-          db.transaction(async (tx) => {
+        return db.transaction(async (tx) => {
             await tx`insert into tx_probe2 (id) values (3)`
             throw new Error('boom')
-          }),
-        ).rejects.toThrow('boom')
+          }).then(() => null, (error: unknown) => error)
       })()
 
-      await Promise.all([committed, failed])
+      const [, failure] = await Promise.all([committed, failed])
+      expect(failure).toBeInstanceOf(Error)
+      expect((failure as Error).message).toBe('boom')
 
       const { rows } = await db<{ id: number }>`select id from tx_probe2 order by id`
       // The committed transaction keeps both rows; the failed one leaves nothing.

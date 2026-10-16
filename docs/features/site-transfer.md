@@ -384,3 +384,31 @@ A nightly cron can hit `/admin/api/cms/export` with an admin session cookie and 
   - `src/__tests__/architecture/cmsTransferPreview.test.ts`
   - `src/__tests__/architecture/cmsTransferImport.test.ts`
   - `src/__tests__/architecture/import-export-roundtrip.test.ts`
+
+### Guarded maintenance imports
+
+Authenticated `GET /admin/api/cms/publish/status` returns `contentGuardVersion: 1`
+and an opaque SHA-256 `draftContentHash`. Maintenance callers may send this as
+`X-Instatic-Expected-Draft-Hash` on the existing JSON/archive import and publish
+POST endpoints. Invalid values return 400; changed content returns 409
+`draft_content_changed`, without import/publication writes. Never retry a
+conflict without a new review/backup. Omitting the header retains normal editor
+behavior. Guarded maintenance imports accept content-only bundles: nonempty
+media, folder or redirect payloads return 400 before any write or collaboration
+flush; normal unguarded imports retain their existing media behavior. Capabilities and publish step-up remain mandatory.
+
+The hash covers the shell and every live CMS table/row, including unpublished
+pages, components, layouts and custom tables, plus exportable media metadata,
+folder membership and redirects. Media file bytes remain a separate archive
+checksum/backup concern. It includes status and scheduled
+publication, excludes timestamps/user display metadata/session/audit state, and
+is not an export checksum. Import flushes collaboration before entering its
+existing row-write lane and compares within its transaction. Publication flushes
+before its publish lock (the relay may itself bump the publish version), then
+checks under that lock before reading its draft and again inside its
+final write transaction, rejecting changes during runtime builds. PostgreSQL
+locks the seven content tables for each guarded transaction; SQLite uses its
+exclusive transaction owner, queuing outside statements until commit/rollback.
+Detached async tasks cannot reuse a completed owner token; nested guarded
+transactions fail explicitly instead of deadlocking. A conflict may persist pending author
+edits during the collaboration flush; it never discards those edits.

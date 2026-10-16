@@ -6,6 +6,20 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.58 - 2026-10-16
+
+### Guarded maintenance import and publication
+
+- Expose an opaque draft-content precondition through authenticated publish
+  status and accept it on existing content import and whole-site publish APIs.
+- Reject changed drafts before import or publication writes, including author
+  edits during collaboration flush and runtime builds; preserve normal editor
+  capabilities, step-up checks and unguarded API compatibility.
+- Isolate guarded SQLite transactions from outside statements through commit
+  and rollback, and lock the PostgreSQL content tables before comparison.
+- Require guarded maintenance imports to contain only content, excluding
+  nonempty media, folder and redirect payloads from the transactional promise.
+
 ## 0.0.57 - 2026-10-15
 
 ### Release dependency corrections

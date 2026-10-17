@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { parse } from 'yaml'
 import { createHash } from 'node:crypto'
 import { strToU8, unzipSync } from 'fflate'
-import { canonicalFiles, createManifest, packageFiles, planPublication, repository, validateSelection, verifyArchive } from './public-site-release'
+import { canonicalFiles, createManifest, packageFiles, planPublication, releaseIdForTag, repository, validateSelection, verifyArchive } from './public-site-release'
 
 const source = 'a'.repeat(40)
 const projection = 'b'.repeat(40)
@@ -22,6 +22,15 @@ const push = () => ({
 })
 
 describe('public-site release custody', () => {
+  test('resolves an exact draft release ID without relying on the published-only tag endpoint', () => {
+    const tag = 'public-site-v0.8.4'
+    expect(releaseIdForTag([{ id: 42, tag_name: tag, draft: true }, { id: 43, tag_name: 'v0.0.59' }], tag)).toBe(42)
+    expect(releaseIdForTag([{ id: 43, tag_name: 'v0.0.59' }], tag)).toBeNull()
+    expect(releaseIdForTag([], tag)).toBeNull()
+    expect(() => releaseIdForTag([{ id: 42, tag_name: tag }, { id: 43, tag_name: tag }], tag)).toThrow()
+    expect(() => releaseIdForTag([{ id: 'untrusted', tag_name: tag }], tag)).toThrow()
+    expect(() => releaseIdForTag({}, tag)).toThrow()
+  })
   test('admits only the exact merged PR into the dedicated release branch', () => {
     expect(validateSelection(push())).toEqual(selection)
     for (const patch of [

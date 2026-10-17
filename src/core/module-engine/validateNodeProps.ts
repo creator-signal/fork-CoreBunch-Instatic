@@ -186,7 +186,7 @@ function fastPathEligible(schema: TSchema): boolean {
  *     Falls back to module defaults for known keys, unknown keys still survive.
  */
 export function validateNodeProps(
-  def: AnyModuleDefinition,
+  def: Pick<AnyModuleDefinition, 'defaults' | 'propsSchema'>,
   rawProps: Record<string, unknown>,
 ): Record<string, unknown> {
   if (!def.propsSchema) {

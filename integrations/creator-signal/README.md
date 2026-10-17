@@ -8,6 +8,12 @@ and publish the imported pages. Managed deployments can use the starter-site
 bootstrap variables to create the owner, install this package into an empty
 page roster, and publish the complete site automatically.
 
+For independent artifact releases, merge the selected integrated Source through
+a PR into `env/public-site`. The dedicated workflow publishes only this plugin,
+its manifest and checksums as `public-site-v<plugin-version>`; it builds no runtime
+or media images and performs no installation or live content publication. See
+[the public-site release runbook](../../docs/deployment/release-workflow.md#independent-public-site-artifact-release).
+
 ## Included experience
 
 - Twenty-four launch, form, legal, trust, support, and status pages plus a

@@ -57,6 +57,12 @@ without writes. Different Source, tag or artifact bytes require a new plugin
 version. Assets are never overwritten, and unknown assets fail verification.
 This is authenticated GitHub artifact provenance, not a separate signature claim.
 
+Draft retries resolve the authenticated release inventory by exact tag and then
+read the release by ID: GitHub's by-tag endpoint does not return draft releases.
+The first 0.8.3 projection (#289) reached an empty draft before this correction;
+that tag and draft are retained as failed-attempt evidence. The corrected lane
+uses plugin 0.8.4 and does not replace or relabel the failed version's assets.
+
 The compatibility reference is Instatic `v0.0.59` / plugin API 1. Qualification
 uses the selected repository publisher; it does not claim installed acceptance
 for arbitrary older CMS versions. Before a separately authorised deployment,

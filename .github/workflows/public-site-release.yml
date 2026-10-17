@@ -52,6 +52,7 @@ jobs:
         run: |
           bun run creator-signal:design-system:check
           bun run component-library:creator-signal-specimens:check
+          bun run component-library:design-impact:check
           bun run instatic-plugin lint integrations/creator-signal
       - name: Build only the public-site plugin
         run: bun run instatic-plugin build integrations/creator-signal

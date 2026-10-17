@@ -45,7 +45,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: bun run scripts/public-site-release.ts admit
       - name: Check release isolation and immutable package contracts
-        run: bun test scripts/public-site-release.test.ts
+        run: |
+          bun run node_modules/typescript/bin/tsc --ignoreConfig --noEmit --moduleResolution bundler --module preserve --target esnext --types bun --skipLibCheck scripts/public-site-release.ts scripts/public-site-release.test.ts
+          bun test scripts/public-site-release.test.ts
       - name: Verify generated public-site contracts
         run: |
           bun run creator-signal:design-system:check

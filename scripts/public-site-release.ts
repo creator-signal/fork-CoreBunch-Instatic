@@ -117,7 +117,7 @@ export function planPublication(input: unknown, sourceRevision: string, assets: 
   assert(input.assets.every(asset => names.includes(asset.name)), 'unexpected release asset')
   const missing = []
   for (const name of names) {
-    const existing = input.assets.find(asset => asset.name === name)
+    const existing: Static<typeof Release>['assets'][number] | undefined = input.assets.find(asset => asset.name === name)
     if (existing) assert.equal(existing.digest, `sha256:${hash(assets[name]!)}`, 'immutable release asset differs')
     else {
       assert(input.draft, 'published release is missing an immutable asset')

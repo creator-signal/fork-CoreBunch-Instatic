@@ -2,7 +2,7 @@
   "schemaVersion": "creator-signal.component-library-specimens/v1",
   "plugin": {
     "id": "creator-signal.site",
-    "version": "0.8.3"
+    "version": "0.8.4"
   },
   "designSystem": {
     "owner": "@creator-signal/design-system",
@@ -28,7 +28,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-call-to-action.html",
-      "htmlHash": "sha256:16f1c3552772c1bebc33c8838ebdd6f06912f4ab42d2432d3cb2283519ab47d0",
+      "htmlHash": "sha256:eaeafbfb976fa3486d8cdd1737e9db323f2affa41f724152a613558be315adb4",
       "fixture": {
         "source": "starter-route",
         "sourceId": "index"
@@ -106,7 +106,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-campaign-hero.html",
-      "htmlHash": "sha256:34688a86c758c3d218ad7c6a3283b52ecc6966193173ed0f287c0fdd30f0f305",
+      "htmlHash": "sha256:08e384bae179aa4c2e2a5a3ac9921e304a2e64790caef1f4eabe00260ed940e4",
       "fixture": {
         "source": "starter-route",
         "sourceId": "index"
@@ -205,7 +205,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-comparison-section.html",
-      "htmlHash": "sha256:a59f142274924a593a3e629d547a25273496af31bc49b04b7135fb7cca6fb61e",
+      "htmlHash": "sha256:466cfb27cf1eb0ea5125086736867772504696a150d437fb9bc0d0bc85872528",
       "fixture": {
         "source": "registry-defaults",
         "sourceId": "creator-signal.site.comparison-section"
@@ -295,7 +295,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-consent-banner.html",
-      "htmlHash": "sha256:cbf3cf5152d3f51bfa6390acd0440a1e7aed9c8ad7a7b87dce47adc8a98cfcd5",
+      "htmlHash": "sha256:604d1857740ce9003281800672d14fd293c6ccb2519fd1bae14f638e64523bc5",
       "fixture": {
         "source": "starter-route",
         "sourceId": "creator-signal-site-template"
@@ -372,7 +372,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-crm-iframe-form.html",
-      "htmlHash": "sha256:9f78830d694fa46565632378e6820b7dcff5b81ad15811a328a0dfb1dfd8a860",
+      "htmlHash": "sha256:f7aeabc1047e71541a0515f234f59a245edafcfcc6b542a36a3586f12245c239",
       "fixture": {
         "source": "registry-defaults",
         "sourceId": "creator-signal.site.crm-iframe-form"
@@ -474,7 +474,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-faq.html",
-      "htmlHash": "sha256:65d6659d2011da1c524dbc8e56d9f6f4c9ec5622400fd0306c418205933cb2a6",
+      "htmlHash": "sha256:9a32fada5099545b9519037527686677d3929d55126de75ff161dd6969a324b8",
       "fixture": {
         "source": "starter-route",
         "sourceId": "index"
@@ -544,7 +544,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-feature-grid.html",
-      "htmlHash": "sha256:758a41cb58598117686931cad5179c4036df63455fa49ae055cd1c9b4f174d65",
+      "htmlHash": "sha256:a5bc198c67ea4edf625830a6cfac1840e414cc701668e3c41268e8954b3c2f79",
       "fixture": {
         "source": "starter-route",
         "sourceId": "index"
@@ -619,7 +619,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-footer.html",
-      "htmlHash": "sha256:8987e64d5fa406f2be25738c2186aff325346642856a7ce4fc486b7b797bfb08",
+      "htmlHash": "sha256:a5cd98d4bf1c502417627ac4aeaf371856d0ec8ab68e491e6a80e0c692d20831",
       "fixture": {
         "source": "starter-route",
         "sourceId": "creator-signal-site-template"
@@ -688,7 +688,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-founder-story.html",
-      "htmlHash": "sha256:d0c991d5bd5523c14b52cfe57028f1de9fe0c792ce00445e25f51606dcfd9fb9",
+      "htmlHash": "sha256:2b8988439e6146c09c1407fd990f45c0e2a0e03f5769f02ee4480e7a17fa1df8",
       "fixture": {
         "source": "starter-route",
         "sourceId": "index"
@@ -774,7 +774,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-header.html",
-      "htmlHash": "sha256:2a17b91f3aa4a15176121e6d35cd3d5fbd8c0bbcc910e37f0fb4c32fa7d9deee",
+      "htmlHash": "sha256:5ac637a47f73a6bc615a19cdea632954059d545d54f4a1d22420caef46e39fb7",
       "fixture": {
         "source": "starter-route",
         "sourceId": "creator-signal-site-template"
@@ -846,7 +846,7 @@
       "kind": "component",
       "implementationTaxonomy": "visual-component",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-hero.html",
-      "htmlHash": "sha256:8ef1e22738fbd88c9404ade85cd998e27433a74fdfe7e2ad5999ac570a03045f",
+      "htmlHash": "sha256:37183ee2b4dfacbb68d56405a24d4cf972364657d878e7cc21e2f557f04c680d",
       "fixture": {
         "source": "starter-route",
         "sourceId": "products"
@@ -924,7 +924,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-mautic-form.html",
-      "htmlHash": "sha256:1357792b71bce31de3527049d50bc72be3dbc83c2d19fac46104c5751d2e10c2",
+      "htmlHash": "sha256:e5bc4adf74b9890af8fd1ceca1e8a9df02815ab60f1a9ad46455da4a1fa80388",
       "fixture": {
         "source": "starter-route",
         "sourceId": "contact"
@@ -1018,7 +1018,7 @@
       "kind": "pattern",
       "implementationTaxonomy": "pattern",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-article-content-page.html",
-      "htmlHash": "sha256:c328bb2fdb68cb813903e94070d066109d3c7dcbe15065c55687ecbe8f209cd9",
+      "htmlHash": "sha256:4618011569e8f6ccf288d6d42b7a8632bc544ac0ae9069190841a32ab7ef0030",
       "fixture": {
         "source": "pattern-materializer",
         "sourceId": "creator-signal.site.pattern.article-content-page"
@@ -1071,7 +1071,7 @@
       "kind": "pattern",
       "implementationTaxonomy": "pattern",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-comparison-section.html",
-      "htmlHash": "sha256:0bd0e478b08820be6504f945493b175be7b217b530a7b65550c783343f540d7d",
+      "htmlHash": "sha256:3cc84d70c4e7e943cdaab5773fe1e79a7c32d5fb8e9450f2d14f04fdbec35fff",
       "fixture": {
         "source": "pattern-materializer",
         "sourceId": "creator-signal.site.pattern.comparison-section"
@@ -1119,7 +1119,7 @@
       "kind": "pattern",
       "implementationTaxonomy": "pattern",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-contact-page.html",
-      "htmlHash": "sha256:95bf853858be147134ef3869fbd826a06dc0c468a410df48ab84b29f7900aedd",
+      "htmlHash": "sha256:85b1df5685730c81e7ddbaa2aa51cdbd486561e036896f389dca9a74c9d70f99",
       "fixture": {
         "source": "pattern-materializer",
         "sourceId": "creator-signal.site.pattern.contact-page"
@@ -1184,7 +1184,7 @@
       "kind": "pattern",
       "implementationTaxonomy": "pattern",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-content-page.html",
-      "htmlHash": "sha256:80220f5eefcac29c8a96d148471e3ad129ba51812f51fb0b04f6b6870db3c594",
+      "htmlHash": "sha256:bd8319309893da1f55c1bac80a52043aa0cddff0c94caa2b3918c1f083e3b356",
       "fixture": {
         "source": "pattern-materializer",
         "sourceId": "creator-signal.site.pattern.content-page"
@@ -1242,7 +1242,7 @@
       "kind": "pattern",
       "implementationTaxonomy": "pattern",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-early-access-page.html",
-      "htmlHash": "sha256:2f7f11a67a63455f59f671fa2f873d160fe01949ae3274bfb8d4ecc031a8d2be",
+      "htmlHash": "sha256:cf4cf0df77043e31f3f1bde21c1fc6ac19daa7520cd68299b9b50108705b3819",
       "fixture": {
         "source": "pattern-materializer",
         "sourceId": "creator-signal.site.pattern.early-access-page"
@@ -1332,7 +1332,7 @@
       "kind": "pattern",
       "implementationTaxonomy": "pattern",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-empty-state.html",
-      "htmlHash": "sha256:a1104106bfa640c45813323d1726e448e6a323177eab1d9111975fca462e22df",
+      "htmlHash": "sha256:18652fa9b20ddb631d6056d4a4f0aa9e4a56be4c1770a7caf236b134cd19bdba",
       "fixture": {
         "source": "pattern-materializer",
         "sourceId": "creator-signal.site.pattern.empty-state"
@@ -1380,7 +1380,7 @@
       "kind": "pattern",
       "implementationTaxonomy": "pattern",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-error-state.html",
-      "htmlHash": "sha256:fd97c9369e63573b6e57ad0640128609dc98f269ad7b1ef2815fef5d712a3706",
+      "htmlHash": "sha256:494fe832369437bb0d7c51eda50b0f83722207de21fc3eb98f67d0febb13bf92",
       "fixture": {
         "source": "pattern-materializer",
         "sourceId": "creator-signal.site.pattern.error-state"
@@ -1428,7 +1428,7 @@
       "kind": "pattern",
       "implementationTaxonomy": "pattern",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-features-page.html",
-      "htmlHash": "sha256:08aa21e55dbeb3dc75b2ce1c229dd2dedec3dd0c1d404324f94d7cb5c13d79ff",
+      "htmlHash": "sha256:094b4286cce4d731f304c1b90494660e2eb335f568e51f584eeee29f88421fc8",
       "fixture": {
         "source": "pattern-materializer",
         "sourceId": "creator-signal.site.pattern.features-page"
@@ -1481,7 +1481,7 @@
       "kind": "pattern",
       "implementationTaxonomy": "pattern",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-feedback-page.html",
-      "htmlHash": "sha256:2ed0ecd6d28688eadf821f843d558cc68397187a839fcaf628db77d57506fab4",
+      "htmlHash": "sha256:170aef98bd8039432c7f07ec44e705a7f1d480123b03c8bad91c3cfdabd0e046",
       "fixture": {
         "source": "pattern-materializer",
         "sourceId": "creator-signal.site.pattern.feedback-page"
@@ -1546,7 +1546,7 @@
       "kind": "pattern",
       "implementationTaxonomy": "pattern",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-home-v2-page.html",
-      "htmlHash": "sha256:bad073bab0a851d3247f7e02c219877362b70e1c8b2a0b01ffa306eef56daf59",
+      "htmlHash": "sha256:ce302af0eafac5da70d5f550ba77cf7924689313c9022148d4f03aad20ad626e",
       "fixture": {
         "source": "pattern-materializer",
         "sourceId": "creator-signal.site.pattern.home-v2-page"
@@ -1644,7 +1644,7 @@
       "kind": "pattern",
       "implementationTaxonomy": "pattern",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-legal-trust-page.html",
-      "htmlHash": "sha256:9a35b382d719bc7a0aaa24a073cfde4183b0d16f5f3410e7081865446dd6bb53",
+      "htmlHash": "sha256:e27ba4b9b31f7f84ef83e7b7645a953143ad308ada8e310d88f0a443909cd93e",
       "fixture": {
         "source": "pattern-materializer",
         "sourceId": "creator-signal.site.pattern.legal-trust-page"
@@ -1692,7 +1692,7 @@
       "kind": "pattern",
       "implementationTaxonomy": "pattern",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-not-found-state.html",
-      "htmlHash": "sha256:d2ec25710071ac6ebe3ab6737663c9fe8c76badcae5fa65d4325f0a640e52d3a",
+      "htmlHash": "sha256:a3ec383e2169180a0a7f859695d90e0369977c5fc9402d84d14ff232283621cd",
       "fixture": {
         "source": "pattern-materializer",
         "sourceId": "creator-signal.site.pattern.not-found-state"
@@ -1740,7 +1740,7 @@
       "kind": "pattern",
       "implementationTaxonomy": "pattern",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-offline-state.html",
-      "htmlHash": "sha256:79f228057777e7f1a988ff3aa777bd8b5b3e39142fc5042ad71f5e520429b683",
+      "htmlHash": "sha256:2b6a4d97cc2f5934bda3e872f50f78700ed668ab930dcde1327d27e76790c114",
       "fixture": {
         "source": "pattern-materializer",
         "sourceId": "creator-signal.site.pattern.offline-state"
@@ -1788,7 +1788,7 @@
       "kind": "pattern",
       "implementationTaxonomy": "pattern",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-pricing-page.html",
-      "htmlHash": "sha256:791718013dfaa90320a15c8b95dc04ca3be527cfa4cf42af48b70385a92a2974",
+      "htmlHash": "sha256:4807fea607e85dbef813ea3c65cedc5baf23430f5a0abf99e83141528ce517d8",
       "fixture": {
         "source": "pattern-materializer",
         "sourceId": "creator-signal.site.pattern.pricing-page"
@@ -1846,7 +1846,7 @@
       "kind": "pattern",
       "implementationTaxonomy": "pattern",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-product-page.html",
-      "htmlHash": "sha256:10f9853fb47c9da6a42fda514eaa476eb66cda52f1d7c8699150b5cf1c898ab1",
+      "htmlHash": "sha256:d688de2f05028aa491f0c9719b27ee8404e64382b1e5e683018a74189dc341af",
       "fixture": {
         "source": "pattern-materializer",
         "sourceId": "creator-signal.site.pattern.product-page"
@@ -1904,7 +1904,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pricing-plans.html",
-      "htmlHash": "sha256:868fa0a496c169f073c9497f4c61c62449f6b455f5d0a7d5a688a8eb001c55ae",
+      "htmlHash": "sha256:0c1cf406217f340d137b78fddbbc73633d57cce743cd8a50a7fa59be0a4fbe02",
       "fixture": {
         "source": "starter-route",
         "sourceId": "index"
@@ -1982,7 +1982,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-process-steps.html",
-      "htmlHash": "sha256:249829966f09008ed13afcd5f0d65b3ff98f537651298ca3f206b7b2496b60a8",
+      "htmlHash": "sha256:b7f50fac94bcfb505e76c2b04d4785f89147499a6e62fecb35de6b8e2e999882",
       "fixture": {
         "source": "starter-route",
         "sourceId": "index"
@@ -2052,7 +2052,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-public-document.html",
-      "htmlHash": "sha256:f4eb2a1121e74e027e9826975d603a3c5b165ecba9e00deec62f7639252e7e0a",
+      "htmlHash": "sha256:a3919507b170c43d46b871d000f4c0b250690e0fbe035a13609b4c0f6559cf03",
       "fixture": {
         "source": "starter-route",
         "sourceId": "legal/billing"
@@ -2122,7 +2122,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-recovery-state.html",
-      "htmlHash": "sha256:16747fa1c92ecb0d7adf9bb5bce31bd3bb50bf4947ea0c538aaf92fee0b441d2",
+      "htmlHash": "sha256:ad49d04e2951ebd338eab3d17a3ba7ff2d9df444aa6dcada53a8cf6fbfbfe103",
       "fixture": {
         "source": "starter-route",
         "sourceId": "creator-signal-not-found"
@@ -2202,7 +2202,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-rich-text-section.html",
-      "htmlHash": "sha256:82300a4981b6683bd34519415eed7d1c2451eb388ba7386c3ad4eabed47ea31b",
+      "htmlHash": "sha256:c45dd917412723b0d46b883b5b80bbb9929075cfa7c1477e513cac0b61cb1f02",
       "fixture": {
         "source": "starter-route",
         "sourceId": "legal/privacy"
@@ -2267,7 +2267,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-section-intro.html",
-      "htmlHash": "sha256:392fae0611fa1d1feef5f50ec807b63913f084ead339c5e7a44ad7dfeb913f56",
+      "htmlHash": "sha256:27386a7fa636ce0317e1a1e95ec8bac719310af322f192cd4544e27de4acf356",
       "fixture": {
         "source": "starter-route",
         "sourceId": "contact"
@@ -2332,7 +2332,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-signal-comparison.html",
-      "htmlHash": "sha256:07f9dd169e26f3bc22933c105f51c1fb07feefa5f914ac5d76ea8d63a949eb02",
+      "htmlHash": "sha256:60059f5c0ab4d40376e8577b5c432b0f219f3a49f8b1d8e82b24590fdb167fac",
       "fixture": {
         "source": "starter-route",
         "sourceId": "index"
@@ -2428,7 +2428,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-signal-strip.html",
-      "htmlHash": "sha256:65580d0cac6dfb6a755531b4213c1559fbe33c6f52054c80007a7867225c3536",
+      "htmlHash": "sha256:fe27ec99e91a3a8349261ee3c83b3d99bb7ca6de75813c17acca2b54399b4d60",
       "fixture": {
         "source": "starter-route",
         "sourceId": "index"
@@ -2483,7 +2483,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-testimonial.html",
-      "htmlHash": "sha256:a742eea33edb61863f3287fd4b517338570afc01fe5f47b286adf3c256b09bf9",
+      "htmlHash": "sha256:a4e1300b189c8855ffb8bfb66ab6e392de2150675f72e161379585269bfca84c",
       "fixture": {
         "source": "starter-route",
         "sourceId": "early-access"
@@ -2542,7 +2542,7 @@
       "kind": "component",
       "implementationTaxonomy": "visual-component",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-two-column-layout.html",
-      "htmlHash": "sha256:8a4d8caf484cf6898e018af2eea86ce365b328f33056d3b20329c821abfd333b",
+      "htmlHash": "sha256:988389d85a6bcddecadbdac423dd39e4c3fcf8fb58e8690f9ccbbe45cb5ab17e",
       "fixture": {
         "source": "starter-route",
         "sourceId": "contact"
@@ -2580,6 +2580,6 @@
   ],
   "checksum": {
     "algorithm": "sha256",
-    "value": "sha256:342da1908fc6badb161d0f0182acb41369f606a7464317533fa3b6e6edceae9e"
+    "value": "sha256:5fd6b40fe49b52ad82ae577e5239955bea703e98db3efda6a4b212d927e0de82"
   }
 }

@@ -154,6 +154,29 @@ async function api(path: string, allowMissing = false): Promise<unknown> {
   return response.json()
 }
 
+export function releaseIdForTag(input: unknown, tag: string): number | null {
+  const Entries = Type.Array(Type.Object({ id: Type.Integer({ minimum: 1 }), tag_name: Type.String() }))
+  assert(Value.Check(Entries, input), 'invalid release inventory')
+  const matches = input.filter(release => release.tag_name === tag)
+  assert(matches.length <= 1, 'duplicate release tag')
+  return matches[0]?.id ?? null
+}
+
+async function releaseForTag(tag: string): Promise<unknown> {
+  const published = await api(`releases/tags/${tag}`, true)
+  if (published !== null) return published
+  // GitHub's by-tag endpoint omits drafts. Resolve the authenticated release
+  // inventory and then address the exact immutable release ID instead.
+  for (let page = 1; page <= 20; page++) {
+    const entries = await api(`releases?per_page=100&page=${page}`)
+    const id = releaseIdForTag(entries, tag)
+    if (id !== null) return api(`releases/${id}`)
+    assert(Array.isArray(entries))
+    if (entries.length < 100) return null
+  }
+  throw new Error('Release inventory exceeds the bounded lookup')
+}
+
 async function selection(): Promise<{ sourceRevision: string; projectionRevision: string }> {
   const revision = git('rev-parse', 'HEAD')
   if (process.env.GITHUB_EVENT_NAME === 'pull_request') {
@@ -212,7 +235,7 @@ async function main() {
     } else {
       gh('api', `repos/${repository}/git/refs`, '--method', 'POST', '-f', `ref=refs/tags/${tag}`, '-f', `sha=${manifest.sourceRevision}`)
     }
-    if (await api(`releases/tags/${tag}`, true) === null) {
+    if (await releaseForTag(tag) === null) {
       gh('release', 'create', tag, '--repo', repository, '--target', manifest.sourceRevision, '--verify-tag',
         '--draft', '--latest=false',
         '--title', `Creator Signal public site ${manifest.plugin.version}`, '--notes',
@@ -221,7 +244,7 @@ async function main() {
     const actualTag = await api(`git/ref/tags/${tag}`)
     assert(Value.Check(Tag, actualTag))
     assert.equal(actualTag.object.sha, manifest.sourceRevision)
-    const release = await api(`releases/tags/${tag}`)
+    const release = await releaseForTag(tag)
     const expectedNames = ['SHA256SUMS', 'creator-signal.plugin.zip', 'public-site-release.json']
     const assets = Object.fromEntries(await Promise.all(expectedNames.map(async name => [name, await readFile(join(directory, name))] as const)))
     const plan = planPublication(release, manifest.sourceRevision, assets)
@@ -232,7 +255,7 @@ async function main() {
     gh('release', 'download', tag, '--repo', repository, '--dir', verifiedDirectory)
     for (const name of expectedNames) assert.deepEqual(await readFile(join(verifiedDirectory, name)), await readFile(join(directory, name)))
     if (plan.draft) gh('release', 'edit', tag, '--repo', repository, '--draft=false', '--latest=false')
-    const published = await api(`releases/tags/${tag}`)
+    const published = await releaseForTag(tag)
     assert(Value.Check(Release, published))
     assert.equal(published.draft, false)
     assert.deepEqual(published.assets.map(asset => asset.name).sort(), [...expectedNames].sort())

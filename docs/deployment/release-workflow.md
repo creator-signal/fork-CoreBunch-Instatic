@@ -49,7 +49,9 @@ following the release-coupling review in #283).
 
 The manifest records the exact Source and projection revisions, plugin API and
 version, the design-system revision, locked dependency hash and every packaged
-file. ZIP order, timestamps and permissions are normalised. A rerun can finish
+file. ZIP order, timestamps and permissions are normalised, as is the SDK's
+timestamped server-facade source-location comment; executable bytes are preserved.
+A rerun can finish
 an interrupted draft only with identical inputs; a completed version is checked
 without writes. Different Source, tag or artifact bytes require a new plugin
 version. Assets are never overwritten, and unknown assets fail verification.

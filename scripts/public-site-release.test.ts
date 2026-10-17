@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { parse } from 'yaml'
 import { createHash } from 'node:crypto'
 import { strToU8, unzipSync } from 'fflate'
-import { createManifest, packageFiles, planPublication, repository, validateSelection, verifyArchive } from './public-site-release'
+import { canonicalFiles, createManifest, packageFiles, planPublication, repository, validateSelection, verifyArchive } from './public-site-release'
 
 const source = 'a'.repeat(40)
 const projection = 'b'.repeat(40)
@@ -50,6 +50,16 @@ describe('public-site release custody', () => {
     expect(manifest.projectionRevision).toBe(projection)
     expect(Object.keys(unzipSync(archive)).sort()).toEqual(manifest.files.map(file => file.path))
     expect(manifest.compatibility.deploymentRequired).toBe(true)
+  })
+
+  test('normalises only the generated server facade comment, preserving executable and authored bytes', () => {
+    const bundle = (timestamp: number) => strToU8(`// authored 123\n  // integrations/creator-signal/server/__sandbox-facade-${timestamp}.ts\n  var __default = exports_server && undefined;\nconsole.log("__sandbox-facade-${123}.ts");`)
+    const first = canonicalFiles({ 'server/index.js': bundle(111), 'frontend/site.js': bundle(111) })
+    const second = canonicalFiles({ 'server/index.js': bundle(222), 'frontend/site.js': bundle(111) })
+    expect(first).toEqual(second)
+    expect(new TextDecoder().decode(first['server/index.js'])).toContain('console.log("__sandbox-facade-123.ts")')
+    expect(first['frontend/site.js']).toEqual(bundle(111))
+    expect(packageFiles(first)).toEqual(packageFiles(second))
   })
 
   test('rejects tampered archives, missing/extra files, wrong identity/version and unknown manifest fields', () => {

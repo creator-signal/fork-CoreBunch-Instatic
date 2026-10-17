@@ -28,7 +28,9 @@ const Manifest = Type.Object({
 type ReleaseManifest = Static<typeof Manifest>
 const Plugin = Type.Object({ id: Type.Literal('creator-signal.site'), version: Version, apiVersion: Type.Literal(1) }, { additionalProperties: true })
 const hash = (bytes: Uint8Array | string) => createHash('sha256').update(bytes).digest('hex')
-const git = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8' }).trim()
+// Container checkout ownership differs from its runner. Trust only this explicit
+// workspace for each command, without changing global Git configuration.
+const git = (...args: string[]) => execFileSync('git', ['-c', `safe.directory=${process.cwd()}`, ...args], { encoding: 'utf8' }).trim()
 
 export function validateSelection(input: {
   eventName: string; repositoryName: string; ref: string; revision: string;
@@ -59,6 +61,21 @@ export function packageFiles(files: Record<string, Uint8Array>): Uint8Array {
     archive[name] = [files[name]!, { mtime: new Date(1980, 0, 1), os: 3, attrs: 0o100644 << 16 }]
   }
   return zipSync(archive, { level: 9 })
+}
+
+export function canonicalFiles(input: Record<string, Uint8Array>): Record<string, Uint8Array> {
+  const files = { ...input }
+  const server = files['server/index.js']
+  if (server) {
+    // Bun emits the SDK's temporary facade filename as a source-location
+    // comment. Normalise only that marker, preserving all executable bytes.
+    const source = new TextDecoder('utf-8', { fatal: true }).decode(server)
+    files['server/index.js'] = new TextEncoder().encode(source.replace(
+      /^([ \t]*\/\/ integrations\/creator-signal\/server\/)__sandbox-facade-\d+(\.ts\r?)(?=\n\s*var __default =)/gm,
+      '$1__sandbox-facade$2',
+    ))
+  }
+  return files
 }
 
 async function readTree(directory: string, prefix = ''): Promise<Record<string, Uint8Array>> {
@@ -163,7 +180,7 @@ async function main() {
     const selected: unknown = JSON.parse(await readFile(join(directory, 'selection.json'), 'utf8'))
     const Selection = Type.Object({ sourceRevision: Sha, projectionRevision: Sha }, { additionalProperties: false })
     assert(Value.Check(Selection, selected))
-    const files = await readTree('integrations/creator-signal/dist')
+    const files = canonicalFiles(await readTree('integrations/creator-signal/dist'))
     const archive = packageFiles(files)
     const lock: unknown = JSON.parse(await readFile('integrations/creator-signal/design-system/lock.json', 'utf8'))
     const Lock = Type.Object({ source: Type.Object({ revision: Sha }) })

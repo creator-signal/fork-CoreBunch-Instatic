@@ -116,6 +116,11 @@ export const siteHeader = defineModule({
   category: 'Creator Signal',
   htmlTag: 'header',
   defaults: {
+    skipLinkLabel: 'Skip to main content',
+    homeLabel: 'Creator Signal home',
+    menuLabel: 'Menu',
+    navigationLabel: 'Main navigation',
+
     brandName: 'Creator Signal',
     tagline: 'Clearer signals for independent creative businesses.',
     homeUrl: '/',
@@ -130,20 +135,25 @@ export const siteHeader = defineModule({
     ] as NavigationItem[],
   },
   schema: {
+    skipLinkLabel: control.text('Skip link label'),
+    homeLabel: control.text('Home label'),
+    menuLabel: control.text('Menu label'),
+    navigationLabel: control.text('Navigation label'),
+
     brandName: control.text('Brand name'),
     tagline: control.text('Tagline'),
     homeUrl: control.url('Home URL'),
     items: control.textarea('Navigation items'),
   },
   render: ({ props }) => ({ ...withCreatorSignalCss(html`<header class="site-header">
-      <a class="skip-link" href="#main-content" data-parity-ignore>Skip to main content</a>
-      <a class="site-brand" href="${safeUrl(props.homeUrl)}" aria-label="${escapedProp(props.brandName)} home">
+      <a class="skip-link" href="#main-content" data-parity-ignore>${escapedProp(props.skipLinkLabel)}</a>
+      <a class="site-brand" href="${safeUrl(props.homeUrl)}" aria-label="${escapedProp(props.homeLabel)}">
         <img class="site-brand-mark" src="${safeUrl(creatorSignalBrandAssets.markLight)}" alt="" width="1024" height="688">
         <span><strong>${escapedProp(props.brandName)}</strong><small>${escapedProp(props.tagline)}</small></span>
       </a>
       <details class="site-navigation" open>
-        <summary class="site-menu-toggle">Menu</summary>
-        <nav aria-label="Main navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
+        <summary class="site-menu-toggle">${escapedProp(props.menuLabel)}</summary>
+        <nav aria-label="${escapedProp(props.navigationLabel)}" itemscope itemtype="https://schema.org/SiteNavigationElement">
           ${navigationItems(props.items, true)}
         </nav>
       </details>
@@ -157,6 +167,8 @@ export const siteFooter = defineModule({
   category: 'Creator Signal',
   htmlTag: 'footer',
   defaults: {
+    navigationLabel: 'Footer navigation',
+
     brandName: 'Creator Signal',
     tagline: 'Clearer signals for independent creative businesses.',
     copyright: '© 2026 Creator Signal',
@@ -177,6 +189,8 @@ export const siteFooter = defineModule({
     ] as NavigationItem[],
   },
   schema: {
+    navigationLabel: control.text('Navigation label'),
+
     brandName: control.text('Brand name'),
     tagline: control.text('Tagline'),
     copyright: control.text('Copyright'),
@@ -187,7 +201,7 @@ export const siteFooter = defineModule({
         <div><strong>${escapedProp(props.brandName)}</strong><p>${escapedProp(props.tagline)}</p></div>
         <small>${escapedProp(props.copyright)}</small>
       </div>
-      <nav aria-label="Footer navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
+      <nav aria-label="${escapedProp(props.navigationLabel)}" itemscope itemtype="https://schema.org/SiteNavigationElement">
         ${navigationItems(props.items)}
       </nav>
     </footer>`),
@@ -200,18 +214,22 @@ export const consentBanner = defineModule({
   category: 'Creator Signal',
   htmlTag: 'aside',
   defaults: {
+    regionLabel: 'Privacy choices',
+
     heading: 'Your privacy choices',
     body: 'Aggregate traffic measurement is enabled when configured. Optional journey analytics only runs with your permission.',
     essentialLabel: 'Essential only',
     optionalLabel: 'Allow optional analytics',
   },
   schema: {
+    regionLabel: control.text('Region label'),
+
     heading: control.text('Heading'),
     body: control.textarea('Explanation', { rows: 3 }),
     essentialLabel: control.text('Essential choice label'),
     optionalLabel: control.text('Optional choice label'),
   },
-  render: ({ props }) => withCreatorSignalCss(html`<aside class="consent" data-consent-banner aria-label="Privacy choices">
+  render: ({ props }) => withCreatorSignalCss(html`<aside class="consent" data-consent-banner aria-label="${escapedProp(props.regionLabel)}">
       <div><strong>${escapedProp(props.heading)}</strong><p>${escapedProp(props.body)}</p></div>
       <div class="consent-actions">
         <button class="button button-secondary" type="button" data-analytics-choice="denied">${escapedProp(props.essentialLabel)}</button>
@@ -356,6 +374,11 @@ export const signalComparison = defineModule({
   category: 'Creator Signal',
   htmlTag: 'section',
   defaults: {
+    beforeHeading: 'Limited reporting',
+    afterHeading: 'A visual sales signal',
+    beforeArtwork: '',
+    beforeArtworkAlt: '',
+
     eyebrow: "Let's see what's working",
     heading: 'From this, to this.',
     introduction: 'Compare the limited view with the clearer Creator Signal experience.',
@@ -363,11 +386,16 @@ export const signalComparison = defineModule({
     beforeBody: 'Thirty days, sales counts only and one bare-bones chart.',
     afterLabel: 'To',
     afterBody: "Your own design thumbnails, sorted by what's working.",
-    artwork: '',
+    artwork: creatorSignalBrandAssets.salesPulseSocial,
     artworkAlt: '',
     sectionId: 'signal-comparison',
   },
   schema: {
+    beforeHeading: control.text('Before heading'),
+    afterHeading: control.text('After heading'),
+    beforeArtwork: control.image('Before artwork'),
+    beforeArtworkAlt: control.text('Before artwork alt'),
+
     eyebrow: control.text('Eyebrow'),
     heading: control.text('Heading'),
     introduction: control.textarea('Introduction', { rows: 2 }),
@@ -382,19 +410,19 @@ export const signalComparison = defineModule({
   render: ({ props }) => {
     const artwork = text(props.artwork)
       ? raw(html`<img src="${safeUrl(props.artwork)}" alt="${escapedProp(props.artworkAlt)}" loading="lazy" decoding="async">`)
-      : raw(html`<img src="${safeUrl(creatorSignalBrandAssets.salesPulseSocial)}" alt="" loading="lazy" decoding="async">`)
+      : raw('')
     return withCreatorSignalCss(html`<section class="content-section signal-comparison" aria-labelledby="${escapedProp(props.sectionId)}">
       <div class="section-intro"><p class="eyebrow">${escapedProp(props.eyebrow)}</p><h2 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h2><p>${escapedProp(props.introduction)}</p></div>
       <div class="signal-comparison-grid">
         <article class="signal-comparison-card signal-comparison-before">
           <p class="comparison-label">${escapedProp(props.beforeLabel)}</p>
-          <div class="comparison-bars" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-          <h3>Limited reporting</h3><p>${escapedProp(props.beforeBody)}</p>
+          ${text(props.beforeArtwork) ? raw(html`<div class="signal-comparison-art"><img src="${safeUrl(props.beforeArtwork)}" alt="${escapedProp(props.beforeArtworkAlt)}" loading="lazy" decoding="async"></div>`) : raw('<div class="comparison-bars" aria-hidden="true"><span></span><span></span><span></span><span></span></div>')}
+          <h3>${escapedProp(props.beforeHeading)}</h3><p>${escapedProp(props.beforeBody)}</p>
         </article>
         <article class="signal-comparison-card signal-comparison-after">
           <p class="comparison-label">${escapedProp(props.afterLabel)}</p>
           <div class="signal-comparison-art">${artwork}</div>
-          <h3>A visual sales signal</h3><p>${escapedProp(props.afterBody)}</p>
+          <h3>${escapedProp(props.afterHeading)}</h3><p>${escapedProp(props.afterBody)}</p>
         </article>
       </div>
     </section>`)
@@ -445,6 +473,8 @@ export const pricingPlans = defineModule({
   category: 'Creator Signal',
   htmlTag: 'section',
   defaults: {
+    featuredLabel: 'Most popular',
+
     eyebrow: 'Skip the maths',
     heading: 'Find your fit.',
     introduction: "Start free. Upgrade whenever you're ready to see more of your signal.",
@@ -457,6 +487,8 @@ export const pricingPlans = defineModule({
     ] as PricingPlan[],
   },
   schema: {
+    featuredLabel: control.text('Featured label'),
+
     eyebrow: control.text('Eyebrow'),
     heading: control.text('Heading'),
     introduction: control.textarea('Introduction', { rows: 2 }),
@@ -469,7 +501,7 @@ export const pricingPlans = defineModule({
       const features = lines(item.features).map((feature) => raw(html`<li>${feature}</li>`))
       const featured = item.emphasis === 'featured'
       return raw(html`<article class="pricing-card${featured ? ' pricing-card-featured' : ''}">
-        ${featured ? raw('<p class="pricing-badge">Most popular</p>') : raw('')}
+        ${featured ? raw(html`<p class="pricing-badge">${escapedProp(props.featuredLabel)}</p>`) : raw('')}
         <h3>${text(item.name)}</h3>
         <p class="pricing-price">${text(item.price)}${text(item.cadence) ? raw(html` <span>${text(item.cadence)}</span>`) : raw('')}</p>
         <p>${text(item.description)}</p>
@@ -666,6 +698,8 @@ export const comparisonSection = defineModule({
   category: 'Creator Signal',
   htmlTag: 'section',
   defaults: {
+    criteriaLabel: 'Criteria',
+
     eyebrow: 'Comparison',
     heading: 'Compare the options.',
     introduction: 'Use the same criteria for every option so the differences are clear.',
@@ -680,6 +714,8 @@ export const comparisonSection = defineModule({
     ] as ComparisonItem[],
   },
   schema: {
+    criteriaLabel: control.text('Criteria label'),
+
     eyebrow: control.text('Eyebrow'),
     heading: control.text('Heading'),
     introduction: control.textarea('Introduction', { rows: 3 }),
@@ -703,7 +739,7 @@ export const comparisonSection = defineModule({
         <div class="comparison-table-scroll" tabindex="0" role="region" aria-label="${escapedProp(props.caption)}">
           <table class="comparison-table">
             <caption>${escapedProp(props.caption)}</caption>
-            <thead><tr><th scope="col">Criteria</th><th scope="col">${escapedProp(props.firstLabel)}</th><th scope="col">${escapedProp(props.secondLabel)}</th><th scope="col">${escapedProp(props.thirdLabel)}</th></tr></thead>
+            <thead><tr><th scope="col">${escapedProp(props.criteriaLabel)}</th><th scope="col">${escapedProp(props.firstLabel)}</th><th scope="col">${escapedProp(props.secondLabel)}</th><th scope="col">${escapedProp(props.thirdLabel)}</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>
@@ -718,6 +754,11 @@ export const recoveryState = defineModule({
   category: 'Creator Signal',
   htmlTag: 'section',
   defaults: {
+    emptyLabel: 'No content yet',
+    errorLabel: 'Something went wrong',
+    offlineLabel: 'Connection unavailable',
+    notFoundLabel: 'Page not found',
+
     state: 'empty' as RecoveryStateKind,
     heading: 'Nothing here yet',
     body: 'There is no content to show here yet.',
@@ -726,6 +767,11 @@ export const recoveryState = defineModule({
     sectionId: 'recovery-state',
   },
   schema: {
+    emptyLabel: control.text('Empty label'),
+    errorLabel: control.text('Error label'),
+    offlineLabel: control.text('Offline label'),
+    notFoundLabel: control.text('Not found label'),
+
     state: control.select('State', [
       { label: 'Empty', value: 'empty' },
       { label: 'Error', value: 'error' },
@@ -741,14 +787,14 @@ export const recoveryState = defineModule({
   render: ({ props }) => {
     const state = recoveryStateKind(props.state)
     const stateLabel = state === 'not-found'
-      ? 'Page not found'
+      ? props.notFoundLabel
       : state === 'error'
-      ? 'Something went wrong'
+      ? props.errorLabel
       : state === 'offline'
-        ? 'Connection unavailable'
-        : 'No content yet'
+        ? props.offlineLabel
+        : props.emptyLabel
     return withCreatorSignalCss(html`<section class="recovery-state" data-recovery-state="${state}" aria-labelledby="${escapedProp(props.sectionId)}">
-        <p class="eyebrow">${stateLabel}</p>
+        <p class="eyebrow">${escapedProp(stateLabel)}</p>
         <h1 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h1>
         <p>${escapedProp(props.body)}</p>
         <div class="actions"><a class="button button-primary" href="${safeUrl(props.actionUrl)}">${escapedProp(props.actionLabel)}</a></div>

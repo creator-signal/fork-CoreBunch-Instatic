@@ -17,6 +17,7 @@ type CrmIframeFormProps = {
   formUrl: string
   iframeTitle: string
   fallbackLabel: string
+  readyMessage: string
   loadingMessage: string
   unavailableMessage: string
   initialHeight: number
@@ -76,7 +77,7 @@ const runtime = String.raw`(() => {
     let origin = '';
     try { origin = new URL(source).origin; } catch { /* published fallback is already visible */ }
     if (!frame || !origin || !instanceId) {
-      setStatus(host, host.dataset.csCrmFormUnavailable || 'This form is not configured yet.');
+      setStatus(host, host.dataset.csCrmFormUnavailable || '');
       return;
     }
     host.dataset.csCrmIframeMounted = 'true';
@@ -117,10 +118,10 @@ const runtime = String.raw`(() => {
         setStatus(host, '');
         return;
       }
-      setStatus(host, 'The form is ready. Its CRM page can send resize updates as its content changes.');
+      setStatus(host, host.dataset.csCrmFormReady || '');
     };
     const unavailable = () => {
-      setStatus(host, host.dataset.csCrmFormUnavailable || 'This form could not be displayed here.');
+      setStatus(host, host.dataset.csCrmFormUnavailable || '');
     };
     window.addEventListener('message', message);
     frame.addEventListener('load', loaded);
@@ -170,6 +171,7 @@ const defaultProps: CrmIframeFormProps = {
   formUrl: 'https://marketing.creatorsignal.me/form/creator-signal-contact',
   iframeTitle: 'Creator Signal contact form',
   fallbackLabel: 'Open the form in a new tab',
+  readyMessage: 'The form is ready. Its CRM page can send resize updates as its content changes.',
   loadingMessage: 'Loading form…',
   unavailableMessage: 'This form could not be displayed here. Open it in a new tab.',
   initialHeight: 640,
@@ -189,6 +191,7 @@ export default defineModule({
     formUrl: control.url('CRM form URL', { description: 'HTTPS Mautic form page hosted at marketing.creatorsignal.me.' }),
     iframeTitle: control.text('Accessible iframe title'),
     fallbackLabel: control.text('Fallback link label'),
+    readyMessage: control.text('Ready message'),
     loadingMessage: control.text('Loading message'),
     unavailableMessage: control.text('Unavailable message'),
     initialHeight: control.number('Initial height', { min: CRM_IFRAME_FORM_MIN_HEIGHT, max: CRM_IFRAME_FORM_MAX_HEIGHT, step: 10, unit: 'px' }),
@@ -212,6 +215,7 @@ export default defineModule({
           data-cs-crm-form-instance="${escapedProp(props.sectionId)}"
           data-cs-crm-form-minimum="${heights.minimum}"
           data-cs-crm-form-maximum="${heights.maximum}"
+          data-cs-crm-form-ready="${escapedProp(props.readyMessage)}"
           data-cs-crm-form-unavailable="${escapedProp(props.unavailableMessage)}">
           <iframe class="cs-crm-iframe-form-frame" data-cs-crm-form-frame src="${formUrl}" title="${escapedProp(props.iframeTitle)}" loading="eager" sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin" style="height:${heights.initial}px"></iframe>
           <p class="cs-crm-iframe-form-status" role="status" aria-live="polite" data-cs-crm-form-status>${escapedProp(props.loadingMessage)}</p>

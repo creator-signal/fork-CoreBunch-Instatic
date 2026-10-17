@@ -1,0 +1,107 @@
+name: Public Site Release
+
+on:
+  pull_request:
+    branches: [creator-signal/develop, env/public-site]
+  push:
+    branches: [env/public-site]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-site-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    name: Qualify public-site package
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/playwright:v1.60.0-noble@sha256:9bd26ad900bb5e0f4dee75839e957a89ae89c2b7ab1e76050e559790e946b948
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+    steps:
+      - name: Checkout selected public-site source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare plugin packaging tools
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends unzip zip
+          rm -rf /var/lib/apt/lists/*
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version: 1.3.11
+      - name: Install locked tooling
+        run: bun install --frozen-lockfile
+      - name: Admit the exact public-site selection
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bun run scripts/public-site-release.ts admit
+      - name: Check release isolation and immutable package contracts
+        run: bun test scripts/public-site-release.test.ts
+      - name: Verify generated public-site contracts
+        run: |
+          bun run creator-signal:design-system:check
+          bun run component-library:creator-signal-specimens:check
+          bun run instatic-plugin lint integrations/creator-signal
+      - name: Build only the public-site plugin
+        run: bun run instatic-plugin build integrations/creator-signal
+      - name: Verify published public pages on desktop and mobile
+        run: bun run verify:creator-signal-public-acceptance
+      - name: Package the deterministic public-site release
+        run: bun run scripts/public-site-release.ts package
+      - name: Retain qualified public-site package
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-site-release
+          path: |
+            .tmp/public-site-release/creator-signal.plugin.zip
+            .tmp/public-site-release/public-site-release.json
+            .tmp/public-site-release/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 90
+      - name: Retain public-site browser evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-site-release-browser
+          path: .tmp/creator-signal-public-acceptance
+          if-no-files-found: warn
+          retention-days: 90
+
+  publish:
+    name: Publish only the qualified public-site assets
+    if: github.event_name == 'push' && github.ref == 'refs/heads/env/public-site'
+    needs: qualify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout exact release selection
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version: 1.3.11
+      - name: Install locked verification tooling
+        run: bun install --frozen-lockfile --ignore-scripts
+      - name: Download this run's qualified package
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: public-site-release
+          path: .tmp/public-site-release
+      - name: Publish immutable assets and verify pullback
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bun run scripts/public-site-release.ts publish

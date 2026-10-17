@@ -9,6 +9,66 @@ tag does not deploy either image to a running environment.
 
 ---
 
+## Independent public-site artifact release
+
+The user-authorised `env/public-site` lane releases the Creator Signal site
+plugin independently of the Instatic application. Its sole workflow is
+`.github/workflows/public-site-release.yml`; its admission, deterministic package
+and publication helper is `scripts/public-site-release.ts` (Issue #286,
+following the release-coupling review in #283).
+
+1. Implement site changes through a PR into `creator-signal/develop`. Advance
+   `creatorSignalPluginVersion` in
+   `integrations/creator-signal/design-system/contract.ts` for changed package
+   contents. The Instatic `package.json` version need not change.
+2. For the first release only, initialise `env/public-site` at the accepted
+   `v0.0.59` commit through authorised repository administration. That historical
+   source has no public-site release workflow, so creating the branch publishes
+   nothing. This pipeline implementation does not create the branch or release.
+3. Open a PR from the exact integrated site Source into `env/public-site`.
+   The workflow validates the package and published pages on PRs without write
+   permissions. Merge using a two-parent **merge commit**, preserving the exact
+   selected Source as its second parent. Do not squash, rebase or directly push
+   release changes. The resulting `env/public-site` push is release authority.
+4. Admission independently reads GitHub's merged-PR record, checks the exact
+   projection/head/repository identity, requires Source ancestry in
+   `creator-signal/develop`, and requires the projection tree to equal Source.
+5. The read-only qualification job uses locked Bun tooling, the existing plugin
+   builder, generated design-system checks and the real published-page browser
+   verifier. Browser checks cover all 26 public routes, desktop/tablet/mobile,
+   both themes, contrast, fonts, navigation, no-JavaScript behavior, accessibility
+   and the committed visual baselines. It does not build the application,
+   runtime/media images, private source maps or the generic install bundle.
+6. A separate contents-write job downloads that same run's qualified artifact,
+   verifies its complete file inventory and checksum, and publishes three assets
+   under `public-site-v<plugin-version>`: `creator-signal.plugin.zip`,
+   `public-site-release.json` and `SHA256SUMS`. It creates a draft release first,
+   verifies downloaded asset bytes before making it public, and never changes
+   the Instatic release's `latest` selection. The distinct tag namespace does
+   not trigger `.github/workflows/release.yml`.
+
+The manifest records the exact Source and projection revisions, plugin API and
+version, the design-system revision, locked dependency hash and every packaged
+file. ZIP order, timestamps and permissions are normalised. A rerun can finish
+an interrupted draft only with identical inputs; a completed version is checked
+without writes. Different Source, tag or artifact bytes require a new plugin
+version. Assets are never overwritten, and unknown assets fail verification.
+This is authenticated GitHub artifact provenance, not a separate signature claim.
+
+The compatibility reference is Instatic `v0.0.59` / plugin API 1. Qualification
+uses the selected repository publisher; it does not claim installed acceptance
+for arbitrary older CMS versions. Before a separately authorised deployment,
+verify the selected running CMS supports the package and its registered
+capabilities. Installing the ZIP or changing versioned plugin records is a
+deployment operation; importing or publishing authored content is another
+explicit operation. Neither happens in this lane. Preserve the existing
+preview/backup/draft-hash safeguards for retained content and use the previous
+verified package plus the separately owned content backup for rollback.
+
+The full runtime release path below remains independent. It may still include
+its matching site-plugin ZIP for complete installations, but public-site releases
+never invoke or alter its images, aliases, runtime version or release bundle.
+
 ## TL;DR
 
 The workflow publishes the same accepted digest under these runtime tags:

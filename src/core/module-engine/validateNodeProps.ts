@@ -175,7 +175,8 @@ function fastPathEligible(schema: TSchema): boolean {
  * Coerce and default-fill `rawProps` against `def.propsSchema`.
  *
  * Behaviour:
- *   - No schema → return `rawProps` unchanged.
+ *   - No schema → fill absent keys from module defaults before escaping.
+ *     Authored values, including empty strings and null, always win.
  *   - Schema fast-path eligible AND props already conform → return `rawProps`
  *     unchanged (value-identical to the slow path, minus the clone).
  *   - Schema present, coercion succeeds → `{ ...rawProps, ...cleanedProps }`.
@@ -185,10 +186,15 @@ function fastPathEligible(schema: TSchema): boolean {
  *     Falls back to module defaults for known keys, unknown keys still survive.
  */
 export function validateNodeProps(
-  def: AnyModuleDefinition,
+  def: Pick<AnyModuleDefinition, 'defaults' | 'propsSchema'>,
   rawProps: Record<string, unknown>,
 ): Record<string, unknown> {
-  if (!def.propsSchema) return rawProps
+  if (!def.propsSchema) {
+    // Retained nodes may predate a new field. Resolve defaults at render time
+    // rather than rewriting authored content during plugin upgrades.
+    if (Object.keys(def.defaults).every((key) => key in rawProps)) return rawProps
+    return { ...def.defaults, ...rawProps }
+  }
 
   // Tier 1: already-conforming props short-circuit through the cached
   // compiled validator — no clone, no interpreted Value.Parse.

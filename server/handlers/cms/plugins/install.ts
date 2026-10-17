@@ -11,7 +11,7 @@
  *
  *   - Fresh install (`installFreshFromPackage`)
  *   - Upgrade (`installUpgradeFromPackage`) — runs old `deactivate`, swaps
- *     assets, runs new `migrate` + `activate`, drops old assets. Failure
+ *     assets, runs new `migrate` + `activate`, retains old versioned assets. Failure
  *     triggers `rollbackUpgrade`.
  *   - Downgrade — explicitly rejected.
  *
@@ -281,12 +281,12 @@ interface UpgradeContext extends InstallContext {
  *   1. Run old version's `deactivate(api)` and unregister its module pack.
  *   2. Write the new version's assets to its own version-stamped dir
  *      (`/uploads/plugins/{id}/{newVersion}/`). The old version's dir is
- *      preserved on disk until step 6 — that's what makes rollback cheap.
+ *      preserved on disk for retained content and rollback.
  *   3. Replace the DB row with the new manifest (settings, granted
  *      permissions from the user's confirmation, installed_at preserved).
  *   4. Run new version's `migrate({ fromVersion }, api)`.
  *   5. Run new version's `activate(api)`.
- *   6. Delete the OLD version's asset dir.
+ *   6. Retain the old version's assets: draft/published content may reference them.
  *
  * Any failure in steps 4 or 5 triggers a rollback: revert the DB row to
  * the previous manifest, delete the new version's assets, re-activate the
@@ -378,12 +378,12 @@ async function installUpgradeFromPackage(ctx: UpgradeContext): Promise<Response>
     )
   }
 
-  // 6. Drop the old version's assets. With worker isolation, plugin server
-  //    files no longer live in the host process's `bun --watch` graph
-  //    (they're imported inside the worker), so deleting them here doesn't
-  //    race the response write — straightforward `await rm` is safe in
-  //    both dev and production.
-  await removePluginVersionAssets(options.uploadsDir, pluginId, fromVersion)
+  // 6. Keep immutable versioned assets. Authored pages, historical published
+  // snapshots and reusable content may still reference the old URLs. Rewriting
+  // those documents or deleting their images is not part of a technical
+  // upgrade. Old workers/modules were unloaded above; only the new version is
+  // active. Explicit plugin uninstall still removes the complete asset tree.
+
 
   // Re-fetch so the response carries the post-activation row (settings,
   // lifecycle = 'active', etc.).
@@ -399,6 +399,7 @@ async function installUpgradeFromPackage(ctx: UpgradeContext): Promise<Response>
     fromVersion,
     toVersion: newVersion,
     rebuiltPublishedPages,
+    retainedAssetVersion: fromVersion,
   })
   broadcastPluginEvent({
     kind: 'updated',

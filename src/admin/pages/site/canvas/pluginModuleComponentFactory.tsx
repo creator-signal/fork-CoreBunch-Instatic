@@ -29,6 +29,7 @@ import type {
   PluginModuleDefinition,
 } from '@core/plugin-sdk'
 import type { PluginModuleComponentFactory } from '@core/plugins/moduleAdapter'
+import { validateNodeProps } from '@core/module-engine'
 import { useContext, useEffect, useLayoutEffect, useRef } from 'react'
 import { CanvasDocumentContext } from './CanvasContexts'
 
@@ -130,7 +131,7 @@ export const editorPluginModuleComponentFactory: PluginModuleComponentFactory = 
     let html: string
     let css: string | undefined
     try {
-      const out = renderForEditor(props.props, childList)
+      const out = renderForEditor(validateNodeProps(definition, props.props), childList)
       html = out.html
       css = out.css
     } catch (err) {

@@ -44,7 +44,7 @@ import {
   retainedCreatorSignalPageVersion,
   restoredStarterPageId,
 } from '../../../integrations/creator-signal/migrations/0.2.0/migration'
-import { creatorSignalPatternEntries } from '../../../integrations/creator-signal/component-library'
+import { creatorSignalMauticFormEntry, creatorSignalPatternEntries } from '../../../integrations/creator-signal/component-library'
 import {
   creatorSignalNotFoundAuthoringReference,
   creatorSignalPageAuthoringReference,
@@ -591,7 +591,7 @@ describe('Creator Signal 0.2.0 content migration', () => {
       moduleId: 'creator-signal.site.mautic-form',
       catalogueInstance: {
         entryId: 'creator-signal.site.mautic-form',
-        entryVersion: '2.0.0',
+        entryVersion: creatorSignalMauticFormEntry.version,
         variantId: 'default',
       },
       props: {

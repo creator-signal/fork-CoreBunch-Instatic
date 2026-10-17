@@ -4,7 +4,7 @@
  * Covers:
  *   (a) Junk / missing authored props coerce to module defaults via the schema.
  *   (b) Unknown injected fields (e.g. _resolvedMediaByKey) survive validation.
- *   (c) A module with no propsSchema returns rawProps unchanged (pass-through).
+ *   (c) A module with no propsSchema fills missing keys, preserving authored values.
  *   (d) Fast path: already-conforming props return the SAME object reference
  *       (no clone) when the schema is fast-path eligible.
  *   (e) Eligibility guards: optional-with-default and Transform schemas must
@@ -388,4 +388,14 @@ describe('validateNodeProps — (f) all base module schemas are fast-path eligib
       expect(validateNodeProps(def, normalized)).toBe(normalized)
     })
   }
+})
+
+
+describe('retained module content defaults', () => {
+  it('fills newly added fields without changing explicit clears or unknown props', () => {
+    const def = stubDef({ defaults: { label: 'Existing wording', image: '/default.png', description: 'Default' } })
+    const authored = { image: '', description: null, custom: 'Retained' }
+    expect(validateNodeProps(def, authored)).toEqual({ label: 'Existing wording', ...authored })
+    expect(authored).not.toHaveProperty('label')
+  })
 })

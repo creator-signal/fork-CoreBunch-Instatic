@@ -7,6 +7,9 @@ import crmIframeForm from '../../../integrations/creator-signal/modules/crm-ifra
 import { pack } from '../../../integrations/creator-signal/pack/site'
 import { applyPluginPackToSite, parsePluginPack } from '../../../server/plugins/pack'
 import { makeSite } from '../publisher/helpers'
+import { makeRegistry, makePage } from '../publisher/helpers'
+import { publishPage } from '@core/publisher'
+import { pluginModuleToHostModule } from '@core/plugins/moduleAdapter'
 
 const auditedCopy = [
   [siteHeader, ['skipLinkLabel', 'homeLabel', 'menuLabel', 'navigationLabel']],
@@ -21,6 +24,22 @@ const auditedCopy = [
 ] as const
 
 describe('public copy authoring audit', () => {
+  it('publishes retained nodes with missing new fields using escaped content defaults', () => {
+    for (const definition of [siteHeader, signalComparison, recoveryState, mauticForm]) {
+      const props = { ...definition.defaults }
+      for (const [candidate, keys] of auditedCopy) {
+        if (candidate.id === definition.id) for (const key of keys) delete props[key]
+      }
+      const module = pluginModuleToHostModule('creator-signal.site', definition, () => () => null, ['frontend.assets'])
+      const page = makePage({ root: { moduleId: definition.id, props } })
+      const site = makeSite({ pages: [page] })
+      const result = publishPage(page, site, makeRegistry({ [definition.id]: module }))
+      if (definition.id === siteHeader.id) expect(result.html).toContain('>Menu</summary>')
+      if (definition.id === signalComparison.id) expect(result.html).toContain('<h3>Limited reporting</h3>')
+      if (definition.id === recoveryState.id) expect(result.html).toContain('>No content yet</p>')
+      if (definition.id === mauticForm.id) expect(result.html).toContain('data-failure-message="The form could not be sent. Please try again."')
+    }
+  })
   for (const [definition, keys] of auditedCopy) {
     it(`exposes ${definition.id} copy in the module and content library`, () => {
       const entry = creatorSignalComponentEntries.find((candidate) => candidate.id === definition.id)

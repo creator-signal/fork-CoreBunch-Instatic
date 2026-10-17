@@ -351,3 +351,9 @@ Source merge does not install the plugin, migrate content or publish the site.
 Module names, editor field labels, protocol identifiers and decorative glyphs
 are technical/editor metadata. Starter defaults are insertion content, not a
 mechanism for updating retained public pages.
+
+The retained-content default resolution also changes the Instatic publisher's
+module boundary (`validateNodeProps`). This delivery therefore includes CMS
+runtime source as well as the technical plugin; a plugin-only install onto a
+runtime without that fix does not qualify this upgrade. No install or runtime
+release is performed by this Source PR.

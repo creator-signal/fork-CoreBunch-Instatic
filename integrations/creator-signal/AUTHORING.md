@@ -357,3 +357,11 @@ module boundary (`validateNodeProps`). This delivery therefore includes CMS
 runtime source as well as the technical plugin; a plugin-only install onto a
 runtime without that fix does not qualify this upgrade. No install or runtime
 release is performed by this Source PR.
+
+Plugin upgrades retain previous version directories because draft content,
+published snapshots and reusable components can keep those immutable image URLs.
+The old plugin's workers/modules are deactivated; retained asset bytes do not
+activate old code. Technical upgrades do not rewrite URLs or remove their media.
+The update audit records the retained asset version. Explicit plugin uninstall
+still removes the complete plugin asset tree; retired content assets are retained
+state, not disposable build output.

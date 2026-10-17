@@ -6,6 +6,18 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.59 - 2026-10-17
+
+### Accessible public-site navigation
+
+- Retain every authored navigation destination on mobile through a native Menu
+  disclosure, with keyboard operation, Escape focus return, close on selection,
+  and expanded navigation when JavaScript is unavailable.
+- Preserve the generated Creator Signal colour and typography contracts and
+  correct primary header button hover contrast.
+- Verify all 26 public routes across light/dark desktop, tablet and mobile,
+  including contrast, typography, reflow and reviewed menu screenshot baselines.
+
 ## 0.0.58 - 2026-10-16
 
 ### Guarded maintenance import and publication

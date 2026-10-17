@@ -117,7 +117,7 @@ export const siteHeader = defineModule({
   htmlTag: 'header',
   defaults: {
     skipLinkLabel: 'Skip to main content',
-    homeLabel: 'Creator Signal home',
+    homeLabel: '{brandName} home',
     menuLabel: 'Menu',
     navigationLabel: 'Main navigation',
 
@@ -147,7 +147,7 @@ export const siteHeader = defineModule({
   },
   render: ({ props }) => ({ ...withCreatorSignalCss(html`<header class="site-header">
       <a class="skip-link" href="#main-content" data-parity-ignore>${escapedProp(props.skipLinkLabel)}</a>
-      <a class="site-brand" href="${safeUrl(props.homeUrl)}" aria-label="${escapedProp(props.homeLabel)}">
+      <a class="site-brand" href="${safeUrl(props.homeUrl)}" aria-label="${escapedProp(text(props.homeLabel).replace('{brandName}', text(props.brandName)))}">
         <img class="site-brand-mark" src="${safeUrl(creatorSignalBrandAssets.markLight)}" alt="" width="1024" height="688">
         <span><strong>${escapedProp(props.brandName)}</strong><small>${escapedProp(props.tagline)}</small></span>
       </a>

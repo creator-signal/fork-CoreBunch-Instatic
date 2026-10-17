@@ -26,7 +26,7 @@ const auditedCopy = [
 describe('public copy authoring audit', () => {
   it('publishes retained nodes with missing new fields using escaped content defaults', () => {
     for (const definition of [siteHeader, signalComparison, recoveryState, mauticForm]) {
-      const props = { ...definition.defaults }
+      const props = { ...definition.defaults, ...(definition.id === siteHeader.id ? { brandName: 'Authored brand' } : {}) }
       for (const [candidate, keys] of auditedCopy) {
         if (candidate.id === definition.id) for (const key of keys) delete props[key]
       }
@@ -34,7 +34,10 @@ describe('public copy authoring audit', () => {
       const page = makePage({ root: { moduleId: definition.id, props } })
       const site = makeSite({ pages: [page] })
       const result = publishPage(page, site, makeRegistry({ [definition.id]: module }))
-      if (definition.id === siteHeader.id) expect(result.html).toContain('>Menu</summary>')
+      if (definition.id === siteHeader.id) {
+        expect(result.html).toContain('>Menu</summary>')
+        expect(result.html).toContain('aria-label="Authored brand home"')
+      }
       if (definition.id === signalComparison.id) expect(result.html).toContain('<h3>Limited reporting</h3>')
       if (definition.id === recoveryState.id) expect(result.html).toContain('>No content yet</p>')
       if (definition.id === mauticForm.id) expect(result.html).toContain('data-failure-message="The form could not be sent. Please try again."')

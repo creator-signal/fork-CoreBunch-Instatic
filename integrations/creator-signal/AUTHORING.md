@@ -365,3 +365,7 @@ activate old code. Technical upgrades do not rewrite URLs or remove their media.
 The update audit records the retained asset version. Explicit plugin uninstall
 still removes the complete plugin asset tree; retired content assets are retained
 state, not disposable build output.
+
+The header home-link label supports `{brandName}` in its CMS text. Its default
+keeps the retained brand name in the accessible label; authors can replace the
+complete label or retain that substitution.

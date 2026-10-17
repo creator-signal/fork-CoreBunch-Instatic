@@ -139,7 +139,9 @@ p { line-height: var(--cs-type-body-large-line-height); }
   font-weight: var(--cs-type-control-weight);
   text-decoration: none;
 }
-.site-header nav a:hover, .site-footer nav a:hover { color: var(--cs-text-primary); }
+.site-header nav a:not(.button):hover, .site-footer nav a:hover { color: var(--cs-text-primary); }
+.site-navigation { min-width: 0; }
+.site-menu-toggle { display: none; }
 
 .button {
   display: inline-flex;
@@ -490,9 +492,25 @@ p { line-height: var(--cs-type-body-large-line-height); }
 .consent .button { min-height: var(--cs-size-control-min-target); padding-inline: var(--cs-spacing-4); font-size: var(--cs-type-body-small-size); white-space: nowrap; }
 
 @media (max-width: 900px) {
-  .site-header { align-items: flex-start; }
-  .site-header nav { justify-content: flex-end; gap: var(--cs-spacing-3); }
-  .site-header nav a:not(.button) { display: none; }
+  .site-header { align-items: center; flex-wrap: wrap; }
+  .site-navigation { margin-left: auto; }
+  .site-menu-toggle {
+    display: list-item;
+    min-height: var(--cs-size-control-min-target);
+    padding: var(--cs-spacing-3) var(--cs-spacing-4);
+    border: 1px solid var(--cs-border-strong);
+    border-radius: var(--cs-radius-md);
+    background: var(--cs-surface-raised);
+    color: var(--cs-text-primary);
+    font-family: var(--cs-type-control-family);
+    font-weight: var(--cs-type-control-weight);
+    cursor: pointer;
+    list-style-position: inside;
+  }
+  .site-navigation[open] { width: 100%; }
+  .site-navigation[open] .site-menu-toggle { position: absolute; top: var(--cs-spacing-3); right: var(--cs-spacing-4); width: fit-content; }
+  .site-header nav { align-items: stretch; flex-direction: column; gap: var(--cs-spacing-2); padding-block: var(--cs-spacing-3); }
+  .site-header nav a { display: flex; align-items: center; min-height: var(--cs-size-control-min-target); padding: var(--cs-spacing-3) var(--cs-spacing-4); }
   .hero-section, .campaign-hero { grid-template-columns: minmax(0, 1fr); }
   .hero-art, .campaign-hero-art { min-height: 20rem; }
   .two-column-layout,

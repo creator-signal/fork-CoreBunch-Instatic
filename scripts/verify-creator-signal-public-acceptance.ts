@@ -432,6 +432,44 @@ async function waitForPage(page: Page): Promise<void> {
       visibility.height > 0,
     `Main heading is not visible: ${JSON.stringify(visibility)}`,
   )
+  const design = await page.evaluate(() => {
+    const pixel = document.createElement('canvas').getContext('2d')!
+    const rgba = (color: string) => {
+      pixel.clearRect(0, 0, 1, 1)
+      pixel.fillStyle = color
+      pixel.fillRect(0, 0, 1, 1)
+      return Array.from(pixel.getImageData(0, 0, 1, 1).data)
+    }
+    const luminance = (rgb: number[]) => rgb.slice(0, 3).reduce((sum, channel, index) => {
+      const value = channel / 255
+      return sum + (value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4) * [0.2126, 0.7152, 0.0722][index]!
+    }, 0)
+    const contrast = Array.from(document.querySelectorAll('main h1, .site-brand strong, header nav a')).flatMap((node) => {
+      if (!node.getBoundingClientRect().height) return []
+      const chain: Element[] = []
+      for (let ancestor: Element | null = node; ancestor; ancestor = ancestor.parentElement) chain.unshift(ancestor)
+      let background = [255, 255, 255]
+      for (const ancestor of chain) {
+        const color = rgba(getComputedStyle(ancestor).backgroundColor)
+        background = background.map((channel, index) => color[index]! * color[3]! / 255 + channel * (1 - color[3]! / 255))
+      }
+      const style = getComputedStyle(node)
+      const foreground = rgba(style.color)
+      const text = background.map((channel, index) => foreground[index]! * foreground[3]! / 255 + channel * (1 - foreground[3]! / 255))
+      const a = luminance(text)
+      const b = luminance(background)
+      const large = Number.parseFloat(style.fontSize) >= 24 || (Number.parseFloat(style.fontSize) >= 18.66 && Number.parseInt(style.fontWeight) >= 700)
+      return [{ text: node.textContent?.trim(), ratio: (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05), required: large ? 3 : 4.5 }]
+    })
+    return {
+      headingFont: getComputedStyle(document.querySelector('main h1')!).fontFamily,
+      bodyFont: getComputedStyle(document.body).fontFamily,
+      contrast,
+    }
+  })
+  assert.match(design.headingFont, /Fredoka Variable/, 'published heading must use the canonical font contract')
+  assert.match(design.bodyFont, /Mulish Variable/, 'published body must use the canonical font contract')
+  assert.deepEqual(design.contrast.filter((sample) => sample.ratio < sample.required), [], 'published heading/header contrast')
 }
 
 async function addDeniedConsent(context: BrowserContext): Promise<void> {
@@ -459,13 +497,14 @@ const browser = browserCdpUrl
     })
 
 try {
+  for (const colorScheme of ['light', 'dark'] as const) {
   for (const viewport of [
     { name: 'desktop', width: 1440, height: 900 },
     { name: 'tablet', width: 900, height: 900 },
     { name: 'mobile', width: 390, height: 844 },
   ]) {
-    await runCheck(`all public routes render without ${viewport.name} document overflow`, async () => {
-      const context = await browser.newContext({ viewport })
+    await runCheck(`all public routes retain contrast, fonts and reflow at ${viewport.name} in ${colorScheme}`, async () => {
+      const context = await browser.newContext({ viewport, colorScheme })
       await addDeniedConsent(context)
       const page = await context.newPage()
       await routeMarketing(page)
@@ -490,6 +529,22 @@ try {
       }
     })
   }
+  }
+
+  await runCheck('mobile navigation stays reachable without JavaScript', async () => {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, javaScriptEnabled: false })
+    await addDeniedConsent(context)
+    const page = await context.newPage()
+    try {
+      await page.goto(`${baseUrl}/products/sales-pulse`, { waitUntil: 'load' })
+      const declared = await page.locator('header nav a').count()
+      assert(declared > 0)
+      assert.equal(await page.locator('header nav a:visible').count(), declared)
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false)
+    } finally {
+      await context.close()
+    }
+  })
 
   await runCheck('representative routes pass automated WCAG 2.2 AA analysis', async () => {
     const routes = [
@@ -546,13 +601,31 @@ try {
       ), true)
       await page.keyboard.press('Enter')
       assert.equal(await page.evaluate(() => document.activeElement?.id), 'main-content')
+      const menu = page.locator('details.site-navigation')
+      const toggle = page.getByText('Menu', { exact: true })
+      assert.equal(await menu.evaluate((node) => (node as HTMLDetailsElement).open), false)
+      await toggle.focus()
+      await page.keyboard.press('Enter')
+      const expectedTargets = await page.locator('header nav a').allTextContents()
       const navTargets = await page.locator('header nav a:visible').evaluateAll((nodes) => nodes.map((node) => {
         const rect = node.getBoundingClientRect()
         return { label: node.textContent?.trim(), width: rect.width, height: rect.height }
       }))
-      assert.equal(navTargets.length, 1)
-      assert.equal(navTargets[0]?.label, 'Get started free')
-      assert.equal(navTargets.every((target) => target.width > 0 && target.height >= 40), true)
+      assert.deepEqual(navTargets.map((target) => target.label), expectedTargets.map((label) => label.trim()))
+      assert.equal(navTargets.every((target) => target.width >= 44 && target.height >= 44), true)
+      await waitForPage(page)
+      await page.keyboard.press('Tab')
+      assert.equal(await page.locator('header nav a').first().evaluate((node) => node === document.activeElement), true)
+      await page.keyboard.press('Escape')
+      assert.equal(await menu.evaluate((node) => (node as HTMLDetailsElement).open), false)
+      assert.equal(await toggle.evaluate((node) => node === document.activeElement), true)
+      await page.keyboard.press('Space')
+      await page.locator('header nav a').first().click()
+      assert.equal(await menu.evaluate((node) => (node as HTMLDetailsElement).open), false)
+      await page.setViewportSize({ width: 1440, height: 900 })
+      assert.equal(await page.locator('header nav a:visible').count(), expectedTargets.length)
+      await page.setViewportSize({ width: 390, height: 844 })
+      assert.equal(await menu.evaluate((node) => (node as HTMLDetailsElement).open), false)
       const summary = page.locator('.faq-list summary').first()
       await summary.focus()
       await page.keyboard.press('Enter')

@@ -162,6 +162,15 @@ exporting the migration input; an additional row still blocks shared-template
 installation. A content export is not a database/account/secret backup: follow
 the platform backup and restore runbook separately for those records.
 
+An operator can verify a specific content backup with
+`INSTATIC_BACKUP_VERIFY_ARCHIVE=/absolute/path/site-bundle.zip bun test src/__tests__/architecture/cmsTransferImport.test.ts`
+(set the environment variable separately in PowerShell). This exercises the real
+archive importer against a fresh in-memory SQLite database, checks all row content,
+stored settings, normalized styles/runtime and media bytes, and removes its owned
+scratch. It never publishes or connects to the live database. Without that explicit
+input, the operator-only restore check is skipped; ordinary synthetic transfer
+tests still run. This proves content restoration, not account/secret recovery.
+
 For a
 0.7.0 recipe wrapper, authored differences beneath that exact wrapper are
 preserved because the migration removes only the presentation-free wrapper.

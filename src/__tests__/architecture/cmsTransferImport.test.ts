@@ -16,6 +16,10 @@
  */
 
 import { describe, test, expect, beforeAll } from 'bun:test'
+import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises'
+import { join, resolve, sep } from 'node:path'
+import { strFromU8, unzipSync } from 'fflate'
+import { createHash } from 'node:crypto'
 import { createSqliteClient } from '../../../server/db/sqlite'
 import { runMigrations } from '../../../server/db/runMigrations'
 import { sqliteMigrations } from '../../../server/db/migrations-sqlite'
@@ -30,6 +34,10 @@ import {
 } from '../../../server/auth/tokens'
 import { createDataRow, listDataRows } from '../../../server/repositories/data/rows'
 import { handleImportRoute } from '../../../server/handlers/cms/import'
+import { handleImportArchiveRoute } from '../../../server/handlers/cms/importArchive'
+import { BUNDLE_ARCHIVE_MANIFEST_PATH, SiteBundleArchiveManifestSchema } from '@core/data/bundleArchive'
+import { canonicalSha256 } from '../../../integrations/creator-signal/migrations/content-hash'
+import { validateSite } from '@core/persistence/validate'
 import { parseValue } from '@core/utils/typeboxHelpers'
 import { ImportResultSchema } from '@core/data/bundleSchema'
 import { createDefaultSiteExplorerOrganization } from '@core/page-tree'
@@ -40,6 +48,59 @@ import type { DataRow, DataTable } from '@core/data/schemas'
 // ---------------------------------------------------------------------------
 // Minimal valid site shell for seeding
 // ---------------------------------------------------------------------------
+
+const operatorBackup = process.env.INSTATIC_BACKUP_VERIFY_ARCHIVE
+test.skipIf(!operatorBackup)('operator backup restores its exact content and media into isolated SQLite without publication', async () => {
+  const parent = resolve('.tmp/288-session')
+  await mkdir(parent, { recursive: true })
+  const temporary = await mkdtemp(join(parent, 'backup-restore-'))
+  if (!temporary.startsWith(parent + sep)) throw new Error('Restore scratch escaped its owned parent')
+  const db = createSqliteClient(':memory:')
+  try {
+    await runMigrations(db, sqliteMigrations)
+    const cookie = await seedAuth(db)
+    const bytes = new Uint8Array(await Bun.file(operatorBackup!).arrayBuffer())
+    const archive = unzipSync(bytes)
+    const manifest = parseValue(SiteBundleArchiveManifestSchema, JSON.parse(strFromU8(archive[BUNDLE_ARCHIVE_MANIFEST_PATH]!)))
+    const request = new Request('http://localhost/admin/api/cms/import/archive?strategy=replace', {
+      method: 'POST', headers: { 'Content-Type': 'application/zip' }, body: bytes,
+    })
+    request.headers.set('cookie', cookie)
+    const response = await handleImportArchiveRoute(request, db, { uploadsDir: temporary })
+    expect(response?.status).toBe(200)
+    const result = parseValue(ImportResultSchema, await response!.json())
+    expect(result.rowsInserted).toBe(manifest.rows.length)
+    for (const table of manifest.tables) {
+      const actual = await listDataRows(db, table.id)
+      const expected = manifest.rows.filter(row => row.tableId === table.id)
+      expect(actual).toHaveLength(expected.length)
+      for (const row of expected) {
+        const restored = actual.find(candidate => candidate.id === row.id)
+        expect(restored).toBeDefined()
+        expect(canonicalSha256({ cells: restored!.cells, slug: restored!.slug, status: restored!.status }))
+          .toBe(canonicalSha256({ cells: row.cells, slug: row.slug, status: row.status }))
+      }
+    }
+    if (manifest.site) {
+      const restored = await getDraftSite(db)
+      expect(restored).not.toBeNull()
+      const expected = validateSite(manifest.site)
+      const { rows: stored } = await db<{ settings_json: { site: SiteShell } }>`select settings_json from site where id = 'default'`
+      expect(canonicalSha256(stored[0]!.settings_json.site.settings)).toBe(canonicalSha256(manifest.site.settings))
+      for (const key of ['name', 'styleRules', 'settings', 'breakpoints', 'files', 'runtime'] as const) {
+        expect(canonicalSha256(restored![key]), `Restored site field ${key}`).toBe(canonicalSha256(expected[key]))
+      }
+    }
+    for (const media of manifest.media ?? []) {
+      const restored = await readFile(join(temporary, media.storagePath))
+      expect(createHash('sha256').update(restored).digest('hex'))
+        .toBe(createHash('sha256').update(archive[`media/${media.storagePath}`]!).digest('hex'))
+    }
+  } finally {
+    await db.close()
+    await rm(temporary, { recursive: true })
+  }
+})
 
 const TEST_SHELL: SiteShell = {
   id: 'default',

@@ -1,4 +1,5 @@
 import type { DataRow, DataTable } from '@core/data/schemas'
+import { creatorSignalBrandAssets } from '../../design-system/contract'
 import type { SiteBundleArchiveManifest } from '@core/data/bundleArchive'
 import { pageFromRow, pageToCells } from '@core/data/pageFromRow'
 import { legacyCreatorSignalPageHashes0111 } from '../legacy-0.1.11-hashes'
@@ -515,7 +516,7 @@ export function prepareCreatorSignalContentMigration(
 }
 
 const retainedExpandedArtworkUrl = '/uploads/plugins/creator-signal.site/0.7.0/assets/design-system/brand/sales-pulse-social.png'
-const currentExpandedArtworkUrl = '/uploads/plugins/creator-signal.site/0.8.2/assets/design-system/brand/sales-pulse-social.png'
+const currentExpandedArtworkUrl = creatorSignalBrandAssets.salesPulseSocial
 
 /**
  * The 0.7.0 recipe expansion deliberately retained component props while it

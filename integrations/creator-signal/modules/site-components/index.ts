@@ -1,6 +1,7 @@
 import { control, defineModule, html, raw, safeUrl } from '@core/plugin-sdk'
 import { creatorSignalBrandAssets } from '../../design-system/contract'
 import { creatorSignalSiteCss } from '../mautic-form'
+import { navigationRuntime } from './navigation-runtime'
 
 export interface NavigationItem {
   label: string
@@ -134,16 +135,19 @@ export const siteHeader = defineModule({
     homeUrl: control.url('Home URL'),
     items: control.textarea('Navigation items'),
   },
-  render: ({ props }) => withCreatorSignalCss(html`<header class="site-header">
+  render: ({ props }) => ({ ...withCreatorSignalCss(html`<header class="site-header">
       <a class="skip-link" href="#main-content" data-parity-ignore>Skip to main content</a>
       <a class="site-brand" href="${safeUrl(props.homeUrl)}" aria-label="${escapedProp(props.brandName)} home">
         <img class="site-brand-mark" src="${safeUrl(creatorSignalBrandAssets.markLight)}" alt="" width="1024" height="688">
         <span><strong>${escapedProp(props.brandName)}</strong><small>${escapedProp(props.tagline)}</small></span>
       </a>
-      <nav aria-label="Main navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
-        ${navigationItems(props.items, true)}
-      </nav>
-    </header>`),
+      <details class="site-navigation" open>
+        <summary class="site-menu-toggle">Menu</summary>
+        <nav aria-label="Main navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
+          ${navigationItems(props.items, true)}
+        </nav>
+      </details>
+    </header>`), js: navigationRuntime }),
 })
 
 export const siteFooter = defineModule({

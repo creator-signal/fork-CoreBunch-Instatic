@@ -19,7 +19,8 @@ const outputDirectory = resolve(repositoryRoot, '.tmp/creator-signal-design-syst
 const pluginAssetPrefix = `/uploads/plugins/creator-signal.site/${creatorSignalPluginVersion}`
 const requestedPort = Number.parseInt(process.env.CREATOR_SIGNAL_BROWSER_PORT ?? '0', 10)
 
-const header = siteHeader.render(siteHeader.defaults, []).html
+const headerOutput = siteHeader.render(siteHeader.defaults, [])
+const header = headerOutput.html
 const features = featureGrid.render(featureGrid.defaults, []).html
 const comparison = comparisonSection.render(comparisonSection.defaults, []).html
 const cta = callToAction.render(callToAction.defaults, []).html
@@ -54,6 +55,7 @@ const documentFixture = (main: string, title: string) => `<!doctype html>
   </label>
   ${main}
   ${footer}
+  <script>${headerOutput.js}</script>
   <script type="module" src="${pluginAssetPrefix}/frontend/theme-control.js"></script>
 </body>
 </html>`

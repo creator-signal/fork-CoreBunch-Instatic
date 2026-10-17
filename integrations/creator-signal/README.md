@@ -151,6 +151,18 @@ is added only when its reserved ID is absent. An occupied ID with any other
 content blocks the whole migration.
 Any authored difference in the older hash-governed packs blocks the whole
 migration for manual mapping; it is never overwritten heuristically. For a
+missing original starter route, obtain an explicit restoration disposition and
+pass its exact reserved page ID through `--restore-missing-pages` (comma-separated
+for multiple IDs) to both preview and prepare. Omission continues to block;
+unknown/template IDs and occupied routes are rejected. The report marks each
+restoration, creates it as a draft, and never publishes it. Existing rows still
+undergo the same authored-content checks. Back up the full site first and remove
+only user-authorised test rows using the CMS recoverable delete path before
+exporting the migration input; an additional row still blocks shared-template
+installation. A content export is not a database/account/secret backup: follow
+the platform backup and restore runbook separately for those records.
+
+For a
 0.7.0 recipe wrapper, authored differences beneath that exact wrapper are
 preserved because the migration removes only the presentation-free wrapper.
 After expansion, the classifier replaces only the exact versioned `artwork`

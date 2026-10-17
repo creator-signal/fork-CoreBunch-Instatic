@@ -222,6 +222,49 @@ function legacyManifest(): SiteBundleArchiveManifest {
 }
 
 describe('Creator Signal 0.2.0 content migration', () => {
+  const restorationIds = ['feedback', 'wishlist', 'ask-a-question', 'feature-request', 'report-an-error']
+    .map(slug => `creator-signal.site/page/${slug}`)
+  const missingStarter = () => {
+    const source = legacyManifest()
+    source.rows = source.rows.filter(row => !restorationIds.includes(row.id))
+    return source
+  }
+
+  it('restores only explicitly selected missing starter pages as drafts, with idempotent revalidation', () => {
+    const source = missingStarter()
+    expect(prepareCreatorSignalContentMigration(source, timestamp).report.summary.missing).toBe(5)
+    const partial = prepareCreatorSignalContentMigration(source, timestamp, { restoreMissingPageIds: restorationIds.slice(0, 1) })
+    expect(partial.report.ready).toBe(false)
+    expect(partial.report.summary.missing).toBe(4)
+    expect(partial.manifest).toBeNull()
+    const result = prepareCreatorSignalContentMigration(source, timestamp, { restoreMissingPageIds: restorationIds })
+    expect(result.report.ready).toBe(true)
+    expect(result.report.pages.filter(page => page.restoredMissing).map(page => page.id).sort()).toEqual([...restorationIds].sort())
+    const restored = result.manifest!.rows.filter(row => restorationIds.includes(row.id))
+    expect(restored).toHaveLength(5)
+    expect(restored.every(row => row.status === 'draft' && row.publishedAt === null)).toBe(true)
+    const applied = applyPreparedMigration(source, result.manifest!)
+    const retry = prepareCreatorSignalContentMigration(applied, timestamp, { restoreMissingPageIds: restorationIds })
+    expect(retry.report.ready).toBe(true)
+    expect(retry.manifest!.rows).toHaveLength(0)
+  })
+
+  it('rejects unknown/template restoration IDs, occupied routes and unrelated content', () => {
+    for (const id of ['unknown', 'creator-signal.site/page/site-template']) {
+      expect(() => prepareCreatorSignalContentMigration(missingStarter(), timestamp, { restoreMissingPageIds: [id] })).toThrow()
+    }
+    const source = missingStarter()
+    const other = structuredClone(source.rows[0]!)
+    other.id = 'authored-feedback'
+    other.slug = 'feedback'
+    source.rows.push(other)
+    const result = prepareCreatorSignalContentMigration(source, timestamp, { restoreMissingPageIds: restorationIds })
+    expect(result.report.ready).toBe(false)
+    expect(result.report.blockers).toContain('Cannot restore page "feedback": its route belongs to another row.')
+    expect(result.manifest).toBeNull()
+    expect(source.rows.find(row => row.id === other.id)).toEqual(other)
+  })
+
   it('writes equivalent JSON and ZIP manifests with the untouched backup evidence', async () => {
     const temporary = await mkdtemp(join(tmpdir(), 'instatic-creator-signal-migration-'))
     const inputPath = join(temporary, 'retained-site.zip')

@@ -16,6 +16,7 @@ interface Arguments {
   command: 'preview' | 'prepare'
   input: string
   outputDir?: string
+  restoreMissingPageIds: string[]
 }
 
 function parseArguments(argv: string[]): Arguments {
@@ -27,9 +28,18 @@ function parseArguments(argv: string[]): Arguments {
   const outputIndex = argv.indexOf('--output-dir')
   const input = inputIndex >= 0 ? argv[inputIndex + 1] : undefined
   const outputDir = outputIndex >= 0 ? argv[outputIndex + 1] : undefined
+  const restoreIndex = argv.indexOf('--restore-missing-pages')
+  const restoreArgument = restoreIndex >= 0 ? argv[restoreIndex + 1] : undefined
+  if (restoreIndex >= 0 && (!restoreArgument || restoreArgument.startsWith('--'))) {
+    throw new Error('--restore-missing-pages requires comma-separated retained page IDs.')
+  }
+  const restoreMissingPageIds = restoreArgument?.split(',') ?? []
+  if (restoreMissingPageIds.some(id => !id) || new Set(restoreMissingPageIds).size !== restoreMissingPageIds.length) {
+    throw new Error('Restored page IDs must be nonempty and unique.')
+  }
   if (!input) throw new Error('--input is required.')
   if (command === 'prepare' && !outputDir) throw new Error('--output-dir is required for prepare.')
-  return { command, input: resolve(input), ...(outputDir ? { outputDir: resolve(outputDir) } : {}) }
+  return { command, input: resolve(input), restoreMissingPageIds, ...(outputDir ? { outputDir: resolve(outputDir) } : {}) }
 }
 
 async function refuseExisting(path: string): Promise<void> {
@@ -46,7 +56,9 @@ const source = parseValue(
   JSON.parse(strFromU8(manifestBytes)),
 )
 const { prepareCreatorSignalContentMigration } = await import('./migration')
-const prepared = prepareCreatorSignalContentMigration(source)
+const prepared = prepareCreatorSignalContentMigration(source, new Date().toISOString(), {
+  restoreMissingPageIds: args.restoreMissingPageIds,
+})
 const evidence = {
   ...prepared.report,
   evidence: {

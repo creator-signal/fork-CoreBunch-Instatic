@@ -61,6 +61,7 @@ export interface PageMigrationPreview {
   currentHash?: string
   legacyHash?: string
   retainedVersion?: string
+  restoredMissing?: boolean
   targetHash?: string
 }
 
@@ -159,6 +160,7 @@ export function retainedCreatorSignalPageVersion(
 export function prepareCreatorSignalContentMigration(
   source: SiteBundleArchiveManifest,
   now = new Date().toISOString(),
+  options: { restoreMissingPageIds?: readonly string[] } = {},
 ): PreparedCreatorSignalMigration {
   const pageTable = source.tables.find((table) => table.id === 'pages')
   if (!pageTable) {
@@ -169,6 +171,12 @@ export function prepareCreatorSignalContentMigration(
   const sourceRows = source.rows.filter((row) => row.tableId === 'pages')
   const rowById = new Map(sourceRows.map((row) => [row.id, row]))
   const currentPages = pack.pages.filter((page) => !page.template)
+  const restoreMissingIds = new Set(options.restoreMissingPageIds ?? [])
+  for (const id of restoreMissingIds) {
+    if (!currentPages.some(page => page.id === id) || !legacyCreatorSignalPageHashes0111[id]) {
+      throw new Error(`Only an explicitly named retained starter page may be restored: ${id}`)
+    }
+  }
   const knownIds = new Set(currentPages.map((page) => page.id))
   const template = pack.pages.find((page) => page.template?.target.kind === 'everywhere')
   const notFoundTemplate = pack.pages.find((page) => page.template?.target.kind === 'notFound')
@@ -200,8 +208,13 @@ export function prepareCreatorSignalContentMigration(
     const isNewPage = !legacyCreatorSignalPageHashes0111[target.id]
     const targetHash = canonicalPageCellsSha256(pageToCells(target))
     if (!row) {
-      if (isNewPage) {
-        previews.push({ id: target.id, slug: target.slug, state: 'page-add', targetHash })
+      if (isNewPage || restoreMissingIds.has(target.id)) {
+        if (sourceRows.some(candidate => candidate.slug === target.slug)) {
+          blockers.push(`Cannot restore page "${target.slug}": its route belongs to another row.`)
+          continue
+        }
+        previews.push({ id: target.id, slug: target.slug, state: 'page-add', targetHash,
+          ...(restoreMissingIds.has(target.id) ? { restoredMissing: true } : {}) })
         migrationRows.push(newPageRow(target, now))
         continue
       }

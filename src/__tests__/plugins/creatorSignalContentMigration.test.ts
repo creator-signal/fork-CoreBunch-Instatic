@@ -42,6 +42,7 @@ import {
   canonicalSha256,
   prepareCreatorSignalContentMigration,
   retainedCreatorSignalPageVersion,
+  restoredStarterPageId,
 } from '../../../integrations/creator-signal/migrations/0.2.0/migration'
 import { creatorSignalPatternEntries } from '../../../integrations/creator-signal/component-library'
 import {
@@ -50,6 +51,10 @@ import {
   pack,
 } from '../../../integrations/creator-signal/pack/site'
 import { creatorSignalPublicPatternRootProps } from '../../../integrations/creator-signal/public-authoring-contract'
+import { createSqliteClient } from '../../../server/db/sqlite'
+import { runMigrations } from '../../../server/db/runMigrations'
+import { sqliteMigrations } from '../../../server/db/migrations-sqlite'
+import { upsertDataRow, softDeleteDataRow, listDataRows } from '../../../server/repositories/data/rows'
 
 const timestamp = '2026-08-14T00:00:00.000Z'
 
@@ -239,14 +244,15 @@ describe('Creator Signal 0.2.0 content migration', () => {
     expect(partial.manifest).toBeNull()
     const result = prepareCreatorSignalContentMigration(source, timestamp, { restoreMissingPageIds: restorationIds })
     expect(result.report.ready).toBe(true)
-    expect(result.report.pages.filter(page => page.restoredMissing).map(page => page.id).sort()).toEqual([...restorationIds].sort())
-    const restored = result.manifest!.rows.filter(row => restorationIds.includes(row.id))
+    expect(result.report.pages.filter(page => page.restoredMissing).map(page => page.restoredStarterId).sort()).toEqual([...restorationIds].sort())
+    const restored = result.manifest!.rows.filter(row => restorationIds.map(restoredStarterPageId).includes(row.id))
     expect(restored).toHaveLength(5)
     expect(restored.every(row => row.status === 'draft' && row.publishedAt === null)).toBe(true)
     const applied = applyPreparedMigration(source, result.manifest!)
     const retry = prepareCreatorSignalContentMigration(applied, timestamp, { restoreMissingPageIds: restorationIds })
     expect(retry.report.ready).toBe(true)
     expect(retry.manifest!.rows).toHaveLength(0)
+    expect(prepareCreatorSignalContentMigration(applied, timestamp).report.ready).toBe(true)
   })
 
   it('rejects unknown/template restoration IDs, occupied routes and unrelated content', () => {
@@ -263,6 +269,39 @@ describe('Creator Signal 0.2.0 content migration', () => {
     expect(result.report.blockers).toContain('Cannot restore page "feedback": its route belongs to another row.')
     expect(result.manifest).toBeNull()
     expect(source.rows.find(row => row.id === other.id)).toEqual(other)
+  })
+
+  it('blocks duplicate restored identities and authored restored-route changes', () => {
+    const source = legacyManifest()
+    const original = source.rows.find(row => row.id === restorationIds[0])!
+    source.rows.push({ ...original, id: restoredStarterPageId(original.id) })
+    expect(prepareCreatorSignalContentMigration(source, timestamp).report.ready).toBe(false)
+    source.rows = source.rows.filter(row => row.id !== original.id)
+    source.rows.find(row => row.id === restoredStarterPageId(original.id))!.slug = 'authored-feedback'
+    expect(prepareCreatorSignalContentMigration(source, timestamp).report.ready).toBe(false)
+  })
+
+  it('restores visible pages beside deleted originals without changing their tombstones', async () => {
+    const db = createSqliteClient(':memory:')
+    try {
+      await runMigrations(db, sqliteMigrations)
+      for (const row of legacyManifest().rows.filter(row => restorationIds.includes(row.id))) {
+        await upsertDataRow(db, row)
+        await softDeleteDataRow(db, row.id)
+      }
+      const migration = prepareCreatorSignalContentMigration(missingStarter(), timestamp, { restoreMissingPageIds: restorationIds })
+      for (const row of migration.manifest!.rows) await upsertDataRow(db, row)
+      const active = await listDataRows(db, 'pages')
+      expect(active).toHaveLength(28)
+      for (const id of restorationIds) {
+        expect(active.some(row => row.id === restoredStarterPageId(id))).toBe(true)
+        expect(active.some(row => row.id === id)).toBe(false)
+        const { rows } = await db<{ deleted: number }>`select deleted_at is not null as deleted from data_rows where id = ${id}`
+        expect(Boolean(rows[0]!.deleted)).toBe(true)
+      }
+    } finally {
+      await db.close()
+    }
   })
 
   it('writes equivalent JSON and ZIP manifests with the untouched backup evidence', async () => {

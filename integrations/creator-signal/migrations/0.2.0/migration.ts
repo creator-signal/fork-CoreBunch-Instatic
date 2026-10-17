@@ -62,6 +62,7 @@ export interface PageMigrationPreview {
   legacyHash?: string
   retainedVersion?: string
   restoredMissing?: boolean
+  restoredStarterId?: string
   targetHash?: string
 }
 
@@ -157,6 +158,9 @@ export function retainedCreatorSignalPageVersion(
   return retainedPageHashSets.find((candidate) => candidate.hashes[pageId] === hash)?.version ?? null
 }
 
+/** Fresh stable IDs avoid silently updating a still-deleted import tombstone. */
+export const restoredStarterPageId = (id: string): string => `${id}/restored`
+
 export function prepareCreatorSignalContentMigration(
   source: SiteBundleArchiveManifest,
   now = new Date().toISOString(),
@@ -178,6 +182,7 @@ export function prepareCreatorSignalContentMigration(
     }
   }
   const knownIds = new Set(currentPages.map((page) => page.id))
+  for (const page of currentPages) knownIds.add(restoredStarterPageId(page.id))
   const template = pack.pages.find((page) => page.template?.target.kind === 'everywhere')
   const notFoundTemplate = pack.pages.find((page) => page.template?.target.kind === 'notFound')
   if (!template) throw new Error('[creator-signal migration] Current pack has no site template.')
@@ -200,7 +205,17 @@ export function prepareCreatorSignalContentMigration(
   const authoredContentBlockers: string[] = []
 
   for (const target of currentPages) {
-    const row = rowById.get(target.id)
+    const originalRow = rowById.get(target.id)
+    const restoredRow = rowById.get(restoredStarterPageId(target.id))
+    if (originalRow && restoredRow) {
+      blockers.push(`Page "${target.slug}" has both its original and restored identity.`)
+      continue
+    }
+    if (restoredRow && restoredRow.slug !== target.slug) {
+      blockers.push(`Restored page "${target.slug}" has an authored route change.`)
+      continue
+    }
+    const row = originalRow ?? restoredRow
     const legacyHash = legacyCreatorSignalPageHashes0111[target.id]
     // A page absent from the original retained starter is additive. Later
     // retained versions may contain it, but that must not turn an older,
@@ -213,9 +228,11 @@ export function prepareCreatorSignalContentMigration(
           blockers.push(`Cannot restore page "${target.slug}": its route belongs to another row.`)
           continue
         }
-        previews.push({ id: target.id, slug: target.slug, state: 'page-add', targetHash,
-          ...(restoreMissingIds.has(target.id) ? { restoredMissing: true } : {}) })
-        migrationRows.push(newPageRow(target, now))
+        const restoring = restoreMissingIds.has(target.id)
+        const selected = restoring ? { ...target, id: restoredStarterPageId(target.id) } : target
+        previews.push({ id: selected.id, slug: target.slug, state: 'page-add', targetHash,
+          ...(restoring ? { restoredMissing: true, restoredStarterId: target.id } : {}) })
+        migrationRows.push(newPageRow(selected, now))
         continue
       }
       previews.push({ id: target.id, slug: target.slug, state: 'missing', legacyHash, targetHash })

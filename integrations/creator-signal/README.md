@@ -155,7 +155,12 @@ missing original starter route, obtain an explicit restoration disposition and
 pass its exact reserved page ID through `--restore-missing-pages` (comma-separated
 for multiple IDs) to both preview and prepare. Omission continues to block;
 unknown/template IDs and occupied routes are rejected. The report marks each
-restoration, creates it as a draft, and never publishes it. Existing rows still
+restoration, creates it as a draft, and never publishes it. A restored starter uses its stable
+`<original-id>/restored` record ID: merge import does not revive a soft-deleted
+original, and replacing the entire CMS would discard unrelated deleted history.
+The classifier recognises the restored identity on subsequent runs, including
+without the restoration option, and blocks duplicate identities or changed
+restored routes. Existing rows still
 undergo the same authored-content checks. Back up the full site first and remove
 only user-authorised test rows using the CMS recoverable delete path before
 exporting the migration input; an additional row still blocks shared-template

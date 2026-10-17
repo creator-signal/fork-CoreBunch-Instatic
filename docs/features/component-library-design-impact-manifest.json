@@ -14213,11 +14213,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.mautic-form",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-mautic-form.html",
-          "contentHash": "sha256:7427426231298af659ee7350ba1ea6c91456401febbfc24cfff55e9ab6c84e5a"
+          "contentHash": "sha256:316f47e9eb41cbaadd35a169d0717963f2967c2012dc4c14aaaf48cdc34ffc14"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:c45180d44666473a9a9d6532b7d4694b1990235495d3547a4dcd2b308f3008cd"
+      "contentHash": "sha256:b285ef5e3f3fe3d7d37582f58f7ab23afd9c149fb3f18efa5823b4cdc08e71ff"
     },
     {
       "id": "creator-signal.site.pattern.article-content-page",
@@ -16854,11 +16854,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pricing-plans",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pricing-plans.html",
-          "contentHash": "sha256:5a5b528ca495a48d61cee67d6c739a89de0ca77915c91f11b4b0fff44ee5ea60"
+          "contentHash": "sha256:b997f109f6e59c86ae294f4ba95c238869ceb6e013ad92fb9ebaaac78c36b40b"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:3b081bdd0718504c4e976d33f4c96b9597f4902f08ab0d8f759161d2940a65ff"
+      "contentHash": "sha256:fc88961bb7892d666614ab522d664b3fe579f36cfa8026e741838920c77da3f3"
     },
     {
       "id": "creator-signal.site.process-steps",
@@ -17548,11 +17548,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.recovery-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-recovery-state.html",
-          "contentHash": "sha256:8966ea27bffd224cd64172c08eaa3dd418fa8f55865387087627c276e9a4db61"
+          "contentHash": "sha256:de8bf2db772dc20c0835dacdd76153438480e676b969df29e0ac91f6ccf2c899"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:6b3721503137da07db4a8a42ea28eceb2cd8abf3764f6edefb5677d14178da6c"
+      "contentHash": "sha256:58041d42a02206519fc6eef8b66ad9fbe60f6e2f45f11eb1586fd9967acdddb1"
     },
     {
       "id": "creator-signal.site.rich-text-section",
@@ -18231,11 +18231,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.signal-comparison",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-signal-comparison.html",
-          "contentHash": "sha256:dfe4550e940d96c0050ddb64fb1752b862cd714fcd8158116070749303527547"
+          "contentHash": "sha256:ade2fc92d7d0aa68e8e88c0290eea4ae2602e99843c7634ce7d1f39b818f9a1a"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:2867300facdb9ba9f9d2449135491ce96dbe583ec74e7fd119de98b6b13262e9"
+      "contentHash": "sha256:bc6ba09b513c6600d779108742d378c51009242e5b84af983ae50e9fc9621d58"
     },
     {
       "id": "creator-signal.site.signal-strip",
@@ -18781,15 +18781,15 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.two-column-layout",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-two-column-layout.html",
-          "contentHash": "sha256:f52c2420f723ff2a4a3c2b82baf9e1f8a4f8ab27ea2c5b318609fee65ed7ec15"
+          "contentHash": "sha256:9ce00b11c5b664761e38a70b4b6334574b21a99c4cc5dfd7e5f7770a8a05cf44"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:9074f6fef0103b30cc5dd505dfd34ade201fb6949f8fe35deff710bf065d5452"
+      "contentHash": "sha256:b935de4d8b30f021326bb939a01579bf8e5a2c40e1cc8b27493926a0d3b1f3d6"
     }
   ],
   "checksum": {
     "algorithm": "sha256",
-    "value": "sha256:5238c8aab96d0ccc565ba6b27d1532dacdade3e911dfe86943505042405dc850"
+    "value": "sha256:124194d9190f2430f5a258e84b3663f74159e496c35fc3244719f83d1c79e34c"
   }
 }

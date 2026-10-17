@@ -964,7 +964,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-mautic-form.html",
-      "htmlHash": "sha256:7427426231298af659ee7350ba1ea6c91456401febbfc24cfff55e9ab6c84e5a",
+      "htmlHash": "sha256:316f47e9eb41cbaadd35a169d0717963f2967c2012dc4c14aaaf48cdc34ffc14",
       "fixture": {
         "source": "starter-route",
         "sourceId": "contact"
@@ -1969,7 +1969,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pricing-plans.html",
-      "htmlHash": "sha256:5a5b528ca495a48d61cee67d6c739a89de0ca77915c91f11b4b0fff44ee5ea60",
+      "htmlHash": "sha256:b997f109f6e59c86ae294f4ba95c238869ceb6e013ad92fb9ebaaac78c36b40b",
       "fixture": {
         "source": "starter-route",
         "sourceId": "index"
@@ -2192,7 +2192,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-recovery-state.html",
-      "htmlHash": "sha256:8966ea27bffd224cd64172c08eaa3dd418fa8f55865387087627c276e9a4db61",
+      "htmlHash": "sha256:de8bf2db772dc20c0835dacdd76153438480e676b969df29e0ac91f6ccf2c899",
       "fixture": {
         "source": "starter-route",
         "sourceId": "creator-signal-not-found"
@@ -2422,7 +2422,7 @@
       "kind": "component",
       "implementationTaxonomy": "primitive",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-signal-comparison.html",
-      "htmlHash": "sha256:dfe4550e940d96c0050ddb64fb1752b862cd714fcd8158116070749303527547",
+      "htmlHash": "sha256:ade2fc92d7d0aa68e8e88c0290eea4ae2602e99843c7634ce7d1f39b818f9a1a",
       "fixture": {
         "source": "starter-route",
         "sourceId": "index"
@@ -2652,7 +2652,7 @@
       "kind": "component",
       "implementationTaxonomy": "visual-component",
       "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-two-column-layout.html",
-      "htmlHash": "sha256:f52c2420f723ff2a4a3c2b82baf9e1f8a4f8ab27ea2c5b318609fee65ed7ec15",
+      "htmlHash": "sha256:9ce00b11c5b664761e38a70b4b6334574b21a99c4cc5dfd7e5f7770a8a05cf44",
       "fixture": {
         "source": "starter-route",
         "sourceId": "contact"
@@ -2690,6 +2690,6 @@
   ],
   "checksum": {
     "algorithm": "sha256",
-    "value": "sha256:8d5da29563b51d04842f9317e411a121ebf11fc366913651dcea05466a927218"
+    "value": "sha256:6678c0eb35cee9890e37fec0822f89f60eb9c1092ed7069a4e6e1663fc6bbba1"
   }
 }

@@ -220,6 +220,8 @@ export interface SiteSlice {
     index?: number,
     options?: InsertNodeOptions,
   ) => string | null
+  /** Explicit, undoable optional-field update; rejects incompatible/pinned definitions. */
+  upgradeComponentContentFields: (nodeId: string, targetVersion: string) => boolean
   /**
    * Update one field declared by the selected node's retained Component
    * Library definition. Returns false for freeform, stale or undeclared keys.

@@ -70,6 +70,7 @@ export {
 } from './definition'
 
 export { resolveComponentLibraryAvailability } from './availability'
+export { canUpgradeComponentContentFields } from './compatibleContentFields'
 
 export type { ComponentLibraryFilter } from './query'
 export {

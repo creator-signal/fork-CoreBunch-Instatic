@@ -42,7 +42,7 @@ import { pushToast } from '@ui/components/Toast'
 import { depthInTree, resolveActiveTreeTarget } from './helpers'
 import { pruneCanvasSelectionDraft } from '../selectionSlice'
 import { createStyleRuleOrderAllocator, indexStyleRulesByName, linkImportedClassNames, mergeImportedStyleRules } from './importLinking'
-import { backingComponentLibraryImplementation, initialComponentLibraryVariantValues, safeComponentLibraryOverrides } from './componentLibraryNodeOptions'
+import { backingComponentLibraryImplementation, initialComponentLibraryVariantValues, safeComponentLibraryOverrides, upgradeComponentLibraryNodeContentFields, updateComponentLibraryNodeField } from './componentLibraryNodeOptions'
 import { consolidateCoherentRichText } from './coherentRichTextAction'
 import type { SiteSlice, SiteSliceHelpers } from './types'
 
@@ -52,6 +52,7 @@ type NodeActions = Pick<
   | 'insertComponentRef'
   | 'insertImportedNodes'
   | 'updateComponentLibraryField'
+  | 'upgradeComponentContentFields'
   | 'applyComponentLibraryOption'
   | 'convertFreeformPrimitiveToComponent'
   | 'consolidateCoherentRichText'
@@ -329,36 +330,11 @@ export function createNodeActions(helpers: SiteSliceHelpers): NodeActions {
       return inserted ? newNode.id : null
     },
 
+    upgradeComponentContentFields: (nodeId, targetVersion) =>
+      mutateActiveTree((tree) => upgradeComponentLibraryNodeContentFields(tree.nodes[nodeId], targetVersion)),
+
     updateComponentLibraryField: (nodeId, fieldKey, value) =>
-      mutateActiveTree((tree) => {
-        const node = tree.nodes[nodeId]
-        const metadata = node?.catalogueInstance
-        if (!node || !metadata) return false
-        const entry = componentLibraryDefinitionForInstance(metadata.entryId, metadata.entryVersion)
-        if (!entry?.fields.some((field) => field.key === fieldKey)) return false
-        const implementation = backingComponentLibraryImplementation(
-          entry.implementation,
-        )
-        if (implementation.type === 'primitive') {
-          if (implementation.moduleId !== node.moduleId) return false
-          node.props[fieldKey] = value
-        } else if (implementation.type === 'visual-component') {
-          if (
-            node.moduleId !== 'base.visual-component-ref' ||
-            node.props.componentId !== implementation.componentId
-          ) {
-            return false
-          }
-          node.props.propOverrides = {
-            ...safeComponentLibraryOverrides(node.props.propOverrides),
-            [fieldKey]: value,
-          }
-        } else if (implementation.type === 'pattern') node.props[fieldKey] = value
-        else {
-          return false
-        }
-        return true
-      }),
+      mutateActiveTree((tree) => updateComponentLibraryNodeField(tree.nodes[nodeId], fieldKey, value)),
 
     applyComponentLibraryOption: (nodeId, kind, optionId) =>
       mutateActiveTree((tree) => {

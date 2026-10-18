@@ -8,6 +8,7 @@ import { composeTemplateChain } from '@core/templates'
 import { pluginModuleToHostModule } from '@core/plugins/moduleAdapter'
 import { makeRegistry, makeSite } from '../publisher/helpers'
 import creatorSignalPlugin from '../../../integrations/creator-signal/instatic-plugin.config'
+import retainedDefinitions from '../../../integrations/creator-signal/retained-component-definitions.json'
 import {
   creatorSignalComponentEntries,
   creatorSignalComponentLibraryEntries,
@@ -188,7 +189,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.8.6')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.8.7')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -777,7 +778,8 @@ describe('Creator Signal site pack', () => {
 
   it('registers every site block as a Creator Signal governed component', () => {
     expect(creatorSignalPlugin.manifest.permissions).toContain('componentLibrary.register')
-    expect(creatorSignalPlugin.componentLibrary).toEqual(creatorSignalComponentLibraryEntries)
+    expect(creatorSignalPlugin.componentLibrary.slice(retainedDefinitions.versions.length)).toEqual(creatorSignalComponentLibraryEntries)
+    expect(creatorSignalPlugin.componentLibrary.slice(0, retainedDefinitions.versions.length)).toEqual(retainedDefinitions.versions.map(({ definition }) => definition))
     expect(creatorSignalComponentLibraryEntries).toContain(creatorSignalHeroEntry)
     expect(creatorSignalComponentEntries.map((entry) => entry.id)).toEqual([
       'creator-signal.site.hero',

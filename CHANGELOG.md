@@ -6,6 +6,14 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.63 - 2026-10-18
+
+- Validate omitted first-party Visual Component fields using the same definition
+  defaults shown in the editor. A newly authored hosted video can publish with
+  inherited controls/preload; explicit clears remain clears and missing required
+  media still blocks publication. Verify using the actual editor insertion path.
+- Retain the unchanged site plugin 0.8.6 and its independently published content.
+
 ## 0.0.62 - 2026-10-18
 
 - Permit the existing same-owner Design System Media entry in Creator Signal

@@ -350,6 +350,8 @@ The draft can retain a newly inserted component while required content is still
 being filled in. Publication still rejects missing required fields. Ownership,
 typed values, allowed variants, fixed implementation values and appearance rules
 are checked on every draft write as well as publication.
+Omitted first-party Visual Component fields use their registered defaults, as
+shown in the editor. Explicit saved clears are not replaced by defaults.
 
 | Surface | Content ownership |
 | --- | --- |

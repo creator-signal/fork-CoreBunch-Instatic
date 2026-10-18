@@ -1,6 +1,7 @@
 import type { AnyModuleDefinition, PropertyControl } from '@core/module-engine'
 import {
   analyseComponentLibraryAccessibility,
+  canUpgradeComponentContentFields,
   analyseCoherentRichTextConversion,
   componentLibraryRegistry,
   findComponentLibraryConversionCandidates,
@@ -57,6 +58,8 @@ export function ComponentPropertiesView({
   const consolidateRichText = useEditorStore(
     (state) => state.consolidateCoherentRichText,
   )
+  const upgradeContentFields = useEditorStore((state) => state.upgradeComponentContentFields)
+  const [upgradeOpen, setUpgradeOpen] = useState(false)
   const metadata = node.catalogueInstance
   const accessibilityDiagnostics = activePage
     ? analyseComponentLibraryAccessibility(
@@ -172,6 +175,7 @@ export function ComponentPropertiesView({
 
   const status = resolveComponentLibraryInstanceStatus(metadata, latestEntry)
   const canApplyOptions = permissions.canEditComponents
+  const canUpgrade = permissions.canEditStructure && !metadata.pinnedVersion && canUpgradeComponentContentFields(entry, latestEntry)
 
   return (
     <div className={styles.surface} data-testid="component-properties-view">
@@ -197,6 +201,22 @@ export function ComponentPropertiesView({
           {statusGuidance(status)}
         </div>
       ) : null}
+
+      {canUpgrade ? <Button variant="secondary" onClick={() => setUpgradeOpen(true)}>Review content field update</Button> : null}
+      <Dialog open={upgradeOpen} onClose={() => setUpgradeOpen(false)} title="Update component content fields" footer={<>
+        <Button variant="secondary" onClick={() => setUpgradeOpen(false)}>Keep current definition</Button>
+        <Button variant="primary" disabled={!canUpgrade} onClick={() => {
+          if (!latestEntry || !upgradeContentFields(node.id, latestEntry.version)) {
+            pushToast({ kind: 'error', title: 'Content field update not applied', body: 'The instance or definition changed. Review the current selection again.', location: 'component-library' })
+          }
+          setUpgradeOpen(false)
+        }}>Update content fields</Button>
+      </>}>
+        <p>Update this instance from {metadata.entryVersion} to {latestEntry?.version}. Authored values, empty values, child content and node identity stay unchanged. Nothing is published.</p>
+        <p>Additional optional fields:</p>
+        <ul>{latestEntry?.fields.filter(field => !entry.fields.some(previous => previous.key === field.key)).map(field => <li key={field.key}>{field.label}</li>)}</ul>
+        <p>You can undo this change in the editor.</p>
+      </Dialog>
 
       {entry.presets.length > 0 ? (
         <OptionControl

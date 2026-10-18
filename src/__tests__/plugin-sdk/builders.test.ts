@@ -439,6 +439,9 @@ describe('definePlugin', () => {
     })
 
     expect(definition.componentLibrary).toEqual([componentEntry])
+    expect(definePlugin({ id: 'acme.ui-kit', name: 'UI Kit', version: '1.0.0', permissions: [permissions.componentLibraryRegister], componentLibrary: [componentEntry, { ...componentEntry, version: '1.1.0' }] }).componentLibrary).toHaveLength(2)
+    expect(() => definePlugin({ id: 'acme.ui-kit', name: 'UI Kit', version: '1.0.0', permissions: [permissions.componentLibraryRegister], componentLibrary: [componentEntry, componentEntry] })).toThrow(/Duplicate Component Library entry/)
+
     expect(() => definePlugin({
       id: 'acme.ui-kit',
       name: 'UI Kit',

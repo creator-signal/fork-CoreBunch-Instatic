@@ -3,7 +3,7 @@
   "generatedFrom": {
     "executableRegistry": {
       "designImpactManifestPath": "docs/features/component-library-design-impact-manifest.json",
-      "designImpactManifestChecksum": "sha256:124194d9190f2430f5a258e84b3663f74159e496c35fc3244719f83d1c79e34c",
+      "designImpactManifestChecksum": "sha256:695ed05015c449663e82ca03d65b3c488d255a0cc90aa000e1b84c547b22e58e",
       "sourceRevision": "sha256:0f19fe270f31acd34ef8ee13b6e809f0444fb247a62099b87c425bd5f820ab8a"
     },
     "renderer": "@core/publisher.publishPage",
@@ -2580,6 +2580,6 @@
   ],
   "checksum": {
     "algorithm": "sha256",
-    "value": "sha256:5ff536d65ed78dcd3be65c93f8886d209b9ab615d684abf09eea7b54e4a68bed"
+    "value": "sha256:575bd3aaeccccac9f63f73536ce4f317e499d9025fc89bba9c7a8a83b6403f43"
   }
 }

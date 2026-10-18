@@ -6,7 +6,13 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
-## 0.0.60 - 2026-10-18
+## 0.0.61 - 2026-10-18
+
+- Carry the retained-content/runtime fixes below with synchronized design-impact
+  and non-form specimen lineage. The 0.0.60 release workflow detected stale
+  specimen lineage before image publication; its failed tag remains unchanged.
+
+## 0.0.60 - 2026-10-18 (publication failed)
 
 ### Retained public content and media authoring
 

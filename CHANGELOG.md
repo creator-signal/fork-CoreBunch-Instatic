@@ -6,6 +6,33 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.62 - 2026-10-18
+
+- Permit the existing same-owner Design System Media entry in Creator Signal
+  public authoring, with Audio and Hosted video variants, explicit media/poster
+  roles, and fixed variant implementation values. Raw video modules and other
+  provider/variant entries remain denied by the same HTTP and collaboration guards.
+- Bundle site plugin 0.8.6. Tutorial copy, uploaded media, poster and transcript
+  remain authored CMS content; retained pages and other drafts are preserved.
+
+## 0.0.61 - 2026-10-18
+
+- Carry the retained-content/runtime fixes below with synchronized design-impact
+  and non-form specimen lineage. The 0.0.60 release workflow detected stale
+  specimen lineage before image publication; its failed tag remains unchanged.
+
+## 0.0.60 - 2026-10-18 (publication failed)
+
+### Retained public content and media authoring
+
+- Expose all audited public text and separate comparison images as authored
+  plugin content, retaining omitted historical defaults and explicit clears.
+- Resolve retained default content consistently in the canvas and publisher.
+- Preserve immutable media from earlier plugin versions during upgrades so
+  existing published image URLs remain valid.
+- Include Creator Signal site plugin 0.8.5; runtime release alone does not
+  install the plugin or rewrite existing public pages.
+
 ## 0.0.59 - 2026-10-17
 
 ### Accessible public-site navigation

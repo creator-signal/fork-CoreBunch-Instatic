@@ -20,7 +20,7 @@ import { verifyCreatorSignalDesignSystem } from '../../../scripts/sync-creator-s
 
 describe('Creator Signal public authoring contract', () => {
   it('versions the freely authorable reference-design contract', () => {
-    expect(creatorSignalPublicAuthoringContract.version).toBe('1.5.0')
+    expect(creatorSignalPublicAuthoringContract.version).toBe('1.6.0')
   })
 
   it('depends on generated master design-system adapters instead of copied token values', () => {
@@ -56,6 +56,10 @@ describe('Creator Signal public authoring contract', () => {
   })
 
   it('allow-lists every Creator Signal catalogue entry and only governed variants', () => {
+    expect(isCreatorSignalComponentPermitted('creator-signal.site.catalogue.media')).toBe(true)
+    expect(isCreatorSignalVariantPermitted('creator-signal.site.catalogue.media', 'hosted-video')).toBe(true)
+    expect(isCreatorSignalVariantPermitted('creator-signal.site.catalogue.media', 'audio')).toBe(true)
+    expect(isCreatorSignalVariantPermitted('creator-signal.site.catalogue.media', 'youtube')).toBe(false)
     for (const entry of creatorSignalComponentEntries) {
       expect(isCreatorSignalComponentPermitted(entry.id)).toBe(true)
       expect(entry.variants.length).toBeGreaterThan(0)

@@ -6,6 +6,18 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.60 - 2026-10-18
+
+### Retained public content and media authoring
+
+- Expose all audited public text and separate comparison images as authored
+  plugin content, retaining omitted historical defaults and explicit clears.
+- Resolve retained default content consistently in the canvas and publisher.
+- Preserve immutable media from earlier plugin versions during upgrades so
+  existing published image URLs remain valid.
+- Include Creator Signal site plugin 0.8.5; runtime release alone does not
+  install the plugin or rewrite existing public pages.
+
 ## 0.0.59 - 2026-10-17
 
 ### Accessible public-site navigation

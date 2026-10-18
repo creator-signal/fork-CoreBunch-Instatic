@@ -97,7 +97,11 @@ ghcr.io/creator-signal/instatic-media-edge:latest
 
 Release flow:
 
-1. Update `package.json` and `CHANGELOG.md` to the new version.
+1. Update `package.json` and `CHANGELOG.md` to the new version. Regenerate
+   version-bound metadata in dependency order with
+   `bun run component-library:design-impact` followed by
+   `bun run component-library:non-form-specimens`; the specimen manifest embeds
+   the design-impact checksum. Verify both generated checks before promotion.
 2. Merge the release change through a pull request to protected `creator-signal/develop`.
 3. Promote the accepted candidate through a pull request from `creator-signal/develop` to protected `creator-signal/main`.
 4. Tag that exact `creator-signal/main` commit, for example `v0.0.24`.

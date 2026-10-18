@@ -3,7 +3,7 @@ import type {
   ComponentLibraryRepeaterItemField,
 } from '@core/component-library'
 import { Button } from '@ui/components/Button'
-import { Input } from '@ui/components/Input'
+import { Input, Textarea } from '@ui/components/Input'
 import { Select } from '@ui/components/Select'
 import { Switch } from '@ui/components/Switch'
 import styles from './ComponentPropertiesView.module.css'
@@ -161,12 +161,29 @@ function RepeaterItemControl({
     )
   }
 
+  if (field.type === 'text') {
+    return (
+      <label className={styles.repeaterControl} htmlFor={inputId}>
+        <span>{field.label}</span>
+        <Textarea
+          id={inputId}
+          value={typeof value === 'string' ? value : ''}
+          disabled={disabled}
+          fieldSize="sm"
+          required={field.required}
+          rows={2}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      </label>
+    )
+  }
+
   return (
     <label className={styles.repeaterControl} htmlFor={inputId}>
       <span>{field.label}</span>
       <Input
         id={inputId}
-        type={field.type === 'url' ? 'url' : field.type === 'number' ? 'number' : 'text'}
+        type={field.type}
         value={field.type === 'number'
           ? (typeof value === 'number' && Number.isFinite(value) ? value : 0)
           : (typeof value === 'string' ? value : '')}

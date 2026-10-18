@@ -2,7 +2,7 @@
   "schemaVersion": "instatic.component-library-design-impact/v2",
   "generatedFrom": {
     "instatic": {
-      "version": "0.0.62",
+      "version": "0.0.63",
       "sourceRevision": "sha256:0f19fe270f31acd34ef8ee13b6e809f0444fb247a62099b87c425bd5f820ab8a",
       "revisionKind": "executable-registry-content"
     },
@@ -18790,6 +18790,6 @@
   ],
   "checksum": {
     "algorithm": "sha256",
-    "value": "sha256:d2ca40f9e356260c57d49d008c48ce3f177e518a21d1d22df36052bf3fad1a4d"
+    "value": "sha256:c5c4972fd5ef69bd5b5c2c1607c94f2f6d92070b734998d7e14d862316e8caef"
   }
 }

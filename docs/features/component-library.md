@@ -172,6 +172,12 @@ this model for links or actions. Authors edit the records in one component
 properties surface; the renderer owns the list, anchor, button, accessibility
 and structured-data markup.
 
+Repeater text fields use the shared multiline `Textarea`. Existing line breaks
+remain intact when authors edit content such as a plan's one-feature-per-line
+list; new text fields can also accept line breaks. URL, number, boolean and
+select fields retain their typed controls. This changes the editor control,
+not the stored array/record shape or publication semantics.
+
 `composition: 'container'` is reserved for genuine arbitrary composition.
 Reusable Section, Accordion, Tabs, Carousel, Modal/Dialog, Drawer and Reusable
 Form Fragment retain slots because their children are independently authored

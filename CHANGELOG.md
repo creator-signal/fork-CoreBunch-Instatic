@@ -6,6 +6,15 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.62 - 2026-10-18
+
+- Permit the existing same-owner Design System Media entry in Creator Signal
+  public authoring, with Audio and Hosted video variants, explicit media/poster
+  roles, and fixed variant implementation values. Raw video modules and other
+  provider/variant entries remain denied by the same HTTP and collaboration guards.
+- Bundle site plugin 0.8.6. Tutorial copy, uploaded media, poster and transcript
+  remain authored CMS content; retained pages and other drafts are preserved.
+
 ## 0.0.61 - 2026-10-18
 
 - Carry the retained-content/runtime fixes below with synchronized design-impact

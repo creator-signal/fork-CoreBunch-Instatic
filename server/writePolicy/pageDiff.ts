@@ -93,7 +93,7 @@ export function validatePageWriteDiff({
 }: PageDiffInput): void {
   if (publicAuthoringPolicy) {
     for (const page of changedPages) {
-      assertPublicAuthoringPage(page, publicAuthoringPolicy, componentLibraryRegistry)
+      assertPublicAuthoringPage(page, publicAuthoringPolicy, componentLibraryRegistry, 'draft')
     }
     for (const template of publicAuthoringPolicy.templates) {
       if (deletedPageIds.has(template.pageId)) {

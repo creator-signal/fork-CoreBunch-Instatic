@@ -6,6 +6,7 @@ import type {
 } from '@core/page-tree'
 import type { ComponentLibraryRegistry } from './registry'
 import { deepEqual } from '@core/utils/deepEqual'
+import { resolveVisualComponent } from '@core/visual-components-schema'
 import type {
   ComponentLibraryEntry,
   ComponentLibraryField,
@@ -298,6 +299,9 @@ function validateComponentNode(
   const values = implementation.type === 'visual-component'
     ? safeRecord(node.props.propOverrides)
     : node.props
+  const inheritedDefinition = implementation.type === 'visual-component'
+    ? resolveVisualComponent(undefined, implementation.componentId)
+    : undefined
   const allowedKeys = new Set(entry.fields.map((field) => field.key))
   const variantValues = entry.variants.find(
     (variant) => variant.id === node.catalogueInstance?.variantId,
@@ -337,7 +341,9 @@ function validateComponentNode(
   for (const field of entry.fields) {
     diagnostics.push(...validateFieldValue(
       field,
-      values[field.key],
+      Object.prototype.hasOwnProperty.call(values, field.key)
+        ? values[field.key]
+        : inheritedDefinition?.params.find((parameter) => parameter.id === field.key)?.defaultValue,
       `${nodePath}.props.${field.key}`,
       policy,
       phase === 'publish',

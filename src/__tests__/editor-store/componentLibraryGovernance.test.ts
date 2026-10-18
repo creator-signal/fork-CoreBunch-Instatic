@@ -3,7 +3,12 @@ import { useEditorStore } from '@site/store/store'
 import {
   componentLibraryPatternRegistry,
   componentLibraryRegistry,
+  analysePublicAuthoringPage,
 } from '@core/component-library'
+import { registry } from '@core/module-engine'
+import { publishPage } from '@core/publisher'
+import { insertComponentLibraryEntry } from '@site/component-library/componentLibraryAuthoring'
+import { creatorSignalPublicAuthoringPolicy } from '../../../integrations/creator-signal/public-authoring-contract'
 import { creatorSignalCatalogueEntryId } from '@core/page-tree'
 import '@modules/base/index'
 
@@ -24,6 +29,35 @@ beforeEach(() => {
 })
 
 describe('Component Library governed mutations', () => {
+  it('publishes an editor-created hosted video with inherited controls and preload', () => {
+    const site = useEditorStore.getState().createSite('Tutorial Authoring')
+    const page = site.pages[0]!
+    const entry = componentLibraryRegistry.get(publicId('base.media'))!
+    const result = insertComponentLibraryEntry(useEditorStore.getState(), page, entry,
+      { parentId: page.rootNodeId, index: 0 }, { variantId: 'hosted-video' })
+    expect(result.ok).toBe(true)
+    if (!result.ok) throw new Error(result.error)
+    const store = useEditorStore.getState()
+    expect(store.updateComponentLibraryField(result.nodeId, 'source', '/media/tutorial.mp4')).toBe(true)
+    expect(store.updateComponentLibraryField(result.nodeId, 'title', 'Download your sales files')).toBe(true)
+    const authoredSite = useEditorStore.getState().site!
+    const authoredPage = authoredSite.pages[0]!
+    const overrides = authoredPage.nodes[result.nodeId]!.props.propOverrides as Record<string, unknown>
+    expect(overrides).not.toHaveProperty('controls')
+    expect(overrides).not.toHaveProperty('preload')
+    expect(analysePublicAuthoringPage(authoredPage, creatorSignalPublicAuthoringPolicy,
+      componentLibraryRegistry)).toEqual([])
+    const output = publishPage(authoredPage, authoredSite, registry)
+    expect(output.html).toContain('<video')
+    expect(output.html).toContain('controls')
+    expect(output.html).toContain('preload="metadata"')
+    expect(useEditorStore.getState().updateComponentLibraryField(result.nodeId, 'source', '')).toBe(true)
+    expect(analysePublicAuthoringPage(useEditorStore.getState().site!.pages[0]!,
+      creatorSignalPublicAuthoringPolicy, componentLibraryRegistry)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: 'field.required' }),
+    ]))
+  })
+
   it('converts an eligible freeform primitive atomically and undo restores it', () => {
     const store = useEditorStore.getState()
     const site = store.createSite('Conversion Test')

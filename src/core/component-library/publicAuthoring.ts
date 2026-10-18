@@ -5,12 +5,13 @@ import type {
   SiteDocument,
 } from '@core/page-tree'
 import type { ComponentLibraryRegistry } from './registry'
+import { deepEqual } from '@core/utils/deepEqual'
 import type {
   ComponentLibraryEntry,
   ComponentLibraryField,
   ComponentLibraryImplementation,
 } from './schemas'
-import { analysePublicAuthoringPolicyContract } from './publicAuthoringPolicyContract'
+import { analysePublicAuthoringPolicyContract, isPublicAuthoringEntryOwned } from './publicAuthoringPolicyContract'
 import {
   diagnostic,
   type PublicAuthoringDiagnostic,
@@ -111,6 +112,7 @@ export function analysePublicAuthoringPage(
   page: Page,
   policy: PublicAuthoringPolicy,
   registry: ComponentLibraryRegistry,
+  phase: 'draft' | 'publish' = 'publish',
 ): PublicAuthoringDiagnostic[] {
   const diagnostics: PublicAuthoringDiagnostic[] = []
   const pagePath = `pages.${page.id}`
@@ -222,7 +224,7 @@ export function analysePublicAuthoringPage(
     if (implementation.type === 'pattern') {
       continue
     }
-    diagnostics.push(...validateComponentNode(page, node, entry, policy))
+    diagnostics.push(...validateComponentNode(page, node, entry, policy, phase))
   }
 
   const titleCount = Object.values(page.nodes).filter((node) =>
@@ -277,8 +279,9 @@ export function assertPublicAuthoringPage(
   page: Page,
   policy: PublicAuthoringPolicy,
   registry: ComponentLibraryRegistry,
+  phase: 'draft' | 'publish' = 'publish',
 ): void {
-  const diagnostics = analysePublicAuthoringPage(page, policy, registry)
+  const diagnostics = analysePublicAuthoringPage(page, policy, registry, phase)
   if (diagnostics.length > 0) throw new PublicAuthoringPolicyError(diagnostics)
 }
 
@@ -287,6 +290,7 @@ function validateComponentNode(
   node: PageNode,
   entry: ComponentLibraryEntry,
   policy: PublicAuthoringPolicy,
+  phase: 'draft' | 'publish',
 ): PublicAuthoringDiagnostic[] {
   const diagnostics: PublicAuthoringDiagnostic[] = []
   const nodePath = `pages.${page.id}.nodes.${node.id}`
@@ -295,6 +299,22 @@ function validateComponentNode(
     ? safeRecord(node.props.propOverrides)
     : node.props
   const allowedKeys = new Set(entry.fields.map((field) => field.key))
+  const variantValues = entry.variants.find(
+    (variant) => variant.id === node.catalogueInstance?.variantId,
+  )?.values ?? {}
+  for (const [key, expected] of Object.entries(variantValues)) {
+    // Variant-owned implementation values are fixed, rather than new author fields.
+    if (allowedKeys.has(key)) continue
+    allowedKeys.add(key)
+    if (!deepEqual(values[key], expected)) {
+      diagnostics.push(diagnostic(
+        'field.variant-value-mismatch',
+        `${nodePath}.props.${key}`,
+        `Property "${key}" differs from the approved variant value.`,
+        'Reapply the approved variant instead of overriding its implementation values.',
+      ))
+    }
+  }
 
   if (entry.composition === 'leaf' && node.children.length > 0) {
     diagnostics.push(diagnostic(
@@ -320,6 +340,7 @@ function validateComponentNode(
       values[field.key],
       `${nodePath}.props.${field.key}`,
       policy,
+      phase === 'publish',
     ))
   }
   for (const [key, value] of Object.entries(values)) {
@@ -386,9 +407,10 @@ function validateFieldValue(
   value: unknown,
   path: string,
   policy: PublicAuthoringPolicy,
+  requireComplete: boolean,
 ): PublicAuthoringDiagnostic[] {
   const diagnostics: PublicAuthoringDiagnostic[] = []
-  if (field.required && (value === undefined || value === null || value === '')) {
+  if (requireComplete && field.required && (value === undefined || value === null || value === '')) {
     diagnostics.push(diagnostic(
       'field.required',
       path,
@@ -431,7 +453,7 @@ function validateFieldValue(
       }
       for (const itemField of field.itemFields) {
         const itemValue = record[itemField.key]
-        if (itemField.required && (itemValue === undefined || itemValue === null || itemValue === '')) {
+        if (requireComplete && itemField.required && (itemValue === undefined || itemValue === null || itemValue === '')) {
           diagnostics.push(diagnostic(
             'field.required',
             `${path}.${index}.${itemField.key}`,
@@ -477,7 +499,7 @@ function resolvePolicyEntry(
   const metadata = node.catalogueInstance
   if (!metadata) return undefined
   const entry = registry.getVersion(metadata.entryId, metadata.entryVersion)
-  if (!entry || entry.source.type !== 'plugin' || entry.source.pluginId !== policy.ownerPluginId) {
+  if (!isPublicAuthoringEntryOwned(entry, policy.ownerPluginId)) {
     return undefined
   }
   const implementation = backingImplementation(entry.implementation)

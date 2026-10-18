@@ -123,11 +123,18 @@ const BUDGETS: ChunkBudget[] = [
   // can paint the existing toolbar/chrome before the editor body downloads.
   {
     prefix: 'SitePage-',
-    maxBytes: 30_000,
+    // The inspector's lazy preload references add 84 B to the shell while
+    // removing ~71 KB from the editor body; retain a separate inspector budget.
+    maxBytes: 30_200,
     rationale:
-      'site route shell (current ~22 KB raw / ~9 KB gzipped). Must not ' +
+      'site route shell including deferred-inspector references (current 30,084 B raw). Must not ' +
       'pull the visual editor body, DnD, canvas, first-party modules, or ' +
       'PropertiesPanel back into the active route chunk.',
+  },
+  {
+    prefix: 'ComponentPropertiesView-',
+    maxBytes: 28_000,
+    rationale: 'governed field inspector and explicit conversion/update dialogs, loaded only for a selected component (current 25,274 B raw)',
   },
   {
     prefix: 'AdminCanvasEditorBody-',

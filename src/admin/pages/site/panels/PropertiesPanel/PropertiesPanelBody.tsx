@@ -18,7 +18,7 @@
  * the moduleTabContent JSX once (via `renderModuleTabContent`) and passes it
  * in, keeping the schema → control dispatch reusable across surfaces.
  */
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { EmptyState } from '@ui/components/EmptyState'
 import { useEditorPermissions } from '@site/editorPermissionsContext'
 import { useEditorStore } from '@site/store/store'
@@ -37,9 +37,11 @@ import { ConvertToComponentButton } from './ConvertToComponentButton'
 import { MultiSelectionInspector } from './MultiSelectionInspector'
 import { MultiSelectorInspector } from './MultiSelectorInspector'
 import { SelectorInspector } from './SelectorInspector'
-import { ComponentPropertiesView } from './ComponentPropertiesView'
 import { canComponentizeNode } from '@site/componentization'
 import styles from './PropertiesPanel.module.css'
+
+const ComponentPropertiesView = lazy(() => import('./ComponentPropertiesView')
+  .then(module => ({ default: module.ComponentPropertiesView })))
 
 interface PropertiesPanelBodyProps {
   selectedSelectorClass: StyleRule | null
@@ -113,12 +115,14 @@ export function PropertiesPanelBody(props: PropertiesPanelBodyProps): React.Reac
       )
     }
     return (
-      <ComponentPropertiesView
-        node={selectedNode}
-        definition={definition}
-        entry={componentLibraryEntry}
-        latestEntry={latestComponentLibraryEntry}
-      />
+      <Suspense fallback={<p role="status">Loading component content fields…</p>}>
+        <ComponentPropertiesView
+          node={selectedNode}
+          definition={definition}
+          entry={componentLibraryEntry}
+          latestEntry={latestComponentLibraryEntry}
+        />
+      </Suspense>
     )
   }
 

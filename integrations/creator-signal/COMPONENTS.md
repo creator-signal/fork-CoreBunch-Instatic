@@ -305,7 +305,7 @@ affect only the selected reference.
 
 ## Retained definition versions and content field updates
 
-Runtime0.0.64 and plugin0.8.7 retain the exact older definition DTOs recorded in
+Runtime0.0.65 and plugin0.8.7 retain the exact older definition DTOs recorded in
 `retained-component-definitions.json`. Each snapshot identifies its immutable
 source revision, manifest path and SHA256. These are definition contracts, not
 customer content. The plugin pack carries distinct entry versions; activation

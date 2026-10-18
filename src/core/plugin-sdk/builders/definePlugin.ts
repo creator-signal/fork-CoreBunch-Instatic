@@ -36,6 +36,7 @@ import type {
 import type { PluginModuleDefinition } from '../modules'
 import {
   parseComponentLibraryEntry,
+  compareComponentLibraryVersions,
   type ComponentLibraryEntry,
 } from '@core/component-library'
 import type { PluginPackContents } from './definePack'
@@ -102,7 +103,8 @@ export interface DefinePluginConfig {
   /**
    * Governed catalogue entries packaged separately from canvas modules.
    * Every entry must be namespaced under, and declare ownership by, this
-   * plugin. Requires `componentLibrary.register`.
+   * plugin. Distinct versions retain saved instances; the host selects the
+   * newest definition for new instances. Requires `componentLibrary.register`.
    */
   componentLibrary?: ComponentLibraryEntry[]
 
@@ -174,7 +176,7 @@ export function definePlugin(config: DefinePluginConfig): PluginDefinition {
       '[plugin-sdk] Component Library entries require the "componentLibrary.register" permission.',
     )
   }
-  const componentEntryIds = new Set<string>()
+  const componentEntryVersions = new Map<string, string[]>()
   for (const entry of componentLibrary) {
     if (!entry.id.startsWith(`${config.id}.`)) {
       throw new Error(
@@ -189,12 +191,13 @@ export function definePlugin(config: DefinePluginConfig): PluginDefinition {
         `[plugin-sdk] Component Library entry "${entry.id}" must declare plugin source ownership by "${config.id}".`,
       )
     }
-    if (componentEntryIds.has(entry.id)) {
+    const versions = componentEntryVersions.get(entry.id) ?? []
+    if (versions.some(version => compareComponentLibraryVersions(version, entry.version) === 0)) {
       throw new Error(
-        `[plugin-sdk] Duplicate Component Library entry id "${entry.id}".`,
+        `[plugin-sdk] Duplicate Component Library entry id "${entry.id}" at version "${entry.version}".`,
       )
     }
-    componentEntryIds.add(entry.id)
+    componentEntryVersions.set(entry.id, [...versions, entry.version])
   }
 
   if (config.settings && config.settings.length > 0) {

@@ -32,6 +32,46 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('ComponentPropertiesView', () => {
+  it('requires review and confirmation before an undoable compatible field update', () => {
+    const entryId = publicId('base.email-input')
+    const entry = componentLibraryRegistry.getOrThrow(entryId)
+    const latest = { ...entry, version: '1.1.0', fields: [...entry.fields, { key: 'additionalNote', label: 'Additional note', type: 'text' as const, required: false }] }
+    componentLibraryRegistry.registerOrReplace(latest)
+    try {
+      const state = useEditorStore.getState()
+      const node = state.site!.pages[0]!.nodes[state.selectedNodeId!]!
+      const before = structuredClone(node)
+      render(<EditorPermissionsContext.Provider value={{ canEditComponents: true, canEditStructure: true, canEditContent: true, canEditStyle: true }}>
+        <ComponentPropertiesView node={node} definition={registry.get('base.input')!} entry={entry} latestEntry={latest}/>
+      </EditorPermissionsContext.Provider>)
+      expect(useEditorStore.getState().site!.pages[0]!.nodes[node.id]).toEqual(before)
+      fireEvent.click(screen.getByRole('button', { name: 'Review content field update' }))
+      const dialog = screen.getByRole('dialog', { name: 'Update component content fields' })
+      expect(within(dialog).getByText('Additional note')).toBeTruthy()
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Keep current definition' }))
+      expect(useEditorStore.getState().site!.pages[0]!.nodes[node.id]).toEqual(before)
+      fireEvent.click(screen.getByRole('button', { name: 'Review content field update' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Update content fields', exact: true }))
+      const updated = useEditorStore.getState().site!.pages[0]!.nodes[node.id]!
+      expect(updated).toEqual({ ...before, catalogueInstance: { ...before.catalogueInstance!, entryVersion: '1.1.0' } })
+      useEditorStore.getState().undo()
+      expect(useEditorStore.getState().site!.pages[0]!.nodes[node.id]).toEqual(before)
+    } finally {
+      componentLibraryRegistry.unregister(entryId)
+      componentLibraryRegistry.register(entry)
+    }
+  })
+
+  it('keeps definition upgrades unavailable to a component-only author', () => {
+    const state = useEditorStore.getState()
+    const node = state.site!.pages[0]!.nodes[state.selectedNodeId!]!
+    const entry = componentLibraryRegistry.getOrThrow(publicId('base.email-input'))
+    render(<EditorPermissionsContext.Provider value={{ canEditComponents: true, canEditStructure: false, canEditContent: false, canEditStyle: false }}>
+      <ComponentPropertiesView node={node} definition={registry.get('base.input')!} entry={entry} latestEntry={{ ...entry, version: '1.1.0' }}/>
+    </EditorPermissionsContext.Provider>)
+    expect(screen.queryByRole('button', { name: 'Review content field update' })).toBeNull()
+  })
+
   it('renders approved fields and guidance without raw implementation controls', () => {
     const state = useEditorStore.getState()
     const node = state.site!.pages[0]!.nodes[state.selectedNodeId!]!

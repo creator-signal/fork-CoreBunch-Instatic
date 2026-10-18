@@ -1,5 +1,7 @@
 import { definePlugin, permissions } from '@core/plugin-sdk'
 import { creatorSignalComponentLibraryEntries } from './component-library'
+import retainedDefinitions from './retained-component-definitions.json'
+import { parseComponentLibraryEntry } from '@core/component-library'
 import { creatorSignalPluginIdentity } from './plugin-contract'
 import crmIframeForm from './modules/crm-iframe-form'
 import mauticForm from './modules/mautic-form'
@@ -34,7 +36,7 @@ export default definePlugin({
     'errors-api.creatorsignal.me',
   ],
   modules: [mauticForm, crmIframeForm, ...creatorSignalSiteModules],
-  componentLibrary: creatorSignalComponentLibraryEntries,
+  componentLibrary: [...retainedDefinitions.versions.map(({ definition }) => parseComponentLibraryEntry(definition)), ...creatorSignalComponentLibraryEntries],
   pack,
   settings: [
     { id: 'plausibleEnabled', type: 'toggle', label: 'Enable Plausible pageviews', default: false },

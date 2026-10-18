@@ -99,21 +99,21 @@ const runtime = String.raw`(() => {
     const target = root.querySelector('[data-form-mount]');
     if (!/^https:\/\//.test(base) || !/^[a-zA-Z0-9_-]+$/.test(alias) ||
       !/^\/[a-zA-Z0-9_./-]+\.js$/.test(registryPath) || registryPath.includes('..') || !target) {
-      if (status) status.textContent = 'This form is not configured yet.';
+      if (status) status.textContent = (root.dataset.notConfiguredMessage || '');
       dispatch(root, 'failure', 'invalid_configuration');
       return;
     }
     try {
-      if (status) status.textContent = 'Loading form…';
+      if (status) status.textContent = (root.dataset.loadingMessage || '');
       await loadScript(base + registryPath, 'mautic-registry:' + base + ':' + registryPath);
     } catch {
-      if (status) status.textContent = 'The form is temporarily unavailable.';
+      if (status) status.textContent = (root.dataset.unavailableMessage || '');
       dispatch(root, 'failure', 'registry_load_failed');
       return;
     }
     const entry = formEntry(alias);
     if (!entry) {
-      if (status) status.textContent = 'The form is temporarily unavailable.';
+      if (status) status.textContent = (root.dataset.unavailableMessage || '');
       dispatch(root, 'failure', 'registry_invalid');
       return;
     }
@@ -124,10 +124,10 @@ const runtime = String.raw`(() => {
       setBusy(root, target, false);
       if (success) {
         target.hidden = true;
-        if (status) status.textContent = root.dataset.successMessage || 'Thanks — your message has been received.';
+        if (status) status.textContent = root.dataset.successMessage || '';
         dispatch(root, 'success');
       } else {
-        if (status) status.textContent = 'The form could not be sent. Please try again.';
+        if (status) status.textContent = (root.dataset.failureMessage || '');
         dispatch(root, 'failure', 'mautic_response_failed');
       }
       return true;
@@ -163,7 +163,7 @@ const runtime = String.raw`(() => {
             return;
           }
           setBusy(root, target, true);
-          if (status) status.textContent = 'Sending...';
+          if (status) status.textContent = (root.dataset.sendingMessage || '');
           try {
             const submission = await fetch(
               base + '/form/submit?formId=' + encodeURIComponent(formId) + '&ajax=1',
@@ -183,7 +183,7 @@ const runtime = String.raw`(() => {
       if (status) status.textContent = '';
     } catch (error) {
       setBusy(root, target, false);
-      if (status) status.textContent = 'The form is temporarily unavailable.';
+      if (status) status.textContent = (root.dataset.unavailableMessage || '');
       dispatch(root, 'failure', error instanceof Error && error.message === 'form_markup_missing'
         ? 'form_markup_missing'
         : 'form_script_load_failed');
@@ -340,6 +340,12 @@ export default defineModule({
   category: 'Creator Signal',
   htmlTag: 'section',
   defaults: {
+    notConfiguredMessage: 'This form is not configured yet.',
+    loadingMessage: 'Loading form…',
+    unavailableMessage: 'The form is temporarily unavailable.',
+    failureMessage: 'The form could not be sent. Please try again.',
+    sendingMessage: 'Sending...',
+
     successMessage: 'Thanks — your message has been received.',
     sectionId: 'managed-form',
     mauticBaseUrl: 'https://marketing.creatorsignal.me',
@@ -349,6 +355,12 @@ export default defineModule({
     campaignCode: 'contact',
   },
   schema: {
+    notConfiguredMessage: control.text('Not configured message'),
+    loadingMessage: control.text('Loading message'),
+    unavailableMessage: control.text('Unavailable message'),
+    failureMessage: control.text('Failure message'),
+    sendingMessage: control.text('Sending message'),
+
     successMessage: control.textarea('Success message', { rows: 2 }),
     sectionId: control.text('Section anchor'),
     mauticBaseUrl: control.url('Mautic public URL'),
@@ -367,6 +379,11 @@ export default defineModule({
           data-registry-path="${escapedProp(props.registryPath)}"
           data-form-code="${escapedProp(props.formCode)}"
           data-campaign-code="${escapedProp(props.campaignCode)}"
+          data-not-configured-message="${escapedProp(props.notConfiguredMessage)}"
+          data-loading-message="${escapedProp(props.loadingMessage)}"
+          data-unavailable-message="${escapedProp(props.unavailableMessage)}"
+          data-failure-message="${escapedProp(props.failureMessage)}"
+          data-sending-message="${escapedProp(props.sendingMessage)}"
           data-success-message="${escapedProp(props.successMessage)}">
           <div class="cs-mautic-form-shell">
             <div data-form-mount></div>

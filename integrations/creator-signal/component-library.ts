@@ -132,7 +132,7 @@ export const creatorSignalHeroEntry: ComponentLibraryEntry = {
 
 export const creatorSignalHeaderEntry = siteEntry({
   id: 'creator-signal.site.header',
-  version: '1.2.0',
+  version: '1.3.0',
   name: 'Site Header',
   description: 'Pack-owned brand identity and primary navigation inherited from the site template.',
   tags: ['header', 'navigation', 'brand', 'shared'],
@@ -141,6 +141,11 @@ export const creatorSignalHeaderEntry = siteEntry({
   usage: 'Edit once in the shared template; every ordinary page inherits the updated brand identity and navigation.',
   accessibilityGuidance: 'Use short navigation labels, one primary action, and a Home URL that returns to the site root.',
   fields: [
+    { key: 'skipLinkLabel', label: 'Skip link label', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+    { key: 'homeLabel', label: 'Home label', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+    { key: 'menuLabel', label: 'Menu label', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+    { key: 'navigationLabel', label: 'Navigation label', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+
     { key: 'brandName', label: 'Brand name', description: 'Visible site name and home-link accessible name.', type: 'text', required: true },
     { key: 'tagline', label: 'Tagline', description: 'Short supporting line displayed with the brand.', type: 'text', required: true },
     { key: 'homeUrl', label: 'Home URL', description: 'Destination used by the shared brand link.', type: 'url', required: true },
@@ -161,7 +166,7 @@ export const creatorSignalHeaderEntry = siteEntry({
 
 export const creatorSignalFooterEntry = siteEntry({
   id: 'creator-signal.site.footer',
-  version: '1.1.0',
+  version: '1.2.0',
   name: 'Site Footer',
   description: 'Shared footer identity, legal routes and service links.',
   tags: ['footer', 'navigation', 'legal', 'shared'],
@@ -170,6 +175,8 @@ export const creatorSignalFooterEntry = siteEntry({
   usage: 'Edit once in the shared template; every ordinary page inherits the updated footer links and legal routes.',
   accessibilityGuidance: 'Keep link labels unique enough to make sense when read out of context.',
   fields: [
+    { key: 'navigationLabel', label: 'Navigation label', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+
     { key: 'brandName', label: 'Brand name', description: 'Visible site name in the shared footer.', type: 'text', required: true },
     { key: 'tagline', label: 'Tagline', description: 'Short supporting brand line.', type: 'text', required: true },
     { key: 'copyright', label: 'Copyright', description: 'Current copyright notice displayed on every page.', type: 'text', required: true },
@@ -185,6 +192,7 @@ export const creatorSignalFooterEntry = siteEntry({
 })
 
 export const creatorSignalConsentEntry = siteEntry({
+  version: '1.1.0',
   id: 'creator-signal.site.consent-banner',
   name: 'Privacy Choices',
   description: 'Shared privacy notice and analytics choices.',
@@ -194,6 +202,8 @@ export const creatorSignalConsentEntry = siteEntry({
   usage: 'Edit once in the shared template; every ordinary page inherits the same privacy choices.',
   accessibilityGuidance: 'Describe the optional purpose plainly and keep both choices equally understandable.',
   fields: [
+    { key: 'regionLabel', label: 'Region label', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+
     { key: 'heading', label: 'Heading', description: 'Short name for the privacy choice.', type: 'text', required: true },
     { key: 'body', label: 'Explanation', description: 'Plain-language explanation of essential and optional processing.', type: 'text', required: true },
     { key: 'essentialLabel', label: 'Essential choice label', description: 'Button label for declining optional analytics.', type: 'text', required: true },
@@ -267,6 +277,7 @@ export const creatorSignalSignalStripEntry = siteEntry({
 })
 
 export const creatorSignalSignalComparisonEntry = siteEntry({
+  version: '1.1.0',
   id: 'creator-signal.site.signal-comparison',
   name: 'Signal Comparison',
   description: 'A before-and-after explanation of limited reporting and a visual sales signal.',
@@ -275,6 +286,11 @@ export const creatorSignalSignalComparisonEntry = siteEntry({
   usage: 'Use for a two-sided narrative comparison; use Comparison Section when visitors need a row-and-column data table.',
   accessibilityGuidance: 'State both sides in text and provide alternative text for informative artwork so the comparison never relies on imagery alone.',
   fields: [
+    { key: 'beforeHeading', label: 'Before heading', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+    { key: 'afterHeading', label: 'After heading', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+    { key: 'beforeArtwork', label: 'Before artwork', description: 'Editable public content.', type: 'image', required: false },
+    { key: 'beforeArtworkAlt', label: 'Before artwork alt', description: 'Editable public content.', type: 'text', required: false },
+
     { key: 'eyebrow', label: 'Eyebrow', description: 'Short context label above the comparison.', type: 'text', required: true },
     { key: 'heading', label: 'Heading', description: 'Outcome-focused heading for the complete comparison.', type: 'text', required: true },
     { key: 'introduction', label: 'Introduction', description: 'Why the before-and-after distinction matters.', type: 'text', required: true },
@@ -310,6 +326,7 @@ export const creatorSignalProcessStepsEntry = siteEntry({
 })
 
 export const creatorSignalPricingPlansEntry = siteEntry({
+  version: '1.1.0',
   id: 'creator-signal.site.pricing-plans',
   name: 'Pricing Plans',
   description: 'Three clear public plan cards with explicit prices, included features and signup handoffs.',
@@ -318,6 +335,8 @@ export const creatorSignalPricingPlansEntry = siteEntry({
   usage: 'Use for the concise Home plan summary. Keep the detailed Pricing route as the semantic comparison authority.',
   accessibilityGuidance: 'Write price cadence in text, include a descriptive feature list, and never communicate the featured plan through colour alone.',
   fields: [
+    { key: 'featuredLabel', label: 'Featured label', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+
     { key: 'eyebrow', label: 'Eyebrow', description: 'Short context label above the plans.', type: 'text', required: true },
     { key: 'heading', label: 'Heading', description: 'Heading for the complete plan group.', type: 'text', required: true },
     { key: 'introduction', label: 'Introduction', description: 'Short explanation of how to choose.', type: 'text', required: true },
@@ -423,6 +442,7 @@ export const creatorSignalFaqEntry = siteEntry({
 })
 
 export const creatorSignalComparisonEntry = siteEntry({
+  version: '1.1.0',
   id: 'creator-signal.site.comparison-section',
   name: 'Comparison Section',
   description: 'A captioned comparison table with consistent criteria across three options.',
@@ -430,6 +450,8 @@ export const creatorSignalComparisonEntry = siteEntry({
   moduleId: comparisonSection.id,
   accessibilityGuidance: 'Keep the caption specific and write row labels that make sense independently of visual position.',
   fields: [
+    { key: 'criteriaLabel', label: 'Criteria label', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+
     { key: 'eyebrow', label: 'Eyebrow', description: 'Short context label above the comparison.', type: 'text', required: true },
     { key: 'heading', label: 'Heading', description: 'Outcome-focused heading for the complete comparison.', type: 'text', required: true },
     { key: 'introduction', label: 'Introduction', description: 'Explain what is being compared and why.', type: 'text', required: true },
@@ -452,6 +474,7 @@ export const creatorSignalComparisonEntry = siteEntry({
 })
 
 export const creatorSignalRecoveryStateEntry = siteEntry({
+  version: '1.1.0',
   id: 'creator-signal.site.recovery-state',
   name: 'Recovery State',
   description: 'A textual empty, error, offline or not-found state with one clear recovery action.',
@@ -460,6 +483,11 @@ export const creatorSignalRecoveryStateEntry = siteEntry({
   constraints: { allowedDocumentKinds: ['page', 'template'] },
   accessibilityGuidance: 'Name the state in text, explain what happened, and offer an action that works without relying on colour.',
   fields: [
+    { key: 'emptyLabel', label: 'Empty label', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+    { key: 'errorLabel', label: 'Error label', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+    { key: 'offlineLabel', label: 'Offline label', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+    { key: 'notFoundLabel', label: 'Not found label', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+
     { key: 'state', label: 'State', description: 'Governed empty, error, offline or not-found semantic treatment.', type: 'select', required: true },
     { key: 'heading', label: 'Heading', description: 'Plain-language page heading.', type: 'text', required: true },
     { key: 'body', label: 'Explanation', description: 'Explain the state and any safe next step.', type: 'text', required: true },
@@ -486,12 +514,18 @@ export const creatorSignalPublicDocumentEntry = siteEntry({
 
 export const creatorSignalMauticFormEntry = siteEntry({
   id: 'creator-signal.site.mautic-form',
-  version: '2.0.0',
+  version: '2.1.0',
   name: 'Managed Form',
   description: 'A standalone governed form provider resolved from the generated Mautic registry.',
   tags: ['form', 'contact', 'mautic', 'integration'],
   moduleId: 'creator-signal.site.mautic-form',
   fields: [
+    { key: 'notConfiguredMessage', label: 'Not configured message', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+    { key: 'loadingMessage', label: 'Loading message', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+    { key: 'unavailableMessage', label: 'Unavailable message', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+    { key: 'failureMessage', label: 'Failure message', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+    { key: 'sendingMessage', label: 'Sending message', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+
     { key: 'successMessage', label: 'Success message', description: 'Confirmation announced after a successful submission.', type: 'text', required: true },
     { key: 'sectionId', label: 'Section anchor', description: 'Unique page anchor used by the form section.', type: 'text', required: true, advanced: true },
     { key: 'mauticBaseUrl', label: 'Mautic public URL', description: 'Approved public form-provider origin.', type: 'url', required: true, advanced: true },
@@ -504,12 +538,14 @@ export const creatorSignalMauticFormEntry = siteEntry({
 
 export const creatorSignalCrmIframeFormEntry = siteEntry({
   id: 'creator-signal.site.crm-iframe-form',
-  version: '2.0.0',
+  version: '2.1.0',
   name: 'Embedded CRM Form',
   description: 'A standalone authorable Mautic iframe with a validated seamless-resize protocol.',
   tags: ['form', 'crm', 'mautic', 'iframe', 'embed'],
   moduleId: 'creator-signal.site.crm-iframe-form',
   fields: [
+    { key: 'readyMessage', label: 'Ready message', description: 'Editable public content; omitted values use the component default.', type: 'text', required: false },
+
     { key: 'sectionId', label: 'Section anchor', description: 'Unique identifier used to match resize messages from this CRM form.', type: 'text', required: true, advanced: true },
     { key: 'formUrl', label: 'CRM form URL', description: 'HTTPS Mautic form page hosted at the approved public CRM origin.', type: 'url', required: true },
     { key: 'iframeTitle', label: 'Accessible iframe title', description: 'Concise name announced before visitors enter the embedded form.', type: 'text', required: true },

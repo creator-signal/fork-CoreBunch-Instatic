@@ -359,10 +359,10 @@ export async function removeAllPluginAssets(uploadsDir: string, pluginId: string
 }
 
 /**
- * Delete a specific plugin version's on-disk dir. Used by the upgrade flow
- * (drop the old version after a successful upgrade, drop the new version
- * during rollback). `removeAllPluginAssets` deletes the entire plugin tree;
- * this one is version-scoped.
+ * Delete a failed new plugin version during upgrade rollback. Successful
+ * upgrades retain prior versioned assets for authored content references.
+ * `removeAllPluginAssets` deletes the entire tree on explicit uninstall;
+ * this rollback helper is version-scoped.
  */
 export async function removePluginVersionAssets(
   uploadsDir: string,

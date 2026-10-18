@@ -1,0 +1,2160 @@
+{
+  "sourcePath": "docs/features/component-library-design-impact-manifest.json",
+  "versions": [
+    {
+      "definition": {
+        "id": "creator-signal.site.comparison-section",
+        "version": "1.0.0",
+        "name": "Comparison Section",
+        "description": "A captioned comparison table with consistent criteria across three options.",
+        "category": "Creator Signal",
+        "tags": [
+          "comparison",
+          "pricing",
+          "products",
+          "table"
+        ],
+        "icon": "layout-solid",
+        "source": {
+          "type": "plugin",
+          "pluginId": "creator-signal.site",
+          "name": "Creator Signal"
+        },
+        "status": "stable",
+        "composition": "leaf",
+        "implementation": {
+          "type": "primitive",
+          "moduleId": "creator-signal.site.comparison-section"
+        },
+        "fields": [
+          {
+            "key": "eyebrow",
+            "label": "Eyebrow",
+            "description": "Short context label above the comparison.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "heading",
+            "label": "Heading",
+            "description": "Outcome-focused heading for the complete comparison.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "introduction",
+            "label": "Introduction",
+            "description": "Explain what is being compared and why.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "sectionId",
+            "label": "Section anchor",
+            "description": "Unique page anchor used by the section heading.",
+            "type": "text",
+            "required": true,
+            "advanced": true
+          },
+          {
+            "key": "caption",
+            "label": "Table caption",
+            "description": "Accessible name describing the comparison.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "firstLabel",
+            "label": "First option",
+            "description": "Column heading for the first option.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "secondLabel",
+            "label": "Second option",
+            "description": "Column heading for the second option.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "thirdLabel",
+            "label": "Third option",
+            "description": "Column heading for the third option.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "items",
+            "label": "Comparison rows",
+            "description": "Ordered criteria with one value for each option.",
+            "type": "repeater",
+            "required": true,
+            "itemLabel": "Criterion",
+            "minItems": 1,
+            "maxItems": 24,
+            "itemFields": [
+              {
+                "key": "label",
+                "label": "Criterion",
+                "description": "Row heading shared by all three values.",
+                "type": "text",
+                "required": true
+              },
+              {
+                "key": "firstValue",
+                "label": "First value",
+                "description": "Value for the first option.",
+                "type": "text",
+                "required": true
+              },
+              {
+                "key": "secondValue",
+                "label": "Second value",
+                "description": "Value for the second option.",
+                "type": "text",
+                "required": true
+              },
+              {
+                "key": "thirdValue",
+                "label": "Third value",
+                "description": "Value for the third option.",
+                "type": "text",
+                "required": true
+              }
+            ]
+          }
+        ],
+        "variants": [
+          {
+            "id": "default",
+            "name": "Default",
+            "description": "The governed Creator Signal treatment.",
+            "values": {}
+          }
+        ],
+        "presets": [],
+        "slots": [],
+        "constraints": {
+          "allowedDocumentKinds": [
+            "page",
+            "template"
+          ]
+        },
+        "requirements": {
+          "capabilities": [],
+          "providerAdapters": [],
+          "plugins": [
+            "creator-signal.site"
+          ]
+        },
+        "documentation": {
+          "usage": "Edit the typed content fields; the component owns its semantic HTML and uses @creator-signal/design-system.",
+          "accessibility": "Keep the caption specific and write row labels that make sense independently of visual position."
+        },
+        "accessibility": {
+          "checks": [
+            {
+              "rule": "a11y.semantic-structure",
+              "category": "semantic",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed component must retain its documented semantic HTML structure.",
+              "remediation": "Review the published semantic structure; do not replace the governed component with raw markup."
+            },
+            {
+              "rule": "a11y.accessible-name",
+              "category": "naming",
+              "enforcement": "automated",
+              "severity": "error",
+              "fields": [
+                "heading",
+                "caption",
+                "firstLabel",
+                "secondLabel",
+                "thirdLabel"
+              ],
+              "summary": "The comparison table needs a heading, caption and named columns.",
+              "remediation": "Provide concise, outcome-focused text in the named field."
+            },
+            {
+              "rule": "a11y.heading-order",
+              "category": "heading",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The component heading must remain in the page outline.",
+              "remediation": "Keep the supplied heading at the documented level and preserve the surrounding page hierarchy.",
+              "fields": [
+                "heading"
+              ]
+            },
+            {
+              "rule": "a11y.contrast",
+              "category": "contrast",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed treatment must remain readable in normal and forced-colors modes.",
+              "remediation": "Review the published component in normal, high-contrast and forced-colors modes; do not override its governed treatment."
+            }
+          ],
+          "notApplicable": [
+            {
+              "rule": "a11y.form-control-label",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.unique-field-id",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.keyboard-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.focus-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.dismissal-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.announcement-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.no-javascript-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.provider-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.image-alternative",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.motion-control",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.touch-target",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            }
+          ]
+        }
+      },
+      "sourceRevision": "746a74adf2e36cc27be82c27257d225e5aceaa1a",
+      "sourceSha256": "f7bcfa1884b0769ca6de45036805c44b1c3a3bf46433be493cade659139881e0"
+    },
+    {
+      "definition": {
+        "id": "creator-signal.site.consent-banner",
+        "version": "1.0.0",
+        "name": "Privacy Choices",
+        "description": "Shared privacy notice and analytics choices.",
+        "category": "Creator Signal",
+        "tags": [
+          "privacy",
+          "consent",
+          "analytics",
+          "shared"
+        ],
+        "icon": "layout-solid",
+        "source": {
+          "type": "plugin",
+          "pluginId": "creator-signal.site",
+          "name": "Creator Signal"
+        },
+        "status": "stable",
+        "composition": "leaf",
+        "implementation": {
+          "type": "primitive",
+          "moduleId": "creator-signal.site.consent-banner"
+        },
+        "fields": [
+          {
+            "key": "heading",
+            "label": "Heading",
+            "description": "Short name for the privacy choice.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "body",
+            "label": "Explanation",
+            "description": "Plain-language explanation of essential and optional processing.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "essentialLabel",
+            "label": "Essential choice label",
+            "description": "Button label for declining optional analytics.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "optionalLabel",
+            "label": "Optional choice label",
+            "description": "Button label for granting optional analytics.",
+            "type": "text",
+            "required": true
+          }
+        ],
+        "variants": [
+          {
+            "id": "default",
+            "name": "Default",
+            "description": "The governed Creator Signal treatment.",
+            "values": {}
+          }
+        ],
+        "presets": [],
+        "slots": [],
+        "constraints": {
+          "allowedDocumentKinds": [
+            "page",
+            "template"
+          ]
+        },
+        "requirements": {
+          "capabilities": [],
+          "providerAdapters": [],
+          "plugins": [
+            "creator-signal.site"
+          ]
+        },
+        "documentation": {
+          "usage": "Edit once in the shared template; every ordinary page inherits the same privacy choices.",
+          "accessibility": "Describe the optional purpose plainly and keep both choices equally understandable."
+        },
+        "accessibility": {
+          "checks": [
+            {
+              "rule": "a11y.semantic-structure",
+              "category": "semantic",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed component must retain its documented semantic HTML structure.",
+              "remediation": "Review the published semantic structure; do not replace the governed component with raw markup."
+            },
+            {
+              "rule": "a11y.accessible-name",
+              "category": "naming",
+              "enforcement": "automated",
+              "severity": "error",
+              "fields": [
+                "heading",
+                "essentialLabel",
+                "optionalLabel"
+              ],
+              "summary": "Privacy choices need a clear heading and named actions.",
+              "remediation": "Provide concise, outcome-focused text in the named field."
+            },
+            {
+              "rule": "a11y.keyboard-contract",
+              "category": "keyboard",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Privacy choices must be operable with keyboard controls.",
+              "remediation": "Verify both choices can be reached and activated with the keyboard."
+            },
+            {
+              "rule": "a11y.focus-contract",
+              "category": "focus",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "The privacy banner must not trap or lose focus.",
+              "remediation": "Verify focus remains predictable when the banner appears and after a choice is made."
+            },
+            {
+              "rule": "a11y.dismissal-contract",
+              "category": "dismissal",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Privacy choices must close only after a deliberate choice.",
+              "remediation": "Verify either explicit choice dismisses the banner and no accidental outside dismissal occurs."
+            },
+            {
+              "rule": "a11y.announcement-contract",
+              "category": "focus",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Privacy-choice status must be announced to assistive technology.",
+              "remediation": "Verify the choice result is exposed through the documented status message."
+            },
+            {
+              "rule": "a11y.no-javascript-fallback",
+              "category": "no-javascript",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "The privacy notice must remain understandable when enhancement is unavailable.",
+              "remediation": "Verify essential processing remains described without JavaScript."
+            },
+            {
+              "rule": "a11y.contrast",
+              "category": "contrast",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed treatment must remain readable in normal and forced-colors modes.",
+              "remediation": "Review the published component in normal, high-contrast and forced-colors modes; do not override its governed treatment."
+            },
+            {
+              "rule": "a11y.touch-target",
+              "category": "touch",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Every visible action must remain comfortably operable at touch sizes and 200% zoom.",
+              "remediation": "Check the published action at 200% zoom and on a narrow touch viewport before publishing."
+            }
+          ],
+          "notApplicable": [
+            {
+              "rule": "a11y.heading-order",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.form-control-label",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.unique-field-id",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.provider-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.image-alternative",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.motion-control",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            }
+          ]
+        }
+      },
+      "sourceRevision": "746a74adf2e36cc27be82c27257d225e5aceaa1a",
+      "sourceSha256": "f7bcfa1884b0769ca6de45036805c44b1c3a3bf46433be493cade659139881e0"
+    },
+    {
+      "definition": {
+        "id": "creator-signal.site.crm-iframe-form",
+        "version": "2.0.0",
+        "name": "Embedded CRM Form",
+        "description": "A standalone authorable Mautic iframe with a validated seamless-resize protocol.",
+        "category": "Creator Signal",
+        "tags": [
+          "form",
+          "crm",
+          "mautic",
+          "iframe",
+          "embed"
+        ],
+        "icon": "layout-solid",
+        "source": {
+          "type": "plugin",
+          "pluginId": "creator-signal.site",
+          "name": "Creator Signal"
+        },
+        "status": "stable",
+        "composition": "leaf",
+        "implementation": {
+          "type": "primitive",
+          "moduleId": "creator-signal.site.crm-iframe-form"
+        },
+        "fields": [
+          {
+            "key": "sectionId",
+            "label": "Section anchor",
+            "description": "Unique identifier used to match resize messages from this CRM form.",
+            "type": "text",
+            "required": true,
+            "advanced": true
+          },
+          {
+            "key": "formUrl",
+            "label": "CRM form URL",
+            "description": "HTTPS Mautic form page hosted at the approved public CRM origin.",
+            "type": "url",
+            "required": true
+          },
+          {
+            "key": "iframeTitle",
+            "label": "Accessible iframe title",
+            "description": "Concise name announced before visitors enter the embedded form.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "fallbackLabel",
+            "label": "Fallback link label",
+            "description": "Visible link that opens the CRM form outside the iframe.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "loadingMessage",
+            "label": "Loading message",
+            "description": "Status announced while the iframe form loads.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "unavailableMessage",
+            "label": "Unavailable message",
+            "description": "Status announced when the provider cannot be framed.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "initialHeight",
+            "label": "Initial height",
+            "description": "Starting iframe height before same-origin or CRM resize updates arrive.",
+            "type": "number",
+            "required": true,
+            "advanced": true
+          },
+          {
+            "key": "minimumHeight",
+            "label": "Minimum height",
+            "description": "Smallest accepted iframe height.",
+            "type": "number",
+            "required": true,
+            "advanced": true
+          },
+          {
+            "key": "maximumHeight",
+            "label": "Maximum height",
+            "description": "Largest accepted iframe height.",
+            "type": "number",
+            "required": true,
+            "advanced": true
+          }
+        ],
+        "variants": [
+          {
+            "id": "default",
+            "name": "Default",
+            "description": "The governed Creator Signal treatment.",
+            "values": {}
+          }
+        ],
+        "presets": [],
+        "slots": [],
+        "constraints": {
+          "allowedDocumentKinds": [
+            "page",
+            "template"
+          ]
+        },
+        "requirements": {
+          "capabilities": [],
+          "providerAdapters": [],
+          "plugins": [
+            "creator-signal.site"
+          ]
+        },
+        "documentation": {
+          "usage": "Place this standalone embed in any compatible slot, then paste an approved Mautic form page URL. Same-origin forms resize automatically; cross-origin forms must send the documented resize message.",
+          "accessibility": "Provide a concise iframe title and fallback link. Verify keyboard flow in the hosted form before publishing."
+        },
+        "accessibility": {
+          "checks": [
+            {
+              "rule": "a11y.semantic-structure",
+              "category": "semantic",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed component must retain its documented semantic HTML structure.",
+              "remediation": "Review the published semantic structure; do not replace the governed component with raw markup."
+            },
+            {
+              "rule": "a11y.accessible-name",
+              "category": "naming",
+              "enforcement": "automated",
+              "severity": "error",
+              "fields": [
+                "iframeTitle",
+                "fallbackLabel"
+              ],
+              "summary": "The embedded CRM form needs an accessible iframe title and fallback link.",
+              "remediation": "Provide concise, outcome-focused text in the named field."
+            },
+            {
+              "rule": "a11y.keyboard-contract",
+              "category": "keyboard",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "The hosted CRM controls and fallback link must be keyboard operable.",
+              "remediation": "Verify tab order and submission in the published embedded form, then verify the fallback link opens the same form.",
+              "fields": [
+                "formUrl",
+                "fallbackLabel"
+              ]
+            },
+            {
+              "rule": "a11y.focus-contract",
+              "category": "focus",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Focus must enter the iframe and return to the page predictably.",
+              "remediation": "Verify keyboard focus crosses the iframe boundary without trapping visitors.",
+              "fields": [
+                "formUrl"
+              ]
+            },
+            {
+              "rule": "a11y.announcement-contract",
+              "category": "focus",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Loading, unavailable and resize states must be announced.",
+              "remediation": "Verify the live status remains understandable while the CRM form loads, resizes or cannot be framed.",
+              "fields": [
+                "loadingMessage",
+                "unavailableMessage"
+              ]
+            },
+            {
+              "rule": "a11y.provider-fallback",
+              "category": "provider",
+              "enforcement": "automated",
+              "severity": "error",
+              "fields": [
+                "formUrl",
+                "iframeTitle",
+                "fallbackLabel"
+              ],
+              "summary": "Embedded CRM Form requires an approved HTTPS form URL, accessible iframe title and fallback link.",
+              "remediation": "Use the approved CRM URL, give the iframe a concise title and retain a link that opens the same form outside the page."
+            },
+            {
+              "rule": "a11y.no-javascript-fallback",
+              "category": "no-javascript",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The fallback link must remain available when the resize runtime cannot run.",
+              "remediation": "Verify the published link opens the CRM form in a new tab without JavaScript."
+            },
+            {
+              "rule": "a11y.contrast",
+              "category": "contrast",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed treatment must remain readable in normal and forced-colors modes.",
+              "remediation": "Review the published component in normal, high-contrast and forced-colors modes; do not override its governed treatment."
+            },
+            {
+              "rule": "a11y.touch-target",
+              "category": "touch",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Every visible action must remain comfortably operable at touch sizes and 200% zoom.",
+              "remediation": "Check the published action at 200% zoom and on a narrow touch viewport before publishing."
+            }
+          ],
+          "notApplicable": [
+            {
+              "rule": "a11y.heading-order",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.form-control-label",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.unique-field-id",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.dismissal-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.image-alternative",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.motion-control",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            }
+          ]
+        }
+      },
+      "sourceRevision": "746a74adf2e36cc27be82c27257d225e5aceaa1a",
+      "sourceSha256": "f7bcfa1884b0769ca6de45036805c44b1c3a3bf46433be493cade659139881e0"
+    },
+    {
+      "definition": {
+        "id": "creator-signal.site.footer",
+        "version": "1.1.0",
+        "name": "Site Footer",
+        "description": "Shared footer identity, legal routes and service links.",
+        "category": "Creator Signal",
+        "tags": [
+          "footer",
+          "navigation",
+          "legal",
+          "shared"
+        ],
+        "icon": "layout-solid",
+        "source": {
+          "type": "plugin",
+          "pluginId": "creator-signal.site",
+          "name": "Creator Signal"
+        },
+        "status": "stable",
+        "composition": "leaf",
+        "implementation": {
+          "type": "primitive",
+          "moduleId": "creator-signal.site.footer"
+        },
+        "fields": [
+          {
+            "key": "brandName",
+            "label": "Brand name",
+            "description": "Visible site name in the shared footer.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "tagline",
+            "label": "Tagline",
+            "description": "Short supporting brand line.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "copyright",
+            "label": "Copyright",
+            "description": "Current copyright notice displayed on every page.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "items",
+            "label": "Footer links",
+            "description": "Ordered product, help, legal and service destinations shared by every page.",
+            "type": "repeater",
+            "required": true,
+            "itemLabel": "Link",
+            "minItems": 1,
+            "maxItems": 24,
+            "itemFields": [
+              {
+                "key": "label",
+                "label": "Label",
+                "description": "Concise visible link text.",
+                "type": "text",
+                "required": true
+              },
+              {
+                "key": "url",
+                "label": "URL",
+                "description": "Internal path or approved external destination.",
+                "type": "url",
+                "required": true
+              }
+            ]
+          }
+        ],
+        "variants": [
+          {
+            "id": "default",
+            "name": "Default",
+            "description": "The governed Creator Signal treatment.",
+            "values": {}
+          }
+        ],
+        "presets": [],
+        "slots": [],
+        "constraints": {
+          "allowedDocumentKinds": [
+            "page",
+            "template"
+          ]
+        },
+        "requirements": {
+          "capabilities": [],
+          "providerAdapters": [],
+          "plugins": [
+            "creator-signal.site"
+          ]
+        },
+        "documentation": {
+          "usage": "Edit once in the shared template; every ordinary page inherits the updated footer links and legal routes.",
+          "accessibility": "Keep link labels unique enough to make sense when read out of context."
+        },
+        "accessibility": {
+          "checks": [
+            {
+              "rule": "a11y.semantic-structure",
+              "category": "semantic",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed component must retain its documented semantic HTML structure.",
+              "remediation": "Review the published semantic structure; do not replace the governed component with raw markup."
+            },
+            {
+              "rule": "a11y.accessible-name",
+              "category": "naming",
+              "enforcement": "automated",
+              "severity": "error",
+              "fields": [
+                "brandName"
+              ],
+              "summary": "The shared footer needs a named brand link.",
+              "remediation": "Provide concise, outcome-focused text in the named field."
+            },
+            {
+              "rule": "a11y.keyboard-contract",
+              "category": "keyboard",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Footer links must remain keyboard reachable in document order.",
+              "remediation": "Verify the footer links by keyboard after the page content.",
+              "fields": [
+                "items"
+              ]
+            },
+            {
+              "rule": "a11y.contrast",
+              "category": "contrast",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed treatment must remain readable in normal and forced-colors modes.",
+              "remediation": "Review the published component in normal, high-contrast and forced-colors modes; do not override its governed treatment."
+            },
+            {
+              "rule": "a11y.touch-target",
+              "category": "touch",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Every visible action must remain comfortably operable at touch sizes and 200% zoom.",
+              "remediation": "Check the published action at 200% zoom and on a narrow touch viewport before publishing."
+            }
+          ],
+          "notApplicable": [
+            {
+              "rule": "a11y.heading-order",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.form-control-label",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.unique-field-id",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.focus-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.dismissal-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.announcement-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.no-javascript-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.provider-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.image-alternative",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.motion-control",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            }
+          ]
+        }
+      },
+      "sourceRevision": "746a74adf2e36cc27be82c27257d225e5aceaa1a",
+      "sourceSha256": "f7bcfa1884b0769ca6de45036805c44b1c3a3bf46433be493cade659139881e0"
+    },
+    {
+      "definition": {
+        "id": "creator-signal.site.header",
+        "version": "1.2.0",
+        "name": "Site Header",
+        "description": "Pack-owned brand identity and primary navigation inherited from the site template.",
+        "category": "Creator Signal",
+        "tags": [
+          "header",
+          "navigation",
+          "brand",
+          "shared"
+        ],
+        "icon": "layout-solid",
+        "source": {
+          "type": "plugin",
+          "pluginId": "creator-signal.site",
+          "name": "Creator Signal"
+        },
+        "status": "stable",
+        "composition": "leaf",
+        "implementation": {
+          "type": "primitive",
+          "moduleId": "creator-signal.site.header"
+        },
+        "fields": [
+          {
+            "key": "brandName",
+            "label": "Brand name",
+            "description": "Visible site name and home-link accessible name.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "tagline",
+            "label": "Tagline",
+            "description": "Short supporting line displayed with the brand.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "homeUrl",
+            "label": "Home URL",
+            "description": "Destination used by the shared brand link.",
+            "type": "url",
+            "required": true
+          },
+          {
+            "key": "items",
+            "label": "Navigation links",
+            "description": "Ordered primary navigation shared by every page.",
+            "type": "repeater",
+            "required": true,
+            "itemLabel": "Link",
+            "minItems": 1,
+            "maxItems": 12,
+            "itemFields": [
+              {
+                "key": "label",
+                "label": "Label",
+                "description": "Concise visible link text.",
+                "type": "text",
+                "required": true
+              },
+              {
+                "key": "url",
+                "label": "URL",
+                "description": "Internal path or approved external destination.",
+                "type": "url",
+                "required": true
+              },
+              {
+                "key": "emphasis",
+                "label": "Treatment",
+                "description": "Use the primary treatment for one principal action only.",
+                "type": "select",
+                "required": true,
+                "options": [
+                  {
+                    "label": "Standard",
+                    "value": "default"
+                  },
+                  {
+                    "label": "Primary action",
+                    "value": "primary"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "variants": [
+          {
+            "id": "default",
+            "name": "Default",
+            "description": "The governed Creator Signal treatment.",
+            "values": {}
+          }
+        ],
+        "presets": [],
+        "slots": [],
+        "constraints": {
+          "allowedDocumentKinds": [
+            "page",
+            "template"
+          ]
+        },
+        "requirements": {
+          "capabilities": [],
+          "providerAdapters": [],
+          "plugins": [
+            "creator-signal.site"
+          ]
+        },
+        "documentation": {
+          "usage": "Edit once in the shared template; every ordinary page inherits the updated brand identity and navigation.",
+          "accessibility": "Use short navigation labels, one primary action, and a Home URL that returns to the site root."
+        },
+        "accessibility": {
+          "checks": [
+            {
+              "rule": "a11y.semantic-structure",
+              "category": "semantic",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed component must retain its documented semantic HTML structure.",
+              "remediation": "Review the published semantic structure; do not replace the governed component with raw markup."
+            },
+            {
+              "rule": "a11y.accessible-name",
+              "category": "naming",
+              "enforcement": "automated",
+              "severity": "error",
+              "fields": [
+                "brandName"
+              ],
+              "summary": "The shared header needs a named brand link.",
+              "remediation": "Provide concise, outcome-focused text in the named field."
+            },
+            {
+              "rule": "a11y.keyboard-contract",
+              "category": "keyboard",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Primary navigation must be usable with keyboard navigation.",
+              "remediation": "Verify link order, mobile navigation activation and Escape behavior in the published header.",
+              "fields": [
+                "items"
+              ]
+            },
+            {
+              "rule": "a11y.focus-contract",
+              "category": "focus",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Primary navigation must expose a visible, logical focus order.",
+              "remediation": "Verify the skip link and focus movement through desktop and mobile navigation.",
+              "fields": [
+                "items"
+              ]
+            },
+            {
+              "rule": "a11y.no-javascript-fallback",
+              "category": "no-javascript",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "Primary navigation must remain usable before enhancement.",
+              "remediation": "Verify the semantic navigation links without JavaScript."
+            },
+            {
+              "rule": "a11y.contrast",
+              "category": "contrast",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed treatment must remain readable in normal and forced-colors modes.",
+              "remediation": "Review the published component in normal, high-contrast and forced-colors modes; do not override its governed treatment."
+            },
+            {
+              "rule": "a11y.touch-target",
+              "category": "touch",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Every visible action must remain comfortably operable at touch sizes and 200% zoom.",
+              "remediation": "Check the published action at 200% zoom and on a narrow touch viewport before publishing."
+            }
+          ],
+          "notApplicable": [
+            {
+              "rule": "a11y.heading-order",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.form-control-label",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.unique-field-id",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.dismissal-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.announcement-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.provider-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.image-alternative",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.motion-control",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            }
+          ]
+        }
+      },
+      "sourceRevision": "746a74adf2e36cc27be82c27257d225e5aceaa1a",
+      "sourceSha256": "f7bcfa1884b0769ca6de45036805c44b1c3a3bf46433be493cade659139881e0"
+    },
+    {
+      "definition": {
+        "id": "creator-signal.site.mautic-form",
+        "version": "2.0.0",
+        "name": "Managed Form",
+        "description": "A standalone governed form provider resolved from the generated Mautic registry.",
+        "category": "Creator Signal",
+        "tags": [
+          "form",
+          "contact",
+          "mautic",
+          "integration"
+        ],
+        "icon": "layout-solid",
+        "source": {
+          "type": "plugin",
+          "pluginId": "creator-signal.site",
+          "name": "Creator Signal"
+        },
+        "status": "stable",
+        "composition": "leaf",
+        "implementation": {
+          "type": "primitive",
+          "moduleId": "creator-signal.site.mautic-form"
+        },
+        "fields": [
+          {
+            "key": "successMessage",
+            "label": "Success message",
+            "description": "Confirmation announced after a successful submission.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "sectionId",
+            "label": "Section anchor",
+            "description": "Unique page anchor used by the form section.",
+            "type": "text",
+            "required": true,
+            "advanced": true
+          },
+          {
+            "key": "mauticBaseUrl",
+            "label": "Mautic public URL",
+            "description": "Approved public form-provider origin.",
+            "type": "url",
+            "required": true,
+            "advanced": true
+          },
+          {
+            "key": "formAlias",
+            "label": "Governed form alias",
+            "description": "Stable alias resolved through the generated registry; never use a numeric form ID.",
+            "type": "text",
+            "required": true,
+            "advanced": true
+          },
+          {
+            "key": "registryPath",
+            "label": "Registry path",
+            "description": "Published path for the generated form registry.",
+            "type": "text",
+            "required": true,
+            "advanced": true
+          },
+          {
+            "key": "formCode",
+            "label": "Analytics form code",
+            "description": "Stable analytics identifier for this form.",
+            "type": "text",
+            "required": true,
+            "advanced": true
+          },
+          {
+            "key": "campaignCode",
+            "label": "Analytics campaign code",
+            "description": "Stable analytics identifier for this journey.",
+            "type": "text",
+            "required": true,
+            "advanced": true
+          }
+        ],
+        "variants": [
+          {
+            "id": "default",
+            "name": "Default",
+            "description": "The governed Creator Signal treatment.",
+            "values": {}
+          }
+        ],
+        "presets": [],
+        "slots": [],
+        "constraints": {
+          "allowedDocumentKinds": [
+            "page",
+            "template"
+          ]
+        },
+        "requirements": {
+          "capabilities": [],
+          "providerAdapters": [],
+          "plugins": [
+            "creator-signal.site"
+          ]
+        },
+        "documentation": {
+          "usage": "Edit the typed content fields; the component owns its semantic HTML and uses @creator-signal/design-system.",
+          "accessibility": "Keep labels descriptive and preserve the component heading hierarchy."
+        },
+        "accessibility": {
+          "checks": [
+            {
+              "rule": "a11y.semantic-structure",
+              "category": "semantic",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed component must retain its documented semantic HTML structure.",
+              "remediation": "Review the published semantic structure; do not replace the governed component with raw markup."
+            },
+            {
+              "rule": "a11y.accessible-name",
+              "category": "naming",
+              "enforcement": "automated",
+              "severity": "error",
+              "fields": [
+                "successMessage"
+              ],
+              "summary": "The managed form needs a success message; its surrounding Section Intro owns the heading.",
+              "remediation": "Provide concise, outcome-focused text in the named field."
+            },
+            {
+              "rule": "a11y.form-control-label",
+              "category": "form",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Every generated provider control must have an associated visible label.",
+              "remediation": "Verify the generated form labels after the provider markup loads."
+            },
+            {
+              "rule": "a11y.keyboard-contract",
+              "category": "keyboard",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Generated provider controls must be keyboard operable.",
+              "remediation": "Verify tab order, validation and submission in the published form."
+            },
+            {
+              "rule": "a11y.focus-contract",
+              "category": "focus",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Validation and submission must move focus predictably.",
+              "remediation": "Verify invalid fields and result feedback receive the documented focus treatment."
+            },
+            {
+              "rule": "a11y.announcement-contract",
+              "category": "focus",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Validation, success and unavailable states must be announced.",
+              "remediation": "Verify provider success, failure and unavailable messages through assistive technology."
+            },
+            {
+              "rule": "a11y.provider-fallback",
+              "category": "provider",
+              "enforcement": "automated",
+              "severity": "error",
+              "fields": [
+                "mauticBaseUrl",
+                "formAlias"
+              ],
+              "summary": "Managed Form requires a configured provider origin and governed alias.",
+              "remediation": "Select a valid generated form alias and preserve the approved provider origin."
+            },
+            {
+              "rule": "a11y.no-javascript-fallback",
+              "category": "no-javascript",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The unavailable form state must provide a non-destructive alternative.",
+              "remediation": "Verify the published fallback explains the unavailable provider without hiding contact context."
+            },
+            {
+              "rule": "a11y.contrast",
+              "category": "contrast",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed treatment must remain readable in normal and forced-colors modes.",
+              "remediation": "Review the published component in normal, high-contrast and forced-colors modes; do not override its governed treatment."
+            },
+            {
+              "rule": "a11y.touch-target",
+              "category": "touch",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Every visible action must remain comfortably operable at touch sizes and 200% zoom.",
+              "remediation": "Check the published action at 200% zoom and on a narrow touch viewport before publishing."
+            }
+          ],
+          "notApplicable": [
+            {
+              "rule": "a11y.heading-order",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.unique-field-id",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.dismissal-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.image-alternative",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.motion-control",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            }
+          ]
+        }
+      },
+      "sourceRevision": "746a74adf2e36cc27be82c27257d225e5aceaa1a",
+      "sourceSha256": "f7bcfa1884b0769ca6de45036805c44b1c3a3bf46433be493cade659139881e0"
+    },
+    {
+      "definition": {
+        "id": "creator-signal.site.pricing-plans",
+        "version": "1.0.0",
+        "name": "Pricing Plans",
+        "description": "Three clear public plan cards with explicit prices, included features and signup handoffs.",
+        "category": "Creator Signal",
+        "tags": [
+          "pricing",
+          "plans",
+          "subscriptions",
+          "call to action"
+        ],
+        "icon": "layout-solid",
+        "source": {
+          "type": "plugin",
+          "pluginId": "creator-signal.site",
+          "name": "Creator Signal"
+        },
+        "status": "stable",
+        "composition": "leaf",
+        "implementation": {
+          "type": "primitive",
+          "moduleId": "creator-signal.site.pricing-plans"
+        },
+        "fields": [
+          {
+            "key": "eyebrow",
+            "label": "Eyebrow",
+            "description": "Short context label above the plans.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "heading",
+            "label": "Heading",
+            "description": "Heading for the complete plan group.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "introduction",
+            "label": "Introduction",
+            "description": "Short explanation of how to choose.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "footnote",
+            "label": "Footnote",
+            "description": "A qualification shared by every plan.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "sectionId",
+            "label": "Section anchor",
+            "description": "Unique page anchor used by the pricing heading.",
+            "type": "text",
+            "required": true,
+            "advanced": true
+          },
+          {
+            "key": "items",
+            "label": "Plans",
+            "description": "Ordered public plans; separate feature lines with line breaks.",
+            "type": "repeater",
+            "required": true,
+            "itemLabel": "Plan",
+            "minItems": 1,
+            "maxItems": 3,
+            "itemFields": [
+              {
+                "key": "name",
+                "label": "Name",
+                "description": "Public plan name.",
+                "type": "text",
+                "required": true
+              },
+              {
+                "key": "price",
+                "label": "Price",
+                "description": "Visible price including currency where required.",
+                "type": "text",
+                "required": true
+              },
+              {
+                "key": "cadence",
+                "label": "Cadence",
+                "description": "Billing cadence such as per month; leave blank for Free.",
+                "type": "text",
+                "required": false
+              },
+              {
+                "key": "description",
+                "label": "Description",
+                "description": "Who the plan is for.",
+                "type": "text",
+                "required": true
+              },
+              {
+                "key": "features",
+                "label": "Features",
+                "description": "One feature per line.",
+                "type": "text",
+                "required": true
+              },
+              {
+                "key": "actionLabel",
+                "label": "Action label",
+                "description": "Specific signup action.",
+                "type": "text",
+                "required": true
+              },
+              {
+                "key": "actionUrl",
+                "label": "Action URL",
+                "description": "Sales Pulse application-owned signup destination.",
+                "type": "url",
+                "required": true
+              },
+              {
+                "key": "emphasis",
+                "label": "Emphasis",
+                "description": "Use Featured for at most one plan.",
+                "type": "select",
+                "required": true,
+                "options": [
+                  {
+                    "label": "Default",
+                    "value": "default"
+                  },
+                  {
+                    "label": "Featured",
+                    "value": "featured"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "variants": [
+          {
+            "id": "default",
+            "name": "Default",
+            "description": "The governed Creator Signal treatment.",
+            "values": {}
+          }
+        ],
+        "presets": [],
+        "slots": [],
+        "constraints": {
+          "allowedDocumentKinds": [
+            "page",
+            "template"
+          ]
+        },
+        "requirements": {
+          "capabilities": [],
+          "providerAdapters": [],
+          "plugins": [
+            "creator-signal.site"
+          ]
+        },
+        "documentation": {
+          "usage": "Use for the concise Home plan summary. Keep the detailed Pricing route as the semantic comparison authority.",
+          "accessibility": "Write price cadence in text, include a descriptive feature list, and never communicate the featured plan through colour alone."
+        },
+        "accessibility": {
+          "checks": [
+            {
+              "rule": "a11y.semantic-structure",
+              "category": "semantic",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed component must retain its documented semantic HTML structure.",
+              "remediation": "Review the published semantic structure; do not replace the governed component with raw markup."
+            },
+            {
+              "rule": "a11y.accessible-name",
+              "category": "naming",
+              "enforcement": "automated",
+              "severity": "error",
+              "fields": [
+                "heading"
+              ],
+              "summary": "The plan group needs a section heading.",
+              "remediation": "Provide concise, outcome-focused text in the named field."
+            },
+            {
+              "rule": "a11y.heading-order",
+              "category": "heading",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The component heading must remain in the page outline.",
+              "remediation": "Keep the supplied heading at the documented level and preserve the surrounding page hierarchy.",
+              "fields": [
+                "heading"
+              ]
+            },
+            {
+              "rule": "a11y.contrast",
+              "category": "contrast",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed treatment must remain readable in normal and forced-colors modes.",
+              "remediation": "Review the published component in normal, high-contrast and forced-colors modes; do not override its governed treatment."
+            },
+            {
+              "rule": "a11y.touch-target",
+              "category": "touch",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Every visible action must remain comfortably operable at touch sizes and 200% zoom.",
+              "remediation": "Check the published action at 200% zoom and on a narrow touch viewport before publishing."
+            }
+          ],
+          "notApplicable": [
+            {
+              "rule": "a11y.form-control-label",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.unique-field-id",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.keyboard-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.focus-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.dismissal-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.announcement-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.no-javascript-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.provider-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.image-alternative",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.motion-control",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            }
+          ]
+        }
+      },
+      "sourceRevision": "746a74adf2e36cc27be82c27257d225e5aceaa1a",
+      "sourceSha256": "f7bcfa1884b0769ca6de45036805c44b1c3a3bf46433be493cade659139881e0"
+    },
+    {
+      "definition": {
+        "id": "creator-signal.site.recovery-state",
+        "version": "1.0.0",
+        "name": "Recovery State",
+        "description": "A textual empty, error, offline or not-found state with one clear recovery action.",
+        "category": "Creator Signal",
+        "tags": [
+          "empty state",
+          "error",
+          "offline",
+          "not found",
+          "recovery"
+        ],
+        "icon": "layout-solid",
+        "source": {
+          "type": "plugin",
+          "pluginId": "creator-signal.site",
+          "name": "Creator Signal"
+        },
+        "status": "stable",
+        "composition": "leaf",
+        "implementation": {
+          "type": "primitive",
+          "moduleId": "creator-signal.site.recovery-state"
+        },
+        "fields": [
+          {
+            "key": "state",
+            "label": "State",
+            "description": "Governed empty, error, offline or not-found semantic treatment.",
+            "type": "select",
+            "required": true
+          },
+          {
+            "key": "heading",
+            "label": "Heading",
+            "description": "Plain-language page heading.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "body",
+            "label": "Explanation",
+            "description": "Explain the state and any safe next step.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "actionLabel",
+            "label": "Recovery action",
+            "description": "Specific visible action label.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "actionUrl",
+            "label": "Recovery URL",
+            "description": "Safe destination for recovery.",
+            "type": "url",
+            "required": true
+          },
+          {
+            "key": "sectionId",
+            "label": "Heading anchor",
+            "description": "Unique ID used by the page heading.",
+            "type": "text",
+            "required": true,
+            "advanced": true
+          }
+        ],
+        "variants": [
+          {
+            "id": "default",
+            "name": "Default",
+            "description": "The governed Creator Signal treatment.",
+            "values": {}
+          }
+        ],
+        "presets": [],
+        "slots": [],
+        "constraints": {
+          "allowedDocumentKinds": [
+            "page",
+            "template"
+          ]
+        },
+        "requirements": {
+          "capabilities": [],
+          "providerAdapters": [],
+          "plugins": [
+            "creator-signal.site"
+          ]
+        },
+        "documentation": {
+          "usage": "Edit the typed content fields; the component owns its semantic HTML and uses @creator-signal/design-system.",
+          "accessibility": "Name the state in text, explain what happened, and offer an action that works without relying on colour."
+        },
+        "accessibility": {
+          "checks": [
+            {
+              "rule": "a11y.semantic-structure",
+              "category": "semantic",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed component must retain its documented semantic HTML structure.",
+              "remediation": "Review the published semantic structure; do not replace the governed component with raw markup."
+            },
+            {
+              "rule": "a11y.accessible-name",
+              "category": "naming",
+              "enforcement": "automated",
+              "severity": "error",
+              "fields": [
+                "heading",
+                "body",
+                "actionLabel"
+              ],
+              "summary": "The recovery state needs a textual explanation and named action.",
+              "remediation": "Provide concise, outcome-focused text in the named field."
+            },
+            {
+              "rule": "a11y.announcement-contract",
+              "category": "focus",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "A changed recovery state must be announced to assistive technology.",
+              "remediation": "Verify the runtime state uses the documented status semantics."
+            },
+            {
+              "rule": "a11y.no-javascript-fallback",
+              "category": "no-javascript",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "Recovery text and its link must remain usable without JavaScript.",
+              "remediation": "Keep the explanation and recovery URL in the authored fields."
+            },
+            {
+              "rule": "a11y.contrast",
+              "category": "contrast",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed treatment must remain readable in normal and forced-colors modes.",
+              "remediation": "Review the published component in normal, high-contrast and forced-colors modes; do not override its governed treatment."
+            },
+            {
+              "rule": "a11y.touch-target",
+              "category": "touch",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Every visible action must remain comfortably operable at touch sizes and 200% zoom.",
+              "remediation": "Check the published action at 200% zoom and on a narrow touch viewport before publishing."
+            }
+          ],
+          "notApplicable": [
+            {
+              "rule": "a11y.heading-order",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.form-control-label",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.unique-field-id",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.keyboard-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.focus-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.dismissal-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.provider-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.image-alternative",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.motion-control",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            }
+          ]
+        }
+      },
+      "sourceRevision": "746a74adf2e36cc27be82c27257d225e5aceaa1a",
+      "sourceSha256": "f7bcfa1884b0769ca6de45036805c44b1c3a3bf46433be493cade659139881e0"
+    },
+    {
+      "definition": {
+        "id": "creator-signal.site.signal-comparison",
+        "version": "1.0.0",
+        "name": "Signal Comparison",
+        "description": "A before-and-after explanation of limited reporting and a visual sales signal.",
+        "category": "Creator Signal",
+        "tags": [
+          "comparison",
+          "before and after",
+          "sales",
+          "media"
+        ],
+        "icon": "layout-solid",
+        "source": {
+          "type": "plugin",
+          "pluginId": "creator-signal.site",
+          "name": "Creator Signal"
+        },
+        "status": "stable",
+        "composition": "leaf",
+        "implementation": {
+          "type": "primitive",
+          "moduleId": "creator-signal.site.signal-comparison"
+        },
+        "fields": [
+          {
+            "key": "eyebrow",
+            "label": "Eyebrow",
+            "description": "Short context label above the comparison.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "heading",
+            "label": "Heading",
+            "description": "Outcome-focused heading for the complete comparison.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "introduction",
+            "label": "Introduction",
+            "description": "Why the before-and-after distinction matters.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "beforeLabel",
+            "label": "Before label",
+            "description": "Short name for the limited starting point.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "beforeBody",
+            "label": "Before description",
+            "description": "Text description of the existing limitation.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "afterLabel",
+            "label": "After label",
+            "description": "Short name for the improved view.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "afterBody",
+            "label": "After description",
+            "description": "Text description of the improved experience.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "artwork",
+            "label": "After artwork",
+            "description": "Optional approved product artwork.",
+            "type": "image",
+            "required": false
+          },
+          {
+            "key": "artworkAlt",
+            "label": "Artwork alternative text",
+            "description": "Describe informative artwork; leave blank only when it repeats adjacent copy.",
+            "type": "text",
+            "required": false
+          },
+          {
+            "key": "sectionId",
+            "label": "Section anchor",
+            "description": "Unique page anchor used by the comparison heading.",
+            "type": "text",
+            "required": true,
+            "advanced": true
+          }
+        ],
+        "variants": [
+          {
+            "id": "default",
+            "name": "Default",
+            "description": "The governed Creator Signal treatment.",
+            "values": {}
+          }
+        ],
+        "presets": [],
+        "slots": [],
+        "constraints": {
+          "allowedDocumentKinds": [
+            "page",
+            "template"
+          ]
+        },
+        "requirements": {
+          "capabilities": [],
+          "providerAdapters": [],
+          "plugins": [
+            "creator-signal.site"
+          ]
+        },
+        "documentation": {
+          "usage": "Use for a two-sided narrative comparison; use Comparison Section when visitors need a row-and-column data table.",
+          "accessibility": "State both sides in text and provide alternative text for informative artwork so the comparison never relies on imagery alone."
+        },
+        "accessibility": {
+          "checks": [
+            {
+              "rule": "a11y.semantic-structure",
+              "category": "semantic",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed component must retain its documented semantic HTML structure.",
+              "remediation": "Review the published semantic structure; do not replace the governed component with raw markup."
+            },
+            {
+              "rule": "a11y.accessible-name",
+              "category": "naming",
+              "enforcement": "automated",
+              "severity": "error",
+              "fields": [
+                "heading",
+                "beforeLabel",
+                "afterLabel"
+              ],
+              "summary": "The comparison needs a heading and named sides.",
+              "remediation": "Provide concise, outcome-focused text in the named field."
+            },
+            {
+              "rule": "a11y.heading-order",
+              "category": "heading",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The component heading must remain in the page outline.",
+              "remediation": "Keep the supplied heading at the documented level and preserve the surrounding page hierarchy.",
+              "fields": [
+                "heading"
+              ]
+            },
+            {
+              "rule": "a11y.image-alternative",
+              "category": "media",
+              "enforcement": "automated",
+              "severity": "error",
+              "fields": [
+                "artwork",
+                "artworkAlt"
+              ],
+              "summary": "Informative selected media needs an alternative text value.",
+              "remediation": "Describe the selected media in artworkAlt, or remove the media when it repeats adjacent text."
+            },
+            {
+              "rule": "a11y.contrast",
+              "category": "contrast",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed treatment must remain readable in normal and forced-colors modes.",
+              "remediation": "Review the published component in normal, high-contrast and forced-colors modes; do not override its governed treatment."
+            }
+          ],
+          "notApplicable": [
+            {
+              "rule": "a11y.form-control-label",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.unique-field-id",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.keyboard-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.focus-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.dismissal-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.announcement-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.no-javascript-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.provider-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.motion-control",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.touch-target",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            }
+          ]
+        }
+      },
+      "sourceRevision": "746a74adf2e36cc27be82c27257d225e5aceaa1a",
+      "sourceSha256": "f7bcfa1884b0769ca6de45036805c44b1c3a3bf46433be493cade659139881e0"
+    },
+    {
+      "definition": {
+        "id": "creator-signal.site.pattern.feedback-page",
+        "version": "1.0.0",
+        "name": "Feedback Page",
+        "description": "Hero followed by an editable two-column layout containing separate introductory copy and CRM embed components.",
+        "category": "Creator Signal patterns",
+        "tags": [
+          "feedback",
+          "form",
+          "iframe",
+          "columns"
+        ],
+        "icon": "layout-solid",
+        "source": {
+          "type": "plugin",
+          "pluginId": "creator-signal.site",
+          "name": "Creator Signal"
+        },
+        "status": "stable",
+        "composition": "container",
+        "implementation": {
+          "type": "pattern",
+          "patternId": "creator-signal.site.pattern.feedback-page"
+        },
+        "fields": [],
+        "variants": [
+          {
+            "id": "default",
+            "name": "Default",
+            "description": "The governed Creator Signal treatment.",
+            "values": {}
+          }
+        ],
+        "presets": [],
+        "slots": [],
+        "constraints": {
+          "allowedDocumentKinds": [
+            "page",
+            "template"
+          ]
+        },
+        "requirements": {
+          "capabilities": [],
+          "providerAdapters": [],
+          "plugins": [
+            "creator-signal.site"
+          ]
+        },
+        "documentation": {
+          "usage": "Use as the Feedback starting composition. Edit, reorder, replace, add or remove content independently in either column.",
+          "accessibility": "Keep the Section Intro heading before the embedded form in reading order and preserve the iframe title and fallback link."
+        },
+        "accessibility": {
+          "checks": [
+            {
+              "rule": "a11y.semantic-structure",
+              "category": "semantic",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed component must retain its documented semantic HTML structure.",
+              "remediation": "Review the published semantic structure; do not replace the governed component with raw markup."
+            },
+            {
+              "rule": "a11y.heading-order",
+              "category": "heading",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The component heading must remain in the page outline.",
+              "remediation": "Keep the supplied heading at the documented level and preserve the surrounding page hierarchy."
+            }
+          ],
+          "notApplicable": [
+            {
+              "rule": "a11y.accessible-name",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.form-control-label",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.unique-field-id",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.keyboard-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.focus-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.dismissal-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.announcement-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.no-javascript-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.provider-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.image-alternative",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.motion-control",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.contrast",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.touch-target",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            }
+          ]
+        }
+      },
+      "sourceRevision": "9016086211346123c4fd7ed6498ae9ca99fb2d63",
+      "sourceSha256": "03ea90d901738bec1d9e52d6385df31595da400a920683acba88bf249f3b8722"
+    }
+  ]
+}

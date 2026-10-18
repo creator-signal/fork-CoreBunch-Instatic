@@ -77,6 +77,21 @@ afterEach(() => {
 })
 
 describe('plugin Component Library package lifecycle', () => {
+  it('retains distinct versions after cold activation and selects newest independently of pack order', () => {
+    const original = entry()
+    const newer = entry({ version: '1.1.0', fields: [...original.fields, { key: 'hint', label: 'Hint', type: 'text', required: false }] })
+    for (const pack of [[newer, original], [original, newer]]) {
+      deactivatePluginComponentLibraryPack(pluginId)
+      const current = activatePluginComponentLibraryPack(manifest, pack)
+      expect(current).toEqual([newer])
+      expect(componentLibraryRegistry.getVersion(original.id, '1.0.0')).toEqual(original)
+      expect(componentLibraryRegistry.get(original.id)).toEqual(newer)
+      expect(listPluginComponentLibraryEntryIds(pluginId)).toEqual([original.id])
+    }
+    expect(() => activatePluginComponentLibraryPack(manifest, [entry({ version: '1.1.0+a' }), entry({ version: '1.1.0+b' })])).toThrow(/duplicate entry/)
+    expect(componentLibraryRegistry.get(original.id)).toEqual(newer)
+  })
+
   it('registers validated plugin-owned entries and removes them on deactivate', () => {
     const registered = activatePluginComponentLibraryPack(manifest, [entry()])
 

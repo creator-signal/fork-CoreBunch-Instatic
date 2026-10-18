@@ -1,5 +1,6 @@
 import {
   componentLibraryRegistry,
+  compareComponentLibraryVersions,
   findComponentLibraryUsages,
   parseComponentLibraryEntry,
   type ComponentLibraryEntry,
@@ -49,20 +50,31 @@ export function activatePluginComponentLibraryPack(
 
   const entries = raw.map((candidate) => parseComponentLibraryEntry(candidate))
   const entryIds = new Set<string>()
+  const definitionVersions = new Map<string, string[]>()
   for (const entry of entries) {
     assertPluginEntryOwnership(manifest.id, entry)
-    if (entryIds.has(entry.id)) {
+    const identity = `${entry.id}@${entry.version.split('+')[0]}`
+    const versions = definitionVersions.get(entry.id) ?? []
+    if (versions.some(version => compareComponentLibraryVersions(version, entry.version) === 0)) {
       throw new Error(
-        `Plugin "${manifest.id}" Component Library pack contains duplicate entry "${entry.id}".`,
+        `Plugin "${manifest.id}" Component Library pack contains duplicate entry "${identity}".`,
       )
     }
+    definitionVersions.set(entry.id, [...versions, entry.version])
     entryIds.add(entry.id)
     assertPrimitiveImplementationAvailable(manifest.id, entry)
   }
 
   deactivatePluginComponentLibraryPack(manifest.id)
+  const latest = new Map<string, ComponentLibraryEntry>()
   try {
-    for (const entry of entries) componentLibraryRegistry.register(entry)
+    // Retained definitions survive a cold activation; array order cannot make
+    // an older version current. Duplicate SemVer precedence was denied above.
+    for (const entry of [...entries].sort((a, b) => compareComponentLibraryVersions(a.version, b.version))) {
+      if (latest.has(entry.id)) componentLibraryRegistry.registerOrReplace(entry)
+      else componentLibraryRegistry.register(entry)
+      latest.set(entry.id, entry)
+    }
   } catch (error) {
     componentLibraryRegistry.unregisterSource({
       type: 'plugin',
@@ -71,7 +83,7 @@ export function activatePluginComponentLibraryPack(
     throw error
   }
   registeredByPlugin.set(manifest.id, entryIds)
-  return entries
+  return [...latest.values()]
 }
 
 export function deactivatePluginComponentLibraryPack(pluginId: string): void {

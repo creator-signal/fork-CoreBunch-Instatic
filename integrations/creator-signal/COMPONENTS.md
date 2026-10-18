@@ -303,6 +303,28 @@ bun run lint
 Component definition edits affect every instance. Instance parameter edits
 affect only the selected reference.
 
+## Retained definition versions and content field updates
+
+Runtime0.0.64 and plugin0.8.7 retain the exact older definition DTOs recorded in
+`retained-component-definitions.json`. Each snapshot identifies its immutable
+source revision, manifest path and SHA256. These are definition contracts, not
+customer content. The plugin pack carries distinct entry versions; activation
+validates every version before changing the registry, rejects duplicate SemVer
+precedence, and selects the newest definition independently of array order.
+Reloading the plugin therefore keeps existing instances authorable. Older hosts
+reject the multi-version pack; update the runtime before installing plugin0.8.7.
+
+An administrator can choose **Review content field update** in Components view.
+The dialog lists added optional fields and requires explicit confirmation.
+The store rechecks the current definition, target version, backing module and
+pin before changing only that selected instance's version metadata. Authored
+values (including explicit empty strings), node IDs and descendants remain
+unchanged; Undo restores the previous metadata. Nothing is imported or published.
+Component-only authors cannot run the update. Patterns, altered implementations,
+slots/options/dependencies/constraints, changed existing field semantics and new
+required fields need a separate migration. Missing versions remain read-only;
+HTML editing and permission changes are not recovery paths.
+
 ## Forbidden patterns
 
 | Pattern | Use instead |

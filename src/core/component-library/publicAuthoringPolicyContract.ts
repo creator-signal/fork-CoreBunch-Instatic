@@ -4,11 +4,22 @@ import type { ComponentLibraryRegistry } from './registry'
 import type {
   ComponentLibraryField,
   ComponentLibraryImplementation,
+  ComponentLibraryEntry,
 } from './schemas'
 import {
   diagnostic,
   type PublicAuthoringDiagnostic,
 } from './publicAuthoringTypes'
+
+export function isPublicAuthoringEntryOwned(
+  entry: ComponentLibraryEntry | undefined,
+  ownerPluginId: string,
+): entry is ComponentLibraryEntry {
+  return Boolean(entry && (
+    (entry.source.type === 'plugin' && entry.source.pluginId === ownerPluginId) ||
+    (entry.source.type === 'design-system' && entry.source.id === ownerPluginId)
+  ))
+}
 
 /** Validate that a persisted policy still agrees with its owner catalogue. */
 export function analysePublicAuthoringPolicyContract(
@@ -99,7 +110,7 @@ export function analysePublicAuthoringPolicyContract(
   }
   for (const entryId of entryIds) {
     const entry = registry.get(entryId)
-    if (!entry || entry.source.type !== 'plugin' || entry.source.pluginId !== policy.ownerPluginId) {
+    if (!isPublicAuthoringEntryOwned(entry, policy.ownerPluginId)) {
       diagnostics.push(diagnostic(
         'policy.entry-definition-missing',
         `settings.publicAuthoring.allowedEntries.${entryId}`,

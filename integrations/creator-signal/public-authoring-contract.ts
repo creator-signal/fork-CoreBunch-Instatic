@@ -48,7 +48,7 @@ export const creatorSignalPublicPatternCatalogue = [
 
 export const creatorSignalPublicAuthoringContract = {
   id: 'creator-signal.public-authoring',
-  version: '1.5.0',
+  version: '1.6.0',
   designSystem: creatorSignalDesignSystemDependency,
   permittedComponents: [
     {
@@ -78,6 +78,7 @@ export const creatorSignalPublicAuthoringContract = {
     { entryId: 'creator-signal.site.founder-story', variants: ['default'], assetRoles: ['content-image'], constraints: { allowedDocumentKinds: ['page', 'template'] } },
     { entryId: 'creator-signal.site.call-to-action', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
     { entryId: 'creator-signal.site.rich-text-section', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
+    { entryId: 'creator-signal.site.catalogue.media', variants: ['audio', 'hosted-video'], assetRoles: ['content-media', 'content-image'], constraints: { allowedDocumentKinds: ['page', 'template'] } },
     { entryId: 'creator-signal.site.testimonial', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
     { entryId: 'creator-signal.site.faq', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
     { entryId: 'creator-signal.site.comparison-section', variants: ['default'], assetRoles: [], constraints: { allowedDocumentKinds: ['page', 'template'] } },
@@ -110,7 +111,7 @@ export const creatorSignalPublicAuthoringContract = {
   },
   assets: {
     source: 'instatic-media',
-    roles: ['hero-artwork', 'content-image', 'product-artwork', 'decorative-artwork'],
+    roles: ['hero-artwork', 'content-image', 'product-artwork', 'decorative-artwork', 'content-media'],
     treatments: ['default', 'contain', 'cover'],
     fields: [{
       entryId: 'creator-signal.site.hero',
@@ -137,6 +138,16 @@ export const creatorSignalPublicAuthoringContract = {
       fieldKey: 'portrait',
       role: 'content-image',
       treatment: 'cover',
+    }, {
+      entryId: 'creator-signal.site.catalogue.media',
+      fieldKey: 'source',
+      role: 'content-media',
+      treatment: 'default',
+    }, {
+      entryId: 'creator-signal.site.catalogue.media',
+      fieldKey: 'poster',
+      role: 'content-image',
+      treatment: 'contain',
     }],
     essentialTextInImages: false,
   },

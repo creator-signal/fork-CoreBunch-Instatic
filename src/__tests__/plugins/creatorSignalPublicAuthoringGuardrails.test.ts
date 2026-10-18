@@ -4,11 +4,13 @@ import '@modules/base'
 import {
   ComponentLibraryRegistry,
   analysePublicAuthoringPolicy,
+  assertPublicAuthoringPolicyPublishable,
   componentLibraryRegistry,
 } from '@core/component-library'
 import { reindexNodeParents, type SiteDocument, type SiteShell } from '@core/page-tree'
 import {
   seedPageDoc,
+  populatePageDoc,
   seedSiteDoc,
   shellMap,
   SITE_DOC_ID,
@@ -39,6 +41,8 @@ const ALL_SITE_WRITE_CAPABILITIES = [
 
 const localRegistry = new ComponentLibraryRegistry()
 for (const entry of creatorSignalComponentLibraryEntries) localRegistry.register(entry)
+const mediaEntry = componentLibraryRegistry.get('creator-signal.site.catalogue.media')!
+localRegistry.register(mediaEntry)
 
 function governedSite(): SiteDocument {
   return makeSite({
@@ -86,6 +90,62 @@ afterAll(() => {
 })
 
 describe('Creator Signal public authoring guardrails', () => {
+  it('saves hosted tutorial media through the HTTP and collaboration policies', () => {
+    const previous = governedSite()
+    const next = structuredClone(previous)
+    const page = next.pages.find((item) => item.slug === 'products/sales-pulse')!
+    page.nodes['tutorial-video'] = {
+      id: 'tutorial-video', moduleId: 'base.visual-component-ref',
+      props: { componentId: 'base.vc.media', propOverrides: {
+        kind: 'video', source: '/media/tutorial.mp4', poster: '/media/poster.png',
+        title: 'Download your sales files', transcriptUrl: '#text-guide',
+        controls: true, autoplay: false, preload: 'metadata',
+      } },
+      children: [], parentId: page.rootNodeId, classIds: [], breakpointOverrides: {},
+      catalogueInstance: { entryId: mediaEntry.id, entryVersion: mediaEntry.version, variantId: 'hosted-video' },
+    }
+    page.nodes[page.rootNodeId]!.children.push('tutorial-video')
+    const media = page.nodes['tutorial-video']!
+    const overrides = media.props.propOverrides as Record<string, unknown>
+    overrides.source = ''
+    expect(() => validatePageWriteDiff({
+      previousPages: previous.pages, changedPages: [page], deletedPageIds: new Set(),
+      capabilities: ALL_SITE_WRITE_CAPABILITIES, publicAuthoringPolicy: creatorSignalPublicAuthoringPolicy,
+    })).not.toThrow()
+    const doc = new Y.Doc()
+    seedPageDoc(doc, previous.pages.find((item) => item.id === page.id)!)
+    const insertion = updateFrom(doc, (fork) => populatePageDoc(fork, page))
+    expect(validateGuardedUpdate(`page:${page.id}`, doc, insertion,
+      [...ALL_SITE_WRITE_CAPABILITIES], creatorSignalPublicAuthoringPolicy)).toEqual({ ok: true })
+    expect(() => assertPublicAuthoringPolicyPublishable(next, localRegistry)).toThrow(/field.required/)
+    Y.applyUpdate(doc, insertion)
+    overrides.source = '/media/tutorial.mp4'
+    expect(analysePublicAuthoringPolicy(next, localRegistry)).toEqual([])
+    expect(() => validatePageWriteDiff({
+      previousPages: previous.pages, changedPages: [page], deletedPageIds: new Set(),
+      capabilities: ALL_SITE_WRITE_CAPABILITIES, publicAuthoringPolicy: creatorSignalPublicAuthoringPolicy,
+    })).not.toThrow()
+    const update = updateFrom(doc, (fork) => populatePageDoc(fork, page))
+    expect(validateGuardedUpdate(`page:${page.id}`, doc, update,
+      [...ALL_SITE_WRITE_CAPABILITIES], creatorSignalPublicAuthoringPolicy)).toEqual({ ok: true })
+
+    overrides.kind = 'audio'
+    expect(diagnosticCodes(next)).toContain('field.variant-value-mismatch')
+    media.catalogueInstance!.variantId = 'youtube'
+    expect(diagnosticCodes(next)).toContain('entry.variant-not-allowed')
+    media.moduleId = 'base.video'
+    expect(diagnosticCodes(next)).toContain('entry.definition-invalid')
+  })
+
+  it('does not trust a differently owned Design System entry', () => {
+    const foreignRegistry = new ComponentLibraryRegistry()
+    for (const entry of creatorSignalComponentLibraryEntries) foreignRegistry.register(entry)
+    foreignRegistry.register({ ...mediaEntry, source: { type: 'design-system', id: 'other-owner', name: 'Other' } })
+    expect(analysePublicAuthoringPolicy(governedSite(), foreignRegistry)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: 'policy.entry-definition-missing' }),
+    ]))
+  })
+
   it('installs one site-owned policy and accepts every governed pack page', () => {
     const parsed = parsePluginPack('creator-signal.site', pack)
     const installed = applyPluginPackToSite(

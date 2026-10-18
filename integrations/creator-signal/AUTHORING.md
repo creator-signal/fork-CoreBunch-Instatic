@@ -336,6 +336,21 @@ Source merge does not install the plugin, migrate content or publish the site.
 
 ### Copy audit coverage (Issue #297)
 
+Hosted tutorials use the existing **Media** catalogue entry, with **Hosted video**
+selected, alongside **Rich Text Section** for the complete text alternative.
+The public authoring contract permits only its Audio and Hosted video variants.
+Select the uploaded media and poster, provide an accessible title, keep controls
+enabled and autoplay off, and link the transcript to its authored section anchor.
+Captions are optional for a silent video whose instructions are all on screen
+and repeated in the adjacent text guide. Do not insert a raw video module or
+provider iframe. The same-owner Design System definition is reused; this adds
+no tutorial renderer or hardcoded tutorial content.
+
+The draft can retain a newly inserted component while required content is still
+being filled in. Publication still rejects missing required fields. Ownership,
+typed values, allowed variants, fixed implementation values and appearance rules
+are checked on every draft write as well as publication.
+
 | Surface | Content ownership |
 | --- | --- |
 | Header, footer and consent | Brand, links, buttons and accessible names are CMS fields. |

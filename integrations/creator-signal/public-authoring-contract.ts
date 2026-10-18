@@ -124,6 +124,11 @@ export const creatorSignalPublicAuthoringContract = {
       treatment: 'cover',
     }, {
       entryId: 'creator-signal.site.signal-comparison',
+      fieldKey: 'beforeArtwork',
+      role: 'product-artwork',
+      treatment: 'cover',
+    }, {
+      entryId: 'creator-signal.site.signal-comparison',
       fieldKey: 'artwork',
       role: 'product-artwork',
       treatment: 'cover',

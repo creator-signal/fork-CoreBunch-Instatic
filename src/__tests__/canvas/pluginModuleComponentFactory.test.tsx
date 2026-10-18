@@ -29,6 +29,14 @@ const componentProps: ModuleComponentProps = {
 }
 
 describe('editorPluginModuleComponentFactory', () => {
+  it('previews new field defaults on retained nodes without replacing authored clears', () => {
+    const Component = editorPluginModuleComponentFactory(definition)
+    const view = render(<Component {...componentProps} props={{}} />)
+    expect(view.container.textContent).toBe('Preview')
+    view.rerender(<Component {...componentProps} props={{ label: '' }} />)
+    expect(view.container.textContent).toBe('')
+  })
+
   it('forwards the canvas identity and hover contract to a leaf plugin module', () => {
     const Component = editorPluginModuleComponentFactory(definition)
     let hoverCount = 0

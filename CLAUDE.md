@@ -14,6 +14,15 @@ Use local seeded development data only when a task asks for a browser smoke test
 
 `fork-origin/main` is the read-only upstream source. `origin/develop` is its automation-owned fast-forward mirror; it is not a Creator Signal delivery target. `origin/main` is a retained transition branch, not an upstream mirror and not a delivery target. Never push to, branch ordinary work from, or open ordinary pull requests against either unprefixed branch. Follow [`docs/reference/repository-branches.md`](docs/reference/repository-branches.md) for upstream refreshes.
 
+`env/public-site` is the independent public-site artifact release projection.
+Its updates use two-parent PR merges selecting an already integrated
+`creator-signal/develop` Source tree. `.github/workflows/public-site-release.yml`
+qualifies those PRs and publishes only the site-plugin ZIP, manifest and checksums
+on the authenticated merged push. It never deploys, publishes live CMS content,
+builds images or promotes the Instatic runtime. Ordinary implementation still
+targets `creator-signal/develop`; release and branch-initialisation instructions
+are in `docs/deployment/release-workflow.md`.
+
 When publishing work:
 
 - Start from an up-to-date `origin/creator-signal/develop`, then create a feature branch. If you are already on a task branch, keep using it only when the requested change belongs in that PR; otherwise create a separate branch from `origin/creator-signal/develop`.

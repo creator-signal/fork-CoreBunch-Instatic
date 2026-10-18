@@ -1240,3 +1240,14 @@ export default definePlugin({
   - `src/__tests__/server/pluginVmDeadlines.test.ts` — hang hardening: top-level loops abort at load, overlapping evals keep their deadlines, runaway timer callbacks are interrupted, VM stacks survive with the `plugin:<id>` filename
   - `src/__tests__/server/pluginWorkerRpcTimeout.test.ts` — host-side RPC timeout: wedged workers are reset through the crash machinery instead of hanging callers
   - `src/admin/pages/plugins/utils/pluginEventStream.test.ts` — SSE frame validation: well-formed events dispatched, unknown-shape frames dropped with `console.warn`
+
+
+### Versioned asset retention on upgrade
+
+Successful upgrades retain previous version directories under
+`uploads/plugins/<id>/<version>/`. Retained draft and published content may
+reference those immutable media URLs. An upgrade changes the active manifest,
+workers and modules, and records `retainedAssetVersion` in its update audit; it
+does not rewrite content or delete its prior assets. A failed upgrade still
+removes the failed new version during rollback. Explicit plugin uninstall removes
+the complete plugin asset tree. Retained content assets are not build caches.

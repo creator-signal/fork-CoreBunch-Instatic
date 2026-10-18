@@ -2,8 +2,8 @@
   "schemaVersion": "instatic.component-library-design-impact/v2",
   "generatedFrom": {
     "instatic": {
-      "version": "0.0.59",
-      "sourceRevision": "sha256:f08e616e778f8e5bd753c809a447dae2b1fcb98372edca93bab81d5f5601b232",
+      "version": "0.0.60",
+      "sourceRevision": "sha256:0f19fe270f31acd34ef8ee13b6e809f0444fb247a62099b87c425bd5f820ab8a",
       "revisionKind": "executable-registry-content"
     },
     "componentLibraryEntrySchemaVersion": "1.0.0",
@@ -11,7 +11,7 @@
       {
         "id": "creator-signal.site",
         "name": "Creator Signal public site",
-        "version": "0.8.3"
+        "version": "0.8.5"
       }
     ],
     "designSystemLocks": [
@@ -257,11 +257,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.call-to-action",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-call-to-action.html",
-          "contentHash": "sha256:16f1c3552772c1bebc33c8838ebdd6f06912f4ab42d2432d3cb2283519ab47d0"
+          "contentHash": "sha256:3b14e79875b816f97d827ae5ebf2eebdda68a547fa6dc57b791da35337e4ccb4"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:ccf6b601d2d0e89a6c4332294b8504243bb44424780bda7e5cabb3d0059c69d0"
+      "contentHash": "sha256:c95fae56b6a9b5728e905b37e19811759c4e7bed697c15be4742960a4b805f68"
     },
     {
       "id": "creator-signal.site.campaign-hero",
@@ -513,11 +513,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.campaign-hero",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-campaign-hero.html",
-          "contentHash": "sha256:34688a86c758c3d218ad7c6a3283b52ecc6966193173ed0f287c0fdd30f0f305"
+          "contentHash": "sha256:bdcd2e09f53cefc1e883f8f7f419d7a5eec1dd58491be3892890d2569d0b158b"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:2b55c33f7823bca9bd51335b11022da8a7240c1a70f2f12e19736a357ea4a9db"
+      "contentHash": "sha256:020d6d380189d535e5988c76733ee153f1fbfeb599566e7e2829998468bc8990"
     },
     {
       "id": "creator-signal.site.catalogue.accordion",
@@ -11707,7 +11707,7 @@
       "implementationTaxonomy": "primitive",
       "definition": {
         "id": "creator-signal.site.comparison-section",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "name": "Comparison Section",
         "description": "A captioned comparison table with consistent criteria across three options.",
         "category": "Creator Signal",
@@ -11730,6 +11730,13 @@
           "moduleId": "creator-signal.site.comparison-section"
         },
         "fields": [
+          {
+            "key": "criteriaLabel",
+            "label": "Criteria label",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
           {
             "key": "eyebrow",
             "label": "Eyebrow",
@@ -11956,18 +11963,18 @@
         ]
       },
       "specimen": {
-        "contractReference": "instatic://component-library/creator-signal.site.comparison-section@1.0.0",
+        "contractReference": "instatic://component-library/creator-signal.site.comparison-section@1.1.0",
         "rendered": null,
         "executable": {
           "schemaVersion": "creator-signal.component-library-specimens/v1",
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.comparison-section",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-comparison-section.html",
-          "contentHash": "sha256:a59f142274924a593a3e629d547a25273496af31bc49b04b7135fb7cca6fb61e"
+          "contentHash": "sha256:e4eeccbad2c5335c67e96d3bdd4781f225a202eab8505229d983a37dad469536"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:68a4de0a17b0ac67c2c72224f153d70d7dcc872fca3b94868052d31fdb5983cd"
+      "contentHash": "sha256:9412c0f35e09ec9ab4e5d38f94584bc6765373afebc051914068632b650500c3"
     },
     {
       "id": "creator-signal.site.consent-banner",
@@ -11980,7 +11987,7 @@
       "implementationTaxonomy": "primitive",
       "definition": {
         "id": "creator-signal.site.consent-banner",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "name": "Privacy Choices",
         "description": "Shared privacy notice and analytics choices.",
         "category": "Creator Signal",
@@ -12003,6 +12010,13 @@
           "moduleId": "creator-signal.site.consent-banner"
         },
         "fields": [
+          {
+            "key": "regionLabel",
+            "label": "Region label",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
           {
             "key": "heading",
             "label": "Heading",
@@ -12175,18 +12189,18 @@
         ]
       },
       "specimen": {
-        "contractReference": "instatic://component-library/creator-signal.site.consent-banner@1.0.0",
+        "contractReference": "instatic://component-library/creator-signal.site.consent-banner@1.1.0",
         "rendered": null,
         "executable": {
           "schemaVersion": "creator-signal.component-library-specimens/v1",
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.consent-banner",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-consent-banner.html",
-          "contentHash": "sha256:cbf3cf5152d3f51bfa6390acd0440a1e7aed9c8ad7a7b87dce47adc8a98cfcd5"
+          "contentHash": "sha256:0b3722a6529b039d6d0583b01695b955372e7ce1fd81c2620283d00c199c9f3a"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:717414b600b2b4b0f156a5c443c1c500ef338242b20618319b70f43a1f21fc77"
+      "contentHash": "sha256:c148633a51ed5cdfe5a088cf0610f2504489b4220572e6200b33cf6a06888d03"
     },
     {
       "id": "creator-signal.site.crm-iframe-form",
@@ -12199,7 +12213,7 @@
       "implementationTaxonomy": "primitive",
       "definition": {
         "id": "creator-signal.site.crm-iframe-form",
-        "version": "2.0.0",
+        "version": "2.1.0",
         "name": "Embedded CRM Form",
         "description": "A standalone authorable Mautic iframe with a validated seamless-resize protocol.",
         "category": "Creator Signal",
@@ -12223,6 +12237,13 @@
           "moduleId": "creator-signal.site.crm-iframe-form"
         },
         "fields": [
+          {
+            "key": "readyMessage",
+            "label": "Ready message",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
           {
             "key": "sectionId",
             "label": "Section anchor",
@@ -12449,18 +12470,18 @@
         ]
       },
       "specimen": {
-        "contractReference": "instatic://component-library/creator-signal.site.crm-iframe-form@2.0.0",
+        "contractReference": "instatic://component-library/creator-signal.site.crm-iframe-form@2.1.0",
         "rendered": null,
         "executable": {
           "schemaVersion": "creator-signal.component-library-specimens/v1",
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.crm-iframe-form",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-crm-iframe-form.html",
-          "contentHash": "sha256:9f78830d694fa46565632378e6820b7dcff5b81ad15811a328a0dfb1dfd8a860"
+          "contentHash": "sha256:bc1a911ffb44ca8d34258a065a28b4ab21c3e4b96dfc072e96d16d959889de67"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:e55a4dd7e620f5c152cee963a540c530fbfce86c32d86415a9c93e5a3d14f53a"
+      "contentHash": "sha256:a7b840515f5e3aa19c039feb77bf5149903e0034e141b62f01b9bf51b05a0adf"
     },
     {
       "id": "creator-signal.site.faq",
@@ -12697,11 +12718,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.faq",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-faq.html",
-          "contentHash": "sha256:65d6659d2011da1c524dbc8e56d9f6f4c9ec5622400fd0306c418205933cb2a6"
+          "contentHash": "sha256:3b038e847d288223fc6c2904f653ca33d9c2fa4acc9e6fc4750f5437352e1221"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:b8c71756772ca554ccc78c5c02e090a12e397cd9101f6cddd4862cc3f532f044"
+      "contentHash": "sha256:36a943b6c4280786392001de78dd83309e6daa387161eaceb1830b4c94a69e2a"
     },
     {
       "id": "creator-signal.site.feature-grid",
@@ -12938,11 +12959,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.feature-grid",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-feature-grid.html",
-          "contentHash": "sha256:758a41cb58598117686931cad5179c4036df63455fa49ae055cd1c9b4f174d65"
+          "contentHash": "sha256:b3b756eec6d3176fda369d346c5c1347dc45268fd3262236c253f633fce894c3"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:c5f8e41bd61ac90afebf35b1ebf28347ec63defe2e785e04bb1158ac01dd5159"
+      "contentHash": "sha256:393d6485fd1258b173b039c724598dfcdbeed53276c7a537f9870b5909741b36"
     },
     {
       "id": "creator-signal.site.footer",
@@ -12955,7 +12976,7 @@
       "implementationTaxonomy": "primitive",
       "definition": {
         "id": "creator-signal.site.footer",
-        "version": "1.1.0",
+        "version": "1.2.0",
         "name": "Site Footer",
         "description": "Shared footer identity, legal routes and service links.",
         "category": "Creator Signal",
@@ -12978,6 +12999,13 @@
           "moduleId": "creator-signal.site.footer"
         },
         "fields": [
+          {
+            "key": "navigationLabel",
+            "label": "Navigation label",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
           {
             "key": "brandName",
             "label": "Brand name",
@@ -13154,18 +13182,18 @@
         ]
       },
       "specimen": {
-        "contractReference": "instatic://component-library/creator-signal.site.footer@1.1.0",
+        "contractReference": "instatic://component-library/creator-signal.site.footer@1.2.0",
         "rendered": null,
         "executable": {
           "schemaVersion": "creator-signal.component-library-specimens/v1",
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.footer",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-footer.html",
-          "contentHash": "sha256:8987e64d5fa406f2be25738c2186aff325346642856a7ce4fc486b7b797bfb08"
+          "contentHash": "sha256:72c63c3f7a43181e3215f2a36dd4598903a30b5c15e9140273789ba29200690d"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:97f1372618a968e7ce8304ba01fd09902151a2f7633ce75a55a05487e3156b40"
+      "contentHash": "sha256:abbb07e8eac60055ff0e0345cf49629060ceef0564f66974dc3eb44a76cc0251"
     },
     {
       "id": "creator-signal.site.founder-story",
@@ -13399,11 +13427,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.founder-story",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-founder-story.html",
-          "contentHash": "sha256:d0c991d5bd5523c14b52cfe57028f1de9fe0c792ce00445e25f51606dcfd9fb9"
+          "contentHash": "sha256:ce419b6df3bdb79637500463e180a6495ae8fb1acb1f207d9b5417ac73fa0e32"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:daefdb59f95ac7c68b95b01c05efe037c24ba15e08a92266e1d937c3f334b51c"
+      "contentHash": "sha256:d279eebc5e039c8c6db44f097f00f2e4513cdae1d7d170159d16f5b871daab40"
     },
     {
       "id": "creator-signal.site.header",
@@ -13416,7 +13444,7 @@
       "implementationTaxonomy": "primitive",
       "definition": {
         "id": "creator-signal.site.header",
-        "version": "1.2.0",
+        "version": "1.3.0",
         "name": "Site Header",
         "description": "Pack-owned brand identity and primary navigation inherited from the site template.",
         "category": "Creator Signal",
@@ -13439,6 +13467,34 @@
           "moduleId": "creator-signal.site.header"
         },
         "fields": [
+          {
+            "key": "skipLinkLabel",
+            "label": "Skip link label",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
+          {
+            "key": "homeLabel",
+            "label": "Home label",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
+          {
+            "key": "menuLabel",
+            "label": "Menu label",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
+          {
+            "key": "navigationLabel",
+            "label": "Navigation label",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
           {
             "key": "brandName",
             "label": "Brand name",
@@ -13643,18 +13699,18 @@
         ]
       },
       "specimen": {
-        "contractReference": "instatic://component-library/creator-signal.site.header@1.2.0",
+        "contractReference": "instatic://component-library/creator-signal.site.header@1.3.0",
         "rendered": null,
         "executable": {
           "schemaVersion": "creator-signal.component-library-specimens/v1",
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.header",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-header.html",
-          "contentHash": "sha256:2a17b91f3aa4a15176121e6d35cd3d5fbd8c0bbcc910e37f0fb4c32fa7d9deee"
+          "contentHash": "sha256:9cd56fc1d60836c89942a214b20e1b73518a3269482b75fcf0f94b22876c6ec2"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:e5a2640be5a3c5f9a9cfb76903e94457a4ced8cd247f141821cc64776e808626"
+      "contentHash": "sha256:7acb70e2fddab18dbee8c0571acb516c34a442d5b4af4cc1fe511a8ab58725ca"
     },
     {
       "id": "creator-signal.site.hero",
@@ -13870,11 +13926,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.hero",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-hero.html",
-          "contentHash": "sha256:8ef1e22738fbd88c9404ade85cd998e27433a74fdfe7e2ad5999ac570a03045f"
+          "contentHash": "sha256:dc99c424b4560197e94e5ed0ef7d3641757ebeb2529d72f1b4abccc02a8a9d44"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:d0b1423173427833af88f4834c02cf83e60cac2cdca01c07071e87b870c3848e"
+      "contentHash": "sha256:003a82d8b67fb10807a6340926973b125e1fe625dd2c90f07d37180f9af5979c"
     },
     {
       "id": "creator-signal.site.mautic-form",
@@ -13887,7 +13943,7 @@
       "implementationTaxonomy": "primitive",
       "definition": {
         "id": "creator-signal.site.mautic-form",
-        "version": "2.0.0",
+        "version": "2.1.0",
         "name": "Managed Form",
         "description": "A standalone governed form provider resolved from the generated Mautic registry.",
         "category": "Creator Signal",
@@ -13910,6 +13966,41 @@
           "moduleId": "creator-signal.site.mautic-form"
         },
         "fields": [
+          {
+            "key": "notConfiguredMessage",
+            "label": "Not configured message",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
+          {
+            "key": "loadingMessage",
+            "label": "Loading message",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
+          {
+            "key": "unavailableMessage",
+            "label": "Unavailable message",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
+          {
+            "key": "failureMessage",
+            "label": "Failure message",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
+          {
+            "key": "sendingMessage",
+            "label": "Sending message",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
           {
             "key": "successMessage",
             "label": "Success message",
@@ -14115,18 +14206,18 @@
         ]
       },
       "specimen": {
-        "contractReference": "instatic://component-library/creator-signal.site.mautic-form@2.0.0",
+        "contractReference": "instatic://component-library/creator-signal.site.mautic-form@2.1.0",
         "rendered": null,
         "executable": {
           "schemaVersion": "creator-signal.component-library-specimens/v1",
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.mautic-form",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-mautic-form.html",
-          "contentHash": "sha256:1357792b71bce31de3527049d50bc72be3dbc83c2d19fac46104c5751d2e10c2"
+          "contentHash": "sha256:316f47e9eb41cbaadd35a169d0717963f2967c2012dc4c14aaaf48cdc34ffc14"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:adf0be0237534bd0e78845a147669760511b96b6c4851562a218135ff8071df9"
+      "contentHash": "sha256:b285ef5e3f3fe3d7d37582f58f7ab23afd9c149fb3f18efa5823b4cdc08e71ff"
     },
     {
       "id": "creator-signal.site.pattern.article-content-page",
@@ -14278,11 +14369,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.article-content-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-article-content-page.html",
-          "contentHash": "sha256:c328bb2fdb68cb813903e94070d066109d3c7dcbe15065c55687ecbe8f209cd9"
+          "contentHash": "sha256:2a9040df6b01eeffbe013289c3fa563f65fcb0f12635d7704ecdae4be4ac950a"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:55244f46737b78bbf39c4b4f83ef0cd557e41f00981a94f8069dadf51d3475e3"
+      "contentHash": "sha256:529f169dce04e46792a91d1bcd91e8853b7b2813f22261559bcc35d87735b964"
     },
     {
       "id": "creator-signal.site.pattern.comparison-section",
@@ -14434,11 +14525,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.comparison-section",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-comparison-section.html",
-          "contentHash": "sha256:0bd0e478b08820be6504f945493b175be7b217b530a7b65550c783343f540d7d"
+          "contentHash": "sha256:ed5d62138ce9eddff7b2892b45a0fcfff48c2fe5d8f652ac6a1d1e8c09a8c3d0"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:dcb25b6ccb91a4f53be5c7d37319928d34659cef846361d9f85670640465cae1"
+      "contentHash": "sha256:6d201ec56c96e51fc3d603d830ef79a62ef00f21f71bee07f6e66e2ed7e8a654"
     },
     {
       "id": "creator-signal.site.pattern.contact-page",
@@ -14591,11 +14682,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.contact-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-contact-page.html",
-          "contentHash": "sha256:95bf853858be147134ef3869fbd826a06dc0c468a410df48ab84b29f7900aedd"
+          "contentHash": "sha256:aa6f29c5dee099ac1c0d89eea674b9b64847b38a8dba2a5ac0339c0ddbd8d116"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:5946b61e2f3cd2c6321761f0b74ef18defca96f3ca97ad2272887ee90d4c9f8e"
+      "contentHash": "sha256:b8d41d3f7470f0d64da30c467733e6727e4ea54af26256879e1935a2c5094e8c"
     },
     {
       "id": "creator-signal.site.pattern.content-page",
@@ -14747,11 +14838,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.content-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-content-page.html",
-          "contentHash": "sha256:80220f5eefcac29c8a96d148471e3ad129ba51812f51fb0b04f6b6870db3c594"
+          "contentHash": "sha256:4dd1aef0cbd334647e4ee29a0936b9c52111262cf7806b6a587d5f02692b4c89"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:383ad6605ce140334c3b742359231b2eb14672735cb62d18bf97dc0e07012cae"
+      "contentHash": "sha256:4f4527acc1d608300b9dbbf7dfd6f0d7664aa2ae1bd0b1f21acd968edfa8f48c"
     },
     {
       "id": "creator-signal.site.pattern.early-access-page",
@@ -14905,11 +14996,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.early-access-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-early-access-page.html",
-          "contentHash": "sha256:2f7f11a67a63455f59f671fa2f873d160fe01949ae3274bfb8d4ecc031a8d2be"
+          "contentHash": "sha256:279140ae7c3eb8570220ef82c019556d4bb15feb3f894f26a06fd7165725aa2c"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:d492843fe40bec0e487a487fa204c597f082862d9d1e0b305703b4f6a4b8c53e"
+      "contentHash": "sha256:944436204f6c44a7437cf1c09e2fc8535bc0958fe4ee38e5a75950aaedaa68ed"
     },
     {
       "id": "creator-signal.site.pattern.empty-state",
@@ -15061,11 +15152,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.empty-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-empty-state.html",
-          "contentHash": "sha256:a1104106bfa640c45813323d1726e448e6a323177eab1d9111975fca462e22df"
+          "contentHash": "sha256:807f4e05b613c9660f23093b52e4553c0665638c76f28d926630d8a4404b22cd"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:348fc0a53e2cf6b2f688f786c8aef5840a824170f5f80af470fe618aed1bfa8d"
+      "contentHash": "sha256:e35d3060f0ace38d142e4e67121f62d4e86b773dea9c12aa36f4fdf5a92442da"
     },
     {
       "id": "creator-signal.site.pattern.error-state",
@@ -15217,11 +15308,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.error-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-error-state.html",
-          "contentHash": "sha256:fd97c9369e63573b6e57ad0640128609dc98f269ad7b1ef2815fef5d712a3706"
+          "contentHash": "sha256:7c53b2e57026044c9b8d36e0faa1433233bc98f9289a8707c15883eb09a53d3b"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:22610c2cf3c0d6453b99301676027e76670034d857402fc7d99bc28ed6c8e83c"
+      "contentHash": "sha256:30a0d197d6b45c7b2b3e9a4aed8dedfa037328df80e2a532efaa65f4b018dd83"
     },
     {
       "id": "creator-signal.site.pattern.features-page",
@@ -15373,11 +15464,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.features-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-features-page.html",
-          "contentHash": "sha256:08aa21e55dbeb3dc75b2ce1c229dd2dedec3dd0c1d404324f94d7cb5c13d79ff"
+          "contentHash": "sha256:056226c10625645ff49ba7bb0c7330d2f065279f18bb8aaf65c1b2e3fdb9f976"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:0ef164b5f00827997d598a4fd959f40e57dbb5cefd46ef6e20d460fdc42ec901"
+      "contentHash": "sha256:e7a79bee48c303d15834ad2955ace7d4a734b49f8f14a5ae0088746a17b6a97c"
     },
     {
       "id": "creator-signal.site.pattern.feedback-page",
@@ -15530,11 +15621,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.feedback-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-feedback-page.html",
-          "contentHash": "sha256:2ed0ecd6d28688eadf821f843d558cc68397187a839fcaf628db77d57506fab4"
+          "contentHash": "sha256:f047965565bbd9812c3715b0fb11c864d4371ab8ef038af2e6c82a7ec82489b7"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:42770a4bec5a7145835b5fc90b2ad99c5429f8556ec9d51f4ffa8642c32fb31c"
+      "contentHash": "sha256:30b864e2471fcf6647d1d1e633933dda38f48c0b0f188273be13e4a0f780a725"
     },
     {
       "id": "creator-signal.site.pattern.home-v2-page",
@@ -15686,11 +15777,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.home-v2-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-home-v2-page.html",
-          "contentHash": "sha256:bad073bab0a851d3247f7e02c219877362b70e1c8b2a0b01ffa306eef56daf59"
+          "contentHash": "sha256:cccbb1f983cc60dc4743cec8f414d6d19344560930f97917b026feddc14212ee"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:925f3e49fc41e879d320b03aaf6051b6d3342072839a1e53f9fa08c6201485a4"
+      "contentHash": "sha256:b8292cf968f221f616be2d911ec0394f75b4ea450855d675f46ee48cf169e5a1"
     },
     {
       "id": "creator-signal.site.pattern.legal-trust-page",
@@ -15842,11 +15933,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.legal-trust-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-legal-trust-page.html",
-          "contentHash": "sha256:9a35b382d719bc7a0aaa24a073cfde4183b0d16f5f3410e7081865446dd6bb53"
+          "contentHash": "sha256:66f24bc9f614d06235170f77664897b42da464c797e66667c280f4a56ac49815"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:bc8fc47870792417f80d86fb9870cb418a72bf792271ea05eb5f4775c08e7df3"
+      "contentHash": "sha256:20d481bbcafae88802ef6b65b59966e5a07154f41448c4f1c7504fe325708c3b"
     },
     {
       "id": "creator-signal.site.pattern.not-found-state",
@@ -15998,11 +16089,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.not-found-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-not-found-state.html",
-          "contentHash": "sha256:d2ec25710071ac6ebe3ab6737663c9fe8c76badcae5fa65d4325f0a640e52d3a"
+          "contentHash": "sha256:73660404e60c4884cdce0240fb67118e86ca83205f30a316754004918af907dd"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:9d3892a64c5b2e4f063493860d463ff8d32b243faa46d60c115ea927adff7453"
+      "contentHash": "sha256:f6bf1597d88a10e51bb40c3b517a54d1e2bb4f6658f1e945f470093bc2100b26"
     },
     {
       "id": "creator-signal.site.pattern.offline-state",
@@ -16154,11 +16245,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.offline-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-offline-state.html",
-          "contentHash": "sha256:79f228057777e7f1a988ff3aa777bd8b5b3e39142fc5042ad71f5e520429b683"
+          "contentHash": "sha256:e91c54af8eddcfe9716303e730c8bc55c589a6e5795de1d42660389ceb869171"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:9f431e1dc420de23f0c68a533adbc21ce251efe40e3e8caa8a451173a72cc0d6"
+      "contentHash": "sha256:5edca26d2d2f6151f5dbbeab0933be5e5a2afa4bd80ce94208e8ff98a18a92e6"
     },
     {
       "id": "creator-signal.site.pattern.pricing-page",
@@ -16310,11 +16401,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.pricing-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-pricing-page.html",
-          "contentHash": "sha256:791718013dfaa90320a15c8b95dc04ca3be527cfa4cf42af48b70385a92a2974"
+          "contentHash": "sha256:0ea3ba3a8b4027ac195f9be5fcf3fb1de9b707cab1d847e7ea623bd07f5c634b"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:0bbcdc7f3f00fcf27604ec120db9cfe2009d3356ae3936a6290015cf83c489ab"
+      "contentHash": "sha256:db83776edb198be53444377c73e2e6e930104eca392b94c0cec6fb0055be0d27"
     },
     {
       "id": "creator-signal.site.pattern.product-page",
@@ -16466,11 +16557,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.product-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-product-page.html",
-          "contentHash": "sha256:10f9853fb47c9da6a42fda514eaa476eb66cda52f1d7c8699150b5cf1c898ab1"
+          "contentHash": "sha256:aed86b777e1ec72d5db8c578e4b0c9facec53cb9c21dafa94deeaf9efaeb82e7"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:7c93a7c6c115459750df367213a33e2d77cc7bc5f6e835a4376f1d226675cae5"
+      "contentHash": "sha256:d5e358155588918ca5c9734578d3ba3220d62da6865c8162bef9730321cc0ca6"
     },
     {
       "id": "creator-signal.site.pricing-plans",
@@ -16483,7 +16574,7 @@
       "implementationTaxonomy": "primitive",
       "definition": {
         "id": "creator-signal.site.pricing-plans",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "name": "Pricing Plans",
         "description": "Three clear public plan cards with explicit prices, included features and signup handoffs.",
         "category": "Creator Signal",
@@ -16506,6 +16597,13 @@
           "moduleId": "creator-signal.site.pricing-plans"
         },
         "fields": [
+          {
+            "key": "featuredLabel",
+            "label": "Featured label",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
           {
             "key": "eyebrow",
             "label": "Eyebrow",
@@ -16749,18 +16847,18 @@
         ]
       },
       "specimen": {
-        "contractReference": "instatic://component-library/creator-signal.site.pricing-plans@1.0.0",
+        "contractReference": "instatic://component-library/creator-signal.site.pricing-plans@1.1.0",
         "rendered": null,
         "executable": {
           "schemaVersion": "creator-signal.component-library-specimens/v1",
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pricing-plans",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pricing-plans.html",
-          "contentHash": "sha256:868fa0a496c169f073c9497f4c61c62449f6b455f5d0a7d5a688a8eb001c55ae"
+          "contentHash": "sha256:b997f109f6e59c86ae294f4ba95c238869ceb6e013ad92fb9ebaaac78c36b40b"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:ad936fb306220df78391cfc72fd4ea25fa291d49fec1ed51783d7fd44e128459"
+      "contentHash": "sha256:fc88961bb7892d666614ab522d664b3fe579f36cfa8026e741838920c77da3f3"
     },
     {
       "id": "creator-signal.site.process-steps",
@@ -16990,11 +17088,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.process-steps",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-process-steps.html",
-          "contentHash": "sha256:249829966f09008ed13afcd5f0d65b3ff98f537651298ca3f206b7b2496b60a8"
+          "contentHash": "sha256:52d7b11e703e6a66b0a15587d97802b0fe881787f448ec272e7c091e20647f7b"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:deced441fa84d3be4d64ebe29cab9925a1d3c09783275796db9522b822e4df86"
+      "contentHash": "sha256:01c936cf74f25b2b35962ad5267a333f616fb849aa028d0cb586639dc0f67380"
     },
     {
       "id": "creator-signal.site.public-document",
@@ -17199,11 +17297,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.public-document",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-public-document.html",
-          "contentHash": "sha256:f4eb2a1121e74e027e9826975d603a3c5b165ecba9e00deec62f7639252e7e0a"
+          "contentHash": "sha256:461d4451a6a1aeeee955598fac0913e138ff5230cae79ac59a5f3ee669ac49d0"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:6429b2f71cdf29f7fdcf9390866bdec7f54b255ecd7623275b2f8b148608f66d"
+      "contentHash": "sha256:0332380e410e70b9074691175258591011d7abd8076220f9caba3332bce2a65d"
     },
     {
       "id": "creator-signal.site.recovery-state",
@@ -17216,7 +17314,7 @@
       "implementationTaxonomy": "primitive",
       "definition": {
         "id": "creator-signal.site.recovery-state",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "name": "Recovery State",
         "description": "A textual empty, error, offline or not-found state with one clear recovery action.",
         "category": "Creator Signal",
@@ -17240,6 +17338,34 @@
           "moduleId": "creator-signal.site.recovery-state"
         },
         "fields": [
+          {
+            "key": "emptyLabel",
+            "label": "Empty label",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
+          {
+            "key": "errorLabel",
+            "label": "Error label",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
+          {
+            "key": "offlineLabel",
+            "label": "Offline label",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
+          {
+            "key": "notFoundLabel",
+            "label": "Not found label",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
           {
             "key": "state",
             "label": "State",
@@ -17415,18 +17541,18 @@
         ]
       },
       "specimen": {
-        "contractReference": "instatic://component-library/creator-signal.site.recovery-state@1.0.0",
+        "contractReference": "instatic://component-library/creator-signal.site.recovery-state@1.1.0",
         "rendered": null,
         "executable": {
           "schemaVersion": "creator-signal.component-library-specimens/v1",
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.recovery-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-recovery-state.html",
-          "contentHash": "sha256:16747fa1c92ecb0d7adf9bb5bce31bd3bb50bf4947ea0c538aaf92fee0b441d2"
+          "contentHash": "sha256:de8bf2db772dc20c0835dacdd76153438480e676b969df29e0ac91f6ccf2c899"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:f1ecf8727ea290271baf1bf7dbf9abe19af0b82356f5116eebe0654a6d6c2c71"
+      "contentHash": "sha256:58041d42a02206519fc6eef8b66ad9fbe60f6e2f45f11eb1586fd9967acdddb1"
     },
     {
       "id": "creator-signal.site.rich-text-section",
@@ -17623,11 +17749,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.rich-text-section",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-rich-text-section.html",
-          "contentHash": "sha256:82300a4981b6683bd34519415eed7d1c2451eb388ba7386c3ad4eabed47ea31b"
+          "contentHash": "sha256:b9a3638de9a6afd6cc388a19a366a160bbf5f9bb10bd1381ff834af872db5aff"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:3b6e12932c4c02a0602ef35f18b454b76a4fdf97bb17a4748c7b793f3a0954ca"
+      "contentHash": "sha256:e4a62b4dad121bf23ca301d043a373fb8809cc69a702a8a83ee3daf85382b719"
     },
     {
       "id": "creator-signal.site.section-intro",
@@ -17824,11 +17950,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.section-intro",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-section-intro.html",
-          "contentHash": "sha256:392fae0611fa1d1feef5f50ec807b63913f084ead339c5e7a44ad7dfeb913f56"
+          "contentHash": "sha256:2c82fef2c99cec0fcfca21dab773f7c07a3aaadc4f8e74bd2641f2adb9782097"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:241b4d02e6f9bedb45530b6c5c2062c2862909d486ecc351ddd187428a47257b"
+      "contentHash": "sha256:4c125f94d0f45b165c0fc3780b95cc66e35a8ab418f465678d9adde3b03b64d6"
     },
     {
       "id": "creator-signal.site.signal-comparison",
@@ -17841,7 +17967,7 @@
       "implementationTaxonomy": "primitive",
       "definition": {
         "id": "creator-signal.site.signal-comparison",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "name": "Signal Comparison",
         "description": "A before-and-after explanation of limited reporting and a visual sales signal.",
         "category": "Creator Signal",
@@ -17864,6 +17990,34 @@
           "moduleId": "creator-signal.site.signal-comparison"
         },
         "fields": [
+          {
+            "key": "beforeHeading",
+            "label": "Before heading",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
+          {
+            "key": "afterHeading",
+            "label": "After heading",
+            "description": "Editable public content; omitted values use the component default.",
+            "type": "text",
+            "required": false
+          },
+          {
+            "key": "beforeArtwork",
+            "label": "Before artwork",
+            "description": "Editable public content.",
+            "type": "image",
+            "required": false
+          },
+          {
+            "key": "beforeArtworkAlt",
+            "label": "Before artwork alt",
+            "description": "Editable public content.",
+            "type": "text",
+            "required": false
+          },
           {
             "key": "eyebrow",
             "label": "Eyebrow",
@@ -18070,18 +18224,18 @@
         ]
       },
       "specimen": {
-        "contractReference": "instatic://component-library/creator-signal.site.signal-comparison@1.0.0",
+        "contractReference": "instatic://component-library/creator-signal.site.signal-comparison@1.1.0",
         "rendered": null,
         "executable": {
           "schemaVersion": "creator-signal.component-library-specimens/v1",
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.signal-comparison",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-signal-comparison.html",
-          "contentHash": "sha256:07f9dd169e26f3bc22933c105f51c1fb07feefa5f914ac5d76ea8d63a949eb02"
+          "contentHash": "sha256:ade2fc92d7d0aa68e8e88c0290eea4ae2602e99843c7634ce7d1f39b818f9a1a"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:66fcdba6f67da5a5a0b75ca3c2df851e58874209a5eadb5f72079015d85fb701"
+      "contentHash": "sha256:bc6ba09b513c6600d779108742d378c51009242e5b84af983ae50e9fc9621d58"
     },
     {
       "id": "creator-signal.site.signal-strip",
@@ -18272,11 +18426,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.signal-strip",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-signal-strip.html",
-          "contentHash": "sha256:65580d0cac6dfb6a755531b4213c1559fbe33c6f52054c80007a7867225c3536"
+          "contentHash": "sha256:05345d39e345507eeb28d02576d48d0a6e1f0549a44d3d9ad77e0152a8a75eb6"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:ab63861cdfca8a9a575185307390dfd402c7a7b62dfcebe44344077a67062ed3"
+      "contentHash": "sha256:58bdccee1cb892bff6c733a921b04aa1fa7b804870673b15c335f1775d9af079"
     },
     {
       "id": "creator-signal.site.testimonial",
@@ -18458,11 +18612,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.testimonial",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-testimonial.html",
-          "contentHash": "sha256:a742eea33edb61863f3287fd4b517338570afc01fe5f47b286adf3c256b09bf9"
+          "contentHash": "sha256:326df525d0a5a807b8f33458d2fcd6fa62055a48a6838dc6643af57c772fc3f9"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:b441ec7754c414037e7d590c9541e8f9b97b751304c4929adbdb5735c1c4de4e"
+      "contentHash": "sha256:768fcbca3fdb8a8323fe49aad29593e196a798a143b511c9e9cc22454df8a39a"
     },
     {
       "id": "creator-signal.site.two-column-layout",
@@ -18627,15 +18781,15 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.two-column-layout",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-two-column-layout.html",
-          "contentHash": "sha256:8a4d8caf484cf6898e018af2eea86ce365b328f33056d3b20329c821abfd333b"
+          "contentHash": "sha256:9ce00b11c5b664761e38a70b4b6334574b21a99c4cc5dfd7e5f7770a8a05cf44"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:a1fa3e1a4cc3e0a2ea4cb2c0be78d49eda8efc36efe62cd9aee3898d97e89bd1"
+      "contentHash": "sha256:b935de4d8b30f021326bb939a01579bf8e5a2c40e1cc8b27493926a0d3b1f3d6"
     }
   ],
   "checksum": {
     "algorithm": "sha256",
-    "value": "sha256:ce6b7406687adebf9508fd0f3c7f95c6a782523fbd8d98d2794225d4073cac61"
+    "value": "sha256:d35205b9ff1866230cc023c3ffc67c048fcffebe9284b31489266015e91e23e6"
   }
 }

@@ -2,8 +2,9 @@
 
 This reference maps the public site to the shared template and governed components authors edit in Instatic.
 
-The source of truth is `integrations/creator-signal/pack/site.ts`. It defines
-the 26 route documents as page content only, one everywhere template that owns
+The retained CMS draft is the source of truth for authored text and media.
+`integrations/creator-signal/pack/site.ts` supplies starter content only when no
+active pages exist: 26 route documents, one everywhere template that owns
 shared header/footer/privacy choices, and one not-found template that owns the
 unknown-route recovery content.
 
@@ -312,3 +313,59 @@ The visual report is evidence, not deployment authority. Production release and 
 - `src/__tests__/plugins/creatorSignalSitePack.test.ts` — route, template and component gates
 - `src/__tests__/component-library/componentLibraryPlacement.test.ts` — placement-policy gate
 - `src/__tests__/panels/componentLibraryDialog.test.tsx` — author-facing placement explanation gate
+
+## Public copy and retained content
+
+All public text is edited through component content fields, including accessible
+navigation names, skip links, menu text, privacy region names, comparison card
+headings, pricing badges, comparison column labels and recovery-state labels.
+Managed Mautic forms expose configuration, loading, sending, success, failure
+and unavailable messages. Embedded CRM forms expose their ready status as well.
+Provider-owned field labels and validation copy are edited in the CRM form.
+
+Signal Comparison supports independently selected before/after images and their
+alternative text. Clearing the after image removes it; the renderer does not
+substitute a brand image. Existing image selections and all other retained page
+properties stay unchanged when the technical plugin is refreshed.
+
+Technical plugin refresh updates schemas, authoring metadata and renderers;
+it skips starter pages whenever active pages exist. New fields use the previous
+wording as defaults, so existing pages keep their copy until an author edits it.
+It does not rewrite page IDs, routes, customized copy, media or publication state.
+Source merge does not install the plugin, migrate content or publish the site.
+
+### Copy audit coverage (Issue #297)
+
+| Surface | Content ownership |
+| --- | --- |
+| Header, footer and consent | Brand, links, buttons and accessible names are CMS fields. |
+| Hero, campaign hero and signal strip | Copy already consists of CMS fields or repeaters. |
+| Signal comparison | Both headings, descriptions, labels and both media selections are CMS fields. |
+| Feature grid, process, pricing | Repeaters own item copy; pricing badge now has a CMS field. |
+| Founder, CTA, rich text, section intro, testimonial, FAQ and public document | Copy already consists of CMS fields or rich text. |
+| Comparison and recovery | Column heading and all four state labels now have CMS fields. |
+| Managed Mautic and embedded CRM forms | All wrapper status copy is CMS content; remote form copy belongs to CRM. |
+| Two-column layout and 16 insertion recipes | Layout emits structure; recipes expand into editable content nodes. |
+| Navigation, theme and analytics runtimes | No business copy is generated; form runtimes read authored data attributes. |
+
+Module names, editor field labels, protocol identifiers and decorative glyphs
+are technical/editor metadata. Starter defaults are insertion content, not a
+mechanism for updating retained public pages.
+
+The retained-content default resolution also changes the Instatic publisher's
+module boundary (`validateNodeProps`). This delivery therefore includes CMS
+runtime source as well as the technical plugin; a plugin-only install onto a
+runtime without that fix does not qualify this upgrade. No install or runtime
+release is performed by this Source PR.
+
+Plugin upgrades retain previous version directories because draft content,
+published snapshots and reusable components can keep those immutable image URLs.
+The old plugin's workers/modules are deactivated; retained asset bytes do not
+activate old code. Technical upgrades do not rewrite URLs or remove their media.
+The update audit records the retained asset version. Explicit plugin uninstall
+still removes the complete plugin asset tree; retired content assets are retained
+state, not disposable build output.
+
+The header home-link label supports `{brandName}` in its CMS text. Its default
+keeps the retained brand name in the accessible label; authors can replace the
+complete label or retain that substitution.

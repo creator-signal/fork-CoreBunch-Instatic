@@ -28,6 +28,7 @@ publishes only `main`, so automation mirrors `fork-origin/main` exactly at
 | `origin/develop` | Mirror automation | Fast-forward mirror of `fork-origin/main` | `.github/workflows/sync-upstream-develop.yml` only |
 | `origin/creator-signal/develop` | Creator Signal | Protected default integration | Pull-request merges only |
 | `origin/creator-signal/main` | Creator Signal | Protected release source | Promotion pull-request merges only |
+| `origin/env/public-site` | Creator Signal public site | Independently selected site-plugin artifact release | Two-parent pull-request merges only; no deployment |
 | `origin/main` | Creator Signal | Retained transition history | No ordinary delivery |
 | `<type>/<short-kebab-description>` | Contributor | One Issue-scoped change | Contributor pushes, then PR |
 
@@ -35,6 +36,15 @@ publishes only `main`, so automation mirrors `fork-origin/main` exactly at
 for pull requests and pushes on both Creator Signal branches and monitors the
 two unprefixed branches. `.github/workflows/release.yml` rejects release tags
 whose commit is not an ancestor of `origin/creator-signal/main`.
+
+`.github/workflows/public-site-release.yml` is a separate, explicitly authorised
+public-site artifact lane. PRs into `env/public-site` build and verify only the
+site package; an exact merged push publishes `public-site-v<plugin-version>`.
+Its selected second parent must already belong to `creator-signal/develop`, and
+its tree must equal that Source tree. Direct commits, squash/rebase merges,
+foreign PR heads and ambiguous merge identities cannot publish. This branch is
+not a deployment projection; changing a live installation remains separately
+authorised. See the independent public-site section of the release runbook.
 
 ## Start ordinary work
 

@@ -8,6 +8,12 @@ and publish the imported pages. Managed deployments can use the starter-site
 bootstrap variables to create the owner, install this package into an empty
 page roster, and publish the complete site automatically.
 
+For independent artifact releases, merge the selected integrated Source through
+a PR into `env/public-site`. The dedicated workflow publishes only this plugin,
+its manifest and checksums as `public-site-v<plugin-version>`; it builds no runtime
+or media images and performs no installation or live content publication. See
+[the public-site release runbook](../../docs/deployment/release-workflow.md#independent-public-site-artifact-release).
+
 ## Included experience
 
 - Twenty-four launch, form, legal, trust, support, and status pages plus a
@@ -145,6 +151,32 @@ is added only when its reserved ID is absent. An occupied ID with any other
 content blocks the whole migration.
 Any authored difference in the older hash-governed packs blocks the whole
 migration for manual mapping; it is never overwritten heuristically. For a
+missing original starter route, obtain an explicit restoration disposition and
+pass its exact reserved page ID through `--restore-missing-pages` (comma-separated
+for multiple IDs) to both preview and prepare. Omission continues to block;
+unknown/template IDs and occupied routes are rejected. The report marks each
+restoration, creates it as a draft, and never publishes it. A restored starter uses its stable
+`<original-id>/restored` record ID: merge import does not revive a soft-deleted
+original, and replacing the entire CMS would discard unrelated deleted history.
+The classifier recognises the restored identity on subsequent runs, including
+without the restoration option, and blocks duplicate identities or changed
+restored routes. Existing rows still
+undergo the same authored-content checks. Back up the full site first and remove
+only user-authorised test rows using the CMS recoverable delete path before
+exporting the migration input; an additional row still blocks shared-template
+installation. A content export is not a database/account/secret backup: follow
+the platform backup and restore runbook separately for those records.
+
+An operator can verify a specific content backup with
+`INSTATIC_BACKUP_VERIFY_ARCHIVE=/absolute/path/site-bundle.zip bun test src/__tests__/architecture/cmsTransferImport.test.ts`
+(set the environment variable separately in PowerShell). This exercises the real
+archive importer against a fresh in-memory SQLite database, checks all row content,
+stored settings, normalized styles/runtime and media bytes, and removes its owned
+scratch. It never publishes or connects to the live database. Without that explicit
+input, the operator-only restore check is skipped; ordinary synthetic transfer
+tests still run. This proves content restoration, not account/secret recovery.
+
+For a
 0.7.0 recipe wrapper, authored differences beneath that exact wrapper are
 preserved because the migration removes only the presentation-free wrapper.
 After expansion, the classifier replaces only the exact versioned `artwork`

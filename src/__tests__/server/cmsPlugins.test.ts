@@ -11,6 +11,7 @@ import { hookBus } from '@core/plugins/hookBus'
 import { makeNode, makePage, makeSite } from '../fixtures'
 import type { PagePublicationMetadata } from '../../../server/repositories/publish'
 import { getActiveSlot, prepareInactiveSlot, readArtefact, swapSlot, writeArtefact } from '../../../server/publish/staticArtefact'
+import { serveStaticFile } from '../../../server/static'
 
 function makeFakeDb(publicationMetadata: PagePublicationMetadata[] = []) {
   const admins: Record<string, unknown>[] = [
@@ -1463,7 +1464,7 @@ describe('CMS plugin handlers', () => {
   // The upgrade path detects an already-installed plugin id, runs the new
   // version's `migrate({ fromVersion }, api)` between the old version's
   // deactivate and the new version's activate, preserves settings + installed_at,
-  // drops the old version's asset dir on success, and rolls back to the prior
+  // retains versioned content assets on success, and rolls back to the prior
   // version on activate failure.
 
   it('routes a same-id newer-version upload through the upgrade flow with migrate', async () => {
@@ -1518,6 +1519,7 @@ describe('CMS plugin handlers', () => {
       v1FormData.set('file', pluginZip({
         'plugin.json': JSON.stringify(baseManifest('1.0.0')),
         'server/index.js': v1,
+        'assets/retained-image.svg': '<svg xmlns="http://www.w3.org/2000/svg"><title>Retained image</title></svg>',
       }))
       v1FormData.set('grantedPermissions', JSON.stringify(['cms.routes', 'cms.hooks']))
       const installV1 = await handleCmsRequest(
@@ -1565,13 +1567,17 @@ describe('CMS plugin handlers', () => {
       // installed_at preserved across the upgrade.
       expect(db.plugins[0].installed_at).toBe(installedAtBefore)
 
-      // Old version's asset dir was deleted; new version's is on disk.
+      // Retained content can keep its old image URL while the new version is active.
       await expect(readFile(
         join(uploadsDir, 'plugins/acme.upgrade/1.1.0/server/index.js'),
         'utf-8',
       )).resolves.toContain('migrate')
       const { existsSync } = await import('node:fs')
-      expect(existsSync(join(uploadsDir, 'plugins/acme.upgrade/1.0.0'))).toBe(false)
+      expect(existsSync(join(uploadsDir, 'plugins/acme.upgrade/1.0.0'))).toBe(true)
+      await expect(readFile(join(uploadsDir, 'plugins/acme.upgrade/1.0.0/assets/retained-image.svg'), 'utf-8')).resolves.toBe('<svg xmlns="http://www.w3.org/2000/svg"><title>Retained image</title></svg>')
+      const retainedImage = await serveStaticFile(uploadsDir, '/plugins/acme.upgrade/1.0.0/assets/retained-image.svg')
+      expect(retainedImage?.status).toBe(200)
+      expect(await retainedImage?.text()).toContain('<title>Retained image</title>')
     } finally {
       hookBus.unregisterPlugin('test')
       await rm(uploadsDir, { recursive: true, force: true })

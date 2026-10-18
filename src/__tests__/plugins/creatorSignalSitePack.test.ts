@@ -18,7 +18,6 @@ import {
 } from '../../../integrations/creator-signal/component-library'
 import crmIframeForm from '../../../integrations/creator-signal/modules/crm-iframe-form'
 import mauticForm, { creatorSignalSiteCss } from '../../../integrations/creator-signal/modules/mautic-form'
-import creatorSignalPlugin from '../../../integrations/creator-signal/instatic-plugin.config'
 import {
   campaignHero,
   callToAction,
@@ -189,7 +188,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.8.3')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.8.5')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -504,7 +503,7 @@ describe('Creator Signal site pack', () => {
     expect(output.js).toContain('consentTimestampFields')
     expect(output.js).toContain('syncConsentTimestamps')
     expect(output.js).toContain('choiceField: null')
-    expect(output.js).toContain("status.textContent = 'Sending...'")
+    expect(output.js).toContain("root.dataset.sendingMessage")
     expect(output.js).toContain('const invalid = controls.filter((control) => !control.checkValidity())')
     expect(output.js).toContain("control.setAttribute('aria-invalid', 'true')")
     expect(output.js).toContain("setAttribute('aria-busy', 'true')")

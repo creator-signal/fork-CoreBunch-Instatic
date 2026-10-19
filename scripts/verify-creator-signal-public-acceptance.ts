@@ -25,6 +25,7 @@ import {
 import { installPackCompileEnvironment } from '../src/core/plugin-sdk/cli/packCompileEnvironment'
 import { creatorSignalPluginVersion } from '../integrations/creator-signal/design-system/contract'
 import { creatorSignalPublicRouteSlugs } from '../integrations/creator-signal/pack/routes'
+import { routeMarketing, verifyManagedForm } from '../integrations/creator-signal/acceptance/managed-form'
 
 installPackCompileEnvironment()
 
@@ -344,68 +345,6 @@ async function runCheck(name: string, task: () => Promise<unknown>): Promise<voi
   }
 }
 
-const formRegistry = `window.CreatorSignalMauticForms=${JSON.stringify({
-  schema: 'creator-signal.mautic-forms/v1',
-  forms: Object.fromEntries([
-    'creator_signal_contact',
-    'creator_signal_feedback',
-    'creator_signal_wishlist',
-    'creator_signal_waitlist',
-    'creator_signal_beta_application',
-    'creator_signal_question',
-    'creator_signal_feature_request',
-    'creator_signal_error_report',
-  ].map((alias, index) => [alias, {
-    id: index + 1,
-    apiName: `${alias}_form`,
-    code: alias,
-    consentTimestampField: 'consent_timestamp',
-  }])),
-})};`
-
-const generatedForm = String.raw`(() => {
-  const target = document.currentScript && document.currentScript.parentElement;
-  if (!target) return;
-  const formId = new URL(document.currentScript.src).searchParams.get('id');
-  const preference = formId === '3'
-    ? '<fieldset class="mauticform-row"><legend>Which updates would you like?</legend><label><input type="radio" name="contact_preference" value="launch" required> Launch notification</label><label><input type="radio" name="contact_preference" value="testing"> Early testing</label><label><input type="radio" name="contact_preference" value="both"> Both</label></fieldset>'
-    : '';
-  target.innerHTML = '<form novalidate><div class="mauticform-row"><label for="acceptance-email">Email address</label><input id="acceptance-email" name="email" type="email" required aria-describedby="acceptance-email-error"><span id="acceptance-email-error" class="mauticform-errormsg" hidden>Enter a valid email address.</span></div>' + preference + '<div class="mauticform-row"><label for="acceptance-message">Message</label><textarea id="acceptance-message" name="message" required></textarea></div><input name="mauticform[consent_timestamp]" type="hidden"><button type="submit">Send message</button></form>';
-  const form = target.querySelector('form');
-  const email = target.querySelector('#acceptance-email');
-})();`
-
-async function routeMarketing(page: Page, registryAvailable = true): Promise<void> {
-  await page.route('https://marketing.creatorsignal.me/**', async (route) => {
-    const url = new URL(route.request().url())
-    if (url.pathname.endsWith('/media/creator-signal/forms-v1.js')) {
-      if (!registryAvailable) return route.abort('failed')
-      return route.fulfill({
-        status: 200,
-        contentType: 'text/javascript; charset=utf-8',
-        body: formRegistry,
-      })
-    }
-    if (url.pathname.endsWith('/media/js/mautic-form.js')) {
-      return route.fulfill({ status: 200, contentType: 'text/javascript; charset=utf-8', body: '' })
-    }
-    if (url.pathname.endsWith('/form/generate.js')) {
-      return route.fulfill({
-        status: 200,
-        contentType: 'text/javascript; charset=utf-8',
-        body: generatedForm,
-      })
-    }
-    if (url.pathname.endsWith('/form/submit')) {
-      return route.fulfill({
-        status: 200,
-        contentType: 'application/json; charset=utf-8',
-        body: JSON.stringify({ success: !page.url().includes('formResult=failure') }),
-      })
-    }
-    return route.abort('blockedbyclient')
-  })
-}
 
 async function waitForPage(page: Page): Promise<void> {
   await page.evaluate(async () => {
@@ -697,37 +636,7 @@ try {
     const page = await context.newPage()
     await routeMarketing(page)
     try {
-      await page.goto(`${baseUrl}/contact?formResult=success`, { waitUntil: 'load' })
-      const form = page.locator('[data-form-mount] form')
-      await form.waitFor({ state: 'attached' })
-      await page.getByRole('button', { name: 'Send message' }).click({ noWaitAfter: true })
-      const email = page.getByLabel('Email address')
-      assert.equal(await email.getAttribute('aria-invalid'), 'true')
-      assert.equal(await page.evaluate(() => document.activeElement?.id), 'acceptance-email')
-      assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('aria-busy'), null)
-      await email.fill('creator@example.com')
-      await page.getByRole('textbox', { name: 'Message', exact: true }).fill('Please send a useful signal.')
-      await page.getByRole('button', { name: 'Send message' }).click({ noWaitAfter: true })
-      await form.waitFor({ state: 'hidden' })
-      await page.getByText('Thanks — your message has been received.', { exact: true }).waitFor()
-
-      await page.goto(`${baseUrl}/contact?formResult=failure`, { waitUntil: 'load' })
-      await page.locator('[data-form-mount] form').waitFor({ state: 'attached' })
-      await page.getByLabel('Email address').fill('creator@example.com')
-      await page.getByRole('textbox', { name: 'Message', exact: true }).fill('Please retry this signal.')
-      await page.getByRole('button', { name: 'Send message' }).click({ noWaitAfter: true })
-      await page.getByText('The form could not be sent. Please try again.', { exact: true }).waitFor()
-      assert.equal(await page.locator('[data-form-mount]').isVisible(), true)
-      assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('aria-busy'), null)
-      assert.equal(await page.getByRole('button', { name: 'Send message' }).isEnabled(), true)
-
-      await page.goto(`${baseUrl}/early-access`, { waitUntil: 'load' })
-      await page.locator('[data-form-mount] form').waitFor({ state: 'attached' })
-      assert.equal(await page.locator('[data-cs-mautic-form]').count(), 1)
-      assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('data-form-alias'), 'creator_signal_wishlist')
-      assert.equal(await page.locator('[data-cs-mautic-form]').getAttribute('data-campaign-code'), 'early_access')
-      assert.equal(await page.getByRole('radio').count(), 3)
-      await page.getByText('Which updates would you like?', { exact: true }).waitFor()
+      await verifyManagedForm(page, baseUrl)
     } finally {
       await context.close()
     }

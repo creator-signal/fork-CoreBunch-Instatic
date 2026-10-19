@@ -17,6 +17,27 @@ The command writes actual screenshots and `report.json` under
 check fails. Passing this command proves source readiness only; it does not
 deploy, converge or accept a production environment.
 
+Managed-form checks use provider-style required metadata on field rows, without
+pre-populating native `required` attributes. They verify empty/invalid fields
+produce no submission, required select and minimum-one choice groups work,
+optional follow-up remains optional, and an in-flight form cannot send twice.
+Provider failure retains values and permits retry; success uses authored status
+copy. All provider requests are intercepted in the existing published-page
+verifier, so these cases send no external message. They do not establish durable
+server idempotency, production delivery or acknowledgement-email receipt.
+
+The registered Creator Signal CMS E2E lane reuses those same assertions through
+the actual seeded Bun CMS and its published pages:
+
+```sh
+bun run verify:creator-signal-editor-authoring --grep 'Managed Form validates'
+```
+
+`scripts/lib/bunCommand.ts` already supports `INSTATIC_VITE_RUNTIME` for a
+supported Vite driver on hosts where Bun's Vite transport stalls. The CMS itself
+continues to run with Bun. Playwright's normal CLI owns the browser driver; no
+new acceptance workflow or production provider write is introduced.
+
 The Component Library uses a separate isolated-specimen gate after the same
 plugin build:
 

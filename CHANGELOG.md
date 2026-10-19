@@ -6,6 +6,22 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.66 - 2026-10-18
+
+- Preserve line breaks when editing text inside component-library repeaters.
+  Shared multiline controls keep existing feature lists intact and allow new
+  line-separated content; URL, number, boolean and select controls keep their
+  existing behavior. Authored content, schemas and permissions are unchanged.
+- Retain the unchanged public-site plugin 0.8.7.
+
+## 0.0.65 - 2026-10-18
+
+- Retain historical component definitions and offer explicit administrator review
+  of compatible optional content fields without rewriting authored properties.
+  Include public-site plugin 0.8.7 and defer loading the component inspector.
+- Correct the failed 0.0.64 release's generated specimen lineage and bundle
+  size verification before publication. The failed tag remains unchanged.
+
 ## 0.0.63 - 2026-10-18
 
 - Validate omitted first-party Visual Component fields using the same definition

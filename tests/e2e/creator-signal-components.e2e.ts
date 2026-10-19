@@ -4,8 +4,10 @@ import {
   openComponentsPanel,
   openSiteEditor,
   openSitePanel,
+  publishDraft,
   setPropValue,
 } from './helpers'
+import { routeMarketing, verifyManagedForm } from '../../integrations/creator-signal/acceptance/managed-form'
 
 type FormRoute = {
   path: string
@@ -390,3 +392,21 @@ async function dragTreeRowBefore(
   )
   await page.mouse.up()
 }
+
+
+test('Managed Form validates provider-required metadata and serializes retry', async ({ page, browser }) => {
+  await openSiteEditor(page)
+  await publishDraft(page)
+  const visitor = await browser.newContext()
+  const publicPage = await visitor.newPage()
+  await publicPage.route('**/*', (route) => {
+    const host = new URL(route.request().url()).hostname
+    return ['127.0.0.1', 'localhost'].includes(host) ? route.continue() : route.abort('blockedbyclient')
+  })
+  await routeMarketing(publicPage)
+  try {
+    await verifyManagedForm(publicPage, process.env.E2E_PUBLIC_BASE_URL ?? 'http://127.0.0.1:3012')
+  } finally {
+    await visitor.close()
+  }
+})

@@ -430,6 +430,16 @@ export async function updateArtefactInPlace(
   await writeArtefact(dir, urlPath, html)
 }
 
+/** Write a content-addressed asset before replacing its page HTML. */
+export async function updateStaticAssetInPlace(
+  uploadsDir: string,
+  publicPath: string,
+  bytes: Uint8Array,
+): Promise<void> {
+  const slot = await getActiveSlot(uploadsDir)
+  await writeStaticAsset(getSlotDir(uploadsDir, slot), publicPath, bytes)
+}
+
 /**
  * Remove a single artefact from the ACTIVE slot in-place.
  *

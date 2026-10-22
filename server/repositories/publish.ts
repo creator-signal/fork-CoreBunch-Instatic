@@ -99,7 +99,7 @@ export interface PersistSitePublishInput {
   site: SiteDocument
   serializedImportmap: { body: string; sha256: string } | null
   pages: PublishedPageVersionWrite[]
-  publishedByUserId: string
+  publishedByUserId: string | null
 }
 
 // ---------------------------------------------------------------------------

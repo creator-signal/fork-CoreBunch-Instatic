@@ -6,6 +6,14 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.68 - 2026-10-22
+
+- Update the MCP SDK to 2.3.0, the media build toolchain to checksum-pinned
+  Go 1.26.10, and klauspost/compress to 1.18.7 after the 0.0.67 candidate
+  scan rejected CVE-2026-111768, CVE-2026-111770, CVE-2026-63209 and
+  CVE-2026-111943. Retain the failed candidate and its immutable tag; no
+  release or image aliases were published by that failed attempt.
+
 ## 0.0.67 - 2026-10-22
 
 - Publish selected Pages through the site-snapshot pipeline, updating their

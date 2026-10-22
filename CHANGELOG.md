@@ -6,6 +6,14 @@ This project is pre-1.0. Breaking changes may appear in minor or patch releases 
 
 ## Unreleased
 
+## 0.0.67 - 2026-10-22
+
+- Publish selected Pages through the site-snapshot pipeline, updating their
+  public HTML and assets while preserving every other page's active version,
+  draft content and the published site shell. The same path repairs historical
+  metadata-only page publications and supports system-scheduled publication.
+  Template changes continue through the full-site publisher.
+
 ## 0.0.66 - 2026-10-18
 
 - Preserve line breaks when editing text inside component-library repeaters.

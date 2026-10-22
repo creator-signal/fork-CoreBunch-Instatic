@@ -45,6 +45,20 @@ const runtime = String.raw`(() => {
       timestampInput.value = permitted ? (timestampInput.value || timestamp) : '';
     });
   };
+  const syncRequiredFields = (form) => {
+    form.querySelectorAll('.mauticform-required').forEach((row) => {
+      const controls = [...row.querySelectorAll('input:not([type="hidden"]), select, textarea')]
+        .filter((control) => !control.disabled && !['submit', 'button', 'reset'].includes(control.type));
+      const choices = controls.filter((control) => ['checkbox', 'radio'].includes(control.type));
+      if (choices.length && choices.length === controls.length) {
+        // Provider choice groups require one selection, not every checkbox.
+        const selected = choices.some((control) => control.checked);
+        choices.forEach((control, index) => { control.required = !selected && index === 0; });
+      } else {
+        controls.forEach((control) => { control.required = true; });
+      }
+    });
+  };
   const waitForForm = (target) => {
     if (target.querySelector('form')) return Promise.resolve();
     return new Promise((resolve, reject) => {
@@ -119,10 +133,14 @@ const runtime = String.raw`(() => {
     }
     const formId = String(entry.id);
     const apiName = String(entry.apiName);
+    let submitting = false;
+    let completed = false;
     const handleResponse = (response) => {
       const success = response && (response.success === true || response.success === 1 || response.success === '1');
+      submitting = false;
       setBusy(root, target, false);
       if (success) {
+        completed = true;
         target.hidden = true;
         if (status) status.textContent = root.dataset.successMessage || '';
         dispatch(root, 'success');
@@ -150,9 +168,24 @@ const runtime = String.raw`(() => {
       const form = target.querySelector('form');
       if (form && form.dataset.csSubmitBound !== 'true') {
         form.dataset.csSubmitBound = 'true';
-        form.addEventListener('change', () => syncConsentTimestamps(target, entry.consentTimestampFields));
+        // Mautic declares required fields on rows, not native controls. The
+        // adapter owns validation as well as submission while its SDK is off.
+        form.noValidate = true;
+        syncRequiredFields(form);
+        form.addEventListener('input', () => {
+          syncRequiredFields(form);
+          form.querySelectorAll('[aria-invalid="true"]').forEach((control) => {
+            if (control.checkValidity()) control.removeAttribute('aria-invalid');
+          });
+        });
+        form.addEventListener('change', () => {
+          syncRequiredFields(form);
+          syncConsentTimestamps(target, entry.consentTimestampFields);
+        });
         form.addEventListener('submit', async (event) => {
           event.preventDefault();
+          if (submitting || completed) return;
+          syncRequiredFields(form);
           syncConsentTimestamps(target, entry.consentTimestampFields);
           const controls = [...form.querySelectorAll('input, select, textarea')];
           controls.forEach((control) => control.removeAttribute('aria-invalid'));
@@ -160,8 +193,10 @@ const runtime = String.raw`(() => {
             const invalid = controls.filter((control) => !control.checkValidity());
             invalid.forEach((control) => control.setAttribute('aria-invalid', 'true'));
             invalid[0]?.focus();
+            invalid[0]?.reportValidity();
             return;
           }
+          submitting = true;
           setBusy(root, target, true);
           if (status) status.textContent = (root.dataset.sendingMessage || '');
           try {

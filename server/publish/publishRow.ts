@@ -15,6 +15,8 @@
  */
 import type { DbClient } from '../db/client'
 import type { DataRow, DataRowVersion } from '@core/data/schemas'
+import { getDataRow } from '../repositories/data'
+import { publishSelectedPageLocked } from './publishSelectedPage'
 import { resolveTemplateChain } from '@core/templates'
 import {
   getPublishedDataRowByRoute,
@@ -64,6 +66,11 @@ async function publishDataRowLocked(
   publisherUserId: string | null,
   uploadsDir?: string,
 ): Promise<PublishDataRowResult> {
+  const selected = await getDataRow(db, rowId)
+  if (!selected) throw new Error('data row not found')
+  if (selected.tableId === 'pages') {
+    return publishSelectedPageLocked(db, selected, publisherUserId, uploadsDir)
+  }
   const { row, version, previousRoute } = await persistDataRowPublish(db, rowId, publisherUserId)
 
   // Layer A: incremental artefact update outside the transaction.

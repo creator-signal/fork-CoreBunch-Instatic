@@ -325,6 +325,12 @@ slots/options/dependencies/constraints, changed existing field semantics and new
 required fields need a separate migration. Missing versions remain read-only;
 HTML editing and permission changes are not recovery paths.
 
+Plugin0.8.9 adds optional Campaign Hero text-only/hidden-actions controls and a
+Call to Action link-only presentation. Both1.0.0 definitions are retained from
+the recorded immutable source, so other pages keep their existing field sets.
+Review the optional field update only for instances whose presentation needs
+to change; it does not migrate or publish any retained content or Managed Form.
+
 ## Forbidden patterns
 
 | Pattern | Use instead |

@@ -189,7 +189,7 @@ describe('Creator Signal site pack', () => {
     )
     const parameterIds = hero?.params.map((parameter) => parameter.id) ?? []
 
-    expect(creatorSignalPlugin.manifest.version).toBe('0.8.8')
+    expect(creatorSignalPlugin.manifest.version).toBe('0.8.9')
     expect(parameterIds).toContain('creator-signal.site.hero.heading')
     expect(parameterIds.some((id) => id.startsWith(`${hero?.id}/param/`))).toBe(false)
   })
@@ -737,6 +737,37 @@ describe('Creator Signal site pack', () => {
     const output = callToAction.render(callToAction.defaults, []).html
     expect(output).toContain('class="button button-secondary"')
     expect(output).not.toContain('class="button button-primary"')
+  })
+
+  it('can introduce an inline application without artwork, actions or their footnote', () => {
+    const output = campaignHero.render({
+      ...campaignHero.defaults,
+      presentation: 'text-only',
+      showActions: false,
+      heading: 'Be one of the first to try Creator Signal.',
+    }, []).html
+    expect(output).toContain('<h1>Be one of the first to try Creator Signal.</h1>')
+    expect(output).toContain('campaign-hero-text-only')
+    expect(output).not.toContain('<img')
+    expect(output).not.toContain('<a ')
+    expect(output).not.toContain('campaign-hero-footnote')
+    const original = campaignHero.render(campaignHero.defaults, []).html
+    expect(original).toContain('campaign-hero-art')
+    expect(original).toContain('Get started free')
+    expect(original).toContain('campaign-hero-footnote')
+  })
+
+  it('can place an accessible privacy action after existing content without an extra heading', () => {
+    const output = callToAction.render({
+      ...callToAction.defaults,
+      presentation: 'link-only',
+      actionLabel: 'Read our privacy notice',
+      actionUrl: '/legal/privacy',
+    }, []).html
+    expect(output).toContain('href="/legal/privacy">Read our privacy notice</a>')
+    expect(output).not.toContain('<h2')
+    expect(output).not.toContain('aria-labelledby')
+    expect(output).not.toContain(callToAction.defaults.body)
   })
 
   it('preserves the consent runtime hooks and sanitised rich-text boundary', () => {

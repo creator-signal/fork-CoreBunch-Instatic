@@ -22,7 +22,7 @@ afterEach(() => {
 
 describe('retained Creator Signal authoring definitions', () => {
   it('ships immutable source identities and resolves every retained version after a cold load', () => {
-    expect(retained.versions).toHaveLength(10)
+    expect(retained.versions).toHaveLength(12)
     for (const snapshot of retained.versions) {
       expect(snapshot.sourceRevision).toMatch(/^[a-f0-9]{40}$/)
       expect(snapshot.sourceSha256).toMatch(/^[a-f0-9]{64}$/)
@@ -32,6 +32,26 @@ describe('retained Creator Signal authoring definitions', () => {
     const old = componentLibraryRegistry.getVersion('creator-signal.site.signal-comparison', '1.0.0')!
     expect(old.fields.some(field => field.key === 'beforeArtwork')).toBe(false)
     expect(canUpgradeComponentContentFields(old, componentLibraryRegistry.get(old.id))).toBe(true)
+  })
+
+  it('preserves existing hero and action instances on cold load and upgrades only reviewed optional fields', () => {
+    for (const entryId of ['creator-signal.site.campaign-hero', 'creator-signal.site.call-to-action']) {
+      const old = componentLibraryRegistry.getVersion(entryId, '1.0.0')!
+      const current = componentLibraryRegistry.get(entryId)!
+      expect(old).toBeDefined()
+      expect(current.version).toBe('1.1.0')
+      expect(canUpgradeComponentContentFields(old, current)).toBe(true)
+      const site = useEditorStore.getState().createSite('Retained beta presentation')
+      const page = site.pages[0]!
+      const id = useEditorStore.getState().insertNode(entryId, { heading: 'Authored title', body: '', actionUrl: '/legal/privacy' }, page.rootNodeId, undefined,
+        { catalogueInstance: { entryId, entryVersion: '1.0.0' } })
+      const before = structuredClone(useEditorStore.getState().site!.pages[0]!.nodes)
+      expect(useEditorStore.getState().upgradeComponentContentFields(id, '1.1.0')).toBe(true)
+      const after = structuredClone(before)
+      after[id]!.catalogueInstance!.entryVersion = '1.1.0'
+      expect(useEditorStore.getState().site!.pages[0]!.nodes).toEqual(after)
+      useEditorStore.getState().clearSite()
+    }
   })
 
   it('updates only reviewed instance metadata, preserves empty content and descendants, and supports undo/redo', () => {

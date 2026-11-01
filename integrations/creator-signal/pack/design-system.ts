@@ -201,6 +201,7 @@ p { line-height: var(--cs-type-body-large-line-height); }
   padding: var(--cs-spacing-16) 0;
 }
 .hero-copy, .campaign-hero-copy { min-width: 0; max-width: 36rem; }
+.campaign-hero-text-only { grid-template-columns: minmax(0, 1fr); }
 .hero-body, .campaign-hero-body {
   max-width: 34rem;
   margin: var(--cs-spacing-5) 0 var(--cs-spacing-8);

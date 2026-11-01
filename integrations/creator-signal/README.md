@@ -45,6 +45,11 @@ or media images and performs no installation or live content publication. See
   destination. Enter/Space toggle it, Escape closes it and restores focus, and
   choosing a destination closes it. Without JavaScript the links remain expanded.
   Desktop renders the same navigation without a disclosure control.
+- Campaign Hero supports a text-only presentation and an explicit Show actions
+  control for pages whose next step is an inline form. Call to Action supports
+  a link-only presentation for a privacy notice below that form. Existing
+  instances keep their illustrated hero and banner defaults. These controls
+  change only presentation; they do not recreate or reconfigure Managed Forms.
 - Operator-approved initial legal, trust, support, and account-data copy marked
   with version `2026-08-02`, its effective date, and the verified operating
   company. External legal advice remains outside the site-pack contract.

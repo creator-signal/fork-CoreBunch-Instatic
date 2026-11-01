@@ -218,6 +218,43 @@ const stateCopy: Record<string, { label: string; heading: string; body: string }
 }
 
 const acceptanceRoutes = new Map<string, string>()
+// Exercise the supported authoring composition without changing retained CMS
+// content or the starter pack. The provider-owned form subtree is copied intact.
+const betaPresentation = structuredClone(publicPages.find((page) => page.slug === 'beta'))
+assert(betaPresentation, 'Beta page is missing')
+const betaHero = Object.values(betaPresentation.nodes).find((node) =>
+  node.props.componentId === 'creator-signal.site/component/hero')
+const betaForm = Object.values(betaPresentation.nodes).find((node) =>
+  node.moduleId === 'creator-signal.site.mautic-form')
+assert(betaHero && betaForm, 'Beta introduction or Managed Form is missing')
+const originalForm = JSON.stringify(betaForm)
+betaHero.moduleId = 'creator-signal.site.campaign-hero'
+betaHero.props = {
+  ...modules[betaHero.moduleId]!.defaults,
+  presentation: 'text-only',
+  showActions: false,
+  eyebrow: 'EARLY TESTING · ONLY A FEW SPOTS',
+  heading: 'Be one of the first to try Creator Signal.',
+}
+betaHero.catalogueInstance = undefined
+const formParent = Object.values(betaPresentation.nodes).find((node) => node.children.includes(betaForm.id))
+assert(formParent, 'Beta Managed Form parent is missing')
+const privacyId = 'acceptance-beta-privacy'
+betaPresentation.nodes[privacyId] = {
+  ...structuredClone(betaHero),
+  id: privacyId,
+  moduleId: 'creator-signal.site.call-to-action',
+  parentId: formParent.id,
+  props: {
+    ...modules['creator-signal.site.call-to-action']!.defaults,
+    presentation: 'link-only',
+    actionLabel: 'Read our privacy notice',
+    actionUrl: '/legal/privacy',
+  },
+}
+formParent.children.splice(formParent.children.indexOf(betaForm.id) + 1, 0, privacyId)
+assert.equal(JSON.stringify(betaForm), originalForm, 'Presentation fixture changed the Managed Form')
+acceptanceRoutes.set('/__acceptance/beta-presentation', renderPublishedPage(betaPresentation))
 for (const [stateName, copy] of Object.entries(stateCopy)) {
   const page = structuredClone(notFoundTemplate)
   page.id = `creator-signal-public-acceptance-${stateName}`
@@ -442,6 +479,31 @@ try {
     { name: 'tablet', width: 900, height: 900 },
     { name: 'mobile', width: 390, height: 844 },
   ]) {
+    await runCheck(`text-only beta and trailing privacy action at ${viewport.name} in ${colorScheme}`, async () => {
+      const context = await browser.newContext({ viewport, colorScheme })
+      await addDeniedConsent(context)
+      const page = await context.newPage()
+      await routeMarketing(page)
+      try {
+        await page.goto(`${baseUrl}/__acceptance/beta-presentation`, { waitUntil: 'load' })
+        await waitForPage(page)
+        assert.equal(await page.locator('main h1').textContent(), 'Be one of the first to try Creator Signal.')
+        assert.equal(await page.locator('.campaign-hero img, .campaign-hero .actions').count(), 0)
+        const privacy = page.getByRole('link', { name: 'Read our privacy notice', exact: true })
+        assert.equal(await privacy.count(), 1)
+        assert.equal(await privacy.getAttribute('href'), '/legal/privacy')
+        assert.equal(await page.evaluate(() => {
+          const form = document.querySelector('[data-form-mount]')
+          const privacy = Array.from(document.querySelectorAll('a')).find((link) => link.textContent === 'Read our privacy notice')
+          return Boolean(form && privacy && (form.compareDocumentPosition(privacy) & Node.DOCUMENT_POSITION_FOLLOWING))
+        }), true)
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false)
+        await privacy.focus()
+        assert.equal(await privacy.evaluate((link) => document.activeElement === link), true)
+      } finally {
+        await context.close()
+      }
+    })
     await runCheck(`all public routes retain contrast, fonts and reflow at ${viewport.name} in ${colorScheme}`, async () => {
       const context = await browser.newContext({ viewport, colorScheme })
       await addDeniedConsent(context)

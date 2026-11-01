@@ -238,7 +238,7 @@ export const creatorSignalFeatureGridEntry = siteEntry({
 
 export const creatorSignalCampaignHeroEntry = siteEntry({
   id: 'creator-signal.site.campaign-hero',
-  version: '1.0.0',
+  version: '1.1.0',
   name: 'Campaign Hero',
   description: 'The governed public-site introduction with one primary action, an optional secondary action and approved artwork.',
   tags: ['hero', 'campaign', 'landing page', 'call to action', 'media'],
@@ -247,6 +247,8 @@ export const creatorSignalCampaignHeroEntry = siteEntry({
   usage: 'Use once at the start of an approved campaign or launch page; keep signup and login destinations application-owned.',
   accessibilityGuidance: 'Keep one H1, name both actions by outcome, and provide alternative text when the artwork conveys information.',
   fields: [
+    { key: 'presentation', label: 'Presentation', description: 'Illustrated introduction or text-only page title without artwork.', type: 'select', required: false },
+    { key: 'showActions', label: 'Show actions', description: 'Hide both actions and their footnote when the next step is already on the page.', type: 'boolean', required: false },
     { key: 'eyebrow', label: 'Eyebrow', description: 'Short context label above the page promise.', type: 'text', required: true },
     { key: 'heading', label: 'Heading', description: 'The single public page title.', type: 'text', required: true },
     { key: 'body', label: 'Introduction', description: 'Plain-language supporting copy.', type: 'text', required: true },
@@ -380,11 +382,13 @@ export const creatorSignalFounderStoryEntry = siteEntry({
 
 export const creatorSignalCallToActionEntry = siteEntry({
   id: 'creator-signal.site.call-to-action',
+  version: '1.1.0',
   name: 'Call to Action',
   description: 'A focused next step with one primary action.',
   tags: ['call to action', 'link', 'marketing'],
   moduleId: 'creator-signal.site.call-to-action',
   fields: [
+    { key: 'presentation', label: 'Presentation', description: 'Full contextual banner or one standalone link below existing content.', type: 'select', required: false },
     { key: 'eyebrow', label: 'Eyebrow', description: 'Short context label above the call to action.', type: 'text', required: true },
     { key: 'heading', label: 'Heading', description: 'The single next step offered to the visitor.', type: 'text', required: true },
     { key: 'body', label: 'Explanation', description: 'What happens after the visitor takes the action.', type: 'text', required: true },

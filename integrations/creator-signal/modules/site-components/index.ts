@@ -301,6 +301,8 @@ export const campaignHero = defineModule({
     footnote: 'Free forever plan. No spreadsheets, no stress.',
     artwork: '',
     artworkAlt: '',
+    presentation: 'illustrated',
+    showActions: true,
   },
   schema: {
     eyebrow: control.text('Eyebrow'),
@@ -313,6 +315,11 @@ export const campaignHero = defineModule({
     footnote: control.text('Action footnote'),
     artwork: control.image('Artwork'),
     artworkAlt: control.text('Artwork alternative text'),
+    presentation: control.select('Presentation', [
+      { label: 'Illustrated', value: 'illustrated' },
+      { label: 'Text only', value: 'text-only' },
+    ]),
+    showActions: control.toggle('Show actions'),
   },
   render: ({ props }) => {
     const secondary = text(props.secondaryActionLabel) && text(props.secondaryActionUrl)
@@ -321,18 +328,20 @@ export const campaignHero = defineModule({
     const artwork = text(props.artwork)
       ? raw(html`<img src="${safeUrl(props.artwork)}" alt="${escapedProp(props.artworkAlt)}" loading="eager" fetchpriority="high" decoding="async">`)
       : raw(html`<img src="${safeUrl(creatorSignalBrandAssets.markLight)}" alt="" width="1024" height="688" loading="eager" fetchpriority="high" decoding="async">`)
-    return withCreatorSignalCss(html`<section class="campaign-hero">
+    const textOnly = props.presentation === 'text-only'
+    const actions = props.showActions === false ? raw('') : raw(html`<div class="actions">
+            <a class="button button-primary" href="${safeUrl(props.primaryActionUrl)}">${escapedProp(props.primaryActionLabel)}</a>
+            ${secondary}
+          </div>
+          <p class="campaign-hero-footnote">${escapedProp(props.footnote)}</p>`)
+    return withCreatorSignalCss(html`<section class="${textOnly ? 'campaign-hero campaign-hero-text-only' : 'campaign-hero'}">
         <div class="campaign-hero-copy">
           <p class="eyebrow">${escapedProp(props.eyebrow)}</p>
           <h1>${escapedProp(props.heading)}</h1>
           <p class="campaign-hero-body">${escapedProp(props.body)}</p>
-          <div class="actions">
-            <a class="button button-primary" href="${safeUrl(props.primaryActionUrl)}">${escapedProp(props.primaryActionLabel)}</a>
-            ${secondary}
-          </div>
-          <p class="campaign-hero-footnote">${escapedProp(props.footnote)}</p>
+          ${actions}
         </div>
-        <div class="campaign-hero-art">${artwork}</div>
+        ${textOnly ? raw('') : raw(html`<div class="campaign-hero-art">${artwork}</div>`)}
       </section>`)
   },
 })
@@ -573,6 +582,7 @@ export const callToAction = defineModule({
     actionLabel: 'Take the next step',
     actionUrl: '#',
     sectionId: 'next-step',
+    presentation: 'banner',
   },
   schema: {
     eyebrow: control.text('Eyebrow'),
@@ -581,8 +591,14 @@ export const callToAction = defineModule({
     actionLabel: control.text('Action label'),
     actionUrl: control.url('Action URL'),
     sectionId: control.text('Section anchor'),
+    presentation: control.select('Presentation', [
+      { label: 'Banner', value: 'banner' },
+      { label: 'Link only', value: 'link-only' },
+    ]),
   },
-  render: ({ props }) => withCreatorSignalCss(html`<section class="cta-section" aria-labelledby="${escapedProp(props.sectionId)}">
+  render: ({ props }) => withCreatorSignalCss(props.presentation === 'link-only'
+    ? html`<div class="actions"><a class="button button-secondary" href="${safeUrl(props.actionUrl)}">${escapedProp(props.actionLabel)}</a></div>`
+    : html`<section class="cta-section" aria-labelledby="${escapedProp(props.sectionId)}">
       <div class="cta-copy"><p class="eyebrow">${escapedProp(props.eyebrow)}</p><h2 id="${escapedProp(props.sectionId)}">${escapedProp(props.heading)}</h2><p>${escapedProp(props.body)}</p></div>
       <div class="actions"><a class="button button-secondary" href="${safeUrl(props.actionUrl)}">${escapedProp(props.actionLabel)}</a></div>
     </section>`),

@@ -2,8 +2,8 @@
   "schemaVersion": "instatic.component-library-design-impact/v2",
   "generatedFrom": {
     "instatic": {
-      "version": "0.0.66",
-      "sourceRevision": "sha256:0f19fe270f31acd34ef8ee13b6e809f0444fb247a62099b87c425bd5f820ab8a",
+      "version": "0.0.68",
+      "sourceRevision": "sha256:a070362da26b9499285611c9d0457eeb6ee36b608df098854bb203dd38fd4c0b",
       "revisionKind": "executable-registry-content"
     },
     "componentLibraryEntrySchemaVersion": "1.0.0",
@@ -11,7 +11,7 @@
       {
         "id": "creator-signal.site",
         "name": "Creator Signal public site",
-        "version": "0.8.8"
+        "version": "0.8.9"
       }
     ],
     "designSystemLocks": [
@@ -55,7 +55,7 @@
       "implementationTaxonomy": "primitive",
       "definition": {
         "id": "creator-signal.site.call-to-action",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "name": "Call to Action",
         "description": "A focused next step with one primary action.",
         "category": "Creator Signal",
@@ -77,6 +77,13 @@
           "moduleId": "creator-signal.site.call-to-action"
         },
         "fields": [
+          {
+            "key": "presentation",
+            "label": "Presentation",
+            "description": "Full contextual banner or one standalone link below existing content.",
+            "type": "select",
+            "required": false
+          },
           {
             "key": "eyebrow",
             "label": "Eyebrow",
@@ -250,18 +257,18 @@
         ]
       },
       "specimen": {
-        "contractReference": "instatic://component-library/creator-signal.site.call-to-action@1.0.0",
+        "contractReference": "instatic://component-library/creator-signal.site.call-to-action@1.1.0",
         "rendered": null,
         "executable": {
           "schemaVersion": "creator-signal.component-library-specimens/v1",
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.call-to-action",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-call-to-action.html",
-          "contentHash": "sha256:852ed8cbde929c6d10aa760460dcf822e2c993221ae3d7b307d4e6ac39cac7ea"
+          "contentHash": "sha256:a97c477d6c2306ca3d5ca47a0301eeaf28cbf7a714df0c9fe46dbf83585987a6"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:436c49cb4dde40fe15ec4f10d31a286d9b237526d0febda148d53a898854df34"
+      "contentHash": "sha256:4f01c1fc43129109412b7a438d9a962e4596c063a91c0e8b68508407ef04c24f"
     },
     {
       "id": "creator-signal.site.campaign-hero",
@@ -274,7 +281,7 @@
       "implementationTaxonomy": "primitive",
       "definition": {
         "id": "creator-signal.site.campaign-hero",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "name": "Campaign Hero",
         "description": "The governed public-site introduction with one primary action, an optional secondary action and approved artwork.",
         "category": "Creator Signal",
@@ -298,6 +305,20 @@
           "moduleId": "creator-signal.site.campaign-hero"
         },
         "fields": [
+          {
+            "key": "presentation",
+            "label": "Presentation",
+            "description": "Illustrated introduction or text-only page title without artwork.",
+            "type": "select",
+            "required": false
+          },
+          {
+            "key": "showActions",
+            "label": "Show actions",
+            "description": "Hide both actions and their footnote when the next step is already on the page.",
+            "type": "boolean",
+            "required": false
+          },
           {
             "key": "eyebrow",
             "label": "Eyebrow",
@@ -506,18 +527,18 @@
         ]
       },
       "specimen": {
-        "contractReference": "instatic://component-library/creator-signal.site.campaign-hero@1.0.0",
+        "contractReference": "instatic://component-library/creator-signal.site.campaign-hero@1.1.0",
         "rendered": null,
         "executable": {
           "schemaVersion": "creator-signal.component-library-specimens/v1",
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.campaign-hero",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-campaign-hero.html",
-          "contentHash": "sha256:bedf4bda5730221a061b603c278ed68fc7e7f46289784350ce12855f883b3059"
+          "contentHash": "sha256:ac568146c3ad9fcb4bd36f5ef8f26d79be32fe3ef3d2c152491ee0076380c5fd"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:c49ad73fc663bd75e41c4a1602795ae05ebaf8ad1f5093073c05bbe6b382a961"
+      "contentHash": "sha256:6b2698beb742a2f14506c2a50d93fe57976fd965a95c00e9f1166b597e83a5d6"
     },
     {
       "id": "creator-signal.site.catalogue.accordion",
@@ -11970,11 +11991,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.comparison-section",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-comparison-section.html",
-          "contentHash": "sha256:5715606915b119c40efa47d6ba3882c9906839cfc7ce427cd37a0c7739074e5f"
+          "contentHash": "sha256:90600cf38aa8c12ae048b8024b377e4257b2e90f1d9a2f9ba4401924c8de9687"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:d588d62eefc0a3e509c795bf8deefe4f10b4361cf282080250f11968fce8b5b2"
+      "contentHash": "sha256:fb118578fd1d75aa1f6bce7abdfb84060992cff3bd2a0785e6db39b101f2142a"
     },
     {
       "id": "creator-signal.site.consent-banner",
@@ -12196,11 +12217,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.consent-banner",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-consent-banner.html",
-          "contentHash": "sha256:edd80ae5cd4aa4c86c1edecb921d577fc7dee45aa795bca36a031d673b89eda6"
+          "contentHash": "sha256:d926cdf845483ea4ffcb4b64bfbf5e7a984487820ad652472236ccb39ea2e8bc"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:90ed17f7741e4bd5bc117c06777e65f0f8f68220f6ab28a9bee18ca3cae6aaaa"
+      "contentHash": "sha256:5badb7f19623d22a241fcae5e64e97fddc70827db054947d5a30322aff8674ae"
     },
     {
       "id": "creator-signal.site.crm-iframe-form",
@@ -12477,11 +12498,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.crm-iframe-form",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-crm-iframe-form.html",
-          "contentHash": "sha256:3ffa705af5aaaed9cb70fcf3ce99b60ec15fdc012dd753a7aaac809b5801ff3e"
+          "contentHash": "sha256:33f48959c29a0d419d66d71dba9776ea09ce82c8d0d7e2b462fc038850e0d9dc"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:ff9e8475bb1e55882fec162a319fc361dc159b937ce4fa5115ec519632dc3f3c"
+      "contentHash": "sha256:ba4ef5fc8a9fa4710a309970da430f4263292abf7c6d348cc77b71a7005a591d"
     },
     {
       "id": "creator-signal.site.faq",
@@ -12718,11 +12739,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.faq",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-faq.html",
-          "contentHash": "sha256:77433f785d155fc82089f872633185873a1755a6e1ddcdfa4b00dc1d17d96fc7"
+          "contentHash": "sha256:871ba43c03d7f39ae3d1a0f37b704091643605c4965e8479bc444d2acceb4e6f"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:16f41686d48f67b4a31b055b443e5d77330754426ff85b25fcc8f3858e57b820"
+      "contentHash": "sha256:1e5baecb5719588f0c236ff3e467993ddcfb80d0136b78e8f08c7659b43cebf7"
     },
     {
       "id": "creator-signal.site.feature-grid",
@@ -12959,11 +12980,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.feature-grid",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-feature-grid.html",
-          "contentHash": "sha256:e738882d104d7561207a944517bca21a61321a7f6a508543f86e46fb22f02f31"
+          "contentHash": "sha256:e7df814cf42cafcfbb1c05dc30ac9e21200eaac11281ca6b1cff8c6d219f344a"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:0692e560648b52e88e51832ac8566557d3ac341b3bfa776fdfd178d3ee823828"
+      "contentHash": "sha256:203e89b2c2720190f39306a389773e652a39c29ff7dbd28af6c5ae28223f101a"
     },
     {
       "id": "creator-signal.site.footer",
@@ -13189,11 +13210,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.footer",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-footer.html",
-          "contentHash": "sha256:c6fb01520a63ff37ac5c01eae5e8e15f2da39c2b7f3404e7ecf2402497765087"
+          "contentHash": "sha256:f24a4e07b7124554162a8f260ae39a528190c37b1bf76828ca9f5610821584ea"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:0d03999644983b8de6dff1b629ca46aec6880d557f809e1a7d53a3895194dea3"
+      "contentHash": "sha256:73b334d378127e24835a8381e047170d92e5a06158a40a501a6c83f9b4c38129"
     },
     {
       "id": "creator-signal.site.founder-story",
@@ -13427,11 +13448,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.founder-story",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-founder-story.html",
-          "contentHash": "sha256:b5ddc2282a8fb1ac01981c97c1dff7621561b4510d84813620ea965145bfc6a1"
+          "contentHash": "sha256:54a34871c97ab923d6dab08a0fc13663cafbcfb2371088873201f0948d09130f"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:f733c0a80eb470f4ece0669a6f0516159c61c73b18c5f280933d27f5270484db"
+      "contentHash": "sha256:52df1928185acf1d5404766669f25180743cb009c924c5f6b623b612cdc6e65c"
     },
     {
       "id": "creator-signal.site.header",
@@ -13706,11 +13727,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.header",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-header.html",
-          "contentHash": "sha256:dcf8dcf7a6598a3dd00eb1e8ce25c1b7038801d0b6571ed368ad733f6e6efd98"
+          "contentHash": "sha256:77b112122f74fe71be328a042c92fc6b5cef7424fe77689b14685aac355381a3"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:252affc848e426902f2f4df0a18dd1487b3fed151dd6a010ce772539e425e5c4"
+      "contentHash": "sha256:67ab9ef371a3d48a74c45653997f7f350f6b776fcf6b4420a21795ed36b10019"
     },
     {
       "id": "creator-signal.site.hero",
@@ -13926,11 +13947,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.hero",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-hero.html",
-          "contentHash": "sha256:4735e6ec323aa61a119e1755162e7283f41406adcb55c65703e98d940210107b"
+          "contentHash": "sha256:2dd0bb733b3fef3298c83933d42477f61614d7a9693766477b89287d5f3af327"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:89ff864d0f9ce61a813005897e163a2f0a4b16a5beca92e2bd48d4a83d87f556"
+      "contentHash": "sha256:33cbe286036399679df493f0787d8982f929f2bb26d875366659aeee174883bf"
     },
     {
       "id": "creator-signal.site.mautic-form",
@@ -14213,11 +14234,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.mautic-form",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-mautic-form.html",
-          "contentHash": "sha256:0977b782df9ac1678b266f14a60ee2863312280d5e6ad0e915c707c17aaaa169"
+          "contentHash": "sha256:2483f2019d2e66d60cd1fe7176f0cfc43bce7a62f3a9ef68a990bcf61b93a942"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:ac05719656ccc55553c3c4c8fd38d5ffe02663a8585fbb57405be34d119a888c"
+      "contentHash": "sha256:a503ce3ca4472936a8ff427d1e1d74f1d5e8e5b2c926c4a2c4eba81cabe9092f"
     },
     {
       "id": "creator-signal.site.pattern.article-content-page",
@@ -14369,11 +14390,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.article-content-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-article-content-page.html",
-          "contentHash": "sha256:5d95a3764fe716d55a1940dacfa33d31a2be93d37b4bacd7533d4f0f185a3f4e"
+          "contentHash": "sha256:fd8d585e21bc0cc483975d339a068d4e7e7e11939f669234ffb7297da36db1f2"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:f1de9dd8e43da36419fe05d77a615cbff7ffa39493852ddb637108a9883e8c9c"
+      "contentHash": "sha256:84e57af189cd7ae803db5441eff2c6397f3a22aa3b5eeb6a3ea8580fecac010e"
     },
     {
       "id": "creator-signal.site.pattern.comparison-section",
@@ -14525,11 +14546,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.comparison-section",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-comparison-section.html",
-          "contentHash": "sha256:cfb91d0aef24c0c0eeace7e65f6c6a6b6ed0897a657a020191f8dc3fc7215cbc"
+          "contentHash": "sha256:968767cdfa59a1881b8e0bfd4675f52b433874064790063949d82f6e10384c59"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:b4d9449f8a29864f77b9782ae90a2d107f28f549799a4ce745035a29b37b6c72"
+      "contentHash": "sha256:737b2a2c609ebedc89c826be0a3a9b28d1ccb3f4e6087d7074a7d44d687c3853"
     },
     {
       "id": "creator-signal.site.pattern.contact-page",
@@ -14682,11 +14703,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.contact-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-contact-page.html",
-          "contentHash": "sha256:1199c3337ca97a5b5f5f41118ee7b4ba25e9605eacbbdc12f624ad6b7a234186"
+          "contentHash": "sha256:0404c178ceeab07cff58faeda22af5ffc81bd97de4f20817c08f84839af65ed8"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:82638594d46a3bebb996b54084852f8105099d972e65bc0dd193ee334c93f386"
+      "contentHash": "sha256:71f62862370fbba15b67ff8c60243aca76d5b972b3d3f0e7785557713304aa33"
     },
     {
       "id": "creator-signal.site.pattern.content-page",
@@ -14838,11 +14859,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.content-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-content-page.html",
-          "contentHash": "sha256:146f3024a2ed89b73ea321ea0cd3eac763f1f2443e63e3763556541b69c7ed3b"
+          "contentHash": "sha256:7333a5a6be670f3eea5c5fc5896e6f4e6c8e447ba90e97a4284a0b986d7ec05d"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:3caf89309d0027b75f3b4be429179c3dda477c6a4aa4a5a252c7c61519ea9699"
+      "contentHash": "sha256:8d89203949507a9ad3b65c8727d265e62a6a5e1cde2511c7766be1fce8fb26ea"
     },
     {
       "id": "creator-signal.site.pattern.early-access-page",
@@ -14996,11 +15017,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.early-access-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-early-access-page.html",
-          "contentHash": "sha256:a66b13ae5076f4d5b826a944f3c5b303ce352e8047f1bb6f883aada680b72090"
+          "contentHash": "sha256:0179bc3c8270a337e9b3d3e050b4b2aa6e7bc4a735a7dc1a79d149d4eac96920"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:7e40331da480d84ad2661b508572076963e754d758565912bb82c95e1294e8b9"
+      "contentHash": "sha256:e2e8a270db079edd5c9d6c4f3899d4b847ab3015fd3857616477dc53b8a7ebf7"
     },
     {
       "id": "creator-signal.site.pattern.empty-state",
@@ -15152,11 +15173,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.empty-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-empty-state.html",
-          "contentHash": "sha256:d010c7f39cf8cbb8d9fbe047ef60187c44a03b21e1e9a3b5cf870a3c0b3b758f"
+          "contentHash": "sha256:6e0f18caf2043986717a696aae2a9b560f610be2a36739fa440cc83089a8e2ab"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:0c6d9ff110fe28981f093f331d77a6fe3d76d9fad81dcb5a395e81391fd721d8"
+      "contentHash": "sha256:79fb5cca5f0ac910e1016940d8b4a6e6f65574ac72c600bc20be110a25b04e70"
     },
     {
       "id": "creator-signal.site.pattern.error-state",
@@ -15308,11 +15329,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.error-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-error-state.html",
-          "contentHash": "sha256:ea2d6c21d473180c79fe2d4c7605cbdfeaec58257f016d59c545bf006e943610"
+          "contentHash": "sha256:af1324a400df8217a33bea7d47e08a7a03f8a68a40759a82f03b443e9ce5956d"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:ae8d6c71e63c0424ed5abdfff7ac66a1575a95bceed62a0c195077eaab67fd69"
+      "contentHash": "sha256:15c9b4f1f990e951f2bcabda81060fc37e7727bb9a2c8278529daf2d452f42c3"
     },
     {
       "id": "creator-signal.site.pattern.features-page",
@@ -15464,11 +15485,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.features-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-features-page.html",
-          "contentHash": "sha256:d52d785cf6d9f9bb77a65fdcfa6aa460ef91268d14a5cdf88eea6d5de82526a9"
+          "contentHash": "sha256:f4579a4e330514bcfd131a54ad571889f4f94c853a4234fee2360c57557b824e"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:369a3a6130311d1e9a1de51945a5bc08eef9ec2502a035278ca92cd26bd969ac"
+      "contentHash": "sha256:d9270a7807c086fea74dd44dbf053f00b177ad350b31038cf4ae28222db3fc82"
     },
     {
       "id": "creator-signal.site.pattern.feedback-page",
@@ -15621,11 +15642,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.feedback-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-feedback-page.html",
-          "contentHash": "sha256:482730d680cc9eff13834ade448cf0a5f0bc7835ac4415c2cc8f1e808e1bec1b"
+          "contentHash": "sha256:8f45c00e92d6b358c325bab98dbb4b37f46cf82d28f7050333c154820ea2bcf5"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:75fabf58bcc6f8d0e8541e5b3d373d8f3bca55ba5842912b106492ccd6b36085"
+      "contentHash": "sha256:7ea42ea0796849ae331e589f3fa8f26a094192d2d6c1c1909086681f96dc5cce"
     },
     {
       "id": "creator-signal.site.pattern.home-v2-page",
@@ -15777,11 +15798,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.home-v2-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-home-v2-page.html",
-          "contentHash": "sha256:075da48a5bbb782547717f1f1a7e55e2d8a0e09be04f0bcfe31a4197ff4ddd73"
+          "contentHash": "sha256:2ac4a71d4b5d10b85c539025c724c95ec14b0b061f0e1e42d389194955a3e21c"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:bbea8a35970ba754a0446877923097e149fbfbcf840c0a4fe2aedc6f2148ad7a"
+      "contentHash": "sha256:806da501d3da87b9f447e271ee5372edc9f5b9b549c28c3c7da5c6c56812949a"
     },
     {
       "id": "creator-signal.site.pattern.legal-trust-page",
@@ -15933,11 +15954,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.legal-trust-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-legal-trust-page.html",
-          "contentHash": "sha256:a9bb1f6b5f26f46655a84987eff382376b474116bb6806e3705045b2ab9a7fde"
+          "contentHash": "sha256:d6bc7d94177c6f75a1d63d341238a298872fc33f60435ee441a71fdc081bd2b4"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:cf6cd5deeb946190cf0c02f60fb7dea5cc44a4fa6b09aa46bbc49c9419c6442c"
+      "contentHash": "sha256:fd8ebd65582102a424735a5587350666605144b11f71aa5f494bc1e97d8e7219"
     },
     {
       "id": "creator-signal.site.pattern.not-found-state",
@@ -16089,11 +16110,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.not-found-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-not-found-state.html",
-          "contentHash": "sha256:41c5e12c19ab19fbf51192c4ab96a3fdf85863b8bb4318e97feed0900f71712b"
+          "contentHash": "sha256:1c47c4ab25476a638c04578e7b71e58b5c503bf5e86c20fd3177d0d0219f079d"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:4b77d271dbbcd966393b2d05975c3ca51f9587e23b693395db1a9b1b34b130c0"
+      "contentHash": "sha256:890989964b20dbb99d8bdc3f1cc4e1303c1979106909eb63526aca97170c62c8"
     },
     {
       "id": "creator-signal.site.pattern.offline-state",
@@ -16245,11 +16266,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.offline-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-offline-state.html",
-          "contentHash": "sha256:218d581c9517aa95f39140c53367d7fe789f5f07d6530652d0360b93d0ef96b1"
+          "contentHash": "sha256:74044731ccb60fe10b3b4701148384568d7c278cd111842bafad647262291082"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:82d9c949cedc67c25476b4d4df081fef28c5f62e375e5525b9a1d22a9aa6b560"
+      "contentHash": "sha256:c7ac47f6205012b408da04e91e01649b61731d07d25e731af01c05c92c61a928"
     },
     {
       "id": "creator-signal.site.pattern.pricing-page",
@@ -16401,11 +16422,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.pricing-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-pricing-page.html",
-          "contentHash": "sha256:87882e952b024d54d6af16c2edccd918d7e5534626deec6f4b36b32518012630"
+          "contentHash": "sha256:a63425c3a5bdb4b3426f3b9e2e60dad50bbc47baa957e6c91568908e1c51c8e7"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:8cd260d0d2bb0bcbd4246049f93bbd866ec91645c6497a96b326b33a95d7714e"
+      "contentHash": "sha256:07c7b16ec2f4454dcddb82c4e4898fc1416aae7cef6f2832f01001d3969ebf77"
     },
     {
       "id": "creator-signal.site.pattern.product-page",
@@ -16557,11 +16578,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pattern.product-page",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pattern-product-page.html",
-          "contentHash": "sha256:ac9a16920cc689bfd30aa2243fd6e218caa0b0b3906948be552f8850d2277115"
+          "contentHash": "sha256:f19799d936600d2c991cdfbe11c2c5ca28a3668ef8b911e830625c6161cc23cf"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:dc0aa46bf882b17330b032df9cbea2862760aab71406aa12a3abd1829635e4e6"
+      "contentHash": "sha256:65e7d4393dcc3e328d619a6316c75278272adebdcb2d15a4727cf4c0d1dff860"
     },
     {
       "id": "creator-signal.site.pricing-plans",
@@ -16854,11 +16875,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.pricing-plans",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-pricing-plans.html",
-          "contentHash": "sha256:aa4825a081066acdad45d269560bec8d4e0e2f3dd118b92702d350873c62b485"
+          "contentHash": "sha256:454f1cd24194b0a53becb76beb18128471c229cc6f63a9f2540b750fb3633749"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:66351492d1de9a204d65a2ee7e1db84451728818725db0aa70b8fa01db64b060"
+      "contentHash": "sha256:3dfc64291c9e24f64594ee2343b4d4335ea4ce3f1b378aeec279fe8372ea91e6"
     },
     {
       "id": "creator-signal.site.process-steps",
@@ -17088,11 +17109,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.process-steps",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-process-steps.html",
-          "contentHash": "sha256:4c86552f4099bb15f55652682dbc70a2baa94308cd9672df8756740aac716986"
+          "contentHash": "sha256:e5cbe838c130a5c5eb620ae2c9f3d40e60ac7789014317da1f87d3bbe4e6fadc"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:5d046cd384814eb3256882e3005372fbfa5e0f151b30e2dd4fb697f467b09122"
+      "contentHash": "sha256:14852a0f3d88cbd7a0945302330e313d45b45606e8b5fd8356438e4a2593f8b8"
     },
     {
       "id": "creator-signal.site.public-document",
@@ -17297,11 +17318,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.public-document",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-public-document.html",
-          "contentHash": "sha256:1031b215dcf590db7c2cc47df442b26f629ad7a64db2392b597babd00235848f"
+          "contentHash": "sha256:4cc384e74eebbb8283302d086f9385295c6b6e13edfa3e1a095ef52964f476bb"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:aa829c1097288e036e26626a5db002f0c178ce426945ea52ed5e052de8fcaf90"
+      "contentHash": "sha256:5ad9ed13a2298ee13b584cc2df1752065e7322015180116483d692afa3b66274"
     },
     {
       "id": "creator-signal.site.recovery-state",
@@ -17548,11 +17569,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.recovery-state",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-recovery-state.html",
-          "contentHash": "sha256:5660f91846ef97c7c8983e9e39c3ac9299b4e9e2b575d0efc7f77166c8d077b3"
+          "contentHash": "sha256:d03b68af21e78435807f21b5ef781b1ddc3caab0d2d1d8f757362a06213ee69e"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:33efa58ffcbc5202b4cdb9550cf7ee1cca307ff33333423f24906b7a7fa7adbe"
+      "contentHash": "sha256:cc526599c4a346d6f60415bbbe1f9f3760672be204190923bc505b3deb77c667"
     },
     {
       "id": "creator-signal.site.rich-text-section",
@@ -17749,11 +17770,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.rich-text-section",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-rich-text-section.html",
-          "contentHash": "sha256:37c7d7e8c407845f469483878c404abd7e6e90ae4eb89a02b8d8f5568b6c9290"
+          "contentHash": "sha256:1c7104bf3c2aabdbe4a80500af72aa785e666a4fe06c55042b4f4c34030e9884"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:a5c470f0e087a9ecb0418d8816c5e4f3deb5daf709563eaeadd3de21e989e447"
+      "contentHash": "sha256:6dc41ba4eb8bfb358468eddcb7bf827f9cc4ca2de6ce0af16afb858257cd9037"
     },
     {
       "id": "creator-signal.site.section-intro",
@@ -17950,11 +17971,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.section-intro",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-section-intro.html",
-          "contentHash": "sha256:0c11e756960b603bf64d32877ad33b1f215309e2ccfaae378ca39f2b860c08eb"
+          "contentHash": "sha256:761ecc953662ba24fe03fa0a197f5b435dc6057fa08901cc9fa10b6af38a019b"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:9799c4091e5475a90e97849013bd5a2cee40745929759f907f844243f7b611d1"
+      "contentHash": "sha256:5a9a3d0a665468ada97808cdc34c790ff6b6f084f07cee7b7966f0e88e2c38e5"
     },
     {
       "id": "creator-signal.site.signal-comparison",
@@ -18231,11 +18252,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.signal-comparison",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-signal-comparison.html",
-          "contentHash": "sha256:2c6ef1ecae21ec1425358a84aa9a072ba0bcd4b9f11e8728935a47b6c6c27ee9"
+          "contentHash": "sha256:0deb3387c76d5b904cbe836376150ca86eb9f9e9dc5efe44da7523c1ed405066"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:279e602adad69003e04b1271f4bf80fd2dd2781035e6a692e7beba41b9864e90"
+      "contentHash": "sha256:28f0c180122f04be8afcaf03ac1eeb471293e66d35e2af982c1acdfc488f7e36"
     },
     {
       "id": "creator-signal.site.signal-strip",
@@ -18426,11 +18447,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.signal-strip",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-signal-strip.html",
-          "contentHash": "sha256:5e0c87e562edc69e3e0ba35f4c1eb4d206e7a329ad67e73948e4fa01c68d835c"
+          "contentHash": "sha256:4c090892a92c1113afb46484c7e5d93994d45e81bff77b5435c8590d11ad008a"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:2c9650962f5180c6e8b401e1dde6d1698ff55ce605a4fd544ef4bce8e65a7b97"
+      "contentHash": "sha256:bc26a3a87768b6ebe376d77f8ff1784beb738deea08b5db8ae2e9387cf47239f"
     },
     {
       "id": "creator-signal.site.testimonial",
@@ -18612,11 +18633,11 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.testimonial",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-testimonial.html",
-          "contentHash": "sha256:4ae3fb20a6cc8901035b3bd9c1d30a306ad00b3b840e2e200fd7e7752f882a5e"
+          "contentHash": "sha256:5ccac363ccbe829796c9f281eda6fb0b845be20352bce65b8306871ecc8af58b"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:3ebfa7ba02704e738ca7376e6b19174a6d28879cbdb3fb5b7720b5348ad86bf5"
+      "contentHash": "sha256:5f0cbe9fd14776e40e8a196eb2835dd618bf4edbc41ab5106bd1d4496875e6a1"
     },
     {
       "id": "creator-signal.site.two-column-layout",
@@ -18781,15 +18802,15 @@
           "bundleReference": "integrations/creator-signal/specimens/manifest.json",
           "entryId": "creator-signal.site.two-column-layout",
           "htmlReference": "integrations/creator-signal/specimens/html/creator-signal-site-two-column-layout.html",
-          "contentHash": "sha256:6d2c8367a52396cec44cc05db8f26a58a6b0da7be2e40659b03a165053c9b931"
+          "contentHash": "sha256:6a4fbed6041abd01588795aa64396900efe271aa63b717938305f074f0fd2381"
         },
         "bundleEntryReference": null
       },
-      "contentHash": "sha256:fafaf2a81d41d4aff204f46d007b7d8bed4e477c9ed81ca32b99fab1c90794cf"
+      "contentHash": "sha256:62e11b5c948271a49daa8ddd3a1bfd022bee8d509f8a0a80261c25975327d526"
     }
   ],
   "checksum": {
     "algorithm": "sha256",
-    "value": "sha256:b7a457f5c5c2db690ad08732d8ef92a86cf0c830f499bbd1ec01b21ac4b21d42"
+    "value": "sha256:f408773a83266258f1b161928ecefe142e117eb6f1affdefd9428bbb4ff40897"
   }
 }

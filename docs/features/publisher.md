@@ -58,6 +58,7 @@ server/publish/
 ├── mediaPrefetch.ts, loopPrefetch.ts — pre-warm caches needed by the renderer
 ├── republish.ts                    — bulk re-publish on site-level changes
 ├── publishScheduler.ts             — scheduled publish jobs
+├── publishSelectedPage.ts          — selected-page snapshots and incremental HTML/assets; retains the published shell and every other active page, excluding their drafts
 ├── runtime/                        — per-site bun install workspace serving
 └── loopRuntime.ts                  — loop runtime asset
 ```

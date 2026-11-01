@@ -2,18 +2,36 @@ import { afterEach, describe, expect, it } from 'bun:test'
 import type { DbClient } from '../../../server/db'
 import { tickPublishScheduler } from '../../../server/publish/publishScheduler'
 import { getDataRow, listDuePublishSchedules } from '../../../server/repositories/data/rows'
-import { createTestDb, type TestDb } from '../helpers/createTestDb'
+import type { TestDb } from '../helpers/createTestDb'
+import { createSqliteClient } from '../../../server/db/sqlite'
+import { sqliteMigrations } from '../../../server/db/migrations-sqlite'
+import { runMigrations } from '../../../server/db/runMigrations'
+import { makePage, makeSite } from '../publisher/helpers'
+import { pageToCells } from '@core/data/pageFromRow'
+import { saveDraftSite } from '../../../server/repositories/site'
+import { createUser } from '../../../server/repositories/users'
+import { createDataRow } from '../../../server/repositories/data'
+import { publishDraftSite } from '../../../server/publish/publishSite'
 
 async function seedScheduledPageRow(
   db: DbClient,
   input: { rowId: string; slug: string; scheduledAt: string },
 ): Promise<void> {
+  // An individual page publishes against an already published site shell.
+  // Use real page cells, rather than a metadata-only row with no page tree.
+  const { rows } = await db<{ id: string }>`select id from roles limit 1`
+  const user = await createUser(db, { email: 'scheduler@example.test', displayName: 'Synthetic publisher', passwordHash: 'not-a-login', roleId: rows[0].id, allowOwnerRole: true })
+  await saveDraftSite(db, makeSite())
+  const home = { ...makePage({ root: { moduleId: 'base.body' } }), id: 'published-home', slug: 'index' }
+  await createDataRow(db, { id: home.id, tableId: 'pages', slug: home.slug, cells: pageToCells(home) }, user.id)
+  await publishDraftSite(db, user.id)
+  const scheduled = { ...home, id: input.rowId, slug: input.slug, title: 'Scheduled page' }
   await db`
     insert into data_rows (id, table_id, cells_json, slug, status, scheduled_publish_at)
     values (
       ${input.rowId},
       ${'pages'},
-      ${{ title: 'Scheduled page', page: { id: input.rowId } }},
+      ${pageToCells(scheduled)},
       ${input.slug},
       ${'scheduled'},
       ${input.scheduledAt}
@@ -29,7 +47,9 @@ describe('publish scheduler', () => {
   })
 
   async function makeDb(): Promise<TestDb> {
-    const testDb = await createTestDb()
+    const db = createSqliteClient(':memory:')
+    await runMigrations(db, sqliteMigrations)
+    const testDb = { db, cleanup: async () => { await db.close?.() } }
     cleanupFns.push(testDb.cleanup)
     return testDb
   }

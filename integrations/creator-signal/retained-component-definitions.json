@@ -2155,6 +2155,429 @@
       },
       "sourceRevision": "9016086211346123c4fd7ed6498ae9ca99fb2d63",
       "sourceSha256": "03ea90d901738bec1d9e52d6385df31595da400a920683acba88bf249f3b8722"
+    },
+    {
+      "definition": {
+        "id": "creator-signal.site.campaign-hero",
+        "version": "1.0.0",
+        "name": "Campaign Hero",
+        "description": "The governed public-site introduction with one primary action, an optional secondary action and approved artwork.",
+        "category": "Creator Signal",
+        "tags": [
+          "hero",
+          "campaign",
+          "landing page",
+          "call to action",
+          "media"
+        ],
+        "icon": "layout-solid",
+        "source": {
+          "type": "plugin",
+          "pluginId": "creator-signal.site",
+          "name": "Creator Signal"
+        },
+        "status": "stable",
+        "composition": "leaf",
+        "implementation": {
+          "type": "primitive",
+          "moduleId": "creator-signal.site.campaign-hero"
+        },
+        "fields": [
+          {
+            "key": "eyebrow",
+            "label": "Eyebrow",
+            "description": "Short context label above the page promise.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "heading",
+            "label": "Heading",
+            "description": "The single public page title.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "body",
+            "label": "Introduction",
+            "description": "Plain-language supporting copy.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "primaryActionLabel",
+            "label": "Primary action label",
+            "description": "Specific label for the one primary journey.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "primaryActionUrl",
+            "label": "Primary action URL",
+            "description": "Approved internal or application-owned destination.",
+            "type": "url",
+            "required": true
+          },
+          {
+            "key": "secondaryActionLabel",
+            "label": "Secondary action label",
+            "description": "Optional label for a supporting page-local or explanatory route.",
+            "type": "text",
+            "required": false
+          },
+          {
+            "key": "secondaryActionUrl",
+            "label": "Secondary action URL",
+            "description": "Optional destination paired with the secondary action.",
+            "type": "url",
+            "required": false
+          },
+          {
+            "key": "footnote",
+            "label": "Action footnote",
+            "description": "Short qualification below the actions.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "artwork",
+            "label": "Artwork",
+            "description": "Approved media selected from the Instatic Media workspace.",
+            "type": "image",
+            "required": false
+          },
+          {
+            "key": "artworkAlt",
+            "label": "Artwork alternative text",
+            "description": "Describe informative artwork; leave blank only when it is decorative.",
+            "type": "text",
+            "required": false
+          }
+        ],
+        "variants": [
+          {
+            "id": "default",
+            "name": "Default",
+            "description": "The governed Creator Signal treatment.",
+            "values": {}
+          }
+        ],
+        "presets": [],
+        "slots": [],
+        "constraints": {
+          "allowedDocumentKinds": [
+            "page",
+            "template"
+          ]
+        },
+        "requirements": {
+          "capabilities": [],
+          "providerAdapters": [],
+          "plugins": [
+            "creator-signal.site"
+          ]
+        },
+        "documentation": {
+          "usage": "Use once at the start of an approved campaign or launch page; keep signup and login destinations application-owned.",
+          "accessibility": "Keep one H1, name both actions by outcome, and provide alternative text when the artwork conveys information."
+        },
+        "accessibility": {
+          "checks": [
+            {
+              "rule": "a11y.semantic-structure",
+              "category": "semantic",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed component must retain its documented semantic HTML structure.",
+              "remediation": "Review the published semantic structure; do not replace the governed component with raw markup."
+            },
+            {
+              "rule": "a11y.accessible-name",
+              "category": "naming",
+              "enforcement": "automated",
+              "severity": "error",
+              "fields": [
+                "heading",
+                "primaryActionLabel"
+              ],
+              "summary": "The Campaign Hero needs a page title and named primary action.",
+              "remediation": "Provide concise, outcome-focused text in the named field."
+            },
+            {
+              "rule": "a11y.heading-order",
+              "category": "heading",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The component heading must remain in the page outline.",
+              "remediation": "Keep the supplied heading at the documented level and preserve the surrounding page hierarchy.",
+              "fields": [
+                "heading"
+              ]
+            },
+            {
+              "rule": "a11y.image-alternative",
+              "category": "media",
+              "enforcement": "automated",
+              "severity": "error",
+              "fields": [
+                "artwork",
+                "artworkAlt"
+              ],
+              "summary": "Informative selected media needs an alternative text value.",
+              "remediation": "Describe the selected media in artworkAlt, or remove the media when it repeats adjacent text."
+            },
+            {
+              "rule": "a11y.contrast",
+              "category": "contrast",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed treatment must remain readable in normal and forced-colors modes.",
+              "remediation": "Review the published component in normal, high-contrast and forced-colors modes; do not override its governed treatment."
+            },
+            {
+              "rule": "a11y.touch-target",
+              "category": "touch",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Every visible action must remain comfortably operable at touch sizes and 200% zoom.",
+              "remediation": "Check the published action at 200% zoom and on a narrow touch viewport before publishing."
+            }
+          ],
+          "notApplicable": [
+            {
+              "rule": "a11y.form-control-label",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.unique-field-id",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.keyboard-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.focus-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.dismissal-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.announcement-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.no-javascript-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.provider-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.motion-control",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            }
+          ]
+        }
+      },
+      "sourceRevision": "87fac060257386956aa5c0ad78309b701d9e9aaf",
+      "sourceSha256": "a2479e72cbff58c5a57fa764c3251e55b88f0058885bfbf4949f086d5e9e0f29"
+    },
+    {
+      "definition": {
+        "id": "creator-signal.site.call-to-action",
+        "version": "1.0.0",
+        "name": "Call to Action",
+        "description": "A focused next step with one primary action.",
+        "category": "Creator Signal",
+        "tags": [
+          "call to action",
+          "link",
+          "marketing"
+        ],
+        "icon": "layout-solid",
+        "source": {
+          "type": "plugin",
+          "pluginId": "creator-signal.site",
+          "name": "Creator Signal"
+        },
+        "status": "stable",
+        "composition": "leaf",
+        "implementation": {
+          "type": "primitive",
+          "moduleId": "creator-signal.site.call-to-action"
+        },
+        "fields": [
+          {
+            "key": "eyebrow",
+            "label": "Eyebrow",
+            "description": "Short context label above the call to action.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "heading",
+            "label": "Heading",
+            "description": "The single next step offered to the visitor.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "body",
+            "label": "Explanation",
+            "description": "What happens after the visitor takes the action.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "actionLabel",
+            "label": "Action label",
+            "description": "Specific visible link text.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "actionUrl",
+            "label": "Action URL",
+            "description": "Internal path or approved external destination.",
+            "type": "url",
+            "required": true
+          },
+          {
+            "key": "sectionId",
+            "label": "Section anchor",
+            "description": "Unique page anchor used by the section heading.",
+            "type": "text",
+            "required": true,
+            "advanced": true
+          }
+        ],
+        "variants": [
+          {
+            "id": "default",
+            "name": "Default",
+            "description": "The governed Creator Signal treatment.",
+            "values": {}
+          }
+        ],
+        "presets": [],
+        "slots": [],
+        "constraints": {
+          "allowedDocumentKinds": [
+            "page",
+            "template"
+          ]
+        },
+        "requirements": {
+          "capabilities": [],
+          "providerAdapters": [],
+          "plugins": [
+            "creator-signal.site"
+          ]
+        },
+        "documentation": {
+          "usage": "Edit the typed content fields; the component owns its semantic HTML and uses @creator-signal/design-system.",
+          "accessibility": "Keep labels descriptive and preserve the component heading hierarchy."
+        },
+        "accessibility": {
+          "checks": [
+            {
+              "rule": "a11y.semantic-structure",
+              "category": "semantic",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed component must retain its documented semantic HTML structure.",
+              "remediation": "Review the published semantic structure; do not replace the governed component with raw markup."
+            },
+            {
+              "rule": "a11y.accessible-name",
+              "category": "naming",
+              "enforcement": "automated",
+              "severity": "error",
+              "fields": [
+                "heading",
+                "actionLabel"
+              ],
+              "summary": "The call to action needs a heading and named action.",
+              "remediation": "Provide concise, outcome-focused text in the named field."
+            },
+            {
+              "rule": "a11y.heading-order",
+              "category": "heading",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The component heading must remain in the page outline.",
+              "remediation": "Keep the supplied heading at the documented level and preserve the surrounding page hierarchy.",
+              "fields": [
+                "heading"
+              ]
+            },
+            {
+              "rule": "a11y.contrast",
+              "category": "contrast",
+              "enforcement": "manual",
+              "severity": "warning",
+              "summary": "The governed treatment must remain readable in normal and forced-colors modes.",
+              "remediation": "Review the published component in normal, high-contrast and forced-colors modes; do not override its governed treatment."
+            },
+            {
+              "rule": "a11y.touch-target",
+              "category": "touch",
+              "enforcement": "behavior-test",
+              "severity": "warning",
+              "summary": "Every visible action must remain comfortably operable at touch sizes and 200% zoom.",
+              "remediation": "Check the published action at 200% zoom and on a narrow touch viewport before publishing."
+            }
+          ],
+          "notApplicable": [
+            {
+              "rule": "a11y.form-control-label",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.unique-field-id",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.keyboard-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.focus-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.dismissal-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.announcement-contract",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.no-javascript-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.provider-fallback",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.image-alternative",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            },
+            {
+              "rule": "a11y.motion-control",
+              "rationale": "This governed entry has no author-configurable behavior for this requirement."
+            }
+          ]
+        }
+      },
+      "sourceRevision": "87fac060257386956aa5c0ad78309b701d9e9aaf",
+      "sourceSha256": "a2479e72cbff58c5a57fa764c3251e55b88f0058885bfbf4949f086d5e9e0f29"
     }
   ]
 }
